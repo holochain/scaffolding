@@ -1,54 +1,16 @@
 {
-  "name": "ts-express-vue3",
-  "version": "1.0.0",
-  "description": "Boilerplate for Express + Vue 3 with Typescript & Composition API",
+  "name": "@holochain/create-monorepo",
   "private": true,
-  "author": "Onur Elibol",
+  "version": "0.0.1",
+  "workspaces": [
+    "./packages/client",
+    "./packages/server",
+    "./packages/generators"
+  ],
   "scripts": {
-    "serve": "rm -rf dist && concurrently \"npm run dev:server\" \"npm run dev:client\" --raw",
-    "build": "rm -rf dist && concurrently \"npm run build:server\" \"npm run build:client\"",
-    "dev:client": "vue-cli-service build --watch",
-    "build:client": "vue-cli-service build",
-    "dev:server": "nodemon --config ./nodemon.config.json",
-    "build:server": "rimraf dist/server && tsc -p tsconfig.server.json",
-    "lint": "vue-cli-service lint"
-  },
-  "dependencies": {
-    "body-parser": "^1.19.0",
-    "core-js": "^3.6.5",
-    "dotenv": "^8.2.0",
-    "express": "^4.17.1",
-    "vue": "^3.0.0-0",
-    "vue-class-component": "^8.0.0-0",
-    "vue-property-decorator": "^9.0.0",
-    "vue-router": "^4.0.0-0",
-    "vuex": "^4.0.0-0"
+    "start": "npm run build -w @holochain/create-ui && concurrently -k \"npm run build:watch -w @holochain/create-ui\" \"npm start -w @holochain/create\""
   },
   "devDependencies": {
-    "@types/body-parser": "^1.19.0",
-    "@types/dotenv": "^8.2.0",
-    "@types/express": "^4.17.7",
-    "@typescript-eslint/eslint-plugin": "^2.33.0",
-    "@typescript-eslint/parser": "^2.33.0",
-    "@vue/cli-plugin-babel": "^4.5.3",
-    "@vue/cli-plugin-eslint": "^4.5.3",
-    "@vue/cli-plugin-router": "^4.5.3",
-    "@vue/cli-plugin-typescript": "^4.5.3",
-    "@vue/cli-plugin-vuex": "~4.5.3",
-    "@vue/cli-service": "^4.5.13",
-    "@vue/compiler-sfc": "^3.0.0-0",
-    "@vue/eslint-config-prettier": "^6.0.0",
-    "@vue/eslint-config-typescript": "^5.0.2",
-    "concurrently": "^5.1.0",
-    "eslint": "^7.7.0",
-    "eslint-plugin-prettier": "^3.1.4",
-    "eslint-plugin-vue": "^7.0.0-0",
-    "nodemon": "^2.0.4",
-    "prettier": "^1.19.1",
-    "rimraf": "^3.0.2",
-    "sass": "^1.26.5",
-    "sass-loader": "^8.0.2",
-    "ts-node": "^8.10.2",
-    "typescript": "~3.9.3"
+    "concurrently": "^6.2.1"
   }
 }
