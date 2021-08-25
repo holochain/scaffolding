@@ -4,7 +4,7 @@ const CopyPlugin = require('copy-webpack-plugin');
 module.exports = {
   entry: './src/app.ts',
   target: 'node',
-  mode: 'production',
+  mode: 'development',
   module: {
     rules: [
       {
@@ -12,13 +12,13 @@ module.exports = {
         use: 'ts-loader',
         exclude: /node_modules/,
       },
-      { test: /\.hbs$/, loader: 'handlebars-loader' },
     ],
   },
   resolve: {
-    extensions: ['.tsx', '.ts', '.js', '.hbs'],
+    extensions: ['.tsx', '.ts', '.js'],
   },
   output: {
+    globalObject: 'this',
     filename: 'app.js',
     path: path.resolve(__dirname, 'dist'),
   },

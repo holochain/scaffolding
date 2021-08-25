@@ -1,0 +1,14 @@
+use hdk::prelude::*;
+
+#[hdk_entry(id = "post")]
+struct Post(String);
+
+entry_defs![
+    Post::entry_def(),
+];
+
+#[hdk_extern]
+pub fn create_post(post: Post) -> ExternResult<EntryHash> {
+    create_entry(&post)?;
+    hash_entry(&post)
+}

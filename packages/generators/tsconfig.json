@@ -4,11 +4,8 @@
     "typeRoots": ["../../node_modules/@types"],
     "sourceMap": true,
     "baseUrl": ".",
-    "types": ["webpack-env"],
-    "paths": {
-      "@/*": ["./src/*"]
-    },
-    "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
+    "declaration": true,
+    "declarationDir": "dist"
   },
   "include": ["./**/*.ts"],
   "exclude": ["node_modules/**/*", "dist"]

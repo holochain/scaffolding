@@ -1,4 +1,18 @@
 {
   "name": "@holochain/create-generators",
-  "version": "0.0.1"
+  "version": "0.0.1",
+  "scripts": {
+    "start": "webpack --config webpack.config.js --watch",
+    "build": "webpack --config webpack.config.js",
+    "build:watch": "webpack --config webpack.config.js --watch"
+  },
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "dependencies": {
+    "diff": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/diff": "^5.0.1",
+    "handlebars-loader": "^1.7.1"
+  }
 }

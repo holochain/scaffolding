@@ -5,10 +5,11 @@
   "workspaces": [
     "./packages/client",
     "./packages/server",
-    "./packages/generators"
+    "./packages/generators",
+    "./packages/types"
   ],
   "scripts": {
-    "start": "npm run build -w @holochain/create-ui && concurrently -k \"npm run build:watch -w @holochain/create-ui\" \"npm start -w @holochain/create\""
+    "start": "npm run build -w @holochain/create-generators -w @holochain/create-types -w @holochain/create-ui && concurrently -k \"npm run build:watch -w @holochain/create-ui -w @holochain/create-generators -w @holochain/create-types\" \"npm start -w @holochain/create\""
   },
   "devDependencies": {
     "concurrently": "^6.2.1"
