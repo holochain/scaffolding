@@ -6,7 +6,7 @@
   "scripts": {
     "start": "npm run build && concurrently \"webpack --config webpack.config.js --watch\" \"nodemon --config ./nodemon.config.json\" --raw",
     "build": "rm -rf dist && webpack --config webpack.config.js",
-    "publish-to-branch": "npm run build && gh-pages -d ./ -b build"
+    "publish-to-branch": "cd ../.. && npm run build && cd packages/server && gh-pages -d ./ -b build"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
