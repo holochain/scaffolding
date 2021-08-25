@@ -5,7 +5,7 @@ const webpack = require('webpack');
 module.exports = {
   entry: './src/app.ts',
   target: 'node',
-  mode: 'development',
+  mode: 'production',
   module: {
     rules: [
       {

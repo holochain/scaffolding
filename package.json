@@ -10,7 +10,7 @@
   ],
   "scripts": {
     "start": "npm run build -w @holochain/create-generators -w @holochain/create-types -w @holochain/create-ui && concurrently -k \"npm run build:watch -w @holochain/create-ui -w @holochain/create-generators -w @holochain/create-types\" \"npm start -w @holochain/create\"",
-    "build": "npm run build -w @holochain/create-generators -w @holochain/create-types -w @holochain/create"
+    "build": "npm run build -w @holochain/create-generators -w @holochain/create-types -w @holochain/create-ui -w @holochain/create"
   },
   "devDependencies": {
     "concurrently": "^6.2.1"

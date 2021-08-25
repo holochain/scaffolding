@@ -1,7 +1,7 @@
 <template>
   <v-container>
     <div class="column center">
-      <v-img :src="require('../assets/holochain_logo.svg')" class="my-3" contain height="200" />
+      <v-img :src="require('../assets/holochain_logo.svg')" class="my-3" contain height="200" width="200" />
 
       <div class="column center">
         <h1>Welcome to the Holochain RAD tools</h1>
