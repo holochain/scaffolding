@@ -13,3 +13,8 @@ export default defineComponent({
   name: 'App',
 });
 </script>
+<style>
+body {
+  font-family: Mulish,sans-serif;
+}
+</style>

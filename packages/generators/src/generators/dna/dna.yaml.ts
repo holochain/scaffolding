@@ -13,7 +13,7 @@ ${mergeStrings(
     zome =>
       `  - name: ${zome.name}
     bundled: ${pathToBase}target/wasm32-unknown-unknown/release/${zome.name}.wasm
-    `,
+`,
   ),
 )}
 `;

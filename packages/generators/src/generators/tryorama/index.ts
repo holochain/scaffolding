@@ -10,7 +10,7 @@ export function generateTryorama(happ: HappDefinition): FileChanges[] {
     {
       type: FileChangesType.Create,
       fileName: 'package.json',
-      content: packageJson('holochain/tryorama#3970c375e5f48bbf520e8ec906fb37f1ee29c35e'),
+      content: packageJson('0.4.5'),
     },
     {
       type: FileChangesType.Create,

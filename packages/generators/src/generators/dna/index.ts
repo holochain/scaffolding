@@ -27,7 +27,7 @@ export function generateDna(dna: DnaDefinition, pathToBase: string): FileChanges
       changes: dna.zomes.map(zome => ({
         type: FileChangesType.InDir,
         dirName: zome.name,
-        changes: generateZome(dna, zome),
+        changes: generateZome(zome),
       })),
     },
   ];

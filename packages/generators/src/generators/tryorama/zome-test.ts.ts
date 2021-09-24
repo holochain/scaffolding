@@ -1,7 +1,7 @@
 import { DnaDefinition, ZomeDefinition } from '../../types';
 
 export default (dna: DnaDefinition, zome: ZomeDefinition) => `
-import { Orchestrator, Player } from "@holochain/tryorama";
+import { Orchestrator, Player, Cell } from "@holochain/tryorama";
 import { config, installation, sleep } from '../utils';
 
 export default (orchestrator: Orchestrator<any>) => 

@@ -1,17 +1,21 @@
 <template>
-  <v-container>
-    <div class="column center">
-      <div class="column center">
-        <mwc-textfield
-          label="hApp Name"
-          ref="happName"
-          class="text-input"
-          required
-          autoValidate
-          @input="happ.name = $event.target.value"
-        ></mwc-textfield>
+  <div class="column">
+    <mwc-card style="width: auto">
+      <span>Scaffold New App</span>
+      <div class="column">
+        <div class="row">
+          <span>App Name</span>
+          <mwc-textfield
+            label="hApp Name"
+            class="text-input"
+            required
+            autoValidate
+            @input="happ.name = $event.target.value"
+            style="margin-left: 8px"
+          ></mwc-textfield>
+        </div>
 
-        <mwc-card v-for="dna of happ.dnas" :key="dna.name" style="width: auto">
+        <div v-for="dna of happ.dnas" :key="dna.name">
           <div class="column">
             <mwc-textfield
               label="DNA Name"
@@ -47,12 +51,11 @@
               ></mwc-textfield>
             </div>
           </div>
-        </mwc-card>
-
-        <mwc-button @click="$emit('scaffoldApp', happ)" style="margin-top: 24px" label="Scaffold new app"></mwc-button>
+        </div>
       </div>
-    </div>
-  </v-container>
+    </mwc-card>
+    <mwc-button @click="$emit('scaffoldApp', happ)" style="margin-top: 24px" label="Scaffold new app"></mwc-button>
+  </div>
 </template>
 
 <script lang="ts">
@@ -62,6 +65,8 @@ import { ClientEventType } from '@holochain/scaffolding-types';
 import { generateWebHapp, HappDefinition } from '@holochain/scaffolding-generators';
 import '@material/mwc-textfield';
 import '@authentic/mwc-card';
+import '@material/mwc-button';
+import '@material/mwc-list';
 
 export default {
   name: 'AppDefinitionBuilder',

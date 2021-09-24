@@ -34,6 +34,6 @@ export function generateZomeCode(zomeName: string): FileChanges[] {
   ];
 }
 
-export function generateZome(dna: DnaDefinition, zome: ZomeDefinition): FileChanges[] {
-  return [...generateZomeCargoToml(`${dna.name}-${zome.name}`, '<AUTHOR>'), ...generateZomeCode(zome.name)];
+export function generateZome(zome: ZomeDefinition): FileChanges[] {
+  return [...generateZomeCargoToml(zome.name, '<AUTHOR>'), ...generateZomeCode(zome.name)];
 }
