@@ -1,0 +1,23 @@
+{
+  "name": "my-app-dev",
+  "private": true,
+  "workspaces": [
+    "ui",
+    "tests"
+  ],
+  "scripts": {
+    "start": "npm run build:happ && npm run build -w my-app-ui && cross-env HC_PORT=$(port) concurrently -k \"npm run start:happ\" \"npm run start -w my-app-ui\"",
+    "test": "npm run build:happ && npm t -w tests",
+    "start:happ": "hc sandbox clean && RUST_LOG=warn hc s generate ./workdir/my-app.happ --run=$HC_PORT -a my-app network mdns",
+    "package": "npm run build:happ && npm run package -w my-app-ui && hc web-app pack workdir",
+    "build:happ": "npm run build:dnas && hc app pack ./workdir",
+    "build:dnas": "npm run build:zomes && hc dna pack ./dna/workdir",
+    "build:zomes": "CARGO_TARGET_DIR=target cargo build --release --target wasm32-unknown-unknown"
+  },
+  "devDependencies": {
+    "concurrently": "^6.2.1",
+    "cross-env": "^7.0.3",
+    "new-port-cli": "^1.0.0",
+    "rimraf": "^3.0.2"
+  }
+}

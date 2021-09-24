@@ -1,52 +1,83 @@
 <template>
-  <v-container>
-    <div class="column center">
-      <v-img :src="require('../assets/holochain_logo.svg')" class="my-3" contain height="200" width="200" />
-
-      <div class="column center">
-        <h1>Welcome to the Holochain RAD tools</h1>
-        <AppDefinitionBuilder @scaffold-app="$event"></AppDefinitionBuilder>
-      </div>
+  <div class="column" style="align-items: center">
+    <div style="width: 800px">
+      <AppDefinitionBuilder @scaffold-app="generateFileChanges($event)"></AppDefinitionBuilder>
     </div>
-  </v-container>
+  </div>
+
+  <mwc-dialog ref="dialog" heading="Preview" scrimClickAction="" escapeKeyAction="">
+    <div class="column">
+      <span>This will create the following structure in the directory: {{ currentDir }}</span>
+
+      <ui5-tree>
+        <FileNode :fileTree="fileChanges"> </FileNode>
+      </ui5-tree>
+    </div>
+
+    <mwc-button slot="secondaryAction" dialogAction="close" label="Cancel"></mwc-button>
+    <mwc-button slot="primaryAction" dialogAction="close" @click="scaffoldApp()" label="Yes"></mwc-button>
+  </mwc-dialog>
+  <mwc-dialog ref="helpdialog" heading="App Scaffolded!">
+    <div class="column">
+      <span
+        >If you haven't yet, <b><a href="https://nixos.org/download.html">install nix-shell</a>.</b></span
+      >
+      <span>Run this to get started:</span>
+      <code class="language-bash" style="width: 800px;">
+        cd {{ currentDir }}/{{ happName }}
+
+        nix-shell && npm install
+      </code>
+    </div>
+    <mwc-button slot="primaryAction" dialogAction="close" label="Ok"></mwc-button>
+  </mwc-dialog>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { socket } from '../socket';
 import { ClientEventType } from '@holochain/scaffolding-types';
-import { generateWebHapp, HappDefinition } from '@holochain/scaffolding-generators';
-import '@material/mwc-textfield';
+import { FileChanges, FileChangesType, generateWebHapp, HappDefinition } from '@holochain/scaffolding-generators';
 import AppDefinitionBuilder from './AppDefinitionBuilder.vue';
-import '@authentic/mwc-card';
+import FileNode from './FileNode.vue';
+import type { Dialog } from '@material/mwc-dialog';
 
-export default {
+export default defineComponent({
   name: 'Scaffold',
   components: {
-    AppDefinitionBuilder
+    AppDefinitionBuilder,
+    FileNode,
+  },
+  data(): { currentDir: string | undefined; fileChanges: FileChanges[] | undefined; happName: string | undefined } {
+    return {
+      currentDir: undefined,
+      fileChanges: undefined,
+      happName: undefined,
+    };
+  },
+  async mounted() {
+    socket.emit(ClientEventType.ReadDir, (dir: { dirPath: string }) => (this.currentDir = dir.dirPath));
   },
   methods: {
-    scaffoldApp(happ: HappDefinition): void {
-      socket.emit(ClientEventType.ApplyChanges, generateWebHapp(happ));
+    scaffoldApp(): void {
+      socket.emit(ClientEventType.ApplyChanges, [
+        {
+          type: FileChangesType.InDir,
+          dirName: this.happName,
+          changes: this.fileChanges,
+        },
+      ]);
+      (this.$refs.helpdialog as Dialog).show();
+    },
+    generateFileChanges(happ: HappDefinition) {
+      this.fileChanges = generateWebHapp(happ);
+      this.happName = happ.name;
+      (this.$refs.dialog as Dialog).show();
     },
   },
-};
+});
 </script>
 <style scoped>
-.row {
-  display: flex;
-  flex-direction: row;
-}
-.column {
-  display: flex;
-  flex-direction: column;
-}
-
-.center {
-  justify-content: center;
-  align-items: center;
-}
-
 .text-input {
   width: 424px;
   margin: 16px;

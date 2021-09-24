@@ -1,61 +1,107 @@
 <template>
   <div class="column">
-    <mwc-card style="width: auto">
-      <span>Scaffold New App</span>
+    <h1>Scaffold New App</h1>
+    <ui5-card style="width: auto">
+      <div class="column" style="margin: 16px">
+        <span class="secondary-title">App Information</span>
+        <mwc-textfield
+          label="hApp Name"
+          class="text-input"
+          required
+          autoValidate
+          outlined
+          :value="happ.name"
+          @input="happ.name = $event.target.value"
+          style="margin-top: 8px"
+        ></mwc-textfield>
+      </div>
+    </ui5-card>
+
+    <div style="margin-top: 16px; margin-bottom: 12px" class="row center">
+      <span class="secondary-title" style="flex: 1">Dna Slots</span>
+      <mwc-button
+        icon="add"
+        label="Add dna"
+        @click="
+          happ.dnas.push({
+            name: 'my-dna',
+            zomes: [
+              {
+                name: 'my-zome',
+              },
+            ],
+          })
+        "
+      ></mwc-button>
+    </div>
+    <ui5-card style="width: auto; margin-bottom: 16px" v-for="(dna, index) of happ.dnas" :key="dna.name">
       <div class="column">
-        <div class="row">
-          <span>App Name</span>
+        <div class="column" style="margin: 16px">
+          <div class="row">
+            <span style="flex: 1; font-size: 18px">Dna Slot #{{ index + 1 }}</span>
+            <mwc-icon-button
+              :disabled="happ.dnas.length < 2"
+              @click="happ.dnas.splice(index, 1)"
+              icon="delete"
+            ></mwc-icon-button>
+          </div>
+
           <mwc-textfield
-            label="hApp Name"
-            class="text-input"
+            label="DNA Name"
             required
+            outlined
             autoValidate
-            @input="happ.name = $event.target.value"
-            style="margin-left: 8px"
+            @input="dna.name = $event.target.value"
+            class="text-input"
+            :value="dna.name"
           ></mwc-textfield>
         </div>
+        <div class="row center" style="margin: 4px 16px">
+          <span style="flex: 1; font-size: 18px">Zomes</span>
+          <mwc-button icon="add" label="Add zome" @click="dna.zomes.push({ name: 'new-zome' })"></mwc-button>
+        </div>
+        <span style="width: 100%; height: 1px; background-color: lightgrey"></span>
+        <div class="column">
+          <div class="row">
+            <mwc-list style="width: 200px" activatable>
+              <mwc-list-item
+                v-for="(zome, index) of dna.zomes"
+                :key="zome.name"
+                :activated="selectedZomes[dna.name] === index"
+                @click="selectedZomes[dna.name] = index"
+              >
+                {{ zome.name }}
+              </mwc-list-item>
+            </mwc-list>
 
-        <div v-for="dna of happ.dnas" :key="dna.name">
-          <div class="column">
-            <mwc-textfield
-              label="DNA Name"
-              required
-              autoValidate
-              @input="dna.name = $event.target.value"
-              class="text-input"
-              :value="dna.name"
-            ></mwc-textfield>
-
-            <div class="row">
-              <div class="column">
-                <mwc-list>
-                  <mwc-list-item
-                    v-for="zome of dna.zomes"
-                    :key="zome.name"
-                    @click="selectedZomes[dna.name] = zome.name"
-                  >
-                    {{ zome.name }}
-                  </mwc-list-item>
-                </mwc-list>
-
-                <mwc-button label="Add zome" @click="dna.zomes.push({ name: 'new-zome' })"></mwc-button>
-              </div>
-
+            <div class="row center" style="flex: 1; align-self: start">
               <mwc-textfield
                 label="Zome Name"
                 class="text-input"
-                :value="selectedZomes[dna.name].name"
-                @input="selectedZomes[dna.name].name = $event.target.value"
+                :value="dna.zomes[selectedZomes[dna.name]].name"
+                @input="dna.zomes[selectedZomes[dna.name]].name = $event.target.value"
                 required
+                outlined
                 autoValidate
+                style="flex: 1; margin: 8px"
               ></mwc-textfield>
+
+              <mwc-icon-button :disabled="dna.zomes.length < 2" @click="deleteSelectedZome(index)" icon="delete">
+              </mwc-icon-button>
             </div>
           </div>
         </div>
       </div>
-    </mwc-card>
-    <mwc-button @click="$emit('scaffoldApp', happ)" style="margin-top: 24px" label="Scaffold new app"></mwc-button>
+    </ui5-card>
   </div>
+
+  <mwc-fab
+    @click="$emit('scaffoldApp', happ)"
+    style="position: fixed; bottom: 16px; right: 16px"
+    label="Scaffold app"
+    extended
+    icon="system_update_alt"
+  ></mwc-fab>
 </template>
 
 <script lang="ts">
@@ -63,18 +109,14 @@ import { defineComponent } from 'vue';
 import { socket } from '../socket';
 import { ClientEventType } from '@holochain/scaffolding-types';
 import { generateWebHapp, HappDefinition } from '@holochain/scaffolding-generators';
-import '@material/mwc-textfield';
-import '@authentic/mwc-card';
-import '@material/mwc-button';
-import '@material/mwc-list';
 
-export default {
+export default defineComponent({
   name: 'AppDefinitionBuilder',
 
-  data(): { happ: HappDefinition; selectedZomes: { [dna: string]: string } } {
+  data(): { happ: HappDefinition; selectedZomes: { [dna: string]: number } } {
     return {
       selectedZomes: {
-        'my-dna': 'my-zome',
+        'my-dna': 0,
       },
       happ: {
         name: 'my-app',
@@ -91,26 +133,24 @@ export default {
       },
     };
   },
+  methods: {
+    deleteSelectedZome(dnaIndex: number) {
+      const dna = this.happ.dnas[dnaIndex];
+      const selectedZome = this.selectedZomes[dna.name];
+
+      dna.zomes.splice(selectedZome, 1);
+      if (this.selectedZomes[dna.name] !== 0) this.selectedZomes[dna.name]--;
+    },
+  },
   emits: ['scaffoldApp'],
-};
+});
 </script>
 <style scoped>
-.row {
-  display: flex;
-  flex-direction: row;
-}
-.column {
-  display: flex;
-  flex-direction: column;
-}
-
-.center {
-  justify-content: center;
-  align-items: center;
-}
-
 .text-input {
   width: 424px;
-  margin: 16px;
+}
+
+.secondary-title {
+  font-size: 18px;
 }
 </style>
