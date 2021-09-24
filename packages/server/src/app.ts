@@ -5,7 +5,7 @@ import open from 'open';
 import http from 'http';
 import { Server } from 'socket.io';
 
-import { ClientEvents, ClientEventType, ServerEvents } from '@holochain/create-types';
+import { ClientEvents, ClientEventType, ServerEvents } from '@holochain/scaffolding-types';
 import { applyGeneratedChanges } from './events/apply-changes';
 
 dotenv.config();

@@ -1,4 +1,4 @@
-import { FileChanges, FileChangesType } from '@holochain/create-generators';
+import { FileChanges, FileChangesType } from '@holochain/scaffolding-generators';
 import fs from 'fs';
 
 export function applyGeneratedChanges(baseDirPath: string, fileChanges: FileChanges[]) {

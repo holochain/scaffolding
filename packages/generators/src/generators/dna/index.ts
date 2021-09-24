@@ -1,53 +1,35 @@
-import { FileChanges, FileChangesType } from '../../types';
+import { DnaDefinition, FileChanges, FileChangesType } from '../../types';
 import { camelToSnakeCase } from '../utils';
 import { generateZome } from '../zome';
 
-//@ts-ignore
-import cargoToml from './Cargo.toml.hbs';
-//@ts-ignore
-import dnaYaml from './dna.yaml.hbs';
+import dnaYaml from './dna.yaml';
 
-export function generateDnaCargoToml(zomeName: string): FileChanges[] {
-  return [
-    {
-      type: FileChangesType.Create,
-      fileName: 'Cargo.toml',
-      content: cargoToml({ zomeName }),
-    },
-  ];
-}
 
-export function generateDnaYaml(dnaName: string, zomeName: string): FileChanges[] {
+export function generateDnaYaml(dna: DnaDefinition, pathToBase: string): FileChanges[] {
   return [
     {
       type: FileChangesType.Create,
       fileName: 'dna.yaml',
-      content: dnaYaml({
-        dnaName,
-        zomeName: camelToSnakeCase(zomeName),
-      }),
+      content: dnaYaml(dna, `${pathToBase}../`),
     },
   ];
 }
 
-export function generateDna(dnaName: string, zomeName: string): FileChanges[] {
+export function generateDna(dna: DnaDefinition, pathToBase: string): FileChanges[] {
   return [
     {
       type: FileChangesType.InDir,
       dirName: 'workdir',
-      changes: generateDnaYaml(dnaName, zomeName),
+      changes: generateDnaYaml(dna, pathToBase),
     },
-    ...generateDnaCargoToml(zomeName),
     {
       type: FileChangesType.InDir,
       dirName: 'zomes',
-      changes: [
-        {
-          type: FileChangesType.InDir,
-          dirName: zomeName,
-          changes: generateZome(zomeName),
-        },
-      ],
+      changes: dna.zomes.map(zome => ({
+        type: FileChangesType.InDir,
+        dirName: zome.name,
+        changes: generateZome(zome),
+      })),
     },
   ];
 }

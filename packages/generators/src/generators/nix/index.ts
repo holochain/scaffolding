@@ -1,7 +1,6 @@
 import { FileChanges, FileChangesType } from '../../types';
 
-//@ts-ignore
-import defaultNix from './default.nix.hbs';
+import defaultNix from './default.nix';
 
 export function generateNixFile(): FileChanges[] {
   return [
@@ -10,13 +9,13 @@ export function generateNixFile(): FileChanges[] {
       fileName: 'default.nix',
       content: defaultNix({
         holochainVersion: {
-          rev: 'f3d17d993ad8d988402cc01d73a0095484efbabb',
-          sha256: '1z0y1bl1j2cfv4cgr4k7y0pxnkbiv5c0xv89y8dqnr32vli3bld7',
-          cargoSha256: '1rf8vg832qyymw0a4x247g0iikk6kswkllfrd5fqdr0qgf9prc31',
+          rev: 'a1206a694fe3b521440fe633db99a50b8255c1b2',
+          sha256: '0qdjjkqw3xlg8g686gvn509a9rv4kc6qfw07hypzc0fksix9d4iz',
+          cargoSha256: '175b76j31sls0gj08imchwnk7n4ylsxlc1bm58zrhfmq62hcchb1',
         },
         lairKeystoreHashes: {
-          sha256: '1jiz9y1d4ybh33h1ly24s7knsqyqjagsn1gzqbj1ngl22y5v3aqh',
-          cargoSha256: '0agykcl7ysikssfwkjgb3hfw6xl0slzy38prc4rnzvagm5wd1jjv',
+          sha256: '0khg5w5fgdp1sg22vqyzsb2ri7znbxiwl7vr2zx6bwn744wy2cyv',
+          cargoSha256: '1lm8vrxh7fw7gcir9lq85frfd0rdcca9p7883nikjfbn21ac4sn4',
         },
       }),
     },

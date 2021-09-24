@@ -18,8 +18,8 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { socket } from '../socket';
-import { ClientEventType } from '@holochain/create-types';
-import { generateHapp } from '@holochain/create-generators';
+import { ClientEventType } from '@holochain/scaffolding-types';
+import { generateHapp } from '@holochain/scaffolding-generators';
 import '@material/mwc-textfield';
 
 export default {

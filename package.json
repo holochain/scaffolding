@@ -1,5 +1,5 @@
 {
-  "name": "@holochain/create-monorepo",
+  "name": "@holochain/scaffolding-dev",
   "private": true,
   "version": "0.0.1",
   "workspaces": [
@@ -9,10 +9,11 @@
     "./packages/types"
   ],
   "scripts": {
-    "start": "npm run build -w @holochain/create-generators -w @holochain/create-types -w @holochain/create-ui && concurrently -k \"npm run build:watch -w @holochain/create-ui -w @holochain/create-generators -w @holochain/create-types\" \"npm start -w @holochain/create\"",
-    "build": "npm run build -w @holochain/create-generators -w @holochain/create-types -w @holochain/create-ui -w @holochain/create"
+    "start": "npm run build -w @holochain/scaffolding-generators -w @holochain/scaffolding-types -w @holochain/scaffolding-ui && concurrently -k \"npm run build:watch -w @holochain/scaffolding-ui -w @holochain/scaffolding-generators -w @holochain/scaffolding-types\" \"npm start -w @holochain/create\"",
+    "build": "npm run build -w @holochain/scaffolding-generators && npm run build -w @holochain/scaffolding-types && npm run build -w @holochain/scaffolding-ui && npm run build -w @holochain/create"
   },
   "devDependencies": {
-    "concurrently": "^6.2.1"
+    "concurrently": "^6.2.1",
+    "rimraf": "^3.0.2"
   }
 }

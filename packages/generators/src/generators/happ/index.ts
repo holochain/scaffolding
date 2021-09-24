@@ -1,53 +1,79 @@
-import { FileChanges, FileChangesType } from '../../types';
+import { DnaDefinition, FileChanges, FileChangesType, HappDefinition } from '../../types';
 import { generateDna, generateDnaYaml } from '../dna';
 import { generateNixFile } from '../nix';
 
-//@ts-ignore
-import happYaml from './happ.yaml.hbs';
+import cargoToml from '../happ/Cargo.toml';
 
-export function generateHappYaml(happName: string, dnaName: string): FileChanges[] {
+import happYaml from './happ.yaml';
+import { generateRootPackageJson } from '../npm';
+import { generateTryorama } from '../tryorama';
+import { generateGithubWorkfows } from '../github';
+
+export function generateHapp(happ: HappDefinition): FileChanges[] {
+  return [
+    ...generateNixFile(),
+    ...generateHappWorkdir(happ),
+    ...generateWorkspaceCargoToml(happ),
+    ...generateDnas(happ),
+    ...generateRootPackageJson(happ),
+    ...generateGithubWorkfows(happ),
+    {
+      type: FileChangesType.InDir,
+      dirName: 'tests',
+      changes: generateTryorama(happ),
+    },
+  ];
+}
+
+export function generateHappYaml(happ: HappDefinition): FileChanges[] {
   return [
     {
       type: FileChangesType.Create,
       fileName: 'happ.yaml',
-      content: happYaml({
-        happName,
-        dnaName,
-      }),
+      content: happYaml(happ),
     },
   ];
 }
 
-export function generateHappWorkdir(happName: string, dnaName: string): FileChanges[] {
+export function generateHappWorkdir(happ: HappDefinition): FileChanges[] {
   return [
     {
       type: FileChangesType.InDir,
       dirName: 'workdir',
-      changes: generateHappYaml(happName, dnaName),
+      changes: generateHappYaml(happ),
     },
   ];
 }
 
-export function generateHapp(happName: string, dnaName: string, zomeName: string): FileChanges[] {
+function generateDnas(happ: HappDefinition): FileChanges[] {
+  if (happ.dnas.length === 1)
+    return [
+      {
+        type: FileChangesType.InDir,
+        dirName: 'dna',
+        changes: generateDna(happ.dnas[0], '../'),
+      },
+    ];
+
   return [
     {
       type: FileChangesType.InDir,
-      dirName: happName,
-      changes: [
-        ...generateNixFile(),
-        ...generateHappWorkdir(happName, dnaName),
-        {
-          type: FileChangesType.InDir,
-          dirName: 'dnas',
-          changes: [
-            {
-              type: FileChangesType.InDir,
-              dirName: dnaName,
-              changes: generateDna(dnaName, zomeName),
-            },
-          ],
-        },
-      ],
+      dirName: 'dnas',
+      changes: happ.dnas.map(dna => ({
+        type: FileChangesType.InDir,
+        dirName: dna.name,
+        changes: generateDna(dna, '../../'),
+      })),
+    },
+  ];
+}
+
+export function generateWorkspaceCargoToml(happ: HappDefinition): FileChanges[] {
+  return [
+    {
+      type: FileChangesType.Create,
+      fileName: 'Cargo.toml',
+      content: cargoToml(happ),
     },
   ];
 }

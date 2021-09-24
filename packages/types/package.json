@@ -1,5 +1,5 @@
 {
-  "name": "@holochain/create-types",
+  "name": "@holochain/scaffolding-types",
   "version": "0.0.1",
   "description": "Common types for the client and the server to communicate with each other",
   "author": "guillem.cordoba@gmail.com",
@@ -9,6 +9,9 @@
     "start": "tsc -w",
     "build": "tsc",
     "build:watch": "tsc -w"
+  },
+  "dependencies": {
+    "@holochain/scaffolding-generators": "0.0.1"
   },
   "devDependencies": {
     "typescript": "^4.3.5"

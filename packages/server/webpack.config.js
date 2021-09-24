@@ -32,7 +32,7 @@ module.exports = {
     new CopyPlugin({
       patterns: [
         {
-          from: '../../node_modules/@holochain/create-ui/dist',
+          from: '../../node_modules/@holochain/scaffolding-ui/dist',
           to: './public/',
         },
       ],

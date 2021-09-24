@@ -27,3 +27,17 @@ export type FileChanges =
       type: FileChangesType.Delete;
       fileName: string;
     };
+
+export interface HappDefinition {
+  name: string;
+  dnas: DnaDefinition[];
+}
+
+export interface DnaDefinition {
+  name: string;
+  zomes: ZomeDefinition[];
+}
+
+export interface ZomeDefinition {
+  name: string;
+}
