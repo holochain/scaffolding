@@ -4,7 +4,6 @@ import { generateZome } from '../zome';
 
 import dnaYaml from './dna.yaml';
 
-
 export function generateDnaYaml(dna: DnaDefinition, pathToBase: string): FileChanges[] {
   return [
     {
@@ -28,7 +27,7 @@ export function generateDna(dna: DnaDefinition, pathToBase: string): FileChanges
       changes: dna.zomes.map(zome => ({
         type: FileChangesType.InDir,
         dirName: zome.name,
-        changes: generateZome(zome),
+        changes: generateZome(dna, zome),
       })),
     },
   ];

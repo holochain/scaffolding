@@ -1,6 +1,6 @@
 export default ({ zomeName, author, hdkVersion }: { zomeName: string; hdkVersion: string; author: string }) =>
   `[package]
-authors = ["{{author}}"]
+authors = ["${author}"]
 edition = "2018"
 name = "${zomeName}"
 version = "0.0.1"

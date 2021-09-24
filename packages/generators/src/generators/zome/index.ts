@@ -1,4 +1,4 @@
-import { FileChanges, FileChangesType, ZomeDefinition } from '../../types';
+import { DnaDefinition, FileChanges, FileChangesType, ZomeDefinition } from '../../types';
 import { camelToSnakeCase } from '../utils';
 
 import cargoToml from './Cargo.toml';
@@ -34,6 +34,6 @@ export function generateZomeCode(zomeName: string): FileChanges[] {
   ];
 }
 
-export function generateZome(zome: ZomeDefinition): FileChanges[] {
-  return [...generateZomeCargoToml(zome.name, 'test'), ...generateZomeCode(zome.name)];
+export function generateZome(dna: DnaDefinition, zome: ZomeDefinition): FileChanges[] {
+  return [...generateZomeCargoToml(`${dna.name}-${zome.name}`, '<AUTHOR>'), ...generateZomeCode(zome.name)];
 }

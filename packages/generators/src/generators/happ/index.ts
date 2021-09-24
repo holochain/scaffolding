@@ -9,6 +9,7 @@ import { generateRootPackageJson } from '../npm';
 import { generateTryorama } from '../tryorama';
 import { generateGithubWorkfows } from '../github';
 import gitignore from './gitignore';
+import readme from './README.md';
 
 export function generateHapp(happ: HappDefinition): FileChanges[] {
   return [
@@ -18,6 +19,7 @@ export function generateHapp(happ: HappDefinition): FileChanges[] {
     ...generateDnas(happ),
     ...generateRootPackageJson(happ),
     ...generateGithubWorkfows(happ),
+    ...generateGitIgnore(),
     ...generateGitIgnore(),
     {
       type: FileChangesType.InDir,
@@ -43,6 +45,15 @@ export function generateGitIgnore(): FileChanges[] {
       type: FileChangesType.Create,
       fileName: '.gitignore',
       content: gitignore(),
+    },
+  ];
+}
+export function generateReadme(happ: HappDefinition): FileChanges[] {
+  return [
+    {
+      type: FileChangesType.Create,
+      fileName: 'README.md',
+      content: readme(happ),
     },
   ];
 }

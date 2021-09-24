@@ -38,13 +38,13 @@ export function generateTryorama(happ: HappDefinition): FileChanges[] {
 }
 
 function generateDnaTests(dnas: DnaDefinition[]): FileChanges[] {
-  return dnas.map(dna => ({
+  return dnas.map((dna) => ({
     type: FileChangesType.InDir,
     dirName: dna.name,
     changes: dna.zomes.map(zome => ({
       type: FileChangesType.Create,
       fileName: `${zome.name}.ts`,
-      content: zomeTests(zome),
+      content: zomeTests(dna, zome),
     })),
   }));
 }

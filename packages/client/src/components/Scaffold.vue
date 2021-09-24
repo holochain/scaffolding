@@ -5,11 +5,7 @@
 
       <div class="column center">
         <h1>Welcome to the Holochain RAD tools</h1>
-        <mwc-textfield label="hApp Name" ref="happName" class="text-input" :value="'sample-happ'"></mwc-textfield>
-        <mwc-textfield label="DNA Name" ref="dnaName" class="text-input" :value="'sample-dna'"></mwc-textfield>
-        <mwc-textfield label="Zome Name" ref="zomeName" class="text-input" :value="'sample-zome'"></mwc-textfield>
-
-        <v-btn @click="scaffold()" style="margin-top: 24px">Scaffold new hApp</v-btn>
+        <AppDefinitionBuilder @scaffold-app="$event"></AppDefinitionBuilder>
       </div>
     </div>
   </v-container>
@@ -19,29 +15,19 @@
 import { defineComponent } from 'vue';
 import { socket } from '../socket';
 import { ClientEventType } from '@holochain/scaffolding-types';
-import { generateHapp } from '@holochain/scaffolding-generators';
+import { generateWebHapp, HappDefinition } from '@holochain/scaffolding-generators';
 import '@material/mwc-textfield';
+import AppDefinitionBuilder from './AppDefinitionBuilder.vue';
+import '@authentic/mwc-card';
 
 export default {
   name: 'Scaffold',
-
-  data(): { happName: string; dnaName: string; zomeName: string } {
-    return {
-      happName: 'sample-happ',
-      dnaName: 'sample-dna',
-      zomeName: 'sample-zome',
-    };
+  components: {
+    AppDefinitionBuilder
   },
   methods: {
-    scaffold(): void {
-      socket.emit(
-        ClientEventType.ApplyChanges,
-        generateHapp(
-          (this as any).$refs.happName.value,
-          (this as any).$refs.dnaName.value,
-          (this as any).$refs.zomeName.value,
-        ),
-      );
+    scaffoldApp(happ: HappDefinition): void {
+      socket.emit(ClientEventType.ApplyChanges, generateWebHapp(happ));
     },
   },
 };

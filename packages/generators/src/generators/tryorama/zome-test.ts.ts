@@ -1,7 +1,7 @@
-import { ZomeDefinition } from '../../types';
+import { DnaDefinition, ZomeDefinition } from '../../types';
 
-export default (zome: ZomeDefinition) => `
-import { Orchestrator } from "@holochain/tryorama";
+export default (dna: DnaDefinition, zome: ZomeDefinition) => `
+import { Orchestrator, Player } from "@holochain/tryorama";
 import { config, installation, sleep } from '../utils';
 
 export default (orchestrator: Orchestrator<any>) => 
@@ -9,7 +9,7 @@ export default (orchestrator: Orchestrator<any>) =>
     // Declare two players using the previously specified config, nicknaming them "alice" and "bob"
     // note that the first argument to players is just an array conductor configs that that will
     // be used to spin up the conductor processes which are returned in a matching array.
-    const [alice_player, bob_player] = await s.players([config, config]);
+    const [alice_player, bob_player]: Player[] = await s.players([config, config]);
 
     // install your happs into the conductors and destructuring the returned happ data using the same
     // array structure as you created in your installation array.
@@ -18,8 +18,8 @@ export default (orchestrator: Orchestrator<any>) =>
 
     await s.shareAllNodes([alice_player, bob_player]);
 
-    const alice = alice_happ.cells[0];
-    const bob = bob_happ.cells[0];
+    const alice = alice_happ.cells.find(cell => cell.cellNick.includes('/${dna.name}.dna')) as Cell;
+    const bob = bob_happ.cells.find(cell => cell.cellNick.includes('/${dna.name}.dna')) as Cell;
 
     const postContents = "My Post";
 
