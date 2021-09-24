@@ -18,12 +18,11 @@ export const config = Config.gen();
 export const installation: InstallAgentsHapps = [
     // one agent
     [
-        [
-            ${happ.dnas.map(dna => `${dna.name}Dna, // contains this dna
-            `)}
+        [${happ.dnas.map(dna => `
+            ${dna.name}Dna, // contains this dna`)}
         ]
     ]
 ];
 
-export const sleep = (ms: number) => new Promise(resolve => setTimeout(() => resolve(null)), ms);
+export const sleep = (ms: number) => new Promise(resolve => setTimeout(() => resolve(null), ms));
 `

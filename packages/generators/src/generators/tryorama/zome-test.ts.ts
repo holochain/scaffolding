@@ -4,7 +4,7 @@ export default (zome: ZomeDefinition) => `
 import { Orchestrator } from "@holochain/tryorama";
 import { config, installation, sleep } from '../utils';
 
-export default (orchestrator: Orchestrator) => 
+export default (orchestrator: Orchestrator<any>) => 
   orchestrator.registerScenario("${zome.name} tests", async (s, t) => {
     // Declare two players using the previously specified config, nicknaming them "alice" and "bob"
     // note that the first argument to players is just an array conductor configs that that will

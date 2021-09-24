@@ -1,8 +1,9 @@
-import { getDnaPath, getUiPackageName } from '../utils';
+import { getDnaPath, getUiPackageName, mergeStrings } from '../utils';
 import { HappDefinition } from '../../types';
+import { concat } from 'lodash-es';
 
-export default ( happ: HappDefinition) =>
-  `{
+export default ( happ: HappDefinition) => 
+`{
   "name": "${happ.name}-dev",
   "private": true,
   "workspaces": [
@@ -17,7 +18,7 @@ export default ( happ: HappDefinition) =>
   } network mdns",
     "package": "npm run build:happ && npm run package -w ${getUiPackageName(happ)} && hc web-app pack workdir",
     "build:happ": "npm run build:dnas && hc app pack ./workdir",
-    "build:dnas": "npm run build:zomes ${happ.dnas.map(dna => `&& hc dna pack ./${getDnaPath(happ, dna.name)}workdir`)}",
+    "build:dnas": "npm run build:zomes${mergeStrings(happ.dnas.map(dna => ` && hc dna pack ./${getDnaPath(happ, dna.name)}workdir`))}",
     "build:zomes": "CARGO_TARGET_DIR=target cargo build --release --target wasm32-unknown-unknown"
   },
   "devDependencies": {
@@ -27,4 +28,4 @@ export default ( happ: HappDefinition) =>
     "rimraf": "^3.0.2"
   }
 }
-`;
+`

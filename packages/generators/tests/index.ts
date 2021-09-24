@@ -17,6 +17,20 @@ test('hi', t => {
           {
             name: 'hihi',
           },
+          {
+            name: 'hihi2',
+          },
+        ],
+      },
+      {
+        name: 'hehe2',
+        zomes: [
+          {
+            name: 'hihi3',
+          },
+          {
+            name: 'hihi4',
+          },
         ],
       },
     ],

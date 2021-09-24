@@ -8,6 +8,7 @@ import happYaml from './happ.yaml';
 import { generateRootPackageJson } from '../npm';
 import { generateTryorama } from '../tryorama';
 import { generateGithubWorkfows } from '../github';
+import gitignore from './gitignore';
 
 export function generateHapp(happ: HappDefinition): FileChanges[] {
   return [
@@ -17,6 +18,7 @@ export function generateHapp(happ: HappDefinition): FileChanges[] {
     ...generateDnas(happ),
     ...generateRootPackageJson(happ),
     ...generateGithubWorkfows(happ),
+    ...generateGitIgnore(),
     {
       type: FileChangesType.InDir,
       dirName: 'tests',
@@ -31,6 +33,16 @@ export function generateHappYaml(happ: HappDefinition): FileChanges[] {
       type: FileChangesType.Create,
       fileName: 'happ.yaml',
       content: happYaml(happ),
+    },
+  ];
+}
+
+export function generateGitIgnore(): FileChanges[] {
+  return [
+    {
+      type: FileChangesType.Create,
+      fileName: '.gitignore',
+      content: gitignore(),
     },
   ];
 }
