@@ -23,13 +23,11 @@
         >If you haven't yet, <b><a href="https://nixos.org/download.html">install nix-shell</a>.</b></span
       >
       <span>Run this to get started:</span>
-      <code class="language-bash" style="width: 800px;">
-        cd {{ currentDir }}/{{ happName }}
-        
-        nix-env -iA cachix -f https://cachix.org/api/v1/install
-        
-        nix-shell && npm install
-      </code>
+      <pre><code class="language-bash" style="word-break: break-all;">cd {{ currentDir }}/{{ happName }}
+nix-env -iA cachix -f https://cachix.org/api/v1/install
+cachix use holochain-ci
+nix-shell
+npm install</code></pre>
     </div>
     <mwc-button slot="primaryAction" dialogAction="close" label="Ok"></mwc-button>
   </mwc-dialog>

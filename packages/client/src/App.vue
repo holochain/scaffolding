@@ -10,9 +10,34 @@ export default defineComponent({
 });
 </script>
 <style>
+html,
+body,
+#app {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+}
+
+#app {
+  display: flex;
+}
+
+.secondary-title {
+  font-size: 24px;
+}
+
+.tertiary-title {
+  font-size: 18px;
+}
+
 body {
   font-family: Mulish, sans-serif;
   background-color: #ededed;
+}
+:root {
+  font-family: Mulish, sans-serif;
+  --mdc-theme-primary: #4720e3;
+  --mdc-theme-secondary: #0dddd3;
 }
 
 .row {
