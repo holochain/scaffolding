@@ -4,6 +4,7 @@ module.exports = {
   lintOnSave: false,
   outputDir: './dist',
 
+  filenameHashing: false,
   devServer: {
     overlay: {
       warnings: false,
@@ -12,13 +13,6 @@ module.exports = {
   },
   configureWebpack: {
     resolve: {
-      alias: {
-        'lit-element': path.resolve('../../node_modules/lit-element'),
-        'prismjs/prism.js': path.resolve('../../node_modules/prismjs/prism.js'),
-        '/node_modules/prismjs/components': path.resolve('../../node_modules/prismjs/components'),
-        '/node_modules/prismjs/themes/prism.css': path.resolve('../../node_modules/prismjs/themes/prism.css'),
-        'lit-html': path.resolve('../../node_modules/lit-html'),
-      },
     },
   },
   chainWebpack: config => {

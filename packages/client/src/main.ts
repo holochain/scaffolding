@@ -10,7 +10,6 @@ import '@material/mwc-fab';
 import '@material/mwc-list';
 import '@material/mwc-dialog';
 import '@ui5/webcomponents/dist/Card.js';
-import '@justinribeiro/code-block';
 
 createApp(App)
   .use(router)

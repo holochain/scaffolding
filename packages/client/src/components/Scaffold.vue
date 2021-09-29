@@ -25,7 +25,9 @@
       <span>Run this to get started:</span>
       <code class="language-bash" style="width: 800px;">
         cd {{ currentDir }}/{{ happName }}
-
+        
+        nix-env -iA cachix -f https://cachix.org/api/v1/install
+        
         nix-shell && npm install
       </code>
     </div>

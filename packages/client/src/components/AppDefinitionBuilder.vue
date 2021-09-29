@@ -19,74 +19,72 @@
 
     <div style="margin-top: 16px; margin-bottom: 12px" class="row center">
       <span class="secondary-title" style="flex: 1">Dna Slots</span>
-      <mwc-button
-        icon="add"
-        label="Add dna"
-        @click="
-          happ.dnas.push({
-            name: 'my-dna',
-            zomes: [
-              {
-                name: 'my-zome',
-              },
-            ],
-          })
-        "
-      ></mwc-button>
+      <mwc-button icon="add" label="Add dna" @click="addDna()"></mwc-button>
     </div>
-    <ui5-card style="width: auto; margin-bottom: 16px" v-for="(dna, index) of happ.dnas" :key="dna.name">
+    <ui5-card style="width: auto; margin-bottom: 16px" v-for="(dna, dnaIndex) of happ.dnas" :key="dnaIndex">
       <div class="column">
-        <div class="column" style="margin: 16px">
-          <div class="row">
-            <span style="flex: 1; font-size: 18px">Dna Slot #{{ index + 1 }}</span>
-            <mwc-icon-button
-              :disabled="happ.dnas.length < 2"
-              @click="happ.dnas.splice(index, 1)"
-              icon="delete"
-            ></mwc-icon-button>
-          </div>
+        <div class="row">
+          <div class="column" style="margin: 16px; flex: 1">
+            <span style="flex: 1; font-size: 18px">Dna Slot: {{ dna.name }}</span>
 
-          <mwc-textfield
-            label="DNA Name"
-            required
-            outlined
-            autoValidate
-            @input="dna.name = $event.target.value"
-            class="text-input"
-            :value="dna.name"
-          ></mwc-textfield>
+            <mwc-textfield
+              label="DNA Name"
+              outlined
+              required
+              :value="dna.name"
+              :name="`dna-${dnaIndex}`"
+              style="margin-top: 8px"
+              @focus="dnaValidity($event.target)"
+              @input="$event.target.validity.valid && setDnaName(dnaIndex, $event.target.value)"
+              class="text-input"
+              helper="Has to be unique"
+              autoValidate
+            ></mwc-textfield>
+          </div>
+          <mwc-icon-button
+            :disabled="happ.dnas.length < 2"
+            @click="happ.dnas.splice(dnaIndex, 1)"
+            icon="delete"
+          ></mwc-icon-button>
         </div>
         <div class="row center" style="margin: 4px 16px">
           <span style="flex: 1; font-size: 18px">Zomes</span>
-          <mwc-button icon="add" label="Add zome" @click="dna.zomes.push({ name: 'new-zome' })"></mwc-button>
+          <mwc-button
+            icon="add"
+            label="Add zome"
+            @click="dna.zomes.push({ name: `new-zome-${zomeCount++}` })"
+          ></mwc-button>
         </div>
         <span style="width: 100%; height: 1px; background-color: lightgrey"></span>
         <div class="column">
           <div class="row">
             <mwc-list style="width: 200px" activatable>
               <mwc-list-item
-                v-for="(zome, index) of dna.zomes"
+                v-for="(zome, zomeIndex) of dna.zomes"
                 :key="zome.name"
-                :activated="selectedZomes[dna.name] === index"
-                @click="selectedZomes[dna.name] = index"
+                :activated="selectedZomes[dnaIndex] === zomeIndex"
+                @click="selectedZomes[dnaIndex] = zomeIndex"
               >
                 {{ zome.name }}
               </mwc-list-item>
             </mwc-list>
 
-            <div class="row center" style="flex: 1; align-self: start">
+            <div class="row" style="flex: 1; align-self: start">
               <mwc-textfield
                 label="Zome Name"
                 class="text-input"
-                :value="dna.zomes[selectedZomes[dna.name]].name"
-                @input="dna.zomes[selectedZomes[dna.name]].name = $event.target.value"
+                :value="dna.zomes[selectedZomes[dnaIndex]].name"
+                @focus="zomeValidity($event.target)"
+                @input="$event.target.validity.valid && setZomeName(dnaIndex, $event.target.value)"
                 required
                 outlined
+                helper="Has to be unique"
                 autoValidate
+                :name="`dna-${dnaIndex}-zome-${selectedZomes[dnaIndex]}`"
                 style="flex: 1; margin: 8px"
               ></mwc-textfield>
 
-              <mwc-icon-button :disabled="dna.zomes.length < 2" @click="deleteSelectedZome(index)" icon="delete">
+              <mwc-icon-button :disabled="dna.zomes.length < 2" @click="deleteSelectedZome(dnaIndex)" icon="delete">
               </mwc-icon-button>
             </div>
           </div>
@@ -108,16 +106,17 @@
 import { defineComponent } from 'vue';
 import { socket } from '../socket';
 import { ClientEventType } from '@holochain/scaffolding-types';
-import { generateWebHapp, HappDefinition } from '@holochain/scaffolding-generators';
+import { generateWebHapp, HappDefinition, DnaDefinition } from '@holochain/scaffolding-generators';
+import type { TextField } from '@material/mwc-textfield';
 
 export default defineComponent({
   name: 'AppDefinitionBuilder',
 
-  data(): { happ: HappDefinition; selectedZomes: { [dna: string]: number } } {
+  data(): { happ: HappDefinition; selectedZomes: Array<number>; dnaCount: number; zomeCount: number } {
     return {
-      selectedZomes: {
-        'my-dna': 0,
-      },
+      selectedZomes: [0],
+      dnaCount: 1,
+      zomeCount: 1,
       happ: {
         name: 'my-app',
         dnas: [
@@ -134,12 +133,86 @@ export default defineComponent({
     };
   },
   methods: {
+    addDna() {
+      const dnaName = `new-dna-${this.dnaCount++}`;
+      this.happ.dnas.push({
+        name: dnaName,
+        zomes: [
+          {
+            name: `new-zome-${this.zomeCount++}`,
+          },
+        ],
+      });
+      this.selectedZomes[this.happ.dnas.length - 1] = 0;
+    },
     deleteSelectedZome(dnaIndex: number) {
       const dna = this.happ.dnas[dnaIndex];
-      const selectedZome = this.selectedZomes[dna.name];
+      const selectedZome = this.selectedZomes[dnaIndex];
 
       dna.zomes.splice(selectedZome, 1);
-      if (this.selectedZomes[dna.name] !== 0) this.selectedZomes[dna.name]--;
+      if (this.selectedZomes[dnaIndex] !== 0) this.selectedZomes[dnaIndex]--;
+    },
+    dnaValidity(textfield: TextField) {
+      textfield.validityTransform = (newValue, nativeValidity) => {
+        if (newValue === '') {
+          textfield.setCustomValidity('The DNA name must not be empty');
+          return {
+            valid: false,
+          };
+        }
+
+        const splitted = textfield.name.split('-');
+        const dnaIndex = parseInt(splitted[1]);
+        if (this.happ.dnas.find((dna, myDnaIndex) => !(dnaIndex === myDnaIndex) && dna.name === newValue)) {
+          textfield.setCustomValidity('The DNA name has to be unique');
+          return {
+            valid: false,
+          };
+        }
+        textfield.setCustomValidity('');
+        return {
+          valid: true,
+        };
+      };
+    },
+    setDnaName(dnaIndex: number, newValue: string) {
+      this.happ.dnas[dnaIndex].name = newValue;
+      console.log(dnaIndex, newValue, this.happ)
+    },
+    zomeValidity(textfield: TextField) {
+      textfield.validityTransform = (newValue, nativeValidity) => {
+        if (newValue === '') {
+          textfield.setCustomValidity('The zome name must not be empty');
+          return {
+            valid: false,
+          };
+        }
+
+        const splitted = textfield.name.split('-');
+        const dnaIndex = parseInt(splitted[1]);
+        const zomeIndex = parseInt(splitted[3]);
+        if (
+          this.happ.dnas.find((dna, myDnaIndex) =>
+            dna.zomes.find(
+              (zome, myZomeIndex) => !(dnaIndex === myDnaIndex && zomeIndex === myZomeIndex) && zome.name === newValue,
+            ),
+          )
+        ) {
+          textfield.setCustomValidity('The zome name has to be unique');
+          return {
+            valid: false,
+          };
+        }
+        textfield.setCustomValidity('');
+        return {
+          valid: true,
+        };
+      };
+    },
+    setZomeName(dnaIndex: number, newValue: string) {
+      const dna: DnaDefinition = this.happ.dnas[dnaIndex];
+
+      dna.zomes[this.selectedZomes[dnaIndex]].name = newValue;
     },
   },
   emits: ['scaffoldApp'],

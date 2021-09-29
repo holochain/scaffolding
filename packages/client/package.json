@@ -23,7 +23,7 @@
     "@material/mwc-icon-button": "^0.25.1",
     "@material/mwc-list": "^0.25.1",
     "@material/mwc-snackbar": "^0.25.1",
-    "@material/mwc-textfield": "^0.22.1",
+    "@material/mwc-textfield": "^0.25.1",
     "@mdi/font": "5.9.55",
     "@ui5/webcomponents": "^1.0.0-rc.15",
     "prismjs": "^1.25.0",

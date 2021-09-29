@@ -1,9 +1,0 @@
----
-manifest_version: "1"
-name: my-dna
-uuid: 00000000-0000-0000-0000-000000000000
-properties: ~
-zomes: 
-  - name: my-zome
-    bundled: ../../target/wasm32-unknown-unknown/release/my-zome.wasm
-
