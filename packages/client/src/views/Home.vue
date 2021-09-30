@@ -20,6 +20,7 @@
         "
       >
         <span class="secondary-title">Next Steps</span>
+        <span class="documentation-item"><a href="https://developer.holochain.org/concepts/">Core Concepts</a></span>
         <span class="documentation-item"><a href="https://docs.rs/hdk">HDK Documentation</a></span>
         <span class="documentation-item"><a href="https://forum.holochain.org/">Holochain Forum</a></span>
         <span class="documentation-item"

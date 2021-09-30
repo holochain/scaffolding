@@ -19,6 +19,12 @@
   </mwc-dialog>
   <mwc-dialog ref="helpdialog" heading="App Scaffolded!">
     <div class="column">
+      <h3>Automatic Setup</h3>
+      <span
+        >Check the terminal from which you executed "npm init @holochain" to finish your setup.</span
+      >
+      <span style="margin-top: 16px">OR</span>
+      <h3>Manual Setup</h3>
       <span
         >If you haven't yet, <b><a href="https://nixos.org/download.html">install nix-shell</a>.</b></span
       >

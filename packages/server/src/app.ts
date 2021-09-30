@@ -7,6 +7,7 @@ import { Server } from 'socket.io';
 
 import { ClientEvents, ClientEventType, ServerEvents } from '@holochain/scaffolding-types';
 import { applyGeneratedChanges } from './events/apply-changes';
+import { automaticSetup } from './events/automatic-setup';
 
 dotenv.config();
 
@@ -38,7 +39,10 @@ const io = new Server(server, {
 });
 
 io.on('connection', socket => {
-  socket.on(ClientEventType.ApplyChanges, changes => applyGeneratedChanges(process.cwd(), changes));
+  socket.on(ClientEventType.ApplyChanges, changes => {
+    applyGeneratedChanges(process.cwd(), changes);
+    automaticSetup(changes[0].dirName);
+  });
   socket.on(ClientEventType.ReadDir, callback => callback({ dirPath: process.cwd() }));
 });
 
