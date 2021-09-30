@@ -11,31 +11,32 @@
           required
           autoValidate
           outlined
-          :value="happ.name"
+          helper="The name of your app"
           @input="happ.name = $event.target.value"
-          style="margin-top: 8px"
+          style="margin-top: 16px"
+          ref="happName"
         ></mwc-textfield>
       </div>
     </ui5-card>
 
     <div style="margin-top: 16px; margin-bottom: 12px" class="row center">
-      <span class="secondary-title" style="flex: 1">Dna Slots</span>
+      <span class="secondary-title" style="flex: 1">DNA Slots</span>
       <mwc-button icon="add" label="Add dna" @click="addDna()"></mwc-button>
     </div>
     <ui5-card style="width: auto; margin-bottom: 16px" v-for="(dna, dnaIndex) of happ.dnas" :key="dnaIndex">
       <div class="column">
         <div class="row">
           <div class="column" style="margin: 16px; margin-bottom: 4px; flex: 1">
-            <span style="flex: 1" class="tertiary-title">Dna: {{ dna.name }}</span>
+            <span style="flex: 1" class="tertiary-title">DNA: {{ dna.name }}</span>
 
             <mwc-textfield
               label="DNA Name"
               outlined
               required
-              :value="dna.name"
               :name="`dna-${dnaIndex}`"
-              style="margin-top: 8px"
-              @focus="dnaValidity($event.target)"
+              :ref="`dna-${dnaIndex}`"
+              style="margin-top: 16px"
+              @focus="dnaValidity($event.target, dna.name)"
               @input="$event.target.validity.valid && setDnaName(dnaIndex, $event.target.value)"
               class="text-input"
               helper="Has to be unique"
@@ -76,7 +77,6 @@
               <mwc-textfield
                 label="Zome Name"
                 class="text-input"
-                :value="dna.zomes[selectedZomes[dnaIndex]].name"
                 @focus="zomeValidity($event.target)"
                 @input="$event.target.validity.valid && setZomeName(dnaIndex, $event.target.value)"
                 required
@@ -84,7 +84,8 @@
                 helper="Has to be unique"
                 autoValidate
                 :name="`dna-${dnaIndex}-zome-${selectedZomes[dnaIndex]}`"
-                style="margin: 8px"
+                :ref="`dna-${dnaIndex}-zome-${selectedZomes[dnaIndex]}`"
+                style="margin: 8px; margin-top: 16px"
               ></mwc-textfield>
               <span style="flex: 1"></span>
 
@@ -136,7 +137,35 @@ export default defineComponent({
       },
     };
   },
+  updated() {
+    this.$nextTick(() => {
+      setTimeout(() => {
+        this.updateValues();
+      });
+    });
+  },
+  mounted() {
+    this.$nextTick(() => {
+      setTimeout(() => {
+        this.updateValues();
+      });
+    });
+  },
   methods: {
+    // Workaround for the bug inside mwc-textfield
+    updateValues() {
+      const refs = this.$refs as any;
+      refs.happName.value = this.happ.name;
+
+      for (let i = 0; i < this.happ.dnas.length; i++) {
+        const dna = this.happ.dnas[i];
+
+        refs[`dna-${i}`].value = dna.name;
+
+        const selectedZomeIndex = this.selectedZomes[i];
+        refs[`dna-${i}-zome-${selectedZomeIndex}`].value = dna.zomes[selectedZomeIndex].name;
+      }
+    },
     addDna() {
       const dnaName = `new-dna-${this.dnaCount++}`;
       this.happ.dnas.push({
@@ -156,7 +185,7 @@ export default defineComponent({
       dna.zomes.splice(selectedZome, 1);
       if (this.selectedZomes[dnaIndex] !== 0) this.selectedZomes[dnaIndex]--;
     },
-    dnaValidity(textfield: TextField) {
+    dnaValidity(textfield: TextField, firstValue: string) {
       textfield.validityTransform = (newValue, nativeValidity) => {
         if (newValue === '') {
           textfield.setCustomValidity('The DNA name must not be empty');
