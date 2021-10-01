@@ -4,7 +4,7 @@
 
     <ui5-card style="width: auto">
       <div class="column" style="margin: 16px">
-        <span class="tertiary-title">App Information</span>
+        <span class="tertiary-title">App: {{ happ.name }}</span>
         <div class="row" style="margin-top: 16px">
           <mwc-textfield
             label="hApp Name"
@@ -12,8 +12,9 @@
             required
             autoValidate
             outlined
+            validationMessage="Must not be empty"
             helper="The name of your app"
-            @input="happ.name = $event.target.value"
+            @input="setHappName($event.target)"
             ref="happName"
           ></mwc-textfield>
           <span style="flex: 1"></span>
@@ -95,7 +96,7 @@
                 @input="$event.target.validity.valid && setZomeName(dnaIndex, $event.target.value)"
                 required
                 outlined
-                helper="Has to be unique"
+                helper="Has to be unique, and snake_case"
                 autoValidate
                 :name="`dna-${dnaIndex}-zome-${selectedZomes[dnaIndex]}`"
                 :ref="`dna-${dnaIndex}-zome-${selectedZomes[dnaIndex]}`"
@@ -176,6 +177,11 @@ export default defineComponent({
     });
   },
   methods: {
+    setHappName(textfield: TextField) {
+      if (textfield.validity.valid) {
+        this.happ.name = textfield.value;
+      }
+    },
     selectUi(index: number) {
       this.uiTemplate = UiTemplates[index];
     },
@@ -215,7 +221,7 @@ export default defineComponent({
     dnaValidity(textfield: TextField, firstValue: string) {
       textfield.validityTransform = (newValue, nativeValidity) => {
         if (newValue === '') {
-          textfield.setCustomValidity('The DNA name must not be empty');
+          textfield.setCustomValidity('Must not be empty');
           return {
             valid: false,
           };
@@ -241,7 +247,7 @@ export default defineComponent({
     zomeValidity(textfield: TextField) {
       textfield.validityTransform = (newValue, nativeValidity) => {
         if (newValue === '') {
-          textfield.setCustomValidity('The zome name must not be empty');
+          textfield.setCustomValidity('Must not be empty');
           return {
             valid: false,
           };

@@ -8,6 +8,8 @@ RAD tools to enable quick scaffolding of Holochain application.
 npm init @holochain
 ```
 
+This will open a tab in your browser that will guide you through the process of scaffolding a Holochain app.
+
 # Development Setup
 
 ## Environment

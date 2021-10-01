@@ -47,6 +47,7 @@ export async function automaticSetup(happName: string) {
       executeCommands(localCommands);
 
       console.log('> Automatic setup: setup completed!');
+      console.log('');
     } catch (e) {
       console.error('> Automatic setup: there was an error executing the automatic setup, exiting...');
       process.exit();
