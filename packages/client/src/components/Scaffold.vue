@@ -20,7 +20,7 @@
     <mwc-button slot="secondaryAction" dialogAction="close" label="Cancel"></mwc-button>
     <mwc-button slot="primaryAction" dialogAction="close" @click="scaffoldApp()" label="Create"></mwc-button>
   </mwc-dialog>
-  <mwc-dialog ref="helpdialog" heading="App Scaffolded!" scrimClickAction="" escapeKeyAction="">
+  <mwc-dialog ref="helpdialog" heading="App Scaffolded!">
     <div v-if="!settingUp" class="column">
       <h3>Manual Setup</h3>
       <span
@@ -43,6 +43,7 @@ npm install</code></pre>
         window.</span
       >
     </div>
+    <mwc-button slot="secondaryAction" dialogAction="close" label="Close" v-if="!settingUp"></mwc-button>
     <mwc-button
       slot="primaryAction"
       @click="setup()"
