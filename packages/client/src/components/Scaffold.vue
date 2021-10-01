@@ -20,9 +20,7 @@
   <mwc-dialog ref="helpdialog" heading="App Scaffolded!">
     <div class="column">
       <h3>Automatic Setup</h3>
-      <span
-        >Check the terminal from which you executed "npm init @holochain" to finish your setup.</span
-      >
+      <span>Check the terminal from which you executed "npm init @holochain" to finish your setup.</span>
       <span style="margin-top: 16px">OR</span>
       <h3>Manual Setup</h3>
       <span
@@ -46,6 +44,7 @@ import { ClientEventType } from '@holochain/scaffolding-types';
 import { FileChanges, FileChangesType, generateWebHapp, HappDefinition } from '@holochain/scaffolding-generators';
 import AppDefinitionBuilder from './AppDefinitionBuilder.vue';
 import FileNode from './FileNode.vue';
+import { getUiTemplate } from '../utils';
 import type { Dialog } from '@material/mwc-dialog';
 
 export default defineComponent({
@@ -75,8 +74,16 @@ export default defineComponent({
       ]);
       (this.$refs.helpdialog as Dialog).show();
     },
-    generateFileChanges(happ: HappDefinition) {
-      this.fileChanges = generateWebHapp(happ);
+    async generateFileChanges({ happ, uiTemplate }: { happ: HappDefinition; uiTemplate: string }) {
+      const uiTemplateChanges = await getUiTemplate(uiTemplate);
+
+      const uiChanges: FileChanges = {
+        type: FileChangesType.InDir,
+        dirName: 'ui',
+        changes: uiTemplateChanges,
+      };
+
+      this.fileChanges = [...generateWebHapp(happ), uiChanges];
       this.happName = happ.name;
       (this.$refs.dialog as Dialog).show();
     },

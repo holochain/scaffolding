@@ -3,11 +3,18 @@ import { HappDefinition } from '../../types';
 export default (happ: HappDefinition) => `
 # ${happ.name}
 
-## Installation
+## Environment Setup
 
 1. Install the holochain dev environment (only nix-shell is required): https://developer.holochain.org/docs/install/
-2. Clone this repo and \`cd\` inside of it.
-3. Enter the nix shell by running this in the root folder of the repository: 
+2. Enable Holochain cachix with:
+
+\`\`\`bash
+nix-env -iA cachix -f https://cachix.org/api/v1/install
+cachix use holochain-ci
+\`\`\`
+
+3. Clone this repo and \`cd\` inside of it.
+4. Enter the nix shell by running this in the root folder of the repository: 
 
 \`\`\`bash
 nix-shell
@@ -15,8 +22,6 @@ npm install
 \`\`\`
 
 This will install all the needed dependencies in your local environment, including \`holochain\`, \`hc\` and \`npm\`.
-
-> Warning! This can take a lot of time the first time, afterwards your environment will be cached so it will be instantanious.
 
 ## Building the DNA
 

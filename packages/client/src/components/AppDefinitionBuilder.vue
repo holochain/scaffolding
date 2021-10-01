@@ -5,17 +5,25 @@
     <ui5-card style="width: auto">
       <div class="column" style="margin: 16px">
         <span class="tertiary-title">App Information</span>
-        <mwc-textfield
-          label="hApp Name"
-          class="text-input"
-          required
-          autoValidate
-          outlined
-          helper="The name of your app"
-          @input="happ.name = $event.target.value"
-          style="margin-top: 16px"
-          ref="happName"
-        ></mwc-textfield>
+        <div class="row">
+          <mwc-textfield
+            label="hApp Name"
+            class="text-input"
+            required
+            autoValidate
+            outlined
+            helper="The name of your app"
+            @input="happ.name = $event.target.value"
+            style="margin-top: 16px; flex: 1"
+            ref="happName"
+          ></mwc-textfield>
+
+          <mwc-select outlined label="UI Template" @selected="selectUi($event.detail.index)">
+            <mwc-list-item v-for="(ui, index) of UiTemplates" :key="index" :value="index" :selected="index === 0">{{
+              UiTemplates[index]
+            }}</mwc-list-item>
+          </mwc-select>
+        </div>
       </div>
     </ui5-card>
 
@@ -99,7 +107,7 @@
   </div>
 
   <mwc-fab
-    @click="$emit('scaffoldApp', happ)"
+    @click="$emit('scaffoldApp', { happ, uiTemplate })"
     style="position: fixed; bottom: 16px; right: 16px; --mdc-theme-secondary: #4720e3"
     label="Scaffold app"
     extended
@@ -109,18 +117,26 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { socket } from '../socket';
-import { ClientEventType } from '@holochain/scaffolding-types';
-import { generateWebHapp, HappDefinition, DnaDefinition } from '@holochain/scaffolding-generators';
+import { HappDefinition, DnaDefinition } from '@holochain/scaffolding-generators';
 import type { TextField } from '@material/mwc-textfield';
+import { UiTemplates } from '../types';
 
 export default defineComponent({
   name: 'AppDefinitionBuilder',
 
-  data(): { happ: HappDefinition; selectedZomes: Array<number>; dnaCount: number; zomeCount: number } {
+  data(): {
+    happ: HappDefinition;
+    uiTemplate: string;
+    selectedZomes: Array<number>;
+    dnaCount: number;
+    zomeCount: number;
+    UiTemplates: string[];
+  } {
     return {
+      UiTemplates,
       selectedZomes: [0],
       dnaCount: 1,
+      uiTemplate: UiTemplates[0],
       zomeCount: 1,
       happ: {
         name: 'my-app',
@@ -152,6 +168,9 @@ export default defineComponent({
     });
   },
   methods: {
+    selectUi(index: number) {
+      this.uiTemplate = UiTemplates[index];
+    },
     // Workaround for the bug inside mwc-textfield
     updateValues() {
       const refs = this.$refs as any;

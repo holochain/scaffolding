@@ -26,8 +26,10 @@ jobs:
 
       - name: build holochain
         run: |
-        cd $GITHUB_WORKSPACE
-        nix-shell . --run "npm i && npm run build:happ"
+          nix-env -iA cachix -f https://cachix.org/api/v1/install
+          cachix use holochain-ci
+          cd $GITHUB_WORKSPACE
+          nix-shell . --run "npm i && npm run build:happ"
 
       - name: test holochain
         run: |

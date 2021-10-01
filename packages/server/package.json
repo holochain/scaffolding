@@ -20,6 +20,8 @@
   },
   "license": "MIT",
   "devDependencies": {
+    "@babel/core": "^7.15.5",
+    "@babel/preset-env": "^7.15.6",
     "@holochain/scaffolding-ui": "^0.0.1",
     "@mdi/font": "5.9.55",
     "@types/body-parser": "^1.19.0",
@@ -28,6 +30,8 @@
     "@types/prompts": "^2.0.14",
     "@typescript-eslint/eslint-plugin": "^4.18.0",
     "@typescript-eslint/parser": "^4.18.0",
+    "babel-loader": "^8.2.2",
+    "babel-polyfill": "^6.26.0",
     "body-parser": "^1.19.0",
     "bufferutil": "^4.0.3",
     "concurrently": "^5.1.0",
@@ -57,6 +61,7 @@
     "webpack-cli": "^4.8.0"
   },
   "dependencies": {
+    "node-fetch": "^3.0.0",
     "prompts": "^2.4.1"
   }
 }

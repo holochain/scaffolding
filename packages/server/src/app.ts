@@ -1,8 +1,10 @@
+import 'babel-polyfill';
 import express from 'express';
 import dotenv from 'dotenv';
 import bodyParser from 'body-parser';
 import open from 'open';
 import http from 'http';
+import fetch from 'node-fetch';
 import { Server } from 'socket.io';
 
 import { ClientEvents, ClientEventType, ServerEvents } from '@holochain/scaffolding-types';

@@ -9,10 +9,12 @@
     "./packages/types"
   ],
   "scripts": {
-    "start": "npm run build -w @holochain/scaffolding-generators -w @holochain/scaffolding-types -w @holochain/scaffolding-ui && concurrently -k \"npm run build:watch -w @holochain/scaffolding-ui && npm run build:watch -w @holochain/scaffolding-generators && npm run build:watch -w @holochain/scaffolding-types\" \"npm start -w @holochain/create\"",
-    "build": "npm run build -w @holochain/scaffolding-generators && npm run build -w @holochain/scaffolding-types && npm run build -w @holochain/scaffolding-ui && npm run build -w @holochain/create"
+    "start": "npm run setup:client && npm run build -w @holochain/scaffolding-generators -w @holochain/scaffolding-types -w @holochain/scaffolding-ui && concurrently -k \"npm run build:watch -w @holochain/scaffolding-ui && npm run build:watch -w @holochain/scaffolding-generators && npm run build:watch -w @holochain/scaffolding-types\" \"npm start -w @holochain/create\"",
+    "build": "npm run setup:client && npm run build -w @holochain/scaffolding-generators && npm run build -w @holochain/scaffolding-types && npm run build -w @holochain/scaffolding-ui && npm run build -w @holochain/create",
+    "setup:client": "cd templates/svelte/ && bestzip ../../packages/client/public/templates/svelte.zip *"
   },
   "devDependencies": {
+    "bestzip": "^2.2.0",
     "concurrently": "^6.2.1",
     "lit": "^2.0.0",
     "lit-element": "^3.0.0",

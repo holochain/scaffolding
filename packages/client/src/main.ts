@@ -9,6 +9,7 @@ import '@material/mwc-icon-button';
 import '@material/mwc-fab';
 import '@material/mwc-list';
 import '@material/mwc-dialog';
+import '@material/mwc-select';
 import '@ui5/webcomponents/dist/Card.js';
 
 createApp(App)
