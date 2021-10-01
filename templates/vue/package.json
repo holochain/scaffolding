@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
+    "start": "VUE_APP_HC_PORT=HC_PORT vue-cli-service serve",
+    "build": "VUE_APP_HC_PORT=undefined vue-cli-service build",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {

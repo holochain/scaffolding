@@ -1,1 +1,1 @@
-export const UiTemplates = ['svelte', 'vue'];
+export const UiTemplates = ['svelte', 'vue', 'lit'];

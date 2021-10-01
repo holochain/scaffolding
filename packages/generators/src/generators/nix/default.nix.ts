@@ -16,7 +16,7 @@ export default ({
   lairKeystoreHashes: LairKeystoreHashes;
 }) =>
   `{
-  holonixPath ?  builtins.fetchTarball { url = "https://github.com/holochain/holonix/archive/develop.tar.gz"; }
+  holonixPath ?  builtins.fetchTarball { url = "https://github.com/holochain/holonix/archive/a0dcdfac2c8783c58805175dd5bc5528ccbb35fd.tar.gz"; }
 }:
 
 let

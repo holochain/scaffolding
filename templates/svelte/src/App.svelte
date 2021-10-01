@@ -4,20 +4,30 @@
 	export let appWebsocket;
 	export let cell_id;
 
-	const postHash = await appWebsocket.callZome({
-		cap: null as any,
+	let postHash;
+
+	$: postHash;
+
+	 appWebsocket.callZome({
+		cap: null,
 		cell_id: cell_id,
-		zome_name: 'HC_SCAFFOLD{zomeName}',
+		zome_name: 'HC_SCAFFOLDING{zomeName}',
 		fn_name: 'create_post',
 		payload: 'my post',
 		provenance: cell_id[1],
-	});
+	}).then(hash => postHash = hash);
 
 </script>
 
 <main>
 	<h1>Hello {name}!</h1>
 	<p>Visit the <a href="https://svelte.dev/tutorial">Svelte tutorial</a> to learn how to build Svelte apps.</p>
+
+	{#if postHash}
+		<span>Post created with hash {postHash}</span>
+	{:else}
+		<span>Creating...</span>
+	{/if}
 </main>
 
 <style>
