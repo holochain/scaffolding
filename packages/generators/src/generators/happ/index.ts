@@ -20,7 +20,7 @@ export function generateHapp(happ: HappDefinition): FileChanges[] {
     ...generateRootPackageJson(happ),
     ...generateGithubWorkfows(happ),
     ...generateGitIgnore(),
-    ...generateGitIgnore(),
+    ...generateReadme(happ),
     {
       type: FileChangesType.InDir,
       dirName: 'tests',
