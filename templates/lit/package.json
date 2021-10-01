@@ -19,7 +19,7 @@
     "@open-wc/building-rollup": "^1.10.0",
     "@open-wc/eslint-config": "^4.3.0",
     "@rollup/plugin-babel": "^5.3.0",
-    "@rollup/plugin-commonjs": "^20.0.0",
+    "@rollup/plugin-commonjs": "18.0.0",
     "@rollup/plugin-node-resolve": "^13.0.4",
     "@rollup/plugin-replace": "^3.0.0",
     "@typescript-eslint/eslint-plugin": "^4.29.2",

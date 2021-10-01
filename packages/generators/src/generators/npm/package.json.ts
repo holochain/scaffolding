@@ -10,7 +10,7 @@ export default ( happ: HappDefinition) =>
     "tests"
   ],
   "scripts": {
-    "start": "npm run build:happ && npm run build -w ${getUiPackageName(happ)} && cross-env HC_PORT=$(port) concurrently -k \\"npm run start:happ\\" \\"npm run start -w ${getUiPackageName(happ)}\\"",
+    "start": "npm run build:happ && cross-env HC_PORT=$(port) concurrently -k \\"npm run start:happ\\" \\"npm run start -w ${getUiPackageName(happ)}\\"",
     "test": "npm run build:happ && npm t -w tests",
     "start:happ": "hc sandbox clean && RUST_LOG=warn hc s generate ./workdir/${happ.name}.happ --run=$HC_PORT -a ${
     happ.name

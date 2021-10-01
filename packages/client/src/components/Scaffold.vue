@@ -20,11 +20,8 @@
     <mwc-button slot="secondaryAction" dialogAction="close" label="Cancel"></mwc-button>
     <mwc-button slot="primaryAction" dialogAction="close" @click="scaffoldApp()" label="Create"></mwc-button>
   </mwc-dialog>
-  <mwc-dialog ref="helpdialog" heading="App Scaffolded!">
-    <div class="column">
-      <h3>Automatic Setup</h3>
-      <span>You can automatically setup your app if you select "Setup and Close".</span>
-      <span style="margin-top: 16px">OR</span>
+  <mwc-dialog ref="helpdialog" heading="App Scaffolded!" scrimClickAction="" escapeKeyAction="">
+    <div v-if="!settingUp" class="column">
       <h3>Manual Setup</h3>
       <span
         >If you haven't yet, <b><a href="https://nixos.org/download.html">install nix-shell</a>.</b></span
@@ -35,9 +32,23 @@ nix-env -iA cachix -f https://cachix.org/api/v1/install
 cachix use holochain-ci
 nix-shell
 npm install</code></pre>
+      <span>After that, you can safely close this window.</span>
+      <span style="margin-top: 16px">OR</span>
+      <h3>Automatic Setup</h3>
+      <span>You can automatically setup your app by selecting "SETUP AND EXIT".</span>
     </div>
-    <mwc-button slot="secondaryAction" @click="close()" label="Exit"></mwc-button>
-    <mwc-button slot="primaryAction" @click="setup()" label="Setup and Close"></mwc-button>
+    <div v-else>
+      <span
+        >You can safely close this window now, and wait for the automatic setup to complete in the terminal
+        window.</span
+      >
+    </div>
+    <mwc-button
+      slot="primaryAction"
+      @click="setup()"
+      :label="settingUp ? 'Setting up...' : 'Setup and Exit'"
+      :disabled="settingUp"
+    ></mwc-button>
   </mwc-dialog>
 </template>
 
@@ -57,8 +68,14 @@ export default defineComponent({
     AppDefinitionBuilder,
     FileNode,
   },
-  data(): { currentDir: string | undefined; fileChanges: FileChanges[] | undefined; happName: string | undefined } {
+  data(): {
+    settingUp: boolean;
+    currentDir: string | undefined;
+    fileChanges: FileChanges[] | undefined;
+    happName: string | undefined;
+  } {
     return {
+      settingUp: false,
       currentDir: undefined,
       fileChanges: undefined,
       happName: undefined,
@@ -69,6 +86,7 @@ export default defineComponent({
   },
   methods: {
     setup() {
+      this.settingUp = true;
       socket.emit(ClientEventType.AutomaticSetup, this.happName);
     },
     close() {
