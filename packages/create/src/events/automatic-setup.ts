@@ -1,4 +1,3 @@
-import prompts from 'prompts';
 import { execSync } from 'child_process';
 import { chdir } from 'process';
 
@@ -20,55 +19,36 @@ export async function automaticSetup(happName: string) {
   for (const command of [...globalCommands, `cd ${happName}`, ...localCommands]) {
     console.log(command);
   }
-  console.log('');
-
-  const response = await prompts({
-    type: 'confirm',
-    name: 'value',
-    message: 'Execute automatic setup?',
-  });
 
   console.log('');
 
-  if (response.value) {
-    try {
-      if (!isNixInstalled()) {
-        await installNix();
-      }
-
-      executeCommands(globalCommands.slice(1));
-
-      console.log(`> Automatic setup: cd ${happName}`);
-
-      chdir(happName);
-      console.log('');
-
-      executeCommands(localCommands);
-
-      console.log('> Automatic setup: setup completed!');
-      console.log('');
-    } catch (e) {
-      console.error('> Automatic setup: there was an error executing the automatic setup, exiting...');
-      process.exit();
+  try {
+    if (!isNixInstalled()) {
+      await installNix();
     }
-    console.log(`To get started, execute these commands: 
-  
-    cd ${happName}
-    nix-shell
-    npm run build:happ
-    npm start
-`);
-  } else {
-    console.log(`To get started, execute these commands: 
-  
-    nix-env -iA cachix -f https://cachix.org/api/v1/install
-    cachix use holochain-ci
-    cd ${happName}
-    nix-shell
-    npm run build:happ
-    npm start
-`);
+
+    executeCommands(globalCommands.slice(1));
+
+    console.log(`> Automatic setup: cd ${happName}`);
+
+    chdir(happName);
+    console.log('');
+
+    executeCommands(localCommands);
+
+    console.log('> Automatic setup: setup completed!');
+    console.log('');
+  } catch (e) {
+    console.error('> Automatic setup: there was an error executing the automatic setup, exiting...');
+    process.exit();
   }
+  console.log(`To get started, execute these commands: 
+  
+    cd ${happName}
+    nix-shell
+    npm run build:happ
+    npm start
+`);
 
   process.exit();
 }

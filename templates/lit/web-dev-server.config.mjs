@@ -2,8 +2,6 @@
 import { fromRollup } from '@web/dev-server-rollup';
 import rollupReplace from '@rollup/plugin-replace';
 import rollupCommonjs from '@rollup/plugin-commonjs';
-import rollupBuiltins from 'rollup-plugin-node-builtins';
-import rollupGlobals from 'rollup-plugin-node-globals';
 
 const replace = fromRollup(rollupReplace);
 const commonjs = fromRollup(rollupCommonjs);

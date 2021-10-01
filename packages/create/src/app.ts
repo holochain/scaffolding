@@ -42,11 +42,10 @@ export async function launchApp() {
   });
 
   io.on('connection', socket => {
-    socket.on(ClientEventType.ApplyChanges, changes => {
-      applyGeneratedChanges(process.cwd(), changes);
-      automaticSetup(changes[0].dirName);
-    });
+    socket.on(ClientEventType.ApplyChanges, changes => applyGeneratedChanges(process.cwd(), changes));
     socket.on(ClientEventType.ReadDir, callback => callback({ dirPath: process.cwd() }));
+    socket.on(ClientEventType.AutomaticSetup, appName => automaticSetup(appName));
+    socket.on(ClientEventType.Exit, () => process.exit());
   });
 
   console.log(`

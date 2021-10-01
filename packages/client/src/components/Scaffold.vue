@@ -7,7 +7,10 @@
 
   <mwc-dialog ref="dialog" heading="Preview" scrimClickAction="" escapeKeyAction="">
     <div class="column">
-      <span>This will <b>create a new folder {{happName}}</b> in the directory where you executed the CLI with the following structure.</span>
+      <span
+        >This will <b>create a new folder {{ happName }}</b> in the directory where you executed the CLI with the
+        following structure.</span
+      >
 
       <ui5-tree>
         <FileNode :fileTree="fileChanges"> </FileNode>
@@ -20,7 +23,7 @@
   <mwc-dialog ref="helpdialog" heading="App Scaffolded!">
     <div class="column">
       <h3>Automatic Setup</h3>
-      <span>Check the terminal from which you executed "npm init @holochain" to finish your setup.</span>
+      <span>You can automatically setup your app if you select "Setup and Close".</span>
       <span style="margin-top: 16px">OR</span>
       <h3>Manual Setup</h3>
       <span
@@ -33,7 +36,8 @@ cachix use holochain-ci
 nix-shell
 npm install</code></pre>
     </div>
-    <mwc-button slot="primaryAction" dialogAction="close" label="Ok"></mwc-button>
+    <mwc-button slot="secondaryAction" @click="close()" label="Exit"></mwc-button>
+    <mwc-button slot="primaryAction" @click="setup()" label="Setup and Close"></mwc-button>
   </mwc-dialog>
 </template>
 
@@ -64,6 +68,12 @@ export default defineComponent({
     socket.emit(ClientEventType.ReadDir, (dir: { dirPath: string }) => (this.currentDir = dir.dirPath));
   },
   methods: {
+    setup() {
+      socket.emit(ClientEventType.AutomaticSetup, this.happName);
+    },
+    close() {
+      socket.emit(ClientEventType.Exit);
+    },
     scaffoldApp(): void {
       socket.emit(ClientEventType.ApplyChanges, [
         {
