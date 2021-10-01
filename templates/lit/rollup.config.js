@@ -5,8 +5,6 @@ import html from '@web/rollup-plugin-html';
 import { importMetaAssets } from '@web/rollup-plugin-import-meta-assets';
 import { terser } from 'rollup-plugin-terser';
 import replace from '@rollup/plugin-replace';
-import builtins from 'rollup-plugin-node-builtins';
-import globals from 'rollup-plugin-node-globals';
 
 export default {
   input: 'index.html',
@@ -38,9 +36,7 @@ export default {
     nodeResolve({
       browser: true,
     }),
-    builtins(),
     commonjs(),
-    globals(),
     /** Minify JS */
     terser(),
     /** Bundle assets references via import.meta.url */

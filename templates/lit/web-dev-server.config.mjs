@@ -7,8 +7,6 @@ import rollupGlobals from 'rollup-plugin-node-globals';
 
 const replace = fromRollup(rollupReplace);
 const commonjs = fromRollup(rollupCommonjs);
-const builtins = fromRollup(rollupBuiltins);
-const globals = fromRollup(rollupGlobals);
 
 /** Use Hot Module replacement by adding --hmr to the start command */
 const hmr = process.argv.includes('--hmr');

@@ -15,7 +15,7 @@
     </div>
 
     <mwc-button slot="secondaryAction" dialogAction="close" label="Cancel"></mwc-button>
-    <mwc-button slot="primaryAction" dialogAction="close" @click="scaffoldApp()" label="Yes"></mwc-button>
+    <mwc-button slot="primaryAction" dialogAction="close" @click="scaffoldApp()" label="Create"></mwc-button>
   </mwc-dialog>
   <mwc-dialog ref="helpdialog" heading="App Scaffolded!">
     <div class="column">

@@ -12,6 +12,9 @@
     "registry": "https://registry.npmjs.org/",
     "access": "public"
   },
+  "files": [
+    "dist"
+  ],
   "main": "dist/app.js",
   "bin": "./dist/app.js",
   "repository": {

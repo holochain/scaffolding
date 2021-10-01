@@ -3,7 +3,7 @@ import fs from 'fs';
 
 export function applyGeneratedChanges(baseDirPath: string, fileChanges: FileChanges[]) {
   createDirIfNotExists(baseDirPath);
-
+  
   for (const change of fileChanges) {
     if (change.type === FileChangesType.Create) {
       fs.writeFileSync(`${baseDirPath}/${change.fileName}`, change.content);

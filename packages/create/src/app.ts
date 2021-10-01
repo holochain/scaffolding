@@ -38,6 +38,7 @@ const io = new Server(server, {
   cors: {
     origin: [URL],
   },
+  maxHttpBufferSize: 1e8,
 });
 
 io.on('connection', socket => {
