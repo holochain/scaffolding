@@ -5,7 +5,7 @@ async function setup() {
   const appWebsocket = await AppWebsocket.connect(`ws://localhost:${process.env.HC_PORT}`);
 
   const appInfo = await appWebsocket.appInfo({
-    installed_app_id: 'HC_SCAFFOLD{installedAppId}',
+    installed_app_id: 'HC_SCAFFOLDING{installedAppId}',
   });
 
   const cellData = appInfo.cell_data[0];

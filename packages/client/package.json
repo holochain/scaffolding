@@ -22,7 +22,7 @@
     "@material/mwc-fab": "^0.25.1",
     "@material/mwc-icon-button": "^0.25.1",
     "@material/mwc-list": "^0.25.1",
-    "@material/mwc-select": "^0.25.1",
+    "@material/mwc-select": "^0.23.0",
     "@material/mwc-snackbar": "^0.25.1",
     "@material/mwc-switch": "^0.25.1",
     "@material/mwc-textfield": "^0.25.1",
