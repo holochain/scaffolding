@@ -7,7 +7,7 @@
 
   <mwc-dialog ref="dialog" heading="Preview" scrimClickAction="" escapeKeyAction="">
     <div class="column">
-      <span>This will create the following structure in the directory: {{ currentDir }}</span>
+      <span>This will <b>create a new folder {{happName}}</b> in the directory where you executed the CLI with the following structure.</span>
 
       <ui5-tree>
         <FileNode :fileTree="fileChanges"> </FileNode>
