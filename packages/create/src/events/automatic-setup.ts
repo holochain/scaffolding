@@ -17,7 +17,7 @@ export async function automaticSetup(happName: string) {
   console.log('> Automatic Setup: we are about to execute these commands:');
   console.log('');
 
-  for (const command of [...globalCommands, ...localCommands]) {
+  for (const command of [...globalCommands, `cd ${happName}`, ...localCommands]) {
     console.log(command);
   }
   console.log('');

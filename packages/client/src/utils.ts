@@ -82,7 +82,8 @@ export interface ReplaceTargets {
 
 export function replaceText(text: string, target: ReplaceTargets): string {
   for (const [key, value] of Object.entries(target)) {
-    text.replace(toReplace(key), value);
+    text = text.replace(toReplace(key), value);
   }
+
   return text;
 }
