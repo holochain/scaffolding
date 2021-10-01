@@ -26,12 +26,11 @@ export async function automaticSetup(happName: string) {
     type: 'confirm',
     name: 'value',
     message: 'Execute automatic setup?',
-    initial: true,
   });
 
   console.log('');
 
-  if (response) {
+  if (response.value) {
     try {
       if (!isNixInstalled()) {
         await installNix();
@@ -52,14 +51,24 @@ export async function automaticSetup(happName: string) {
       console.error('> Automatic setup: there was an error executing the automatic setup, exiting...');
       process.exit();
     }
-  }
-  console.log(`To get started, execute these commands: 
-
-cd ${happName}
-nix-shell
-npm run build:happ
-npm start
+    console.log(`To get started, execute these commands: 
+  
+    cd ${happName}
+    nix-shell
+    npm run build:happ
+    npm start
 `);
+  } else {
+    console.log(`To get started, execute these commands: 
+  
+    nix-env -iA cachix -f https://cachix.org/api/v1/install',
+    cachix use holochain-ci
+    cd ${happName}
+    nix-shell
+    npm run build:happ
+    npm start
+`);
+  }
 
   process.exit();
 }

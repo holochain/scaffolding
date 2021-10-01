@@ -1,6 +1,6 @@
 {
   "name": "@holochain/create",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "RAD tools for quickly scaffolding holochain apps",
   "author": "guillem.cordoba@gmail.com",
   "scripts": {

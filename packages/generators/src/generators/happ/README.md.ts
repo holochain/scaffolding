@@ -65,12 +65,6 @@ You'll have the \`${happ.name}.webhapp\` in \`workdir\`. This is what you should
 
 You will also have its subcomponent \`${happ.name}.happ\` in the same folder\`.
 
-## Releasing
-
-At every commit in the \`main\` branch, a release process will be triggered. It will create a draft release with your app packaged in the \`.webhapp\` file, ready to be installed in the launcher.
-
-You can customize this behaviour by going into \`.github/workflows/release.yml\`.
-
 ## Documentation
 
 We are using this tooling:
