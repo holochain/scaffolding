@@ -5,7 +5,7 @@
     <ui5-card style="width: auto">
       <div class="column" style="margin: 16px">
         <span class="tertiary-title">App Information</span>
-        <div class="row">
+        <div class="row center" style="margin-top: 16px">
           <mwc-textfield
             label="hApp Name"
             class="text-input"
@@ -14,12 +14,12 @@
             outlined
             helper="The name of your app"
             @input="happ.name = $event.target.value"
-            style="margin-top: 16px; flex: 1"
             ref="happName"
           ></mwc-textfield>
+          <span style="flex: 1"></span>
 
-          <mwc-select outlined label="UI Template" @selected="selectUi($event.detail.index)">
-            <mwc-list-item v-for="(ui, index) of UiTemplates" :key="index" :value="index" :selected="index === 0">{{
+          <mwc-select outlined label="UI Template" ref="uiTemplateSelect" @selected="selectUi($event.detail.index)">
+            <mwc-list-item v-for="(ui, index) of UiTemplates" :key="index" :value="`${index}`" :selected="index == 0">{{
               UiTemplates[index]
             }}</mwc-list-item>
           </mwc-select>
@@ -62,7 +62,7 @@
           <mwc-button
             icon="add"
             label="Add zome"
-            @click="dna.zomes.push({ name: `new-zome-${zomeCount++}` })"
+            @click="dna.zomes.push({ name: `new_zome_${zomeCount++}` })"
           ></mwc-button>
         </div>
         <span style="width: 100%; height: 1px; background-color: lightgrey"></span>
@@ -117,8 +117,9 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { HappDefinition, DnaDefinition } from '@holochain/scaffolding-generators';
+import { HappDefinition, DnaDefinition, kebabToSnakeCase } from '@holochain/scaffolding-generators';
 import type { TextField } from '@material/mwc-textfield';
+import type { Select } from '@material/mwc-select';
 import { UiTemplates } from '../types';
 
 export default defineComponent({
@@ -145,7 +146,7 @@ export default defineComponent({
             name: 'my-dna',
             zomes: [
               {
-                name: 'my-zome',
+                name: 'my_zome',
               },
             ],
           },
@@ -157,6 +158,7 @@ export default defineComponent({
     this.$nextTick(() => {
       setTimeout(() => {
         this.updateValues();
+        (this.$refs.uiTemplateSelect as Select).value = '0';
       });
     });
   },
@@ -191,7 +193,7 @@ export default defineComponent({
         name: dnaName,
         zomes: [
           {
-            name: `new-zome-${this.zomeCount++}`,
+            name: `new_zome_${this.zomeCount++}`,
           },
         ],
       });
@@ -229,7 +231,6 @@ export default defineComponent({
     },
     setDnaName(dnaIndex: number, newValue: string) {
       this.happ.dnas[dnaIndex].name = newValue;
-      console.log(dnaIndex, newValue, this.happ);
     },
     zomeValidity(textfield: TextField) {
       textfield.validityTransform = (newValue, nativeValidity) => {
@@ -264,7 +265,7 @@ export default defineComponent({
     setZomeName(dnaIndex: number, newValue: string) {
       const dna: DnaDefinition = this.happ.dnas[dnaIndex];
 
-      dna.zomes[this.selectedZomes[dnaIndex]].name = newValue;
+      dna.zomes[this.selectedZomes[dnaIndex]].name = kebabToSnakeCase(newValue);
     },
   },
   emits: ['scaffoldApp'],

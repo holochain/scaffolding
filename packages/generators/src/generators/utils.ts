@@ -1,7 +1,7 @@
 import { HappDefinition } from '../types';
 import { flattenDeep } from 'lodash-es';
 
-export const camelToSnakeCase = (str: string) =>
+export const kebabToSnakeCase = (str: string) =>
   str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`).replace(/\-/g, letter => `_`);
 
 export function getDnaBundlePath(happ: HappDefinition, dnaName: string): string {
@@ -14,7 +14,7 @@ export function getDnaPath(happ: HappDefinition, dnaName: string): string {
 }
 
 export function getUiPackageName(happ: HappDefinition): string {
-  return `${happ.name}-ui`;
+  return `ui`;
 }
 
 export function mergeStrings(strings: Array<any>) {

@@ -1,16 +1,15 @@
-import { DnaDefinition, FileChanges, FileChangesType, ZomeDefinition } from '../../types';
-import { camelToSnakeCase } from '../utils';
+import { FileChanges, FileChangesType, ZomeDefinition } from '../../types';
 
 import cargoToml from './Cargo.toml';
 import libRs from './lib.rs';
 
-export function generateZomeCargoToml(zomeName: string, author: string, hdkVersion = '0.0.107'): FileChanges[] {
+export function generateZomeCargoToml(zomeName: string, author: string, hdkVersion = '0.0.108'): FileChanges[] {
   return [
     {
       type: FileChangesType.Create,
       fileName: `Cargo.toml`,
       content: cargoToml({
-        zomeName: camelToSnakeCase(zomeName),
+        zomeName: zomeName,
         author,
         hdkVersion,
       }),

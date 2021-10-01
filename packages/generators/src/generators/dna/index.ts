@@ -1,5 +1,4 @@
 import { DnaDefinition, FileChanges, FileChangesType } from '../../types';
-import { camelToSnakeCase } from '../utils';
 import { generateZome } from '../zome';
 
 import dnaYaml from './dna.yaml';

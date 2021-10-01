@@ -29,7 +29,6 @@ export async function zipToFileChanges(jsZip: JSZip): Promise<FileChanges[]> {
     }
   }
 
-  console.log(fileChanges);
   return fileChanges;
 }
 

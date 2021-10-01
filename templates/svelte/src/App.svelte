@@ -2,6 +2,17 @@
 	export let name;
 
 	export let appWebsocket;
+	export let cell_id;
+
+	const postHash = await appWebsocket.callZome({
+		cap: null as any,
+		cell_id: cell_id,
+		zome_name: 'HC_SCAFFOLD{zomeName}',
+		fn_name: 'create_post',
+		payload: 'my post',
+		provenance: cell_id[1],
+	});
+
 </script>
 
 <main>
