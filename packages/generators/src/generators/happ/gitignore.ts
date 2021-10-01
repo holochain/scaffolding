@@ -7,4 +7,6 @@ export default ()=>
 *.webhapp
 *.zip
 *.dna
+.hc*
+.hc
 `

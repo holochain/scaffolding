@@ -24,7 +24,7 @@
 	<p>Visit the <a href="https://svelte.dev/tutorial">Svelte tutorial</a> to learn how to build Svelte apps.</p>
 
 	{#if postHash}
-		<span>Post created with hash {postHash}</span>
+		<span>Created new Holochain entry! Post with hash {postHash}</span>
 	{:else}
 		<span>Creating...</span>
 	{/if}

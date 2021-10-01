@@ -7,7 +7,7 @@
       <a href="https://cli.vuejs.org" target="_blank" rel="noopener">vue-cli documentation</a>.
     </p>
 
-    <span v-if="postHash">Created post with hash {{ postHash }}</span>
+    <span v-if="postHash">Created new Holochain entry! Post with hash {{ postHash }}</span>
     <span v-else>Creating...</span>
 
     <h3>Installed CLI Plugins</h3>

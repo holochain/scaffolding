@@ -19,7 +19,7 @@ export default /** @type {import('@web/dev-server').DevServerConfig} */ ({
 
   /** Set appIndex to enable SPA routing */
   appIndex: 'index.html',
-
+  clearTerminalOnReload: false,
   plugins: [
     replace({
       'process.env.HC_PORT': JSON.stringify(process.env.HC_PORT),

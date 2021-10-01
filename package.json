@@ -12,9 +12,9 @@
     "start": "npm run setup:client && npm run build -w @holochain/scaffolding-generators -w @holochain/scaffolding-types -w @holochain/scaffolding-ui && concurrently -k \"npm run build:watch -w @holochain/scaffolding-ui && npm run build:watch -w @holochain/scaffolding-generators && npm run build:watch -w @holochain/scaffolding-types\" \"npm start -w @holochain/create\"",
     "build": "npm run setup:client && npm run build -w @holochain/scaffolding-generators && npm run build -w @holochain/scaffolding-types && npm run build -w @holochain/scaffolding-ui && npm run build -w @holochain/create",
     "setup:client": "rimraf packages/client/public/templates && mkdir packages/client/public/templates && npm run setup:svelte && npm run setup:lit && npm run setup:vue",
-    "setup:svelte": "cd templates/svelte/ && bestzip ../../packages/client/public/templates/svelte.zip *",
-    "setup:vue": "cd templates/vue/ && bestzip ../../packages/client/public/templates/vue.zip *",
-    "setup:lit": "cd templates/lit/ && bestzip ../../packages/client/public/templates/lit.zip *"
+    "setup:svelte": "cd templates/svelte/ && bestzip ../../packages/client/public/templates/svelte.zip * .gitignore",
+    "setup:vue": "cd templates/vue/ && bestzip ../../packages/client/public/templates/vue.zip * .gitignore .browserslistrc .eslintrc.js",
+    "setup:lit": "cd templates/lit/ && bestzip ../../packages/client/public/templates/lit.zip * .gitignore"
   },
   "devDependencies": {
     "bestzip": "^2.2.0",

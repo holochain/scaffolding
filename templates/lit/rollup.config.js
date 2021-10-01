@@ -39,7 +39,7 @@ export default {
       browser: true,
     }),
     builtins(),
-    commonjs({}),
+    commonjs(),
     globals(),
     /** Minify JS */
     terser(),

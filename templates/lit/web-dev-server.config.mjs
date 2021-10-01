@@ -14,19 +14,21 @@ const globals = fromRollup(rollupGlobals);
 const hmr = process.argv.includes('--hmr');
 
 export default /** @type {import('@web/dev-server').DevServerConfig} */ ({
-  open: '/',
+  open: true,
   watch: !hmr,
   /** Resolve bare module imports */
   nodeResolve: {
     exportConditions: ['browser', 'development'],
     browser: true,
+    preferBuiltins: false
   },
 
   /** Compile JS for older browsers. Requires @web/dev-server-esbuild plugin */
   // esbuildTarget: 'auto'
 
   /** Set appIndex to enable SPA routing */
-  // appIndex: 'demo/index.html',
+  appIndex: 'index.html',
+  clearTerminalOnReload: false,
 
   plugins: [
     replace({
@@ -34,7 +36,7 @@ export default /** @type {import('@web/dev-server').DevServerConfig} */ ({
       delimiters: ['', ''],
     }),
 
-    commonjs({}),
+    commonjs(),
     /** Use Hot Module Replacement by uncommenting. Requires @open-wc/dev-server-hmr plugin */
     // hmr && hmrPlugin({ exclude: ['**/*/node_modules/**/*'], presets: [presets.litElement] }),
   ],
