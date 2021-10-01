@@ -1,6 +1,11 @@
 import { HappDefinition } from '../types';
 import { flattenDeep } from 'lodash-es';
 
+export const camelize = (s: string) => kebabToCamelCase(snakeToCamelCase(s));
+
+export const kebabToCamelCase = (s: string) => s.replace(/-./g, x => x.toUpperCase()[1]);
+export const snakeToCamelCase = (s: string) => s.replace(/_./g, x => x.toUpperCase()[1]);
+
 export const kebabToSnakeCase = (str: string) =>
   str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`).replace(/\-/g, letter => `_`);
 

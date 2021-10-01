@@ -7,7 +7,7 @@ import { Orchestrator } from "@holochain/tryorama";
 ${mergeStrings(
   dnas.map(dna =>
     dna.zomes.map(
-      zome => `import ${dna.name}_${zome.name} from './${dna.name}/${zome.name}';
+      zome => `import ${zome.name} from './${dna.name}/${zome.name}';
 `,
     ),
   ),
@@ -18,7 +18,7 @@ ${mergeStrings(
   dnas.map(dna =>
     dna.zomes.map(
       zome => `orchestrator = new Orchestrator();
-${dna.name}_${zome.name}(orchestrator);
+${zome.name}(orchestrator);
 orchestrator.run();
 
 `,
