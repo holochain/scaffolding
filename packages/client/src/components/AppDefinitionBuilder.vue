@@ -5,7 +5,7 @@
     <ui5-card style="width: auto">
       <div class="column" style="margin: 16px">
         <span class="tertiary-title">App Information</span>
-        <div class="row center" style="margin-top: 16px">
+        <div class="row" style="margin-top: 16px">
           <mwc-textfield
             label="hApp Name"
             class="text-input"

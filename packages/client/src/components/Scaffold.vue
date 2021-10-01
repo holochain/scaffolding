@@ -44,7 +44,7 @@ import { ClientEventType } from '@holochain/scaffolding-types';
 import { FileChanges, FileChangesType, generateWebHapp, HappDefinition } from '@holochain/scaffolding-generators';
 import AppDefinitionBuilder from './AppDefinitionBuilder.vue';
 import FileNode from './FileNode.vue';
-import { getUiTemplate } from '../utils';
+import { getUiTemplate, replaceText } from '../utils';
 import type { Dialog } from '@material/mwc-dialog';
 
 export default defineComponent({
@@ -75,7 +75,12 @@ export default defineComponent({
       (this.$refs.helpdialog as Dialog).show();
     },
     async generateFileChanges({ happ, uiTemplate }: { happ: HappDefinition; uiTemplate: string }) {
-      const uiTemplateChanges = await getUiTemplate(uiTemplate);
+      const uiTemplateChanges = await getUiTemplate(uiTemplate, text =>
+        replaceText(text, {
+          installedAppId: happ.name,
+          zomeName: happ.dnas[0].zomes[0].name,
+        }),
+      );
 
       const uiChanges: FileChanges = {
         type: FileChangesType.InDir,

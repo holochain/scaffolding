@@ -1,10 +1,10 @@
 import { LitElement, css, html } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, state } from 'lit/decorators.js';
 import { AppWebsocket } from '@holochain/conductor-api';
 
 @customElement('holochain-app')
 export class HolochainApp extends LitElement {
-  @property() title = 'My app';
+  @state() postHash: string | undefined;
 
   async firstUpdated() {
     const appWebsocket = await AppWebsocket.connect(
@@ -12,15 +12,15 @@ export class HolochainApp extends LitElement {
     );
 
     const appInfo = await appWebsocket.appInfo({
-      installed_app_id: 'HC_SCAFFOLD{installedAppId}',
+      installed_app_id: 'HC_SCAFFOLDING{installedAppId}',
     });
 
     const cellData = appInfo.cell_data[0];
 
-    const postHash = await appWebsocket.callZome({
+    this.postHash = await appWebsocket.callZome({
       cap: null as any,
       cell_id: cellData.cell_id,
-      zome_name: 'HC_SCAFFOLD{zomeName}',
+      zome_name: 'HC_SCAFFOLDING{zomeName}',
       fn_name: 'create_post',
       payload: 'my post',
       provenance: cellData.cell_id[1],
@@ -41,6 +41,10 @@ export class HolochainApp extends LitElement {
         >
           Code examples
         </a>
+
+        ${this.postHash
+          ? html`<span>Created post with hash: ${this.postHash}</span>`
+          : html`<span>Creating</span>`}
       </main>
 
       <p class="app-footer">

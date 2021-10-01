@@ -4,7 +4,11 @@ import JSZip, { JSZipObject } from 'jszip';
 //@ts-ignore
 import JSZipUtils from 'jszip-utils';
 
-export function getUiTemplate(uiTemplate: string): Promise<FileChanges[]> {
+export function getUiTemplate(
+  uiTemplate: string,
+
+  textModifier: (text: string) => string,
+): Promise<FileChanges[]> {
   return new Promise((resolve, reject) => {
     JSZipUtils.getBinaryContent(`/templates/${uiTemplate}.zip`, function(err: any, data: any) {
       if (err) {
@@ -13,26 +17,31 @@ export function getUiTemplate(uiTemplate: string): Promise<FileChanges[]> {
       }
 
       JSZip.loadAsync(data)
-        .then(d => zipToFileChanges(d))
+        .then(d => zipToFileChanges(d, textModifier))
         .then(fc => resolve(fc))
         .catch(reject);
     });
   });
 }
 
-export async function zipToFileChanges(jsZip: JSZip): Promise<FileChanges[]> {
+export async function zipToFileChanges(jsZip: JSZip, textModifier: (text: string) => string): Promise<FileChanges[]> {
   const fileChanges: FileChanges[] = [];
 
   for (const [name, object] of Object.entries(jsZip.files)) {
     if (!object.dir) {
-      await addFile(name.split('/'), fileChanges, object);
+      await addFile(name.split('/'), fileChanges, object, textModifier);
     }
   }
 
   return fileChanges;
 }
 
-async function addFile(path: string[], fileChanges: FileChanges[], object: JSZipObject) {
+async function addFile(
+  path: string[],
+  fileChanges: FileChanges[],
+  object: JSZipObject,
+  textModifier: (text: string) => string,
+) {
   let changes = fileChanges;
   while (path.length > 0) {
     const [dirName] = path.splice(0, 1);
@@ -42,7 +51,7 @@ async function addFile(path: string[], fileChanges: FileChanges[], object: JSZip
       changes.push({
         type: FileChangesType.Create,
         fileName: dirName,
-        content: await object.async('text'),
+        content: textModifier(await object.async('text')),
       });
     } else {
       // This is a dir
@@ -62,4 +71,18 @@ async function addFile(path: string[], fileChanges: FileChanges[], object: JSZip
       }).changes;
     }
   }
+}
+
+const toReplace = (s: string) => `HC_SCAFFOLDING{${s}}`;
+
+export interface ReplaceTargets {
+  installedAppId: string;
+  zomeName: string;
+}
+
+export function replaceText(text: string, target: ReplaceTargets): string {
+  for (const [key, value] of Object.entries(target)) {
+    text.replace(toReplace(key), value);
+  }
+  return text;
 }

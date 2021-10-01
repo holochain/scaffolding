@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "workspaces": [
     "./packages/client",
-    "./packages/server",
+    "./packages/create",
     "./packages/generators",
     "./packages/types"
   ],
