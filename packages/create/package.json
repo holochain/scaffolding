@@ -1,6 +1,6 @@
 {
   "name": "@holochain/create",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "RAD tools for quickly scaffolding holochain apps",
   "author": "guillem.cordoba@gmail.com",
   "scripts": {
@@ -15,8 +15,8 @@
   "files": [
     "dist"
   ],
-  "main": "dist/index.js",
-  "bin": "./dist/index.js",
+  "main": "dist/app.js",
+  "bin": "./dist/app.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/holochain/scaffolding"
