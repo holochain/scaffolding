@@ -5,7 +5,7 @@
       style="flex-basis: 500px; box-shadow: 1px 0px 4px grey; background-color: white; align-items: stretch"
     >
       <div class="column center" style="flex: 1">
-        <img :src="require('../assets/holochain_logo.svg')" class="my-3" contain height="200" width="200" />
+        <img :src="require('../assets/holochain_logo.png')" class="my-3" contain height="200" width="200" />
         <h1>Holochain RAD Tools</h1>
         <mwc-button icon="bug_report" label="Report Issue" @click="open('https://github.com/holochain/scaffolding/issues')"> </mwc-button>
       </div>
