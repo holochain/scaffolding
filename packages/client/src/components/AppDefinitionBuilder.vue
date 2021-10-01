@@ -1,5 +1,5 @@
 <template>
-  <div class="column">
+  <div class="column" style="position: relative">
     <h1>Scaffold New App</h1>
 
     <ui5-card style="width: auto">
@@ -18,7 +18,13 @@
           ></mwc-textfield>
           <span style="flex: 1"></span>
 
-          <mwc-select outlined label="UI Template" ref="uiTemplateSelect" @selected="selectUi($event.detail.index)">
+          <mwc-select
+            outlined
+            label="UI Template"
+            ref="uiTemplateSelect"
+            @selected="selectUi($event.detail.index)"
+            style="right: 16px; position: absolute"
+          >
             <mwc-list-item v-for="(ui, index) of UiTemplates" :key="index" :value="`${index}`" :selected="index == 0">{{
               UiTemplates[index]
             }}</mwc-list-item>
