@@ -61,7 +61,7 @@ export async function automaticSetup(happName: string) {
   } else {
     console.log(`To get started, execute these commands: 
   
-    nix-env -iA cachix -f https://cachix.org/api/v1/install',
+    nix-env -iA cachix -f https://cachix.org/api/v1/install
     cachix use holochain-ci
     cd ${happName}
     nix-shell
