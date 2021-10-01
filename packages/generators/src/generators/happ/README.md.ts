@@ -42,8 +42,16 @@ npm run test
 To test out the UI:
 
 \`\`\` bash
-npm run start
+npm start
 \`\`\`
+
+To run another agent, open another terminal, and execute again:
+
+\`\`\`bash
+npm start
+\`\`\`
+
+Each new agent that you create this way will get assigned its own port and get connected to the other agents.
 
 ## Package
 
@@ -53,7 +61,9 @@ To package the web happ:
 npm run package
 \`\`\`
 
-You'll have the \`${happ.name}.webhapp\` in \`workdir\`. You will also have its subcomponent \`${happ.name}.happ\` in the same folder\`.
+You'll have the \`${happ.name}.webhapp\` in \`workdir\`. This is what you should distribute so that the Holochain Launcher can install it.
+
+You will also have its subcomponent \`${happ.name}.happ\` in the same folder\`.
 
 ## Releasing
 
