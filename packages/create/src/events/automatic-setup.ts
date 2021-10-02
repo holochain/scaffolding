@@ -54,7 +54,7 @@ export async function automaticSetup(happName: string) {
 }
 
 function executeCommands(commands: string[]) {
-  for (let i = 1; i < commands.length; i++) {
+  for (let i = 0; i < commands.length; i++) {
     console.log('> Automatic Setup: ', commands[i]);
     console.log('');
     execSync(commands[i], {
