@@ -1,33 +1,30 @@
 import { execSync } from 'child_process';
 import { chdir } from 'process';
 
-const installNixCommand = 'curl -L https://nixos.org/nix/install | sh';
+const installNixCommands = ['curl -L -k https://nixos.org/nix/install | sh', '. ~/.nix-profile/etc/profile.d/nix.sh'];
 
-const localCommands = ['nix-shell', 'npm install'];
+const localCommands = ['nix-shell . --run "npm install"'];
 
-const globalCommands = [
-  installNixCommand,
-  '. ~/.nix-profile/etc/profile.d/nix.sh',
-  'nix-env -iA cachix -f https://cachix.org/api/v1/install',
-  'cachix use holochain-ci',
-];
+const globalCommands = ['nix-env -iA cachix -f https://cachix.org/api/v1/install', 'cachix use holochain-ci'];
 
 export async function automaticSetup(happName: string) {
   console.log('> Automatic Setup: we are about to execute these commands:');
   console.log('');
 
-  for (const command of [...globalCommands, `cd ${happName}`, ...localCommands]) {
+  for (const command of [...installNixCommands, ...globalCommands, `cd ${happName}`, ...localCommands]) {
     console.log(command);
   }
 
   console.log('');
 
   try {
-    if (!isNixInstalled()) {
+    if (isNixInstalled()) {
+      console.log(`> Automatic setup: nix is already installed, skipping`);
+    }else{
       await installNix();
     }
 
-    executeCommands(globalCommands.slice(1));
+    executeCommands(globalCommands);
 
     console.log(`> Automatic setup: cd ${happName}`);
 
@@ -66,9 +63,11 @@ function executeCommands(commands: string[]) {
 
 async function installNix() {
   try {
-    execSync(installNixCommand, {
-      stdio: ['inherit', 'inherit', 'inherit'],
-    });
+    for (const command of installNixCommands) {
+      execSync(command, {
+        stdio: ['inherit', 'inherit', 'inherit'],
+      });
+    }
     if (!isNixInstalled()) {
       throw new Error(
         'Could not install Nix, try to install it manually at https://nixos.org/download.html#nix-quick-install',

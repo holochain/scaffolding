@@ -19,16 +19,8 @@
           ></mwc-textfield>
           <span style="flex: 1"></span>
 
-          <mwc-select
-            outlined
-            label="UI Template"
-            ref="uiTemplateSelect"
-            @selected="selectUi($event.detail.index)"
-            style="right: 16px; position: absolute"
-          >
-            <mwc-list-item v-for="(ui, index) of UiTemplates" :key="index" :value="`${index}`" :selected="index == 0">{{
-              UiTemplates[index]
-            }}</mwc-list-item>
+          <mwc-select outlined label="UI Template" value="svelte" ref="uiTemplateSelect" style="right: 16px; position: absolute">
+            <mwc-list-item v-for="(ui, index) of UiTemplates" :key="index" :value="ui">{{ ui }}</mwc-list-item>
           </mwc-select>
         </div>
       </div>
@@ -114,7 +106,7 @@
   </div>
 
   <mwc-fab
-    @click="$emit('scaffoldApp', { happ, uiTemplate })"
+    @click="requestScaffold()"
     style="position: fixed; bottom: 16px; right: 16px; --mdc-theme-secondary: #4720e3"
     label="Scaffold app"
     extended
@@ -134,7 +126,6 @@ export default defineComponent({
 
   data(): {
     happ: HappDefinition;
-    uiTemplate: string;
     selectedZomes: Array<number>;
     dnaCount: number;
     zomeCount: number;
@@ -144,7 +135,6 @@ export default defineComponent({
       UiTemplates,
       selectedZomes: [0],
       dnaCount: 1,
-      uiTemplate: UiTemplates[0],
       zomeCount: 1,
       happ: {
         name: 'my-app',
@@ -165,7 +155,6 @@ export default defineComponent({
     this.$nextTick(() => {
       setTimeout(() => {
         this.updateValues();
-        (this.$refs.uiTemplateSelect as Select).value = '0';
       });
     });
   },
@@ -177,13 +166,14 @@ export default defineComponent({
     });
   },
   methods: {
+    requestScaffold() {
+      const uiTemplate = (this.$refs.uiTemplateSelect as Select).value;
+      this.$emit('scaffoldApp', { happ: this.happ, uiTemplate });
+    },
     setHappName(textfield: TextField) {
       if (textfield.validity.valid) {
         this.happ.name = textfield.value;
       }
-    },
-    selectUi(index: number) {
-      this.uiTemplate = UiTemplates[index];
     },
     // Workaround for the bug inside mwc-textfield
     updateValues() {
