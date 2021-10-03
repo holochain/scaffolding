@@ -26,14 +26,14 @@ export async function automaticSetup(happName: string) {
       await installNix(happName);
     }
 
-    globalCommands.forEach(execute);
+    globalCommands.forEach(executeWithNix);
 
     console.log(`> Automatic setup: cd ${happName}`);
 
     chdir(happName);
     console.log('');
 
-    localCommands.forEach(execute);
+    localCommands.forEach(executeWithNix);
 
     console.log('> Automatic setup: setup completed!');
     console.log('');
@@ -52,7 +52,10 @@ export async function automaticSetup(happName: string) {
   process.exit();
 }
 
-function execute(command: string) {
+function executeWithNix(command: string) {
+  execute(`. ~/.nix-profile/etc/profile.d/nix.sh && ${command}`)
+}
+  function execute(command: string) {
   console.log('> Automatic Setup: ', command);
   console.log('');
   const options: any = {
