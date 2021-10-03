@@ -22,7 +22,7 @@ export async function automaticSetup(happName: string) {
     if (isNixInstalled()) {
       console.log(`> Automatic setup: nix is already installed, skipping`);
     } else {
-      await installNix();
+      await installNix(happName);
     }
 
     globalCommands.forEach(execute);
