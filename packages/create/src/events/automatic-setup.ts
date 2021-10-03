@@ -63,6 +63,7 @@ function execute(command: string) {
 async function installNix() {
   try {
     if (isMacCatalinaOrMore()) {
+      execute('sudo mount -uw /');
       execute('sh <(curl -L https://nixos.org/nix/install) --darwin-use-unencrypted-nix-store-volume');
     } else {
       execute('sh <(curl -L -k https://nixos.org/nix/install)');
@@ -91,7 +92,7 @@ function isNixInstalled(): boolean {
   }
 }
 
-function isMacCatalinaOrMore() {
+export function isMacCatalinaOrMore() {
   if (os.platform() !== 'darwin') return false;
   let [majorStr, minorStr, _] = os.release().split('.'); //'10.8.0'
   const major = parseInt(majorStr);
