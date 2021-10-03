@@ -1,7 +1,8 @@
 import { execSync } from 'child_process';
 import { chdir } from 'process';
+import os from 'os';
 
-const installNixCommands = ['curl -L -k https://nixos.org/nix/install | sh', '. ~/.nix-profile/etc/profile.d/nix.sh'];
+const installNixCommands = ['sh <(curl -L -k https://nixos.org/nix/install)', '. ~/.nix-profile/etc/profile.d/nix.sh'];
 
 const localCommands = ['nix-shell . --run "npm install"'];
 
@@ -20,18 +21,18 @@ export async function automaticSetup(happName: string) {
   try {
     if (isNixInstalled()) {
       console.log(`> Automatic setup: nix is already installed, skipping`);
-    }else{
+    } else {
       await installNix();
     }
 
-    executeCommands(globalCommands);
+    globalCommands.forEach(execute);
 
     console.log(`> Automatic setup: cd ${happName}`);
 
     chdir(happName);
     console.log('');
 
-    executeCommands(localCommands);
+    localCommands.forEach(execute);
 
     console.log('> Automatic setup: setup completed!');
     console.log('');
@@ -50,24 +51,25 @@ export async function automaticSetup(happName: string) {
   process.exit();
 }
 
-function executeCommands(commands: string[]) {
-  for (let i = 0; i < commands.length; i++) {
-    console.log('> Automatic Setup: ', commands[i]);
-    console.log('');
-    execSync(commands[i], {
-      stdio: ['inherit', 'inherit', 'inherit'],
-    });
-    console.log('');
-  }
+function execute(command: string) {
+  console.log('> Automatic Setup: ', command);
+  console.log('');
+  execSync(command, {
+    stdio: ['inherit', 'inherit', 'inherit'],
+  });
+  console.log('');
 }
 
 async function installNix() {
   try {
-    for (const command of installNixCommands) {
-      execSync(command, {
-        stdio: ['inherit', 'inherit', 'inherit'],
-      });
+    if (isMacCatalinaOrMore()) {
+      execute('sh <(curl -L https://nixos.org/nix/install) --darwin-use-unencrypted-nix-store-volume');
+    } else {
+      execute('sh <(curl -L -k https://nixos.org/nix/install)');
     }
+
+    execute('. ~/.nix-profile/etc/profile.d/nix.sh');
+
     if (!isNixInstalled()) {
       throw new Error(
         'Could not install Nix, try to install it manually at https://nixos.org/download.html#nix-quick-install',
@@ -87,4 +89,13 @@ function isNixInstalled(): boolean {
   } catch (e) {
     return false;
   }
+}
+
+function isMacCatalinaOrMore() {
+  if (os.platform() !== 'darwin') return false;
+  let [majorStr, minorStr, _] = os.release().split('.'); //'10.8.0'
+  const major = parseInt(majorStr);
+  const minor = parseInt(minorStr);
+  if (major === 10) return minor >= 15;
+  else return major > 10;
 }
