@@ -20,20 +20,21 @@ export async function automaticSetup(happName: string) {
   console.log('');
 
   try {
-    if (isNixInstalled()) {
+    let nixInstalled = isNixInstalled();
+    if (nixInstalled) {
       console.log(`> Automatic setup: nix is already installed, skipping`);
     } else {
       await installNix(happName);
     }
 
-    globalCommands.forEach(executeWithNix);
+    globalCommands.forEach(c => execute(c, !nixInstalled));
 
     console.log(`> Automatic setup: cd ${happName}`);
 
     chdir(happName);
     console.log('');
 
-    localCommands.forEach(executeWithNix);
+    localCommands.forEach(c => execute(c, !nixInstalled));
 
     console.log('> Automatic setup: setup completed!');
     console.log('');
@@ -52,10 +53,7 @@ export async function automaticSetup(happName: string) {
   process.exit();
 }
 
-function executeWithNix(command: string) {
-  execute(`. ~/.nix-profile/etc/profile.d/nix.sh && ${command}`)
-}
-  function execute(command: string) {
+function execute(command: string, withNix = false) {
   console.log('> Automatic Setup: ', command);
   console.log('');
   const options: any = {
@@ -64,6 +62,10 @@ function executeWithNix(command: string) {
 
   if (os.platform() !== 'win32') {
     options.shell = '/bin/bash';
+  }
+
+  if (withNix) {
+    command = `. ~/.nix-profile/etc/profile.d/nix.sh && ${command}`;
   }
 
   execSync(command, options);
