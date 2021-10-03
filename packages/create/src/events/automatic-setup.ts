@@ -1,5 +1,6 @@
 import { execSync } from 'child_process';
 import { chdir } from 'process';
+import macosRelease from 'macos-release';
 import os from 'os';
 
 const installNixCommands = ['sh <(curl -L -k https://nixos.org/nix/install)', '. ~/.nix-profile/etc/profile.d/nix.sh'];
@@ -123,7 +124,7 @@ function isNixInstalled(): boolean {
 
 export function isMacCatalinaOrMore() {
   if (os.platform() !== 'darwin') return false;
-  let [majorStr, minorStr, _] = os.release().split('.'); //'10.8.0'
+  let [majorStr, minorStr] = macosRelease().version.split('.'); //'10.8.0'
   const major = parseInt(majorStr);
   const minor = parseInt(minorStr);
   if (major === 10) return minor >= 15;
