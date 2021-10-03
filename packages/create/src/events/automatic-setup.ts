@@ -55,9 +55,15 @@ export async function automaticSetup(happName: string) {
 function execute(command: string) {
   console.log('> Automatic Setup: ', command);
   console.log('');
-  execSync(command, {
+  const options: any = {
     stdio: ['inherit', 'inherit', 'inherit'],
-  });
+  };
+
+  if (os.platform() !== 'win32') {
+    options.shell = '/bin/bash';
+  }
+
+  execSync(command, options);
   console.log('');
 }
 
@@ -96,7 +102,7 @@ async function installNix(happName: string) {
         process.exit();
       }
     } else {
-      execute('sh <(curl -L -k https://nixos.org/nix/install)');
+      execute('curl -L -k https://nixos.org/nix/install | sh');
     }
 
     execute('. ~/.nix-profile/etc/profile.d/nix.sh');
