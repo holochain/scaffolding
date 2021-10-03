@@ -87,18 +87,6 @@ export async function launchApp() {
   console.log('Welcome to the Holochain RAD Tools!');
   console.log('');
 
-  if (isMacCatalinaOrMore()) {
-    console.log('It seems you are running MacOs 10.15 or greater.');
-    console.log(
-      'The Holochain developer environment requires you to have installed Nix in your system. But in MacOs Catalina and later, there is a previous step needed before proceeding with the Nix installation, to disable the read-only MacOs file-system.',
-    );
-    console.log('');
-    console.log('Run this command, restart your MacOs, and run the `npm init @holochain` command again:');
-    console.log('');
-    console.log('csrutil disable');
-    process.exit();
-  }
-  
   console.log('Go to the browser tab that just opened and scaffold your first Holochain app!');
   console.log('');
 

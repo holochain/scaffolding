@@ -60,11 +60,40 @@ function execute(command: string) {
   console.log('');
 }
 
-async function installNix() {
+async function installNix(happName: string) {
   try {
     if (isMacCatalinaOrMore()) {
-      execute('sudo mount -uw /');
-      execute('sh <(curl -L https://nixos.org/nix/install) --darwin-use-unencrypted-nix-store-volume');
+      try {
+        execute('sh <(curl -L https://nixos.org/nix/install) --darwin-use-unencrypted-nix-store-volume');
+      } catch (e) {
+        console.log('> Automatic setup: Could not install NixOs.');
+        console.log('');
+        console.log(
+          'It seems you are running MacOs 10.15 or greater, where there is a problem with nix and its read-only file-system. You can fix it by following these instructions:',
+        );
+        console.log('');
+        console.log('1. Run this command:');
+        console.log('');
+        console.log('    csrutil disable');
+        console.log('');
+        console.log('2. Restart your MacOs.');
+        console.log('3. After the restart, run this commands:');
+        console.log('');
+        console.log('    sudo mount -uw /');
+        console.log('    sh <(curl -L https://nixos.org/nix/install) --darwin-use-unencrypted-nix-store-volume');
+        console.log('');
+        console.log(
+          '4. At this point, nix-shell should be installed in your system. You should be ready to setup your hApp as normal with:',
+        );
+        console.log('');
+        console.log(`    cd ${happName}`);
+        console.log('    nix-shell');
+        console.log('    npm run build:happ');
+        console.log('    npm start');
+        console.log('');
+
+        process.exit();
+      }
     } else {
       execute('sh <(curl -L -k https://nixos.org/nix/install)');
     }
