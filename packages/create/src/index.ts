@@ -3,7 +3,7 @@ import semver from 'semver';
 import chalk from 'chalk';
 import { launchApp } from './app';
 
-console.log('@holochain/create v0.0.14');
+console.log('@holochain/create v0.0.15');
 
 (async () => {
   try {
