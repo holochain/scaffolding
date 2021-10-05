@@ -4,6 +4,18 @@ RAD tools to enable quick scaffolding of Holochain application.
 
 # Usage
 
+NOTE: you will need [Node.js](https://nodejs.org/en/) installed to use this tool.
+
+## from the NPM package
+
+The RAD tools is packaged and available in NPM registry [here](https://www.npmjs.com/package/@holochain/create). To use the RAD tools of the specific version run the following command:
+
+```bash
+npx @holochain/create@0.0.16
+```
+
+## local from the repo
+
 ```bash
 npm init @holochain
 ```
