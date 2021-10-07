@@ -8,6 +8,12 @@ To execute this, run:
 npm init @holochain
 ```
 
+Or, to make sure you are running the latest version, run:
+
+```bash
+npx @holochain/create@0.0.17
+```
+
 You will get this output and a browser tab to guide you through scaffolding your first Holochain app.
 
 ```
