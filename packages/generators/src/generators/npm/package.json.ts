@@ -27,6 +27,9 @@ export default ( happ: HappDefinition) =>
     "new-port-cli": "^1.0.0",
     "rimraf": "^3.0.2",
     "bestzip": "^2.2.0"
+  },
+  "engines": {
+    "npm": ">=7.0.0"
   }
 }
 `
