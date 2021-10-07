@@ -9,13 +9,13 @@ export function generateNixFile(): FileChanges[] {
       fileName: 'default.nix',
       content: defaultNix({
         holochainVersion: {
-          rev: 'holochain-0.0.107',
-          sha256: '1m5clhh0xpr4ajdbybxjqc5vblkd30lsfb1sac4zbzxjrnpp5iki',
-          cargoSha256: '175b76j31sls0gj08imchwnk7n4ylsxlc1bm58zrhfmq62hcchb1',
+          rev: 'holochain-0.0.109',
+          sha256: '1rwss1y8cd52ccd0875pfpbw6v518vcry3hjc1lja69x2g2x12qb',
+          cargoSha256: '08a72d7nqpakml657z9vla739cbg8y046av4pwisdgj1ykyzyi60',
         },
         lairKeystoreHashes: {
-          sha256: '0khg5w5fgdp1sg22vqyzsb2ri7znbxiwl7vr2zx6bwn744wy2cyv',
-          cargoSha256: '1lm8vrxh7fw7gcir9lq85frfd0rdcca9p7883nikjfbn21ac4sn4',
+          sha256: '12n1h94b1r410lbdg4waj5jsx3rafscnw5qnhz3ky98lkdc1mnl3',
+          cargoSha256: '0axr1b2hc0hhik0vrs6sm412cfndk358grfnax9wv4vdpm8bq33m',
         },
       }),
     },
