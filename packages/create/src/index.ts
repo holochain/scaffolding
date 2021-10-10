@@ -2,8 +2,12 @@
 import semver from 'semver';
 import chalk from 'chalk';
 import { launchApp } from './app';
+import clearCache from 'clear-npx-cache';
 
-console.log('@holochain/create v0.0.17');
+console.log('@holochain/create v0.0.18');
+
+//do something when app is closing
+process.on('exit', () => clearCache());
 
 (async () => {
   try {
