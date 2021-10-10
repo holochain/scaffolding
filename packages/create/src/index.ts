@@ -2,11 +2,8 @@
 import semver from 'semver';
 import chalk from 'chalk';
 import { launchApp } from './app';
-import clearCache from 'clear-npx-cache';
 
-console.log('@holochain/create v0.0.18');
-
-clearCache();
+console.log('@holochain/create v0.0.19');
 
 (async () => {
   try {

@@ -2,6 +2,7 @@ import { execSync } from 'child_process';
 import { chdir } from 'process';
 import macosRelease from 'macos-release';
 import os from 'os';
+import clearCache from 'clear-npx-cache';
 
 const installNixCommands = ['sh <(curl -L -k https://nixos.org/nix/install)', '. ~/.nix-profile/etc/profile.d/nix.sh'];
 
@@ -40,7 +41,8 @@ export async function automaticSetup(happName: string) {
     console.log('');
   } catch (e) {
     console.error('> Automatic setup: there was an error executing the automatic setup, exiting...');
-    process.exit();
+
+    exit(1);
   }
   console.log(`To get started, execute these commands: 
   
@@ -50,7 +52,7 @@ export async function automaticSetup(happName: string) {
     npm start
 `);
 
-  process.exit();
+  exit(0);
 }
 
 function execute(command: string, withNix = false) {
@@ -104,7 +106,7 @@ async function installNix(happName: string) {
         console.log('    npm start');
         console.log('');
 
-        process.exit();
+        exit(1);
       }
     } else {
       execute('curl -L -k https://nixos.org/nix/install | sh');
@@ -140,4 +142,9 @@ export function isMacCatalinaOrMore() {
   const minor = parseInt(minorStr);
   if (major === 10) return minor >= 15;
   else return major > 10;
+}
+
+function exit(code = 0) {
+  clearCache();
+  process.exit(code);
 }
