@@ -6,8 +6,7 @@ import clearCache from 'clear-npx-cache';
 
 console.log('@holochain/create v0.0.18');
 
-//do something when app is closing
-process.on('exit', () => clearCache());
+clearCache();
 
 (async () => {
   try {
