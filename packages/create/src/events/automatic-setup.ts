@@ -1,8 +1,9 @@
 import { execSync } from 'child_process';
 import { chdir } from 'process';
-import macosRelease from 'macos-release';
 import os from 'os';
 import clearCache from 'clear-npx-cache';
+
+import macosRelease from '../utils/macos-release';
 
 const installNixCommands = ['sh <(curl -L -k https://nixos.org/nix/install)', '. ~/.nix-profile/etc/profile.d/nix.sh'];
 

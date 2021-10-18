@@ -4,7 +4,7 @@
     "typeRoots": ["../../node_modules/@types"],
     "sourceMap": true,
     "baseUrl": ".",
-    "types": ["webpack-env"],
+    "types": ["webpack-env", "node"],
     "paths": {
       "@/*": ["./src/*"]
     },

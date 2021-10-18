@@ -8,7 +8,7 @@ import { Server } from 'socket.io';
 
 import { ClientEventType } from '@holochain/scaffolding-types';
 import { applyGeneratedChanges } from './events/apply-changes';
-import { automaticSetup, isMacCatalinaOrMore } from './events/automatic-setup';
+import { automaticSetup } from './events/automatic-setup';
 
 export async function launchApp() {
   dotenv.config();
