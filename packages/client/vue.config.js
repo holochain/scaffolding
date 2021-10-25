@@ -1,4 +1,5 @@
 const path = require('path');
+const webpack = require('webpack');
 
 module.exports = {
   lintOnSave: false,
@@ -21,6 +22,11 @@ module.exports = {
         '@material/mwc-icon': path.resolve('../../node_modules/@material/mwc-icon'),
       },
     },
+    plugins: [
+      new webpack.DefinePlugin({
+        globalThis: 'window',
+      }),
+    ],
   },
   chainWebpack: config => {
     config.module
