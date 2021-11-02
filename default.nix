@@ -9,5 +9,9 @@ let
       yarn build
     '';
 
+    nativeBuildInputs = [
+      pkgs.nodejs-16_x
+    ];
+
   };
 in workspace

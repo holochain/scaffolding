@@ -14,14 +14,6 @@ module.exports = {
     },
   },
   configureWebpack: {
-    resolve: {
-      alias: {
-        '@material/mwc-notched-outline': path.resolve('../../node_modules/@material/mwc-notched-outline'),
-        '@material/mwc-ripple': path.resolve('../../node_modules/@material/mwc-ripple'),
-        '@material/mwc-list': path.resolve('../../node_modules/@material/mwc-list'),
-        '@material/mwc-icon': path.resolve('../../node_modules/@material/mwc-icon'),
-      },
-    },
     plugins: [
       new webpack.DefinePlugin({
         globalThis: 'window',
