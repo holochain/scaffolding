@@ -5786,6 +5786,11 @@ fs.realpath@^1.0.0:
   resolved "https://registry.yarnpkg.com/fs.realpath/-/fs.realpath-1.0.0.tgz#1504ad2523158caa40db4a2787cb01411994ea4f"
   integrity sha1-FQStJSMVjKpA20onh8sBQRmU6k8=
 
+fs@^0.0.1-security:
+  version "0.0.1-security"
+  resolved "https://registry.yarnpkg.com/fs/-/fs-0.0.1-security.tgz#8a7bd37186b6dddf3813f23858b57ecaaf5e41d4"
+  integrity sha1-invTcYa23d84E/I4WLV+yq9eQdQ=
+
 fsevents@^1.2.7:
   version "1.2.13"
   resolved "https://registry.yarnpkg.com/fsevents/-/fsevents-1.2.13.tgz#f325cb0455592428bcf11b383370ef70e3bfcc38"
@@ -11434,6 +11439,14 @@ webpack-merge@^5.7.3:
   dependencies:
     clone-deep "^4.0.1"
     wildcard "^2.0.0"
+
+webpack-path-resolve@^0.0.3:
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/webpack-path-resolve/-/webpack-path-resolve-0.0.3.tgz#2307c4f1766fe4021d575cc05e62e871312d1279"
+  integrity sha512-qah4Qg2XNfKqrOtDsqBPAEp/zAQfWc5e4HZMdF0ljCzFlk8u7GIXdtsmSuhufLf3snlJe5kaRox3zkvAsvN4mg==
+  dependencies:
+    fs "^0.0.1-security"
+    path "^0.12.7"
 
 webpack-sources@^1.1.0, webpack-sources@^1.4.0, webpack-sources@^1.4.1, webpack-sources@^1.4.3:
   version "1.4.3"

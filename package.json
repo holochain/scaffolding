@@ -16,7 +16,6 @@
     "setup:lit": "cd templates/lit/ && bestzip ../../packages/client/public/templates/lit.zip * .gitignore"
   },
   "devDependencies": {
-    "bestzip": "^2.2.0",
     "chalk": "^4.1.2",
     "concurrently": "^6.2.1",
     "rimraf": "^3.0.2",

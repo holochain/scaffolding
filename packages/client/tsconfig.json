@@ -4,8 +4,7 @@
     "module": "esnext",
     "noImplicitThis": true,
     "strict": true,
-    "baseUrl": ".",
-    "types": ["webpack-env"],
+    "types": ["webpack-env", "node"],
     "paths": {
       "@/*": ["src/*"]
     },

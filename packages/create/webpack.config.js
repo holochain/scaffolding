@@ -1,6 +1,8 @@
 const path = require('path');
 const CopyPlugin = require('copy-webpack-plugin');
 const webpack = require('webpack');
+const webpackPath = require("webpack-path-resolve");
+const resolve = webpackPath.resolve(require.resolve.paths);
 
 module.exports = {
   entry: './src/index.ts',
@@ -41,7 +43,7 @@ module.exports = {
     new CopyPlugin({
       patterns: [
         {
-          from: `${require.resolve('@holochain/scaffolding-ui')}/dist`,
+          from: `${resolve('@holochain/scaffolding-ui')}/dist`,
           to: './public/',
         },
       ],
