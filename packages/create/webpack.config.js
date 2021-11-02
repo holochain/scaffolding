@@ -41,7 +41,7 @@ module.exports = {
     new CopyPlugin({
       patterns: [
         {
-          from: '../../node_modules/@holochain/scaffolding-ui/dist',
+          from: `${require.resolve('@holochain/scaffolding-ui')}/dist`,
           to: './public/',
         },
       ],

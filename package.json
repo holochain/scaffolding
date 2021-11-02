@@ -3,14 +3,13 @@
   "private": true,
   "version": "0.0.1",
   "workspaces": [
-    "./packages/client",
-    "./packages/create",
-    "./packages/generators",
-    "./packages/types"
+    "packages/*"
   ],
+  "bin": "./packages/create/dist/hc-scaffold.js",
   "scripts": {
-    "start": "npm run setup:client && npm run build -w @holochain/scaffolding-generators -w @holochain/scaffolding-types -w @holochain/scaffolding-ui && concurrently -k \"npm run build:watch -w @holochain/scaffolding-ui && npm run build:watch -w @holochain/scaffolding-generators && npm run build:watch -w @holochain/scaffolding-types\" \"npm start -w @holochain/create\"",
-    "build": "npm run setup:client && npm run build -w @holochain/scaffolding-generators -w @holochain/scaffolding-types -w @holochain/scaffolding-ui -w @holochain/create",
+    "start": "npm run setup:client && npm run workspace @holochain/scaffolding-generators build -w @holochain/scaffolding-types -w @holochain/scaffolding-ui && concurrently -k \"npm run build:watch -w @holochain/scaffolding-ui && npm run build:watch -w @holochain/scaffolding-generators && npm run build:watch -w @holochain/scaffolding-types\" \"npm start -w @holochain/create\"",
+    "postinstall": "npm run build",
+    "build": "yarn workspace @holochain/scaffolding-generators run build && yarn workspace @holochain/scaffolding-types run build && yarn workspace @holochain/scaffolding-ui run build && yarn workspace @holochain/create run build",
     "setup:client": "rimraf packages/client/public/templates && mkdir packages/client/public/templates && npm run setup:svelte && npm run setup:lit && npm run setup:vue",
     "setup:svelte": "cd templates/svelte/ && bestzip ../../packages/client/public/templates/svelte.zip * .gitignore",
     "setup:vue": "cd templates/vue/ && bestzip ../../packages/client/public/templates/vue.zip * .gitignore .browserslistrc .eslintrc.js",
@@ -18,7 +17,9 @@
   },
   "devDependencies": {
     "bestzip": "^2.2.0",
+    "chalk": "^4.1.2",
     "concurrently": "^6.2.1",
-    "rimraf": "^3.0.2"
+    "rimraf": "^3.0.2",
+    "typescript": "^4.4.3"
   }
 }

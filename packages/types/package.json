@@ -7,7 +7,7 @@
   "typings": "dist/index.d.ts",
   "scripts": {
     "start": "tsc -w",
-    "build": "tsc",
+    "build": "rimraf dist && tsc",
     "build:watch": "tsc -w"
   },
   "dependencies": {

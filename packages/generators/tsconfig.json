@@ -1,14 +1,12 @@
 {
-  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "typeRoots": ["../../node_modules/@types"],
     "module": "esnext",
     "sourceMap": true,
     "baseUrl": "src",
     "declaration": true,
     "declarationDir": "dist",
-    "outDir": "dist",
-    "types": ["node"]
+    "moduleResolution": "node",
+    "outDir": "dist"
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules/**/*", "dist", "tests"]
