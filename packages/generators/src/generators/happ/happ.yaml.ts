@@ -6,7 +6,7 @@ export default (happ: HappDefinition) =>
 manifest_version: "1"
 name: ${happ.name}
 description: ~
-slots:
+roles:
 ${mergeStrings(happ.dnas.map(
   dna => `
   - id: ${dna.name}

@@ -18,8 +18,8 @@ export default (orchestrator: Orchestrator<any>) =>
 
     await s.shareAllNodes([alice_player, bob_player]);
 
-    const alice = alice_happ.cells.find(cell => cell.cellNick.includes('/${dna.name}.dna')) as Cell;
-    const bob = bob_happ.cells.find(cell => cell.cellNick.includes('/${dna.name}.dna')) as Cell;
+    const alice = alice_happ.cells.find(cell => cell.cellRole.includes('/${dna.name}.dna')) as Cell;
+    const bob = bob_happ.cells.find(cell => cell.cellRole.includes('/${dna.name}.dna')) as Cell;
 
     const postContents = "My Post";
 

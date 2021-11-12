@@ -8,11 +8,12 @@
     "lint": "eslint --ext .ts,.html . --ignore-path .gitignore && prettier \"**/*.ts\" --check --ignore-path .gitignore",
     "format": "eslint --ext .ts,.html . --fix --ignore-path .gitignore && prettier \"**/*.ts\" --write --ignore-path .gitignore",
     "build": "rimraf dist && tsc && rollup -c rollup.config.js",
-    "start": "tsc && concurrently -k -r \"tsc --watch --preserveWatchOutput\" \"wds\""
+    "build:watch": "run-singleton \"tsc --watch --preserveWatchOutput\"",
+    "start": "tsc && concurrently -r \"npm run build:watch\" \"wds\""
   },
   "dependencies": {
-    "@holochain/conductor-api": "^0.2.1",
-    "lit": "^2.0.0"
+    "@holochain/conductor-api": "^0.2.4",
+    "lit": "^2.0.2"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.15.0",
@@ -40,6 +41,7 @@
     "rollup": "^2.56.2",
     "rollup-plugin-terser": "^7.0.2",
     "rollup-plugin-workbox": "^6.2.0",
+    "run-singleton-cli": "^0.0.5",
     "tslib": "^2.3.1",
     "typescript": "^4.3.5"
   },
