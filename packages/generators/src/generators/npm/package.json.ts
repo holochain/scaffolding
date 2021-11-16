@@ -14,7 +14,7 @@ export default ( happ: HappDefinition) =>
     "network": "npm run build:happ && concurrently-repeat \\"npm run start:agent\\"",
     "start:agent": "cross-env HC_PORT=$(port) concurrently -k \\"npm run start:happ\\" \\"sleep 5 && npm run start -w ${getUiPackageName(happ)}\\"",
     "test": "npm run build:happ && npm t -w tests",
-    "start:happ": "hc sandbox clean && RUST_LOG=warn hc s generate ./workdir/${happ.name}.happ --run=$HC_PORT -a ${
+    "start:happ": "RUST_LOG=warn hc s generate ./workdir/${happ.name}.happ --run=$HC_PORT -a ${
     happ.name
   } network mdns",
     "package": "npm run build:happ && npm run package:ui && hc web-app pack workdir",
