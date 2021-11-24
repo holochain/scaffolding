@@ -9,4 +9,5 @@ export default ()=>
 *.dna
 .hc*
 .hc
+.running
 `
