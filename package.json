@@ -5,7 +5,6 @@
   "workspaces": [
     "packages/*"
   ],
-  "bin": "./packages/create/dist/hc-scaffold.js",
   "scripts": {
     "start": "concurrently -k \"yarn workspace @holochain/scaffolding-ui build:watch && yarn workspace @holochain/scaffolding-generators run build:watch && yarn workspace @holochain/scaffolding-types run build:watch\" \"yarn workspace @holochain/create run start\"",
     "postinstall": "npm run build",
