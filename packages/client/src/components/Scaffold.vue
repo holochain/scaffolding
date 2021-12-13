@@ -57,7 +57,7 @@ npm install</code></pre>
 import { defineComponent } from 'vue';
 import { socket } from '../socket';
 import { ClientEventType } from '@holochain/scaffolding-types';
-import { FileChanges, FileChangesType, generateWebHapp, HappDefinition } from '@holochain/scaffolding-generators';
+import { FileChanges, FileChangesType, generateWebHapp, HappDefinition } from '@holochain/scaffolding';
 import AppDefinitionBuilder from './AppDefinitionBuilder.vue';
 import FileNode from './FileNode.vue';
 import { getUiTemplate, replaceText } from '../utils';

@@ -1,4 +1,4 @@
-import { FileChanges, FileChangesType } from '@holochain/scaffolding-generators';
+import { FileChanges, FileChangesType } from '@holochain/scaffolding';
 import JSZip, { JSZipObject } from 'jszip';
 
 //@ts-ignore

@@ -27,4 +27,4 @@ jobs:
           cachix use holochain-ci
           nix-shell . --run "npm install"
       - name: Test
-        run: nix-shell . --run "npm test -w @holochain/scaffolding-generators"
+        run: nix-shell . --run "npm test -w @holochain/scaffolding"

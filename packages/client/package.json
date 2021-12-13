@@ -18,7 +18,7 @@
     "setup:lit": "cd templates/lit/ && bestzip ../../public/templates/lit.zip * .gitignore"
   },
   "dependencies": {
-    "@holochain/scaffolding-generators": "^0.0.1",
+    "@holochain/scaffolding": "^0.0.1",
     "@holochain/scaffolding-types": "^0.0.1",
     "@justinribeiro/code-block": "^1.0.0",
     "@material/mwc-button": "^0.25.3",

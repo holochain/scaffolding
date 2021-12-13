@@ -12,20 +12,14 @@ This will open a tab in your browser that will guide you through the process of 
 
 # Development Setup
 
-## Environment
-
-This package requires NPM v7.14 or later.
-
-You can use the `default.nix` included in this repository for a quick setup.
-
 ## Structure
 
-`@holochain/create` is structured as an NPM monorepo (available from NPM v7), to allow for composability and decoupling of its building blocks.
+The Holochain scaffolding tools are structured as an Yarn monorepo, to allow for composability and decoupling of its building blocks.
 
-Workspaces:
+Packages:
 
+- `@holochain/scaffolding` (located in `packages/scaffolding`): types, elements and vanilla JS functions to help design and generate Holochain applications.
 - `@holochain/scaffolding-ui` (located in `packages/client`): Vue app that serves as the client for `@holochain/create`.
-- `@holochain/scaffolding-generators` (located in `packages/generators`): vanilla JS functions that can generate Holochain code.
 - `@holochain/create` (located in `packages/create`): aggregator package that can be executed to scaffold fully working Holochain apps.
 
 ## Usage
@@ -35,8 +29,18 @@ Workspaces:
 From the root folder of the repository, run:
 
 ```bash
-npm install
+yarn
 ```
+
+### Testing
+
+From the root folder of the repository, run:
+
+```bash
+npm test
+```
+
+This will scaffold a fully working holochain application and run its tests.
 
 ### Starting
 
@@ -48,7 +52,7 @@ npm start
 
 ### Building @holochain/create
 
-Go into `packages/server` and run:
+From the root of the repository, run:
 
 ```bash
 npm run build

@@ -6,10 +6,10 @@
     "packages/*"
   ],
   "scripts": {
-    "start": "concurrently -k \"yarn workspace @holochain/scaffolding-ui build:watch && yarn workspace @holochain/scaffolding-generators run build:watch && yarn workspace @holochain/scaffolding-types run build:watch\" \"yarn workspace @holochain/create run start\"",
+    "start": "concurrently -k \"yarn workspace @holochain/scaffolding-ui build:watch && yarn workspace @holochain/scaffolding run build:watch && yarn workspace @holochain/scaffolding-types run build:watch\" \"yarn workspace @holochain/create run start\"",
     "postinstall": "npm run build",
-    "test": "yarn workspace @holochain/scaffolding-generators run test",
-    "build": "yarn workspace @holochain/scaffolding-generators run build && yarn workspace @holochain/scaffolding-types run build && yarn workspace @holochain/scaffolding-ui run build && yarn workspace @holochain/create run build"
+    "test": "yarn workspace @holochain/scaffolding run test",
+    "build": "yarn workspace @holochain/scaffolding run build && yarn workspace @holochain/scaffolding-types run build && yarn workspace @holochain/scaffolding-ui run build && yarn workspace @holochain/create run build"
   },
   "devDependencies": {
     "chalk": "^4.1.2",

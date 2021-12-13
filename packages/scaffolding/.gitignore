@@ -1,0 +1,4 @@
+tests/.fixture
+/dist/
+/out-tsc/
+custom-elements.json

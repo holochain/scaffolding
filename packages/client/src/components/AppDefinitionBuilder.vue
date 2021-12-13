@@ -116,7 +116,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { HappDefinition, DnaDefinition, kebabToSnakeCase } from '@holochain/scaffolding-generators';
+import { HappDefinition, DnaDefinition, kebabToSnakeCase } from '@holochain/scaffolding';
 import type { TextField } from '@material/mwc-textfield';
 import type { Select } from '@material/mwc-select';
 import { UiTemplates } from '../types';

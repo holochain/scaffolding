@@ -11,7 +11,7 @@
     "build:watch": "tsc -w"
   },
   "dependencies": {
-    "@holochain/scaffolding-generators": "0.0.1"
+    "@holochain/scaffolding": "0.0.1"
   },
   "devDependencies": {
     "rimraf": "^3.0.2",

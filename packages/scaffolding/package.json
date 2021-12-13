@@ -1,0 +1,32 @@
+{
+  "name": "@holochain/scaffolding",
+  "version": "0.0.1",
+  "scripts": {
+    "build": "rimraf dist && tsc",
+    "build:watch": "tsc --watch --noPreserveWatchOutput",
+    "test": "npm run build && rimraf tests/.fixture && npm run generate:fixture && cd tests/.fixture && nix-shell . --run \"npm install && npm test\"",
+    "generate:fixture": "npm run build && node --loader ts-node/esm --experimental-specifier-resolution=node tests/index.ts | tap-diff"
+  },
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "dependencies": {
+    "diff": "^5.0.0",
+    "lit": "^2.0.2",
+    "lodash-es": "^4.17.21"
+  },
+  "devDependencies": {
+    "@types/diff": "^5.0.1",
+    "@types/node": "^16.11.6",
+    "@types/lodash-es": "^4.17.5",
+    "@types/tape": "^4.13.2",
+    "child-process": "^1.0.2",
+    "esm": "^3.2.25",
+    "path": "^0.12.7",
+    "rimraf": "^3.0.2",
+    "tap-diff": "^0.1.1",
+    "tape": "^5.3.1",
+    "ts-node": "^10.2.1",
+    "typescript": "^4.4.3"
+  },
+  "type": "module"
+}

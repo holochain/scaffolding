@@ -1,4 +1,4 @@
-import { FileChanges } from '@holochain/scaffolding-generators';
+import { FileChanges } from '@holochain/scaffolding';
 
 export enum ClientEventType {
   ApplyChanges = 'ApplyChanges',
