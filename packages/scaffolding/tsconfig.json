@@ -9,6 +9,6 @@
     "outDir": "dist",
     "allowSyntheticDefaultImports": true
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue", "tests/**/*.ts", "tests/**/*.tsx"],
   "exclude": ["node_modules/**/*", "dist", "tests"]
 }

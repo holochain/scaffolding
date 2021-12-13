@@ -2,8 +2,8 @@
   "name": "@holochain/scaffolding",
   "version": "0.0.1",
   "scripts": {
-    "build": "rimraf dist && tsc",
-    "build:watch": "tsc --watch --noPreserveWatchOutput",
+    "build": "rimraf dist && rollup -c",
+    "build:watch": "rollup -c -w",
     "test": "npm run build && rimraf tests/.fixture && npm run generate:fixture && cd tests/.fixture && nix-shell . --run \"npm install && npm test\"",
     "generate:fixture": "npm run build && node --loader ts-node/esm --experimental-specifier-resolution=node tests/index.ts | tap-diff"
   },
