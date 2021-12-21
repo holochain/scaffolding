@@ -1,8 +1,6 @@
 <template>
-  <div class="column" style="align-items: center">
-    <div style="width: 800px">
-      <AppDefinitionBuilder @scaffold-app="generateFileChanges($event)"></AppDefinitionBuilder>
-    </div>
+  <div class="column" style="flex: 1">
+    <AppDefinitionBuilder @scaffold-app="generateFileChanges($event)"></AppDefinitionBuilder>
   </div>
 
   <mwc-dialog ref="dialog" heading="Preview" scrimClickAction="" escapeKeyAction="">
@@ -12,9 +10,18 @@
         following structure.</span
       >
 
-      <ui5-tree>
-        <FileNode :fileTree="fileChanges"> </FileNode>
-      </ui5-tree>
+      <div class="row" style="margin-top: 16px">
+        <div class="flex-scrollable-parent" style="flex: 1; height: 600px">
+          <div class="flex-scrollable-container">
+            <div class="flex-scrollable-y">
+              <ui5-tree>
+                <FileNode :fileTree="sortedFiles()" @file-selected="selectedPreviewFileContents = $event.content">
+                </FileNode>
+              </ui5-tree>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <mwc-button slot="secondaryAction" dialogAction="close" label="Cancel"></mwc-button>
@@ -56,8 +63,9 @@ npm install</code></pre>
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { socket } from '../socket';
-import { ClientEventType } from '@holochain/scaffolding-types';
-import { FileChanges, FileChangesType, generateWebHapp, HappDefinition } from '@holochain/scaffolding';
+import { ClientEventType } from '@holochain/scaffolding-events';
+import { FileChanges, FileChangesType, generateWebHapp } from '@holochain/rad-generators';
+import { HappDefinition } from '@holochain/rad-definitions';
 import AppDefinitionBuilder from './AppDefinitionBuilder.vue';
 import FileNode from './FileNode.vue';
 import { getUiTemplate, replaceText } from '../utils';
@@ -74,18 +82,30 @@ export default defineComponent({
     currentDir: string | undefined;
     fileChanges: FileChanges[] | undefined;
     happName: string | undefined;
+    selectedPreviewFileContents: string | undefined;
   } {
     return {
       settingUp: false,
       currentDir: undefined,
       fileChanges: undefined,
       happName: undefined,
+      selectedPreviewFileContents: undefined,
     };
   },
   async mounted() {
     socket.emit(ClientEventType.ReadDir, (dir: { dirPath: string }) => (this.currentDir = dir.dirPath));
   },
   methods: {
+    sortedFiles() {
+      return (
+        this.fileChanges &&
+        this.fileChanges.sort((fc1: FileChanges, fc2: FileChanges) => {
+          if (fc1.type === 'InDir') return -1;
+          if (fc2.type === 'InDir') return 1;
+          return -1;
+        })
+      );
+    },
     setup() {
       this.settingUp = true;
       socket.emit(ClientEventType.AutomaticSetup, this.happName);
@@ -111,13 +131,7 @@ export default defineComponent({
         }),
       );
 
-      const uiChanges: FileChanges = {
-        type: FileChangesType.InDir,
-        dirName: 'ui',
-        changes: uiTemplateChanges,
-      };
-
-      this.fileChanges = [...generateWebHapp(happ), uiChanges];
+      this.fileChanges = await generateWebHapp(happ, uiTemplateChanges);
       this.happName = happ.name;
       (this.$refs.dialog as Dialog).show();
     },

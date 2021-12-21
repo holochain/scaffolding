@@ -25,6 +25,7 @@ jobs:
         run: |
           nix-env -iA cachix -f https://cachix.org/api/v1/install
           cachix use holochain-ci
-          nix-shell . --run "npm install"
+          nix-shell . --run "npm i -g yarn@1.22"
+          nix-shell . --run "yarn test"
       - name: Test
-        run: nix-shell . --run "npm test -w @holochain/scaffolding"
+        run: nix-shell . --run "yarn test"

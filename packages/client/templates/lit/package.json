@@ -30,7 +30,7 @@
     "@web/rollup-plugin-html": "^1.9.1",
     "@web/rollup-plugin-import-meta-assets": "^1.0.7",
     "babel-plugin-template-html-minifier": "^4.1.0",
-    "concurrently": "^5.3.0",
+    "concurrently": "^6.2.1",
     "deepmerge": "^4.2.2",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",

@@ -1,0 +1,17 @@
+{
+  "name": "@holochain/rad-definitions",
+  "version": "0.0.1",
+  "description": "Common types for the client and the server to communicate with each other",
+  "author": "guillem.cordoba@gmail.com",
+  "module": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "scripts": {
+    "start": "tsc -w",
+    "build": "rimraf dist && tsc",
+    "build:watch": "tsc -w --preserveWatchOutput"
+  },
+  "devDependencies": {
+    "rimraf": "^3.0.2",
+    "typescript": "^4.4.3"
+  }
+}

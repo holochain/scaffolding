@@ -9,13 +9,13 @@
 </template>
 
 <script lang="ts">
-import { FileChanges, FileChangesType } from '@holochain/scaffolding';
+import { defineComponent } from 'vue';
 
-export default {
+export default defineComponent({
   name: 'FileNode',
 
   props: {
     fileTree: Array,
   },
-};
+});
 </script>

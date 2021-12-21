@@ -1,12 +1,17 @@
 <template>
-  <router-view />
+  <Home />
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+import Home from './views/Home.vue';
 
 export default defineComponent({
   name: 'App',
+
+  components: {
+    Home,
+  },
 });
 </script>
 <style>
@@ -22,13 +27,6 @@ body,
   display: flex;
 }
 
-.secondary-title {
-  font-size: 24px;
-}
-
-.tertiary-title {
-  font-size: 18px;
-}
 
 body {
   font-family: Mulish, sans-serif;
@@ -40,6 +38,13 @@ body {
   --mdc-theme-secondary: #0dddd3;
 }
 
+.secondary-title {
+  font-size: 24px;
+}
+
+.tertiary-title {
+  font-size: 18px;
+}
 .row {
   display: flex;
   flex-direction: row;

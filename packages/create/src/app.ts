@@ -6,7 +6,7 @@ import open from 'open';
 import http from 'http';
 import { Server } from 'socket.io';
 
-import { ClientEventType } from '@holochain/scaffolding-types';
+import { ClientEventType } from '@holochain/scaffolding-events';
 import { applyGeneratedChanges } from './events/apply-changes';
 import { automaticSetup } from './events/automatic-setup';
 
