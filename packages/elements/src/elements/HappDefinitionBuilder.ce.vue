@@ -15,14 +15,14 @@
           <DefineEntry
             :entryDef="selectedEntryDef"
             :otherEntryDefsNames="otherEntryDefsNames()"
-            @entry-def-changed="emitChanged()"
+            @entry-def-changed="onChanged()"
           ></DefineEntry>
         </div>
         <div v-else-if="selectedZome">
           <DefineZome
             :zome="selectedZome"
             :otherZomesNames="otherZomesNames()"
-            @zome-changed="emitChanged()"
+            @zome-changed="onChanged()"
             @entry-def-selected="selectedEntryDefIndex = $event"
             @entry-def-added="selectedEntryDefIndex = $event"
             @entry-def-deleted="selectedEntryDefIndex = -1"
@@ -32,7 +32,7 @@
           <DefineDna
             :dna="selectedDna"
             :otherDnasNames="otherDnasNames()"
-            @dna-changed="emitChanged()"
+            @dna-changed="onChanged()"
             @zome-selected="selectedZomeIndex = $event"
             @zome-added="selectedZomeIndex = $event"
             @zome-deleted="selectedZomeIndex = -1"
@@ -42,7 +42,7 @@
         <div v-else>
           <DefineHapp
             :happ="happ"
-            @happ-changed="emitChanged()"
+            @happ-changed="onChanged()"
             @dna-selected="selectedDnaIndex = $event"
             @dna-added="selectedDnaIndex = $event"
             @dna-deleted="selectedDnaIndex = -1"
@@ -67,7 +67,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import { HappDefinition } from '@holochain/rad-definitions';
+import { DnaDefinition, HappDefinition } from '@holochain/rad-definitions';
 import DefineHapp from './DefineHapp.ce.vue';
 import DefineDna from './DefineDna.ce.vue';
 import DefineZome from './DefineZome.ce.vue';
@@ -136,7 +136,10 @@ export default defineComponent({
         .filter((_, index) => index !== this.selectedEntryDefIndex)
         .map(entryDef => entryDef.name);
     },
-
+    onChanged() {
+      this.$forceUpdate();
+      this.emitChanged();
+    },
     selectZome() {
       this.selectedEntryDefIndex = -1;
     },

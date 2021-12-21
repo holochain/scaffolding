@@ -11,7 +11,7 @@
         outlined
         validationMessage="Must not be empty"
         @focus="nameValidity($event.target)"
-        @input="$event.target.validity.valid && setName($event.target.value)"
+        @input="setName($event.target)"
       ></mwc-textfield>
 
       <slot name="additionalProperty"></slot>
