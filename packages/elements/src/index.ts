@@ -7,6 +7,7 @@ import '@material/mwc-list';
 import '@material/mwc-dialog';
 import '@material/mwc-drawer';
 import '@material/mwc-select';
+import '@material/mwc-ripple';
 import '@material/mwc-checkbox';
 import '@material/mwc-formfield';
 import { SlBreadcrumb, SlBreadcrumbItem } from '@scoped-elements/shoelace';

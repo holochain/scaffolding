@@ -1,52 +1,131 @@
 <template>
-  <ParentDetail
-    :parent="zome"
-    :children="zome.entry_defs"
-    parentLabel="Zome"
-    childrenLabel="Entry Def"
-    :siblingsNames="otherZomesNames"
-    :snakeCaseRequired="true"
-    @parent-changed="emitChanged()"
-    @add-child="addEntryDef()"
-    @delete-child="deleteEntryDef($event)"
-    @child-selected="selectEntryDef($event)"
-  ></ParentDetail>
+  <div style="display: flex; flex-direction: column; flex: 1">
+    <div style="display: flex; flex-direction: row">
+      <div style="display: flex; flex-direction: column; flex: 1">
+        <span style="font-size: 18px">Dna: {{ selectedDna.name }} > Zome: {{ zome.name }}</span>
+        <mwc-textfield
+          label="Zome Name"
+          style="width: 424px; margin-top: 16px"
+          required
+          autoValidate
+          ref="zome-name"
+          outlined
+          validationMessage="Must not be empty"
+          @focus="zomeValidity($event.target)"
+          @input="setZomeName($event.target)"
+        ></mwc-textfield>
+      </div>
+
+      <mwc-icon-button :disabled="selectedDna.zomes.length < 2" icon="delete" @click="deleteZome()"></mwc-icon-button>
+    </div>
+
+    <div style="display: flex; flex-direction: row">
+      <span style="flex: 1; font-size: 16px">Entry Defs</span>
+      <mwc-button icon="add" label="Add Entry Def" @click="addEntryDef()"></mwc-button>
+    </div>
+    <div style="display: flex; flex-direction: row; flex: 1">
+      <mwc-list activatable>
+        <div
+          style="display: flex; flex-direction: row; flex: 1"
+          v-for="(entryDef, entryDefIndex) of zome.entry_defs"
+          :key="entryDefIndex"
+        >
+          <mwc-list-item
+            :activated="selectedEntryDefIndex === entryDefIndex"
+            @click="selectedEntryDefIndex = entryDefIndex"
+            style="flex: 1"
+          >
+            {{ entryDef.name }}
+          </mwc-list-item>
+
+          <mwc-icon-button
+            :disabled="zome.entry_defs.length < 2"
+            @click="deleteEntryDef(entryDefIndex)"
+            icon="delete"
+          ></mwc-icon-button>
+        </div>
+      </mwc-list>
+
+      <DefineEntry
+        v-if="selectedEntryDef"
+        :entryDef="selectedEntryDef"
+        :otherEntryDefsNames="otherEntryDefsNames"
+      ></DefineEntry>
+      <div v-else style="display: flex; flex: 1; align-items: center; justify-content: center">
+        <span style="opacity: 0.6">Select an entry def </span>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 import type { TextField } from '@material/mwc-textfield';
 import { isSnakeCase } from '@holochain/rad-generators';
-import { ZomeDefinition } from '@holochain/rad-definitions';
+import { HappDefinition, ZomeDefinition } from '@holochain/rad-definitions';
 import { newEntryDef } from '../utils';
-import ParentDetail from './ParentDetail.vue';
+import DefineEntry from './DefineEntry.ce.vue';
 
 export default defineComponent({
   name: 'DefineZome',
-  components: { ParentDetail },
+
+  components: {
+    DefineEntry,
+  },
 
   props: {
-    zome: { type: Object as PropType<ZomeDefinition>, required: true },
-    otherZomesNames: { type: Array, required: true },
+    happ: { type: Object as PropType<HappDefinition>, required: true },
+    selectedDnaIndex: { type: Number, required: true },
+    selectedZomeIndex: { type: Number, required: true },
   },
-  data(): { entryDefCount: number } {
+  data(): { entryDefCount: number; selectedEntryDefIndex: number } {
     return {
       entryDefCount: 1,
+      selectedEntryDefIndex: -1,
     };
   },
-  methods: {
-    selectEntryDef(entryDefIndex: number) {
-      this.$emit('entry-def-selected', entryDefIndex);
+  mounted() {
+    const field = this.$refs['zome-name'] as TextField;
+    field.value = this.zome.name;
+  },
+  watch: {
+    selectedDnaIndex: function () {
+      const field = this.$refs['zome-name'] as TextField;
+      field.value = this.zome.name;
     },
+    selectedZomeIndex: function () {
+      const field = this.$refs['zome-name'] as TextField;
+      field.value = this.zome.name;
+    },
+  },
+  computed: {
+    selectedEntryDef() {
+      if (this.selectedEntryDefIndex === -1) return undefined;
+      else return this.zome.entry_defs[this.selectedEntryDefIndex];
+    },
+    otherZomesNames() {
+      return this.selectedDna?.zomes.filter((_, index) => index !== this.selectedZomeIndex).map(zome => zome.name);
+    },
+    otherEntryDefsNames() {
+      return this.zome?.entry_defs
+        .filter((_, index) => index !== this.selectedEntryDefIndex)
+        .map(entryDef => entryDef.name);
+    },
+    selectedDna() {
+      return this.happ.dnas[this.selectedDnaIndex];
+    },
+    zome() {
+      return this.selectedDna.zomes[this.selectedZomeIndex];
+    },
+  },
+  methods: {
     addEntryDef() {
       const name = `entry_def_${this.entryDefCount++}`;
       this.zome.entry_defs.push(newEntryDef(name));
-      this.$emit('entry-def-added', this.zome.entry_defs.length - 1);
       this.emitChanged();
     },
     deleteEntryDef(entryDefIndex: number) {
       this.zome.entry_defs.splice(entryDefIndex, 1);
-      this.$emit('entry-def-deleted');
       this.emitChanged();
     },
     zomeValidity(textfield: TextField) {
@@ -77,9 +156,15 @@ export default defineComponent({
         };
       };
     },
-    setZomeName(newValue: string) {
-      this.zome.name = newValue;
+    setZomeName(textfield: TextField) {
+      if (textfield.validity.valid) {
+        this.zome.name = textfield.value;
+      }
       this.emitChanged();
+    },
+    deleteZome() {
+      this.selectedDna.zomes.splice(this.selectedZomeIndex, 1);
+      this.$emit('zome-deleted');
     },
     emitChanged() {
       this.$emit('zome-changed', this.zome);

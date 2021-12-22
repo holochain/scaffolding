@@ -1,57 +1,102 @@
 <template>
-  <ParentDetail
-    :parent="happ"
-    :children="happ.dnas"
-    parentLabel="Happ"
-    childrenLabel="Dna"
-    @parent-changed="emitChanged()"
-    @add-child="addDna()"
-    @delete-child="deleteDna($event)"
-    @child-selected="selectDna($event)"
-  ></ParentDetail>
+  <div style="display: flex; flex-direction: column; flex: 1">
+    <mwc-card style="display: flex">
+      <div style="display: flex; flex-direction: row; margin: 16px">
+        <div style="display: flex; flex-direction: column">
+          <span style="font-size: 18px">hApp: {{ happ.name }}</span>
+          <mwc-textfield
+            label="hApp Name"
+            style="width: 424px; margin-top: 16px"
+            required
+            autoValidate
+            outlined
+            validationMessage="Must not be empty"
+            @input="setHappName($event.target)"
+          ></mwc-textfield>
+        </div>
+        <slot name="additionalProperty"></slot>
+      </div>
+    </mwc-card>
+
+    <div style="display: flex; flex-direction: row; align-items: center; margin-top: 16px">
+      <span style="flex: 1; font-size: 16px">DNAs</span>
+      <mwc-button icon="add" label="Add Dna" @click="addDna()"></mwc-button>
+    </div>
+    <DefineDna
+      v-for="(dna, dnaIndex) of happ.dnas"
+      :key="key + dnaIndex"
+      style="margin-top: 16px"
+      :happ="happ"
+      :dnaIndex="dnaIndex"
+      :selectedZomeIndex="dnaIndex === selectedDnaIndex ? selectedZomeIndex : undefined"
+      @zome-selected="$emit('zome-selected', $event)"
+      @dna-changed="emitChanged()"
+      @dna-deleted="onDnaDeleted(dnaIndex)"
+    ></DefineDna>
+  </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 import { HappDefinition } from '@holochain/rad-definitions';
-import { newDna } from '../utils';
-import ParentDetail from './ParentDetail.vue';
+import { newDna, newZome } from '../utils';
+import DefineDna from './DefineDna.ce.vue';
+import { TextField } from '@material/mwc-textfield';
 
 export default defineComponent({
   name: 'DefineHapp',
-  components: { ParentDetail },
+  components: { DefineDna },
 
   props: {
     happ: {
       type: Object as PropType<HappDefinition>,
       required: true,
     },
+    selectedDnaIndex: {
+      type: Number,
+      required: false,
+    },
+    selectedZomeIndex: {
+      type: Number,
+      required: false,
+    },
   },
-  data(): {
-    dnaCount: number;
-  } {
+  data(): { key: number } {
     return {
-      dnaCount: 1,
+      key: 0,
     };
   },
   methods: {
+    newDnaName() {
+      for (let i = 0; i < this.happ.dnas.length + 1; i++) {
+        const name = `dna_${i}`;
+        if (!this.happ.dnas.find(dna => dna.name === name)) {
+          return name;
+        }
+      }
+      return `dna_${this.happ.dnas.length + 1}`;
+    },
+    setHappName(textfield: TextField) {
+      if (textfield.validity.valid) {
+        this.happ.name = textfield.value;
+      }
+      this.emitChanged();
+    },
     addDna() {
-      const name = `dna_${this.dnaCount++}`;
+      const name = this.newDnaName();
       this.happ.dnas.push(newDna(name));
 
-      this.$emit('dna-added', this.happ.dnas.length - 1);
+      this.key += 100;
       this.emitChanged();
     },
-    deleteDna(dnaIndex: number) {
-      this.happ.dnas.splice(dnaIndex, 1);
+    onDnaDeleted(dnaIndex: number) {
+      this.key += 100;
       this.$emit('dna-deleted', dnaIndex);
-      this.emitChanged();
     },
     emitChanged() {
+      this.$forceUpdate();
+
       this.$emit('happ-changed', this.happ);
-    },
-    selectDna(dnaIndex: number) {
-      this.$emit('dna-selected', dnaIndex);
     },
   },
 });

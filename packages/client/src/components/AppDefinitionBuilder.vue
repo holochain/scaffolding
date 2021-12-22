@@ -2,15 +2,13 @@
   <div class="column" style="flex: 1; margin: 16px">
     <span style="font-size: 24px">Scaffold New App</span>
 
-    <div style="flex: 1; display: flex; align-items: center; justify-content: center">
-      <happ-definition-builder
-        style="height: 800px; width: 1000px; margin: 16px; display: flex"
-        ref="defineHapp"
-        :uiTemplates="UiTemplates"
-        @happ-changed="happ = $event.detail[0]"
-      >
-      </happ-definition-builder>
-    </div>
+    <happ-definition-builder
+      style="flex: 1; margin: 16px; display: flex"
+      ref="defineHapp"
+      :uiTemplates="UiTemplates"
+      @happ-changed="happ = $event.detail[0]"
+    >
+    </happ-definition-builder>
 
     <mwc-fab
       @click="requestScaffold()"
