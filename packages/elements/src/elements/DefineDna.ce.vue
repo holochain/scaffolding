@@ -47,13 +47,11 @@
 import { defineComponent, PropType } from 'vue';
 import { DnaDefinition, HappDefinition } from '@holochain/rad-definitions';
 import { newZome } from '../utils';
-import ParentDetail from './ParentDetail.vue';
 import { TextField } from '@material/mwc-textfield';
 import { isSnakeCase } from '@holochain/rad-generators';
 
 export default defineComponent({
   name: 'DefineDna',
-  components: { ParentDetail },
 
   props: {
     happ: { type: Object as PropType<HappDefinition>, required: true },

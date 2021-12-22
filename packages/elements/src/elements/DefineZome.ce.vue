@@ -21,35 +21,34 @@
 
     <div style="display: flex; flex-direction: row">
       <span style="flex: 1; font-size: 16px">Entry Defs</span>
-      <mwc-button icon="add" label="Add Entry Def" @click="addEntryDef()"></mwc-button>
     </div>
     <div style="display: flex; flex-direction: row; flex: 1">
-      <mwc-list activatable>
-        <div
-          style="display: flex; flex-direction: row; flex: 1"
-          v-for="(entryDef, entryDefIndex) of zome.entry_defs"
-          :key="entryDefIndex"
-        >
-          <mwc-list-item
-            :activated="selectedEntryDefIndex === entryDefIndex"
-            @click="selectedEntryDefIndex = entryDefIndex"
-            style="flex: 1"
+      <div style="display: flex; flex-direction: column">
+        <mwc-list activatable>
+          <div
+            style="display: flex; flex-direction: row; flex: 1"
+            v-for="(entryDef, entryDefIndex) of zome.entry_defs"
+            :key="entryDefIndex"
           >
-            {{ entryDef.name }}
-          </mwc-list-item>
-
-          <mwc-icon-button
-            :disabled="zome.entry_defs.length < 2"
-            @click="deleteEntryDef(entryDefIndex)"
-            icon="delete"
-          ></mwc-icon-button>
-        </div>
-      </mwc-list>
+            <mwc-list-item
+              :activated="selectedEntryDefIndex === entryDefIndex"
+              @click="selectedEntryDefIndex = entryDefIndex"
+              style="flex: 1"
+            >
+              {{ entryDef.name }}
+            </mwc-list-item>
+          </div>
+        </mwc-list>
+        <mwc-button icon="add" label="Add Entry Def" @click="addEntryDef()"></mwc-button>
+      </div>
 
       <DefineEntry
         v-if="selectedEntryDef"
-        :entryDef="selectedEntryDef"
-        :otherEntryDefsNames="otherEntryDefsNames"
+        :happ="happ"
+        :dnaIndex="dnaIndex"
+        :zomeIndex="zomeIndex"
+        :entryDefIndex="selectedEntryDefIndex"
+        @entry-def-deleted="onEntryDefDeleted(selectedEntryDefIndex)"
       ></DefineEntry>
       <div v-else style="display: flex; flex: 1; align-items: center; justify-content: center">
         <span style="opacity: 0.6">Select an entry def </span>
@@ -75,8 +74,8 @@ export default defineComponent({
 
   props: {
     happ: { type: Object as PropType<HappDefinition>, required: true },
-    selectedDnaIndex: { type: Number, required: true },
-    selectedZomeIndex: { type: Number, required: true },
+    dnaIndex: { type: Number, required: true },
+    zomeIndex: { type: Number, required: true },
   },
   data(): { entryDefCount: number; selectedEntryDefIndex: number } {
     return {
@@ -89,11 +88,11 @@ export default defineComponent({
     field.value = this.zome.name;
   },
   watch: {
-    selectedDnaIndex: function () {
+    dnaIndex: function () {
       const field = this.$refs['zome-name'] as TextField;
       field.value = this.zome.name;
     },
-    selectedZomeIndex: function () {
+    zomeIndex: function () {
       const field = this.$refs['zome-name'] as TextField;
       field.value = this.zome.name;
     },
@@ -104,18 +103,13 @@ export default defineComponent({
       else return this.zome.entry_defs[this.selectedEntryDefIndex];
     },
     otherZomesNames() {
-      return this.selectedDna?.zomes.filter((_, index) => index !== this.selectedZomeIndex).map(zome => zome.name);
-    },
-    otherEntryDefsNames() {
-      return this.zome?.entry_defs
-        .filter((_, index) => index !== this.selectedEntryDefIndex)
-        .map(entryDef => entryDef.name);
+      return this.selectedDna?.zomes.filter((_, index) => index !== this.zomeIndex).map(zome => zome.name);
     },
     selectedDna() {
-      return this.happ.dnas[this.selectedDnaIndex];
+      return this.happ.dnas[this.dnaIndex];
     },
     zome() {
-      return this.selectedDna.zomes[this.selectedZomeIndex];
+      return this.selectedDna.zomes[this.zomeIndex];
     },
   },
   methods: {
@@ -124,8 +118,8 @@ export default defineComponent({
       this.zome.entry_defs.push(newEntryDef(name));
       this.emitChanged();
     },
-    deleteEntryDef(entryDefIndex: number) {
-      this.zome.entry_defs.splice(entryDefIndex, 1);
+    onEntryDefDeleted(entryDefIndex: number) {
+      this.selectedEntryDefIndex = -1;
       this.emitChanged();
     },
     zomeValidity(textfield: TextField) {
@@ -163,10 +157,11 @@ export default defineComponent({
       this.emitChanged();
     },
     deleteZome() {
-      this.selectedDna.zomes.splice(this.selectedZomeIndex, 1);
+      this.selectedDna.zomes.splice(this.zomeIndex, 1);
       this.$emit('zome-deleted');
     },
     emitChanged() {
+      this.$forceUpdate();
       this.$emit('zome-changed', this.zome);
     },
   },

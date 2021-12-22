@@ -1,6 +1,10 @@
 <template>
   <div style="display: flex; flex-direction: column; flex: 1; margin: 16px">
-    <span style="font-size: 22px">Entry Definition: {{ entryDef.name }}</span>
+    <div style="display: flex; flex-direction: row">
+      <span style="font-size: 22px; flex: 1">Entry Definition: {{ entryDef.name }}</span>
+
+      <mwc-icon-button :disabled="zome.entry_defs.length < 2" @click="deleteEntryDef()" icon="delete"></mwc-icon-button>
+    </div>
 
     <mwc-textfield
       label="Entry Definition Id"
@@ -11,7 +15,7 @@
       outlined
       helper="Has to be unique, and snake_case"
       autoValidate
-      style="width: 424px; margin-top: 16px;"
+      style="width: 424px; margin-top: 16px"
     ></mwc-textfield>
 
     <div style="display: flex; flex-direction: row; flex: 1">
@@ -73,25 +77,47 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 import type { TextField } from '@material/mwc-textfield';
-import { EntryDefinition } from '@holochain/rad-definitions';
+import { EntryDefinition, HappDefinition } from '@holochain/rad-definitions';
 import { isSnakeCase } from '@holochain/rad-generators';
 
 export default defineComponent({
   name: 'DefineEntry',
 
   props: {
-    entryDef: { type: Object as PropType<EntryDefinition>, required: true },
-    otherEntryDefsNames: { type: Array, required: true },
+    happ: { type: Object as PropType<HappDefinition>, required: true },
+    dnaIndex: { type: Number, required: true },
+    zomeIndex: { type: Number, required: true },
+    entryDefIndex: { type: Number, required: true },
   },
   mounted() {
     this.onEntryDefChanged();
   },
   watch: {
-    entryDef: function () {
+    dnaIndex: function () {
+      this.onEntryDefChanged();
+    },
+    zomeIndex: function () {
+      this.onEntryDefChanged();
+    },
+    entryDefIndex: function () {
       this.onEntryDefChanged();
     },
   },
+  computed: {
+    dna() {
+      return this.happ.dnas[this.dnaIndex];
+    },
+    zome() {
+      return this.dna?.zomes[this.zomeIndex];
+    },
+    entryDef() {
+      return this.zome.entry_defs[this.entryDefIndex];
+    },
+  },
   methods: {
+    otherEntryDefsNames() {
+      return this.zome?.entry_defs.filter((_, index) => index !== this.entryDefIndex).map(entryDef => entryDef.name);
+    },
     onEntryDefChanged() {
       const sampleField = this.$refs['json-field'] as any;
       sampleField.value = JSON.stringify(this.entryDef.sample, null, 2);
@@ -135,7 +161,7 @@ export default defineComponent({
           };
         }
 
-        if (this.otherEntryDefsNames.find(name => name === newValue)) {
+        if (this.otherEntryDefsNames().find(name => name === newValue)) {
           textfield.setCustomValidity('The entry_def_id has to be unique in this zome');
           return {
             valid: false,
@@ -154,6 +180,10 @@ export default defineComponent({
     setEntryDefSample(newValue: string) {
       this.entryDef.sample = JSON.parse(newValue);
       this.emitChanged();
+    },
+    deleteEntryDef() {
+      this.zome.entry_defs.splice(this.entryDefIndex, 1);
+      this.$emit('entry-def-deleted');
     },
     emitChanged() {
       this.$emit('entry-def-changed', this.entryDef);
