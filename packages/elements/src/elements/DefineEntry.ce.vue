@@ -1,7 +1,7 @@
 <template>
-  <div style="display: flex; flex-direction: column; flex: 1; margin: 16px">
-    <div style="display: flex; flex-direction: row">
-      <span style="font-size: 22px; flex: 1">Entry Definition: {{ entryDef.name }}</span>
+  <div style="display: flex; flex-direction: column; flex: 1; margin-left: 16px">
+    <div style="display: flex; flex-direction: row;">
+      <span style="font-size: 18px; flex: 1; margin-top: 16px">Entry Definition: {{ entryDef.name }}</span>
 
       <mwc-icon-button :disabled="zome.entry_defs.length < 2" @click="deleteEntryDef()" icon="delete"></mwc-icon-button>
     </div>
@@ -13,7 +13,7 @@
       required
       :value="entryDef.name"
       outlined
-      helper="Has to be unique, and snake_case"
+      helper="Has to be unique within the zome, and snake_case"
       autoValidate
       style="width: 424px; margin-top: 16px"
     ></mwc-textfield>

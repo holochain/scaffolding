@@ -9,6 +9,7 @@ import '@material/mwc-drawer';
 import '@material/mwc-select';
 import '@material/mwc-ripple';
 import '@material/mwc-checkbox';
+import '@material/mwc-top-app-bar';
 import '@material/mwc-formfield';
 import { SlBreadcrumb, SlBreadcrumbItem } from '@scoped-elements/shoelace';
 customElements.define('sl-breadcrumb', SlBreadcrumb);
@@ -19,9 +20,9 @@ customElements.define('mwc-card', Card as any);
 
 import { defineCustomElement } from 'vue';
 
-import HappDefinitionBuilderVue from './elements/HappDefinitionBuilder.ce.vue';
+import WebHappDefinitionBuilderVue from './elements/WebHappDefinitionBuilder.ce.vue';
 
-const HappDefinitionBuilder = defineCustomElement(HappDefinitionBuilderVue);
+const WebHappDefinitionBuilder = defineCustomElement(WebHappDefinitionBuilderVue);
 
-export { HappDefinitionBuilder };
+export { WebHappDefinitionBuilder };
 export * from './utils';

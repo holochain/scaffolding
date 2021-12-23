@@ -1,8 +1,12 @@
 <template>
   <div style="display: flex; flex-direction: column; flex: 1">
     <div style="display: flex; flex-direction: row">
-      <div style="display: flex; flex-direction: column; flex: 1">
-        <span style="font-size: 18px">Dna: {{ selectedDna.name }} > Zome: {{ zome.name }}</span>
+      <div style="margin-left: 16px; margin-top: 16px; display: flex; flex-direction: column; flex: 1">
+        <div style="display: flex; flex-direction: row; align-items: center; flex: 1; font-size: 18px">
+          <span>Dna: {{ selectedDna.name }}</span
+          ><span style="font-size: 16px; margin: 0 8px; color: rgba(0, 0, 0, 0.6)">></span
+          ><span> Zome: {{ zome.name }}</span>
+        </div>
         <mwc-textfield
           label="Zome Name"
           style="width: 424px; margin-top: 16px"
@@ -11,6 +15,7 @@
           ref="zome-name"
           outlined
           validationMessage="Must not be empty"
+          helper="Has to be unique within the Dna, and snake_case"
           @focus="zomeValidity($event.target)"
           @input="setZomeName($event.target)"
         ></mwc-textfield>
@@ -20,8 +25,9 @@
     </div>
 
     <div style="display: flex; flex-direction: row">
-      <span style="flex: 1; font-size: 16px">Entry Defs</span>
+      <span style="flex: 1; font-size: 18px; margin-left: 16px">Entry Defs</span>
     </div>
+    <span style="height: 1px; width: 100%; background-color: lightgrey; margin-top: 8px"></span>
     <div style="display: flex; flex-direction: row; flex: 1">
       <div style="display: flex; flex-direction: column">
         <mwc-list activatable>
@@ -42,8 +48,11 @@
         <mwc-button icon="add" label="Add Entry Def" @click="addEntryDef()"></mwc-button>
       </div>
 
+      <span style="height: 100%; width: 1px; background-color: lightgrey"></span>
+
       <DefineEntry
         v-if="selectedEntryDef"
+        :key="key"
         :happ="happ"
         :dnaIndex="dnaIndex"
         :zomeIndex="zomeIndex"
@@ -77,8 +86,9 @@ export default defineComponent({
     dnaIndex: { type: Number, required: true },
     zomeIndex: { type: Number, required: true },
   },
-  data(): { entryDefCount: number; selectedEntryDefIndex: number } {
+  data(): { entryDefCount: number; key: number; selectedEntryDefIndex: number } {
     return {
+      key: 0,
       entryDefCount: 1,
       selectedEntryDefIndex: -1,
     };
@@ -116,10 +126,12 @@ export default defineComponent({
     addEntryDef() {
       const name = `entry_def_${this.entryDefCount++}`;
       this.zome.entry_defs.push(newEntryDef(name));
+      this.key++;
       this.emitChanged();
     },
     onEntryDefDeleted(entryDefIndex: number) {
       this.selectedEntryDefIndex = -1;
+      this.key++;
       this.emitChanged();
     },
     zomeValidity(textfield: TextField) {

@@ -1,14 +1,12 @@
 <template>
   <div class="column" style="flex: 1; margin: 16px">
-    <span style="font-size: 24px">Scaffold New App</span>
-
-    <happ-definition-builder
-      style="flex: 1; margin: 16px; display: flex"
+    <webhapp-definition-builder
+      style="flex: 1; display: flex"
       ref="defineHapp"
-      :uiTemplates="UiTemplates"
+      :uitemplates="UiTemplates.join(',')"
       @happ-changed="happ = $event.detail[0]"
     >
-    </happ-definition-builder>
+    </webhapp-definition-builder>
 
     <mwc-fab
       @click="requestScaffold()"
@@ -23,31 +21,31 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { HappDefinition } from '@holochain/rad-definitions';
+import { WebHappDefinition } from '@holochain/rad-definitions';
 import { newDna } from '@holochain/rad-elements';
-import type { Select } from '@material/mwc-select';
 import { UiTemplates } from '../types';
 
 export default defineComponent({
   name: 'AppDefinitionBuilder',
 
   data(): {
-    happ: HappDefinition;
+    happ: WebHappDefinition;
     UiTemplates: string[];
   } {
     return {
       UiTemplates,
       happ: {
-        name: 'my-app',
-        dnas: [newDna()],
+        happ: {
+          name: 'my-app',
+          dnas: [newDna()],
+        },
+        uiTemplate: 'svelte',
       },
     };
   },
   methods: {
     requestScaffold() {
-      const uiTemplate = (this.$refs.uiTemplateSelect as Select).value;
-
-      this.$emit('scaffoldApp', { happ: this.happ, uiTemplate });
+      this.$emit('scaffoldApp', this.happ);
     },
   },
   emits: ['scaffoldApp'],

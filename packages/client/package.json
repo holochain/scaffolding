@@ -35,6 +35,7 @@
     "@material/mwc-snackbar": "^0.25.3",
     "@material/mwc-switch": "^0.25.3",
     "@material/mwc-textfield": "^0.25.3",
+    "@material/mwc-top-app-bar": "^0.25.3",
     "@mdi/font": "5.9.55",
     "core-js": "^3.19.0",
     "jsonschema": "^1.4.0",

@@ -15,8 +15,7 @@
           <div class="flex-scrollable-container">
             <div class="flex-scrollable-y">
               <ui5-tree>
-                <FileNode :fileTree="sortedFiles()" @file-selected="selectedPreviewFileContents = $event.content">
-                </FileNode>
+                <FileNode :fileTree="sortedFiles()"> </FileNode>
               </ui5-tree>
             </div>
           </div>
@@ -27,7 +26,8 @@
     <mwc-button slot="secondaryAction" dialogAction="close" label="Cancel"></mwc-button>
     <mwc-button slot="primaryAction" dialogAction="close" @click="scaffoldApp()" label="Create"></mwc-button>
   </mwc-dialog>
-  <mwc-dialog ref="helpdialog" heading="App Scaffolded!">
+
+  <mwc-dialog ref="helpdialog" :heading="settingUp ? 'Next Steps' : 'App Scaffolded!'">
     <div v-if="!settingUp" class="column">
       <h3>Manual Setup</h3>
       <span
@@ -42,19 +42,38 @@ npm install</code></pre>
       <span>After that, you can safely close this window.</span>
       <span style="margin-top: 16px">OR</span>
       <h3>Automatic Setup</h3>
-      <span>You can automatically setup your app by selecting "SETUP AND EXIT".</span>
+      <span>You can automatically setup your app by selecting "AUTOMATIC SETUP".</span>
     </div>
-    <div v-else>
-      <span
+    <div v-else class="column">
+      <span>Here are some useful resources to begin the development of your hApp</span>
+      <ul>
+        <li>
+          <a href="https://developer.holochain.org/concepts/">Core Concepts</a>
+        </li>
+        <li>
+          <a href="https://docs.rs/hdk">HDK Documentation</a>
+        </li>
+        <li>
+          <a href="https://forum.holochain.org/">Holochain Forum</a>
+        </li>
+        <li>
+          <a href="https://github.com/holochain/happ-build-tutorial/">hApp Build Tutorial</a>
+        </li>
+        <li>
+          <a href="https://holochain-gym.github.io/developers/basic/zome-functions/">Holochain Gym Tutorial</a>
+        </li>
+      </ul>
+
+      <span style="margin-top: 16px"
         >You can safely close this window now, and wait for the automatic setup to complete in the terminal
         window.</span
       >
     </div>
-    <mwc-button slot="secondaryAction" dialogAction="close" label="Close" v-if="!settingUp"></mwc-button>
+    <mwc-button slot="secondaryAction" @click="settingUp = true" label="Next Steps" v-if="!settingUp"></mwc-button>
     <mwc-button
       slot="primaryAction"
       @click="setup()"
-      :label="settingUp ? 'Setting up...' : 'Setup and Exit'"
+      :label="settingUp ? 'Setting up...' : 'Automatic Setup and Next Steps'"
       :disabled="settingUp"
     ></mwc-button>
   </mwc-dialog>

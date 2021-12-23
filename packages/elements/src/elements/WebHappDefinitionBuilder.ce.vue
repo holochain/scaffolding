@@ -13,14 +13,17 @@
             @dna-deleted="onDnaDeleted($event)"
           >
             <mwc-select
-              v-if="uiTemplates"
+              v-if="uitemplates"
               outlined
-              slot="additionalProperty"
+              :fixedMenuPosition="true"
               label="UI Template"
               value="svelte"
               ref="uiTemplateSelect"
+              @change="emitChanged()"
             >
-              <mwc-list-item v-for="(ui, index) of uiTemplates" :key="index" :value="ui">{{ ui }}</mwc-list-item>
+              <mwc-list-item v-for="(ui, index) of uitemplates.split(',')" :key="index" :value="ui">{{
+                ui
+              }}</mwc-list-item>
             </mwc-select>
           </DefineHapp>
         </div>
@@ -36,7 +39,6 @@
         :zomeIndex="selectedZomeIndex"
         @zome-changed="dnaRender++"
         @zome-deleted="onZomeDeleted()"
-        style="margin: 16px"
       ></DefineZome>
       <div v-else style="display: flex; flex: 1; align-items: center; justify-content: center">
         <span style="opacity: 0.6">Select a zome to define it</span>
@@ -48,12 +50,13 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 import { HappDefinition } from '@holochain/rad-definitions';
+import type { Select } from '@material/mwc-select';
 import DefineHapp from './DefineHapp.ce.vue';
 import DefineZome from './DefineZome.ce.vue';
 import { newDna } from '../utils';
 
 export default defineComponent({
-  name: 'HappDefinitionBuilder',
+  name: 'WebHappDefinitionBuilder',
 
   components: {
     DefineHapp,
@@ -68,8 +71,8 @@ export default defineComponent({
         dnas: [newDna()],
       },
     },
-    uiTemplates: {
-      type: Object as PropType<Array<string>>,
+    uitemplates: {
+      type: String,
       required: false,
     },
   },
@@ -107,7 +110,8 @@ export default defineComponent({
       this.selectedZomeIndex = zomeIndex;
     },
     emitChanged() {
-      this.$emit('happ-changed', this.happ);
+      const uiTemplateSelect = this.$refs['uiTemplateSelect'] as Select;
+      this.$emit('happ-changed', { happ: this.happ, uiTemplate: uiTemplateSelect.value });
     },
     onDnaDeleted(dnaIndex: number) {
       if (this.selectedDnaIndex === dnaIndex) {

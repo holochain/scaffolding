@@ -1,6 +1,28 @@
 <template>
-  <div class="row" style="flex: 1">
-    <Scaffold style="flex: 1" class="column"></Scaffold>
+  <div class="column" style="flex: 1">
+    <mwc-top-app-bar style="flex: 1; display: flex">
+      <img
+        :src="require('../assets/holochain_logo.png')"
+        class="my-3"
+        contain
+        height="48"
+        width="48"
+        slot="navigationIcon"
+      />
+      <div slot="title">Scaffold New hApp</div>
+      <mwc-button
+        icon="bug_report"
+        label="Report Issue"
+        slot="actionItems"
+        style="--mdc-theme-primary: white"
+        @click="open('https://github.com/holochain/scaffolding/issues')"
+      >
+      </mwc-button>
+
+      <div style="width: 100vw; height: 100%; flex: 1; display: flex">
+        <Scaffold class="column" style="flex: 1"></Scaffold>
+      </div>
+    </mwc-top-app-bar>
   </div>
 </template>
 

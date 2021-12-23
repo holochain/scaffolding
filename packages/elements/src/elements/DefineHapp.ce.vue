@@ -1,25 +1,27 @@
 <template>
   <div style="display: flex; flex-direction: column; flex: 1">
     <mwc-card style="display: flex">
-      <div style="display: flex; flex-direction: row; margin: 16px">
-        <div style="display: flex; flex-direction: column">
-          <span style="font-size: 18px">hApp: {{ happ.name }}</span>
-          <mwc-textfield
-            label="hApp Name"
-            style="width: 424px; margin-top: 16px"
-            required
-            autoValidate
-            outlined
-            validationMessage="Must not be empty"
-            @input="setHappName($event.target)"
-          ></mwc-textfield>
+      <div style="display: flex; flex-direction: column; margin: 16px">
+        <span style="font-size: 18px">hApp: {{ happ.name }}</span>
+        <div style="display: flex; flex-direction: row; margin-top: 16px">
+          <div style="flex: 1">
+            <mwc-textfield
+              label="hApp Name"
+              style="width: 424px"
+              required
+              autoValidate
+              outlined
+              validationMessage="Must not be empty"
+              @input="setHappName($event.target)"
+            ></mwc-textfield>
+          </div>
+          <slot></slot>
         </div>
-        <slot name="additionalProperty"></slot>
       </div>
     </mwc-card>
 
     <div style="display: flex; flex-direction: row; align-items: center; margin-top: 16px">
-      <span style="flex: 1; font-size: 16px">DNAs</span>
+      <span style="flex: 1; font-size: 18px">Dnas</span>
       <mwc-button icon="add" label="Add Dna" @click="addDna()"></mwc-button>
     </div>
     <DefineDna
@@ -39,7 +41,7 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 import { HappDefinition } from '@holochain/rad-definitions';
-import { newDna, newZome } from '../utils';
+import { newDna } from '../utils';
 import DefineDna from './DefineDna.ce.vue';
 import { TextField } from '@material/mwc-textfield';
 

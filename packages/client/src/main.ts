@@ -1,3 +1,4 @@
+import { WebHappDefinitionBuilder } from '@holochain/rad-elements';
 import { createApp } from 'vue';
 import App from './App.vue';
 import '@ui5/webcomponents/dist/Tree.js';
@@ -10,8 +11,7 @@ import '@material/mwc-dialog';
 import '@material/mwc-select';
 import '@ui5/webcomponents/dist/Card.js';
 
-import { HappDefinitionBuilder } from '@holochain/rad-elements';
 
-customElements.define('happ-definition-builder', HappDefinitionBuilder);
+customElements.define('webhapp-definition-builder', WebHappDefinitionBuilder);
 
 createApp(App).mount('#app');

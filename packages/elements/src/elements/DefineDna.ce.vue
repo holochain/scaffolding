@@ -2,14 +2,15 @@
   <mwc-card style="display: flex; flex-direction: column">
     <div style="display: flex; flex-direction: row">
       <div style="display: flex; flex-direction: column; flex: 1; margin: 16px; margin-bottom: 0">
-        <span style="font-size: 16px">Dna: {{ dna.name }}</span>
+        <span style="font-size: 18px">Dna: {{ dna.name }}</span>
         <mwc-textfield
           label="Dna Name"
-          style="width: 424px; margin-top: 8px"
+          style="width: 424px; margin-top: 16px"
           required
           autoValidate
           :ref="`dna-name-${dnaIndex}`"
           outlined
+          helper="Has to be unique within the hApp, and snake_case"
           validationMessage="Must not be empty"
           @focus="dnaNameValidity(dnaIndex, $event.target)"
           @input="setDnaName(dnaIndex, $event.target)"
@@ -19,7 +20,7 @@
       <mwc-icon-button :disabled="happ.dnas.length < 2" icon="delete" @click="deleteDna()"></mwc-icon-button>
     </div>
 
-    <span style="margin-left: 16px; margin-bottom: 8px">Zomes</span>
+    <span style="margin-left: 16px; margin-bottom: 8px; font-size: 18px">Zomes</span>
 
     <div style="display: flex; flex-direction: row; flex-wrap: wrap; background-color: lightgrey; align-items: center">
       <mwc-card
@@ -45,7 +46,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import { DnaDefinition, HappDefinition } from '@holochain/rad-definitions';
+import { HappDefinition } from '@holochain/rad-definitions';
 import { newZome } from '../utils';
 import { TextField } from '@material/mwc-textfield';
 import { isSnakeCase } from '@holochain/rad-generators';
