@@ -30,8 +30,9 @@ export function generateWebHappYaml({
 
 export async function generateWebHapp(happ: HappDefinition, uiFileChanges: FileChanges[]): Promise<FileChanges[]> {
   const src = uiFileChanges.find(change => change.type === FileChangesType.InDir && change.dirName === 'src') as InDir;
-
-  src.changes = [...src.changes, ...(await generateTsTypes(happ))];
+  if (src) {
+    src.changes = [...src.changes, ...(await generateTsTypes(happ))];
+  }
 
   return [
     ...(await generateHapp(happ)),

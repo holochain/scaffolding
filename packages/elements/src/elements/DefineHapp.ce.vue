@@ -21,7 +21,7 @@
     </mwc-card>
 
     <div style="display: flex; flex-direction: row; align-items: center; margin-top: 16px">
-      <span style="flex: 1; font-size: 18px">Dnas</span>
+      <span style="margin-left: 16px; flex: 1; font-size: 18px">Dnas</span>
       <mwc-button icon="add" label="Add Dna" @click="addDna()"></mwc-button>
     </div>
     <DefineDna

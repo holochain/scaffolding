@@ -44,6 +44,10 @@ export default {
       dedupe: ['svelte'],
     }),
     commonjs(),
+		typescript({
+			sourceMap: !production,
+			inlineSources: !production
+		}),
 
     // If we're building for production (npm run build
     // instead of npm run start), minify

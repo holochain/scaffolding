@@ -60,7 +60,7 @@ export const entryCrudTests = (dna: DnaDefinition, zome: ZomeDefinition, entryDe
       "update_${entryDef.name}",
       {
         original_header_hash: create_output.header_hash,
-        updated_${entryDef.name}: ${generateAnotherSample(entryDef.sample)}
+        updated_${entryDef.name}: ${JSON.stringify(generateAnotherSample(entryDef.sample), null, 2).replace('\n', '\n        ')}
       }
     );
     t.ok(update_output.header_hash);
@@ -96,6 +96,10 @@ export const entryCrudTests = (dna: DnaDefinition, zome: ZomeDefinition, entryDe
 `;
 
 function generateAnotherSample(sample: any): any {
+  console.log('asdf', sample);
   let schema = toJsonSchema(sample);
-  return jsf.generate(schema);
+  console.log('asdf2', schema);
+  const result = jsf.generate(schema);
+  console.log('asdf3', result);
+  return result;
 }
