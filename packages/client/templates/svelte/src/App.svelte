@@ -15,7 +15,7 @@
 		fn_name: 'HC_SCAFFOLDING{fnName}',
     payload: HC_SCAFFOLDING{entrySample},
 		provenance: cell_id[1],
-	}).then(hash => entryHash = hash);
+	}).then(result => entryHash = result.entry_hash);
 
 </script>
 

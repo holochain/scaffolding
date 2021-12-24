@@ -10,7 +10,8 @@
     "prepare": "wasm2js ../../node_modules/json_typegen_wasm/json_typegen_wasm_bg.wasm -o json_typegen.js ",
     "build:watch": "tsc -w --preserveWatchOutput",
     "test": "npm run build && rimraf tests/.fixture && npm run generate:fixture && cd tests/.fixture && nix-shell . --run \"npm install && npm test\"",
-    "generate:fixture": "node --loader ts-node/esm --experimental-specifier-resolution=node tests/index.ts | tap-diff"
+    "generate:fixture": "node --loader ts-node/esm --experimental-specifier-resolution=node tests/index.ts | tap-diff",
+    "hi": "resolve json-schema-faker"
   },
   "dependencies": {
     "@holochain/rad-definitions": "0.0.1",
@@ -26,6 +27,7 @@
     "esm": "^3.2.25",
     "json_typegen_wasm": "^0.7.0",
     "path": "^0.12.7",
+    "require-resolve-cli": "^1.0.0",
     "rimraf": "^3.0.2",
     "rollup": "^2.61.1",
     "tap-diff": "^0.1.1",

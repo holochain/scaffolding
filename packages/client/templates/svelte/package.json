@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "npm run build && concurrently \"npm run build:watch\" \"wds --config wds.config.mjs\"",
+    "prepare": "npm run build",
+    "start": "concurrently \"npm run build:watch\" \"wds --config web-dev-server.config.mjs\"",
     "build": "rollup -c",
     "build:watch": "run-singleton \"rollup -c -w\""
   },
