@@ -20,7 +20,7 @@
       </mwc-button>
 
       <div style="width: 100vw; height: 100%; flex: 1; display: flex">
-        <Scaffold class="column" style="flex: 1"></Scaffold>
+        <Scaffold></Scaffold>
       </div>
     </mwc-top-app-bar>
   </div>

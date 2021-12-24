@@ -10,7 +10,7 @@
   "scripts": {
     "start": "vue-cli-service serve",
     "lint": "vue-cli-service lint",
-    "build": "npm run setup && rimraf dist && vue-cli-service build",
+    "build": "npm run setup && rimraf dist && vue-cli-service build --mode development",
     "build:watch": "vue-cli-service build --watch --no-clean",
     "setup": "rimraf ./public/templates && mkdir ./public/templates && npm run setup:svelte && npm run setup:lit && npm run setup:vue",
     "setup:svelte": "cd templates/svelte/ && bestzip ../../public/templates/svelte.zip * .gitignore",
