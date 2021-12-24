@@ -13,11 +13,11 @@ export default ( happ: HappDefinition) =>
   "scripts": {
     "start": "npm run build:happ && npm run start:agent",
     "network": "npm run build:happ && concurrently-repeat \\"npm run start:agent\\"",
-    "start:agent": "cross-env HC_PORT=$(port) concurrently -k \\"npm run start:happ\\" \\"sleep 5 && npm run start -w ${getUiPackageName(happ)}\\" \\"npm run playground\\"",
+    "start:agent": "cross-env HC_PORT=$(port) concurrently -k \\"npm run start:happ\\" \\"sleep 5 && npm run start -w ${getUiPackageName(happ)}\\"",
     "test": "npm run build:happ && npm t -w tests",
-    "start:happ": "RUST_LOG=warn hc s generate ./workdir/${happ.name}.happ --run=$HC_PORT -a ${
+    "start:happ": "concurrently \\"RUST_LOG=warn hc s generate ./workdir/${happ.name}.happ --run=$HC_PORT -a ${
     happ.name
-  } network mdns",
+  } network mdns\\" \\"npm run playground\\"",
     "package": "npm run build:happ && npm run package:ui && hc web-app pack workdir",
     "package:ui": "npm run build -w ${getUiPackageName(happ)} && cd ui/dist && bestzip ../dist.zip *",
     "build:happ": "npm run build:dnas && hc app pack ./workdir",
@@ -26,7 +26,7 @@ export default ( happ: HappDefinition) =>
     "playground": "run-singleton \\"holochain-playground\\""
   },
   "devDependencies": {
-    "@holochain-playground/cli": "^0.0.7",
+    "@holochain-playground/cli": "^0.0.8",
     "concurrently": "^6.2.1",
     "concurrently-repeat": "^0.0.1",
     "cross-env": "^7.0.3",

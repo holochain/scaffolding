@@ -39,7 +39,7 @@ nix-env -iA cachix -f https://cachix.org/api/v1/install
 cachix use holochain-ci
 nix-shell
 npm install</code></pre>
-      <span>After that, you can safely close this window.</span>
+      <span>After completing the manual setup, proceed to "Next Steps" to see relevant documentation.</span>
       <span style="margin-top: 16px">OR</span>
       <h3>Automatic Setup</h3>
       <span>You can automatically setup your app by selecting "AUTOMATIC SETUP".</span>
@@ -73,7 +73,7 @@ npm install</code></pre>
     <mwc-button
       slot="primaryAction"
       @click="setup()"
-      :label="settingUp ? 'Setting up...' : 'Automatic Setup and Next Steps'"
+      :label="settingUp ? 'Setting up...' : 'Automatic Setup'"
       :disabled="settingUp"
     ></mwc-button>
   </mwc-dialog>

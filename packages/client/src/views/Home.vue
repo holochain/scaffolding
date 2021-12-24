@@ -5,8 +5,8 @@
         :src="require('../assets/holochain_logo.png')"
         class="my-3"
         contain
-        height="48"
-        width="48"
+        height="32"
+        width="32"
         slot="navigationIcon"
       />
       <div slot="title">Scaffold New hApp</div>
