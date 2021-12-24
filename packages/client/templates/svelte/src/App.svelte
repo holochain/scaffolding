@@ -4,18 +4,18 @@
 	export let appWebsocket;
 	export let cell_id;
 
-	let postHash;
+	let entryHash;
 
-	$: postHash;
+	$: entryHash;
 
 	 appWebsocket.callZome({
 		cap: null,
 		cell_id: cell_id,
 		zome_name: 'HC_SCAFFOLDING{zomeName}',
-		fn_name: 'create_post',
-		payload: 'my post',
+		fn_name: 'HC_SCAFFOLDING{fnName}',
+    payload: HC_SCAFFOLDING{entrySample},
 		provenance: cell_id[1],
-	}).then(hash => postHash = hash);
+	}).then(hash => entryHash = hash);
 
 </script>
 
@@ -23,8 +23,8 @@
 	<h1>Hello {name}!</h1>
 	<p>Visit the <a href="https://svelte.dev/tutorial">Svelte tutorial</a> to learn how to build Svelte apps.</p>
 
-	{#if postHash}
-		<span>Created new Holochain entry! Post with hash {postHash}</span>
+	{#if entryHash}
+		<span>Created new Holochain entry! HC_SCAFFOLDING{entryDefName} with hash {entryHash}</span>
 	{:else}
 		<span>Creating...</span>
 	{/if}

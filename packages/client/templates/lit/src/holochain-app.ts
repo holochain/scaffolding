@@ -1,10 +1,10 @@
 import { LitElement, css, html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
-import { AppWebsocket } from '@holochain/conductor-api';
+import { AppWebsocket, InstalledCell } from '@holochain/conductor-api';
 
 @customElement('holochain-app')
 export class HolochainApp extends LitElement {
-  @state() postHash: string | undefined;
+  @state() entryHash: string | undefined;
 
   async firstUpdated() {
     const appWebsocket = await AppWebsocket.connect(
@@ -15,16 +15,17 @@ export class HolochainApp extends LitElement {
       installed_app_id: 'HC_SCAFFOLDING{installedAppId}',
     });
 
-    const cellData = appInfo.cell_data[0];
+    const cellData = appInfo.cell_data.find(data => data.role_id === 'HC_SCAFFOLDING{dnaName}') as InstalledCell;
 
-    this.postHash = await appWebsocket.callZome({
+    const result = await appWebsocket.callZome({
       cap: null as any,
       cell_id: cellData.cell_id,
       zome_name: 'HC_SCAFFOLDING{zomeName}',
-      fn_name: 'create_post',
-      payload: 'my post',
+      fn_name: 'HC_SCAFFOLDING{fnName}',
+      payload: HC_SCAFFOLDING{entrySample},
       provenance: cellData.cell_id[1],
     });
+    this.entryHash = result.entry_hash
   }
 
   render() {
@@ -43,9 +44,9 @@ export class HolochainApp extends LitElement {
         </a>
       </main>
 
-      ${this.postHash
+      ${this.entryHash
         ? html`<span
-            >Created new Holochain entry! Post with hash: ${this.postHash}</span
+            >Created new Holochain entry! HC_SCAFFOLDING{entryDefName} with hash: ${this.entryHash}</span
           >`
         : html`<span>Creating...</span>`}
 

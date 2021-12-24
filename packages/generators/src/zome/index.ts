@@ -6,7 +6,9 @@ import cargoToml from './Cargo.toml';
 import { generateEntryDef } from './entry';
 import libRs from './lib.rs';
 
-export function generateZomeCargoToml(zomeName: string, author: string, hdkVersion = '0.0.116'): FileChanges[] {
+export * from './entry';
+
+export function generateZomeCargoToml(zomeName: string, author: string, hdkVersion = '0.0.117'): FileChanges[] {
   return [
     {
       type: FileChangesType.Create,

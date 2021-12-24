@@ -20,7 +20,7 @@ export async function generateTsTypesForDna(dna: DnaDefinition): Promise<FileCha
     async zome =>
       ({
         type: FileChangesType.Create,
-        fileName: zome.name,
+        fileName: `${zome.name}.ts`,
         content: await tsTypesForZome(zome),
       } as FileChanges),
   );

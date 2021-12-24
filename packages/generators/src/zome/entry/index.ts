@@ -2,8 +2,11 @@ import { EntryDefinition } from '@holochain/rad-definitions';
 import { FileChanges, FileChangesType } from '../../file-changes';
 
 import { generateEntryTypes } from './entry.rs';
-import handlersRs from './handlers.rs';
+import { generateEntryHandlers } from './handlers.rs';
 import modRs from './mod.rs';
+
+export * from './handlers.rs';
+export * from './entry.rs';
 
 export async function generateEntryDef(entryDef: EntryDefinition): Promise<FileChanges[]> {
   return [
@@ -15,7 +18,7 @@ export async function generateEntryDef(entryDef: EntryDefinition): Promise<FileC
     {
       type: FileChangesType.Create,
       fileName: `handlers.rs`,
-      content: handlersRs(entryDef),
+      content: generateEntryHandlers(entryDef),
     },
     {
       type: FileChangesType.Create,

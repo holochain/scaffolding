@@ -45,7 +45,7 @@ npm install</code></pre>
       <span>You can automatically setup your app by selecting "AUTOMATIC SETUP".</span>
     </div>
     <div v-else class="column">
-      <span>Here are some useful resources to begin the development of your hApp</span>
+      <span>Here are some useful resources to begin the development of your hApp.</span>
       <ul>
         <li>
           <a href="https://developer.holochain.org/concepts/">Core Concepts</a>
@@ -87,7 +87,7 @@ import { FileChanges, FileChangesType, generateWebHapp } from '@holochain/rad-ge
 import { HappDefinition } from '@holochain/rad-definitions';
 import AppDefinitionBuilder from './AppDefinitionBuilder.vue';
 import FileNode from './FileNode.vue';
-import { getUiTemplate, replaceText } from '../utils';
+import { getFirstEntry, getUiTemplate, replaceText } from '../utils';
 import type { Dialog } from '@material/mwc-dialog';
 
 export default defineComponent({
@@ -143,12 +143,22 @@ export default defineComponent({
       (this.$refs.helpdialog as Dialog).show();
     },
     async generateFileChanges({ happ, uiTemplate }: { happ: HappDefinition; uiTemplate: string }) {
-      const uiTemplateChanges = await getUiTemplate(uiTemplate, text =>
-        replaceText(text, {
-          installedAppId: happ.name,
-          zomeName: happ.dnas[0].zomes[0].name,
-        }),
-      );
+      const firstCreateCall = getFirstEntry(happ);
+
+      const toReplace: any = {
+        installedAppId: happ.name,
+        zomeName: happ.dnas[0].zomes[0].name,
+      };
+
+      if (firstCreateCall) {
+        toReplace['fnName'] = firstCreateCall.fnName;
+        toReplace['dnaName'] = firstCreateCall.dnaName;
+        toReplace['entrySample'] = JSON.stringify(firstCreateCall.sample, null, 2);
+        toReplace['zomeName'] = firstCreateCall.zomeName;
+        toReplace['entryDefName'] = firstCreateCall.entryDefName;
+      }
+
+      const uiTemplateChanges = await getUiTemplate(uiTemplate, text => replaceText(text, toReplace));
 
       this.fileChanges = await generateWebHapp(happ, uiTemplateChanges);
       this.happName = happ.name;

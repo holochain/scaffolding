@@ -1,6 +1,6 @@
 <template>
   <div style="display: flex; flex-direction: column; flex: 1; margin-left: 16px">
-    <div style="display: flex; flex-direction: row;">
+    <div style="display: flex; flex-direction: row">
       <span style="font-size: 18px; flex: 1; margin-top: 16px">Entry Definition: {{ entryDef.name }}</span>
 
       <mwc-icon-button :disabled="zome.entry_defs.length < 2" @click="deleteEntryDef()" icon="delete"></mwc-icon-button>
@@ -45,6 +45,7 @@
         <mwc-formfield label="Create">
           <mwc-checkbox
             :checked="entryDef.create"
+            :disabled="true"
             @change="
               entryDef.create = $event.target.checked;
               emitChanged();

@@ -7,7 +7,7 @@
       <a href="https://cli.vuejs.org" target="_blank" rel="noopener">vue-cli documentation</a>.
     </p>
 
-    <span v-if="postHash">Created new Holochain entry! Post with hash {{ postHash }}</span>
+    <span v-if="entryHash">Created new Holochain entry! HC_SCAFFOLDING{entryDefName} with hash {{ entryHash }}</span>
     <span v-else>Creating...</span>
 
     <h3>Installed CLI Plugins</h3>
@@ -76,6 +76,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+import type { InstalledCell } from '@holochain/conductor-api';
 import { appInfo, appWebsocket } from '../store/holochain';
 
 export default defineComponent({
@@ -83,24 +84,25 @@ export default defineComponent({
   props: {
     msg: String,
   },
-  data(): { postHash: string | undefined } {
+  data(): { entryHash: string | undefined } {
     return {
-      postHash: undefined,
+      entryHash: undefined,
     };
   },
   async mounted() {
     const info = await appInfo();
-    const cell_id = info.cell_data[0].cell_id;
+    const cellData = info.cell_data.find(data => data.role_id === 'HC_SCAFFOLDING{dnaName}') as InstalledCell;
 
     const appWs = await appWebsocket();
-    this.postHash = await appWs.callZome({
+    const result = await appWs.callZome({
       cap: null,
-      cell_id: cell_id,
+      cell_id: cellData.cell_id,
       zome_name: 'HC_SCAFFOLDING{zomeName}',
-      fn_name: 'create_post',
-      payload: 'my post',
-      provenance: cell_id[1],
+      fn_name: 'HC_SCAFFOLDING{fnName}',
+      payload: HC_SCAFFOLDING{entrySample},
+      provenance: cellData.cell_id[1],
     });
+    this.entryHash = result.entry_hash
   },
 });
 </script>
