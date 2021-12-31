@@ -1,4 +1,4 @@
-import typegen from '../json_typegen.js';
+import typegen from '../thirdparty/json_typegen.js';
 const { buffer } = typegen();
 
 let WASM_VECTOR_LEN = 0;

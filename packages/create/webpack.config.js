@@ -36,6 +36,7 @@ module.exports = {
   },
   node: {
     global: false,
+    buffer: false,
     __filename: false,
     __dirname: false,
   },
