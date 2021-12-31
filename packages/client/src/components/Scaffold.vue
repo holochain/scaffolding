@@ -72,8 +72,9 @@ npm install</code></pre>
     <mwc-button slot="secondaryAction" @click="settingUp = true" label="Next Steps" v-if="!settingUp"></mwc-button>
     <mwc-button
       slot="primaryAction"
+      v-if="!settingUp"
       @click="setup()"
-      :label="settingUp ? 'Setting up...' : 'Automatic Setup'"
+      label="Automatic Setup"
       :disabled="settingUp"
     ></mwc-button>
   </mwc-dialog>

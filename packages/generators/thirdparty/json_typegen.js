@@ -1,5 +1,4 @@
-import { encode, decode } from 'js-base64';
-
+import { Buffer } from 'buffer'
 
 loadWebAssembly.supported = typeof WebAssembly !== 'undefined'
 
@@ -52,7 +51,7 @@ export default function loadWebAssembly (opts) {
 }
 
 function toUint8Array (s) {
-  return decode(s);
+  return Buffer.from(s, 'base64')
 }
 
 function charCodeAt (c) {
