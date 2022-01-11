@@ -24,20 +24,27 @@
     </div>
     <span style="height: 1px; width: 100%; background-color: lightgrey; margin-top: 8px"></span>
     <div style="display: flex; flex-direction: row; flex: 1">
-      <div style="display: flex; flex-direction: column">
-        <mwc-list activatable>
-          <mwc-list-item
-            v-for="(entryDef, entryDefIndex) of zome.entry_defs"
-            :key="entryDefIndex"
-            graphic="icon"
-            :activated="selectedEntryDefIndex === entryDefIndex"
-            @click="selectedEntryDefIndex = entryDefIndex"
-            style="flex: 1"
-          >
-            <mwc-icon slot="graphic">sticky_note_2</mwc-icon>
-            {{ entryDef.name }}
-          </mwc-list-item>
-        </mwc-list>
+      <div style="display: flex; flex-direction: column; flex-basis: 300px">
+        <div style="position: relative; display: flex; flex: 1">
+          <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0">
+            <div style="max-height: 100%; overflow-y: auto">
+              <mwc-list activatable>
+                <mwc-list-item
+                  v-for="(entryDef, entryDefIndex) of zome.entry_defs"
+                  :key="entryDefIndex"
+                  graphic="icon"
+                  :activated="selectedEntryDefIndex === entryDefIndex"
+                  @click="selectedEntryDefIndex = entryDefIndex"
+                  style="flex: 1"
+                >
+                  <mwc-icon slot="graphic">sticky_note_2</mwc-icon>
+                  {{ entryDef.name }}
+                </mwc-list-item>
+              </mwc-list>
+            </div>
+          </div>
+        </div>
+
         <mwc-button icon="add" label="Add Entry Def" @click="addEntryDef()"></mwc-button>
       </div>
 
@@ -51,11 +58,13 @@
         @entry-def-changed="emitChanged()"
         style="margin-left: 16px; margin-bottom: 8px"
       >
-        <mwc-icon-button
+        <mwc-button
+          label="Remove Entry Def"
           :disabled="zome.entry_defs.length < 2"
-          @click="deleteEntryDef()"
           icon="delete"
-        ></mwc-icon-button>
+          @click="deleteEntryDef()"
+          style="margin: 8px; --mdc-theme-primary: black"
+        ></mwc-button>
       </DefineEntry>
       <div v-else style="display: flex; flex: 1; align-items: center; justify-content: center">
         <span style="opacity: 0.6">Select an entry def </span>

@@ -18,19 +18,24 @@
 
       <span style="font-size: 18px; margin: 16px">DNAs</span>
       <span style="width: 100%; height: 1px; background-color: lightgrey"></span>
-
-      <mwc-list activatable>
-        <mwc-list-item
-          graphic="icon"
-          v-for="(dna, dnaIndex) of happ.dnas"
-          :key="dnaIndex"
-          :activated="selectedDnaIndex === dnaIndex"
-          @click="selectedDnaIndex = dnaIndex"
-        >
-          <mwc-icon slot="graphic">hive</mwc-icon>
-          {{ dna.name }}
-        </mwc-list-item>
-      </mwc-list>
+      <div style="position: relative; display: flex; flex: 1">
+        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0">
+          <div style="max-height: 100%; overflow-y: auto">
+            <mwc-list activatable>
+              <mwc-list-item
+                graphic="icon"
+                v-for="(dna, dnaIndex) of happ.dnas"
+                :key="dnaIndex"
+                :activated="selectedDnaIndex === dnaIndex"
+                @click="selectedDnaIndex = dnaIndex"
+              >
+                <mwc-icon slot="graphic">hive</mwc-icon>
+                {{ dna.name }}
+              </mwc-list-item>
+            </mwc-list>
+          </div>
+        </div>
+      </div>
       <mwc-button icon="add" label="Add Dna" @click="addDna()"></mwc-button>
     </div>
 
@@ -43,7 +48,13 @@
       :otherDnasNames="otherDnasNames"
       @dna-changed="emitChanged()"
     >
-      <mwc-icon-button :disabled="happ.dnas.length < 2" icon="delete" @click="deleteDna()"></mwc-icon-button>
+      <mwc-button
+        label="Remove DNA"
+        :disabled="happ.dnas.length < 2"
+        icon="delete"
+        @click="deleteDna()"
+        style="margin: 8px; --mdc-theme-primary: black"
+      ></mwc-button>
     </DefineDna>
   </div>
 </template>

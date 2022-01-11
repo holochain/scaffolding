@@ -44,9 +44,15 @@
       :zome="selectedZome"
       :otherZomesNames="otherZomesNames"
       @zome-changed="emitChanged()"
-      style="margin-top: 8px;"
+      style="margin-top: 8px"
     >
-      <mwc-icon-button :disabled="dna.zomes.length < 2" icon="delete" @click="deleteZome()"></mwc-icon-button>
+      <mwc-button
+        label="Remove Zome"
+        :disabled="dna.zomes.length < 2"
+        icon="delete"
+        @click="deleteZome()"
+        style="margin: 8px; --mdc-theme-primary: black"
+      ></mwc-button>
     </DefineZome>
   </div>
 </template>
