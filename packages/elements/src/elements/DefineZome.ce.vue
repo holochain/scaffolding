@@ -1,27 +1,22 @@
 <template>
   <div style="display: flex; flex-direction: column; flex: 1">
     <div style="display: flex; flex-direction: row">
-      <div style="margin-left: 16px; margin-top: 16px; display: flex; flex-direction: column; flex: 1">
-        <div style="display: flex; flex-direction: row; align-items: center; flex: 1; font-size: 18px">
-          <span>Dna: {{ selectedDna.name }}</span
-          ><span style="font-size: 16px; margin: 0 8px; color: rgba(0, 0, 0, 0.6)">></span
-          ><span> Zome: {{ zome.name }}</span>
-        </div>
-        <mwc-textfield
-          label="Zome Name"
-          style="width: 424px; margin-top: 16px"
-          required
-          autoValidate
-          ref="zome-name"
-          outlined
-          validationMessage="Must not be empty"
-          helper="Has to be unique within the Dna, and snake_case"
-          @focus="zomeValidity($event.target)"
-          @input="setZomeName($event.target)"
-        ></mwc-textfield>
-      </div>
+      <mwc-textfield
+        label="Zome Name"
+        style="width: 424px; margin: 16px"
+        required
+        autoValidate
+        ref="zome-name"
+        outlined
+        validationMessage="Must not be empty"
+        helper="Has to be unique within the Dna, and snake_case"
+        @focus="zomeValidity($event.target)"
+        @input="setZomeName($event.target)"
+      ></mwc-textfield>
 
-      <mwc-icon-button :disabled="selectedDna.zomes.length < 2" icon="delete" @click="deleteZome()"></mwc-icon-button>
+      <span style="flex: 1"></span>
+
+      <slot></slot>
     </div>
 
     <div style="display: flex; flex-direction: row">
@@ -31,19 +26,17 @@
     <div style="display: flex; flex-direction: row; flex: 1">
       <div style="display: flex; flex-direction: column">
         <mwc-list activatable>
-          <div
-            style="display: flex; flex-direction: row; flex: 1"
+          <mwc-list-item
             v-for="(entryDef, entryDefIndex) of zome.entry_defs"
             :key="entryDefIndex"
+            graphic="icon"
+            :activated="selectedEntryDefIndex === entryDefIndex"
+            @click="selectedEntryDefIndex = entryDefIndex"
+            style="flex: 1"
           >
-            <mwc-list-item
-              :activated="selectedEntryDefIndex === entryDefIndex"
-              @click="selectedEntryDefIndex = entryDefIndex"
-              style="flex: 1"
-            >
-              {{ entryDef.name }}
-            </mwc-list-item>
-          </div>
+            <mwc-icon slot="graphic">sticky_note_2</mwc-icon>
+            {{ entryDef.name }}
+          </mwc-list-item>
         </mwc-list>
         <mwc-button icon="add" label="Add Entry Def" @click="addEntryDef()"></mwc-button>
       </div>
@@ -52,13 +45,18 @@
 
       <DefineEntry
         v-if="selectedEntryDef"
-        :key="key"
-        :happ="happ"
-        :dnaIndex="dnaIndex"
-        :zomeIndex="zomeIndex"
-        :entryDefIndex="selectedEntryDefIndex"
-        @entry-def-deleted="onEntryDefDeleted(selectedEntryDefIndex)"
-      ></DefineEntry>
+        :key="selectedEntryDefIndex"
+        :entryDef="selectedEntryDef"
+        :otherEntryDefsNames="otherEntryDefsNames"
+        @entry-def-changed="emitChanged()"
+        style="margin-left: 16px; margin-bottom: 8px"
+      >
+        <mwc-icon-button
+          :disabled="zome.entry_defs.length < 2"
+          @click="deleteEntryDef()"
+          icon="delete"
+        ></mwc-icon-button>
+      </DefineEntry>
       <div v-else style="display: flex; flex: 1; align-items: center; justify-content: center">
         <span style="opacity: 0.6">Select an entry def </span>
       </div>
@@ -70,8 +68,8 @@
 import { defineComponent, PropType } from 'vue';
 import type { TextField } from '@material/mwc-textfield';
 import { isSnakeCase } from '@holochain/rad-generators';
-import { HappDefinition, ZomeDefinition } from '@holochain/rad-definitions';
-import { newEntryDef } from '../utils';
+import { ZomeDefinition } from '@holochain/rad-definitions';
+import { newEntryDef, newZomeDef } from '../utils';
 import DefineEntry from './DefineEntry.ce.vue';
 
 export default defineComponent({
@@ -82,56 +80,55 @@ export default defineComponent({
   },
 
   props: {
-    happ: { type: Object as PropType<HappDefinition>, required: true },
-    dnaIndex: { type: Number, required: true },
-    zomeIndex: { type: Number, required: true },
+    zome: { type: Object as PropType<ZomeDefinition>, required: false, default: newZomeDef() },
+    otherZomesNames: { type: Array, required: false, default: [] },
   },
-  data(): { entryDefCount: number; key: number; selectedEntryDefIndex: number } {
+  data(): { entryDefCount: number; selectedEntryDefIndex: number } {
     return {
-      key: 0,
       entryDefCount: 1,
       selectedEntryDefIndex: -1,
     };
   },
-  mounted() {
-    const field = this.$refs['zome-name'] as TextField;
-    field.value = this.zome.name;
-  },
-  watch: {
-    dnaIndex: function () {
-      const field = this.$refs['zome-name'] as TextField;
-      field.value = this.zome.name;
-    },
-    zomeIndex: function () {
-      const field = this.$refs['zome-name'] as TextField;
-      field.value = this.zome.name;
-    },
-  },
   computed: {
+    otherEntryDefsNames() {
+      return this.zome.entry_defs
+        .filter((_, index) => index !== this.selectedEntryDefIndex)
+        .map(entryDef => entryDef.name);
+    },
     selectedEntryDef() {
       if (this.selectedEntryDefIndex === -1) return undefined;
       else return this.zome.entry_defs[this.selectedEntryDefIndex];
     },
-    otherZomesNames() {
-      return this.selectedDna?.zomes.filter((_, index) => index !== this.zomeIndex).map(zome => zome.name);
-    },
-    selectedDna() {
-      return this.happ.dnas[this.dnaIndex];
-    },
+  },
+  mounted() {
+    this.updateZomeName();
+  },
+  watch: {
     zome() {
-      return this.selectedDna.zomes[this.zomeIndex];
+      this.updateZomeName();
+      this.selectedEntryDefIndex = -1;
     },
   },
   methods: {
+    updateZomeName() {
+      // setTimeout is a workaround for the mwc-textfield label bug
+      setTimeout(() => {
+        const field = this.$refs['zome-name'] as TextField;
+        field.value = this.zome.name;
+      }, 1);
+    },
     addEntryDef() {
       const name = `entry_def_${this.entryDefCount++}`;
       this.zome.entry_defs.push(newEntryDef(name));
-      this.key++;
+      this.selectedEntryDefIndex = this.zome.entry_defs.length - 1;
       this.emitChanged();
     },
-    onEntryDefDeleted(entryDefIndex: number) {
-      this.selectedEntryDefIndex = -1;
-      this.key++;
+    deleteEntryDef() {
+      this.zome.entry_defs.splice(this.selectedEntryDefIndex, 1);
+
+      this.selectedEntryDefIndex--;
+      if (this.selectedEntryDefIndex < 0) this.selectedEntryDefIndex = 0;
+
       this.emitChanged();
     },
     zomeValidity(textfield: TextField) {
@@ -167,10 +164,6 @@ export default defineComponent({
         this.zome.name = textfield.value;
       }
       this.emitChanged();
-    },
-    deleteZome() {
-      this.selectedDna.zomes.splice(this.zomeIndex, 1);
-      this.$emit('zome-deleted');
     },
     emitChanged() {
       this.$forceUpdate();

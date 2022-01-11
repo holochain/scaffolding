@@ -1,47 +1,57 @@
 <template>
-  <div style="display: flex; flex-direction: column; flex: 1">
-    <mwc-card style="display: flex">
+  <div style="display: flex; flex-direction: row; flex: 1">
+    <div style="display: flex; flex-direction: column; box-shadow: rgb(0 0 0 / 23%) 1px 0px 6px">
       <div style="display: flex; flex-direction: column; margin: 16px">
-        <span style="font-size: 18px">hApp: {{ happ.name }}</span>
-        <div style="display: flex; flex-direction: row; margin-top: 16px">
-          <div style="flex: 1">
-            <mwc-textfield
-              label="hApp Name"
-              style="width: 424px"
-              required
-              autoValidate
-              outlined
-              validationMessage="Must not be empty"
-              @input="setHappName($event.target)"
-            ></mwc-textfield>
-          </div>
-          <slot></slot>
-        </div>
+        <span style="font-size: 20px">hApp: {{ happ.name }}</span>
+        <mwc-textfield
+          label="hApp Name"
+          style="width: 424px; margin-top: 24px; margin-bottom: 16px"
+          required
+          autoValidate
+          ref="happ-name"
+          outlined
+          validationMessage="Must not be empty"
+          @input="setHappName($event.target)"
+        ></mwc-textfield>
+        <slot></slot>
       </div>
-    </mwc-card>
 
-    <div style="display: flex; flex-direction: row; align-items: center; margin-top: 16px">
-      <span style="margin-left: 16px; flex: 1; font-size: 18px">Dnas</span>
+      <span style="font-size: 18px; margin: 16px">DNAs</span>
+      <span style="width: 100%; height: 1px; background-color: lightgrey"></span>
+
+      <mwc-list activatable>
+        <mwc-list-item
+          graphic="icon"
+          v-for="(dna, dnaIndex) of happ.dnas"
+          :key="dnaIndex"
+          :activated="selectedDnaIndex === dnaIndex"
+          @click="selectedDnaIndex = dnaIndex"
+        >
+          <mwc-icon slot="graphic">hive</mwc-icon>
+          {{ dna.name }}
+        </mwc-list-item>
+      </mwc-list>
       <mwc-button icon="add" label="Add Dna" @click="addDna()"></mwc-button>
     </div>
+
+    <span style="height: 100%; width: 1px; background-color: lightgrey"></span>
+
     <DefineDna
-      v-for="(dna, dnaIndex) of happ.dnas"
-      :key="key + dnaIndex"
-      style="margin-top: 16px"
-      :happ="happ"
-      :dnaIndex="dnaIndex"
-      :selectedZomeIndex="dnaIndex === selectedDnaIndex ? selectedZomeIndex : undefined"
-      @zome-selected="$emit('zome-selected', $event)"
+      v-if="selectedDna"
+      :dna="selectedDna"
+      :key="selectedDnaIndex"
+      :otherDnasNames="otherDnasNames"
       @dna-changed="emitChanged()"
-      @dna-deleted="onDnaDeleted(dnaIndex)"
-    ></DefineDna>
+    >
+      <mwc-icon-button :disabled="happ.dnas.length < 2" icon="delete" @click="deleteDna()"></mwc-icon-button>
+    </DefineDna>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 import { HappDefinition } from '@holochain/rad-definitions';
-import { newDna } from '../utils';
+import { newDnaDef, newHappDef } from '../utils';
 import DefineDna from './DefineDna.ce.vue';
 import { TextField } from '@material/mwc-textfield';
 
@@ -52,32 +62,32 @@ export default defineComponent({
   props: {
     happ: {
       type: Object as PropType<HappDefinition>,
-      required: true,
-    },
-    selectedDnaIndex: {
-      type: Number,
       required: false,
-    },
-    selectedZomeIndex: {
-      type: Number,
-      required: false,
+      default: newHappDef(),
     },
   },
-  data(): { key: number } {
+  data(): { dnaCount: number; selectedDnaIndex: number } {
     return {
-      key: 0,
+      dnaCount: 1,
+      selectedDnaIndex: 0,
     };
   },
-  methods: {
-    newDnaName() {
-      for (let i = 0; i < this.happ.dnas.length + 1; i++) {
-        const name = `dna_${i}`;
-        if (!this.happ.dnas.find(dna => dna.name === name)) {
-          return name;
-        }
-      }
-      return `dna_${this.happ.dnas.length + 1}`;
+  mounted() {
+    setTimeout(() => {
+      const field = this.$refs['happ-name'] as TextField;
+      field.value = this.happ.name;
+    }, 1);
+  },
+  computed: {
+    selectedDna() {
+      if (this.selectedDnaIndex < 0) return undefined;
+      return this.happ.dnas[this.selectedDnaIndex];
     },
+    otherDnasNames() {
+      return this.happ.dnas.filter((_, index) => index !== this.selectedDnaIndex).map(dna => dna.name);
+    },
+  },
+  methods: {
     setHappName(textfield: TextField) {
       if (textfield.validity.valid) {
         this.happ.name = textfield.value;
@@ -85,15 +95,18 @@ export default defineComponent({
       this.emitChanged();
     },
     addDna() {
-      const name = this.newDnaName();
-      this.happ.dnas.push(newDna(name));
+      const name = `dna_${this.dnaCount++}`;
 
-      this.key += 100;
+      this.happ.dnas.push(newDnaDef(name));
+      this.selectedDnaIndex = this.happ.dnas.length - 1;
+
       this.emitChanged();
     },
-    onDnaDeleted(dnaIndex: number) {
-      this.key += 100;
-      this.$emit('dna-deleted', dnaIndex);
+    deleteDna() {
+      this.happ.dnas.splice(this.selectedDnaIndex, 1);
+      this.selectedDnaIndex--;
+      if (this.selectedDnaIndex < 0) this.selectedDnaIndex = 0;
+      this.emitChanged();
     },
     emitChanged() {
       this.$forceUpdate();

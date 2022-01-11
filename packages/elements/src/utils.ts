@@ -1,4 +1,4 @@
-import { DnaDefinition, EntryDefinition, ZomeDefinition } from '@holochain/rad-definitions';
+import { DnaDefinition, EntryDefinition, HappDefinition, ZomeDefinition } from '@holochain/rad-definitions';
 
 export function newEntryDef(name: string = 'entry_def_0'): EntryDefinition {
   return {
@@ -9,21 +9,28 @@ export function newEntryDef(name: string = 'entry_def_0'): EntryDefinition {
     name,
     sample: {
       foo: 'hi',
-      bar: 3
+      bar: 3,
     },
   };
 }
 
-export function newZome(name: string = 'zome_0'): ZomeDefinition {
+export function newZomeDef(name: string = 'zome_0'): ZomeDefinition {
   return {
     entry_defs: [newEntryDef()],
     name,
   };
 }
 
-export function newDna(name: string = 'dna_0'): DnaDefinition {
+export function newDnaDef(name: string = 'dna_0'): DnaDefinition {
   return {
     name,
-    zomes: [newZome()],
+    zomes: [newZomeDef()],
+  };
+}
+
+export function newHappDef(): HappDefinition {
+  return {
+    name: 'my-app',
+    dnas: [newDnaDef()],
   };
 }

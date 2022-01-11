@@ -11,14 +11,21 @@
       />
       <div slot="title">Scaffold New hApp</div>
       <mwc-button
+        icon="info"
+        label="Core Concepts"
+        slot="actionItems"
+        style="--mdc-theme-primary: white"
+        @click="open('https://developer.holochain.org/concepts/2_application_architecture/#happ')"
+      >
+      </mwc-button>
+      <mwc-button
         icon="bug_report"
         label="Report Issue"
         slot="actionItems"
-        style="--mdc-theme-primary: white"
+        style="--mdc-theme-primary: white; margin-left: 8px"
         @click="open('https://github.com/holochain/scaffolding/issues')"
       >
       </mwc-button>
-
       <div style="width: 100vw; height: 100%; flex: 1; display: flex">
         <Scaffold></Scaffold>
       </div>

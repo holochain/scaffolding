@@ -22,8 +22,8 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { WebHappDefinition } from '@holochain/rad-definitions';
-import { newDna } from '@holochain/rad-elements';
 import { UiTemplates } from '../types';
+import { newHappDef } from '@holochain/rad-elements/src/utils';
 
 export default defineComponent({
   name: 'AppDefinitionBuilder',
@@ -35,10 +35,7 @@ export default defineComponent({
     return {
       UiTemplates,
       happ: {
-        happ: {
-          name: 'my-app',
-          dnas: [newDna()],
-        },
+        happ: newHappDef(),
         uiTemplate: 'svelte',
       },
     };
