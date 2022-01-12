@@ -16,7 +16,7 @@ export default (tryoramaVersion: string) =>
     "lodash-es": "^4.17.21",
     "path": "^0.12.7",
     "tape": "^5.2.2",
-    "ts-node": "^9.1.1",
+    "ts-node": "^10.4.0",
     "typescript": "4.3.5",
     "uuidv4": "^6.2.11"
   },
