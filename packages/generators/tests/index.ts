@@ -55,7 +55,7 @@ test('generate a full blown happ', async t => {
           name: 'hehe2',
           zomes: [
             {
-              name: 'hihi3',
+              name: 'hihi',
               entry_defs: [
                 {
                   name: 'sample_entry',

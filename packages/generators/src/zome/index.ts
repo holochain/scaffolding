@@ -1,4 +1,4 @@
-import { ZomeDefinition } from '@holochain/rad-definitions';
+import { HappDefinition, ZomeDefinition } from '@holochain/rad-definitions';
 
 import { FileChanges, FileChangesType } from '../file-changes';
 
@@ -49,6 +49,31 @@ export async function generateZomeCode(zomeDefinition: ZomeDefinition): Promise<
   ];
 }
 
-export async function generateZome(zome: ZomeDefinition): Promise<FileChanges[]> {
-  return [...generateZomeCargoToml(zome.name, '<AUTHOR>'), ...(await generateZomeCode(zome))];
+export async function generateZome(happ: HappDefinition, dnaIndex: number, zomeIndex: number): Promise<FileChanges[]> {
+  const crateName = getCrateName(happ, dnaIndex, zomeIndex);
+  const zome = happ.dnas[dnaIndex].zomes[zomeIndex];
+
+  return [...generateZomeCargoToml(crateName, '<AUTHOR>'), ...(await generateZomeCode(zome))];
+}
+
+export function getCrateName(happ: HappDefinition, dnaIndex: number, zomeIndex: number): string {
+  let thereIsAnotherZomeInAnotherDnaWithTheSameName = false;
+  const zome = happ.dnas[dnaIndex].zomes[zomeIndex];
+
+  for (let i = 0; i < happ.dnas.length; i++) {
+    const dna = happ.dnas[i];
+    for (let j = 0; j < dna.zomes.length; j++) {
+      if (i !== dnaIndex || j !== zomeIndex) {
+        if (dna.zomes[j].name === zome.name) {
+          thereIsAnotherZomeInAnotherDnaWithTheSameName = true;
+        }
+      }
+    }
+  }
+
+  if (thereIsAnotherZomeInAnotherDnaWithTheSameName) {
+    return `${happ.dnas[dnaIndex].name}_${zome.name}`;
+  } else {
+    return zome.name;
+  }
 }

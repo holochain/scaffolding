@@ -1,3 +1,5 @@
+import { ZomeDefinition } from '@holochain/rad-definitions';
+import { HappDefinition } from '@holochain/rad-definitions';
 import { DnaDefinition } from '@holochain/rad-definitions';
 
 import { FileChanges, FileChangesType } from '../file-changes';
@@ -5,23 +7,24 @@ import { generateZome } from '../zome';
 
 import dnaYaml from './dna.yaml';
 
-export function generateDnaYaml(dna: DnaDefinition, pathToBase: string): FileChanges[] {
+export function generateDnaYaml(happ: HappDefinition, dnaIndex: number, pathToBase: string): FileChanges[] {
   return [
     {
       type: FileChangesType.Create,
       fileName: 'dna.yaml',
-      content: dnaYaml(dna, `${pathToBase}../`),
+      content: dnaYaml(happ, dnaIndex, `${pathToBase}../`),
     },
   ];
 }
 
-export async function generateDna(dna: DnaDefinition, pathToBase: string): Promise<FileChanges[]> {
+export async function generateDna(happ: HappDefinition, dnaIndex: number, pathToBase: string): Promise<FileChanges[]> {
+  const dna = happ.dnas[dnaIndex];
   const promises = dna.zomes.map(
-    async zome =>
+    async (zome: ZomeDefinition, zomeIndex: number) =>
       ({
         type: FileChangesType.InDir,
         dirName: zome.name,
-        changes: await generateZome(zome),
+        changes: await generateZome(happ, dnaIndex, zomeIndex),
       } as FileChanges),
   );
 
@@ -31,7 +34,7 @@ export async function generateDna(dna: DnaDefinition, pathToBase: string): Promi
     {
       type: FileChangesType.InDir,
       dirName: 'workdir',
-      changes: generateDnaYaml(dna, pathToBase),
+      changes: generateDnaYaml(happ, dnaIndex, pathToBase),
     },
     {
       type: FileChangesType.InDir,

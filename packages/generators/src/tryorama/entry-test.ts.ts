@@ -1,22 +1,21 @@
 import { DnaDefinition, EntryDefinition, ZomeDefinition } from '@holochain/rad-definitions';
-import { mergeStrings } from '../utils';
 import toJsonSchema from 'to-json-schema';
 import jsf from 'json-schema-faker';
 jsf.option('alwaysFakeOptionals', true);
 jsf.option('fillProperties', false);
 
-export default (dna: DnaDefinition, zome: ZomeDefinition) => `
+export default (dna: DnaDefinition, zome: ZomeDefinition, entryDef: EntryDefinition) => `
 import { Orchestrator, Player, Cell } from "@holochain/tryorama";
-import { config, installation, sleep } from '../utils';
+import { config, installation, sleep } from '../../utils';
 
 export default (orchestrator: Orchestrator<any>) =>  {
-  ${mergeStrings(zome.entry_defs.filter(e => e.create).map(entry_def => entryCrudTests(dna, zome, entry_def)))}
+  ${entryCrudTests(dna, zome, entryDef)}
 }
 
 `;
 
 export const entryCrudTests = (dna: DnaDefinition, zome: ZomeDefinition, entryDef: EntryDefinition) => `
-  orchestrator.registerScenario("${zome.name} CRUD tests", async (s, t) => {
+  orchestrator.registerScenario("${entryDef.name} CRUD tests", async (s, t) => {
     // Declare two players using the previously specified config, nicknaming them "alice" and "bob"
     // note that the first argument to players is just an array conductor configs that that will
     // be used to spin up the conductor processes which are returned in a matching array.

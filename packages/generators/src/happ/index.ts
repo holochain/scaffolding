@@ -1,4 +1,4 @@
-import { HappDefinition } from '@holochain/rad-definitions';
+import { HappDefinition, DnaDefinition } from '@holochain/rad-definitions';
 
 import { FileChanges, FileChangesType } from '../file-changes';
 import { generateDna } from '../dna';
@@ -76,16 +76,16 @@ async function generateDnas(happ: HappDefinition): Promise<FileChanges[]> {
       {
         type: FileChangesType.InDir,
         dirName: 'dna',
-        changes: await generateDna(happ.dnas[0], '../'),
+        changes: await generateDna(happ, 0, '../'),
       },
     ];
 
   const promises = happ.dnas.map(
-    async dna =>
+    async (dna: DnaDefinition, dnaIndex: number) =>
       ({
         type: FileChangesType.InDir,
         dirName: dna.name,
-        changes: await generateDna(dna, '../../'),
+        changes: await generateDna(happ, dnaIndex, '../../'),
       } as FileChanges),
   );
 
