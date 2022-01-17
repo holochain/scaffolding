@@ -2,7 +2,7 @@
 
 let
   workspace = pkgs.yarn2nix-moretea.mkYarnWorkspace {
-    src = ./.;
+    src = pkgs.nix-gitignore.gitignoreSource [] ./.;
     name = "hc-scaffold";
 
     buildPhase = ''
