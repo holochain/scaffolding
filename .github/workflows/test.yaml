@@ -21,6 +21,10 @@ jobs:
         with:
           name: holochain-ci
 
+      - name: Build Nix package
+        run: |
+          nix build -f .
+
       - name: Install
         run: |
           nix-shell shell.nix \
