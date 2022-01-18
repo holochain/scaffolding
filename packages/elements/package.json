@@ -9,6 +9,9 @@
   },
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "dependencies": {
     "@holochain/rad-definitions": "0.0.1",
     "@holochain/rad-generators": "0.0.1",
