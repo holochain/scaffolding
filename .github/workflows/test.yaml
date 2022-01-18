@@ -21,6 +21,16 @@ jobs:
         with:
           name: holochain-ci
 
+      - name: Install
+        run: |
+          nix-shell shell.nix \
+            --keep NIX_PATH \
+            --pure \
+            --run "yarn install"
+
       - name: Test
         run: |
-          nix-shell shell.nix --run "yarn test"
+          nix-shell shell.nix \
+            --keep NIX_PATH \
+            --pure \
+            --run "yarn test"

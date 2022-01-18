@@ -9,5 +9,6 @@ in nixpkgs.mkShell {
     nodejs-16_x
 
     niv
+    nix
   ];
 }
