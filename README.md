@@ -4,6 +4,14 @@ RAD tools to enable quick scaffolding of Holochain application.
 
 # Usage
 
+Enter nix-shell:
+
+```bash
+nix-shell
+```
+
+Then initialize Holochain:
+
 ```bash
 npm init @holochain
 ```
