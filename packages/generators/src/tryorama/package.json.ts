@@ -5,7 +5,7 @@ export default (tryoramaVersion: string) =>
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "TRYORAMA_LOG_LEVEL=info RUST_BACKTRACE=1 RUST_LOG=holochain::core::ribosome::host_fn::debug=debug TRYORAMA_HOLOCHAIN_PATH=\\"holochain\\" node --loader ts-node/esm --experimental-specifier-resolution=node src/index.ts | tap-diff"
+    "test": "set -o pipefail && TRYORAMA_LOG_LEVEL=info RUST_BACKTRACE=1 RUST_LOG=holochain::core::ribosome::host_fn::debug=debug TRYORAMA_HOLOCHAIN_PATH=\\"holochain\\" node --loader ts-node/esm --experimental-specifier-resolution=node src/index.ts | tap-diff"
   },
   "author": "",
   "license": "CAL-1.0",
