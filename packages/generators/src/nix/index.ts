@@ -7,7 +7,7 @@ export function generateNixFile(): FileChanges[] {
     {
       type: FileChangesType.Create,
       fileName: 'default.nix',
-      content: defaultNix('d15633710a8d4349dc0ff03b7b47ad01eb9f2433'),
+      content: defaultNix('1cb431ac2d30d6f44dbcb5a40520f7328ae49ec1'),
     },
   ];
 }

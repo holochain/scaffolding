@@ -8,7 +8,7 @@ import libRs from './lib.rs';
 
 export * from './entry';
 
-export function generateZomeCargoToml(zomeName: string, author: string, hdkVersion = '0.0.118'): FileChanges[] {
+export function generateZomeCargoToml(zomeName: string, author: string, hdkVersion = '0.0.120'): FileChanges[] {
   return [
     {
       type: FileChangesType.Create,
