@@ -1,5 +1,0 @@
-{
-  "watch": ["./dist/"],
-  "ignore": ["**/*.map.js"],
-  "exec": "node ./dist/app.js"
-}

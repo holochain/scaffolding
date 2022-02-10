@@ -1,10 +1,10 @@
 import test from 'tape';
-import { webHapp } from '../dist';
+import { webHapp, WebFramework } from '../dist';
 import path from 'path';
 import { applyPatch } from '@patcher/fs';
 
 import { fileURLToPath } from 'url';
-import { PatcherNodeType } from '@patcher/types';
+
 // @ts-ignore
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -73,10 +73,7 @@ test('generate a full blown happ', async t => {
         },
       ],
     },
-    {
-      type: PatcherNodeType.Directory,
-      children: {},
-    },
+    WebFramework.Vue,
   );
 
   applyPatch(__dirname + '/.fixture', happChanges);

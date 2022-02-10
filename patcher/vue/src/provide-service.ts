@@ -50,6 +50,7 @@ ${serviceProvided.createFnContent}
         inner: [`{{ ${serviceIdentifier} }}`],
       },
       inject: [{ name: serviceIdentifier, type: serviceProvided.service.type }],
+      imports: serviceProvided.imports,
     },
     `{ ${serviceIdentifier}: ${serviceProvided.service.type} }`,
   );
@@ -74,6 +75,7 @@ ${serviceProvided.createFnContent}
       `import { computed } from 'vue';`,
       `import HelloWorld from './components/HelloWorld.vue';`,
       `import { ${createFnName} } from './services/${serviceIdentifier}';`,
+      ...serviceProvided.imports,
     ],
     subcomponents: ['HelloWorld'],
     onMounted: {
