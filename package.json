@@ -3,13 +3,14 @@
   "private": true,
   "version": "0.0.1",
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "patcher/*"
   ],
   "scripts": {
-    "start": "concurrently -k \"yarn workspace @holochain/rad-definitions run build:watch\" \"yarn workspace @holochain/rad-generators run build:watch\" \"yarn workspace @holochain/rad-elements run build:watch\" \"yarn workspace @holochain/scaffolding-events run build:watch\" \"yarn workspace @holochain/scaffolding-ui run build:watch\" \"yarn workspace @holochain/create run start\"",
+    "start": "concurrently -k \"yarn workspace @holochain/rad-definitions run build:watch\" \"yarn workspace @holochain/rad-patcher run build:watch\" \"yarn workspace @holochain/rad-elements run build:watch\" \"yarn workspace @holochain/scaffolding-events run build:watch\" \"yarn workspace @holochain/scaffolding-ui run build:watch\" \"yarn workspace @holochain/create run start\"",
     "postinstall": "npm run build",
-    "test": "yarn workspace @holochain/rad-generators run test",
-    "build": "yarn workspace @holochain/rad-definitions run build && yarn workspace @holochain/rad-generators run build && yarn workspace @holochain/rad-elements run build && yarn workspace @holochain/scaffolding-events run build && yarn workspace @holochain/scaffolding-ui run build && yarn workspace @holochain/create run build"
+    "test": "yarn workspace @holochain/rad-patcher run test",
+    "build": "yarn workspace @patcher/types run build && yarn workspace @patcher/fs run build && yarn workspace @holochain/rad-definitions run build && yarn workspace @holochain/rad-patcher run build && yarn workspace @holochain/rad-elements run build && yarn workspace @holochain/scaffolding-events run build && yarn workspace @holochain/scaffolding-ui run build && yarn workspace @holochain/create run build"
   },
   "devDependencies": {
     "chalk": "^4.1.2",

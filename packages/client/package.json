@@ -10,16 +10,13 @@
   "scripts": {
     "start": "vue-cli-service serve",
     "lint": "vue-cli-service lint",
-    "build": "npm run setup && rimraf dist && vue-cli-service build --mode development",
-    "build:watch": "vue-cli-service build --watch --no-clean",
-    "setup": "rimraf ./public/templates && mkdir ./public/templates && npm run setup:svelte && npm run setup:lit && npm run setup:vue",
-    "setup:svelte": "cd templates/svelte/ && bestzip ../../public/templates/svelte.zip * .gitignore",
-    "setup:vue": "cd templates/vue/ && bestzip ../../public/templates/vue.zip * .gitignore .browserslistrc .eslintrc.js",
-    "setup:lit": "cd templates/lit/ && bestzip ../../public/templates/lit.zip * .gitignore"
+    "build": "rimraf dist && vue-cli-service build --mode development",
+    "build:watch": "vue-cli-service build --watch --no-clean"
   },
   "dependencies": {
     "@holochain/rad-elements": "^0.0.1",
-    "@holochain/rad-generators": "^0.0.1",
+    "@holochain/rad-patcher": "^0.0.1",
+    "@patcher/vue": "^0.0.1",
     "@holochain/scaffolding-events": "^0.0.1",
     "@justinribeiro/code-block": "^1.0.0",
     "@material/mwc-button": "^0.25.3",

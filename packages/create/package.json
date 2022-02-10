@@ -28,6 +28,7 @@
     "@holochain/scaffolding-events": "0.0.1",
     "@holochain/scaffolding-ui": "0.0.1",
     "@mdi/font": "5.9.55",
+    "@patcher/fs": "0.0.1",
     "@types/body-parser": "^1.19.0",
     "@types/dotenv": "^8.2.0",
     "@types/express": "^4.17.7",
