@@ -84,12 +84,14 @@ npm install</code></pre>
 import { defineComponent } from 'vue';
 import { socket } from '../socket';
 import { ClientEventType } from '@holochain/scaffolding-events';
-import { FileChanges, FileChangesType, generateWebHapp } from '@holochain/rad-generators';
+import { webHapp } from '@holochain/rad-patcher';
 import { HappDefinition } from '@holochain/rad-definitions';
 import AppDefinitionBuilder from './AppDefinitionBuilder.vue';
 import FileNode from './FileNode.vue';
-import { getFirstEntry, getUiTemplate, replaceText } from '../utils';
+import { getFirstEntry } from '../utils';
 import type { Dialog } from '@material/mwc-dialog';
+import { PatcherDirectory, PatcherNodeType, PatcherNode } from '@patcher/types';
+import { generateVueApp } from '@patcher/vue';
 
 export default defineComponent({
   name: 'Scaffold',
@@ -100,14 +102,14 @@ export default defineComponent({
   data(): {
     settingUp: boolean;
     currentDir: string | undefined;
-    fileChanges: FileChanges[] | undefined;
+    happDir: PatcherDirectory | undefined;
     happName: string | undefined;
     selectedPreviewFileContents: string | undefined;
   } {
     return {
       settingUp: false,
       currentDir: undefined,
-      fileChanges: undefined,
+      happDir: undefined,
       happName: undefined,
       selectedPreviewFileContents: undefined,
     };
@@ -118,10 +120,10 @@ export default defineComponent({
   methods: {
     sortedFiles() {
       return (
-        this.fileChanges &&
-        this.fileChanges.sort((fc1: FileChanges, fc2: FileChanges) => {
-          if (fc1.type === 'InDir') return -1;
-          if (fc2.type === 'InDir') return 1;
+        this.happDir &&
+        Object.entries(this.happDir.children).sort(([_, node1]: [string, PatcherNode], [__, node2]: [string, PatcherNode]) => {
+          if (node1.type === PatcherNodeType.Directory) return -1;
+          if (node2.type === PatcherNodeType.Directory) return 1;
           return -1;
         })
       );
@@ -134,17 +136,20 @@ export default defineComponent({
       socket.emit(ClientEventType.Exit);
     },
     scaffoldApp(): void {
-      socket.emit(ClientEventType.ApplyChanges, [
-        {
-          type: FileChangesType.InDir,
-          dirName: this.happName,
-          changes: this.fileChanges,
-        },
-      ]);
+      socket.emit(ClientEventType.ApplyPatch, {
+        happ: this.happDir,
+        happName: this.happName,
+      });
       (this.$refs.helpdialog as Dialog).show();
     },
     async generateFileChanges({ happ, uiTemplate }: { happ: HappDefinition; uiTemplate: string }) {
       const firstCreateCall = getFirstEntry(happ);
+
+      let dir = undefined;
+      if (uiTemplate === 'Vue') {
+        dir = generateVueApp();
+        
+      }
 
       const toReplace: any = {
         installedAppId: happ.name,
@@ -159,9 +164,7 @@ export default defineComponent({
         toReplace['entryDefName'] = firstCreateCall.entryDefName;
       }
 
-      const uiTemplateChanges = await getUiTemplate(uiTemplate, text => replaceText(text, toReplace));
-
-      this.fileChanges = await generateWebHapp(happ, uiTemplateChanges);
+      this.happDir = await webHapp(happ, dir as PatcherDirectory);
       this.happName = happ.name;
       (this.$refs.dialog as Dialog).show();
     },

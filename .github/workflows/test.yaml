@@ -9,23 +9,32 @@ on:
 
 jobs:
   testbuild:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: setup node
-        uses: actions/setup-node@v1
-        with:
-          node-version: 12
 
-      - uses: cachix/install-nix-action@v12
+      - uses: cachix/install-nix-action@v15
         with:
-          nix_path: nixpkgs=channel:nixos-unstable
+          nix_path: nixpkgs=channel:nixos-21.11
+
+      - uses: cachix/cachix-action@v10
+        with:
+          name: holochain-ci
+
+      - name: Build Nix package
+        run: |
+          nix build -f .
 
       - name: Install
         run: |
-          nix-env -iA cachix -f https://cachix.org/api/v1/install
-          cachix use holochain-ci
-          nix-shell shell.nix --run "npm i -g yarn@1.22"
-          nix-shell shell.nix --run "yarn test"
+          nix-shell shell.nix \
+            --keep NIX_PATH \
+            --pure \
+            --run "yarn install"
+
       - name: Test
-        run: nix-shell shell.nix --run "yarn test"
+        run: |
+          nix-shell shell.nix \
+            --keep NIX_PATH \
+            --pure \
+            --run "yarn test"

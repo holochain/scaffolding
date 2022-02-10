@@ -5,9 +5,10 @@ import bodyParser from 'body-parser';
 import open from 'open';
 import http from 'http';
 import { Server } from 'socket.io';
+import fs from 'fs';
 
 import { ClientEventType } from '@holochain/scaffolding-events';
-import { applyGeneratedChanges } from './events/apply-changes';
+import { applyPatch } from '@patcher/fs';
 import { automaticSetup } from './events/automatic-setup';
 
 export async function launchApp() {
@@ -42,7 +43,12 @@ export async function launchApp() {
   });
 
   io.on('connection', socket => {
-    socket.on(ClientEventType.ApplyChanges, changes => applyGeneratedChanges(process.cwd(), changes));
+    socket.on(ClientEventType.ApplyPatch, ({ happ, happName }) => {
+      const dir = `${process.cwd()}/${happName}`;
+      fs.mkdirSync(dir);
+
+      applyPatch(dir, happ);
+    });
     socket.on(ClientEventType.ReadDir, callback => callback({ dirPath: process.cwd() }));
     socket.on(ClientEventType.AutomaticSetup, appName => automaticSetup(appName));
     socket.on(ClientEventType.Exit, () => process.exit());

@@ -62,7 +62,7 @@ import { defineComponent, PropType } from 'vue';
 import { DnaDefinition, HappDefinition } from '@holochain/rad-definitions';
 import { newDnaDef, newZomeDef } from '../utils';
 import { TextField } from '@material/mwc-textfield';
-import { isSnakeCase } from '@holochain/rad-generators';
+import { isSnakeCase } from '@holochain/rad-patcher';
 import DefineZome from './DefineZome.ce.vue';
 
 export default defineComponent({

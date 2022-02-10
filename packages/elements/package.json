@@ -9,9 +9,12 @@
   },
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "dependencies": {
     "@holochain/rad-definitions": "0.0.1",
-    "@holochain/rad-generators": "0.0.1",
+    "@holochain/rad-patcher": "0.0.1",
     "@material/mwc-button": "^0.25.3",
     "@material/mwc-checkbox": "^0.25.3",
     "@material/mwc-dialog": "^0.25.3",

@@ -11,3 +11,7 @@ export interface EntryDefinition {
   delete: boolean;
   sample: any;
 }
+
+export interface FieldDefinition {}
+
+export const hdkTypes = ['AgentPubKeyB64', 'EntryHashB64', 'HeaderHashB64'];
