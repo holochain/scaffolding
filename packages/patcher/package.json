@@ -17,6 +17,7 @@
   "dependencies": {
     "@holochain/rad-definitions": "0.0.1",
     "@patcher/types": "0.0.1",
+    "@patcher/vue": "0.0.1",
     "json-schema-faker": "^0.5.0-rcv.40",
     "lodash-es": "^4.17.21",
     "to-json-schema": "^0.2.5"

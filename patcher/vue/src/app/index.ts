@@ -1,7 +1,6 @@
 import { PatcherNodeType, PatcherDirectory } from '@patcher/types'; 
 
 import { gitignore } from './gitignore';
-import vscode from './vscode';
 import { readmeMd } from './readmeMd';
 import { indexHtml } from './indexHtml';
 import { packageJson } from './packageJson';
@@ -14,7 +13,6 @@ export default (): PatcherDirectory => ({
   type: PatcherNodeType.Directory,
   children: {
   '.gitignore': gitignore(),
-  '.vscode': vscode(),
   'README.md': readmeMd(),
   'index.html': indexHtml(),
   'package.json': packageJson(),

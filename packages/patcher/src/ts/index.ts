@@ -24,7 +24,7 @@ export async function generateTsTypesForDna(dna: DnaDefinition): Promise<Patcher
       type: PatcherNodeType.File,
       content: await tsTypesForZome(zome),
     };
-    files[zome.name] = file;
+    files[`${zome.name}.ts`] = file;
   }
 
   return {

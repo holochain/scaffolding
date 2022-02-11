@@ -4,14 +4,9 @@ import { happ } from '../happ';
 import { PatcherDirectory } from '@patcher/types';
 
 import { webHappYaml } from './web-happ.yaml';
-import { generateTsTypes } from '../ts';
+import { webApp, WebFramework } from '../web';
 
-export async function webHapp(happDef: HappDefinition, uiDir: PatcherDirectory): Promise<PatcherDirectory> {
-  const src = uiDir.children['src'] as PatcherDirectory;
-  if (src) {
-    src.children['types.ts'] = await generateTsTypes(happDef);
-  }
-
+export async function webHapp(happDef: HappDefinition, webFramework: WebFramework): Promise<PatcherDirectory> {
   const happDir = await happ(happDef);
 
   (happDir.children['workdir'] as PatcherDirectory).children['web-happ.yaml'] = webHappYaml({
@@ -20,7 +15,7 @@ export async function webHapp(happDef: HappDefinition, uiDir: PatcherDirectory):
     happBundlePath: `./${happDef.name}.happ`,
   });
 
-  happDir.children['ui'] = uiDir;
+  happDir.children['ui'] = await webApp(happDef, webFramework);
 
   return happDir;
 }

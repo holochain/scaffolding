@@ -84,7 +84,7 @@ npm install</code></pre>
 import { defineComponent } from 'vue';
 import { socket } from '../socket';
 import { ClientEventType } from '@holochain/scaffolding-events';
-import { webHapp } from '@holochain/rad-patcher';
+import { webHapp, WebFramework } from '@holochain/rad-patcher';
 import { HappDefinition } from '@holochain/rad-definitions';
 import AppDefinitionBuilder from './AppDefinitionBuilder.vue';
 import FileNode from './FileNode.vue';
@@ -145,11 +145,6 @@ export default defineComponent({
     async generateFileChanges({ happ, uiTemplate }: { happ: HappDefinition; uiTemplate: string }) {
       const firstCreateCall = getFirstEntry(happ);
 
-      let dir = undefined;
-      if (uiTemplate === 'Vue') {
-        dir = generateVueApp();
-        
-      }
 
       const toReplace: any = {
         installedAppId: happ.name,
@@ -164,7 +159,7 @@ export default defineComponent({
         toReplace['entryDefName'] = firstCreateCall.entryDefName;
       }
 
-      this.happDir = await webHapp(happ, dir as PatcherDirectory);
+      this.happDir = await webHapp(happ, WebFramework.Vue);
       this.happName = happ.name;
       (this.$refs.dialog as Dialog).show();
     },
