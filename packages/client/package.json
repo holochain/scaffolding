@@ -5,7 +5,7 @@
   "description": "UI client for @holochain/create",
   "author": "guillem.cordoba@gmail.com",
   "files": [
-    "dist/**/*"
+    "dist"
   ],
   "scripts": {
     "start": "vue-cli-service serve",
