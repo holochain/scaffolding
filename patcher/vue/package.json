@@ -18,7 +18,6 @@
     "@patcher/web-apps": "0.0.1"
   },
   "devDependencies": {
-    "@holochain/rad-patcher": "0.0.1",
     "@patcher/fs": "0.0.1",
     "rimraf": "^3.0.2",
     "tape": "^5.5.0",
