@@ -11,6 +11,5 @@
     "allowSyntheticDefaultImports": true,
     "sourceMap": true
   },
-  "files": [],
-  "references": [{ "path": "packages/client" }, { "path": "packages/server" }, { "path": "packages/generators" }]
+  "files": []
 }

@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "target": "es2015",
     "module": "esnext",
     "sourceMap": true,
     "baseUrl": "src",
@@ -8,7 +9,8 @@
     "incremental": true,
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
-    "outDir": "dist"
+    "outDir": "dist",
+    "types": ["node"]
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules/**/*", "dist", "tests"]
