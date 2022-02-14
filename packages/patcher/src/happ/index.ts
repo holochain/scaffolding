@@ -1,4 +1,4 @@
-import { HappDefinition, DnaDefinition } from '@holochain/rad-definitions';
+import { HappDefinition, DnaDefinition } from '@holochain-scaffolding/definitions';
 
 import { dna } from '../dna';
 import { defaultNix } from '../nix/default.nix';

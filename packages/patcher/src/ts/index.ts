@@ -1,4 +1,4 @@
-import { DnaDefinition, HappDefinition } from '@holochain/rad-definitions';
+import { DnaDefinition, HappDefinition } from '@holochain-scaffolding/definitions';
 import { PatcherDirectory, PatcherFile, PatcherNodeType } from '@patcher/types';
 
 import { tsTypesForZome } from './types';

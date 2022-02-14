@@ -1,5 +1,5 @@
 {
-  "name": "@holochain/rad-patcher",
+  "name": "@holochain-scaffolding/patcher",
   "version": "0.0.1",
   "description": "Common types for the client and the server to communicate with each other",
   "author": "guillem.cordoba@gmail.com",
@@ -15,7 +15,7 @@
     "generate:fixture": "node --loader ts-node/esm --experimental-specifier-resolution=node tests/index.ts | tap-diff"
   },
   "dependencies": {
-    "@holochain/rad-definitions": "0.0.1",
+    "@holochain-scaffolding/definitions": "0.0.1",
     "@patcher/types": "0.0.1",
     "@patcher/vue": "0.0.1",
     "json-schema-faker": "^0.5.0-rcv.40",

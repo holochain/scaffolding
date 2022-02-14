@@ -1,4 +1,4 @@
-import { ZomeDefinition } from '@holochain/rad-definitions';
+import { ZomeDefinition } from '@holochain-scaffolding/definitions';
 import { PatcherFile, PatcherNodeType } from '@patcher/types';
 import { mergeStrings, toTitleCase } from '../utils';
 

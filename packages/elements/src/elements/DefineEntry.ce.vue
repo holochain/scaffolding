@@ -75,8 +75,8 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 import type { TextField } from '@material/mwc-textfield';
-import { EntryDefinition } from '@holochain/rad-definitions';
-import { isSnakeCase } from '@holochain/rad-patcher';
+import { EntryDefinition } from '@holochain-scaffolding/definitions';
+import { isSnakeCase } from '@holochain-scaffolding/patcher';
 import { newEntryDef } from '../utils';
 
 export default defineComponent({

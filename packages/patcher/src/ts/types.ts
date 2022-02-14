@@ -1,4 +1,4 @@
-import { EntryDefinition, ZomeDefinition } from '@holochain/rad-definitions';
+import { EntryDefinition, ZomeDefinition } from '@holochain-scaffolding/definitions';
 import { run } from '../typegen';
 import { mergeStrings, toTitleCase } from '../utils';
 

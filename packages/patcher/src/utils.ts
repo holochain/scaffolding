@@ -1,5 +1,5 @@
 import { flattenDeep } from 'lodash-es';
-import { HappDefinition } from '@holochain/rad-definitions';
+import { HappDefinition } from '@holochain-scaffolding/definitions';
 
 export function getDnaBundlePath(happ: HappDefinition, dnaName: string): string {
   return `${getDnaPath(happ, dnaName)}workdir/${dnaName}.dna`;

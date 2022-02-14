@@ -1,4 +1,4 @@
-import { ZomeDefinition, DnaDefinition, HappDefinition } from '@holochain/rad-definitions';
+import { ZomeDefinition, DnaDefinition, HappDefinition } from '@holochain-scaffolding/definitions';
 import { PatcherDirectory, PatcherNodeType } from '@patcher/types';
 
 import { tryoramaPackageJson } from './package.json';

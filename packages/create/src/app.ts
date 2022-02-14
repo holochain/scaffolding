@@ -7,7 +7,7 @@ import http from 'http';
 import { Server } from 'socket.io';
 import fs from 'fs';
 
-import { ClientEventType } from '@holochain/scaffolding-events';
+import { ClientEventType } from '@holochain-scaffolding/events';
 import { applyPatch } from '@patcher/fs';
 import { automaticSetup } from './events/automatic-setup';
 

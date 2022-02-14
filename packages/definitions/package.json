@@ -1,5 +1,5 @@
 {
-  "name": "@holochain/rad-definitions",
+  "name": "@holochain-scaffolding/definitions",
   "version": "0.0.1",
   "description": "Common types for the client and the server to communicate with each other",
   "author": "guillem.cordoba@gmail.com",

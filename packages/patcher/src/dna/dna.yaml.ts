@@ -1,4 +1,4 @@
-import { ZomeDefinition, HappDefinition } from '@holochain/rad-definitions';
+import { ZomeDefinition, HappDefinition } from '@holochain-scaffolding/definitions';
 import { PatcherFile, PatcherNodeType } from '@patcher/types';
 import { mergeStrings } from '../utils';
 import { getCrateName } from '../zome';

@@ -1,5 +1,5 @@
 {
-  "name": "@holochain/rad-elements",
+  "name": "@holochain-scaffolding/elements",
   "version": "0.0.1",
   "scripts": {
     "build": "rimraf dist && rollup -c",
@@ -13,8 +13,8 @@
     "dist"
   ],
   "dependencies": {
-    "@holochain/rad-definitions": "0.0.1",
-    "@holochain/rad-patcher": "0.0.1",
+    "@holochain-scaffolding/definitions": "0.0.1",
+    "@holochain-scaffolding/patcher": "0.0.1",
     "@material/mwc-button": "^0.25.3",
     "@material/mwc-checkbox": "^0.25.3",
     "@material/mwc-dialog": "^0.25.3",

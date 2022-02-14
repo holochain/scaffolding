@@ -21,8 +21,8 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { WebHappDefinition } from '@holochain/rad-definitions';
-import { newHappDef } from '@holochain/rad-elements';
+import { WebHappDefinition } from '@holochain-scaffolding/definitions';
+import { newHappDef } from '@holochain-scaffolding/elements';
 import { UiTemplates } from '../types';
 
 export default defineComponent({

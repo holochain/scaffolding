@@ -1,5 +1,5 @@
-import { createHandlerFnName } from '@holochain/rad-patcher';
-/* import { HappDefinition } from '@holochain/rad-definitions';
+import { createHandlerFnName } from '@holochain-scaffolding/patcher';
+/* import { HappDefinition } from '@holochain-scaffolding/definitions';
 import JSZip, { JSZipObject } from 'jszip';
 
 //@ts-ignore
@@ -89,7 +89,7 @@ export function replaceText(text: string, target: ReplaceTargets): string {
 }
  */
 
-import { HappDefinition } from '@holochain/rad-definitions';
+import { HappDefinition } from '@holochain-scaffolding/definitions';
 
 export function getFirstEntry(
   happ: HappDefinition,

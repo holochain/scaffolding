@@ -18,7 +18,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import { HappDefinition } from '@holochain/rad-definitions';
+import { HappDefinition } from '@holochain-scaffolding/definitions';
 import type { Select } from '@material/mwc-select';
 import DefineHapp from './DefineHapp.ce.vue';
 import { newHappDef } from '../utils';

@@ -1,4 +1,4 @@
-import { HappDefinition } from '@holochain/rad-definitions';
+import { HappDefinition } from '@holochain-scaffolding/definitions';
 import { PatcherDirectory, PatcherFile } from '@patcher/types';
 import { generateVueApp, provideServiceForApp, patchEnvVars, patchNpmDependency } from '@patcher/vue';
 import { generateTsTypes } from '../ts';

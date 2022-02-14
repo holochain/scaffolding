@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body {
+        background: #fafafa;
+      }
+    </style>
+    <link
+      href="https://fonts.googleapis.com/css?family=Material+Icons&display=block"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <create-and-preview id="create"> </create-and-preview>
+
+    <script type="module">
+      import { html, LitElement, render } from 'lit';
+      import { CreateTypeDefinition, PreviewCreateType } from '../dist';
+
+      customElements.define('create-type-definition', CreateTypeDefinition);
+      customElements.define('preview-create-type', PreviewCreateType);
+
+      customElements.define(
+        'create-and-preview',
+        class extends LitElement {
+          static get properties() {
+            return {
+              typeDef: undefined,
+            };
+          }
+
+          render() {
+            return html`
+              <create-type-definition
+                @change=${e => (this.typeDef = e.target.value)}
+              >
+              </create-type-definition>
+              ${this.typeDef
+                ? html`
+                    <preview-create-type .typeDef=${this.typeDef}>
+                    </preview-create-type>
+                  `
+                : html``}
+            `;
+          }
+        }
+      );
+    </script>
+  </body>
+</html>

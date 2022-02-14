@@ -1,4 +1,4 @@
-import { HappDefinition } from '@holochain/rad-definitions';
+import { HappDefinition } from '@holochain-scaffolding/definitions';
 
 import { happ } from '../happ';
 import { PatcherDirectory } from '@patcher/types';

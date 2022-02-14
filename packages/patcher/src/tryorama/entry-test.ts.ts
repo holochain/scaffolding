@@ -1,4 +1,4 @@
-import { DnaDefinition, EntryDefinition, ZomeDefinition } from '@holochain/rad-definitions';
+import { DnaDefinition, EntryDefinition, ZomeDefinition } from '@holochain-scaffolding/definitions';
 import toJsonSchema from 'to-json-schema';
 import jsf from 'json-schema-faker';
 import { PatcherFile, PatcherNodeType } from '@patcher/types';

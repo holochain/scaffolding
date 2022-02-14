@@ -1,4 +1,4 @@
-import { WebFramework, webHapp } from '@holochain/rad-patcher';
+import { WebFramework, webHapp } from '@holochain-scaffolding/patcher';
 import { applyPatch } from '@patcher/fs';
 
 export async function init(appName: string) {

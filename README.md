@@ -19,7 +19,7 @@ The Holochain scaffolding tools are structured as an Yarn monorepo, to allow for
 Packages:
 
 - `@holochain/scaffolding` (located in `packages/scaffolding`): types, elements and vanilla JS functions to help design and generate Holochain applications.
-- `@holochain/scaffolding-ui` (located in `packages/client`): Vue app that serves as the client for `@holochain/create`.
+- `@holochain-scaffolding/ui` (located in `packages/client`): Vue app that serves as the client for `@holochain/create`.
 - `@holochain/create` (located in `packages/create`): aggregator package that can be executed to scaffold fully working Holochain apps.
 
 ## Usage

@@ -1,5 +1,5 @@
 {
-  "name": "@holochain/scaffolding-ui",
+  "name": "@holochain-scaffolding/ui",
   "private": true,
   "version": "0.0.1",
   "description": "UI client for @holochain/create",
@@ -14,10 +14,10 @@
     "build:watch": "vue-cli-service build --watch --no-clean"
   },
   "dependencies": {
-    "@holochain/rad-elements": "^0.0.1",
-    "@holochain/rad-patcher": "^0.0.1",
+    "@holochain-scaffolding/elements": "^0.0.1",
+    "@holochain-scaffolding/events": "^0.0.1",
+    "@holochain-scaffolding/patcher": "^0.0.1",
     "@patcher/vue": "^0.0.1",
-    "@holochain/scaffolding-events": "^0.0.1",
     "@justinribeiro/code-block": "^1.0.0",
     "@material/mwc-button": "^0.25.3",
     "@material/mwc-dialog": "^0.25.3",

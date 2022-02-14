@@ -1,4 +1,4 @@
-import { WebHappDefinitionBuilder } from '@holochain/rad-elements';
+import { WebHappDefinitionBuilder } from '@holochain-scaffolding/elements';
 import { createApp } from 'vue';
 import App from './App.vue';
 import '@ui5/webcomponents/dist/Tree.js';

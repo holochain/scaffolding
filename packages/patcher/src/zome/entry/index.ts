@@ -1,4 +1,4 @@
-import { EntryDefinition } from '@holochain/rad-definitions';
+import { EntryDefinition } from '@holochain-scaffolding/definitions';
 import { PatcherDirectory, PatcherNodeType } from '@patcher/types';
 
 import { entryTypes } from './entry.rs';

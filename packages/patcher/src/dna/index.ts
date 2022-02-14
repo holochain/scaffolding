@@ -1,4 +1,4 @@
-import { HappDefinition, ZomeDefinition } from '@holochain/rad-definitions';
+import { HappDefinition, ZomeDefinition } from '@holochain-scaffolding/definitions';
 import { PatcherDirectory, PatcherNodeType } from '@patcher/types';
 
 import { zome } from '../zome';

@@ -1,4 +1,4 @@
-import { DnaDefinition, EntryDefinition, HappDefinition, ZomeDefinition } from '@holochain/rad-definitions';
+import { DnaDefinition, EntryDefinition, HappDefinition, ZomeDefinition } from '@holochain-scaffolding/definitions';
 
 export function newEntryDef(name: string = 'entry_def_0'): EntryDefinition {
   return {

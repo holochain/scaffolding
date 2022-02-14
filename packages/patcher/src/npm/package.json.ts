@@ -1,4 +1,4 @@
-import { HappDefinition } from '@holochain/rad-definitions';
+import { HappDefinition } from '@holochain-scaffolding/definitions';
 import { PatcherFile, PatcherNodeType } from '@patcher/types';
 
 import { getDnaPath, getUiPackageName, mergeStrings } from '../utils';

@@ -1,5 +1,5 @@
 {
-  "name": "@holochain/scaffolding-events",
+  "name": "@holochain-scaffolding/events",
   "version": "0.0.1",
   "description": "Common types for the client and the server to communicate with each other",
   "author": "guillem.cordoba@gmail.com",
@@ -15,7 +15,7 @@
     "build:watch": "tsc -w --preserveWatchOutput"
   },
   "dependencies": {
-    "@holochain/rad-patcher": "0.0.1"
+    "@holochain-scaffolding/patcher": "0.0.1"
   },
   "devDependencies": {
     "rimraf": "^3.0.2",
