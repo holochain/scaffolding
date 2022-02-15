@@ -1,5 +1,24 @@
+import { Element, ElementContent } from 'hast';
+
+export interface IfCondition {
+  type: 'ifCondition';
+  condition: string;
+  then: Element;
+  else?: Element;
+}
+
+declare module 'hast' {
+  interface ElementContentMap {
+    ifCondition: IfCondition;
+  }
+
+  interface Element {
+    inputs?: Properties | undefined;
+  }
+}
+
 export interface WebComponent {
-  template: HTMLNode;
+  template: ElementContent[];
   onMounted?: {
     callback: LifecycleCallback;
     async: boolean;

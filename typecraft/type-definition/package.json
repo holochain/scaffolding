@@ -1,5 +1,5 @@
 {
-  "name": "@patcher/web-apps",
+  "name": "@typecraft/type-definition",
   "version": "0.0.1",
   "description": "Common types for the client and the server to communicate with each other",
   "author": "guillem.cordoba@gmail.com",
@@ -11,12 +11,12 @@
     "build": "rimraf dist && tsc",
     "build:watch": "tsc -w --preserveWatchOutput"
   },
-  "dependencies": {
-    "@types/hast": "^2.3.4"
-  },
   "devDependencies": {
     "rimraf": "^3.0.2",
     "typescript": "^4.4.3"
+  },
+  "dependencies": {
+    "@types/json-schema": "^7.0.9"
   },
   "files": [
     "dist"

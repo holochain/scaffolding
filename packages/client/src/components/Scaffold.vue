@@ -160,6 +160,9 @@ export default defineComponent({
       }
 
       this.happDir = await webHapp(happ, WebFramework.Vue);
+
+      // For every entry, add create and detail component
+
       this.happName = happ.name;
       (this.$refs.dialog as Dialog).show();
     },

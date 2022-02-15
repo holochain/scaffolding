@@ -1,4 +1,5 @@
 import { DnaDefinition, EntryDefinition, HappDefinition, ZomeDefinition } from '@holochain-scaffolding/definitions';
+import { dateType } from '@typecraft/craft-type';
 
 export function newEntryDef(name: string = 'entry_def_0'): EntryDefinition {
   return {
@@ -7,9 +8,18 @@ export function newEntryDef(name: string = 'entry_def_0'): EntryDefinition {
     delete: true,
     update: true,
     name,
-    sample: {
-      foo: 'hi',
-      bar: 3,
+    typeDefinition: {
+      name,
+      description: `Holochain entry containing a ${name}`,
+      fields: [
+        {
+          name: 'new_field',
+          configuration: {},
+          type: dateType,
+        },
+      ],
+      create: [],
+      detail: [],
     },
   };
 }

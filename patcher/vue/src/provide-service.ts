@@ -45,10 +45,18 @@ ${serviceProvided.createFnContent}
 
   const helloWorld = vueComponent(
     {
-      template: {
-        tag: 'span',
-        inner: [`{{ ${serviceIdentifier} }}`],
-      },
+      template: [
+        {
+          type: 'element',
+          tagName: 'span',
+          children: [
+            {
+              type: 'text',
+              value: `{{ ${serviceIdentifier} }}`,
+            },
+          ],
+        },
+      ],
       inject: [{ name: serviceIdentifier, type: serviceProvided.service.type }],
       imports: serviceProvided.imports,
     },
@@ -60,10 +68,17 @@ ${serviceProvided.createFnContent}
   // Create App.vue
 
   const appVue = vueComponent({
-    template: {
-      tag: 'HelloWorld',
-      ifCondition: serviceIdentifier,
-    },
+    template: [
+      {
+        type: 'ifCondition',
+        condition: serviceIdentifier,
+        then: {
+          type: 'element',
+          tagName: 'HelloWorld',
+          children: [],
+        },
+      },
+    ],
     localState: {
       [serviceIdentifier]: {
         default: undefined,

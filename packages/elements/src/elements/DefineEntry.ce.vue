@@ -1,6 +1,6 @@
 <template>
-  <div style="display: flex; flex-direction: row; flex: 1">
-    <div style="display: flex; flex-direction: column; flex: 1">
+  <div style="display: flex; flex-direction: column; flex: 1">
+    <div style="display: flex; flex-direction: row">
       <mwc-textfield
         label="Entry Definition Id"
         @focus="entryDefValidity($event.target)"
@@ -12,63 +12,64 @@
         autoValidate
         style="width: 424px; margin-top: 16px"
       ></mwc-textfield>
+      <span style="flex: 1"></span>
+      <slot></slot>
+    </div>
 
-      <div style="display: flex; flex-direction: row; flex: 1">
-        <mwc-textarea
-          outlined
-          autoValidate
-          helper="Has to be a valid JSON object"
-          label="JSON Sample"
-          ref="json-field"
-          @focus="entryDefSampleValidity($event.target)"
-          @input="$event.target.validity.valid && setEntryDefSample($event.target.value)"
-          style="flex: 1"
-        >
-        </mwc-textarea>
+    <div style="display: flex; flex-direction: row; flex: 1">
+      <div style="display: flex; flex-direction: column; flex-basis: 250px">
+        <span style="font-size: 18px">CRUD Handlers</span>
+        <mwc-formfield label="Create" style="opacity: 0.4">
+          <mwc-checkbox
+            :checked="entryDef.create"
+            :disabled="true"
+            @change="
+              entryDef.create = $event.target.checked;
+              emitChanged();
+            "
+          ></mwc-checkbox>
+        </mwc-formfield>
+        <mwc-formfield label="Read">
+          <mwc-checkbox
+            :checked="entryDef.read"
+            @change="
+              entryDef.read = $event.target.checked;
+              emitChanged();
+            "
+          ></mwc-checkbox>
+        </mwc-formfield>
+        <mwc-formfield label="Update">
+          <mwc-checkbox
+            :checked="entryDef.update"
+            @change="
+              entryDef.update = $event.target.checked;
+              emitChanged();
+            "
+          ></mwc-checkbox>
+        </mwc-formfield>
+        <mwc-formfield label="Delete">
+          <mwc-checkbox
+            :checked="entryDef.delete"
+            @change="
+              entryDef.delete = $event.target.checked;
+              emitChanged();
+            "
+          ></mwc-checkbox>
+        </mwc-formfield>
+      </div>
 
-        <div style="display: flex; flex-direction: column; flex: 1; margin-left: 24px">
-          <span style="font-size: 18px">CRUD Handlers</span>
-          <mwc-formfield label="Create" style="opacity: 0.4">
-            <mwc-checkbox
-              :checked="entryDef.create"
-              :disabled="true"
-              @change="
-                entryDef.create = $event.target.checked;
-                emitChanged();
-              "
-            ></mwc-checkbox>
-          </mwc-formfield>
-          <mwc-formfield label="Read">
-            <mwc-checkbox
-              :checked="entryDef.read"
-              @change="
-                entryDef.read = $event.target.checked;
-                emitChanged();
-              "
-            ></mwc-checkbox>
-          </mwc-formfield>
-          <mwc-formfield label="Update">
-            <mwc-checkbox
-              :checked="entryDef.update"
-              @change="
-                entryDef.update = $event.target.checked;
-                emitChanged();
-              "
-            ></mwc-checkbox>
-          </mwc-formfield>
-          <mwc-formfield label="Delete">
-            <mwc-checkbox
-              :checked="entryDef.delete"
-              @change="
-                entryDef.delete = $event.target.checked;
-                emitChanged();
-              "
-            ></mwc-checkbox>
-          </mwc-formfield>
+      <div style="position: relative; display: flex; flex: 1">
+        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0">
+          <div style="max-height: 100%; overflow-y: auto">
+            <craft-fields
+              :fields="entryDef.typeDefinition.fields"
+              style="flex: 1"
+              @change="setFields($event.target.value)"
+            ></craft-fields>
+          </div>
         </div>
       </div>
     </div>
-    <slot></slot>
   </div>
 </template>
 
@@ -78,6 +79,7 @@ import type { TextField } from '@material/mwc-textfield';
 import { EntryDefinition } from '@holochain-scaffolding/definitions';
 import { isSnakeCase } from '@holochain-scaffolding/patcher';
 import { newEntryDef } from '../utils';
+import { FieldDefinition } from '@typecraft/type-definition';
 
 export default defineComponent({
   name: 'DefineEntry',
@@ -98,33 +100,7 @@ export default defineComponent({
     },
   },
   methods: {
-    onEntryDefChanged() {
-      const sampleField = this.$refs['json-field'] as any;
-      sampleField.value = JSON.stringify(this.entryDef.sample, null, 2);
-    },
-    entryDefSampleValidity(textfield: TextField) {
-      textfield.validityTransform = (newValue, nativeValidity) => {
-        if (newValue === '') {
-          textfield.setCustomValidity('Must not be empty');
-          return {
-            valid: false,
-          };
-        }
-
-        try {
-          JSON.parse(newValue);
-          textfield.setCustomValidity('');
-          return {
-            valid: true,
-          };
-        } catch (e) {
-          textfield.setCustomValidity('The entry sample must be a valid JSON object');
-          return {
-            valid: false,
-          };
-        }
-      };
-    },
+    onEntryDefChanged() {},
     entryDefValidity(textfield: TextField) {
       textfield.validityTransform = (newValue, nativeValidity) => {
         if (newValue === '') {
@@ -157,8 +133,8 @@ export default defineComponent({
       this.entryDef.name = newValue;
       this.emitChanged();
     },
-    setEntryDefSample(newValue: string) {
-      this.entryDef.sample = JSON.parse(newValue);
+    setFields(fields: Array<FieldDefinition<any>>) {
+      this.entryDef.typeDefinition.fields = fields;
       this.emitChanged();
     },
     emitChanged() {

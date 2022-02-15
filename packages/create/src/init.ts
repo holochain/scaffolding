@@ -16,9 +16,13 @@ export async function init(appName: string) {
                   delete: true,
                   update: true,
                   read: true,
-                  sample: {
-                    foo: 1,
-                    bar: 'some content',
+                  typeDefinition: {
+                    name: 'entry-def-1',
+                    description: 'Holochain entry',
+                    // TODO: fix this
+                    fields: [],
+                    create: [],
+                    detail: [],
                   },
                   name: 'entry-def-1',
                 },

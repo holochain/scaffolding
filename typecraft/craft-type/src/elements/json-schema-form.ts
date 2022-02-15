@@ -8,12 +8,16 @@ import { ref } from 'lit/directives/ref.js';
 export class JsonSchemaForm extends ScopedElementsMixin(LitElement) {
   @property({ type: Object }) schema!: JSONSchema7;
 
+  @property({ type: Object })
   value: any = {};
 
   firstUpdated() {
     if (!this.schema.properties) return;
+
     for (const [name, prop] of Object.entries(this.schema.properties)) {
-      this.value[name] = (prop as JSONSchema7).default;
+      if (!this.value[name]) {
+        this.value[name] = (prop as JSONSchema7).default;
+      }
     }
   }
 
@@ -22,12 +26,7 @@ export class JsonSchemaForm extends ScopedElementsMixin(LitElement) {
       case 'boolean':
         return html` <mwc-formfield .label=${property.description}>
           <mwc-checkbox
-            ${ref(
-              el =>
-                el &&
-                property.default &&
-                ((el as Checkbox).checked = property.default as boolean)
-            )}
+            .checked=${this.value[propertyName]}
             @change=${(e: Event) => {
               this.value[propertyName] = (e.target as Checkbox).checked;
               this.dispatchEvent(
@@ -44,12 +43,7 @@ export class JsonSchemaForm extends ScopedElementsMixin(LitElement) {
           <mwc-textfield
             type="number"
             outlined
-            ${ref(
-              el =>
-                el &&
-                property.default &&
-                ((el as TextField).value = `${property.default}`)
-            )}
+            .value=${this.value[propertyName]}
             @input=${(e: Event) => {
               this.value[propertyName] = (e.target as TextField).value;
               this.dispatchEvent(new Event('change'));

@@ -2,7 +2,7 @@ import { html, css, LitElement } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import { ScopedElementsMixin } from '@open-wc/scoped-elements';
-import { TypeDefinition } from './type-definition';
+import { TypeDefinition } from '@typecraft/type-definition';
 
 import kebabCase from 'lodash-es/kebabCase';
 

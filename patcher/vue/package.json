@@ -15,7 +15,13 @@
   },
   "dependencies": {
     "@patcher/types": "0.0.1",
-    "@patcher/web-apps": "0.0.1"
+    "@patcher/web-apps": "0.0.1",
+    "@types/hast": "^2.3.4",
+    "hast-util-to-html": "^8.0.3",
+    "rehype-format": "^4.0.1",
+    "rehype-stringify": "^9.0.3",
+    "unified": "^10.1.1",
+    "unist-util-visit": "^4.1.0"
   },
   "devDependencies": {
     "@patcher/fs": "0.0.1",

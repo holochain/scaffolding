@@ -1,5 +1,5 @@
 import test from 'tape';
-import { provideServiceForApp, patchEnvVars, generateVueApp } from '../dist';
+import { provideServiceForApp, patchEnvVars, generateVueApp, vueComponent } from '../dist';
 import path from 'path';
 import { PatcherDirectory, PatcherFile } from '@patcher/types';
 import { applyPatch } from '@patcher/fs';

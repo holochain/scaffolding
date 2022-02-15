@@ -1,3 +1,6 @@
+
+import { CraftFields } from '@typecraft/craft-type';
+customElements.define('craft-fields', CraftFields);
 import '@material/mwc-textfield';
 import '@material/mwc-textarea';
 import '@material/mwc-button';

@@ -19,8 +19,7 @@ export default {
       css: false,
       compilerOptions: {
         // treat any tag that starts with ion- as custom elements
-        isCustomElement: tag =>
-          tag.startsWith('copyable-') || tag.startsWith('mwc-') || tag.startsWith('ui5-') || tag.startsWith('sl-'),
+        isCustomElement: tag => tag.includes('-'),
       },
     }),
   ],

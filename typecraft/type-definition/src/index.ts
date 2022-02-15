@@ -10,13 +10,13 @@ export interface TypeConfigSchema<C> extends JSONSchema7 {
 
 export type Constructor<T> = new (...args: any[]) => T;
 
-export interface CreateType<T, C> {
+export interface CreateElement<T, C> {
   configuration: C;
 
   get value(): T;
 }
 
-export interface DetailType<T, C> {
+export interface DetailElement<T, C> {
   configuration: C;
   value: T;
 }
@@ -31,7 +31,7 @@ export interface ElementReference<E> {
   element: Constructor<HTMLElement & E>;
   package: string;
   version: string;
-  customImport?: string;
+  customImportDefiningCustomElement?: string;
 }
 
 export interface TypeDefinition<T, C> {
@@ -41,6 +41,6 @@ export interface TypeDefinition<T, C> {
   fields?: Array<FieldDefinition<any>>;
 
   configurationSchema?: TypeConfigSchema<C>;
-  create: Array<ElementReference<CreateType<T, C>>>;
-  detail: Array<ElementReference<DetailType<T, C>>>;
+  create: Array<ElementReference<CreateElement<T, C>>>;
+  detail: Array<ElementReference<DetailElement<T, C>>>;
 }

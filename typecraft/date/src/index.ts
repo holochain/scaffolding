@@ -1,0 +1,1 @@
+export { dateType } from './date';

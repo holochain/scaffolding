@@ -1,19 +1,20 @@
 {
-  "name": "@typecraft/define-type",
+  "name": "@typecraft/craft-type",
   "description": "Webcomponent typecraft-workbench following open-wc recommendations",
   "license": "MIT",
   "author": "guillem.cordoba@gmail.com",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "main": "dist/index.js",
   "module": "dist/index.js",
   "exports": {
     ".": "./dist/index.js",
-    "./typecraft-workbench.js": "./dist/typecraft-workbench.js"
+    "./craft-type": "./dist/definitions/craft-type.js"
   },
   "scripts": {
     "analyze": "cem analyze --litelement",
-    "start": "tsc && concurrently -k -r \"tsc --watch --preserveWatchOutput\" \"wds\"",
+    "start": "tsc && concurrently -k -r \"npm run build:watch\" \"wds\"",
     "build": "tsc && npm run analyze -- --exclude dist",
+    "build:watch": "tsc --watch --preserveWatchOutput",
     "prepublish": "tsc && npm run analyze -- --exclude dist",
     "lint": "eslint --ext .ts,.html . --ignore-path .gitignore && prettier \"**/*.ts\" --check --ignore-path .gitignore",
     "format": "eslint --ext .ts,.html . --fix --ignore-path .gitignore && prettier \"**/*.ts\" --write --ignore-path .gitignore"
@@ -21,7 +22,8 @@
   "dependencies": {
     "@open-wc/scoped-elements": "^2.0.1",
     "@scoped-elements/material-web": "^0.0.16",
-    "@types/json-schema": "^7.0.9",
+    "@typecraft/type-definition": "^0.0.1",
+    "@typecraft/date": "^0.0.1",
     "lit": "^2.0.2",
     "lodash-es": "^4.17.21"
   },

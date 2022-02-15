@@ -1,6 +1,6 @@
-import { ScopedElementsMixin } from '@open-wc/scoped-elements';
+/* import { ScopedElementsMixin } from '@open-wc/scoped-elements';
 import { html, LitElement } from 'lit';
-import { CreateType, DetailType, TypeDefinition } from './type-definition';
+import { CreateType, DetailType, TypeDefinition } from '@typecraft/type-definition';
 
 export interface TimeRangeConfig {}
 
@@ -51,3 +51,4 @@ export const timeRangeTypeDefinition: TypeDefinition<
     },
   ],
 };
+ */

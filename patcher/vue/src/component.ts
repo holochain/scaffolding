@@ -1,9 +1,17 @@
 import { PatcherFile, PatcherNodeType } from '@patcher/types';
 import { HTMLNode, WebComponent } from '@patcher/web-apps';
+import { Root, Element, Properties, ElementContent } from 'hast';
+import { Plugin } from 'unified';
+import { visit } from 'unist-util-visit';
+import { unified } from 'unified';
+import rehypeStringify from 'rehype-stringify';
+import rehypeFormat from 'rehype-format';
+
+import { toHtml } from 'hast-util-to-html';
 
 export function vueComponent(component: WebComponent, rawBindings = ''): PatcherFile {
   const template = `<template>
-  ${vueTemplate(component.template)}
+${component.template.map(t => vueTemplate(t as Element)).join('\n')}
 </template>`;
   const script = `<script lang="ts">
 ${vueScript(component, rawBindings)}
@@ -99,37 +107,55 @@ ${
 }`;
 }
 
-function vueTemplate(node: HTMLNode, spaces = 2): string {
-  const spacesStr = Array(spaces)
-    .fill(' ')
-    .join('');
-  return `<${mainTag(node)}>
-${spacesStr}  ${
-    node.inner ? node.inner.map(i => (typeof i === 'string' ? i : vueTemplate(i, spaces + 2))).join('\n') : ''
-  }
-${spacesStr}</${node.tag}>`;
-}
+export const vueTemplatePlugin: Plugin<[], Element> = () => {
+  return tree => {
+    visit(tree, 'element', node => {
+      if (node.inputs) {
+        if (!node.properties) node.properties = {};
+        for (const [inputName, inputValue] of Object.entries(node.inputs)) {
+          node.properties[`:${inputName}`] = inputValue;
+        }
+      }
+    });
+    visit(tree, 'ifCondition', node => {
+      let newNode = (node as any) as Element;
+      newNode.type = 'element';
+      newNode.tagName = 'div';
 
-function mainTag(node: HTMLNode): string {
-  let tagComponents: string[] = [node.tag];
+      newNode.children = [
+        {
+          type: 'element',
+          tagName: 'div',
+          properties: {
+            'v-if': node.condition,
+          },
+          children: [node.then],
+        },
+      ];
 
-  if (node.ifCondition) tagComponents.push(`v-if="${node.ifCondition}"`);
-  if (node.attributes) tagComponents.push(node.attributes.join(' '));
-  if (node.properties) tagComponents.push(vueChildProps(node.properties));
-  if (node.events) tagComponents.push(vueChildEvents(node.events));
-  if (node.style) tagComponents.push(`style="${node.style}"`);
+      if (node.else) {
+        newNode.children.push({
+          type: 'element',
+          tagName: 'div',
+          properties: {
+            'v-else': undefined,
+          },
+          children: [node.else],
+        });
+      }
+    });
+  };
+};
 
-  return tagComponents.join(' ');
-}
+function vueTemplate(element: Element): string {
+  const d = unified()
+    .use(vueTemplatePlugin)
+    .use(rehypeFormat, {
+      indent: '  ',
+    })
+    .runSync(element);
 
-function vueChildProps(props: Record<string, string>) {
-  return Object.entries(props)
-    .map(([key, value]) => `:${key}="${value}"`)
-    .join(' ');
-}
-
-function vueChildEvents(events: Record<string, string>) {
-  return Object.entries(events)
-    .map(([key, value]) => `@${key}="${value}"`)
-    .join(' ');
+  return unified()
+    .use(rehypeStringify)
+    .stringify(d as any);
 }

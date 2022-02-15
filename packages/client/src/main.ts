@@ -11,7 +11,6 @@ import '@material/mwc-dialog';
 import '@material/mwc-select';
 import '@ui5/webcomponents/dist/Card.js';
 
-
 customElements.define('webhapp-definition-builder', WebHappDefinitionBuilder);
 
 createApp(App).mount('#app');
