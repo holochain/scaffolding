@@ -18,10 +18,9 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import { HappDefinition } from '@holochain-scaffolding/definitions';
+import { HappDefinition, newHappDef } from '@holochain-scaffolding/definitions';
 import type { Select } from '@material/mwc-select';
 import DefineHapp from './DefineHapp.ce.vue';
-import { newHappDef } from '../utils';
 
 export default defineComponent({
   name: 'WebHappDefinitionBuilder',

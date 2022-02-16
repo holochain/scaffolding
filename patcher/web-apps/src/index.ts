@@ -14,13 +14,14 @@ declare module 'hast' {
 
   interface Element {
     inputs?: Properties | undefined;
+    events?: Record<string, string> | undefined;
   }
 }
 
 export interface WebComponent {
   template: ElementContent[];
   onMounted?: {
-    callback: LifecycleCallback;
+    callback: FnDefinition;
     async: boolean;
   };
   imports?: string[];
@@ -33,6 +34,8 @@ export interface WebComponent {
   provide?: ServiceProvided[];
   inject?: Service[];
 
+  // Fn name -> fn content
+  methods?: Record<string, FnDefinition> | undefined;
   subcomponents?: string[];
 }
 
@@ -49,7 +52,7 @@ export interface ServiceProvided {
 
 export interface WebComponentProp {
   type: string;
-  default: string | undefined;
+  default?: string | undefined;
 }
 
 export interface HTMLNode {
@@ -65,7 +68,12 @@ export interface HTMLNode {
   inner?: Array<HTMLNode | string>;
 }
 
-export interface LifecycleCallback {
-  params: string[];
+export interface FnDefinition {
+  params: FnParam[];
   fnContent: string;
+}
+
+export interface FnParam {
+  name: string;
+  type: string;
 }

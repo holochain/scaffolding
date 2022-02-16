@@ -21,8 +21,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { WebHappDefinition } from '@holochain-scaffolding/definitions';
-import { newHappDef } from '@holochain-scaffolding/elements';
+import { WebHappDefinition, newHappDef } from '@holochain-scaffolding/definitions';
 import { UiTemplates } from '../types';
 
 export default defineComponent({

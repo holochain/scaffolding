@@ -1,12 +1,11 @@
-import { DnaDefinition, HappDefinition } from '@holochain-scaffolding/definitions';
+import { DnaDefinition, EntryDefinition, HappDefinition, ZomeDefinition } from '@holochain-scaffolding/definitions';
 import { PatcherDirectory, PatcherFile, PatcherNodeType } from '@patcher/types';
+import { generateTypesFile, ProgrammingLanguages } from '@typecraft/type-definition';
 
-import { tsTypesForZome } from './types';
-
-export async function generateTsTypes(happ: HappDefinition): Promise<PatcherDirectory> {
+export function generateTsTypesForHapp(happ: HappDefinition): PatcherDirectory {
   const types: Record<string, PatcherDirectory> = {};
   for (const dna of happ.dnas) {
-    const dir = await generateTsTypesForDna(dna);
+    const dir = generateTsTypesForDna(dna);
     types[dna.name] = dir;
   }
 
@@ -16,13 +15,13 @@ export async function generateTsTypes(happ: HappDefinition): Promise<PatcherDire
   };
 }
 
-export async function generateTsTypesForDna(dna: DnaDefinition): Promise<PatcherDirectory> {
+export function generateTsTypesForDna(dna: DnaDefinition): PatcherDirectory {
   const files: Record<string, PatcherFile> = {};
 
   for (const zome of dna.zomes) {
     const file: PatcherFile = {
       type: PatcherNodeType.File,
-      content: await tsTypesForZome(zome),
+      content: tsTypesForZome(zome),
     };
     files[`${zome.name}.ts`] = file;
   }
@@ -31,4 +30,8 @@ export async function generateTsTypesForDna(dna: DnaDefinition): Promise<Patcher
     type: PatcherNodeType.Directory,
     children: files,
   };
+}
+
+export function tsTypesForZome(zome: ZomeDefinition): string {
+  return generateTypesFile(zome.entry_defs.map(def => def.typeDefinition), ProgrammingLanguages.Typescript);
 }

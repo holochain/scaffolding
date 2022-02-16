@@ -21,6 +21,7 @@
     "typescript": "^4.4.3"
   },
   "dependencies": {
+    "@open-wc/dedupe-mixin": "github:guillemcordoba/open-wc#dedupe-mixin-build",
     "@open-wc/scoped-elements": "^2.0.1",
     "@scoped-elements/material-web": "^0.0.16",
     "@scoped-elements/shoelace": "^0.0.8",

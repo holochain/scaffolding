@@ -93,7 +93,7 @@ import { HappDefinition } from '@holochain-scaffolding/definitions';
 
 export function getFirstEntry(
   happ: HappDefinition,
-): { sample: any; fnName: string; dnaName: string; zomeName: string; entryDefName: string } | undefined {
+): { fnName: string; dnaName: string; zomeName: string; entryDefName: string } | undefined {
   for (const dna of happ.dnas) {
     for (const zome of dna.zomes) {
       for (const entryDef of zome.entry_defs) {
@@ -102,7 +102,6 @@ export function getFirstEntry(
             dnaName: dna.name,
             zomeName: zome.name,
             fnName: createHandlerFnName(entryDef.name),
-            sample: entryDef.sample,
             entryDefName: entryDef.name,
           };
         }

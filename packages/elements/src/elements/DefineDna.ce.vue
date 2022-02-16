@@ -59,8 +59,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import { DnaDefinition, HappDefinition } from '@holochain-scaffolding/definitions';
-import { newDnaDef, newZomeDef } from '../utils';
+import { DnaDefinition, newDnaDef, newZomeDef } from '@holochain-scaffolding/definitions';
 import { TextField } from '@material/mwc-textfield';
 import { isSnakeCase } from '@holochain-scaffolding/patcher';
 import DefineZome from './DefineZome.ce.vue';

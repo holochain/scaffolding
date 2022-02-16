@@ -7,8 +7,6 @@ import { unified } from 'unified';
 import rehypeStringify from 'rehype-stringify';
 import rehypeFormat from 'rehype-format';
 
-import { toHtml } from 'hast-util-to-html';
-
 export function vueComponent(component: WebComponent, rawBindings = ''): PatcherFile {
   const template = `<template>
 ${component.template.map(t => vueTemplate(t as Element)).join('\n')}

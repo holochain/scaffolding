@@ -91,7 +91,7 @@ import FileNode from './FileNode.vue';
 import { getFirstEntry } from '../utils';
 import type { Dialog } from '@material/mwc-dialog';
 import { PatcherDirectory, PatcherNodeType, PatcherNode } from '@patcher/types';
-import { generateVueApp } from '@patcher/vue';
+import { addWebComponentsForHapp } from '../add-component';
 
 export default defineComponent({
   name: 'Scaffold',
@@ -121,11 +121,13 @@ export default defineComponent({
     sortedFiles() {
       return (
         this.happDir &&
-        Object.entries(this.happDir.children).sort(([_, node1]: [string, PatcherNode], [__, node2]: [string, PatcherNode]) => {
-          if (node1.type === PatcherNodeType.Directory) return -1;
-          if (node2.type === PatcherNodeType.Directory) return 1;
-          return -1;
-        })
+        Object.entries(this.happDir.children).sort(
+          ([_, node1]: [string, PatcherNode], [__, node2]: [string, PatcherNode]) => {
+            if (node1.type === PatcherNodeType.Directory) return -1;
+            if (node2.type === PatcherNodeType.Directory) return 1;
+            return -1;
+          },
+        )
       );
     },
     setup() {
@@ -145,7 +147,6 @@ export default defineComponent({
     async generateFileChanges({ happ, uiTemplate }: { happ: HappDefinition; uiTemplate: string }) {
       const firstCreateCall = getFirstEntry(happ);
 
-
       const toReplace: any = {
         installedAppId: happ.name,
         zomeName: happ.dnas[0].zomes[0].name,
@@ -154,7 +155,7 @@ export default defineComponent({
       if (firstCreateCall) {
         toReplace['fnName'] = firstCreateCall.fnName;
         toReplace['dnaName'] = firstCreateCall.dnaName;
-        toReplace['entrySample'] = JSON.stringify(firstCreateCall.sample, null, 2);
+       // toReplace['entrySample'] = JSON.stringify(firstCreateCall.sample, null, 2);
         toReplace['zomeName'] = firstCreateCall.zomeName;
         toReplace['entryDefName'] = firstCreateCall.entryDefName;
       }
@@ -162,6 +163,7 @@ export default defineComponent({
       this.happDir = await webHapp(happ, WebFramework.Vue);
 
       // For every entry, add create and detail component
+      this.happDir = addWebComponentsForHapp(this.happDir, happ);
 
       this.happName = happ.name;
       (this.$refs.dialog as Dialog).show();

@@ -1,9 +1,8 @@
-import { ScopedElementsMixin } from '@open-wc/scoped-elements';
-import { html, LitElement } from 'lit';
-import { TypeDefinition } from '@typecraft/type-definition';
+import { ProgrammingLanguages, TypeDefinition, TypeGenerator } from '@typecraft/type-definition';
 import { DateConfig } from './types';
 import { CreateDate } from './create-date';
 import { ShowDate } from './show-date';
+import { tsGenerator } from './generator';
 
 export const dateType: TypeDefinition<number, DateConfig> = {
   name: 'Date',
@@ -34,4 +33,11 @@ export const dateType: TypeDefinition<number, DateConfig> = {
       customImportDefiningCustomElement: '@typecraft/date/show-date',
     },
   ],
+
+  sample: () => Date.now(),
+
+  generators: {
+    [ProgrammingLanguages.Typescript]: tsGenerator,
+    [ProgrammingLanguages.Rust]: tsGenerator,
+  },
 };

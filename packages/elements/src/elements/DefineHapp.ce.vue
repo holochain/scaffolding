@@ -61,8 +61,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import { HappDefinition } from '@holochain-scaffolding/definitions';
-import { newDnaDef, newHappDef } from '../utils';
+import { HappDefinition, newDnaDef, newHappDef } from '@holochain-scaffolding/definitions';
 import DefineDna from './DefineDna.ce.vue';
 import { TextField } from '@material/mwc-textfield';
 

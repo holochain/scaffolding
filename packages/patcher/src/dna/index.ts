@@ -5,7 +5,7 @@ import { zome } from '../zome';
 
 import { dnaYaml } from './dna.yaml';
 
-export async function dna(happ: HappDefinition, dnaIndex: number, pathToBase: string): Promise<PatcherDirectory> {
+export function dna(happ: HappDefinition, dnaIndex: number, pathToBase: string): PatcherDirectory {
   const dna = happ.dnas[dnaIndex];
 
   const zomes: PatcherDirectory = {
@@ -14,7 +14,7 @@ export async function dna(happ: HappDefinition, dnaIndex: number, pathToBase: st
   };
 
   for (const [zomeIndex, zomeDef] of dna.zomes.entries()) {
-    const z = await zome(happ, dnaIndex, zomeIndex);
+    const z = zome(happ, dnaIndex, zomeIndex);
     zomes.children[zomeDef.name] = z;
   }
 

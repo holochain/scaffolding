@@ -7,7 +7,7 @@ import { libRs } from './lib.rs';
 
 export * from './entry';
 
-export async function zomeCode(zomeDefinition: ZomeDefinition): Promise<PatcherDirectory> {
+export function zomeCode(zomeDefinition: ZomeDefinition): PatcherDirectory {
   const zomeDir: PatcherDirectory = {
     type: PatcherNodeType.Directory,
     children: {
@@ -16,13 +16,13 @@ export async function zomeCode(zomeDefinition: ZomeDefinition): Promise<PatcherD
   };
 
   for (const entryDef of zomeDefinition.entry_defs) {
-    zomeDir.children[entryDef.name] = await generateEntryDef(entryDef);
+    zomeDir.children[entryDef.name] = generateEntryDef(entryDef);
   }
 
   return zomeDir;
 }
 
-export async function zome(happ: HappDefinition, dnaIndex: number, zomeIndex: number): Promise<PatcherDirectory> {
+export function zome(happ: HappDefinition, dnaIndex: number, zomeIndex: number): PatcherDirectory {
   const crateName = getCrateName(happ, dnaIndex, zomeIndex);
   const zome = happ.dnas[dnaIndex].zomes[zomeIndex];
 
@@ -30,7 +30,7 @@ export async function zome(happ: HappDefinition, dnaIndex: number, zomeIndex: nu
     type: PatcherNodeType.Directory,
     children: {
       'Cargo.toml': zomeCargoToml(crateName, '<AUTHOR>'),
-      src: await zomeCode(zome),
+      src: zomeCode(zome),
     },
   };
 }

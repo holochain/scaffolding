@@ -30,4 +30,3 @@ import WebHappDefinitionBuilderVue from './elements/WebHappDefinitionBuilder.ce.
 const WebHappDefinitionBuilder = defineCustomElement(WebHappDefinitionBuilderVue);
 
 export { WebHappDefinitionBuilder };
-export * from './utils';

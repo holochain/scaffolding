@@ -8,13 +8,13 @@ import { modRs } from './mod.rs';
 export * from './handlers.rs';
 export * from './entry.rs';
 
-export async function generateEntryDef(entryDef: EntryDefinition): Promise<PatcherDirectory> {
+export function generateEntryDef(entryDef: EntryDefinition): PatcherDirectory {
   return {
     type: PatcherNodeType.Directory,
     children: {
       'mod.rs': modRs(),
       'handlers.rs': entryHandlers(entryDef),
-      'entry.rs': await entryTypes(entryDef),
+      'entry.rs': entryTypes(entryDef),
     },
   };
 }

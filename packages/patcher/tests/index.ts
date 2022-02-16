@@ -2,6 +2,8 @@ import test from 'tape';
 import { webHapp, WebFramework } from '../dist';
 import path from 'path';
 import { applyPatch } from '@patcher/fs';
+import { holochainEntryTypeDefinition } from '@holochain-scaffolding/definitions';
+import { dateType } from '@typecraft/date';
 
 import { fileURLToPath } from 'url';
 
@@ -26,7 +28,13 @@ test('generate a full blown happ', async t => {
                   update: true,
                   delete: false,
                   read: true,
-                  sample: { foo: 'hi', bar: 3 },
+                  typeDefinition: holochainEntryTypeDefinition('sample_entry', [
+                    {
+                      name: 'createdAt',
+                      type: dateType,
+                      configuration: {},
+                    },
+                  ]),
                 },
                 {
                   name: 'sample_entry2',
@@ -34,7 +42,13 @@ test('generate a full blown happ', async t => {
                   update: false,
                   delete: false,
                   read: true,
-                  sample: { foo: 'hi', bar: 3 },
+                  typeDefinition: holochainEntryTypeDefinition('sample_entry2', [
+                    {
+                      name: 'createdAt',
+                      type: dateType,
+                      configuration: {},
+                    },
+                  ]),
                 },
               ],
             },
@@ -47,7 +61,13 @@ test('generate a full blown happ', async t => {
                   update: false,
                   delete: true,
                   read: false,
-                  sample: { foo: 'hi', bar: 3 },
+                  typeDefinition: holochainEntryTypeDefinition('sample_entry3', [
+                    {
+                      name: 'createdAt',
+                      type: dateType,
+                      configuration: {},
+                    },
+                  ]),
                 },
               ],
             },
@@ -65,7 +85,13 @@ test('generate a full blown happ', async t => {
                   update: false,
                   delete: false,
                   read: true,
-                  sample: { foo: 'hi', bar: 3 },
+                  typeDefinition: holochainEntryTypeDefinition('sample_entry', [
+                    {
+                      name: 'createdAt',
+                      type: dateType,
+                      configuration: {},
+                    },
+                  ]),
                 },
               ],
             },

@@ -76,10 +76,9 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 import type { TextField } from '@material/mwc-textfield';
-import { EntryDefinition } from '@holochain-scaffolding/definitions';
+import { EntryDefinition, holochainEntryRustTypeGenerator, newEntryDef } from '@holochain-scaffolding/definitions';
 import { isSnakeCase } from '@holochain-scaffolding/patcher';
-import { newEntryDef } from '../utils';
-import { FieldDefinition } from '@typecraft/type-definition';
+import { defaultTsGenerator, FieldDefinition, ProgrammingLanguages } from '@typecraft/type-definition';
 
 export default defineComponent({
   name: 'DefineEntry',
@@ -138,7 +137,17 @@ export default defineComponent({
       this.emitChanged();
     },
     emitChanged() {
-      this.$emit('entry-def-changed', this.entryDef);
+      (this.entryDef.typeDefinition.generators = {
+        [ProgrammingLanguages.Typescript]: defaultTsGenerator(
+          this.entryDef.name,
+          this.entryDef.typeDefinition.fields!,
+        ),
+        [ProgrammingLanguages.Rust]: holochainEntryRustTypeGenerator(
+          this.entryDef.name,
+          this.entryDef.typeDefinition.fields!,
+        ),
+      }),
+        this.$emit('entry-def-changed', this.entryDef);
     },
   },
 });

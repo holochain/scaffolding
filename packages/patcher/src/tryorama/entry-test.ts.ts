@@ -1,9 +1,5 @@
 import { DnaDefinition, EntryDefinition, ZomeDefinition } from '@holochain-scaffolding/definitions';
-import toJsonSchema from 'to-json-schema';
-import jsf from 'json-schema-faker';
 import { PatcherFile, PatcherNodeType } from '@patcher/types';
-jsf.option('alwaysFakeOptionals', true);
-jsf.option('fillProperties', false);
 
 export const tryoramaEntryTest = (
   dna: DnaDefinition,
@@ -38,7 +34,7 @@ export const entryCrudTests = (dna: DnaDefinition, zome: ZomeDefinition, entryDe
     const alice = alice_happ.cells.find(cell => cell.cellRole.includes('/${dna.name}.dna')) as Cell;
     const bob = bob_happ.cells.find(cell => cell.cellRole.includes('/${dna.name}.dna')) as Cell;
 
-    const entryContents = ${JSON.stringify(entryDef.sample)};
+    const entryContents = ${JSON.stringify(entryDef.typeDefinition.sample(), null, 2)};
 
     // Alice creates a ${entryDef.name}
     let create_output = await alice.call(
@@ -68,10 +64,7 @@ export const entryCrudTests = (dna: DnaDefinition, zome: ZomeDefinition, entryDe
       "update_${entryDef.name}",
       {
         original_header_hash: create_output.header_hash,
-        updated_${entryDef.name}: ${JSON.stringify(generateAnotherSample(entryDef.sample), null, 2).replace(
-            '\n',
-            '\n        ',
-          )}
+        updated_${entryDef.name}: ${JSON.stringify(entryDef.typeDefinition.sample(), null, 2).replace('\n', '\n        ')}
       }
     );
     t.ok(update_output.header_hash);
@@ -105,8 +98,3 @@ export const entryCrudTests = (dna: DnaDefinition, zome: ZomeDefinition, entryDe
     }
   });
 `;
-
-function generateAnotherSample(sample: any): any {
-  let schema = toJsonSchema(sample);
-  return jsf.generate(schema);
-}

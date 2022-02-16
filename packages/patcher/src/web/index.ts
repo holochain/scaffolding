@@ -1,13 +1,13 @@
 import { HappDefinition } from '@holochain-scaffolding/definitions';
 import { PatcherDirectory, PatcherFile } from '@patcher/types';
 import { generateVueApp, provideServiceForApp, patchEnvVars, patchNpmDependency } from '@patcher/vue';
-import { generateTsTypes } from '../ts';
+import {  generateTsTypesForHapp } from '../ts';
 
 export enum WebFramework {
   Vue = 'vue',
 }
 
-export async function webApp(happDef: HappDefinition, framework: WebFramework): Promise<PatcherDirectory> {
+export function webApp(happDef: HappDefinition, framework: WebFramework): PatcherDirectory {
   if (framework === WebFramework.Vue) {
     const dir = generateVueApp();
 
@@ -30,7 +30,7 @@ export async function webApp(happDef: HappDefinition, framework: WebFramework): 
 
     const src = dir.children['src'] as PatcherDirectory;
     if (src) {
-      src.children['types.ts'] = await generateTsTypes(happDef);
+      src.children['types.ts'] = generateTsTypesForHapp(happDef);
     }
 
     return dir;

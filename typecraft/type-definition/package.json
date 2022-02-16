@@ -16,7 +16,8 @@
     "typescript": "^4.4.3"
   },
   "dependencies": {
-    "@types/json-schema": "^7.0.9"
+    "@types/json-schema": "^7.0.9",
+    "lodash-es": "^4.17.21"
   },
   "files": [
     "dist"

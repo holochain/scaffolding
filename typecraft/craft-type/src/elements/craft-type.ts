@@ -10,7 +10,13 @@ import {
   TextArea,
   TextField,
 } from '@scoped-elements/material-web';
-import { FieldDefinition, TypeDefinition } from '@typecraft/type-definition';
+import {
+  defaultSample,
+  defaultRustGenerator,
+  defaultTsGenerator,
+  ProgrammingLanguages,
+  TypeDefinition,
+} from '@typecraft/type-definition';
 
 import { dateType } from '@typecraft/date';
 import { JsonSchemaForm } from './json-schema-form';
@@ -33,11 +39,20 @@ export class CraftType extends ScopedElementsMixin(LitElement) {
   get value(): TypeDefinition<any, any> {
     const name = this.typeNameField.value;
     const description = this.typeDescriptionField.value;
+    const fields = this.craftFields.value;
 
     return {
       name,
       description,
-      fields: this.craftFields.value,
+      fields,
+      generators: {
+        [ProgrammingLanguages.Rust]: defaultRustGenerator(
+          name,
+          this.craftFields.value
+        ),
+        [ProgrammingLanguages.Typescript]: defaultTsGenerator(name, fields),
+      },
+      sample: () => defaultSample(fields),
       create: [],
       detail: [],
     };

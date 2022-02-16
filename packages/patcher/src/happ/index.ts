@@ -14,21 +14,21 @@ import { PatcherDirectory, PatcherFile, PatcherNodeType } from '@patcher/types';
 import { npmRc } from '../npm/npmrc';
 import { rootPackageJson } from '../npm/package.json';
 
-export async function happ(happDef: HappDefinition): Promise<PatcherDirectory> {
+export function happ(happDef: HappDefinition): PatcherDirectory {
   const happDir: PatcherDirectory = {
     type: PatcherNodeType.Directory,
     children: {},
   };
 
   if (happDef.dnas.length === 0) {
-    happDir.children['dna'] = await dna(happDef, 0, '../../');
+    happDir.children['dna'] = dna(happDef, 0, '../../');
   } else {
     const dnasDir: PatcherDirectory = {
       type: PatcherNodeType.Directory,
       children: {},
     };
     for (const [dnaIndex, dnaDef] of happDef.dnas.entries()) {
-      dnasDir.children[dnaDef.name] = await dna(happDef, dnaIndex, '../../../');
+      dnasDir.children[dnaDef.name] = dna(happDef, dnaIndex, '../../../');
     }
     happDir.children['dnas'] = dnasDir;
   }

@@ -1,3 +1,4 @@
+import { holochainEntryTypeDefinition } from '@holochain-scaffolding/definitions';
 import { WebFramework, webHapp } from '@holochain-scaffolding/patcher';
 import { applyPatch } from '@patcher/fs';
 
@@ -16,14 +17,7 @@ export async function init(appName: string) {
                   delete: true,
                   update: true,
                   read: true,
-                  typeDefinition: {
-                    name: 'entry-def-1',
-                    description: 'Holochain entry',
-                    // TODO: fix this
-                    fields: [],
-                    create: [],
-                    detail: [],
-                  },
+                  typeDefinition: holochainEntryTypeDefinition('entry-def-1', []),
                   name: 'entry-def-1',
                 },
               ],
