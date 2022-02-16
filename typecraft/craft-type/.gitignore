@@ -22,3 +22,4 @@
 
 storybook-static
 custom-elements.json
+*.tsbuildinfo

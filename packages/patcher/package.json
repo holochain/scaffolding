@@ -21,6 +21,7 @@
     "lodash-es": "^4.17.21"
   },
   "devDependencies": {
+    "@lit-labs/ssr": "^2.0.3",
     "@patcher/fs": "0.0.1",
     "@types/tape": "^4.13.2",
     "buffer": "^6.0.3",

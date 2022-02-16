@@ -11,7 +11,9 @@
     "start": "concurrently -k \"yarn workspace @holochain-scaffolding/definitions run build:watch\" \"yarn workspace @typecraft/craft-type run build:watch\" \"yarn workspace @holochain-scaffolding/patcher run build:watch\" \"yarn workspace @holochain-scaffolding/elements run build:watch\" \"yarn workspace @holochain-scaffolding/events run build:watch\" \"yarn workspace @holochain-scaffolding/ui run build:watch\" \"yarn workspace @holochain/create run start\"",
     "postinstall": "npm run build",
     "test": "yarn workspace @holochain-scaffolding/patcher run test",
-    "build": "yarn workspace @patcher/types run build && yarn workspace @patcher/fs run build && yarn workspace @patcher/web-apps run build && yarn workspace @patcher/vue run build && yarn workspace @holochain-scaffolding/definitions run build && yarn workspace @holochain-scaffolding/patcher run build && yarn workspace @holochain-scaffolding/elements run build && yarn workspace @holochain-scaffolding/events run build && yarn workspace @holochain-scaffolding/ui run build && yarn workspace @holochain/create run build"
+    "build": "npm run build:patcher && npm run build:typecraft && yarn workspace @holochain-scaffolding/definitions run build && yarn workspace @holochain-scaffolding/patcher run build && yarn workspace @holochain-scaffolding/elements run build && yarn workspace @holochain-scaffolding/events run build && yarn workspace @holochain-scaffolding/ui run build && yarn workspace @holochain/create run build",
+    "build:patcher": "yarn workspace @patcher/types run build && yarn workspace @patcher/fs run build && yarn workspace @patcher/web-apps run build && yarn workspace @patcher/vue run build",
+    "build:typecraft": "yarn workspace @typecraft/type-definition run build && yarn workspace @typecraft/date run build && yarn workspace @typecraft/craft-type run build"
   },
   "devDependencies": {
     "chalk": "^4.1.2",

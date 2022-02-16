@@ -1,7 +1,8 @@
 import { HappDefinition } from '@holochain-scaffolding/definitions';
 import { PatcherDirectory, PatcherFile } from '@patcher/types';
 import { generateVueApp, provideServiceForApp, patchEnvVars, patchNpmDependency } from '@patcher/vue';
-import {  generateTsTypesForHapp } from '../ts';
+import { generateTsTypesForHapp } from '../ts';
+import { addWebComponentsForHapp } from './add-component';
 
 export enum WebFramework {
   Vue = 'vue',
@@ -11,7 +12,11 @@ export function webApp(happDef: HappDefinition, framework: WebFramework): Patche
   if (framework === WebFramework.Vue) {
     const dir = generateVueApp();
 
-    dir.children['package.json'] = patchNpmDependency(dir.children['package.json'] as PatcherFile, '@holochain/client', '^0.3.2');
+    dir.children['package.json'] = patchNpmDependency(
+      dir.children['package.json'] as PatcherFile,
+      '@holochain/client',
+      '^0.3.2',
+    );
 
     provideServiceForApp(dir, {
       imports: [`import { AppWebsocket } from '@holochain/client';`],
@@ -31,6 +36,9 @@ export function webApp(happDef: HappDefinition, framework: WebFramework): Patche
     const src = dir.children['src'] as PatcherDirectory;
     if (src) {
       src.children['types.ts'] = generateTsTypesForHapp(happDef);
+
+      // For every entry, add create and detail component
+      src.children['components'] = addWebComponentsForHapp(src.children['components'] as PatcherDirectory, happDef);
     }
 
     return dir;

@@ -1,7 +1,9 @@
+import '@lit-labs/ssr/lib/render-with-global-dom-shim.js';
+
 import test from 'tape';
-import { webHapp, WebFramework } from '../dist';
 import path from 'path';
 import { applyPatch } from '@patcher/fs';
+import { webHapp, WebFramework } from '../dist';
 import { holochainEntryTypeDefinition } from '@holochain-scaffolding/definitions';
 import { dateType } from '@typecraft/date';
 
@@ -12,7 +14,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 test('generate a full blown happ', async t => {
-  const happChanges = await webHapp(
+  const happChanges = webHapp(
     {
       name: 'haha',
       dnas: [

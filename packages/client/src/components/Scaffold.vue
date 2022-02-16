@@ -160,10 +160,7 @@ export default defineComponent({
         toReplace['entryDefName'] = firstCreateCall.entryDefName;
       }
 
-      this.happDir = await webHapp(happ, WebFramework.Vue);
-
-      // For every entry, add create and detail component
-      this.happDir = addWebComponentsForHapp(this.happDir, happ);
+      this.happDir = webHapp(happ, WebFramework.Vue);
 
       this.happName = happ.name;
       (this.$refs.dialog as Dialog).show();

@@ -6,9 +6,7 @@ import { TypeDefinition } from '@typecraft/type-definition';
 import { ElementContent, Element } from 'hast';
 import camelCase from 'lodash-es/camelCase';
 
-export function addWebComponentsForHapp(dir: PatcherDirectory, happ: HappDefinition): PatcherDirectory {
-  const componentsDir = (dir.children['src'] as PatcherDirectory).children['components'] as PatcherDirectory;
-
+export function addWebComponentsForHapp(componentsDir: PatcherDirectory, happ: HappDefinition): PatcherDirectory {
   for (const dna of happ.dnas) {
     const dnaDir: PatcherDirectory = {
       type: PatcherNodeType.Directory,
@@ -35,7 +33,7 @@ export function addWebComponentsForHapp(dir: PatcherDirectory, happ: HappDefinit
     componentsDir.children[dna.name] = dnaDir;
   }
 
-  return dir;
+  return componentsDir;
 }
 
 const titleCase = (s: string) => `${s[0] && s[0].toUpperCase()}${camelCase(s.slice(1))}`;
