@@ -1,4 +1,6 @@
-import { flattenDeep } from 'lodash-es';
+import flattenDeep from 'lodash-es/flattenDeep';
+import camelCase from 'lodash-es/camelCase';
+import upperFirst from 'lodash-es/upperFirst';
 import { HappDefinition } from '@holochain-scaffolding/definitions';
 
 export function getDnaBundlePath(happ: HappDefinition, dnaName: string): string {
@@ -20,18 +22,11 @@ export function mergeStrings(strings: Array<any>, separator = '') {
 
 /** Case Utils */
 
-export const camelize = (s: string) => kebabToCamelCase(snakeToCamelCase(s));
-
 export const kebabToCamelCase = (s: string) => s.replace(/-./g, x => x.toUpperCase()[1]);
 export const snakeToCamelCase = (s: string) => s.replace(/_./g, x => x.toUpperCase()[1]);
 
-export const kebabToSnakeCase = (str: string) =>
-  str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`).replace(/\-/g, letter => `_`);
-
-export function toTitleCase(str: string) {
-  return camelize(str).replace(/\w\S*/g, function(txt) {
-    return txt.charAt(0).toUpperCase() + txt.substr(1);
-  });
+export function titleCase(str: string) {
+  return upperFirst(camelCase(str));
 }
 
 const snakeCaseRegex = /^([a-z]{1,})(_[a-z0-9]{1,})*$/;

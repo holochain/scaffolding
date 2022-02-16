@@ -35,9 +35,9 @@ export function webApp(happDef: HappDefinition, framework: WebFramework): Patche
 
     const src = dir.children['src'] as PatcherDirectory;
     if (src) {
-      src.children['types.ts'] = generateTsTypesForHapp(happDef);
-
+      src.children['types'] = generateTsTypesForHapp(happDef);
       // For every entry, add create and detail component
+      // TODO: add dependencies for the elements to package.json
       src.children['components'] = addWebComponentsForHapp(src.children['components'] as PatcherDirectory, happDef);
     }
 

@@ -1,6 +1,8 @@
 import { HappDefinition } from '@holochain-scaffolding/definitions';
 import { PatcherFile, PatcherNodeType } from '@patcher/types';
-import { camelize, getDnaBundlePath, mergeStrings } from '../utils';
+import camelCase from 'lodash-es/camelCase';
+
+import { getDnaBundlePath, mergeStrings } from '../utils';
 
 export const tryoramaUtilsTs = (happ: HappDefinition): PatcherFile => ({
   type: PatcherNodeType.File,
@@ -12,7 +14,7 @@ const __dirname = path.dirname(__filename);
 
 ${mergeStrings(
   happ.dnas.map(
-    dna => `export const ${camelize(dna.name)}Dna = path.join(__dirname, "../../${getDnaBundlePath(happ, dna.name)}");
+    dna => `export const ${camelCase(dna.name)}Dna = path.join(__dirname, "../../${getDnaBundlePath(happ, dna.name)}");
 `,
   ),
 )}
@@ -25,7 +27,7 @@ export const installation: InstallAgentsHapps = [
     [${mergeStrings(
       happ.dnas.map(
         dna => `
-      ${camelize(dna.name)}Dna, // contains this dna`,
+      ${camelCase(dna.name)}Dna, // contains this dna`,
       ),
     )}
     ]

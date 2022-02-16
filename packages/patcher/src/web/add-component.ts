@@ -5,6 +5,8 @@ import { vueComponent } from '@patcher/vue';
 import { TypeDefinition } from '@typecraft/type-definition';
 import { ElementContent, Element } from 'hast';
 import camelCase from 'lodash-es/camelCase';
+import { titleCase } from '../utils';
+import snakeCase from 'lodash-es/snakeCase';
 
 export function addWebComponentsForHapp(componentsDir: PatcherDirectory, happ: HappDefinition): PatcherDirectory {
   for (const dna of happ.dnas) {
@@ -20,7 +22,7 @@ export function addWebComponentsForHapp(componentsDir: PatcherDirectory, happ: H
       };
 
       for (const entry of zome.entry_defs) {
-        const dir = webComponentsForEntry(entry);
+        const dir = webComponentsForEntry(dna.name, zome.name, entry);
         zomeDir.children = {
           ...zomeDir.children,
           ...dir.children,
@@ -36,10 +38,8 @@ export function addWebComponentsForHapp(componentsDir: PatcherDirectory, happ: H
   return componentsDir;
 }
 
-const titleCase = (s: string) => `${s[0] && s[0].toUpperCase()}${camelCase(s.slice(1))}`;
-
-export function webComponentsForEntry(entry: EntryDefinition): PatcherDirectory {
-  const wcs: WebComponent[] = [createWebComponent(entry.typeDefinition)];
+export function webComponentsForEntry(dnaName: string, zomeName: string, entry: EntryDefinition): PatcherDirectory {
+  const wcs: WebComponent[] = [createWebComponent(dnaName, zomeName, entry.typeDefinition)];
 
   const children: Record<string, PatcherFile> = {};
   for (const wc of wcs) {
@@ -52,27 +52,45 @@ export function webComponentsForEntry(entry: EntryDefinition): PatcherDirectory 
   };
 }
 
-export function createWebComponent(type: TypeDefinition<any, any>): WebComponent {
+export function createWebComponent(dnaName: string, zomeName: string, type: TypeDefinition<any, any>): WebComponent {
   const template = createTemplate(type);
 
   const methods: Record<string, FnDefinition> = {};
 
   if (type.fields) {
     for (const field of type.fields) {
-      methods[`on${field.name}Change`] = {
+      methods[`on${titleCase(field.name)}Change`] = {
         params: [{ name: 'event', type: 'Event' }],
-        fnContent: `this.${type.name}.${field.name} = event.target.value;`,
+        fnContent: `this.${camelCase(type.name)}.${camelCase(field.name)} = (event.target as any).value;`,
       };
     }
+    methods[`create${titleCase(type.name)}`] = {
+      params: [],
+      fnContent: `this.appWebsocket.callZome({
+        cap_secret: null,
+        cell_id: [], // TODO: fix
+        zome_name: '${zomeName}',
+        fn_name: 'create_${snakeCase(type.name)}',
+        payload: this.${camelCase(type.name)}
+      }`,
+    };
   }
 
   return {
+    inject: [
+      {
+        name: 'appWebsocket',
+        type: 'AppWebsocket',
+      },
+    ],
     template,
     localState: {
       [camelCase(type.name)]: {
-        type: type.name,
+        type: titleCase(type.name),
+        default: JSON.stringify(type.sample()),
       },
     },
+    imports: [`import { ${titleCase(type.name)} } from '../../../types/${dnaName}/${zomeName}';`],
 
     methods,
   };
@@ -83,9 +101,9 @@ export function createTemplate(type: TypeDefinition<any, any>): ElementContent[]
 
   const fields: Element[] = type.fields.map(f => ({
     type: 'element',
-    tagName: `create-${f.name}`,
+    tagName: f.type.create[0].tagName,
     events: {
-      change: `on${f.name}Change`,
+      change: `on${titleCase(f.name)}Change($event)`,
     },
     children: [],
   }));
@@ -94,7 +112,7 @@ export function createTemplate(type: TypeDefinition<any, any>): ElementContent[]
     type: 'element',
     tagName: 'mwc-button',
     events: {
-      click: `create${type.name}`,
+      click: `create${titleCase(type.name)}`,
     },
     children: [],
   };

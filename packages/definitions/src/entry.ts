@@ -44,7 +44,7 @@ export function newEntryDef(name: string = 'entry_def_0'): EntryDefinition {
 export function holochainEntryRustTypeGenerator(typeName: string, fields: Array<FieldDefinition<any>>): TypeGenerator {
   const imports = ['use hdk::prelude::*;'];
   const defineType = `#[hdk_entry(id = "${snakeCase(typeName)}")]
-  ${defaultRustGeneratorDefineType(typeName, fields)}`;
+${defaultRustGeneratorDefineType(typeName, fields)}`;
 
   return {
     imports,
@@ -69,10 +69,10 @@ export function holochainEntryTypeDefinition(
     generators: {
       [ProgrammingLanguages.Typescript]: {
         imports: [],
-        defineType: defaultTsGeneratorDefineType(name, []),
+        defineType: defaultTsGeneratorDefineType(name, fields),
         referenceType: name,
       },
-      [ProgrammingLanguages.Rust]: holochainEntryRustTypeGenerator(name, []),
+      [ProgrammingLanguages.Rust]: holochainEntryRustTypeGenerator(name, fields),
     },
   };
 }

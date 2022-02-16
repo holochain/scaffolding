@@ -1,5 +1,6 @@
 import { FieldDefinition, ProgrammingLanguages, TypeDefinition, TypeGenerator } from './index';
 import camelCase from 'lodash-es/camelCase';
+import upperFirst from 'lodash-es/upperFirst';
 import snakeCase from 'lodash-es/snakeCase';
 import uniq from 'lodash-es/uniq';
 import flattenDeep from 'lodash-es/flattenDeep';
@@ -28,17 +29,18 @@ export function aggregateGenerators(
 
 export function generateTypesFile(types: Array<TypeDefinition<any, any>>, language: ProgrammingLanguages): string {
   const g = types.map(t => aggregateGenerators(t, language));
+
   const imports = g.map(a => a.imports);
   const defineTypes = g.map(a => a.defineTypes);
 
   return `${uniq(flattenDeep(imports)).join('\n')}
 
-${flattenDeep(defineTypes).join('\n')}
+${flattenDeep(defineTypes).join('\n\n')}
 `;
 }
 
 export function defaultTsGeneratorDefineType(typeName: string, fields: Array<FieldDefinition<any>>): string {
-  return `export interface ${typeName} {
+  return `export interface ${upperFirst(camelCase(typeName))} {
   ${fields
     .map(f => `${camelCase(f.name)}: ${f.type.generators[ProgrammingLanguages.Typescript].referenceType};`)
     .join('\n  ')}
@@ -47,7 +49,7 @@ export function defaultTsGeneratorDefineType(typeName: string, fields: Array<Fie
 
 export function defaultRustGeneratorDefineType(typeName: string, fields: Array<FieldDefinition<any>>): string {
   return `#[derive(Clone)]
-pub struct ${typeName} {
+pub struct ${upperFirst(camelCase(typeName))} {
   ${fields
     .map(f => `${snakeCase(f.name)}: ${f.type.generators[ProgrammingLanguages.Rust].referenceType},`)
     .join('\n  ')}

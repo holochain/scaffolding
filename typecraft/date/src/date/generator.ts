@@ -5,3 +5,9 @@ export const tsGenerator: TypeGenerator = {
   defineType: '',
   referenceType: 'number',
 };
+
+export const rustGenerator: TypeGenerator = {
+  imports: [],
+  defineType: '',
+  referenceType: 'usize',
+};

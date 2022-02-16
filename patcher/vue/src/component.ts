@@ -28,7 +28,9 @@ ${component.properties ? `import { PropType, defineComponent } from 'vue';` : `i
 
 export default defineComponent${rawBindings ? `<any, ${rawBindings}>` : ''}({ ${vueSubcomponents(component)} ${vueProps(
     component,
-  )} ${vueData(component)} ${vueLifecycle(component)} ${vueProvide(component)} ${vueInject(component)}
+  )} ${vueData(component)} ${vueLifecycle(component)} ${vueMethods(component)} ${vueProvide(component)} ${vueInject(
+    component,
+  )}
 })`;
 }
 
@@ -105,6 +107,21 @@ ${
 }`;
 }
 
+function vueMethods(component: WebComponent): string {
+  if (!component.methods) return '';
+
+  return `
+  methods {
+    ${Object.entries(component.methods)
+      .map(
+        ([fnName, fn]) => `${fnName}(${fn.params.map(p => `${p.name}: ${p.type}`).join(', ')}) {
+      ${fn.fnContent}
+    },`,
+      )
+      .join('\n    ')}
+  },`;
+}
+
 export const vueTemplatePlugin: Plugin<[], Element> = () => {
   return tree => {
     visit(tree, 'element', node => {
@@ -112,6 +129,13 @@ export const vueTemplatePlugin: Plugin<[], Element> = () => {
         if (!node.properties) node.properties = {};
         for (const [inputName, inputValue] of Object.entries(node.inputs)) {
           node.properties[`:${inputName}`] = inputValue;
+        }
+      }
+
+      if (node.events) {
+        if (!node.properties) node.properties = {};
+        for (const [eventName, eventValue] of Object.entries(node.events)) {
+          node.properties[`@${eventName}`] = eventValue;
         }
       }
     });

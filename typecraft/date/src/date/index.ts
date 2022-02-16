@@ -2,7 +2,7 @@ import { ProgrammingLanguages, TypeDefinition, TypeGenerator } from '@typecraft/
 import { DateConfig } from './types';
 import { CreateDate } from './create-date';
 import { ShowDate } from './show-date';
-import { tsGenerator } from './generator';
+import { rustGenerator, tsGenerator } from './generator';
 
 export const dateType: TypeDefinition<number, DateConfig> = {
   name: 'Date',
@@ -20,6 +20,7 @@ export const dateType: TypeDefinition<number, DateConfig> = {
   create: [
     {
       element: CreateDate,
+      tagName: 'create-date',
       package: '@typecraft/date',
       version: '0.0.1',
       customImportDefiningCustomElement: '@typecraft/date/create-date',
@@ -28,7 +29,8 @@ export const dateType: TypeDefinition<number, DateConfig> = {
   detail: [
     {
       element: ShowDate,
-      package: '@typecraft/date',
+      package: 'show-date',
+      tagName: '@typecraft/date',
       version: '0.0.1',
       customImportDefiningCustomElement: '@typecraft/date/show-date',
     },
@@ -38,6 +40,6 @@ export const dateType: TypeDefinition<number, DateConfig> = {
 
   generators: {
     [ProgrammingLanguages.Typescript]: tsGenerator,
-    [ProgrammingLanguages.Rust]: tsGenerator,
+    [ProgrammingLanguages.Rust]: rustGenerator,
   },
 };

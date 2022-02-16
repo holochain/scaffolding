@@ -14,6 +14,7 @@ export interface DetailElement<T, C> {
 
 export interface ElementReference<E> {
   element: Constructor<HTMLElement & E>;
+  tagName: string;
   package: string;
   version: string;
   customImportDefiningCustomElement?: string;
