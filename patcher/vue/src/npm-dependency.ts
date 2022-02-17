@@ -6,6 +6,6 @@ export function patchNpmDependency(packageJsonFile: PatcherFile, packageName: st
 
   return {
     type: PatcherNodeType.File,
-    content: JSON.stringify(packageJson),
+    content: JSON.stringify(packageJson, null, 2),
   };
 }

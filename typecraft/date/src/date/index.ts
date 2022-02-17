@@ -29,8 +29,8 @@ export const dateType: TypeDefinition<number, DateConfig> = {
   detail: [
     {
       element: ShowDate,
-      package: 'show-date',
-      tagName: '@typecraft/date',
+      package: '@typecraft/date',
+      tagName: 'show-date',
       version: '0.0.1',
       customImportDefiningCustomElement: '@typecraft/date/show-date',
     },
