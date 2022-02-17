@@ -20,7 +20,7 @@ export async function happ(happDef: HappDefinition): Promise<PatcherDirectory> {
     children: {},
   };
 
-  if (happDef.dnas.length === 0) {
+  if (happDef.dnas.length < 2) {
     happDir.children['dna'] = await dna(happDef, 0, '../../');
   } else {
     const dnasDir: PatcherDirectory = {

@@ -7,7 +7,7 @@ export async function init(appName: string) {
       name: appName,
       dnas: [
         {
-          name: 'dna-1',
+          name: 'dna_1',
           zomes: [
             {
               entry_defs: [
@@ -20,10 +20,10 @@ export async function init(appName: string) {
                     foo: 1,
                     bar: 'some content',
                   },
-                  name: 'entry-def-1',
+                  name: 'entry_def_1',
                 },
               ],
-              name: 'zome-1',
+              name: 'zome_1',
             },
           ],
         },
