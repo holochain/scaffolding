@@ -20,7 +20,7 @@ export function happ(happDef: HappDefinition): PatcherDirectory {
     children: {},
   };
 
-  if (happDef.dnas.length === 0) {
+  if (happDef.dnas.length < 2) {
     happDir.children['dna'] = dna(happDef, 0, '../../');
   } else {
     const dnasDir: PatcherDirectory = {
