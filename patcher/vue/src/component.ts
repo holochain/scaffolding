@@ -111,7 +111,7 @@ function vueMethods(component: WebComponent): string {
   if (!component.methods) return '';
 
   return `
-  methods {
+  methods: {
     ${Object.entries(component.methods)
       .map(
         ([fnName, fn]) => `${fnName}(${fn.params.map(p => `${p.name}: ${p.type}`).join(', ')}) {
