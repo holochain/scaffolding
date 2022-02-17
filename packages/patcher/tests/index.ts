@@ -25,7 +25,6 @@ test('generate a full blown happ', async t => {
               name: 'hihi',
               entry_defs: [
                 {
-                  name: 'sample_entry',
                   create: true,
                   update: true,
                   delete: false,
@@ -39,7 +38,6 @@ test('generate a full blown happ', async t => {
                   ]),
                 },
                 {
-                  name: 'sample_entry2',
                   create: true,
                   update: false,
                   delete: false,
@@ -58,7 +56,6 @@ test('generate a full blown happ', async t => {
               name: 'hihi2',
               entry_defs: [
                 {
-                  name: 'sample_entry',
                   create: true,
                   update: false,
                   delete: true,
@@ -82,7 +79,6 @@ test('generate a full blown happ', async t => {
               name: 'hihi',
               entry_defs: [
                 {
-                  name: 'sample_entry',
                   create: true,
                   update: false,
                   delete: false,

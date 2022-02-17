@@ -18,7 +18,7 @@ export default (orchestrator: Orchestrator<any>) =>  {
 });
 
 export const entryCrudTests = (dna: DnaDefinition, zome: ZomeDefinition, entryDef: EntryDefinition) => `
-  orchestrator.registerScenario("${entryDef.name} CRUD tests", async (s, t) => {
+  orchestrator.registerScenario("${entryDef.typeDefinition.name} CRUD tests", async (s, t) => {
     // Declare two players using the previously specified config, nicknaming them "alice" and "bob"
     // note that the first argument to players is just an array conductor configs that that will
     // be used to spin up the conductor processes which are returned in a matching array.
@@ -36,10 +36,10 @@ export const entryCrudTests = (dna: DnaDefinition, zome: ZomeDefinition, entryDe
 
     const entryContents = ${JSON.stringify(entryDef.typeDefinition.sample(), null, 2)};
 
-    // Alice creates a ${entryDef.name}
+    // Alice creates a ${entryDef.typeDefinition.name}
     let create_output = await alice.call(
         "${zome.name}",
-        "create_${entryDef.name}",
+        "create_${entryDef.typeDefinition.name}",
         entryContents
     );
     t.ok(create_output.header_hash);
@@ -49,8 +49,8 @@ export const entryCrudTests = (dna: DnaDefinition, zome: ZomeDefinition, entryDe
     ${
       entryDef.read
         ? `
-    // Bob gets the created ${entryDef.name}
-    let entry = await bob.call("${zome.name}", "get_${entryDef.name}", create_output.entry_hash);
+    // Bob gets the created ${entryDef.typeDefinition.name}
+    let entry = await bob.call("${zome.name}", "get_${entryDef.typeDefinition.name}", create_output.entry_hash);
     t.deepEqual(entry, entryContents);
     `
         : ``
@@ -58,13 +58,13 @@ export const entryCrudTests = (dna: DnaDefinition, zome: ZomeDefinition, entryDe
     ${
       entryDef.update
         ? `
-    // Alice updates the ${entryDef.name}
+    // Alice updates the ${entryDef.typeDefinition.name}
     let update_output = await alice.call(
       "${zome.name}",
-      "update_${entryDef.name}",
+      "update_${entryDef.typeDefinition.name}",
       {
         original_header_hash: create_output.header_hash,
-        updated_${entryDef.name}: ${JSON.stringify(entryDef.typeDefinition.sample(), null, 2).replace('\n', '\n        ')}
+        updated_${entryDef.typeDefinition.name}: ${JSON.stringify(entryDef.typeDefinition.sample(), null, 2).replace('\n', '\n        ')}
       }
     );
     t.ok(update_output.header_hash);
@@ -77,10 +77,10 @@ export const entryCrudTests = (dna: DnaDefinition, zome: ZomeDefinition, entryDe
     ${
       entryDef.delete
         ? `
-    // Alice delete the ${entryDef.name}
+    // Alice delete the ${entryDef.typeDefinition.name}
     await alice.call(
       "${zome.name}",
-      "delete_${entryDef.name}",
+      "delete_${entryDef.typeDefinition.name}",
       create_output.header_hash
     );
     await sleep(50);
@@ -88,8 +88,8 @@ export const entryCrudTests = (dna: DnaDefinition, zome: ZomeDefinition, entryDe
     ${
       entryDef.read
         ? `
-    // Bob tries to get the deleted ${entryDef.name}, but he doesn't get it because it has been deleted
-    let deletedEntry = await bob.call("${zome.name}", "get_${entryDef.name}", create_output.entry_hash);
+    // Bob tries to get the deleted ${entryDef.typeDefinition.name}, but he doesn't get it because it has been deleted
+    let deletedEntry = await bob.call("${zome.name}", "get_${entryDef.typeDefinition.name}", create_output.entry_hash);
     t.notOk(deletedEntry);`
         : ``
     }

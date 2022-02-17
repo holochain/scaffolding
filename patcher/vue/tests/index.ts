@@ -1,5 +1,5 @@
 import test from 'tape';
-import { provideServiceForApp, patchEnvVars, generateVueApp, vueComponent } from '../dist';
+import { provideContextForApp, patchEnvVars, generateVueApp, vueComponent } from '../dist';
 import path from 'path';
 import { PatcherDirectory, PatcherFile } from '@patcher/types';
 import { applyPatch } from '@patcher/fs';
@@ -14,8 +14,8 @@ test('create a vue component', async t => {
 
   vueApp = patchEnvVars(vueApp, { start: { VITE_HC_PORT: '$HC_PORT' } });
 
-  vueApp = provideServiceForApp(vueApp, {
-    service: {
+  vueApp = provideContextForApp(vueApp, {
+    context: {
       name: 'appWs',
       type: 'number',
     },

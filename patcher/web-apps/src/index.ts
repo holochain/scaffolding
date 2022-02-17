@@ -20,10 +20,7 @@ declare module 'hast' {
 
 export interface WebComponent {
   template: ElementContent[];
-  onMounted?: {
-    callback: FnDefinition;
-    async: boolean;
-  };
+  onMounted?: FnDefinition;
   imports?: string[];
 
   // Property name -> Property Type
@@ -31,23 +28,23 @@ export interface WebComponent {
   // Field name -> Property Type
   localState?: Record<string, WebComponentProp>;
 
-  provide?: ServiceProvided[];
-  inject?: Service[];
+  provide?: ContextProvided[];
+  inject?: Context[];
 
   // Fn name -> fn content
   methods?: Record<string, FnDefinition> | undefined;
   subcomponents?: string[];
 }
 
-export interface Service {
+export interface Context {
   name: string;
   type: string;
+  imports: string[];
 }
 
-export interface ServiceProvided {
-  service: Service;
-  imports: string[];
-  createFnContent: string;
+export interface ContextProvided {
+  context: Context;
+  createContext: FnDefinition;
 }
 
 export interface WebComponentProp {
@@ -69,6 +66,8 @@ export interface HTMLNode {
 }
 
 export interface FnDefinition {
+  async: boolean;
+  imports: string[];
   params: FnParam[];
   fnContent: string;
 }

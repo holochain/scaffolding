@@ -18,6 +18,7 @@
     "@holochain-scaffolding/definitions": "0.0.1",
     "@patcher/types": "0.0.1",
     "@patcher/vue": "0.0.1",
+    "@patcher/web-apps": "0.0.1",
     "lodash-es": "^4.17.21"
   },
   "devDependencies": {

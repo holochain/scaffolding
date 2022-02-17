@@ -8,20 +8,20 @@ export const libRs = (zomeDefinition: ZomeDefinition): PatcherFile => ({
 ${mergeStrings(
   zomeDefinition.entry_defs.map(
     entry_def => `
-mod ${entry_def.name};`,
+mod ${entry_def.typeDefinition.name};`,
   ),
 )}
 ${mergeStrings(
   zomeDefinition.entry_defs.map(
     entry_def => `
-use ${entry_def.name}::${titleCase(entry_def.name)};`,
+use ${entry_def.typeDefinition.name}::${titleCase(entry_def.typeDefinition.name)};`,
   ),
 )}
 
 entry_defs![${mergeStrings(
     zomeDefinition.entry_defs.map(
       entry_def => `
-  ${titleCase(entry_def.name)}::entry_def()`,
+  ${titleCase(entry_def.typeDefinition.name)}::entry_def()`,
     ),
     ',',
   )}

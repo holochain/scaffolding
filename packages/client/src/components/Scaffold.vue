@@ -91,7 +91,6 @@ import FileNode from './FileNode.vue';
 import { getFirstEntry } from '../utils';
 import type { Dialog } from '@material/mwc-dialog';
 import { PatcherDirectory, PatcherNodeType, PatcherNode } from '@patcher/types';
-import { addWebComponentsForHapp } from '../add-component';
 
 export default defineComponent({
   name: 'Scaffold',

@@ -6,13 +6,14 @@ import { visit } from 'unist-util-visit';
 import { unified } from 'unified';
 import rehypeStringify from 'rehype-stringify';
 import rehypeFormat from 'rehype-format';
+import uniq from 'lodash-es/uniq';
 
-export function vueComponent(component: WebComponent, rawBindings = ''): PatcherFile {
+export function vueComponent(component: WebComponent): PatcherFile {
   const template = `<template>
 ${component.template.map(t => vueTemplate(t as Element)).join('\n')}
 </template>`;
   const script = `<script lang="ts">
-${vueScript(component, rawBindings)}
+${vueScript(component)}
 </script>`;
 
   return {
@@ -22,15 +23,34 @@ ${script}`,
   };
 }
 
-function vueScript(component: WebComponent, rawBindings: string): string {
-  return `${component.imports?.join('\n') || ''}
+function vueScript(component: WebComponent): string {
+  const rawBindings = component.inject && component.inject.map(i => `${i.name}: ${i.type}; `).join('');
+  let imports = [];
+  if (component.imports) {
+    imports = [...imports, ...component.imports];
+  }
+  if (component.inject) {
+    for (const i of component.inject) {
+      imports = [...imports, ...i.imports];
+    }
+  }
+  if (component.methods) {
+    for (const i of Object.values(component.methods)) {
+      imports = [...imports, ...i.imports];
+    }
+  }
+  if (component.onMounted) {
+    imports = [...imports, ...component.onMounted.imports];
+  }
+
+  const template = rawBindings ? `<${localDataType(component)}, { ${rawBindings}}>` : '';
+
+  return `${uniq(imports).join('\n') || ''}
 ${component.properties ? `import { PropType, defineComponent } from 'vue';` : `import { defineComponent } from 'vue';`}
 
-export default defineComponent${rawBindings ? `<any, ${rawBindings}>` : ''}({ ${vueSubcomponents(component)} ${vueProps(
+export default defineComponent({ ${vueSubcomponents(component)} ${vueProps(component)} ${vueData(
     component,
-  )} ${vueData(component)} ${vueLifecycle(component)} ${vueMethods(component)} ${vueProvide(component)} ${vueInject(
-    component,
-  )}
+  )} ${vueLifecycle(component)} ${vueMethods(component)} ${vueProvide(component)} ${vueInject(component)}
 })`;
 }
 
@@ -47,27 +67,34 @@ function vueProps(component: WebComponent): string {
   if (!component.properties || Object.entries(component.properties).length === 0) return '';
 
   return `
-  props() {
-    return {
-      ${Object.entries(component.properties)
-        .map(
-          ([propName, prop]) => `${propName}: {
-        type: Object as PropType<${prop.type}>,
-        ${prop.default ? `default: ${prop.default}` : ''}
-      }`,
-        )
-        .join(',\n      ')}
-    }
+  props: {
+    ${Object.entries(component.properties)
+      .map(
+        ([propName, prop]) => `${propName}: {
+      type: Object as PropType<${prop.type}>,
+      ${
+        prop.default
+          ? `default: ${prop.default}
+  `
+          : ''
+      }}`,
+      )
+      .join(',\n      ')}
   },`;
+}
+
+function localDataType(component: WebComponent): string {
+  return `{ ${component.localState &&
+    Object.entries(component.localState)
+      .map(([fieldName, localState]) => `${fieldName}: ${localState.type};`)
+      .join(' ')} }`;
 }
 
 function vueData(component: WebComponent): string {
   if (!component.localState || Object.entries(component.localState).length === 0) return '';
 
   return `
-  data(): { ${Object.entries(component.localState)
-    .map(([fieldName, localState]) => `${fieldName}: ${localState.type};`)
-    .join(' ')} } {
+  data(): ${localDataType(component)} {
     return {
       ${Object.entries(component.localState)
         .map(([fieldName, localState]) => `${fieldName}: ${localState.default || 'undefined'}`)
@@ -83,7 +110,7 @@ function vueProvide(component: WebComponent): string {
   provide() {
     return {
       ${component.provide
-        .map(({ service: { name, type } }) => `${name}: computed(() => this.${name})`)
+        .map(({ context: { name, type } }) => `${name}: computed(() => this.${name})`)
         .join(',\n      ')}
     }
   },`;
@@ -100,8 +127,8 @@ function vueLifecycle(component: WebComponent): string {
   return `
 ${
   component.onMounted
-    ? `  ${component.onMounted.async ? 'async ' : ''}mounted(${component.onMounted.callback.params}) {
-    ${component.onMounted.callback.fnContent}
+    ? `  ${component.onMounted.async ? 'async ' : ''}mounted(${component.onMounted.params}) {
+    ${component.onMounted.fnContent}
   },`
     : ''
 }`;
@@ -114,7 +141,9 @@ function vueMethods(component: WebComponent): string {
   methods: {
     ${Object.entries(component.methods)
       .map(
-        ([fnName, fn]) => `${fnName}(${fn.params.map(p => `${p.name}: ${p.type}`).join(', ')}) {
+        ([fnName, fn]) => `${fn.async ? 'async ' : ''}${fnName}(${fn.params
+          .map(p => `${p.name}: ${p.type}`)
+          .join(', ')}) {
       ${fn.fnContent}
     },`,
       )
@@ -124,21 +153,6 @@ function vueMethods(component: WebComponent): string {
 
 export const vueTemplatePlugin: Plugin<[], Element> = () => {
   return tree => {
-    visit(tree, 'element', node => {
-      if (node.inputs) {
-        if (!node.properties) node.properties = {};
-        for (const [inputName, inputValue] of Object.entries(node.inputs)) {
-          node.properties[`:${inputName}`] = inputValue;
-        }
-      }
-
-      if (node.events) {
-        if (!node.properties) node.properties = {};
-        for (const [eventName, eventValue] of Object.entries(node.events)) {
-          node.properties[`@${eventName}`] = eventValue;
-        }
-      }
-    });
     visit(tree, 'ifCondition', node => {
       let newNode = (node as any) as Element;
       newNode.type = 'element';
@@ -160,12 +174,29 @@ export const vueTemplatePlugin: Plugin<[], Element> = () => {
           type: 'element',
           tagName: 'div',
           properties: {
-            'v-else': undefined,
+            'v-else': '',
           },
           children: [node.else],
         });
       }
     });
+
+    visit(tree, 'element', node => {
+      if (node.inputs) {
+        if (!node.properties) node.properties = {};
+        for (const [inputName, inputValue] of Object.entries(node.inputs)) {
+          node.properties[`:${inputName}`] = inputValue;
+        }
+      }
+      
+      if (node.events) {
+        if (!node.properties) node.properties = {};
+        for (const [eventName, eventValue] of Object.entries(node.events)) {
+          node.properties[`@${eventName}`] = eventValue;
+        }
+      }
+    });
+    return tree;
   };
 };
 
@@ -178,6 +209,8 @@ function vueTemplate(element: Element): string {
     .runSync(element);
 
   return unified()
-    .use(rehypeStringify)
+    .use(rehypeStringify, {
+      collapseEmptyAttributes: true
+    })
     .stringify(d as any);
 }

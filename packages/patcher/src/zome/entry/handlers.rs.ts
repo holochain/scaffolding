@@ -6,22 +6,22 @@ export const entryHandlers = (entryDef: EntryDefinition): PatcherFile => ({
   type: PatcherNodeType.File,
   content: `use hdk::prelude::*;
 use hdk::prelude::holo_hash::*;
-use super::${titleCase(entryDef.name)};
+use super::${titleCase(entryDef.typeDefinition.name)};
 
-${entryDef.read ? readHandler(entryDef.name) : ''}
+${entryDef.read ? readHandler(entryDef.typeDefinition.name) : ''}
 ${
   entryDef.create || entryDef.update
     ? `#[derive(Serialize, Deserialize, Debug)]
-pub struct ${newEntryOutput(entryDef.name)} {
+pub struct ${newEntryOutput(entryDef.typeDefinition.name)} {
   header_hash: HeaderHashB64,
   entry_hash: EntryHashB64,
 }
 `
     : ''
 }
-${entryDef.create ? createHandler(entryDef.name) : ''}
-${entryDef.update ? updateHandler(entryDef.name) : ''}
-${entryDef.delete ? deleteHandler(entryDef.name) : ''}`,
+${entryDef.create ? createHandler(entryDef.typeDefinition.name) : ''}
+${entryDef.update ? updateHandler(entryDef.typeDefinition.name) : ''}
+${entryDef.delete ? deleteHandler(entryDef.typeDefinition.name) : ''}`,
 });
 
 export const readHandlerFnName = (entryDefId: string) => `get_${entryDefId}`;
@@ -73,9 +73,9 @@ pub struct Update${titleCase(entryDefId)}Input {
 }
 
 #[hdk_extern]
-pub fn ${updateHandlerFnName(entryDefId)}(input: Update${titleCase(
+pub fn ${updateHandlerFnName(entryDefId)}(input: Update${titleCase(entryDefId)}Input) -> ExternResult<${newEntryOutput(
   entryDefId,
-)}Input) -> ExternResult<${newEntryOutput(entryDefId)}> {
+)}> {
   let header_hash = update_entry(HeaderHash::from(input.original_header_hash), &input.updated_${entryDefId})?;
 
   let entry_hash = hash_entry(&input.updated_${entryDefId})?;

@@ -56,7 +56,7 @@ function zomeTests(dna: DnaDefinition, zome: ZomeDefinition): PatcherDirectory {
   };
 
   for (const entryDef of zome.entry_defs) {
-    zometests.children[`${entryDef.name}.ts`] = tryoramaEntryTest(dna, zome, entryDef);
+    zometests.children[`${entryDef.typeDefinition.name}.ts`] = tryoramaEntryTest(dna, zome, entryDef);
   }
 
   return zometests;

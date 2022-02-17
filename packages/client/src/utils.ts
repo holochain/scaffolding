@@ -101,8 +101,8 @@ export function getFirstEntry(
           return {
             dnaName: dna.name,
             zomeName: zome.name,
-            fnName: createHandlerFnName(entryDef.name),
-            entryDefName: entryDef.name,
+            fnName: createHandlerFnName(entryDef.typeDefinition.name),
+            entryDefName: entryDef.typeDefinition.name,
           };
         }
       }

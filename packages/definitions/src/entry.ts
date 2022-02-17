@@ -13,7 +13,6 @@ import camelCase from 'lodash-es/camelCase';
 import upperFirst from 'lodash-es/upperFirst';
 
 export interface EntryDefinition {
-  name: string;
   read: boolean;
   create: boolean;
   update: boolean;
@@ -35,7 +34,6 @@ export function newEntryDef(name: string = 'entry_def_0'): EntryDefinition {
     read: true,
     delete: true,
     update: true,
-    name,
 
     typeDefinition: holochainEntryTypeDefinition(name, fields),
   };
@@ -44,6 +42,7 @@ export function newEntryDef(name: string = 'entry_def_0'): EntryDefinition {
 export function holochainEntryRustTypeGenerator(typeName: string, fields: Array<FieldDefinition<any>>): TypeGenerator {
   const imports = ['use hdk::prelude::*;'];
   const defineType = `#[hdk_entry(id = "${snakeCase(typeName)}")]
+#[serde(rename_all = "camelCase")]
 ${defaultRustGeneratorDefineType(typeName, fields)}`;
 
   return {

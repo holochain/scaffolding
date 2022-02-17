@@ -16,7 +16,7 @@ export function zomeCode(zomeDefinition: ZomeDefinition): PatcherDirectory {
   };
 
   for (const entryDef of zomeDefinition.entry_defs) {
-    zomeDir.children[entryDef.name] = generateEntryDef(entryDef);
+    zomeDir.children[entryDef.typeDefinition.name] = generateEntryDef(entryDef);
   }
 
   return zomeDir;
