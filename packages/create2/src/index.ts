@@ -23,7 +23,7 @@ if (!semver.gte(process.version, '14.0.0')) {
 
 if (!process.argv[2] || !process.argv[3]) {
   console.log(
-    'Please provide the [SINGULAR_ITEM] and the [PLURAL_ITEM] names for the module: npm init @holochain-open-dev resource-booking resource-bookings',
+    'Please provide the [SINGULAR_ITEM] and the [PLURAL_ITEM] names in kebab-case for the module: npm init @holochain-open-dev resource-booking resource-bookings',
   );
   process.exit(1);
 }
