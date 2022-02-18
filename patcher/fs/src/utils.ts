@@ -5,7 +5,7 @@ export function isDirectory(path: string): boolean {
 }
 
 export function escapeTemplateLiteral(templateLiteral: string): string {
-  const r1 = replaceAll(templateLiteral, '\\', '\\\\`');
+  const r1 = replaceAll(templateLiteral, '\\', '\\\\');
   const r2 = replaceAll(r1, '`', '\\`');
   return replaceAll(r2, '$', '\\$');
 }

@@ -20,10 +20,13 @@ test('read the PatcherDirectory for this package', async t => {
 
 test('generate a patcher for this package', async t => {
   const d = readFolder(`${__dirname}/../`);
-  
-  const patcher = directoryToPatcher(d, {
-    'Dictionary': 'Pictionary'
-  });
 
-  applyPatch(`${__dirname}/.patcher`, patcher)
+  const patcher = directoryToPatcher(d, [
+    {
+      literal: 'Dictionary',
+      template: 'Pictionary',
+    },
+  ]);
+
+  applyPatch(`${__dirname}/.patcher`, patcher);
 });

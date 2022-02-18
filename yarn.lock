@@ -2068,7 +2068,7 @@
   dependencies:
     "@lit/reactive-element" "^1.0.0"
     "@open-wc/dedupe-mixin" "github:guillemcordoba/open-wc#dedupe-mixin-build"
-    "@webcomponents/scoped-custom-element-registry" "github:guillemcordoba/polyfills#scoped-custom-element-registry-build"
+    "@webcomponents/scoped-custom-element-registry" "^0.0.3"
 
 "@popperjs/core@^2.11.2", "@popperjs/core@^2.7.0":
   version "2.11.2"
@@ -12793,7 +12793,7 @@ ts-loader@^8.0.0:
     micromatch "^4.0.0"
     semver "^7.3.4"
 
-ts-node@^10.2.1, ts-node@^10.4.0:
+ts-node@^10.2.1, ts-node@^10.4.0, ts-node@^10.5.0:
   version "10.5.0"
   resolved "https://registry.yarnpkg.com/ts-node/-/ts-node-10.5.0.tgz#618bef5854c1fbbedf5e31465cbb224a1d524ef9"
   integrity sha512-6kEJKwVxAJ35W4akuiysfKwKmjkbYxwQMTBaAxo9KKAx/Yd26mPUyhGz3ji+EsJoAgrLqVsYHNuuYwQe22lbtw==

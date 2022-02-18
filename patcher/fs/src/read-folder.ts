@@ -5,6 +5,7 @@ import cloneDeep from 'lodash-es/cloneDeep';
 import { isDirectory } from './utils';
 
 export function readFolder(path: string, ignoreManager: Ignore = ignore()): PatcherDirectory {
+  ignoreManager.add('.git');
   if (existsSync('.gitignore')) {
     ignoreManager.add(readFileSync('.gitignore').toString());
   }

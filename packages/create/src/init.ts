@@ -3,7 +3,7 @@ import { WebFramework, webHapp } from '@holochain-scaffolding/patcher';
 import { applyPatch } from '@patcher/fs';
 
 export async function init(appName: string) {
-  const d = await webHapp(
+  const d = webHapp(
     {
       name: appName,
       dnas: [
@@ -18,7 +18,6 @@ export async function init(appName: string) {
                   update: true,
                   read: true,
                   typeDefinition: holochainEntryTypeDefinition('entry-def-1', []),
-                  name: 'entry_def_1',
                 },
               ],
               name: 'zome_1',
