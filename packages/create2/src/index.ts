@@ -21,10 +21,12 @@ if (!semver.gte(process.version, '14.0.0')) {
   process.exit(1);
 }
 
-if (!process.argv[2] || !process.argv[3])
-  throw new Error(
-    'Please provide the name for the module: npm init @holochain-open-dev resource-booking resource-bookings',
+if (!process.argv[2] || !process.argv[3]) {
+  console.log(
+    'Please provide the [SINGULAR_ITEM] and the [PLURAL_ITEM] names for the module: npm init @holochain-open-dev resource-booking resource-bookings',
   );
+  process.exit(1);
+}
 
 const moduleName = process.argv[2];
 const pluralName = process.argv[3];

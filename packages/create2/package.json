@@ -1,7 +1,7 @@
 {
   "name": "@holochain-open-dev/create",
-  "version": "0.0.1",
-  "description": "RAD tools for quickly scaffolding holochain apps",
+  "version": "0.0.2",
+  "description": "RAD tools for quickly scaffolding holochain modules",
   "author": "guillem.cordoba@gmail.com",
   "scripts": {
     "generate": "rimraf src/module && node --es-module-specifier-resolution=node generatePatcher.mjs",
