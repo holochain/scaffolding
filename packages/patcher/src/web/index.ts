@@ -18,6 +18,11 @@ export function webApp(happDef: HappDefinition, framework: WebFramework): Patche
       '@holochain/client',
       '^0.3.2',
     );
+    dir.children['package.json'] = patchNpmDependency(
+      dir.children['package.json'] as PatcherFile,
+      '@types/ws',
+      '^8.2.3',
+    );
 
     provideContextForApp(dir, {
       createContext: {
