@@ -1,7 +1,7 @@
-import { ElementReference, CreateElement, DetailElement } from './elements';
+import { CreateElement, DetailElement, Constructor } from './elements';
 import { JSONSchema7, JSONSchema7Definition } from 'json-schema';
 
-export interface TypeConfigSchema<C> extends JSONSchema7 {
+export interface ConfigurationSchema<C> extends JSONSchema7 {
   properties?:
     | {
         [key in keyof Partial<C>]: JSONSchema7Definition;
@@ -11,24 +11,9 @@ export interface TypeConfigSchema<C> extends JSONSchema7 {
 
 export interface FieldDefinition<C> {
   name: string;
-  type: TypeDefinition<any, any>;
+  type: string;
   configuration: C;
 }
-
-export enum ProgrammingLanguages {
-  Typescript,
-  Rust,
-}
-
-export interface TypeGenerator {
-  imports: string[];
-  defineType: string;
-  referenceType: string;
-}
-
-export type TypeGenerators = {
-  [key in ProgrammingLanguages]: TypeGenerator;
-};
 
 export interface TypeDefinition<T, C> {
   name: string;
@@ -36,10 +21,48 @@ export interface TypeDefinition<T, C> {
 
   fields?: Array<FieldDefinition<any>>;
 
-  generators: TypeGenerators;
   sample: () => T;
 
-  configurationSchema?: TypeConfigSchema<C>;
-  create: Array<ElementReference<CreateElement<T, C>>>;
-  detail: Array<ElementReference<DetailElement<T, C>>>;
+  configurationSchema?: ConfigurationSchema<C>;
 }
+
+export type Vocabulary = { [key: string]: TypeDefinition<any, any> };
+/* 
+export type Renderers<V extends Vocabulary> = { [key in keyof Partial<V>]: () => string };
+
+export type AgentPubKey = string;
+
+export const agentPubKey: TypeDefinition<AgentPubKey, Record<string, never>> = {
+  name: 'AgentPubKey',
+  description: '',
+  sample: () => 'ujkkasjflksajlfkjsalkfjsaljfsdf',
+};
+
+export const header: TypeDefinition<any, any> = {
+  name: 'header',
+  description: '',
+  fields: [
+    {
+      name: 'author',
+      type: agentPubKey.name,
+      configuration: {},
+    },
+  ],
+  sample: () => ({ author: 'ulksjalfjslkfjalsjf' }),
+};
+
+const v: Vocabulary = {
+  AgentPubKey: agentPubKey,
+  Header: header,
+};
+
+const codeGen = {
+  AgentPubKey: agentPubKey,
+  Header: header,
+};
+
+const r: Renderers<v> = {
+  AgentPubKey: (pubkey: string) => '<span>',
+  Header: () => '<span>',
+};
+ */

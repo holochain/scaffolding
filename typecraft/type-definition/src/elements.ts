@@ -1,16 +1,16 @@
 export type Constructor<T> = new (...args: any[]) => T;
 
-export interface CreateElement<T, C> {
-  // Needs to be a property of the element
-  configuration: C;
-
+export type CreateElement<T, C> = {
+  [key in keyof C]: C[key];
+} & {
   get value(): T;
-}
+};
 
-export interface DetailElement<T, C> {
-  configuration: C;
+export type DetailElement<T, C> = {
+  [key in keyof C]: C[key];
+} & {
   value: T;
-}
+};
 
 export interface ElementReference<E> {
   element: Constructor<HTMLElement & E>;

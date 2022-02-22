@@ -1,0 +1,29 @@
+{
+  "name": "@typecraft/type-generators",
+  "version": "0.0.1",
+  "description": "Common types for the client and the server to communicate with each other",
+  "author": "guillem.cordoba@gmail.com",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "start": "tsc -w",
+    "build": "rimraf dist && tsc",
+    "build:watch": "tsc -w --preserveWatchOutput"
+  },
+  "dependencies": {
+    "@types/json-schema": "^7.0.9",
+    "@typecraft/type-definition": "^0.0.1",
+    "@patcher/cargo": "^0.0.1",
+    "@patcher/npm": "^0.0.1",
+    "lodash-es": "^4.17.21"
+  },
+  "devDependencies": {
+    "rimraf": "^3.0.2",
+    "typescript": "^4.4.3"
+  },
+  "type": "module"
+}

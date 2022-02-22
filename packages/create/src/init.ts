@@ -2,7 +2,7 @@ import { holochainEntryTypeDefinition } from '@holochain-scaffolding/definitions
 import { WebFramework, webHapp } from '@holochain-scaffolding/patcher';
 import { applyPatch } from '@patcher/fs';
 
-export async function init(appName: string) {
+export function init(appName: string): void {
   const d = webHapp(
     {
       name: appName,
