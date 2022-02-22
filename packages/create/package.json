@@ -6,7 +6,7 @@
   "scripts": {
     "start": "npm run build && concurrently \"webpack --config webpack.config.js --watch --mode development\" \"nodemon --config ./nodemon.config.json\" --raw",
     "build": "rimraf dist && webpack --config webpack.config.js && chmod +x dist/app.js",
-    "publish-to-branch": "cd ../.. && npm run build && cd packages/create && gh-pages -d ./ -b build"
+    "test": "npm run build && cd tests && node ../dist/app.js init .fixture && cd .fixture && nix-shell . --run \"npm i && npm t\""
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",
