@@ -11,7 +11,16 @@ export async function webApp(happDef: HappDefinition, framework: WebFramework): 
   if (framework === WebFramework.Vue) {
     const dir = generateVueApp();
 
-    dir.children['package.json'] = patchNpmDependency(dir.children['package.json'] as PatcherFile, '@holochain/client', '^0.3.2');
+    dir.children['package.json'] = patchNpmDependency(
+      dir.children['package.json'] as PatcherFile,
+      '@holochain/client',
+      '^0.3.2',
+    );
+    dir.children['package.json'] = patchNpmDependency(
+      dir.children['package.json'] as PatcherFile,
+      '@types/ws',
+      '^8.2.3',
+    );
 
     provideServiceForApp(dir, {
       imports: [`import { AppWebsocket } from '@holochain/client';`],
