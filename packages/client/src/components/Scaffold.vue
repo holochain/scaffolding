@@ -84,13 +84,13 @@ npm install</code></pre>
 import { defineComponent } from 'vue';
 import { socket } from '../socket';
 import { ClientEventType } from '@holochain-scaffolding/events';
-import { webHapp, WebFramework } from '@holochain-scaffolding/patcher';
+import { webHapp, WebFramework } from '@holochain-scaffolding/source-craft';
 import { HappDefinition } from '@holochain-scaffolding/definitions';
 import AppDefinitionBuilder from './AppDefinitionBuilder.vue';
 import FileNode from './FileNode.vue';
 import { getFirstEntry } from '../utils';
 import type { Dialog } from '@material/mwc-dialog';
-import { PatcherDirectory, PatcherNodeType, PatcherNode } from '@patcher/types';
+import { ScDirectory, ScNodeType, ScNode } from '@source-craft/types';
 
 export default defineComponent({
   name: 'Scaffold',
@@ -101,7 +101,7 @@ export default defineComponent({
   data(): {
     settingUp: boolean;
     currentDir: string | undefined;
-    happDir: PatcherDirectory | undefined;
+    happDir: ScDirectory | undefined;
     happName: string | undefined;
     selectedPreviewFileContents: string | undefined;
   } {
@@ -121,9 +121,9 @@ export default defineComponent({
       return (
         this.happDir &&
         Object.entries(this.happDir.children).sort(
-          ([_, node1]: [string, PatcherNode], [__, node2]: [string, PatcherNode]) => {
-            if (node1.type === PatcherNodeType.Directory) return -1;
-            if (node2.type === PatcherNodeType.Directory) return 1;
+          ([_, node1]: [string, ScNode], [__, node2]: [string, ScNode]) => {
+            if (node1.type === ScNodeType.Directory) return -1;
+            if (node2.type === ScNodeType.Directory) return 1;
             return -1;
           },
         )

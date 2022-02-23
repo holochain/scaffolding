@@ -1,0 +1,35 @@
+{
+  "name": "@type-craft/date",
+  "version": "0.0.1",
+  "description": "Common types for the client and the server to communicate with each other",
+  "author": "guillem.cordoba@gmail.com",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./create-date": "./dist/definitions/create-date.js",
+    "./show-date": "./dist/definitions/show-date.js"
+  },
+  "scripts": {
+    "start": "tsc -w",
+    "build": "rimraf dist && tsc",
+    "build:watch": "tsc -w --preserveWatchOutput"
+  },
+  "devDependencies": {
+    "rimraf": "^3.0.2",
+    "typescript": "^4.4.3"
+  },
+  "dependencies": {
+    "@open-wc/scoped-elements": "github:guillemcordoba/open-wc#scoped-elements-build",
+    "@scoped-elements/material-web": "^0.0.16",
+    "@scoped-elements/shoelace": "^0.0.8",
+    "@type-craft/vocabulary": "^0.0.1",
+    "@types/json-schema": "^7.0.9",
+    "lit": "^2.1.3"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module"
+}

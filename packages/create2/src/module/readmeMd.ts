@@ -1,11 +1,11 @@
-import { PatcherFile, PatcherNodeType } from '@patcher/types';
+import { ScFile, ScNodeType } from '@source-craft/types';
 import camelCase from 'lodash-es/camelCase';
 import kebabCase from 'lodash-es/kebabCase';
 import upperFirst from 'lodash-es/upperFirst';
 import snakeCase from 'lodash-es/snakeCase';
 
-export const readmeMd = ({moduleNamePluralTitleCase, moduleNamePlural}: {moduleNamePluralTitleCase: string; moduleNamePlural: string;}): PatcherFile => ({
-  type: PatcherNodeType.File,
+export const readmeMd = ({moduleNamePluralTitleCase, moduleNamePlural}: {moduleNamePluralTitleCase: string; moduleNamePlural: string;}): ScFile => ({
+  type: ScNodeType.File,
   content: `# ${moduleNamePluralTitleCase} Module
 
 Small zome to manage the ${moduleNamePlural} in your DNA, in RSM.

@@ -1,11 +1,11 @@
-import { PatcherFile, PatcherNodeType } from '@patcher/types';
+import { ScFile, ScNodeType } from '@source-craft/types';
 import camelCase from 'lodash-es/camelCase';
 import kebabCase from 'lodash-es/kebabCase';
 import upperFirst from 'lodash-es/upperFirst';
 import snakeCase from 'lodash-es/snakeCase';
 
-export const elementsTestJs = ({_kebab, moduleNameTitleCase, moduleName}: {_kebab: string; moduleNameTitleCase: string; moduleName: string;}): PatcherFile => ({
-  type: PatcherNodeType.File,
+export const elementsTestJs = ({_kebab, moduleNameTitleCase, moduleName}: {_kebab: string; moduleNameTitleCase: string; moduleName: string;}): ScFile => ({
+  type: ScNodeType.File,
   content: `import { html, fixture, expect } from '@open-wc/testing';
 import { setupApolloClientMock } from './mocks';
 import { HodCreate${moduleNameTitleCase}Form } from '../dist';

@@ -1,11 +1,11 @@
-import { PatcherFile, PatcherNodeType } from '@patcher/types';
+import { ScFile, ScNodeType } from '@source-craft/types';
 import camelCase from 'lodash-es/camelCase';
 import kebabCase from 'lodash-es/kebabCase';
 import upperFirst from 'lodash-es/upperFirst';
 import snakeCase from 'lodash-es/snakeCase';
 
-export const $49$0DefaultsNjk = (): PatcherFile => ({
-  type: PatcherNodeType.File,
+export const $49$0DefaultsNjk = (): ScFile => ({
+  type: ScNodeType.File,
   content: `{% set _pageTitle = title %}
 {% if title != site.name %}
   {% set _pageTitle = title + ': ' + site.name %}

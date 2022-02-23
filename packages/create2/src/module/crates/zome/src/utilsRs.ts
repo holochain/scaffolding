@@ -1,11 +1,11 @@
-import { PatcherFile, PatcherNodeType } from '@patcher/types';
+import { ScFile, ScNodeType } from '@source-craft/types';
 import camelCase from 'lodash-es/camelCase';
 import kebabCase from 'lodash-es/kebabCase';
 import upperFirst from 'lodash-es/upperFirst';
 import snakeCase from 'lodash-es/snakeCase';
 
-export const utilsRs = (): PatcherFile => ({
-  type: PatcherNodeType.File,
+export const utilsRs = (): ScFile => ({
+  type: ScNodeType.File,
   content: `use hdk::prelude::*;
 
 pub fn try_get_and_convert<T: TryFrom<SerializedBytes>>(entry_hash: EntryHash) -> ExternResult<T> {

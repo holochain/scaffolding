@@ -1,11 +1,11 @@
-import { PatcherFile, PatcherNodeType } from '@patcher/types';
+import { ScFile, ScNodeType } from '@source-craft/types';
 import camelCase from 'lodash-es/camelCase';
 import kebabCase from 'lodash-es/kebabCase';
 import upperFirst from 'lodash-es/upperFirst';
 import snakeCase from 'lodash-es/snakeCase';
 
-export const defaultNix = (): PatcherFile => ({
-  type: PatcherNodeType.File,
+export const defaultNix = (): ScFile => ({
+  type: ScNodeType.File,
   content: `let
   holonixPath = builtins.fetchTarball "https://github.com/holochain/holonix/archive/9ddfc68aaf665f13e674a5382946f2e262538abe.tar.gz";
   holonix = import (holonixPath) {

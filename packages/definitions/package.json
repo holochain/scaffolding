@@ -13,7 +13,7 @@
     "build:watch": "tsc -w --preserveWatchOutput"
   },
   "dependencies": {
-    "@typecraft/type-definition": "^0.0.1"
+    "@type-craft/vocabulary": "^0.0.1"
   },
   "devDependencies": {
     "rimraf": "^3.0.2",

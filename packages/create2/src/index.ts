@@ -1,7 +1,7 @@
 //@ts-ignore
 import semver from 'semver';
 import chalk from 'chalk';
-import { applyPatch } from '@patcher/fs';
+import { applyPatch } from '@source-craft/fs';
 import generateModule from './module';
 import upperFirst from 'lodash-es/upperFirst';
 import camelCase from 'lodash-es/camelCase';

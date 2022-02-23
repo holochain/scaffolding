@@ -1,11 +1,11 @@
-import { PatcherFile, PatcherNodeType } from '@patcher/types';
+import { ScFile, ScNodeType } from '@source-craft/types';
 import camelCase from 'lodash-es/camelCase';
 import kebabCase from 'lodash-es/kebabCase';
 import upperFirst from 'lodash-es/upperFirst';
 import snakeCase from 'lodash-es/snakeCase';
 
-export const variablesCss = (): PatcherFile => ({
-  type: PatcherNodeType.File,
+export const variablesCss = (): ScFile => ({
+  type: ScNodeType.File,
   content: `html {
   --primary-color: #3f51b5;
   --primary-color-accent: #ff5252;

@@ -1,43 +1,43 @@
-import { PatcherDirectory, findByPath, PatcherFile, PatcherNodeType } from '@patcher/types';
-import { patchNpmDependency } from '@patcher/vue';
+import { ScDirectory, findByPath, ScFile, ScNodeType } from '@source-craft/types';
+import { patchNpmDependency } from '@source-craft/vue';
 import camelCase from 'lodash-es/camelCase';
 import kebabCase from 'lodash-es/kebabCase';
 import snakeCase from 'lodash-es/snakeCase';
 import upperFirst from 'lodash-es/upperFirst';
 
-export function patchProfiles(happDir: PatcherDirectory, itemsSingular: string, itemsPlural: string): PatcherDirectory {
-  const packageJson = findByPath(happDir, 'ui/package.json') as PatcherFile;
+export function patchProfiles(happDir: ScDirectory, itemsSingular: string, itemsPlural: string): ScDirectory {
+  const packageJson = findByPath(happDir, 'ui/package.json') as ScFile;
 
   packageJson.content = patchNpmDependency(packageJson, '@holochain-open-dev/profiles', '^0.0.8').content;
   packageJson.content = patchNpmDependency(packageJson, '@holochain-open-dev/context', '^0.0.3').content;
   packageJson.content = patchNpmDependency(packageJson, '@holochain-open-dev/cell-client', '^0.3.2').content;
 
-  const demo = findByPath(happDir, 'ui/demo/index.html') as PatcherFile;
+  const demo = findByPath(happDir, 'ui/demo/index.html') as ScFile;
   demo.content = profilesDemo(itemsSingular, itemsPlural);
 
-  const crateDirs = findByPath(happDir, 'crates') as PatcherDirectory;
+  const crateDirs = findByPath(happDir, 'crates') as ScDirectory;
 
   crateDirs.children['profiles'] = profilesZome();
 
-  let dnaYaml = findByPath(happDir, 'workdir/dna/dna.yaml') as PatcherFile;
+  let dnaYaml = findByPath(happDir, 'workdir/dna/dna.yaml') as ScFile;
   dnaYaml.content = addZomeToDnaYaml(dnaYaml, 'profiles').content;
 
-  const rootCargoToml = happDir.children['Cargo.toml'] as PatcherFile;
+  const rootCargoToml = happDir.children['Cargo.toml'] as ScFile;
   rootCargoToml.content = addCrateToRootCargoToml(rootCargoToml, 'crates/profiles').content;
 
   return happDir;
 }
 
-export function addZomeToDnaYaml(dnaYaml: PatcherFile, zomeName: string): PatcherFile {
+export function addZomeToDnaYaml(dnaYaml: ScFile, zomeName: string): ScFile {
   return {
-    type: PatcherNodeType.File,
+    type: ScNodeType.File,
     content: `${dnaYaml.content}
   - name: ${zomeName}
     bundled: ../../target/wasm32-unknown-unknown/release/${zomeName}.wasm`,
   };
 }
 
-export function addCrateToRootCargoToml(cargoToml: PatcherFile, zomePath: string): PatcherFile {
+export function addCrateToRootCargoToml(cargoToml: ScFile, zomePath: string): ScFile {
   const content = cargoToml.content.replace(
     'members = [',
     `members = [
@@ -45,17 +45,17 @@ export function addCrateToRootCargoToml(cargoToml: PatcherFile, zomePath: string
   );
 
   return {
-    type: PatcherNodeType.File,
+    type: ScNodeType.File,
     content,
   };
 }
 
-export function profilesZome(): PatcherDirectory {
+export function profilesZome(): ScDirectory {
   return {
-    type: PatcherNodeType.Directory,
+    type: ScNodeType.Directory,
     children: {
       'Cargo.toml': {
-        type: PatcherNodeType.File,
+        type: ScNodeType.File,
         content: `[package]
 name = "profiles"
 version = "0.0.1"
@@ -70,10 +70,10 @@ hc_zome_profiles = {git = "https://github.com/holochain-open-dev/profiles", rev 
         `,
       },
       src: {
-        type: PatcherNodeType.Directory,
+        type: ScNodeType.Directory,
         children: {
           'lib.rs': {
-            type: PatcherNodeType.File,
+            type: ScNodeType.File,
             content: `extern crate hc_zome_profiles;`,
           },
         },

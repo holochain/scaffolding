@@ -1,5 +1,5 @@
 
-import { CraftFields } from '@typecraft/craft-type';
+import { CraftFields } from '@type-craft/crafting';
 customElements.define('craft-fields', CraftFields);
 import '@material/mwc-textfield';
 import '@material/mwc-textarea';

@@ -1,11 +1,11 @@
-import { PatcherFile, PatcherNodeType } from '@patcher/types';
+import { ScFile, ScNodeType } from '@source-craft/types';
 import camelCase from 'lodash-es/camelCase';
 import kebabCase from 'lodash-es/kebabCase';
 import upperFirst from 'lodash-es/upperFirst';
 import snakeCase from 'lodash-es/snakeCase';
 
-export const handlersRs = ({moduleNameSnakeCase, moduleNameTitleCase, moduleName}: {moduleNameSnakeCase: string; moduleNameTitleCase: string; moduleName: string;}): PatcherFile => ({
-  type: PatcherNodeType.File,
+export const handlersRs = ({moduleNameSnakeCase, moduleNameTitleCase, moduleName}: {moduleNameSnakeCase: string; moduleNameTitleCase: string; moduleName: string;}): ScFile => ({
+  type: ScNodeType.File,
   content: `use crate::{utils, Agent${moduleNameTitleCase}, ${moduleNameTitleCase}};
 use hdk::prelude::holo_hash::AgentPubKeyB64;
 use hdk::prelude::*;

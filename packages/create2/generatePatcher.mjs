@@ -1,5 +1,5 @@
 import fs from 'fs';
-import { readFolder, directoryToPatcher, Case, applyPatch } from '@patcher/fs';
+import { readFolder, directoryTo@holochain-scaffolding/source-craft, Case, applyPatch } from '@source-craft/fs';
 import { fileURLToPath } from 'url';
 import path from 'path';
 const __filename = fileURLToPath(import.meta.url);
@@ -19,7 +19,7 @@ const caseByExtensionsKebab = {
   toml: Case.KebabCase,
 };
 
-const patched = directoryToPatcher(d, [
+const patched = directoryToGenerator(d, [
   { literal: '[profile.dev]', template: 'cargoThingDev' },
   { literal: '[profile.release]', template: 'cargoThingRelease' },
   { literal: '@holochain-open-dev/profiles', template: 'packageName' },

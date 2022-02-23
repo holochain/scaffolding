@@ -1,11 +1,11 @@
-import { PatcherFile, PatcherNodeType } from '@patcher/types';
+import { ScFile, ScNodeType } from '@source-craft/types';
 import camelCase from 'lodash-es/camelCase';
 import kebabCase from 'lodash-es/kebabCase';
 import upperFirst from 'lodash-es/upperFirst';
 import snakeCase from 'lodash-es/snakeCase';
 
-export const devSetupMd = ({kebabPlural_}: {kebabPlural_: string;}): PatcherFile => ({
-  type: PatcherNodeType.File,
+export const devSetupMd = ({kebabPlural_}: {kebabPlural_: string;}): ScFile => ({
+  type: ScNodeType.File,
   content: `# Developer Setup
 
 > TLDR: run \`npm install\` and \`npm start\` inside the \`nix-shell\` for this repository.

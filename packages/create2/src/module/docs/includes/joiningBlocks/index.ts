@@ -1,10 +1,10 @@
-import { PatcherNodeType, PatcherDirectory } from '@patcher/types'; 
+import { ScNodeType, ScDirectory } from '@source-craft/types'; 
 
 import layoutHome from './layoutHome';
 import head from './head';  
 
-export default (): PatcherDirectory => ({
-  type: PatcherNodeType.Directory,
+export default (): ScDirectory => ({
+  type: ScNodeType.Directory,
   children: {
   '_layoutHome': layoutHome(),
   'head': head()

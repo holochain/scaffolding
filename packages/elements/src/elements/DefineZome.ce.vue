@@ -76,7 +76,7 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 import type { TextField } from '@material/mwc-textfield';
-import { isSnakeCase } from '@holochain-scaffolding/patcher';
+import { isSnakeCase } from '@holochain-scaffolding/source-craft';
 import { ZomeDefinition, newEntryDef, newZomeDef } from '@holochain-scaffolding/definitions';
 import DefineEntry from './DefineEntry.ce.vue';
 

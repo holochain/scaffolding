@@ -1,11 +1,11 @@
-import { PatcherFile, PatcherNodeType } from '@patcher/types';
+import { ScFile, ScNodeType } from '@source-craft/types';
 import camelCase from 'lodash-es/camelCase';
 import kebabCase from 'lodash-es/kebabCase';
 import upperFirst from 'lodash-es/upperFirst';
 import snakeCase from 'lodash-es/snakeCase';
 
-export const kebabPluralServiceTs = ({moduleNameSnakeCase, moduleNamePluralTitleCase, moduleNameTitleCase, moduleNamePlural, moduleName}: {moduleNameSnakeCase: string; moduleNamePluralTitleCase: string; moduleNameTitleCase: string; moduleNamePlural: string; moduleName: string;}): PatcherFile => ({
-  type: PatcherNodeType.File,
+export const kebabPluralServiceTs = ({moduleNameSnakeCase, moduleNamePluralTitleCase, moduleNameTitleCase, moduleNamePlural, moduleName}: {moduleNameSnakeCase: string; moduleNamePluralTitleCase: string; moduleNameTitleCase: string; moduleNamePlural: string; moduleName: string;}): ScFile => ({
+  type: ScNodeType.File,
   content: `import { CellClient } from '@holochain-open-dev/cell-client';
 import { AgentPubKeyB64 } from '@holochain-open-dev/core-types';
 import { Agent${moduleNameTitleCase}, ${moduleNameTitleCase} } from './types';

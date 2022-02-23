@@ -1,11 +1,11 @@
-import { PatcherFile, PatcherNodeType } from '@patcher/types';
+import { ScFile, ScNodeType } from '@source-craft/types';
 import camelCase from 'lodash-es/camelCase';
 import kebabCase from 'lodash-es/kebabCase';
 import upperFirst from 'lodash-es/upperFirst';
 import snakeCase from 'lodash-es/snakeCase';
 
-export const webDevPluginsMjs = (): PatcherFile => ({
-  type: PatcherNodeType.File,
+export const webDevPluginsMjs = (): ScFile => ({
+  type: ScNodeType.File,
   content: `import { fromRollup } from '@web/dev-server-rollup';
 import rollupCommonjs from '@rollup/plugin-commonjs';
 import rollupReplace from '@rollup/plugin-replace';

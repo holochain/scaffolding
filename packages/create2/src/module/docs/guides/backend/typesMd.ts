@@ -1,11 +1,11 @@
-import { PatcherFile, PatcherNodeType } from '@patcher/types';
+import { ScFile, ScNodeType } from '@source-craft/types';
 import camelCase from 'lodash-es/camelCase';
 import kebabCase from 'lodash-es/kebabCase';
 import upperFirst from 'lodash-es/upperFirst';
 import snakeCase from 'lodash-es/snakeCase';
 
-export const typesMd = ({moduleNameSnakeCase, moduleNamePlural}: {moduleNameSnakeCase: string; moduleNamePlural: string;}): PatcherFile => ({
-  type: PatcherNodeType.File,
+export const typesMd = ({moduleNameSnakeCase, moduleNamePlural}: {moduleNameSnakeCase: string; moduleNamePlural: string;}): ScFile => ({
+  type: ScNodeType.File,
   content: `# Backend Docs >> hc_zome${moduleNameSnakeCase}s_types ||10
 
 Use this crate if you want to communicate with the \`hc_zome${moduleNameSnakeCase}s\` zome from an external source, without defining all its zome functions.

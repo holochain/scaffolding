@@ -1,11 +1,11 @@
-import { PatcherFile, PatcherNodeType } from '@patcher/types';
+import { ScFile, ScNodeType } from '@source-craft/types';
 import camelCase from 'lodash-es/camelCase';
 import kebabCase from 'lodash-es/kebabCase';
 import upperFirst from 'lodash-es/upperFirst';
 import snakeCase from 'lodash-es/snakeCase';
 
-export const listKebabsTs = ({moduleNamePluralTitleCase, _kebab, kebabPlural_, moduleNamePlural, moduleName}: {moduleNamePluralTitleCase: string; _kebab: string; kebabPlural_: string; moduleNamePlural: string; moduleName: string;}): PatcherFile => ({
-  type: PatcherNodeType.File,
+export const listKebabsTs = ({moduleNamePluralTitleCase, _kebab, kebabPlural_, moduleNamePlural, moduleName}: {moduleNamePluralTitleCase: string; _kebab: string; kebabPlural_: string; moduleNamePlural: string; moduleName: string;}): ScFile => ({
+  type: ScNodeType.File,
   content: `import { css, html, LitElement } from 'lit';
 import { property, state } from 'lit/decorators.js';
 

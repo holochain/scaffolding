@@ -1,11 +1,11 @@
-import { PatcherFile, PatcherNodeType } from '@patcher/types';
+import { ScFile, ScNodeType } from '@source-craft/types';
 import camelCase from 'lodash-es/camelCase';
 import kebabCase from 'lodash-es/kebabCase';
 import upperFirst from 'lodash-es/upperFirst';
 import snakeCase from 'lodash-es/snakeCase';
 
-export const cargoToml = ({moduleNameSnakeCase, moduleNamePluralTitleCase, moduleNamePlural}: {moduleNameSnakeCase: string; moduleNamePluralTitleCase: string; moduleNamePlural: string;}): PatcherFile => ({
-  type: PatcherNodeType.File,
+export const cargoToml = ({moduleNameSnakeCase, moduleNamePluralTitleCase, moduleNamePlural}: {moduleNameSnakeCase: string; moduleNamePluralTitleCase: string; moduleNamePlural: string;}): ScFile => ({
+  type: ScNodeType.File,
   content: `[package]
 authors = ["guillem.cordoba@gmail.com", "eric@harris-braun.com", "tatsuya.g.sato@yumeville.com"]
 description = "${moduleNamePluralTitleCase} zome for any Holochain app"

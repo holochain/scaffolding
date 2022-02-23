@@ -1,11 +1,11 @@
-import { PatcherFile, PatcherNodeType } from '@patcher/types';
+import { ScFile, ScNodeType } from '@source-craft/types';
 import camelCase from 'lodash-es/camelCase';
 import kebabCase from 'lodash-es/kebabCase';
 import upperFirst from 'lodash-es/upperFirst';
 import snakeCase from 'lodash-es/snakeCase';
 
-export const webmanifestJson = ({moduleNamePluralTitleCase, kebabPlural_}: {moduleNamePluralTitleCase: string; kebabPlural_: string;}): PatcherFile => ({
-  type: PatcherNodeType.File,
+export const webmanifestJson = ({moduleNamePluralTitleCase, kebabPlural_}: {moduleNamePluralTitleCase: string; kebabPlural_: string;}): ScFile => ({
+  type: ScNodeType.File,
   content: `{
   "name": "${moduleNamePluralTitleCase} Module",
   "short_name": "${kebabPlural_}module",

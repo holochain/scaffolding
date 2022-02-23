@@ -1,11 +1,11 @@
-import { PatcherFile, PatcherNodeType } from '@patcher/types';
+import { ScFile, ScNodeType } from '@source-craft/types';
 import camelCase from 'lodash-es/camelCase';
 import kebabCase from 'lodash-es/kebabCase';
 import upperFirst from 'lodash-es/upperFirst';
 import snakeCase from 'lodash-es/snakeCase';
 
-export const rocketConfigJs = ({moduleNamePlural}: {moduleNamePlural: string;}): PatcherFile => ({
-  type: PatcherNodeType.File,
+export const rocketConfigJs = ({moduleNamePlural}: {moduleNamePlural: string;}): ScFile => ({
+  type: ScNodeType.File,
   content: `import { rocketLaunch } from "@rocket/launch";
 import commonjs from "@rollup/plugin-commonjs";
 import resolve from "@rollup/plugin-node-resolve";

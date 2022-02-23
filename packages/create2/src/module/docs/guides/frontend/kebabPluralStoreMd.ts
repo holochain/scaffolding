@@ -1,11 +1,11 @@
-import { PatcherFile, PatcherNodeType } from '@patcher/types';
+import { ScFile, ScNodeType } from '@source-craft/types';
 import camelCase from 'lodash-es/camelCase';
 import kebabCase from 'lodash-es/kebabCase';
 import upperFirst from 'lodash-es/upperFirst';
 import snakeCase from 'lodash-es/snakeCase';
 
-export const kebabPluralStoreMd = ({packageName, moduleNamePluralTitleCase, moduleNamePlural, moduleName}: {packageName: string; moduleNamePluralTitleCase: string; moduleNamePlural: string; moduleName: string;}): PatcherFile => ({
-  type: PatcherNodeType.File,
+export const kebabPluralStoreMd = ({packageName, moduleNamePluralTitleCase, moduleNamePlural, moduleName}: {packageName: string; moduleNamePluralTitleCase: string; moduleNamePlural: string; moduleName: string;}): ScFile => ({
+  type: ScNodeType.File,
   content: `# Frontend Docs >> ${moduleNamePluralTitleCase}Store ||20
 
 The \`${moduleNamePluralTitleCase}Store\` is a JS class that contains \`svelte\` stores, to which you can subscribe to get reactive updates in your elements.

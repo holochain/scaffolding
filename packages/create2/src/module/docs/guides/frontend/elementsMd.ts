@@ -1,11 +1,11 @@
-import { PatcherFile, PatcherNodeType } from '@patcher/types';
+import { ScFile, ScNodeType } from '@source-craft/types';
 import camelCase from 'lodash-es/camelCase';
 import kebabCase from 'lodash-es/kebabCase';
 import upperFirst from 'lodash-es/upperFirst';
 import snakeCase from 'lodash-es/snakeCase';
 
-export const elementsMd = ({packageName, moduleNamePluralTitleCase, _kebab, kebabSingular_, moduleNamePlural, moduleName}: {packageName: string; moduleNamePluralTitleCase: string; _kebab: string; kebabSingular_: string; moduleNamePlural: string; moduleName: string;}): PatcherFile => ({
-  type: PatcherNodeType.File,
+export const elementsMd = ({packageName, moduleNamePluralTitleCase, _kebab, kebabSingular_, moduleNamePlural, moduleName}: {packageName: string; moduleNamePluralTitleCase: string; _kebab: string; kebabSingular_: string; moduleNamePlural: string; moduleName: string;}): ScFile => ({
+  type: ScNodeType.File,
   content: `# Frontend Docs >> Elements ||10
 
 To add one of these elements to your web-app, import it like this:

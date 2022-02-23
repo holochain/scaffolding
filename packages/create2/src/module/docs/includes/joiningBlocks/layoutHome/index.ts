@@ -1,9 +1,9 @@
-import { PatcherNodeType, PatcherDirectory } from '@patcher/types'; 
+import { ScNodeType, ScDirectory } from '@source-craft/types'; 
 
 import content from './content';  
 
-export default (): PatcherDirectory => ({
-  type: PatcherNodeType.Directory,
+export default (): ScDirectory => ({
+  type: ScNodeType.Directory,
   children: {
   'content': content()
   }

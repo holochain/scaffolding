@@ -1,11 +1,11 @@
-import { PatcherFile, PatcherNodeType } from '@patcher/types';
+import { ScFile, ScNodeType } from '@source-craft/types';
 import camelCase from 'lodash-es/camelCase';
 import kebabCase from 'lodash-es/kebabCase';
 import upperFirst from 'lodash-es/upperFirst';
 import snakeCase from 'lodash-es/snakeCase';
 
-export const imageTs = (): PatcherFile => ({
-  type: PatcherNodeType.File,
+export const imageTs = (): ScFile => ({
+  type: ScNodeType.File,
   content: `// Crop the image and return a base64 bytes string of its content
 export function resizeAndExport(img: HTMLImageElement) {
   const MAX_WIDTH = 300;

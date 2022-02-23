@@ -1,11 +1,11 @@
-import { PatcherFile, PatcherNodeType } from '@patcher/types';
+import { ScFile, ScNodeType } from '@source-craft/types';
 import camelCase from 'lodash-es/camelCase';
 import kebabCase from 'lodash-es/kebabCase';
 import upperFirst from 'lodash-es/upperFirst';
 import snakeCase from 'lodash-es/snakeCase';
 
-export const logoLinkNjk = (): PatcherFile => ({
-  type: PatcherNodeType.File,
+export const logoLinkNjk = (): ScFile => ({
+  type: ScNodeType.File,
   content: `<a class="logo-link" href="{{ '/' | url }}">
 <svg class="logo" viewBox="0 0 30 30" xmlns="http://www.w3.org/2000/svg">
  <defs>

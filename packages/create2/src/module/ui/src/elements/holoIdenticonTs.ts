@@ -1,11 +1,11 @@
-import { PatcherFile, PatcherNodeType } from '@patcher/types';
+import { ScFile, ScNodeType } from '@source-craft/types';
 import camelCase from 'lodash-es/camelCase';
 import kebabCase from 'lodash-es/kebabCase';
 import upperFirst from 'lodash-es/upperFirst';
 import snakeCase from 'lodash-es/snakeCase';
 
-export const holoIdenticonTs = (): PatcherFile => ({
-  type: PatcherNodeType.File,
+export const holoIdenticonTs = (): ScFile => ({
+  type: ScNodeType.File,
   content: `import { deserializeHash, HoloHashB64 } from '@holochain-open-dev/core-types';
 import { css, html, LitElement, PropertyValues } from 'lit';
 import { property, query } from 'lit/decorators.js';

@@ -1,11 +1,11 @@
-import { PatcherFile, PatcherNodeType } from '@patcher/types';
+import { ScFile, ScNodeType } from '@source-craft/types';
 import camelCase from 'lodash-es/camelCase';
 import kebabCase from 'lodash-es/kebabCase';
 import upperFirst from 'lodash-es/upperFirst';
 import snakeCase from 'lodash-es/snakeCase';
 
-export const $49$0HeroNjk = (): PatcherFile => ({
-  type: PatcherNodeType.File,
+export const $49$0HeroNjk = (): ScFile => ({
+  type: ScNodeType.File,
   content: `<svg class="page-logo logo" viewBox="0 0 30 30" xmlns="http://www.w3.org/2000/svg">
  <defs>
   <linearGradient id="a" x1="21.375" x2="32.5" y1="23.879" y2="25.504" gradientUnits="userSpaceOnUse">

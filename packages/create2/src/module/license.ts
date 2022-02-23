@@ -1,11 +1,11 @@
-import { PatcherFile, PatcherNodeType } from '@patcher/types';
+import { ScFile, ScNodeType } from '@source-craft/types';
 import camelCase from 'lodash-es/camelCase';
 import kebabCase from 'lodash-es/kebabCase';
 import upperFirst from 'lodash-es/upperFirst';
 import snakeCase from 'lodash-es/snakeCase';
 
-export const license = (): PatcherFile => ({
-  type: PatcherNodeType.File,
+export const license = (): ScFile => ({
+  type: ScNodeType.File,
   content: `MIT License
 
 Copyright (c) 2020 Holochain Open Development

@@ -1,4 +1,4 @@
-import { PatcherNodeType, PatcherDirectory } from '@patcher/types'; 
+import { ScNodeType, ScDirectory } from '@source-craft/types'; 
 
 import github from './github';
 import { gitignore } from './gitignore';
@@ -18,8 +18,8 @@ import tests from './tests';
 import ui from './ui';
 import workdir from './workdir';  
 
-export default ({moduleNameSnakeCase, cargoThingDev, cargoThingRelease, moduleNamePluralTitleCase, moduleNamePlural, moduleNameTitleCase, moduleName, kebabPlural_, _kebab, kebabSingular_, packageName, testZomeName}: {moduleNameSnakeCase: string; cargoThingDev: string; cargoThingRelease: string; moduleNamePluralTitleCase: string; moduleNamePlural: string; moduleNameTitleCase: string; moduleName: string; kebabPlural_: string; _kebab: string; kebabSingular_: string; packageName: string; testZomeName: string;}): PatcherDirectory => ({
-  type: PatcherNodeType.Directory,
+export default ({moduleNameSnakeCase, cargoThingDev, cargoThingRelease, moduleNamePluralTitleCase, moduleNamePlural, moduleNameTitleCase, moduleName, kebabPlural_, _kebab, kebabSingular_, packageName, testZomeName}: {moduleNameSnakeCase: string; cargoThingDev: string; cargoThingRelease: string; moduleNamePluralTitleCase: string; moduleNamePlural: string; moduleNameTitleCase: string; moduleName: string; kebabPlural_: string; _kebab: string; kebabSingular_: string; packageName: string; testZomeName: string;}): ScDirectory => ({
+  type: ScNodeType.Directory,
   children: {
   '.github': github(),
   '.gitignore': gitignore(),

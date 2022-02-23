@@ -6,8 +6,8 @@ import {
   ProgrammingLanguages,
   TypeDefinition,
   TypeGenerator,
-} from '@typecraft/type-definition';
-import { dateType } from '@typecraft/date';
+} from '@type-craft/vocabulary';
+import { dateType } from '@type-craft/date';
 import snakeCase from 'lodash-es/snakeCase';
 import camelCase from 'lodash-es/camelCase';
 import upperFirst from 'lodash-es/upperFirst';

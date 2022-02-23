@@ -1,11 +1,11 @@
-import { PatcherFile, PatcherNodeType } from '@patcher/types';
+import { ScFile, ScNodeType } from '@source-craft/types';
 import camelCase from 'lodash-es/camelCase';
 import kebabCase from 'lodash-es/kebabCase';
 import upperFirst from 'lodash-es/upperFirst';
 import snakeCase from 'lodash-es/snakeCase';
 
-export const addingTheFrontendMd = ({packageName, moduleNamePluralTitleCase, _kebab, moduleNameTitleCase, moduleNamePlural}: {packageName: string; moduleNamePluralTitleCase: string; _kebab: string; moduleNameTitleCase: string; moduleNamePlural: string;}): PatcherFile => ({
-  type: PatcherNodeType.File,
+export const addingTheFrontendMd = ({packageName, moduleNamePluralTitleCase, _kebab, moduleNameTitleCase, moduleNamePlural}: {packageName: string; moduleNamePluralTitleCase: string; _kebab: string; moduleNameTitleCase: string; moduleNamePlural: string;}): ScFile => ({
+  type: ScNodeType.File,
   content: `# Setting Up >> Adding the Frontend ||20
 
 > This guide assumes you are building a web application written in JS or TS, using NPM as the package manager.

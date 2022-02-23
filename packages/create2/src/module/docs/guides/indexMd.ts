@@ -1,11 +1,11 @@
-import { PatcherFile, PatcherNodeType } from '@patcher/types';
+import { ScFile, ScNodeType } from '@source-craft/types';
 import camelCase from 'lodash-es/camelCase';
 import kebabCase from 'lodash-es/kebabCase';
 import upperFirst from 'lodash-es/upperFirst';
 import snakeCase from 'lodash-es/snakeCase';
 
-export const indexMd = ({moduleNameTitleCase, moduleNamePlural, moduleName}: {moduleNameTitleCase: string; moduleNamePlural: string; moduleName: string;}): PatcherFile => ({
-  type: PatcherNodeType.File,
+export const indexMd = ({moduleNameTitleCase, moduleNamePlural, moduleName}: {moduleNameTitleCase: string; moduleNamePlural: string; moduleName: string;}): ScFile => ({
+  type: ScNodeType.File,
   content: `# Guides
 
 The ${moduleNamePlural} zome and its accompanying frontend module are designed to implement and export useful functionality around personal ${moduleName} information about the agents in a Holochain DHT.

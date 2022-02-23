@@ -14,7 +14,7 @@
   ],
   "dependencies": {
     "@holochain-scaffolding/definitions": "0.0.1",
-    "@holochain-scaffolding/patcher": "0.0.1",
+    "@holochain-scaffolding/source-craft": "0.0.1",
     "@material/mwc-button": "^0.25.3",
     "@material/mwc-checkbox": "^0.25.3",
     "@material/mwc-dialog": "^0.25.3",
@@ -37,7 +37,7 @@
     "@material/mwc-top-app-bar": "^0.25.3",
     "@scoped-elements/material-web": "^0.0.16",
     "@scoped-elements/shoelace": "^0.0.8",
-    "@typecraft/craft-type": "^0.0.1",
+    "@type-craft/crafting": "^0.0.1",
     "@ui5/webcomponents": "^1.0.2",
     "lodash-es": "^4.17.21",
     "vue": "^3.2.26"

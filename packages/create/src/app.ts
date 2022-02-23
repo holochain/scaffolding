@@ -8,7 +8,7 @@ import { Server } from 'socket.io';
 import fs from 'fs';
 
 import { ClientEventType } from '@holochain-scaffolding/events';
-import { applyPatch } from '@patcher/fs';
+import { applyPatch } from '@source-craft/fs';
 import { automaticSetup } from './events/automatic-setup';
 
 export async function launchApp() {

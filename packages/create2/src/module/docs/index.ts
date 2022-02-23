@@ -1,4 +1,4 @@
-import { PatcherNodeType, PatcherDirectory } from '@patcher/types'; 
+import { ScNodeType, ScDirectory } from '@source-craft/types'; 
 
 import { eleventyignore } from './eleventyignore';
 import { nojekyll } from './nojekyll';
@@ -8,8 +8,8 @@ import includes from './includes';
 import guides from './guides';
 import { indexMd } from './indexMd';  
 
-export default ({moduleNameSnakeCase, moduleNamePluralTitleCase, _kebab, kebabPlural_, kebabSingular_, moduleNameTitleCase, moduleNamePlural, moduleName, packageName}: {moduleNameSnakeCase: string; moduleNamePluralTitleCase: string; _kebab: string; kebabPlural_: string; kebabSingular_: string; moduleNameTitleCase: string; moduleNamePlural: string; moduleName: string; packageName: string;}): PatcherDirectory => ({
-  type: PatcherNodeType.Directory,
+export default ({moduleNameSnakeCase, moduleNamePluralTitleCase, _kebab, kebabPlural_, kebabSingular_, moduleNameTitleCase, moduleNamePlural, moduleName, packageName}: {moduleNameSnakeCase: string; moduleNamePluralTitleCase: string; _kebab: string; kebabPlural_: string; kebabSingular_: string; moduleNameTitleCase: string; moduleNamePlural: string; moduleName: string; packageName: string;}): ScDirectory => ({
+  type: ScNodeType.Directory,
   children: {
   '.eleventyignore': eleventyignore(),
   '.nojekyll': nojekyll(),

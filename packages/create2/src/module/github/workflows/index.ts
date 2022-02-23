@@ -1,9 +1,9 @@
-import { PatcherNodeType, PatcherDirectory } from '@patcher/types'; 
+import { ScNodeType, ScDirectory } from '@source-craft/types'; 
 
 import { mainYml } from './mainYml';  
 
-export default (): PatcherDirectory => ({
-  type: PatcherNodeType.Directory,
+export default (): ScDirectory => ({
+  type: ScNodeType.Directory,
   children: {
   'main.yml': mainYml()
   }

@@ -1,4 +1,4 @@
-import { PatcherNodeType, PatcherDirectory } from '@patcher/types'; 
+import { ScNodeType, ScDirectory } from '@source-craft/types'; 
 
 import { agentAvatarTs } from './agentAvatarTs';
 import { createKebabTs } from './createKebabTs';
@@ -10,8 +10,8 @@ import { kebabSingularPromptTs } from './kebabSingularPromptTs';
 import { searchAgentTs } from './searchAgentTs';
 import { updateKebabTs } from './updateKebabTs';  
 
-export default ({_kebab, moduleNameTitleCase, moduleNamePluralTitleCase, kebabSingular_}: {_kebab: string; moduleNameTitleCase: string; moduleNamePluralTitleCase: string; kebabSingular_: string;}): PatcherDirectory => ({
-  type: PatcherNodeType.Directory,
+export default ({_kebab, moduleNameTitleCase, moduleNamePluralTitleCase, kebabSingular_}: {_kebab: string; moduleNameTitleCase: string; moduleNamePluralTitleCase: string; kebabSingular_: string;}): ScDirectory => ({
+  type: ScNodeType.Directory,
   children: {
   'agent-avatar.ts': agentAvatarTs(),
   [`create${_kebab}.ts`]: createKebabTs({_kebab, moduleNameTitleCase}),

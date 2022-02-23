@@ -1,11 +1,11 @@
-import { PatcherFile, PatcherNodeType } from '@patcher/types';
+import { ScFile, ScNodeType } from '@source-craft/types';
 import camelCase from 'lodash-es/camelCase';
 import kebabCase from 'lodash-es/kebabCase';
 import upperFirst from 'lodash-es/upperFirst';
 import snakeCase from 'lodash-es/snakeCase';
 
-export const zomeMd = ({moduleNameSnakeCase}: {moduleNameSnakeCase: string;}): PatcherFile => ({
-  type: PatcherNodeType.File,
+export const zomeMd = ({moduleNameSnakeCase}: {moduleNameSnakeCase: string;}): ScFile => ({
+  type: ScNodeType.File,
   content: `# Backend Docs >> hc_zome${moduleNameSnakeCase}s ||10
 
 Use this crate directly if you want include and maybe extend this zome in your DNA.

@@ -2,9 +2,9 @@ import '@lit-labs/ssr/lib/render-with-global-dom-shim.js';
 
 import test from 'tape';
 import path from 'path';
-import { applyPatch } from '@patcher/fs';
+import { applyPatch } from '@source-craft/fs';
 import { holochainEntryTypeDefinition } from '@holochain-scaffolding/definitions';
-import { dateType } from '@typecraft/date';
+import { dateType } from '@type-craft/date';
 import { execSync } from 'child_process';
 
 import { fileURLToPath } from 'url';

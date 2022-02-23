@@ -1,11 +1,11 @@
-import { PatcherFile, PatcherNodeType } from '@patcher/types';
+import { ScFile, ScNodeType } from '@source-craft/types';
 import camelCase from 'lodash-es/camelCase';
 import kebabCase from 'lodash-es/kebabCase';
 import upperFirst from 'lodash-es/upperFirst';
 import snakeCase from 'lodash-es/snakeCase';
 
-export const editorconfig = (): PatcherFile => ({
-  type: PatcherNodeType.File,
+export const editorconfig = (): ScFile => ({
+  type: ScNodeType.File,
   content: `# EditorConfig helps developers define and maintain consistent
 # coding styles between different editors and IDEs
 # editorconfig.org

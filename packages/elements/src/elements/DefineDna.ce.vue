@@ -61,7 +61,7 @@
 import { defineComponent, PropType } from 'vue';
 import { DnaDefinition, newDnaDef, newZomeDef } from '@holochain-scaffolding/definitions';
 import { TextField } from '@material/mwc-textfield';
-import { isSnakeCase } from '@holochain-scaffolding/patcher';
+import { isSnakeCase } from '@holochain-scaffolding/source-craft';
 import DefineZome from './DefineZome.ce.vue';
 
 export default defineComponent({

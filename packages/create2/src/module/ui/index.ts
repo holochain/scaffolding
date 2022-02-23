@@ -1,4 +1,4 @@
-import { PatcherNodeType, PatcherDirectory } from '@patcher/types'; 
+import { ScNodeType, ScDirectory } from '@source-craft/types'; 
 
 import { editorconfig } from './editorconfig';
 import { eslintrcCjs } from './eslintrcCjs';
@@ -14,8 +14,8 @@ import { webDevServerConfigMjs } from './webDevServerConfigMjs';
 import { webDevPluginsMjs } from './webDevPluginsMjs';
 import { webTestRunnerConfigMjs } from './webTestRunnerConfigMjs';  
 
-export default ({packageName, moduleNameSnakeCase, moduleNamePlural, moduleNamePluralTitleCase, _kebab, kebabPlural_, kebabSingular_, moduleNameTitleCase, moduleName}: {packageName: string; moduleNameSnakeCase: string; moduleNamePlural: string; moduleNamePluralTitleCase: string; _kebab: string; kebabPlural_: string; kebabSingular_: string; moduleNameTitleCase: string; moduleName: string;}): PatcherDirectory => ({
-  type: PatcherNodeType.Directory,
+export default ({packageName, moduleNameSnakeCase, moduleNamePlural, moduleNamePluralTitleCase, _kebab, kebabPlural_, kebabSingular_, moduleNameTitleCase, moduleName}: {packageName: string; moduleNameSnakeCase: string; moduleNamePlural: string; moduleNamePluralTitleCase: string; _kebab: string; kebabPlural_: string; kebabSingular_: string; moduleNameTitleCase: string; moduleName: string;}): ScDirectory => ({
+  type: ScNodeType.Directory,
   children: {
   '.editorconfig': editorconfig(),
   '.eslintrc.cjs': eslintrcCjs(),
