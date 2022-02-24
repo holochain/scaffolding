@@ -4,7 +4,7 @@
   "description": "RAD tools for quickly scaffolding holochain modules",
   "author": "guillem.cordoba@gmail.com",
   "scripts": {
-    "generate": "rimraf src/module && node --es-module-specifier-resolution=node generate@holochain-scaffolding/source-craft.mjs",
+    "generate": "rimraf src/module && node --es-module-specifier-resolution=node generate@holochain-scaffolding/generators.mjs",
     "start": "npm run build && concurrently \"webpack --config webpack.config.cjs --watch --mode development\" \"nodemon --config ./nodemon.config.json\" --raw",
     "build": "rimraf dist && webpack --config webpack.config.cjs && chmod +x dist/app.js",
     "test": "npm run build && rimraf tests/.fixture && npm run generate:fixture && cd tests/.fixture && nix-shell . --run \"npm install && npm test\"",

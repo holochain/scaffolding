@@ -13,7 +13,9 @@
     "build:watch": "tsc -w --preserveWatchOutput"
   },
   "dependencies": {
-    "@type-craft/vocabulary": "^0.0.1"
+    "@holochain-scaffolding/vocabulary": "^0.0.1",
+    "@type-craft/rust": "^0.0.1",
+    "@source-craft/cargo": "^0.0.1"
   },
   "devDependencies": {
     "rimraf": "^3.0.2",

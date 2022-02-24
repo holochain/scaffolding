@@ -1,5 +1,5 @@
 import { ScDirectory, findByPath, ScFile, ScNodeType } from '@source-craft/types';
-import { patchNpmDependency } from '@source-craft/vue';
+import { addNpmDependency } from '@source-craft/npm';
 import camelCase from 'lodash-es/camelCase';
 import kebabCase from 'lodash-es/kebabCase';
 import snakeCase from 'lodash-es/snakeCase';
@@ -8,9 +8,9 @@ import upperFirst from 'lodash-es/upperFirst';
 export function patchProfiles(happDir: ScDirectory, itemsSingular: string, itemsPlural: string): ScDirectory {
   const packageJson = findByPath(happDir, 'ui/package.json') as ScFile;
 
-  packageJson.content = patchNpmDependency(packageJson, '@holochain-open-dev/profiles', '^0.0.8').content;
-  packageJson.content = patchNpmDependency(packageJson, '@holochain-open-dev/context', '^0.0.3').content;
-  packageJson.content = patchNpmDependency(packageJson, '@holochain-open-dev/cell-client', '^0.3.2').content;
+  packageJson.content = addNpmDependency(packageJson, '@holochain-open-dev/profiles', '^0.0.8').content;
+  packageJson.content = addNpmDependency(packageJson, '@holochain-open-dev/context', '^0.0.3').content;
+  packageJson.content = addNpmDependency(packageJson, '@holochain-open-dev/cell-client', '^0.3.2').content;
 
   const demo = findByPath(happDir, 'ui/demo/index.html') as ScFile;
   demo.content = profilesDemo(itemsSingular, itemsPlural);
@@ -19,7 +19,7 @@ export function patchProfiles(happDir: ScDirectory, itemsSingular: string, items
 
   crateDirs.children['profiles'] = profilesZome();
 
-  let dnaYaml = findByPath(happDir, 'workdir/dna/dna.yaml') as ScFile;
+  const dnaYaml = findByPath(happDir, 'workdir/dna/dna.yaml') as ScFile;
   dnaYaml.content = addZomeToDnaYaml(dnaYaml, 'profiles').content;
 
   const rootCargoToml = happDir.children['Cargo.toml'] as ScFile;

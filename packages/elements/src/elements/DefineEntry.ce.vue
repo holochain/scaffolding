@@ -77,7 +77,7 @@
 import { defineComponent, PropType } from 'vue';
 import type { TextField } from '@material/mwc-textfield';
 import { EntryDefinition, holochainEntryRustTypeGenerator, newEntryDef } from '@holochain-scaffolding/definitions';
-import { isSnakeCase } from '@holochain-scaffolding/source-craft';
+import { isSnakeCase } from '@holochain-scaffolding/generators';
 import { defaultTsGenerator, FieldDefinition, ProgrammingLanguages } from '@type-craft/vocabulary';
 
 export default defineComponent({

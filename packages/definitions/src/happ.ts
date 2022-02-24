@@ -10,9 +10,9 @@ export interface WebHappDefinition {
   uiTemplate: string;
 }
 
-export function newHappDef(): HappDefinition {
+export function newHappDef(happName = 'my-app'): HappDefinition {
   return {
-    name: 'my-app',
+    name: happName,
     dnas: [newDnaDef()],
   };
 }

@@ -8,7 +8,9 @@
     "declarationDir": "dist",
     "experimentalDecorators": true,
     "moduleResolution": "node",
-    "outDir": "dist"
+    "incremental": true,
+    "outDir": "dist",
+    "allowSyntheticDefaultImports": true
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules/**/*", "dist", "tests"]

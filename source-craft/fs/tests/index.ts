@@ -1,5 +1,5 @@
 import test from 'tape';
-import { readFolder, applyPatch, directoryTo@holochain-scaffolding/source-craft } from '../dist';
+import { readFolder, applyPatch, directoryToGenerator } from '../dist';
 import path from 'path';
 import { ScDirectory, ScFile } from '@source-craft/types';
 
@@ -18,15 +18,15 @@ test('read the ScDirectory for this package', async t => {
   applyPatch(`${__dirname}/.fixture`, d);
 });
 
-test('generate a @holochain-scaffolding/source-craft for this package', async t => {
+test('generate a generator for this package', async t => {
   const d = readFolder(`${__dirname}/../`);
 
-  const @holochain-scaffolding/source-craft = directoryToGenerator(d, [
+  const generator = directoryToGenerator(d, [
     {
       literal: 'Dictionary',
       template: 'Pictionary',
     },
   ]);
 
-  applyPatch(`${__dirname}/.@holochain-scaffolding/source-craft`, @holochain-scaffolding/source-craft);
+  applyPatch(`${__dirname}/.generator`, generator);
 });

@@ -13,7 +13,7 @@
   },
   "scripts": {
     "start": "tsc -w",
-    "build": "rimraf dist && tsc",
+    "build": "tsc",
     "build:watch": "tsc -w --preserveWatchOutput"
   },
   "devDependencies": {
@@ -24,6 +24,9 @@
     "@open-wc/scoped-elements": "github:guillemcordoba/open-wc#scoped-elements-build",
     "@scoped-elements/material-web": "^0.0.16",
     "@scoped-elements/shoelace": "^0.0.8",
+    "@type-craft/elements-imports": "^0.0.1",
+    "@type-craft/typescript": "^0.0.1",
+    "@type-craft/rust": "^0.0.1",
     "@type-craft/vocabulary": "^0.0.1",
     "@types/json-schema": "^7.0.9",
     "lit": "^2.1.3"

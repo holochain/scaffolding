@@ -8,12 +8,12 @@
     "source-craft/*"
   ],
   "scripts": {
-    "start": "concurrently -k \"yarn workspace @holochain-scaffolding/definitions run build:watch\" \"yarn workspace @type-craft/crafting run build:watch\" \"yarn workspace @holochain-scaffolding/source-craft run build:watch\" \"yarn workspace @holochain-scaffolding/elements run build:watch\" \"yarn workspace @holochain-scaffolding/events run build:watch\" \"yarn workspace @holochain-scaffolding/ui run build:watch\" \"yarn workspace @holochain/create run start\"",
+    "start": "concurrently -k \"yarn workspace @holochain-scaffolding/definitions run build:watch\" \"yarn workspace @type-craft/crafting run build:watch\" \"yarn workspace @holochain-scaffolding/generators run build:watch\" \"yarn workspace @holochain-scaffolding/elements run build:watch\" \"yarn workspace @holochain-scaffolding/events run build:watch\" \"yarn workspace @holochain-scaffolding/ui run build:watch\" \"yarn workspace @holochain/create run start\"",
     "postinstall": "npm run build",
-    "test": "yarn workspace @holochain-scaffolding/source-craft run test",
-    "build": "npm run build:source-craft && npm run build:type-craft && yarn workspace @holochain-scaffolding/definitions run build && yarn workspace @holochain-scaffolding/source-craft run build && yarn workspace @holochain-scaffolding/elements run build && yarn workspace @holochain-scaffolding/events run build && yarn workspace @holochain-scaffolding/ui run build && yarn workspace @holochain/create run build",
-    "build:source-craft": "yarn workspace @source-craft/types run build && yarn workspace @source-craft/cargo run build && yarn workspace @source-craft/npm run build && yarn workspace @source-craft/fs run build && yarn workspace @source-craft/web-apps run build && yarn workspace @source-craft/vue run build",
-    "build:type-craft": "yarn workspace @type-craft/vocabulary run build && yarn workspace @type-craft/date run build && yarn workspace @type-craft/crafting run build && yarn workspace @type-craft/rust-generator run build && yarn workspace @type-craft/typescript-generator run build"
+    "test": "yarn workspace @holochain-scaffolding/generators run test",
+    "build": "npm run build:source-craft && npm run build:type-craft && yarn workspace @holochain-scaffolding/definitions run build && yarn workspace @holochain-scaffolding/generators run build && yarn workspace @holochain-scaffolding/elements run build && yarn workspace @holochain-scaffolding/events run build && yarn workspace @holochain-scaffolding/ui run build && yarn workspace @holochain/create run build",
+    "build:source-craft": "yarn workspace @source-craft/types run build && yarn workspace @source-craft/cargo run build && yarn workspace @source-craft/npm run build && yarn workspace @source-craft/fs run build && yarn workspace @source-craft/web-apps run build",
+    "build:type-craft": "yarn workspace @type-craft/vocabulary run build && yarn workspace @type-craft/elements-imports run build  && yarn workspace @type-craft/rust run build && yarn workspace @type-craft/typescript run build && yarn workspace @type-craft/date run build && yarn workspace @type-craft/crafting run build"
   },
   "devDependencies": {
     "chalk": "^4.1.2",

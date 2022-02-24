@@ -7,7 +7,7 @@ export interface ZomeDefinition {
 
 export const hdkTypes = ['AgentPubKeyB64', 'EntryHashB64', 'HeaderHashB64'];
 
-export function newZomeDef(name: string = 'zome_0'): ZomeDefinition {
+export function newZomeDef(name = 'zome_0'): ZomeDefinition {
   return {
     entry_defs: [newEntryDef()],
     name,

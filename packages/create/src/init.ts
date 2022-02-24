@@ -1,5 +1,5 @@
 import { holochainEntryTypeDefinition } from '@holochain-scaffolding/definitions';
-import { WebFramework, webHapp } from '@holochain-scaffolding/source-craft';
+import { WebFramework, webHapp } from '@holochain-scaffolding/generators';
 import { applyPatch } from '@source-craft/fs';
 
 export function init(appName: string): void {

@@ -84,7 +84,7 @@ npm install</code></pre>
 import { defineComponent } from 'vue';
 import { socket } from '../socket';
 import { ClientEventType } from '@holochain-scaffolding/events';
-import { webHapp, WebFramework } from '@holochain-scaffolding/source-craft';
+import { webHapp, WebFramework } from '@holochain-scaffolding/generators';
 import { HappDefinition } from '@holochain-scaffolding/definitions';
 import AppDefinitionBuilder from './AppDefinitionBuilder.vue';
 import FileNode from './FileNode.vue';

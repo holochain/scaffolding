@@ -5,7 +5,7 @@ export interface DnaDefinition {
   zomes: ZomeDefinition[];
 }
 
-export function newDnaDef(name: string = 'dna_0'): DnaDefinition {
+export function newDnaDef(name = 'dna_0'): DnaDefinition {
   return {
     name,
     zomes: [newZomeDef()],

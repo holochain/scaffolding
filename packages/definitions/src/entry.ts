@@ -1,16 +1,10 @@
-import {
-  defaultRustGeneratorDefineType,
-  defaultSample,
-  defaultTsGeneratorDefineType,
-  FieldDefinition,
-  ProgrammingLanguages,
-  TypeDefinition,
-  TypeGenerator,
-} from '@type-craft/vocabulary';
-import { dateType } from '@type-craft/date';
+import { FieldDefinition, TypeDefinition, defaultSample } from '@type-craft/vocabulary';
+
 import snakeCase from 'lodash-es/snakeCase';
 import camelCase from 'lodash-es/camelCase';
 import upperFirst from 'lodash-es/upperFirst';
+import { RustTypeGenerator, defaultDefineType } from '@type-craft/rust';
+import { happRustGenerators, happVocabulary } from '@holochain-scaffolding/vocabulary';
 
 export interface EntryDefinition {
   read: boolean;
@@ -21,12 +15,12 @@ export interface EntryDefinition {
   typeDefinition: TypeDefinition<any, any>;
 }
 
-export function newEntryDef(name: string = 'entry_def_0'): EntryDefinition {
-  const fields = [
+export function newEntryDef(name = 'entry_def_0'): EntryDefinition {
+  const fields: Array<FieldDefinition<any>> = [
     {
-      name: 'new_field',
+      name: 'title',
       configuration: {},
-      type: dateType,
+      type: 'Title',
     },
   ];
   return {
@@ -39,14 +33,22 @@ export function newEntryDef(name: string = 'entry_def_0'): EntryDefinition {
   };
 }
 
-export function holochainEntryRustTypeGenerator(typeName: string, fields: Array<FieldDefinition<any>>): TypeGenerator {
-  const imports = ['use hdk::prelude::*;'];
+export function holochainEntryRustTypeGenerator(
+  typeName: string,
+  fields: Array<FieldDefinition<any>>,
+): RustTypeGenerator {
   const defineType = `#[hdk_entry(id = "${snakeCase(typeName)}")]
 #[serde(rename_all = "camelCase")]
-${defaultRustGeneratorDefineType(typeName, fields)}`;
+${defaultDefineType(happRustGenerators, typeName, fields)}`;
 
   return {
-    imports,
+    imports: [
+      {
+        crateName: 'hdk',
+        importDeclaration: 'use hdk::prelude::*;',
+        version: '0.0.122',
+      },
+    ],
     defineType,
     referenceType: upperFirst(camelCase(typeName)),
   };
@@ -58,20 +60,9 @@ export function holochainEntryTypeDefinition(
 ): TypeDefinition<any, any> {
   return {
     name,
-    description: `Holochain entry containing a ${name}`,
+    description: `Holochain entry for a ${name}`,
     fields,
-    create: [],
-    detail: [],
 
-    sample: () => defaultSample(fields),
-
-    generators: {
-      [ProgrammingLanguages.Typescript]: {
-        imports: [],
-        defineType: defaultTsGeneratorDefineType(name, fields),
-        referenceType: name,
-      },
-      [ProgrammingLanguages.Rust]: holochainEntryRustTypeGenerator(name, fields),
-    },
+    sample: () => defaultSample(happVocabulary, fields),
   };
 }

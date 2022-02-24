@@ -1,4 +1,4 @@
-import { createHandlerFnName } from '@holochain-scaffolding/source-craft';
+import { createHandlerFnName } from '@holochain-scaffolding/generators';
 /* import { HappDefinition } from '@holochain-scaffolding/definitions';
 import JSZip, { JSZipObject } from 'jszip';
 

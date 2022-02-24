@@ -45,16 +45,7 @@ export class CraftType extends ScopedElementsMixin(LitElement) {
       name,
       description,
       fields,
-      generators: {
-        [ProgrammingLanguages.Rust]: defaultRustGenerator(
-          name,
-          this.craftFields.value
-        ),
-        [ProgrammingLanguages.Typescript]: defaultTsGenerator(name, fields),
-      },
       sample: () => defaultSample(fields),
-      create: [],
-      detail: [],
     };
   }
 

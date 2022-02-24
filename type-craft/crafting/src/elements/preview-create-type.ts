@@ -13,10 +13,10 @@ export class PreviewCreateType extends ScopedElementsMixin(LitElement) {
   firstUpdated() {
     if (this.typeDef.fields) {
       for (const field of this.typeDef.fields) {
-        this.defineScopedElement(
+        /* this.defineScopedElement(
           `create-${kebabCase(field.name)}`,
           field.type.create[0].element
-        );
+        ); */
       }
     }
   }
