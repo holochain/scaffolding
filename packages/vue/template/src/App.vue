@@ -3,7 +3,7 @@
     <div v-if="loading">
       <mwc-circular-progress indeterminate></mwc-circular-progress>
     </div>
-    <div v-else></div>
+    <div v-else><div id="content"></div></div>
   </div>
 </template>
 <script lang="ts">
@@ -12,6 +12,9 @@ import { AppWebsocket, InstalledAppInfo } from '@holochain/client';
 import '@material/mwc-circular-progress';
 
 export default defineComponent({
+  components: {
+    // Add your subcomponents here
+  },
   data(): { appWebsocket: AppWebsocket | undefined; loading: boolean; appInfo: InstalledAppInfo | undefined } {
     return {
       appWebsocket: undefined,

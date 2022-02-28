@@ -1,7 +1,7 @@
 import { DnaDefinition, HappDefinition, ZomeDefinition } from '@holochain-scaffolding/definitions';
 import { happVocabulary, happTsGenerators } from '@holochain-scaffolding/vocabulary';
 import { ScDirectory, ScFile, ScNodeType } from '@source-craft/types';
-import { generateTsTypesFile, VocabularyTypescriptGenerators } from '@type-craft/typescript';
+import { generateTsTypesFile } from '@type-craft/typescript';
 import { Vocabulary } from '@type-craft/vocabulary';
 
 export function generateTsTypesForHapp(happ: HappDefinition): ScDirectory {

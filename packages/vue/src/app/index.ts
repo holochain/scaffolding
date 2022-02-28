@@ -9,7 +9,7 @@ import src from './src';
 import { tsconfigJson } from './tsconfigJson';
 import { viteConfigTs } from './viteConfigTs';  
 
-export default ({happName}: {happName: string;}): ScDirectory => ({
+export default ({happName, appContent, appSubcomponents}: {happName: string; appContent: string; appSubcomponents: string;}): ScDirectory => ({
   type: ScNodeType.Directory,
   children: {
   '.gitignore': gitignore(),
@@ -17,7 +17,7 @@ export default ({happName}: {happName: string;}): ScDirectory => ({
   'index.html': indexHtml(),
   'package.json': packageJson({happName}),
   'public': $public$(),
-  'src': src({happName}),
+  'src': src({happName, appContent, appSubcomponents}),
   'tsconfig.json': tsconfigJson(),
   'vite.config.ts': viteConfigTs()
   }

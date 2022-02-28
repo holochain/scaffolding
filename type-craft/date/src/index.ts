@@ -2,9 +2,6 @@ import { TypeDefinition } from '@type-craft/vocabulary';
 import { TypeElementsImports } from '@type-craft/elements-imports';
 import { importDeclaration } from '@source-craft/web-apps';
 import { DateConfig } from './types';
-import { CreateDate } from './create-date';
-import { ShowDate } from './show-date';
-import { rustGenerator, tsGenerator } from './generator';
 
 export const dateType: TypeDefinition<number, DateConfig> = {
   name: 'Date',

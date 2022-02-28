@@ -6,10 +6,13 @@ import snakeCase from 'lodash-es/snakeCase';
 
 export const mainTs = (): ScFile => ({
   type: ScNodeType.File,
-  content: `import { createApp } from 'vue'
-import App from './App.vue'
+  content: `import { createApp } from 'vue';
+import App from './App.vue';
 
-createApp(App).mount('#app')
+const app = createApp(App);
+
+app.config.unwrapInjectedRef = true;
+app.mount('#app');
 `
 });
     

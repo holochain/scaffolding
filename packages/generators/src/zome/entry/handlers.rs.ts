@@ -12,6 +12,7 @@ ${entryDef.read ? readHandler(entryDef.typeDefinition.name) : ''}
 ${
   entryDef.create || entryDef.update
     ? `#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
 pub struct ${newEntryOutput(entryDef.typeDefinition.name)} {
   header_hash: HeaderHashB64,
   entry_hash: EntryHashB64,
@@ -67,6 +68,7 @@ pub fn ${createHandlerFnName(entryDefId)}(${entryDefId}: ${titleCase(entryDefId)
 export const updateHandlerFnName = (entryDefId: string) => `update_${entryDefId}`;
 
 export const updateHandler = (entryDefId: string) => `#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
 pub struct Update${titleCase(entryDefId)}Input {
   original_header_hash: HeaderHashB64,
   updated_${entryDefId}: ${titleCase(entryDefId)}

@@ -12,6 +12,14 @@ const patched = directoryToGenerator(d, [
     literal: 'my-app',
     template: 'happName',
   },
+  {
+    literal: '<div id="content"></div>',
+    template: 'appContent',
+  },
+  {
+    literal: '// Add your subcomponents here',
+    template: 'appSubcomponents',
+  },
 ]);
 
 if (!fs.existsSync('./src')) fs.mkdirSync('./src');
