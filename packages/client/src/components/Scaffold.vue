@@ -84,11 +84,10 @@ npm install</code></pre>
 import { defineComponent } from 'vue';
 import { socket } from '../socket';
 import { ClientEventType } from '@holochain-scaffolding/events';
-import { webHapp, WebFramework } from '@holochain-scaffolding/generators';
+import { generateVueWebHapp } from '@holochain-scaffolding/vue';
 import { HappDefinition } from '@holochain-scaffolding/definitions';
 import AppDefinitionBuilder from './AppDefinitionBuilder.vue';
 import FileNode from './FileNode.vue';
-import { getFirstEntry } from '../utils';
 import type { Dialog } from '@material/mwc-dialog';
 import { ScDirectory, ScNodeType, ScNode } from '@source-craft/types';
 
@@ -120,13 +119,11 @@ export default defineComponent({
     sortedFiles() {
       return (
         this.happDir &&
-        Object.entries(this.happDir.children).sort(
-          ([_, node1]: [string, ScNode], [__, node2]: [string, ScNode]) => {
-            if (node1.type === ScNodeType.Directory) return -1;
-            if (node2.type === ScNodeType.Directory) return 1;
-            return -1;
-          },
-        )
+        Object.entries(this.happDir.children).sort(([_, node1]: [string, ScNode], [__, node2]: [string, ScNode]) => {
+          if (node1.type === ScNodeType.Directory) return -1;
+          if (node2.type === ScNodeType.Directory) return 1;
+          return -1;
+        })
       );
     },
     setup() {
@@ -144,23 +141,9 @@ export default defineComponent({
       (this.$refs.helpdialog as Dialog).show();
     },
     async generateFileChanges({ happ, uiTemplate }: { happ: HappDefinition; uiTemplate: string }) {
-      const firstCreateCall = getFirstEntry(happ);
-
-      const toReplace: any = {
-        installedAppId: happ.name,
-        zomeName: happ.dnas[0].zomes[0].name,
-      };
-
-      if (firstCreateCall) {
-        toReplace['fnName'] = firstCreateCall.fnName;
-        toReplace['dnaName'] = firstCreateCall.dnaName;
-       // toReplace['entrySample'] = JSON.stringify(firstCreateCall.sample, null, 2);
-        toReplace['zomeName'] = firstCreateCall.zomeName;
-        toReplace['entryDefName'] = firstCreateCall.entryDefName;
+      if (uiTemplate === 'vue') {
+        this.happDir = generateVueWebHapp(happ);
       }
-
-      this.happDir = webHapp(happ, WebFramework.Vue);
-
       this.happName = happ.name;
       (this.$refs.dialog as Dialog).show();
     },

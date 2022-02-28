@@ -5,8 +5,10 @@ import { ScopedElementsMixin } from '@open-wc/scoped-elements';
 import { DateConfig } from './types';
 
 export class ShowDate extends ScopedElementsMixin(LitElement) implements DetailElement<number, DateConfig> {
+  fieldName: string;
+
   @property({ type: Boolean })
-  relativeTime: boolean = false;
+  relativeTime = false;
 
   value!: number;
 }

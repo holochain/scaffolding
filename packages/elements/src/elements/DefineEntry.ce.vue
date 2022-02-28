@@ -6,7 +6,7 @@
         @focus="entryDefValidity($event.target)"
         @input="$event.target.validity.valid && setEntryDefId($event.target.value)"
         required
-        :value="entryDef.name"
+        :value="entryDef.typeDefinition.name"
         outlined
         helper="Has to be unique within the zome, and snake_case"
         autoValidate
@@ -62,6 +62,7 @@
         <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0">
           <div style="max-height: 100%; overflow-y: auto">
             <craft-fields
+              :vocabulary="happVocabulary"
               :fields="entryDef.typeDefinition.fields"
               style="flex: 1"
               @change="setFields($event.target.value)"
@@ -78,7 +79,8 @@ import { defineComponent, PropType } from 'vue';
 import type { TextField } from '@material/mwc-textfield';
 import { EntryDefinition, holochainEntryRustTypeGenerator, newEntryDef } from '@holochain-scaffolding/definitions';
 import { isSnakeCase } from '@holochain-scaffolding/generators';
-import { defaultTsGenerator, FieldDefinition, ProgrammingLanguages } from '@type-craft/vocabulary';
+import { FieldDefinition } from '@type-craft/vocabulary';
+import { happVocabulary } from '@holochain-scaffolding/vocabulary';
 
 export default defineComponent({
   name: 'DefineEntry',
@@ -129,7 +131,7 @@ export default defineComponent({
       };
     },
     setEntryDefId(newValue: string) {
-      this.entryDef.name = newValue;
+      this.entryDef.typeDefinition.name = newValue;
       this.emitChanged();
     },
     setFields(fields: Array<FieldDefinition<any>>) {
@@ -137,18 +139,13 @@ export default defineComponent({
       this.emitChanged();
     },
     emitChanged() {
-      (this.entryDef.typeDefinition.generators = {
-        [ProgrammingLanguages.Typescript]: defaultTsGenerator(
-          this.entryDef.name,
-          this.entryDef.typeDefinition.fields!,
-        ),
-        [ProgrammingLanguages.Rust]: holochainEntryRustTypeGenerator(
-          this.entryDef.name,
-          this.entryDef.typeDefinition.fields!,
-        ),
-      }),
-        this.$emit('entry-def-changed', this.entryDef);
+      this.$emit('entry-def-changed', this.entryDef);
     },
+  },
+  setup() {
+    return {
+      happVocabulary,
+    };
   },
 });
 </script>

@@ -5,6 +5,7 @@ import { DateConfig } from './types';
 import { property } from 'lit/decorators.js';
 
 export class CreateDate extends ScopedElementsMixin(LitElement) implements CreateElement<number, DateConfig> {
+  fieldName: string;
   @property({ type: Boolean, attribute: 'relative-time' })
   relativeTime: boolean;
 

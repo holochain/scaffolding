@@ -1,4 +1,3 @@
-import { CreateElement, DetailElement, Constructor } from './elements';
 import { JSONSchema7, JSONSchema7Definition } from 'json-schema';
 
 export interface ConfigurationSchema<C> extends JSONSchema7 {
@@ -15,7 +14,7 @@ export interface FieldDefinition<C> {
   configuration: C;
 }
 
-export interface TypeDefinition<T, C> {
+export interface TypeDefinition<T, C = void> {
   name: string;
   description: string;
 

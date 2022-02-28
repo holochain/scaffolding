@@ -38,7 +38,7 @@
                   style="flex: 1"
                 >
                   <mwc-icon slot="graphic">sticky_note_2</mwc-icon>
-                  {{ entryDef.name }}
+                  {{ entryDef.typeDefinition.name }}
                 </mwc-list-item>
               </mwc-list>
             </div>

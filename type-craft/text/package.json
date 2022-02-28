@@ -1,5 +1,5 @@
 {
-  "name": "@type-craft/date",
+  "name": "@type-craft/text",
   "version": "0.0.1",
   "description": "Common types for the client and the server to communicate with each other",
   "author": "guillem.cordoba@gmail.com",
@@ -8,8 +8,10 @@
   "types": "dist/index.d.ts",
   "exports": {
     ".": "./dist/index.js",
-    "./create-date": "./dist/definitions/create-date.js",
-    "./show-date": "./dist/definitions/show-date.js"
+    "./create-title": "./dist/definitions/create-title.js",
+    "./title-detail": "./dist/definitions/title-detail.js",
+    "./create-content": "./dist/definitions/create-content.js",
+    "./content-detail": "./dist/definitions/content-detail.js"
   },
   "scripts": {
     "start": "tsc -w",

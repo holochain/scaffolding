@@ -8,7 +8,7 @@
   "typings": "dist/index.d.ts",
   "scripts": {
     "start": "tsc -w",
-    "build": "rimraf dist *.tsbuildinfo && tsc",
+    "build": "tsc",
     "build:watch": "tsc -w --preserveWatchOutput",
     "test": "npm run build && rimraf tests/.fixture tests/.source-craft && node --loader ts-node/esm --experimental-specifier-resolution=node tests/index.ts | tap-diff"
   },

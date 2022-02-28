@@ -12,10 +12,8 @@ import {
 } from '@scoped-elements/material-web';
 import {
   defaultSample,
-  defaultRustGenerator,
-  defaultTsGenerator,
-  ProgrammingLanguages,
   TypeDefinition,
+  Vocabulary,
 } from '@type-craft/vocabulary';
 
 import { dateType } from '@type-craft/date';
@@ -24,8 +22,7 @@ import { CraftFields } from './craft-fields';
 import { defaultTypes } from './default-type-definitions';
 
 export class CraftType extends ScopedElementsMixin(LitElement) {
-  @property({ type: Array }) typeDefs: TypeDefinition<any, any>[] =
-    defaultTypes;
+  @property({ type: Object }) vocabulary!: Vocabulary;
 
   @query('craft-fields')
   craftFields!: CraftFields;
@@ -45,7 +42,7 @@ export class CraftType extends ScopedElementsMixin(LitElement) {
       name,
       description,
       fields,
-      sample: () => defaultSample(fields),
+      sample: () => defaultSample(this.vocabulary, fields),
     };
   }
 
@@ -67,7 +64,7 @@ export class CraftType extends ScopedElementsMixin(LitElement) {
 
         <craft-fields
           style="margin-top: 24px;"
-          .typeDefs=${this.typeDefs}
+          .vocabulary=${this.vocabulary}
         ></craft-fields>
       </div>
     `;

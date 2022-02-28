@@ -10,34 +10,32 @@ import {
   TextArea,
   TextField,
 } from '@scoped-elements/material-web';
-import { FieldDefinition, TypeDefinition } from '@type-craft/vocabulary';
+import {
+  FieldDefinition,
+  TypeDefinition,
+  Vocabulary,
+} from '@type-craft/vocabulary';
 
 import { JsonSchemaForm } from './json-schema-form';
 import { dateType } from '@type-craft/date';
 import { defaultTypes } from './default-type-definitions';
 
 export class CraftFields extends ScopedElementsMixin(LitElement) {
-  @property({ type: Array }) typeDefs: TypeDefinition<any, any>[] =
-    defaultTypes;
+  @property({ type: Object }) vocabulary!: Vocabulary;
 
   @property()
-  fields: Array<FieldDefinition<any>> = [
-    {
-      name: 'new_field',
-      configuration: {},
-      type: dateType,
-    },
-  ];
+  fields: Array<FieldDefinition<any>> = [];
 
   get value(): Array<FieldDefinition<any>> {
     return this.fields;
   }
 
   getType(type: string): TypeDefinition<any, any> {
-    return this.typeDefs.find(t => t.name === type) as TypeDefinition<any, any>;
+    return this.vocabulary[type];
   }
 
   renderField(field: FieldDefinition<any>, index: number) {
+    const typeDefs = Object.values(this.vocabulary);
     return html`
       <div class="column" style="margin-top: 16px;">
         <div class="row" style="align-items: center">
@@ -57,32 +55,38 @@ export class CraftFields extends ScopedElementsMixin(LitElement) {
             style="width: 12em; margin-right: 8px"
             label="Field Type"
             @selected=${(e: CustomEvent) => {
-              field.type = this.typeDefs[e.detail.index];
+              field.type = typeDefs[e.detail.index].name;
               this.requestUpdate();
               this.dispatchEvent(new Event('change'));
             }}
           >
-            ${this.typeDefs.map(
+            ${typeDefs.map(
               t =>
                 html`
                   <mwc-list-item
                     .value=${t.name}
-                    .selected=${t.name === field.type.name}
+                    .selected=${t.name === field.type}
                     >${t.name}</mwc-list-item
                   >
                 `
             )}
           </mwc-select>
 
-          <div class="column" style="flex: 1; margin-top: -8px">
-            <span>Field Configuration</span>
-            <json-schema-form
-              .value=${field.configuration}
-              .schema=${field.type.configurationSchema}
-              @change=${(e: Event) =>
-                (field.configuration = (e.target as JsonSchemaForm).value)}
-            ></json-schema-form>
-          </div>
+          ${this.getType(field.type).configurationSchema
+            ? html`
+                <div class="column" style="flex: 1; margin-top: -8px">
+                  <span>Field Configuration</span>
+                  <json-schema-form
+                    .value=${field.configuration}
+                    .schema=${this.getType(field.type).configurationSchema}
+                    @change=${(e: Event) =>
+                      (field.configuration = (
+                        e.target as JsonSchemaForm
+                      ).value)}
+                  ></json-schema-form>
+                </div>
+              `
+            : html``}
 
           <mwc-icon-button
             icon="delete"
@@ -113,7 +117,7 @@ export class CraftFields extends ScopedElementsMixin(LitElement) {
                 ...this.fields,
                 {
                   name: 'new_field',
-                  type: dateType,
+                  type: Object.keys(this.vocabulary)[0],
                   configuration: {},
                 },
               ];
