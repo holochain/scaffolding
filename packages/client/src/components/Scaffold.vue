@@ -15,7 +15,7 @@
           <div class="flex-scrollable-container">
             <div class="flex-scrollable-y">
               <ui5-tree>
-                <FileNode :fileTree="sortedFiles()"> </FileNode>
+                <DirectoryTree v-if="this.happDir" :directory="this.happDir"> </DirectoryTree>
               </ui5-tree>
             </div>
           </div>
@@ -87,7 +87,7 @@ import { ClientEventType } from '@holochain-scaffolding/events';
 import { generateVueWebHapp } from '@holochain-scaffolding/vue';
 import { HappDefinition } from '@holochain-scaffolding/definitions';
 import AppDefinitionBuilder from './AppDefinitionBuilder.vue';
-import FileNode from './FileNode.vue';
+import DirectoryTree from './DirectoryTree.vue';
 import type { Dialog } from '@material/mwc-dialog';
 import { ScDirectory, ScNodeType, ScNode } from '@source-craft/types';
 
@@ -95,7 +95,7 @@ export default defineComponent({
   name: 'Scaffold',
   components: {
     AppDefinitionBuilder,
-    FileNode,
+    DirectoryTree,
   },
   data(): {
     settingUp: boolean;
@@ -116,16 +116,6 @@ export default defineComponent({
     socket.emit(ClientEventType.ReadDir, (dir: { dirPath: string }) => (this.currentDir = dir.dirPath));
   },
   methods: {
-    sortedFiles() {
-      return (
-        this.happDir &&
-        Object.entries(this.happDir.children).sort(([_, node1]: [string, ScNode], [__, node2]: [string, ScNode]) => {
-          if (node1.type === ScNodeType.Directory) return -1;
-          if (node2.type === ScNodeType.Directory) return 1;
-          return -1;
-        })
-      );
-    },
     setup() {
       this.settingUp = true;
       socket.emit(ClientEventType.AutomaticSetup, this.happName);

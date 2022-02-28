@@ -6,9 +6,8 @@
         outlined
         :fixedMenuPosition="true"
         label="UI Template"
-        value="svelte"
         ref="uiTemplateSelect"
-        @change="selectedUiTemplate = $event.target.value"
+        @selected="onSelect($event.detail.index)"
       >
         <mwc-list-item v-for="(ui, index) of uitemplates.split(',')" :key="index" :value="ui">{{ ui }}</mwc-list-item>
       </mwc-select>
@@ -19,7 +18,6 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 import { HappDefinition, newHappDef } from '@holochain-scaffolding/definitions';
-import type { Select } from '@material/mwc-select';
 import DefineHapp from './DefineHapp.ce.vue';
 
 export default defineComponent({
@@ -36,7 +34,7 @@ export default defineComponent({
     },
     uitemplates: {
       type: String,
-      required: false,
+      required: true,
     },
   },
   data(): { selectedUiTemplate: string } {
@@ -44,7 +42,14 @@ export default defineComponent({
       selectedUiTemplate: this.uitemplates ? this.uitemplates[0] : '',
     };
   },
+  mounted() {
+    (this.$refs['uiTemplateSelect'] as any).value = this.selectedUiTemplate;
+  },
   methods: {
+    onSelect(index: number) {
+      this.selectedUiTemplate = this.uitemplates.split(',')[index];
+      this.emitChanged();
+    },
     emitChanged() {
       this.$emit('happ-changed', { happ: this.happ, uiTemplate: this.selectedUiTemplate });
     },
