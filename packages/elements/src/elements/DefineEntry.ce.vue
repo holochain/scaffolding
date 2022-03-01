@@ -17,8 +17,9 @@
     </div>
 
     <div style="display: flex; flex-direction: row; flex: 1">
-      <div style="display: flex; flex-direction: column; flex-basis: 250px">
-        <span style="font-size: 18px">CRUD Handlers</span>
+      <div style="display: flex; flex-direction: column; flex-basis: 200px">
+        <span style="font-size: 18px; margin-bottom: 4px;">CRUD Handlers</span>
+
         <mwc-formfield label="Create" style="opacity: 0.4">
           <mwc-checkbox
             :checked="entryDef.create"

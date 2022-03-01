@@ -121,7 +121,7 @@ export class CraftFields extends ScopedElementsMixin(LitElement) {
     return html`
       <div class="column">
         ${this.fields.map((f, i) => this.renderField(f, i))}
-        <div style="margin-top: 16px;">
+        <div>
           <mwc-button
             label="Add Field"
             icon="add"
