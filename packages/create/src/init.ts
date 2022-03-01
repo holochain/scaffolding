@@ -16,7 +16,18 @@ export function init(appName: string): void {
                 delete: true,
                 update: true,
                 read: true,
-                typeDefinition: holochainEntryTypeDefinition('entry-def-1', []),
+                typeDefinition: holochainEntryTypeDefinition('entry-def-1', [
+                  {
+                    name: 'title',
+                    type: 'Title',
+                    configuration: {},
+                  },
+                  {
+                    name: 'content',
+                    type: 'Content',
+                    configuration: {},
+                  },
+                ]),
               },
             ],
             name: 'zome_1',

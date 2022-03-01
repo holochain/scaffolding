@@ -25,7 +25,7 @@ ${type.fields.map(f => fieldDetailTemplate(type.name, elementsImports, f))}
   </div>
 </template>
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, inject } from 'vue';
 import { InstalledCell, AppWebsocket, InstalledAppInfo } from '@holochain/client';
 import { ${upperFirst(camelCase(type.name))} } from '../../../types/${dnaName}/${zomeName}';
 ${printTypescript(

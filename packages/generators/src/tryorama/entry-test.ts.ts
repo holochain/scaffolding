@@ -1,11 +1,14 @@
 import { DnaDefinition, EntryDefinition, ZomeDefinition } from '@holochain-scaffolding/definitions';
 import { ScFile, ScNodeType } from '@source-craft/types';
+import { snakeCase } from 'lodash-es';
+import {
+  createHandlerFnName,
+  deleteHandlerFnName,
+  readHandlerFnName,
+  updateHandlerFnName,
+} from '../zome/entry/handlers.rs';
 
-export const tryoramaEntryTest = (
-  dna: DnaDefinition,
-  zome: ZomeDefinition,
-  entryDef: EntryDefinition,
-): ScFile => ({
+export const tryoramaEntryTest = (dna: DnaDefinition, zome: ZomeDefinition, entryDef: EntryDefinition): ScFile => ({
   type: ScNodeType.File,
   content: `
 import { Orchestrator, Player, Cell } from "@holochain/tryorama";
@@ -39,7 +42,7 @@ export const entryCrudTests = (dna: DnaDefinition, zome: ZomeDefinition, entryDe
     // Alice creates a ${entryDef.typeDefinition.name}
     let create_output = await alice.call(
         "${zome.name}",
-        "create_${entryDef.typeDefinition.name}",
+        "${createHandlerFnName(entryDef.typeDefinition.name)}",
         entryContents
     );
     t.ok(create_output.header_hash);
@@ -50,7 +53,9 @@ export const entryCrudTests = (dna: DnaDefinition, zome: ZomeDefinition, entryDe
       entryDef.read
         ? `
     // Bob gets the created ${entryDef.typeDefinition.name}
-    let entry = await bob.call("${zome.name}", "get_${entryDef.typeDefinition.name}", create_output.entry_hash);
+    let entry = await bob.call("${zome.name}", "${readHandlerFnName(
+            entryDef.typeDefinition.name,
+          )}", create_output.entry_hash);
     t.deepEqual(entry, entryContents);
     `
         : ``
@@ -61,10 +66,14 @@ export const entryCrudTests = (dna: DnaDefinition, zome: ZomeDefinition, entryDe
     // Alice updates the ${entryDef.typeDefinition.name}
     let update_output = await alice.call(
       "${zome.name}",
-      "update_${entryDef.typeDefinition.name}",
+      "${updateHandlerFnName(entryDef.typeDefinition.name)}",
       {
         original_header_hash: create_output.header_hash,
-        updated_${entryDef.typeDefinition.name}: ${JSON.stringify(entryDef.typeDefinition.sample(), null, 2).replace('\n', '\n        ')}
+        updated_${snakeCase(entryDef.typeDefinition.name)}: ${JSON.stringify(
+            entryDef.typeDefinition.sample(),
+            null,
+            2,
+          ).replace('\n', '\n        ')}
       }
     );
     t.ok(update_output.header_hash);
@@ -80,7 +89,7 @@ export const entryCrudTests = (dna: DnaDefinition, zome: ZomeDefinition, entryDe
     // Alice delete the ${entryDef.typeDefinition.name}
     await alice.call(
       "${zome.name}",
-      "delete_${entryDef.typeDefinition.name}",
+      "${deleteHandlerFnName(entryDef.typeDefinition.name)}",
       create_output.header_hash
     );
     await sleep(50);
@@ -89,7 +98,9 @@ export const entryCrudTests = (dna: DnaDefinition, zome: ZomeDefinition, entryDe
       entryDef.read
         ? `
     // Bob tries to get the deleted ${entryDef.typeDefinition.name}, but he doesn't get it because it has been deleted
-    let deletedEntry = await bob.call("${zome.name}", "get_${entryDef.typeDefinition.name}", create_output.entry_hash);
+    let deletedEntry = await bob.call("${zome.name}", "${readHandlerFnName(
+            entryDef.typeDefinition.name,
+          )}", create_output.entry_hash);
     t.notOk(deletedEntry);`
         : ``
     }

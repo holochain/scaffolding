@@ -12,20 +12,17 @@ export function getDnaPath(happ: HappDefinition, dnaName: string): string {
   else return `dnas/${dnaName}/`;
 }
 
-export function getUiPackageName(happ: HappDefinition): string {
+export function getUiPackageName(_happ: HappDefinition): string {
   return `ui`;
 }
 
-export function mergeStrings(strings: Array<any>, separator = '') {
+export function mergeStrings(strings: Array<any>, separator = ''): string {
   return flattenDeep(strings).join(separator);
 }
 
 /** Case Utils */
 
-export const kebabToCamelCase = (s: string) => s.replace(/-./g, x => x.toUpperCase()[1]);
-export const snakeToCamelCase = (s: string) => s.replace(/_./g, x => x.toUpperCase()[1]);
-
-export function titleCase(str: string) {
+export function titleCase(str: string): string {
   return upperFirst(camelCase(str));
 }
 
@@ -39,6 +36,6 @@ const snakeCaseRegex = /^([a-z]{1,})(_[a-z0-9]{1,})*$/;
  *
  * @param
  */
-export function isSnakeCase(input: string) {
+export function isSnakeCase(input: string): boolean {
   return snakeCaseRegex.test(input);
 }

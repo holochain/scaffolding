@@ -1,5 +1,6 @@
 import { HappDefinition, ZomeDefinition } from '@holochain-scaffolding/definitions';
 import { ScDirectory, ScFile, ScNodeType } from '@source-craft/types';
+import { snakeCase } from 'lodash-es';
 
 import { zomeCargoToml } from './Cargo.toml';
 import { generateEntryDef } from './entry';
@@ -16,7 +17,7 @@ export function zomeCode(zomeDefinition: ZomeDefinition): ScDirectory {
   };
 
   for (const entryDef of zomeDefinition.entry_defs) {
-    zomeDir.children[entryDef.typeDefinition.name] = generateEntryDef(entryDef);
+    zomeDir.children[snakeCase(entryDef.typeDefinition.name)] = generateEntryDef(entryDef);
   }
 
   return zomeDir;

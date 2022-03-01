@@ -31,7 +31,7 @@ export function generateCreateTypeVueComponent(
 </template>
 <script lang="ts">
 import '@material/mwc-button';
-import { defineComponent } from 'vue';
+import { defineComponent, inject } from 'vue';
 import { InstalledCell, AppWebsocket, InstalledAppInfo } from '@holochain/client';
 import { ${upperFirst(camelCase(type.name))} } from '../../../types/${dnaName}/${zomeName}';
 ${printTypescript(
@@ -41,7 +41,7 @@ ${printTypescript(
 export default defineComponent({
   data(): Partial<${upperFirst(camelCase(type.name))}> {
     return {
-      ${type.fields?.map(f => `${camelCase(f.name)}: undefined`)}
+      ${type.fields?.map(f => `${camelCase(f.name)}: undefined`).join(',\n')}
     }
   },
 
@@ -51,14 +51,14 @@ export default defineComponent({
         .map(f => `this.${camelCase(f.name)}`)
         .join(' && \n      ')};
     },
-    create${upperFirst(camelCase(type.name))}() {
-      const cellData = this.appInfo.cell_data.find((c: InstalledCell) => c.role_id === '${dnaName}');
+    async create${upperFirst(camelCase(type.name))}() {
+      const cellData = this.appInfo.cell_data.find((c: InstalledCell) => c.role_id === '${dnaName}')!;
 
       const ${camelCase(type.name)}: ${upperFirst(camelCase(type.name))} = {
-        ${type.fields.map(field => `${camelCase(field.name)}: this.${camelCase(field.name)}`).join(',\n        ')}
+        ${type.fields.map(field => `${camelCase(field.name)}: this.${camelCase(field.name)}!`).join(',\n        ')}
       };
 
-      this.appWebsocket.callZome({
+      const { entryHash } = await this.appWebsocket.callZome({
         cap_secret: null,
         cell_id: cellData.cell_id,
         zome_name: '${zomeName}',
@@ -66,8 +66,11 @@ export default defineComponent({
         payload: ${camelCase(type.name)},
         provenance: cellData.cell_id[1]
       });
+
+      this.$emit('${snakeCase(type.name)}-created', entryHash)
     },
   },
+  emits: ['${snakeCase(type.name)}-created'],
   setup() {
     const appWebsocket = inject('appWebsocket') as AppWebsocket;
     const appInfo = inject('appInfo') as InstalledAppInfo;
