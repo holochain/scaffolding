@@ -1,7 +1,7 @@
 {
   "name": "@type-craft/text",
   "version": "0.0.1",
-  "description": "Common types for the client and the server to communicate with each other",
+  "description": "Title and Content types for type-craft",
   "author": "guillem.cordoba@gmail.com",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -25,12 +25,10 @@
   "dependencies": {
     "@open-wc/scoped-elements": "^2.0.1",
     "@scoped-elements/material-web": "^0.0.16",
-    "@scoped-elements/shoelace": "^0.0.8",
     "@type-craft/elements-imports": "^0.0.1",
     "@type-craft/typescript": "^0.0.1",
     "@type-craft/rust": "^0.0.1",
     "@type-craft/vocabulary": "^0.0.1",
-    "@types/json-schema": "^7.0.9",
     "lit": "^2.1.3"
   },
   "files": [
