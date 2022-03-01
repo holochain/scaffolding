@@ -1,6 +1,6 @@
 import { ScFile, ScNodeType } from '@source-craft/types';
-import { printTypescript } from '@source-craft/web-apps';
-import { VocabularyElementsImports } from '@type-craft/elements-imports';
+import { printTypescript } from '@source-craft/npm';
+import { VocabularyElementsImportDeclarations } from '@type-craft/web-components';
 import { VocabularyTypescriptGenerators } from '@type-craft/typescript';
 import { FieldDefinition, TypeDefinition } from '@type-craft/vocabulary';
 import { camelCase, flatten, snakeCase, upperFirst } from 'lodash-es';
@@ -8,7 +8,7 @@ import ts from 'typescript';
 
 export function generateTypeDetailVueComponent(
   typescriptGenerators: VocabularyTypescriptGenerators,
-  renderersImports: VocabularyElementsImports,
+  elementsImports: VocabularyElementsImportDeclarations,
   type: TypeDefinition<any, any>,
   dnaName: string,
   zomeName: string,
@@ -17,7 +17,7 @@ export function generateTypeDetailVueComponent(
   <div v-if="${camelCase(type.name)}" style="display: flex; flex-direction: column">
     <span style="font-size: 18px">${upperFirst(camelCase(type.name))}</span>
 
-${type.fields.map(f => fieldDetailTemplate(type.name, renderersImports, f))}
+${type.fields.map(f => fieldDetailTemplate(type.name, elementsImports, f))}
 
   </div>
   <div v-else style="display: flex; flex: 1; align-items: center; justify-content: center">
@@ -29,7 +29,7 @@ import { defineComponent } from 'vue';
 import { InstalledCell, AppWebsocket, InstalledAppInfo } from '@holochain/client';
 import { ${upperFirst(camelCase(type.name))} } from '../../../types/${dnaName}/${zomeName}';
 ${printTypescript(
-  ts.factory.createNodeArray(flatten(type.fields?.map(f => fieldImports(typescriptGenerators, renderersImports, f)))),
+  ts.factory.createNodeArray(flatten(type.fields?.map(f => fieldImports(typescriptGenerators, elementsImports, f)))),
 )}
 import '@material/mwc-circular-progress';
 
@@ -76,10 +76,10 @@ export default defineComponent({
 
 function fieldDetailTemplate(
   typeName: string,
-  renderersImports: VocabularyElementsImports,
+  elementsImports: VocabularyElementsImportDeclarations,
   field: FieldDefinition<any>,
 ): string {
-  const fieldRenderers = renderersImports[field.type];
+  const fieldRenderers = elementsImports[field.type];
   return `
     <${fieldRenderers.detail.tagName}
       :value="${camelCase(typeName)}.${camelCase(field.name)}"
@@ -89,10 +89,10 @@ function fieldDetailTemplate(
 
 function fieldImports(
   typescriptGenerators: VocabularyTypescriptGenerators,
-  renderersImports: VocabularyElementsImports,
+  elementsImports: VocabularyElementsImportDeclarations,
   field: FieldDefinition<any>,
 ): ts.ImportDeclaration[] {
-  return [renderersImports[field.type].detail.sideEffectImport, ...typescriptGenerators[field.type].imports].map(
+  return [elementsImports[field.type].detail.sideEffectImport, ...typescriptGenerators[field.type].imports].map(
     i => i.importDeclaration,
   );
 }

@@ -1,6 +1,6 @@
 import { holochainEntryTypeDefinition } from '@holochain-scaffolding/definitions';
 import { generateVueWebHapp } from '@holochain-scaffolding/vue';
-import { applyPatch } from '@source-craft/fs';
+import { writeDirectoryTree } from '@source-craft/fs';
 
 export function init(appName: string): void {
   const d = generateVueWebHapp({
@@ -25,5 +25,5 @@ export function init(appName: string): void {
       },
     ],
   });
-  applyPatch(`${process.cwd()}/${appName}`, d);
+  writeDirectoryTree(`${process.cwd()}/${appName}`, d);
 }

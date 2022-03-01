@@ -1,21 +1,31 @@
 import { VocabularyRustGenerators } from '@type-craft/rust';
 import { VocabularyTypescriptGenerators } from '@type-craft/typescript';
-import { VocabularyElementsImports } from '@type-craft/elements-imports';
-import { TitleType } from '@type-craft/text';
+import { VocabularyElementsImportDeclarations } from '@type-craft/web-components';
+import * as Title from '@type-craft/title';
+import * as Content from '@type-craft/content';
+import * as DateTime from '@type-craft/date-time';
 import { Vocabulary } from '@type-craft/vocabulary';
 
 export const happVocabulary: Vocabulary = {
-  Title: TitleType.titleType,
+  Title: Title.titleType,
+  Content: Content.contentType,
+  DateTime: DateTime.dateTimeType,
 };
 
 export const happRustGenerators: VocabularyRustGenerators = {
-  Title: TitleType.rustGenerator,
+  Title: Title.rustGenerator,
+  Content: Content.rustGenerator,
+  DateTime: DateTime.rustGenerator,
 };
 
 export const happTsGenerators: VocabularyTypescriptGenerators = {
-  Title: TitleType.tsGenerator,
+  Title: Title.tsGenerator,
+  Content: Content.tsGenerator,
+  DateTime: DateTime.tsGenerator,
 };
 
-export const renderersImports: VocabularyElementsImports = {
-  Title: TitleType.elementImports
+export const elementsImports: VocabularyElementsImportDeclarations = {
+  Title: Title.elementImports,
+  Content: Content.elementImports,
+  DateTime: DateTime.elementImports,
 };

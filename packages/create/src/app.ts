@@ -8,10 +8,10 @@ import { Server } from 'socket.io';
 import fs from 'fs';
 
 import { ClientEventType } from '@holochain-scaffolding/events';
-import { applyPatch } from '@source-craft/fs';
+import { writeDirectoryTree } from '@source-craft/fs';
 import { automaticSetup } from './events/automatic-setup';
 
-export async function launchApp() {
+export function launchApp() {
   dotenv.config();
 
   const app = express();
@@ -43,11 +43,11 @@ export async function launchApp() {
   });
 
   io.on('connection', socket => {
-    socket.on(ClientEventType.ApplyPatch, ({ happ, happName }) => {
+    socket.on(ClientEventType.WriteDirectory, ({ happ, happName }) => {
       const dir = `${process.cwd()}/${happName}`;
       fs.mkdirSync(dir);
 
-      applyPatch(dir, happ);
+      writeDirectoryTree(dir, happ);
     });
     socket.on(ClientEventType.ReadDir, callback => callback({ dirPath: process.cwd() }));
     socket.on(ClientEventType.AutomaticSetup, appName => automaticSetup(appName));

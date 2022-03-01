@@ -11,7 +11,7 @@
   ],
   "scripts": {
     "start": "tsc -w",
-    "build": "rimraf dist && tsc",
+    "build": "tsc",
     "build:watch": "tsc -w --preserveWatchOutput"
   },
   "dependencies": {

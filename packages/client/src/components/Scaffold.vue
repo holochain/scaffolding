@@ -124,7 +124,7 @@ export default defineComponent({
       socket.emit(ClientEventType.Exit);
     },
     scaffoldApp(): void {
-      socket.emit(ClientEventType.ApplyPatch, {
+      socket.emit(ClientEventType.WriteDirectory, {
         happ: this.happDir,
         happName: this.happName,
       });

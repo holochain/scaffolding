@@ -1,7 +1,7 @@
 import { findByPath, ScDirectory, ScFile } from '@source-craft/types';
 import { HappDefinition } from '@holochain-scaffolding/definitions';
 import { webHapp, generateTsTypesForHapp } from '@holochain-scaffolding/generators';
-import { happVocabulary, renderersImports, happTsGenerators } from '@holochain-scaffolding/vocabulary';
+import { happVocabulary, elementsImports, happTsGenerators } from '@holochain-scaffolding/vocabulary';
 import generateVueApp from './app';
 import { addComponentsForEntryDef } from './add-components';
 import { addNpmDependency } from '@source-craft/npm';
@@ -10,7 +10,7 @@ export function generateVueWebHapp(happDefinition: HappDefinition): ScDirectory 
   let vueApp = generateVueApp({
     happName: happDefinition.name,
     appContent: '<!-- TODO: put here the content of your app -->',
-    appSubcomponents: '// TODO: Add here the appropriate subcomponents'
+    appSubcomponents: '// TODO: Add here the appropriate subcomponents',
   });
   const typesDir = generateTsTypesForHapp(happDefinition);
 
@@ -23,7 +23,7 @@ export function generateVueWebHapp(happDefinition: HappDefinition): ScDirectory 
           vueApp,
           happVocabulary,
           happTsGenerators,
-          renderersImports,
+          elementsImports,
           entryDef.typeDefinition,
           dna.name,
           zome.name,

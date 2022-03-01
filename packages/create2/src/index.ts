@@ -1,7 +1,8 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 //@ts-ignore
 import semver from 'semver';
 import chalk from 'chalk';
-import { applyPatch } from '@source-craft/fs';
+import { writeDirectoryTree } from '@source-craft/fs';
 import generateModule from './module';
 import upperFirst from 'lodash-es/upperFirst';
 import camelCase from 'lodash-es/camelCase';
@@ -49,7 +50,7 @@ let d = generateModule({
 
 d = patchProfiles(d, moduleName, pluralName);
 
-applyPatch(`${process.cwd()}/${kebabCase(pluralName)}`, d);
+writeDirectoryTree(`${process.cwd()}/${kebabCase(pluralName)}`, d);
 
 console.log(`Module scaffolded!\n`);
 console.log(`Run these commands to get started:\n\n`);

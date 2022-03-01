@@ -17,9 +17,10 @@
     "test": "npm run build && rimraf tests/.fixture && node --loader ts-node/esm --experimental-specifier-resolution=node tests/index.ts | tap-diff && cd tests/.fixture && npm install && npm run build"
   },
   "dependencies": {
-    "@holochain-scaffolding/generators": "^0.0.1",
     "@holochain-scaffolding/definitions": "^0.0.1",
-    "@type-craft/elements-imports": "^0.0.1",
+    "@holochain-scaffolding/generators": "^0.0.1",
+    "@holochain-scaffolding/vocabulary": "^0.0.1",
+    "@type-craft/web-components": "^0.0.1",
     "@type-craft/vocabulary": "^0.0.1",
     "@source-craft/npm": "^0.0.1",
     "lodash-es": "^4.17.21",

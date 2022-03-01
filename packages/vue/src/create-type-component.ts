@@ -1,17 +1,17 @@
 import { ScFile, ScNodeType } from '@source-craft/types';
-import { printTypescript } from '@source-craft/web-apps';
+import { printTypescript } from '@source-craft/npm';
 import { FieldDefinition, TypeDefinition } from '@type-craft/vocabulary';
 import camelCase from 'lodash-es/camelCase';
 import snakeCase from 'lodash-es/snakeCase';
 import upperFirst from 'lodash-es/upperFirst';
 import flatten from 'lodash-es/flatten';
-import { VocabularyElementsImports } from '@type-craft/elements-imports';
+import { VocabularyElementsImportDeclarations } from '@type-craft/web-components';
 import ts from 'typescript';
 import { VocabularyTypescriptGenerators } from '@type-craft/typescript';
 
 export function generateCreateTypeVueComponent(
   typescriptGenerators: VocabularyTypescriptGenerators,
-  renderersImports: VocabularyElementsImports,
+  elementsImports: VocabularyElementsImportDeclarations,
   type: TypeDefinition<any, any>,
   dnaName: string,
   zomeName: string,
@@ -20,7 +20,7 @@ export function generateCreateTypeVueComponent(
   <div style="display: flex; flex-direction: column">
     <span style="font-size: 18px">Create ${upperFirst(camelCase(type.name))}</span>
 
-    ${type.fields.map(f => createFieldTemplate(renderersImports, f))}
+    ${type.fields.map(f => createFieldTemplate(elementsImports, f))}
 
     <mwc-button 
       label="Create ${upperFirst(camelCase(type.name))}"
@@ -35,7 +35,7 @@ import { defineComponent } from 'vue';
 import { InstalledCell, AppWebsocket, InstalledAppInfo } from '@holochain/client';
 import { ${upperFirst(camelCase(type.name))} } from '../../../types/${dnaName}/${zomeName}';
 ${printTypescript(
-  ts.factory.createNodeArray(flatten(type.fields?.map(f => fieldImports(typescriptGenerators, renderersImports, f)))),
+  ts.factory.createNodeArray(flatten(type.fields?.map(f => fieldImports(typescriptGenerators, elementsImports, f)))),
 )}
 
 export default defineComponent({
@@ -85,8 +85,11 @@ export default defineComponent({
   };
 }
 
-function createFieldTemplate(renderersImports: VocabularyElementsImports, field: FieldDefinition<any>): string {
-  const fieldRenderers = renderersImports[field.type];
+function createFieldTemplate(
+  elementsImports: VocabularyElementsImportDeclarations,
+  field: FieldDefinition<any>,
+): string {
+  const fieldRenderers = elementsImports[field.type];
   return `<${fieldRenderers.create.tagName} 
       @change="${camelCase(field.name)} = $event.target.value"
       style="margin-top: 16px"
@@ -95,10 +98,10 @@ function createFieldTemplate(renderersImports: VocabularyElementsImports, field:
 
 function fieldImports(
   typescriptGenerators: VocabularyTypescriptGenerators,
-  renderersImports: VocabularyElementsImports,
+  elementsImports: VocabularyElementsImportDeclarations,
   field: FieldDefinition<any>,
 ): ts.ImportDeclaration[] {
-  return [renderersImports[field.type].create.sideEffectImport, ...typescriptGenerators[field.type].imports].map(
+  return [elementsImports[field.type].create.sideEffectImport, ...typescriptGenerators[field.type].imports].map(
     i => i.importDeclaration,
   );
 }

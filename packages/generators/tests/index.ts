@@ -2,7 +2,7 @@ import '@lit-labs/ssr/lib/render-with-global-dom-shim.js';
 
 import test from 'tape';
 import path from 'path';
-import { applyPatch } from '@source-craft/fs';
+import { writeDirectoryTree } from '@source-craft/fs';
 import { webHapp } from '../dist';
 import { holochainEntryTypeDefinition } from '@holochain-scaffolding/definitions';
 
@@ -104,7 +104,7 @@ test('generate a full blown happ', async t => {
     },
   );
 
-  applyPatch(__dirname + '/.fixture', happChanges);
+  writeDirectoryTree(__dirname + '/.fixture', happChanges);
 
   t.equal(1, 1);
   t.end();

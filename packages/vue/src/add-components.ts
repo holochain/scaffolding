@@ -1,6 +1,6 @@
 import { addNpmDependency } from '@source-craft/npm';
 import { findByPath, ScDirectory, ScFile, ScNodeType } from '@source-craft/types';
-import { getAllImports, VocabularyElementsImports } from '@type-craft/elements-imports';
+import { getAllImports, VocabularyElementsImportDeclarations } from '@type-craft/web-components';
 import { VocabularyTypescriptGenerators } from '@type-craft/typescript';
 import { getAllChildrenTypes, TypeDefinition, Vocabulary } from '@type-craft/vocabulary';
 import { camelCase, flatten, upperFirst } from 'lodash-es';
@@ -14,7 +14,7 @@ export function addComponentsForEntryDef(
   vueApp: ScDirectory,
   vocabulary: Vocabulary,
   typescriptGenerators: VocabularyTypescriptGenerators,
-  renderersImports: VocabularyElementsImports,
+  elementsImports: VocabularyElementsImportDeclarations,
   type: TypeDefinition<any, any>,
   dnaName: string,
   zomeName: string,
@@ -43,7 +43,7 @@ export function addComponentsForEntryDef(
 
   const createComponentFile = generateCreateTypeVueComponent(
     typescriptGenerators,
-    renderersImports,
+    elementsImports,
     type,
     dnaName,
     zomeName,
@@ -51,7 +51,7 @@ export function addComponentsForEntryDef(
 
   const detailComponentFile = generateTypeDetailVueComponent(
     typescriptGenerators,
-    renderersImports,
+    elementsImports,
     type,
     dnaName,
     zomeName,
@@ -64,7 +64,7 @@ export function addComponentsForEntryDef(
 
   const allTypes = getAllChildrenTypes(vocabulary, type);
 
-  const allRenderers = allTypes.map(t => renderersImports[t]).filter(r => !!r);
+  const allRenderers = allTypes.map(t => elementsImports[t]).filter(r => !!r);
   const allImports = flatten(allRenderers.map(r => getAllImports(r)));
 
   for (const i of allImports) {
