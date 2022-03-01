@@ -17,14 +17,26 @@ import {
 } from '@type-craft/vocabulary';
 
 import { JsonSchemaForm } from './json-schema-form';
-import { dateType } from '@type-craft/date';
-import { defaultTypes } from './default-type-definitions';
+import { UniqueFieldsController } from './unique-fields-controller';
 
 export class CraftFields extends ScopedElementsMixin(LitElement) {
   @property({ type: Object }) vocabulary!: Vocabulary;
 
   @property()
   fields: Array<FieldDefinition<any>> = [];
+
+  uniqueFieldsController = new UniqueFieldsController(
+    this,
+    () => this.uniqueFields
+  );
+
+  _fieldsCount = 0;
+
+  get uniqueFields(): HTMLInputElement[] {
+    return Array.from(
+      this.shadowRoot!.querySelectorAll('.unique-field')
+    ) as HTMLInputElement[];
+  }
 
   get value(): Array<FieldDefinition<any>> {
     return this.fields;
@@ -38,11 +50,14 @@ export class CraftFields extends ScopedElementsMixin(LitElement) {
     const typeDefs = Object.values(this.vocabulary);
     return html`
       <div class="column" style="margin-top: 16px;">
-        <div class="row" style="align-items: center">
+        <div class="row" style="align-items: start">
           <mwc-textfield
             outlined
             label="Field Name"
+            class="unique-field"
+            required
             .value=${field.name}
+            helper="Required and unique"
             @input=${(e: CustomEvent) => {
               field.name = (e.target as TextField).value;
               this.dispatchEvent(new Event('change'));
@@ -105,8 +120,6 @@ export class CraftFields extends ScopedElementsMixin(LitElement) {
   render() {
     return html`
       <div class="column">
-        <span style="font-size: 18px">Fields</span>
-
         ${this.fields.map((f, i) => this.renderField(f, i))}
         <div style="margin-top: 16px;">
           <mwc-button
@@ -116,7 +129,7 @@ export class CraftFields extends ScopedElementsMixin(LitElement) {
               this.fields = [
                 ...this.fields,
                 {
-                  name: 'new_field',
+                  name: `new_field_${this._fieldsCount++}`,
                   type: Object.keys(this.vocabulary)[0],
                   configuration: {},
                 },

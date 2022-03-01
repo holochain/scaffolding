@@ -58,15 +58,19 @@
         </mwc-formfield>
       </div>
 
-      <div style="position: relative; display: flex; flex: 1">
-        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0">
-          <div style="max-height: 100%; overflow-y: auto">
-            <craft-fields
-              :vocabulary="happVocabulary"
-              :fields="entryDef.typeDefinition.fields"
-              style="flex: 1"
-              @change="setFields($event.target.value)"
-            ></craft-fields>
+      <div style="display: flex; flex-direction: column; flex: 1">
+        <span style="font-size: 18px">Fields</span>
+
+        <div style="position: relative; display: flex; flex: 1">
+          <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0">
+            <div style="max-height: 100%; overflow-y: auto">
+              <craft-fields
+                :vocabulary="happVocabulary"
+                :fields="entryDef.typeDefinition.fields"
+                style="flex: 1"
+                @change="setFields($event.target.value)"
+              ></craft-fields>
+            </div>
           </div>
         </div>
       </div>

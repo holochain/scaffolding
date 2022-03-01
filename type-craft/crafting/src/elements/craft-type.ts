@@ -62,6 +62,8 @@ export class CraftType extends ScopedElementsMixin(LitElement) {
           style="margin-top: 16px"
         ></mwc-textarea>
 
+        <span style="font-size: 18px">Fields</span>
+
         <craft-fields
           style="margin-top: 24px;"
           .vocabulary=${this.vocabulary}
