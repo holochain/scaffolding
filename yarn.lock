@@ -2242,10 +2242,10 @@
     "@type-craft/vocabulary" "^0.0.1"
     lodash-es "^4.17.21"
 
-"@type-craft/title@^0.0.1":
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/@type-craft/title/-/title-0.0.1.tgz#50b7a124c30d030ea21091492f299fb96d20510b"
-  integrity sha512-bllAXoBNQBFV/PsHGKUmemdvZwDBXadG3/u4Mc0tZeynkbKW0BSfXdXeL2wDr34s2FP/rCOpMOx3+Z1liFCWJw==
+"@type-craft/title@^0.0.2":
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/@type-craft/title/-/title-0.0.2.tgz#53bb14db7b0efd1c77bd37ccbc36b99457d033c2"
+  integrity sha512-VD1qmg8dNTqlyHdlpZxnBNdsxvVv/EgqMguVElj4z0su6Q2wkvd0iTRnh/TJo7QfaW3bEVknU2A7Upt9t8ThrA==
   dependencies:
     "@open-wc/scoped-elements" "^2.0.1"
     "@scoped-elements/material-web" "^0.0.16"

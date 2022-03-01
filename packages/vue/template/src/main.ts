@@ -1,3 +1,4 @@
+import '@webcomponents/scoped-custom-element-registry'
 import { createApp } from 'vue';
 import App from './App.vue';
 

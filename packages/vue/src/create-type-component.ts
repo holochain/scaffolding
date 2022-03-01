@@ -8,6 +8,7 @@ import flatten from 'lodash-es/flatten';
 import { VocabularyElementsImportDeclarations } from '@type-craft/web-components';
 import ts from 'typescript';
 import { VocabularyTypescriptGenerators } from '@type-craft/typescript';
+import { kebabCase } from 'lodash-es';
 
 export function generateCreateTypeVueComponent(
   typescriptGenerators: VocabularyTypescriptGenerators,
@@ -20,7 +21,7 @@ export function generateCreateTypeVueComponent(
   <div style="display: flex; flex-direction: column">
     <span style="font-size: 18px">Create ${upperFirst(camelCase(type.name))}</span>
 
-    ${type.fields.map(f => createFieldTemplate(elementsImports, f))}
+    ${type.fields.map(f => createFieldTemplate(elementsImports, f)).join('\n\n')}
 
     <mwc-button 
       label="Create ${upperFirst(camelCase(type.name))}"
@@ -67,13 +68,13 @@ export default defineComponent({
         provenance: cellData.cell_id[1]
       });
 
-      this.$emit('${snakeCase(type.name)}-created', entryHash)
+      this.$emit('${kebabCase(type.name)}-created', entryHash)
     },
   },
-  emits: ['${snakeCase(type.name)}-created'],
+  emits: ['${kebabCase(type.name)}-created'],
   setup() {
-    const appWebsocket = inject('appWebsocket') as AppWebsocket;
-    const appInfo = inject('appInfo') as InstalledAppInfo;
+    const appWebsocket = (inject('appWebsocket') as ComputedRef<AppWebsocket>).value;
+    const appInfo = (inject('appInfo') as ComputedRef<InstalledAppInfo>).value;
     return {
       appInfo,
       appWebsocket,

@@ -15,7 +15,7 @@
   "dependencies": {
     "@type-craft/content": "^0.0.1",
     "@type-craft/date-time": "^0.0.2",
-    "@type-craft/title": "^0.0.1",
+    "@type-craft/title": "^0.0.2",
     "@type-craft/rust": "^0.0.1",
     "@type-craft/typescript": "^0.0.1",
     "@type-craft/vocabulary": "^0.0.1",

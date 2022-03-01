@@ -52,8 +52,8 @@ export function getCrateName(happ: HappDefinition, dnaIndex: number, zomeIndex: 
   }
 
   if (thereIsAnotherZomeInAnotherDnaWithTheSameName) {
-    return `${happ.dnas[dnaIndex].name}_${zome.name}`;
+    return `${snakeCase(happ.dnas[dnaIndex].name)}_${snakeCase(zome.name)}`;
   } else {
-    return zome.name;
+    return snakeCase(zome.name);
   }
 }

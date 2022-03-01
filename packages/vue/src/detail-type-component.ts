@@ -58,8 +58,8 @@ export default defineComponent({
     });
   },
   setup() {
-    const appWebsocket = inject('appWebsocket') as AppWebsocket;
-    const appInfo = inject('appInfo') as InstalledAppInfo;
+    const appWebsocket = (inject('appWebsocket') as ComputedRef<AppWebsocket>).value;
+    const appInfo = (inject('appInfo') as ComputedRef<InstalledAppInfo>).value;
     return {
       appInfo,
       appWebsocket,
