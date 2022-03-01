@@ -32,7 +32,7 @@ export function generateCreateTypeVueComponent(
 </template>
 <script lang="ts">
 import '@material/mwc-button';
-import { defineComponent, inject } from 'vue';
+import { defineComponent, inject, ComputedRef } from 'vue';
 import { InstalledCell, AppWebsocket, InstalledAppInfo } from '@holochain/client';
 import { ${upperFirst(camelCase(type.name))} } from '../../../types/${dnaName}/${zomeName}';
 ${printTypescript(

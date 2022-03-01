@@ -18,6 +18,8 @@ export const packageJson = ({happName}: {happName: string;}): ScFile => ({
     "@holochain/client": "^0.3.2",
     "@material/mwc-button": "^0.25.3",
     "@material/mwc-circular-progress": "^0.25.3",
+    "@webcomponents/scoped-custom-element-registry": "0.0.4",
+    "@types/ws": "^8.5.1",
     "vue": "^3.2.25"
   },
   "devDependencies": {
