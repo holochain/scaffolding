@@ -16,5 +16,5 @@ export function entryTypes(entryDef: EntryDefinition): ScFile {
     [typeDef.name]: holochainEntryRustTypeGenerator(typeDef.name, typeDef.fields),
   };
 
-  return generateRustTypesFile(vocabulary, rustGenerators, [entryDef.typeDefinition]);
+  return generateRustTypesFile(vocabulary, rustGenerators, [entryDef.typeDefinition.name]);
 }

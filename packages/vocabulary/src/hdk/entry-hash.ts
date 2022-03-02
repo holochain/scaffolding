@@ -28,7 +28,7 @@ export const rustGenerator: RustTypeGenerator = {
   referenceType: 'EntryHashB64',
 };
 
-export const elementImports: TypeElementsImportDeclarations = {
+export const elementsImports: TypeElementsImportDeclarations = {
   detail: {
     sideEffectImport: {
       importDeclaration: `import '@holochain-open-dev/utils/copiable-hash';`,

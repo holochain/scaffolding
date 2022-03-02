@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@holochain-scaffolding/vocabulary": "^0.0.1",
-    "@type-craft/rust": "^0.0.1",
+    "@type-craft/rust": "^0.0.3",
     "@type-craft/vocabulary": "^0.0.2"
   },
   "devDependencies": {

@@ -16,9 +16,11 @@
   },
   "dependencies": {
     "@holochain-scaffolding/definitions": "0.0.1",
-    "@source-craft/npm": "0.0.3",
-    "@source-craft/types": "0.0.1",
-    "@type-craft/typescript": "0.0.4",
+    "@source-craft/npm": "^0.0.3",
+    "@source-craft/types": "^0.0.1",
+    "@type-craft/rust": "^0.0.3",
+    "@type-craft/typescript": "^0.0.5",
+    "@type-craft/vocabulary": "^0.0.2",
     "lodash-es": "^4.17.21"
   },
   "devDependencies": {
