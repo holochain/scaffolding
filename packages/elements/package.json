@@ -37,7 +37,7 @@
     "@material/mwc-top-app-bar": "^0.25.3",
     "@scoped-elements/material-web": "^0.0.16",
     "@scoped-elements/shoelace": "^0.0.8",
-    "@type-craft/crafting": "^0.0.1",
+    "@type-craft/crafting": "^0.0.3",
     "@ui5/webcomponents": "^1.0.2",
     "lodash-es": "^4.17.21",
     "vue": "^3.2.26"

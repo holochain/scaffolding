@@ -40,6 +40,6 @@ export function tsTypesForZome(zome: ZomeDefinition): ScFile {
   return generateTsTypesFile(
     vocabulary,
     happTsGenerators,
-    zome.entry_defs.map(def => def.typeDefinition),
+    zome.entry_defs.map(def => def.typeDefinition.name),
   );
 }

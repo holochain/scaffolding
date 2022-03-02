@@ -23,6 +23,8 @@ export default defineComponent({
     };
   },
   async mounted() {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     this.appWebsocket = await AppWebsocket.connect(`ws://localhost:${import.meta.env.VITE_HC_PORT}`);
     this.appInfo = await this.appWebsocket.appInfo({ installed_app_id: 'my-app' });
 

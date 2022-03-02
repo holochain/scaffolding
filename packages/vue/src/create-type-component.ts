@@ -1,14 +1,12 @@
 import { ScFile, ScNodeType } from '@source-craft/types';
-import { printTypescript } from '@source-craft/npm';
 import { FieldDefinition, TypeDefinition } from '@type-craft/vocabulary';
 import camelCase from 'lodash-es/camelCase';
 import snakeCase from 'lodash-es/snakeCase';
 import upperFirst from 'lodash-es/upperFirst';
 import flatten from 'lodash-es/flatten';
 import { VocabularyElementsImportDeclarations } from '@type-craft/web-components';
-import ts from 'typescript';
 import { VocabularyTypescriptGenerators } from '@type-craft/typescript';
-import { kebabCase } from 'lodash-es';
+import { kebabCase, uniq } from 'lodash-es';
 
 export function generateCreateTypeVueComponent(
   typescriptGenerators: VocabularyTypescriptGenerators,
@@ -35,9 +33,7 @@ import '@material/mwc-button';
 import { defineComponent, inject, ComputedRef } from 'vue';
 import { InstalledCell, AppWebsocket, InstalledAppInfo } from '@holochain/client';
 import { ${upperFirst(camelCase(type.name))} } from '../../../types/${dnaName}/${zomeName}';
-${printTypescript(
-  ts.factory.createNodeArray(flatten(type.fields?.map(f => fieldImports(typescriptGenerators, elementsImports, f)))),
-)}
+${uniq(flatten(type.fields?.map(f => fieldImports(typescriptGenerators, elementsImports, f)))).join('\n')}
 
 export default defineComponent({
   data(): Partial<${upperFirst(camelCase(type.name))}> {
@@ -56,7 +52,7 @@ export default defineComponent({
       const cellData = this.appInfo.cell_data.find((c: InstalledCell) => c.role_id === '${dnaName}')!;
 
       const ${camelCase(type.name)}: ${upperFirst(camelCase(type.name))} = {
-        ${type.fields.map(field => `${camelCase(field.name)}: this.${camelCase(field.name)}!`).join(',\n        ')}
+        ${type.fields.map(field => fieldProperty(elementsImports, field)).join('\n        ')}
       };
 
       const { entryHash } = await this.appWebsocket.callZome({
@@ -89,12 +85,22 @@ export default defineComponent({
   };
 }
 
+function fieldProperty(elementImports: VocabularyElementsImportDeclarations, field: FieldDefinition<any>): string {
+  return `${camelCase(field.name)}: this.${camelCase(field.name)}!,${
+    elementImports[field.type] ? '' : `    // TODO: set the ${field.name}`
+  }`;
+}
+
 function createFieldTemplate(
   elementsImports: VocabularyElementsImportDeclarations,
   field: FieldDefinition<any>,
 ): string {
   const fieldRenderers = elementsImports[field.type];
+
+  if (!fieldRenderers || !fieldRenderers.create) return '';
+
   return `<${fieldRenderers.create.tagName} 
+      field-name="${field.name}"
       @change="${camelCase(field.name)} = $event.target.value"
       style="margin-top: 16px"
     ></${fieldRenderers.create.tagName}>`;
@@ -104,8 +110,12 @@ function fieldImports(
   typescriptGenerators: VocabularyTypescriptGenerators,
   elementsImports: VocabularyElementsImportDeclarations,
   field: FieldDefinition<any>,
-): ts.ImportDeclaration[] {
-  return [elementsImports[field.type].create.sideEffectImport, ...typescriptGenerators[field.type].imports].map(
-    i => i.importDeclaration,
-  );
+): string[] {
+  let imports = [];
+
+  if (typescriptGenerators[field.type]) imports = [...imports, ...typescriptGenerators[field.type].imports];
+  if (elementsImports[field.type] && elementsImports[field.type].create)
+    imports = [...imports, elementsImports[field.type].create.sideEffectImport];
+
+  return imports.map(i => i.importDeclaration);
 }
