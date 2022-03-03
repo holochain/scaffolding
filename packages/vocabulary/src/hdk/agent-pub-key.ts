@@ -4,16 +4,16 @@ import { TypescriptTypeGenerator } from '@type-craft/typescript';
 import { RustTypeGenerator } from '@type-craft/rust';
 
 export const type: TypeDefinition<string, {}> = {
-  name: 'EntryHash',
-  description: 'A hash of a Holochain entry',
+  name: 'AgentPubKey',
+  description: 'The identifier of an Agent in Holochain',
 
-  sample: () => 'uhCEkuRNJ_3yZw64zed1JwvMgjiAslcCqxfl7sk3tiZ6aLoM',
+  sample: () => 'uhCAkwc-kSLFhLE_stlZWXZGlh4xwo68G1PLF3_mDVweNxvc',
 };
 
 export const tsGenerator: TypescriptTypeGenerator = {
   imports: [],
-  defineType: 'export type EntryHashB64 = string;',
-  referenceType: 'EntryHashB64',
+  defineType: 'export type AgentPubKeyB64 = string;',
+  referenceType: 'AgentPubKeyB64',
 };
 
 export function rustGenerator(hdkVersion: string): RustTypeGenerator {

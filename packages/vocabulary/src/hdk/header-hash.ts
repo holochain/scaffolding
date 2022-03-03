@@ -4,29 +4,31 @@ import { TypescriptTypeGenerator } from '@type-craft/typescript';
 import { RustTypeGenerator } from '@type-craft/rust';
 
 export const type: TypeDefinition<string, {}> = {
-  name: 'EntryHash',
-  description: 'A hash of a Holochain entry',
+  name: 'HeaderHash',
+  description: 'A hash of a Holochain header',
 
-  sample: () => 'uhCEkuRNJ_3yZw64zed1JwvMgjiAslcCqxfl7sk3tiZ6aLoM',
+  sample: () => 'uhCkkh0cUltKm0IGJOehvTk-ENcOKhGSC0Y5yDcwK4rV_kqo',
 };
 
 export const tsGenerator: TypescriptTypeGenerator = {
   imports: [],
-  defineType: 'export type EntryHashB64 = string;',
-  referenceType: 'EntryHashB64',
+  defineType: 'export type HeaderHashB64 = string;',
+  referenceType: 'HeaderHashB64',
 };
 
-export const rustGenerator: RustTypeGenerator = {
-  imports: [
-    {
-      crateName: 'hdk',
-      importDeclaration: `use hdk::prelude::holo_hash::EntryHashB64;`,
-      version: '0.0.122',
-    },
-  ],
-  defineType: '',
-  referenceType: 'EntryHashB64',
-};
+export function rustGenerator(hdkVersion: string): RustTypeGenerator {
+  return {
+    imports: [
+      {
+        crateName: 'hdk',
+        importDeclaration: `use hdk::prelude::holo_hash::HeaderHashB64;`,
+        version: hdkVersion,
+      },
+    ],
+    defineType: '',
+    referenceType: 'HeaderHashB64',
+  };
+}
 
 export const elementsImports: TypeElementsImportDeclarations = {
   detail: {
