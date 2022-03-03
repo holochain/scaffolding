@@ -7,7 +7,7 @@ export const type: TypeDefinition<string, {}> = {
   name: 'AgentPubKey',
   description: 'The identifier of an Agent in Holochain',
 
-  sample: () => 'uhCAkwc-kSLFhLE_stlZWXZGlh4xwo68G1PLF3_mDVweNxvc',
+  sample: () => 'uhCAkr6pGIyV6_lr2MbT_Siw0DXZInPa0cgA9B9Sq1NtokBr0IiM2',
 };
 
 export const tsGenerator: TypescriptTypeGenerator = {

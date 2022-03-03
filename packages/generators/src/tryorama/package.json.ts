@@ -8,7 +8,7 @@ export const tryoramaPackageJson = (tryoramaVersion: string): ScFile => ({
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "TRYORAMA_LOG_LEVEL=info RUST_BACKTRACE=1 RUST_LOG=holochain::core::ribosome::host_fn::debug=debug TRYORAMA_HOLOCHAIN_PATH=\\"holochain\\" node --loader ts-node/esm --experimental-specifier-resolution=node src/index.ts | tap-diff"
+    "test": "TRYORAMA_LOG_LEVEL=info RUST_BACKTRACE=1 RUST_LOG=holochain::core::ribosome::host_fn::debug=debug TRYORAMA_HOLOCHAIN_PATH=\\"holochain\\" node --loader ts-node/esm --experimental-specifier-resolution=node src/index.ts"
   },
   "author": "",
   "license": "CAL-1.0",
@@ -26,9 +26,7 @@ export const tryoramaPackageJson = (tryoramaVersion: string): ScFile => ({
   "devDependencies": {
     "@holochain/tryorama": "${tryoramaVersion}",
     "@types/lodash": "^4.14.158",
-    "@types/node": "^14.0.14",
-    "@detools/tap-diff": "^0.2.2",
-    "tap-diff": "^0.1.1"
+    "@types/node": "^14.0.14"
   },
   "type": "module"
 }

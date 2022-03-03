@@ -1,2 +1,2 @@
 export * from './create-type-component';
-export * from './generate-vue-app';
+export * from './generate-lit-app';

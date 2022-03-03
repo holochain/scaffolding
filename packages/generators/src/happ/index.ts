@@ -1,4 +1,5 @@
-import { HappDefinition, DnaDefinition } from '@holochain-scaffolding/definitions';
+import { ScDirectory, ScNodeType } from '@source-craft/types';
+import { HappDefinition } from '@holochain-scaffolding/definitions';
 
 import { dna } from '../dna';
 import { defaultNix } from '../nix/default.nix';
@@ -10,7 +11,6 @@ import { tryoramaTests } from '../tryorama';
 import { githubWorkfows } from '../github';
 import { gitignore } from './gitignore';
 import { readme } from './README.md';
-import { ScDirectory, ScFile, ScNodeType } from '@source-craft/types';
 import { npmRc } from '../npm/npmrc';
 import { rootPackageJson } from '../npm/package.json';
 
@@ -37,7 +37,7 @@ export function happ(happDef: HappDefinition, hdkVersion = '0.0.122'): ScDirecto
     type: ScNodeType.Directory,
     children: {
       ...happDir.children,
-      'default.nix': defaultNix('1cb431ac2d30d6f44dbcb5a40520f7328ae49ec1'),
+      'default.nix': defaultNix('17bae6b00693f47a09456dec5e42dc54c840a25d', 'v0_0_126'),
       workdir: {
         type: ScNodeType.Directory,
         children: {

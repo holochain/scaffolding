@@ -1,6 +1,6 @@
 import { DnaDefinition, EntryDefinition, ZomeDefinition } from '@holochain-scaffolding/definitions';
 import { ScFile, ScNodeType } from '@source-craft/types';
-import { snakeCase } from 'lodash-es';
+import { camelCase, snakeCase, upperFirst } from 'lodash-es';
 import {
   createHandlerFnName,
   deleteHandlerFnName,
@@ -45,17 +45,17 @@ export const entryCrudTests = (dna: DnaDefinition, zome: ZomeDefinition, entryDe
         "${createHandlerFnName(entryDef.typeDefinition.name)}",
         entryContents
     );
-    t.ok(create_output.header_hash);
-    t.ok(create_output.entry_hash);
+    t.ok(create_output.headerHash);
+    t.ok(create_output.entryHash);
 
-    await sleep(50);
+    await sleep(200);
     ${
       entryDef.read
         ? `
     // Bob gets the created ${entryDef.typeDefinition.name}
     const entry = await bob.call("${zome.name}", "${readHandlerFnName(
             entryDef.typeDefinition.name,
-          )}", create_output.entry_hash);
+          )}", create_output.entryHash);
     t.deepEqual(entry, entryContents);
     `
         : ``
@@ -68,17 +68,17 @@ export const entryCrudTests = (dna: DnaDefinition, zome: ZomeDefinition, entryDe
       "${zome.name}",
       "${updateHandlerFnName(entryDef.typeDefinition.name)}",
       {
-        original_header_hash: create_output.header_hash,
-        updated_${snakeCase(entryDef.typeDefinition.name)}: ${JSON.stringify(
+        originalHeaderHash: create_output.headerHash,
+        updated${upperFirst(camelCase(entryDef.typeDefinition.name))}: ${JSON.stringify(
             entryDef.typeDefinition.sample(),
             null,
             2,
           ).replace('\n', '\n        ')}
       }
     );
-    t.ok(update_output.header_hash);
-    t.ok(update_output.entry_hash);
-    await sleep(50);
+    t.ok(update_output.headerHash);
+    t.ok(update_output.entryHash);
+    await sleep(200);
 
       `
         : ``
@@ -90,9 +90,9 @@ export const entryCrudTests = (dna: DnaDefinition, zome: ZomeDefinition, entryDe
     await alice.call(
       "${zome.name}",
       "${deleteHandlerFnName(entryDef.typeDefinition.name)}",
-      create_output.header_hash
+      create_output.headerHash
     );
-    await sleep(50);
+    await sleep(200);
 
     ${
       entryDef.read
@@ -100,7 +100,7 @@ export const entryCrudTests = (dna: DnaDefinition, zome: ZomeDefinition, entryDe
     // Bob tries to get the deleted ${entryDef.typeDefinition.name}, but he doesn't get it because it has been deleted
     const deletedEntry = await bob.call("${zome.name}", "${readHandlerFnName(
             entryDef.typeDefinition.name,
-          )}", create_output.entry_hash);
+          )}", create_output.entryHash);
     t.notOk(deletedEntry);`
         : ``
     }

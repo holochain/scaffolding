@@ -1,18 +1,28 @@
-{
+import { ScFile, ScNodeType } from '@source-craft/types';
+import camelCase from 'lodash-es/camelCase';
+import kebabCase from 'lodash-es/kebabCase';
+import upperFirst from 'lodash-es/upperFirst';
+import snakeCase from 'lodash-es/snakeCase';
+
+export const packageJson = (): ScFile => ({
+  type: ScNodeType.File,
+  content: `{
   "name": "ui",
   "description": "Webcomponent lit-element following open-wc recommendations",
   "license": "MIT",
   "author": "lit-element",
   "version": "0.0.0",
   "scripts": {
-    "lint": "eslint --ext .ts,.html . --ignore-path .gitignore && prettier \"**/*.ts\" --check --ignore-path .gitignore",
-    "format": "eslint --ext .ts,.html . --fix --ignore-path .gitignore && prettier \"**/*.ts\" --write --ignore-path .gitignore",
+    "lint": "eslint --ext .ts,.html . --ignore-path .gitignore && prettier \\"**/*.ts\\" --check --ignore-path .gitignore",
+    "format": "eslint --ext .ts,.html . --fix --ignore-path .gitignore && prettier \\"**/*.ts\\" --write --ignore-path .gitignore",
     "build": "rimraf dist && tsc && rollup -c rollup.config.js",
-    "build:watch": "run-singleton \"tsc --watch --preserveWatchOutput\"",
-    "start": "tsc && concurrently -r \"npm run build:watch\" \"wds\""
+    "build:watch": "run-singleton \\"tsc --watch --preserveWatchOutput\\"",
+    "start": "tsc && concurrently -r \\"npm run build:watch\\" \\"wds\\""
   },
   "dependencies": {
-    "@holochain/conductor-api": "^0.2.4",
+    "@holochain/client": "^0.3.2",
+    "@holochain-open-dev/context": "^0.0.3",
+    "@material/mwc-circular-progress": "^0.25.3",
     "lit": "^2.0.2"
   },
   "devDependencies": {
@@ -85,3 +95,6 @@
     ]
   }
 }
+`
+});
+    

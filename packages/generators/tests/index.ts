@@ -46,7 +46,7 @@ test('generate a full blown happ', async t => {
                   typeDefinition: holochainEntryTypeDefinition('sample_entry2', [
                     {
                       name: 'title',
-                      type: 'Title',
+                      type: 'Content',
                       configuration: {},
                     },
                   ]),
@@ -64,7 +64,7 @@ test('generate a full blown happ', async t => {
                   typeDefinition: holochainEntryTypeDefinition('sample_entry3', [
                     {
                       name: 'title',
-                      type: 'Title',
+                      type: 'DateTime',
                       configuration: {},
                     },
                   ]),
@@ -87,7 +87,7 @@ test('generate a full blown happ', async t => {
                   typeDefinition: holochainEntryTypeDefinition('sample_entry', [
                     {
                       name: 'title',
-                      type: 'Title',
+                      type: 'EntryHash',
                       configuration: {},
                     },
                   ]),

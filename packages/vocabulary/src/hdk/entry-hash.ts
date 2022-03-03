@@ -7,7 +7,7 @@ export const type: TypeDefinition<string, {}> = {
   name: 'EntryHash',
   description: 'A hash of a Holochain entry',
 
-  sample: () => 'uhCEkuRNJ_3yZw64zed1JwvMgjiAslcCqxfl7sk3tiZ6aLoM',
+  sample: () => 'uhCEkr6pGIyV6_lr2MbT_Siw0DXZInPa0cgA9B9Sq1NtokBr0IiM2',
 };
 
 export const tsGenerator: TypescriptTypeGenerator = {

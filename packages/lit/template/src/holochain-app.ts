@@ -1,37 +1,39 @@
 import { LitElement, css, html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
-import { AppWebsocket, InstalledCell } from '@holochain/conductor-api';
+import { AppWebsocket, InstalledCell } from '@holochain/client';
+import { ContextProvider } from '@holochain-open-dev/context';
+import '@material/mwc-circular-progress';
+
+import { appWebsocketContext, appInfoContext } from './contexts';
 
 @customElement('holochain-app')
 export class HolochainApp extends LitElement {
-  @state() entryHash: string | undefined;
+  @state() loading = true;
 
   async firstUpdated() {
     const appWebsocket = await AppWebsocket.connect(
       `ws://localhost:${process.env.HC_PORT}`
     );
 
+    new ContextProvider(this, appWebsocketContext, appWebsocket);
+
     const appInfo = await appWebsocket.appInfo({
-      installed_app_id: 'HC_SCAFFOLDING{installedAppId}',
+      installed_app_id: 'my-app'
     });
+    new ContextProvider(this, appInfoContext, appInfo);
 
-    const cellData = appInfo.cell_data.find(data => data.role_id === 'HC_SCAFFOLDING{dnaName}') as InstalledCell;
-
-    const result = await appWebsocket.callZome({
-      cap: null as any,
-      cell_id: cellData.cell_id,
-      zome_name: 'HC_SCAFFOLDING{zomeName}',
-      fn_name: 'HC_SCAFFOLDING{fnName}',
-      payload: HC_SCAFFOLDING{entrySample},
-      provenance: cellData.cell_id[1],
-    });
-    this.entryHash = result.entry_hash
+    this.loading = false;
   }
 
   render() {
+    if (this.loading)
+      return html`
+        <mwc-circular-progress indeterminate></mwc-circular-progress>
+      `;
+
     return html`
       <main>
-        <h1>${this.title}</h1>
+        <h1>my-app</h1>
 
         <p>Edit <code>src/holochain-app.ts</code> and save to reload.</p>
         <a
@@ -43,12 +45,6 @@ export class HolochainApp extends LitElement {
           Code examples
         </a>
       </main>
-
-      ${this.entryHash
-        ? html`<span
-            >Created new Holochain entry! HC_SCAFFOLDING{entryDefName} with hash: ${this.entryHash}</span
-          >`
-        : html`<span>Creating...</span>`}
 
       <p class="app-footer">
         🚽 Made with love by
