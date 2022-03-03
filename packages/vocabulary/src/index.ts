@@ -15,12 +15,14 @@ export const happVocabulary: Vocabulary = {
   EntryHash: EntryHash.type,
 };
 
-export const happRustGenerators: VocabularyRustGenerators = {
-  Title: Title.rustGenerator,
-  Content: Content.rustGenerator,
-  DateTime: DateTime.rustGenerator,
-  EntryHash: EntryHash.rustGenerator,
-};
+export function happRustGenerators(hdkVersion: string): VocabularyRustGenerators {
+  return {
+    Title: Title.rustGenerator,
+    Content: Content.rustGenerator,
+    DateTime: DateTime.rustGenerator,
+    EntryHash: EntryHash.rustGenerator(hdkVersion),
+  };
+}
 
 export const happTsGenerators: VocabularyTypescriptGenerators = {
   Title: Title.tsGenerator,

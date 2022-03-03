@@ -16,19 +16,17 @@ export const tsGenerator: TypescriptTypeGenerator = {
   referenceType: 'EntryHashB64',
 };
 
-export function rustGenerator(hdkVersion: string): RustTypeGenerator {
-  return {
-    imports: [
-      {
-        crateName: 'hdk',
-        importDeclaration: `use hdk::prelude::holo_hash::EntryHashB64;`,
-        version: hdkVersion,
-      },
-    ],
-    defineType: '',
-    referenceType: 'EntryHashB64',
-  };
-}
+export const rustGenerator: RustTypeGenerator = {
+  imports: [
+    {
+      crateName: 'hdk',
+      importDeclaration: `use hdk::prelude::holo_hash::EntryHashB64;`,
+      version: '0.0.122',
+    },
+  ],
+  defineType: '',
+  referenceType: 'EntryHashB64',
+};
 
 export const elementsImports: TypeElementsImportDeclarations = {
   detail: {

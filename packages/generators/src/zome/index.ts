@@ -1,5 +1,5 @@
 import { HappDefinition, ZomeDefinition } from '@holochain-scaffolding/definitions';
-import { ScDirectory, ScFile, ScNodeType } from '@source-craft/types';
+import { ScDirectory, ScNodeType } from '@source-craft/types';
 import { snakeCase } from 'lodash-es';
 
 import { zomeCargoToml } from './Cargo.toml';
@@ -8,7 +8,7 @@ import { libRs } from './lib.rs';
 
 export * from './entry';
 
-export function zomeCode(zomeDefinition: ZomeDefinition): ScDirectory {
+export function zomeCode(zomeDefinition: ZomeDefinition, hdkVersion: string): ScDirectory {
   const zomeDir: ScDirectory = {
     type: ScNodeType.Directory,
     children: {
@@ -17,21 +17,21 @@ export function zomeCode(zomeDefinition: ZomeDefinition): ScDirectory {
   };
 
   for (const entryDef of zomeDefinition.entry_defs) {
-    zomeDir.children[snakeCase(entryDef.typeDefinition.name)] = generateEntryDef(entryDef);
+    zomeDir.children[snakeCase(entryDef.typeDefinition.name)] = generateEntryDef(entryDef, hdkVersion);
   }
 
   return zomeDir;
 }
 
-export function zome(happ: HappDefinition, dnaIndex: number, zomeIndex: number): ScDirectory {
+export function zome(happ: HappDefinition, dnaIndex: number, zomeIndex: number, hdkVersion: string): ScDirectory {
   const crateName = getCrateName(happ, dnaIndex, zomeIndex);
   const zome = happ.dnas[dnaIndex].zomes[zomeIndex];
 
   return {
     type: ScNodeType.Directory,
     children: {
-      'Cargo.toml': zomeCargoToml(crateName, '<AUTHOR>'),
-      src: zomeCode(zome),
+      'Cargo.toml': zomeCargoToml(crateName, '<AUTHOR>', hdkVersion),
+      src: zomeCode(zome, hdkVersion),
     },
   };
 }

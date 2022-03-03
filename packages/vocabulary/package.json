@@ -23,7 +23,7 @@
     "@type-craft/title": "^0.0.5",
     "@type-craft/typescript": "^0.0.5",
     "@type-craft/vocabulary": "0.0.2",
-    "@type-craft/web-components": "^0.0.3",
+    "@type-craft/web-components": "^0.0.4",
     "lit": "^2.2.0"
   },
   "devDependencies": {

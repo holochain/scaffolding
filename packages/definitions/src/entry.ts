@@ -36,17 +36,18 @@ export function newEntryDef(name = 'entry_def_0'): EntryDefinition {
 export function holochainEntryRustTypeGenerator(
   typeName: string,
   fields: Array<FieldDefinition<any>>,
+  hdkVersion: string,
 ): RustTypeGenerator {
   const defineType = `#[hdk_entry(id = "${snakeCase(typeName)}")]
 #[serde(rename_all = "camelCase")]
-${defaultDefineType(happRustGenerators, typeName, fields)}`;
+${defaultDefineType(happRustGenerators(hdkVersion), typeName, fields)}`;
 
   return {
     imports: [
       {
         crateName: 'hdk',
         importDeclaration: 'use hdk::prelude::*;',
-        version: '0.0.122',
+        version: hdkVersion,
       },
     ],
     defineType,

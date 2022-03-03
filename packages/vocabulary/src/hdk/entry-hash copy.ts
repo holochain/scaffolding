@@ -21,12 +21,12 @@ export function rustGenerator(hdkVersion: string): RustTypeGenerator {
     imports: [
       {
         crateName: 'hdk',
-        importDeclaration: `use hdk::prelude::holo_hash::EntryHashB64;`,
+        importDeclaration: `use hdk::prelude::holo_hash::AgentPubKeyB64;`,
         version: hdkVersion,
       },
     ],
     defineType: '',
-    referenceType: 'EntryHashB64',
+    referenceType: 'AgentPubKeyB64',
   };
 }
 

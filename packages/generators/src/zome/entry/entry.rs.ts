@@ -4,7 +4,7 @@ import { generateRustTypesFile, VocabularyRustGenerators } from '@type-craft/rus
 import { happRustGenerators, happVocabulary } from '@holochain-scaffolding/vocabulary';
 import { Vocabulary } from '@type-craft/vocabulary';
 
-export function entryTypes(entryDef: EntryDefinition): ScFile {
+export function entryTypes(entryDef: EntryDefinition, hdkVersion: string): ScFile {
   const typeDef = entryDef.typeDefinition;
   const vocabulary: Vocabulary = {
     ...happVocabulary,
@@ -12,8 +12,8 @@ export function entryTypes(entryDef: EntryDefinition): ScFile {
   };
 
   const rustGenerators: VocabularyRustGenerators = {
-    ...happRustGenerators,
-    [typeDef.name]: holochainEntryRustTypeGenerator(typeDef.name, typeDef.fields),
+    ...happRustGenerators(hdkVersion),
+    [typeDef.name]: holochainEntryRustTypeGenerator(typeDef.name, typeDef.fields, hdkVersion),
   };
 
   return generateRustTypesFile(vocabulary, rustGenerators, [entryDef.typeDefinition.name]);

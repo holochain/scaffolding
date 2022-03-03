@@ -1,6 +1,6 @@
 import { ScFile, ScNodeType } from '@source-craft/types';
 
-export const zomeCargoToml = (zomeName: string, author: string, hdkVersion = '0.0.120'): ScFile => ({
+export const zomeCargoToml = (zomeName: string, author: string, hdkVersion: string): ScFile => ({
   type: ScNodeType.File,
   content: `[package]
 edition = "2018"

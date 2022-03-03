@@ -64,7 +64,7 @@ export default defineComponent({
         provenance: cellData.cell_id[1]
       });
 
-      this.$emit('${kebabCase(type.name)}-created', entryHash)
+      this.$emit('${kebabCase(type.name)}-created', entryHash);
     },
   },
   emits: ['${kebabCase(type.name)}-created'],
@@ -86,8 +86,9 @@ export default defineComponent({
 }
 
 function fieldProperty(elementImports: VocabularyElementsImportDeclarations, field: FieldDefinition<any>): string {
+  const imports = elementImports[field.type];
   return `${camelCase(field.name)}: this.${camelCase(field.name)}!,${
-    elementImports[field.type] ? '' : `    // TODO: set the ${field.name}`
+    imports && imports.create ? '' : `    // TODO: set the ${field.name}`
   }`;
 }
 

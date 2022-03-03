@@ -14,21 +14,21 @@ import { ScDirectory, ScFile, ScNodeType } from '@source-craft/types';
 import { npmRc } from '../npm/npmrc';
 import { rootPackageJson } from '../npm/package.json';
 
-export function happ(happDef: HappDefinition): ScDirectory {
+export function happ(happDef: HappDefinition, hdkVersion = '0.0.122'): ScDirectory {
   const happDir: ScDirectory = {
     type: ScNodeType.Directory,
     children: {},
   };
 
   if (happDef.dnas.length < 2) {
-    happDir.children['dna'] = dna(happDef, 0, '../../');
+    happDir.children['dna'] = dna(happDef, 0, '../../', hdkVersion);
   } else {
     const dnasDir: ScDirectory = {
       type: ScNodeType.Directory,
       children: {},
     };
     for (const [dnaIndex, dnaDef] of happDef.dnas.entries()) {
-      dnasDir.children[dnaDef.name] = dna(happDef, dnaIndex, '../../../');
+      dnasDir.children[dnaDef.name] = dna(happDef, dnaIndex, '../../../', hdkVersion);
     }
     happDir.children['dnas'] = dnasDir;
   }

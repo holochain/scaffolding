@@ -62,7 +62,12 @@ export function addComponentsForEntryDef(
 
   const packageJson = findByPath(vueApp, 'package.json') as ScFile;
 
-  const allTypes = getAllChildrenTypes(vocabulary, type.name);
+  const vocabularyForThisHapp: Vocabulary = {
+    ...vocabulary,
+    [type.name]: type,
+  };
+
+  const allTypes = getAllChildrenTypes(vocabularyForThisHapp, type.name);
 
   const allRenderers = allTypes.map(t => elementsImports[t]).filter(r => !!r);
   const allImports = flatten(allRenderers.map(r => getAllImports(r)));

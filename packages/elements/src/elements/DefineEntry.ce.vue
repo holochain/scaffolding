@@ -18,7 +18,7 @@
 
     <div style="display: flex; flex-direction: row; flex: 1">
       <div style="display: flex; flex-direction: column; flex-basis: 200px">
-        <span style="font-size: 18px; margin-bottom: 4px;">CRUD Handlers</span>
+        <span style="font-size: 18px; margin-bottom: 4px">CRUD Handlers</span>
 
         <mwc-formfield label="Create" style="opacity: 0.4">
           <mwc-checkbox
@@ -82,7 +82,12 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 import type { TextField } from '@material/mwc-textfield';
-import { EntryDefinition, holochainEntryRustTypeGenerator, newEntryDef } from '@holochain-scaffolding/definitions';
+import {
+  EntryDefinition,
+  holochainEntryRustTypeGenerator,
+  holochainEntryTypeDefinition,
+  newEntryDef,
+} from '@holochain-scaffolding/definitions';
 import { isSnakeCase } from '@holochain-scaffolding/generators';
 import { FieldDefinition } from '@type-craft/vocabulary';
 import { happVocabulary } from '@holochain-scaffolding/vocabulary';
@@ -99,9 +104,6 @@ export default defineComponent({
   },
   watch: {
     entryDef: function () {
-      this.onEntryDefChanged();
-    },
-    entryDefIndex: function () {
       this.onEntryDefChanged();
     },
   },
@@ -136,11 +138,11 @@ export default defineComponent({
       };
     },
     setEntryDefId(newValue: string) {
-      this.entryDef.typeDefinition.name = newValue;
+      this.entryDef.typeDefinition = holochainEntryTypeDefinition(newValue, this.entryDef.typeDefinition.fields || []);
       this.emitChanged();
     },
     setFields(fields: Array<FieldDefinition<any>>) {
-      this.entryDef.typeDefinition.fields = fields;
+      this.entryDef.typeDefinition = holochainEntryTypeDefinition(this.entryDef.typeDefinition.name, fields);
       this.emitChanged();
     },
     emitChanged() {

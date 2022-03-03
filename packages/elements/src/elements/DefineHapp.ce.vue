@@ -5,7 +5,7 @@
         <span style="font-size: 20px">hApp: {{ happ.name }}</span>
         <mwc-textfield
           label="hApp Name"
-          style="width: 424px; margin-top: 24px; margin-bottom: 16px"
+          style="width: 324px; margin-top: 24px; margin-bottom: 16px"
           required
           autoValidate
           ref="happ-name"

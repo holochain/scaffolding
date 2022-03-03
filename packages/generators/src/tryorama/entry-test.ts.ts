@@ -40,7 +40,7 @@ export const entryCrudTests = (dna: DnaDefinition, zome: ZomeDefinition, entryDe
     const entryContents = ${JSON.stringify(entryDef.typeDefinition.sample(), null, 2)};
 
     // Alice creates a ${entryDef.typeDefinition.name}
-    let create_output = await alice.call(
+    const create_output = await alice.call(
         "${zome.name}",
         "${createHandlerFnName(entryDef.typeDefinition.name)}",
         entryContents
@@ -53,7 +53,7 @@ export const entryCrudTests = (dna: DnaDefinition, zome: ZomeDefinition, entryDe
       entryDef.read
         ? `
     // Bob gets the created ${entryDef.typeDefinition.name}
-    let entry = await bob.call("${zome.name}", "${readHandlerFnName(
+    const entry = await bob.call("${zome.name}", "${readHandlerFnName(
             entryDef.typeDefinition.name,
           )}", create_output.entry_hash);
     t.deepEqual(entry, entryContents);
@@ -64,7 +64,7 @@ export const entryCrudTests = (dna: DnaDefinition, zome: ZomeDefinition, entryDe
       entryDef.update
         ? `
     // Alice updates the ${entryDef.typeDefinition.name}
-    let update_output = await alice.call(
+    const update_output = await alice.call(
       "${zome.name}",
       "${updateHandlerFnName(entryDef.typeDefinition.name)}",
       {
@@ -98,7 +98,7 @@ export const entryCrudTests = (dna: DnaDefinition, zome: ZomeDefinition, entryDe
       entryDef.read
         ? `
     // Bob tries to get the deleted ${entryDef.typeDefinition.name}, but he doesn't get it because it has been deleted
-    let deletedEntry = await bob.call("${zome.name}", "${readHandlerFnName(
+    const deletedEntry = await bob.call("${zome.name}", "${readHandlerFnName(
             entryDef.typeDefinition.name,
           )}", create_output.entry_hash);
     t.notOk(deletedEntry);`
