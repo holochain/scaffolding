@@ -19,7 +19,14 @@ export function addComponentsForEntryDef(
   dnaName: string,
   zomeName: string,
 ): ScDirectory {
-  const componentsDir = findByPath(vueApp, 'src/components') as ScDirectory;
+  const srcDir = findByPath(vueApp, 'src') as ScDirectory;
+
+  const componentsDir: ScDirectory = {
+    type: ScNodeType.Directory,
+    children: {},
+  };
+
+  srcDir.children['components'] = componentsDir;
 
   let dnaComponentsDir = findByPath(componentsDir, dnaName) as ScDirectory;
 

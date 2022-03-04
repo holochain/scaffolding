@@ -1,6 +1,6 @@
 import test from 'tape';
 import path from 'path';
-import { generateVueApp } from '../dist';
+import { generateLitApp } from '../dist';
 import { writeDirectoryTree } from '@source-craft/fs';
 
 import { fileURLToPath } from 'url';
@@ -14,9 +14,9 @@ const __dirname = path.dirname(__filename);
 
 test('create a vue component', async t => {
   const happDef = newHappDef('hello-world');
-  const vueApp = generateVueApp(happDef);
+  const litApp = generateLitApp(happDef);
 
-  const generatedWebHapp = webHapp(happDef, vueApp);
+  const generatedWebHapp = webHapp(happDef, litApp);
 
   writeDirectoryTree(`${__dirname}/.fixture`, generatedWebHapp);
 });

@@ -20,6 +20,10 @@ const patched = directoryToGenerator(d, [
     literal: '// Add your subcomponents here',
     template: 'appSubcomponents',
   },
+  {
+    literal: '// Add the imports for your subcomponents here',
+    template: 'subcomponentsImports',
+  },
 ]);
 
 if (!fs.existsSync('./src')) fs.mkdirSync('./src');

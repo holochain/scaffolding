@@ -84,12 +84,13 @@ npm install</code></pre>
 import { defineComponent } from 'vue';
 import { socket } from '../socket';
 import { ClientEventType } from '@holochain-scaffolding/events';
-import { generateVueWebHapp } from '@holochain-scaffolding/vue';
+import { generateVueApp } from '@holochain-scaffolding/vue';
+import { webHapp } from '@holochain-scaffolding/generators';
 import { HappDefinition } from '@holochain-scaffolding/definitions';
 import AppDefinitionBuilder from './AppDefinitionBuilder.vue';
 import DirectoryTree from './DirectoryTree.vue';
 import type { Dialog } from '@material/mwc-dialog';
-import { ScDirectory, ScNodeType, ScNode } from '@source-craft/types';
+import { ScDirectory } from '@source-craft/types';
 
 export default defineComponent({
   name: 'Scaffold',
@@ -132,7 +133,7 @@ export default defineComponent({
     },
     async generateFileChanges({ happ, uiTemplate }: { happ: HappDefinition; uiTemplate: string }) {
       if (uiTemplate === 'vue') {
-        this.happDir = generateVueWebHapp(happ);
+        this.happDir = webHapp(happ, generateVueApp(happ));
       }
       this.happName = happ.name;
       (this.$refs.dialog as Dialog).show();

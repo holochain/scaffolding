@@ -991,15 +991,15 @@
   resolved "https://registry.yarnpkg.com/@holo-host/identicon/-/identicon-0.1.0.tgz#126f176d07f2992677f017863aeaeeed5b325c5f"
   integrity sha512-Dn5pTV/m3XaK1Zvq3liw/vQUt7goM7Y84x2zUyH8cb9CNMs4kPCNHs3kalbJZ/ymzFvwcdiLwwNW8AKk+WWN5A==
 
-"@holochain-open-dev/utils@^0.0.1":
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/@holochain-open-dev/utils/-/utils-0.0.1.tgz#922ae2de60764a77508ec9a1dbbd3a73c680a598"
-  integrity sha512-K5bH1FoatmW7x3Nsr2PCLUGyZmZz6m0wqeG+i47rr9d3umrR1x8UfQjLo6hs3ps3L2w92KGzkFMIWnRgoGZThA==
+"@holochain-open-dev/utils@^0.0.5":
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/@holochain-open-dev/utils/-/utils-0.0.5.tgz#95102a3bef0c9c3d5847f11c6c13f8ecc28e0eab"
+  integrity sha512-4gToxLlS8faMz6NJYP/40Kkuci8t5Zeo4XnMF4xvmHUpuErPCOdHmMLnYkg17ovv5d4YtuSITLKrCl0QMarjjA==
   dependencies:
     "@holo-host/identicon" "^0.1.0"
     "@holochain/client" "^0.3.2"
-    "@open-wc/scoped-elements" "^2.0.1"
-    "@scoped-elements/material-web" "^0.0.16"
+    "@open-wc/scoped-elements" "github:guillemcordoba/open-wc#scoped-elements-build"
+    "@scoped-elements/material-web" "^0.0.17"
     js-base64 "^3.7.2"
     lit "^2.1.3"
 
@@ -2008,13 +2008,16 @@
   resolved "https://registry.yarnpkg.com/@open-wc/dedupe-mixin/-/dedupe-mixin-1.3.0.tgz#0df5d438285fc3482838786ee81895318f0ff778"
   integrity sha512-UfdK1MPnR6T7f3svzzYBfu3qBkkZ/KsPhcpc3JYhsUY4hbpwNF9wEQtD4Z+/mRqMTJrKg++YSxIxE0FBhY3RIw==
 
-"@open-wc/scoped-elements@^2.0.1":
+"@open-wc/dedupe-mixin@github:guillemcordoba/open-wc#dedupe-mixin-build":
+  version "1.3.1"
+  resolved "https://codeload.github.com/guillemcordoba/open-wc/tar.gz/58fde68b7af8ba7e5c64a6d46cae788baba9d051"
+
+"@open-wc/scoped-elements@^2.0.1", "@open-wc/scoped-elements@github:guillemcordoba/open-wc#scoped-elements-build":
   version "2.0.1"
-  resolved "https://registry.yarnpkg.com/@open-wc/scoped-elements/-/scoped-elements-2.0.1.tgz#6b1c3535f809bd90710574db80093a81e3a1fc2d"
-  integrity sha512-JS6ozxUFwFX3+Er91v9yQzNIaFn7OnE0iESKTbFvkkKdNwvAPtp1fpckBKIvWk8Ae9ZcoI9DYZuT2DDbMPcadA==
+  resolved "https://codeload.github.com/guillemcordoba/open-wc/tar.gz/3450964deaaf9ebfce34fc2d9feed7df8c07d7fd"
   dependencies:
     "@lit/reactive-element" "^1.0.0"
-    "@open-wc/dedupe-mixin" "^1.3.0"
+    "@open-wc/dedupe-mixin" "github:guillemcordoba/open-wc#dedupe-mixin-build"
     "@webcomponents/scoped-custom-element-registry" "^0.0.3"
 
 "@popperjs/core@^2.11.2", "@popperjs/core@^2.7.0":
@@ -2060,6 +2063,44 @@
   version "0.0.16"
   resolved "https://registry.yarnpkg.com/@scoped-elements/material-web/-/material-web-0.0.16.tgz#eff828b5bf4b4887bfc9bd805264008911c30b60"
   integrity sha512-L3OuOT0A9G1mxQu+w/mVDtCWUTlpGhLud1fflct8W5dcRmNJzr+EFlghlomwdLWV/APIaK2jCHRlcMM9N5dpeQ==
+  dependencies:
+    "@material/mwc-button" "^0.25.3"
+    "@material/mwc-checkbox" "^0.25.3"
+    "@material/mwc-circular-progress" "^0.25.3"
+    "@material/mwc-circular-progress-four-color" "^0.25.3"
+    "@material/mwc-dialog" "^0.25.3"
+    "@material/mwc-drawer" "^0.25.3"
+    "@material/mwc-fab" "^0.25.3"
+    "@material/mwc-formfield" "^0.25.3"
+    "@material/mwc-icon" "^0.25.3"
+    "@material/mwc-icon-button" "^0.25.3"
+    "@material/mwc-icon-button-toggle" "^0.25.3"
+    "@material/mwc-linear-progress" "^0.25.3"
+    "@material/mwc-list" "^0.25.3"
+    "@material/mwc-menu" "^0.25.3"
+    "@material/mwc-notched-outline" "^0.25.3"
+    "@material/mwc-radio" "^0.25.3"
+    "@material/mwc-ripple" "^0.25.3"
+    "@material/mwc-select" "^0.25.3"
+    "@material/mwc-slider" "^0.25.3"
+    "@material/mwc-snackbar" "^0.25.3"
+    "@material/mwc-switch" "^0.25.3"
+    "@material/mwc-tab" "^0.25.3"
+    "@material/mwc-tab-bar" "^0.25.3"
+    "@material/mwc-tab-indicator" "^0.25.3"
+    "@material/mwc-tab-scroller" "^0.25.3"
+    "@material/mwc-textarea" "^0.25.3"
+    "@material/mwc-textfield" "^0.25.3"
+    "@material/mwc-top-app-bar" "^0.25.3"
+    "@material/mwc-top-app-bar-fixed" "^0.25.3"
+    "@open-wc/scoped-elements" "^2.0.1"
+    "@ui5/webcomponents" "^1.0.0-rc.15"
+    lit "^2.0.2"
+
+"@scoped-elements/material-web@^0.0.17":
+  version "0.0.17"
+  resolved "https://registry.yarnpkg.com/@scoped-elements/material-web/-/material-web-0.0.17.tgz#0b9c2d9161d779a877f5fea78af752e58cd595d7"
+  integrity sha512-cY2hFJ7+qOG1d4CQN9rNxPGzTFQ2Vos1JkepVhBj0KnBofEfQLmpZ1nd1SfNhwPKzov53lC671vxs9h1KG2U4g==
   dependencies:
     "@material/mwc-button" "^0.25.3"
     "@material/mwc-checkbox" "^0.25.3"
@@ -2224,18 +2265,19 @@
   resolved "https://registry.yarnpkg.com/@tsconfig/node16/-/node16-1.0.2.tgz#423c77877d0569db20e1fc80885ac4118314010e"
   integrity sha512-eZxlbI8GZscaGS7kkc/trHTT5xgrjH3/1n2JDwusC9iahPKWMRvRjJSAN5mCXviuTGQ/lHnhvv8Q1YTpnfz9gA==
 
-"@type-craft/content@^0.0.5":
-  version "0.0.5"
-  resolved "https://registry.yarnpkg.com/@type-craft/content/-/content-0.0.5.tgz#a1c426cf071ab1f444d5ff9bb25287b70ae4d7f7"
-  integrity sha512-dCkrNk/czmVuXKQHHRsmtqa5v8FnK7K9o9Kak75WeYMeMvy/suw+ihzsW7anPFmL6VY9XTq8GrOqsg78OiPrkw==
+"@type-craft/content@^0.0.6":
+  version "0.0.6"
+  resolved "https://registry.yarnpkg.com/@type-craft/content/-/content-0.0.6.tgz#8f4a3b7d2b82d021a09d6ce3fcf685ecea523407"
+  integrity sha512-Htql9Kj4+HLGTIi5OOjl0nXLE00IUSBE7OshAsQh5ZsIysIPYBZqISld8kzVntkVEXtWLO8inP1Nk3KHwcA+eQ==
   dependencies:
     "@open-wc/scoped-elements" "^2.0.1"
     "@scoped-elements/material-web" "^0.0.16"
-    "@type-craft/rust" "^0.0.2"
+    "@type-craft/rust" "^0.0.3"
     "@type-craft/typescript" "^0.0.3"
     "@type-craft/vocabulary" "^0.0.2"
     "@type-craft/web-components" "^0.0.3"
     lit "^2.1.3"
+    lorem-ipsum "^2.0.4"
 
 "@type-craft/crafting@^0.0.4":
   version "0.0.4"
@@ -2263,15 +2305,6 @@
     lit "^2.1.3"
     lodash-es "^4.17.21"
 
-"@type-craft/rust@^0.0.2":
-  version "0.0.2"
-  resolved "https://registry.yarnpkg.com/@type-craft/rust/-/rust-0.0.2.tgz#623254ee82b2eed6ba85dee01a9b871ffee7a676"
-  integrity sha512-phuoIK2HI4hXClonHIIBTr5ygP6ZWLGeLPCO+0rB+hQefjyOK3w3f2bvDTTkjOATEO4JkwMFKrHLUTE9FJ+a/g==
-  dependencies:
-    "@source-craft/rust" "^0.0.1"
-    "@type-craft/vocabulary" "^0.0.1"
-    lodash-es "^4.17.21"
-
 "@type-craft/rust@^0.0.3":
   version "0.0.3"
   resolved "https://registry.yarnpkg.com/@type-craft/rust/-/rust-0.0.3.tgz#efa5c87f6c34063cb16a6825265470fa60942ce7"
@@ -2281,18 +2314,19 @@
     "@type-craft/vocabulary" "^0.0.2"
     lodash-es "^4.17.21"
 
-"@type-craft/title@^0.0.5":
-  version "0.0.5"
-  resolved "https://registry.yarnpkg.com/@type-craft/title/-/title-0.0.5.tgz#d87384846e2845befde03135cf49db6db7aa9c75"
-  integrity sha512-vUCnod29IcdsnFkAbgYwzxYyb1EeN3I9OehKjy2sKgvcUPd4EYtrfa9I1lsToTmAep+TvPwLfp6hGriDW84dgg==
+"@type-craft/title@^0.0.6":
+  version "0.0.6"
+  resolved "https://registry.yarnpkg.com/@type-craft/title/-/title-0.0.6.tgz#14d131222402240b977b6ae8ec81af34d5809779"
+  integrity sha512-d924wQ6O38oAhBAz0/Nlr9vNDAX8fQJKvDUAVH6CcQWSxx24OddbySPyfkIJUkHWT6hcZuNb/TEwT9RWuFap8A==
   dependencies:
     "@open-wc/scoped-elements" "^2.0.1"
     "@scoped-elements/material-web" "^0.0.16"
-    "@type-craft/rust" "^0.0.2"
+    "@type-craft/rust" "^0.0.3"
     "@type-craft/typescript" "^0.0.3"
     "@type-craft/vocabulary" "^0.0.2"
     "@type-craft/web-components" "^0.0.3"
     lit "^2.1.3"
+    lorem-ipsum "^2.0.4"
 
 "@type-craft/typescript@^0.0.3":
   version "0.0.3"
@@ -3255,10 +3289,9 @@
     "@webassemblyjs/wast-parser" "1.9.0"
     "@xtuc/long" "4.2.2"
 
-"@webcomponents/scoped-custom-element-registry@^0.0.3":
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/@webcomponents/scoped-custom-element-registry/-/scoped-custom-element-registry-0.0.3.tgz#774591a886b0b0e4914717273ba53fd8d5657522"
-  integrity sha512-lpSzgDCGbM99dytb3+J3Suo4+Bk1E13MPnWB42JK8GwxSAxFz+tC7TTv2hhDSIE2IirGNKNKCf3m08ecu6eAsQ==
+"@webcomponents/scoped-custom-element-registry@github:guillemcordoba/polyfills#scoped-custom-element-registry-build":
+  version "0.0.4"
+  resolved "https://codeload.github.com/guillemcordoba/polyfills/tar.gz/9b18620ad2dff50ead753f0f8726715be43b5696"
 
 "@webpack-cli/configtest@^1.1.1":
   version "1.1.1"
@@ -4581,7 +4614,7 @@ commander@2.17.x:
   resolved "https://registry.yarnpkg.com/commander/-/commander-2.17.1.tgz#bd77ab7de6de94205ceacc72f1716d29f20a77bf"
   integrity sha512-wPMUt6FnH2yzG95SA6mzjQOEKUU3aLaDEmzs1ti+1E9h+CsrZghRlqEM/EJ4KscsQVG8uNN4uVreUeT8+drlgg==
 
-commander@^2.12.1, commander@^2.18.0, commander@^2.20.0:
+commander@^2.12.1, commander@^2.17.1, commander@^2.18.0, commander@^2.20.0:
   version "2.20.3"
   resolved "https://registry.yarnpkg.com/commander/-/commander-2.20.3.tgz#fd485e84c03eb4881c20722ba48035e8531aeb33"
   integrity sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ==
@@ -8194,6 +8227,13 @@ loglevel@^1.6.8:
   resolved "https://registry.yarnpkg.com/loglevel/-/loglevel-1.8.0.tgz#e7ec73a57e1e7b419cb6c6ac06bf050b67356114"
   integrity sha512-G6A/nJLRgWOuuwdNuA6koovfEV1YpqqAG4pRUlFaz3jj2QNZ8M4vBqnVA+HBTmU/AMNUtlOsMmSpF6NyOjztbA==
 
+lorem-ipsum@^2.0.4:
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/lorem-ipsum/-/lorem-ipsum-2.0.4.tgz#5feedb37a14e9cb96c3e994d4a2edd4cb0c299db"
+  integrity sha512-TD+ERYfxjYiUfOyaKU6OH4euumNVeKoo3BxIhokb7bGmoCULsME48onF9NVxYK3CU1z9L5ALnkDkW8lIkHvMNQ==
+  dependencies:
+    commander "^2.17.1"
+
 lower-case@^1.1.1:
   version "1.1.4"
   resolved "https://registry.yarnpkg.com/lower-case/-/lower-case-1.1.4.tgz#9a2cabd1b9e8e0ae993a4bf7d5875c39c42e8eac"
@@ -11568,7 +11608,7 @@ ts-loader@^8.0.0:
     micromatch "^4.0.0"
     semver "^7.3.4"
 
-ts-node@^10.2.1, ts-node@^10.4.0, ts-node@^10.5.0:
+ts-node@^10.2.1, ts-node@^10.5.0, ts-node@^10.6.0:
   version "10.6.0"
   resolved "https://registry.yarnpkg.com/ts-node/-/ts-node-10.6.0.tgz#c3f4195d5173ce3affdc8f2fd2e9a7ac8de5376a"
   integrity sha512-CJen6+dfOXolxudBQXnVjRVvYTmTWbyz7cn+xq2XTsvnaXbHqr4gXSCNbS2Jj8yTZMuGwUoBESLaOkLascVVvg==

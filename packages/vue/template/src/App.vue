@@ -10,16 +10,23 @@
 import { defineComponent, computed } from 'vue';
 import { AppWebsocket, InstalledAppInfo } from '@holochain/client';
 import '@material/mwc-circular-progress';
+// Add the imports for your subcomponents here
 
 export default defineComponent({
   components: {
     // Add your subcomponents here
   },
-  data(): { appWebsocket: AppWebsocket | undefined; loading: boolean; appInfo: InstalledAppInfo | undefined } {
+  data(): {
+    appWebsocket: AppWebsocket | undefined;
+    loading: boolean;
+    appInfo: InstalledAppInfo | undefined;
+    entryHash: string | undefined;
+  } {
     return {
       appWebsocket: undefined,
       loading: true,
       appInfo: undefined,
+      entryHash: undefined,
     };
   },
   async mounted() {
