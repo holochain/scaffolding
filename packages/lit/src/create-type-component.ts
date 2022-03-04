@@ -17,10 +17,12 @@ export function generateCreateTypeVueComponent(
 ): ScFile {
   const createWebComponent = `
 import { LitElement, html } from 'lit';
-import { state } from 'lit/decorators.js';
+import { state, customElement } from 'lit/decorators.js';
 import { InstalledCell, AppWebsocket, InstalledAppInfo } from '@holochain/client';
-import '@material/mwc-button';
+import { contextProvided } from '@holochain-open-dev/context';
+import { appWebsocketContext, appInfoContext } from '../../../contexts';
 import { ${upperFirst(camelCase(type.name))} } from '../../../types/${dnaName}/${zomeName}';
+import '@material/mwc-button';
 ${uniq(flatten(type.fields?.map(f => fieldImports(typescriptGenerators, elementsImports, f)))).join('\n')}
 
 @customElement('create-${kebabCase(type.name)}')
@@ -28,19 +30,19 @@ export class Create${upperFirst(camelCase(type.name))} extends LitElement {
 
   ${type.fields?.map(
     f => `@state()
-  ${camelCase(f.name)}: ${typescriptGenerators[f.type].referenceType} | undefined;`,
+  _${camelCase(f.name)}: ${typescriptGenerators[f.type].referenceType} | undefined;`,
   )}
 
   is${upperFirst(camelCase(type.name))}Valid() {
     return ${Object.values(type.fields)
-      .map(f => `this.${camelCase(f.name)}`)
+      .map(f => `this._${camelCase(f.name)}`)
       .join(' && \n      ')};
-  },
+  }
 
   @contextProvided({ context: appWebsocketContext })
   appWebsocket!: AppWebsocket;
 
-  @contextProvided({ context: appInfo })
+  @contextProvided({ context: appInfoContext })
   appInfo!: InstalledAppInfo;
 
   async create${upperFirst(camelCase(type.name))}() {
@@ -65,8 +67,8 @@ export class Create${upperFirst(camelCase(type.name))} extends LitElement {
       detail: {
         entryHash
       }
-    });
-  },
+    }));
+  }
 
   render() {
     return html\`
@@ -78,7 +80,7 @@ export class Create${upperFirst(camelCase(type.name))} extends LitElement {
         <mwc-button 
           label="Create ${upperFirst(camelCase(type.name))}"
           .disabled=\${!this.is${upperFirst(camelCase(type.name))}Valid()}
-          @click=\${() => create${upperFirst(camelCase(type.name))}()}
+          @click=\${() => this.create${upperFirst(camelCase(type.name))}()}
         ></mwc-button>
     </div>\`;
   }
@@ -93,7 +95,7 @@ export class Create${upperFirst(camelCase(type.name))} extends LitElement {
 
 function fieldProperty(elementImports: VocabularyElementsImportDeclarations, field: FieldDefinition<any>): string {
   const imports = elementImports[field.type];
-  return `${camelCase(field.name)}: this.${camelCase(field.name)}!,${
+  return `${camelCase(field.name)}: this._${camelCase(field.name)}!,${
     imports && imports.create ? '' : `    // TODO: set the ${field.name}`
   }`;
 }
@@ -108,7 +110,7 @@ function createFieldTemplate(
 
   return `<${fieldRenderers.create.tagName} 
       field-name="${field.name}"
-      @change=\${(e: Event) => this.${camelCase(field.name)} = e.target.value}
+      @change=\${(e: Event) => this._${camelCase(field.name)} = (e.target as any).value}
       style="margin-top: 16px"
     ></${fieldRenderers.create.tagName}>`;
 }

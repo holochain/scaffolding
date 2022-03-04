@@ -3,7 +3,7 @@ import { findByPath, ScDirectory, ScFile, ScNodeType } from '@source-craft/types
 import { getAllImports, VocabularyElementsImportDeclarations } from '@type-craft/web-components';
 import { VocabularyTypescriptGenerators } from '@type-craft/typescript';
 import { getAllChildrenTypes, TypeDefinition, Vocabulary } from '@type-craft/vocabulary';
-import { camelCase, flatten, snakeCase, upperFirst } from 'lodash-es';
+import { camelCase, flatten, kebabCase, snakeCase, upperFirst } from 'lodash-es';
 
 import { generateTypeDetailVueComponent } from './detail-type-component';
 import { generateCreateTypeVueComponent } from './create-type-component';
@@ -64,8 +64,8 @@ export function addComponentsForEntryDef(
     zomeName,
   );
 
-  zomeComponentsDir.children[`create-${snakeCase(type.name)}.ts`] = createComponentFile;
-  zomeComponentsDir.children[`${snakeCase(type.name)}-detail.ts`] = detailComponentFile;
+  zomeComponentsDir.children[`create-${kebabCase(type.name)}.ts`] = createComponentFile;
+  zomeComponentsDir.children[`${kebabCase(type.name)}-detail.ts`] = detailComponentFile;
 
   const packageJson = findByPath(litApp, 'package.json') as ScFile;
 

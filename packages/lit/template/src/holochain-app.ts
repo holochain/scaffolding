@@ -1,3 +1,5 @@
+import '@webcomponents/scoped-custom-element-registry';
+
 import { LitElement, css, html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { AppWebsocket, InstalledCell } from '@holochain/client';

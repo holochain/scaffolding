@@ -15,6 +15,7 @@
     "@holochain/client": "^0.3.2",
     "@holochain-open-dev/context": "^0.0.3",
     "@material/mwc-circular-progress": "^0.25.3",
+    "@webcomponents/scoped-custom-element-registry": "0.0.4",
     "lit": "^2.0.2"
   },
   "devDependencies": {

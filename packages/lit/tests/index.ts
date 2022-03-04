@@ -12,7 +12,7 @@ import { webHapp } from '@holochain-scaffolding/generators';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-test('create a vue component', async t => {
+test('generate a lit webHapp', async t => {
   const happDef = newHappDef('hello-world');
   const litApp = generateLitApp(happDef);
 

@@ -11,36 +11,34 @@ export function generateTypeDetailVueComponent(
   dnaName: string,
   zomeName: string,
 ): ScFile {
-  const detailWebComponent = `<template>
-</template>
-<script lang="ts">
+  const detailWebComponent = `
 import { LitElement, html } from 'lit';
+import { state, customElement, property } from 'lit/decorators.js';
 import { InstalledCell, AppWebsocket, InstalledAppInfo } from '@holochain/client';
-import '@material/mwc-circular-progress';
 import { contextProvided } from '@holochain-open-dev/context';
 import { appInfoContext, appWebsocketContext } from '../../../contexts';
 import { ${upperFirst(camelCase(type.name))} } from '../../../types/${dnaName}/${zomeName}';
+import '@material/mwc-circular-progress';
 ${uniq(flatten(type.fields?.map(f => fieldImports(typescriptGenerators, elementsImports, f)))).join('\n')}
 
 @customElement('${kebabCase(type.name)}-detail')
-export class ${upperFirst(camelCase(type.name))}Detail {
+export class ${upperFirst(camelCase(type.name))}Detail extends LitElement {
   @property()
   entryHash!: string;
 
   @state()
-  ${camelCase(type.name)}: ${upperFirst(camelCase(type.name))} | undefined;
+  _${camelCase(type.name)}: ${upperFirst(camelCase(type.name))} | undefined;
 
   @contextProvided({ context: appWebsocketContext })
   appWebsocket!: AppWebsocket;
 
-  @contextProvided({ context: appInfo })
+  @contextProvided({ context: appInfoContext })
   appInfo!: InstalledAppInfo;
-
 
   async firstUpdated() {
     const cellData = this.appInfo.cell_data.find((c: InstalledCell) => c.role_id === '${dnaName}')!;
 
-    this.${camelCase(type.name)} = await this.appWebsocket.callZome({
+    this._${camelCase(type.name)} = await this.appWebsocket.callZome({
       cap_secret: null,
       cell_id: cellData.cell_id,
       zome_name: '${zomeName}',
@@ -48,10 +46,10 @@ export class ${upperFirst(camelCase(type.name))}Detail {
       payload: this.entryHash,
       provenance: cellData.cell_id[1]
     });
-  },
+  }
 
   render() {
-    if (!this.${camelCase(type.name)}) {
+    if (!this._${camelCase(type.name)}) {
       return html\`<div style="display: flex; flex: 1; align-items: center; justify-content: center">
         <mwc-circular-progress indeterminate></mwc-circular-progress>
       </div>\`;
@@ -87,7 +85,7 @@ function fieldDetailTemplate(
   return `
     <${fieldRenderers.detail.tagName}
       field-name="${field.name}"
-      :value="${camelCase(typeName)}.${camelCase(field.name)}"
+      .value=\${this._${camelCase(typeName)}.${camelCase(field.name)}}
       style="margin-top: 16px"
     ></${fieldRenderers.detail.tagName}>`;
 }

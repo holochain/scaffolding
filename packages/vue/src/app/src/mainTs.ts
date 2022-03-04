@@ -6,7 +6,7 @@ import snakeCase from 'lodash-es/snakeCase';
 
 export const mainTs = (): ScFile => ({
   type: ScNodeType.File,
-  content: `import '@webcomponents/scoped-custom-element-registry'
+  content: `import '@webcomponents/scoped-custom-element-registry';
 import { createApp } from 'vue';
 import App from './App.vue';
 

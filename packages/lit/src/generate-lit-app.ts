@@ -1,12 +1,13 @@
 import { findByPath, ScDirectory, ScFile } from '@source-craft/types';
-import { HappDefinition } from '@holochain-scaffolding/definitions';
+import { EntryDefinition, HappDefinition } from '@holochain-scaffolding/definitions';
 import { generateTsTypesForHapp } from '@holochain-scaffolding/generators';
 import { happVocabulary, elementsImports, happTsGenerators } from '@holochain-scaffolding/vocabulary';
 import litApp from './app';
 import { addComponentsForEntryDef } from './add-components';
 import { addNpmDependency } from '@source-craft/npm';
+import { kebabCase } from 'lodash-es';
 
-export function generateVueApp(happDefinition: HappDefinition): ScDirectory {
+export function generateLitApp(happDefinition: HappDefinition): ScDirectory {
   const firstEntry = getFirstEntryDef(happDefinition);
 
   const firstType = firstEntry.entryDef.typeDefinition;
@@ -16,7 +17,7 @@ export function generateVueApp(happDefinition: HappDefinition): ScDirectory {
 
   let app = litApp({
     happName: happDefinition.name,
-    subcomponentsImports: `import './components/${firstEntry.dna}/${firstEntry.zome}/${create}';
+    subcomponentImports: `import './components/${firstEntry.dna}/${firstEntry.zome}/${create}';
 import './components/${firstEntry.dna}/${firstEntry.zome}/${detail}';`,
     appContent: `<${create} @${kebabCase(
       firstType.name,

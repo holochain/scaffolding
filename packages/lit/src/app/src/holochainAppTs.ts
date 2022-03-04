@@ -4,19 +4,23 @@ import kebabCase from 'lodash-es/kebabCase';
 import upperFirst from 'lodash-es/upperFirst';
 import snakeCase from 'lodash-es/snakeCase';
 
-export const holochainAppTs = ({happName}: {happName: string;}): ScFile => ({
+export const holochainAppTs = ({happName, subcomponentImports, appContent}: {happName: string; subcomponentImports: string; appContent: string;}): ScFile => ({
   type: ScNodeType.File,
-  content: `import { LitElement, css, html } from 'lit';
+  content: `import '@webcomponents/scoped-custom-element-registry';
+
+import { LitElement, css, html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { AppWebsocket, InstalledCell } from '@holochain/client';
 import { ContextProvider } from '@holochain-open-dev/context';
 import '@material/mwc-circular-progress';
 
+${subcomponentImports}
 import { appWebsocketContext, appInfoContext } from './contexts';
 
 @customElement('holochain-app')
 export class HolochainApp extends LitElement {
   @state() loading = true;
+  @state() entryHash: string | undefined;
 
   async firstUpdated() {
     const appWebsocket = await AppWebsocket.connect(
@@ -43,26 +47,8 @@ export class HolochainApp extends LitElement {
       <main>
         <h1>${happName}</h1>
 
-        <p>Edit <code>src/holochain-app.ts</code> and save to reload.</p>
-        <a
-          class="app-link"
-          href="https://open-wc.org/guides/developing-components/code-examples"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Code examples
-        </a>
+        ${appContent}
       </main>
-
-      <p class="app-footer">
-        🚽 Made with love by
-        <a
-          target="_blank"
-          rel="noopener noreferrer"
-          href="https://github.com/open-wc"
-          >open-wc</a
-        >.
-      </p>
     \`;
   }
 
