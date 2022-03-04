@@ -1,7 +1,7 @@
 import { TypeDefinition } from '@type-craft/vocabulary';
 import { TypeElementsImportDeclarations } from '@type-craft/web-components';
 import { TypescriptTypeGenerator } from '@type-craft/typescript';
-import { fakeEntryHash, serializeHash } from '@holochain-open-dev/utils';
+import { fakeEntryHash, serializeHash } from './utils';
 import { RustTypeGenerator } from '@type-craft/rust';
 
 export const type: TypeDefinition<string, {}> = {

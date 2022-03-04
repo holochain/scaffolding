@@ -2,12 +2,13 @@ import { TypeDefinition } from '@type-craft/vocabulary';
 import { TypeElementsImportDeclarations } from '@type-craft/web-components';
 import { TypescriptTypeGenerator } from '@type-craft/typescript';
 import { RustTypeGenerator } from '@type-craft/rust';
+import { fakeHeaderHash, serializeHash } from './utils';
 
 export const type: TypeDefinition<string, {}> = {
   name: 'HeaderHash',
   description: 'A hash of a Holochain header',
 
-  sample: () => 'uhCkkr6pGIyV6_lr2MbT_Siw0DXZInPa0cgA9B9Sq1NtokBr0IiM2',
+  sample: () => serializeHash(fakeHeaderHash()),
 };
 
 export const tsGenerator: TypescriptTypeGenerator = {

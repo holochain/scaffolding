@@ -2,12 +2,13 @@ import { TypeDefinition } from '@type-craft/vocabulary';
 import { TypeElementsImportDeclarations } from '@type-craft/web-components';
 import { TypescriptTypeGenerator } from '@type-craft/typescript';
 import { RustTypeGenerator } from '@type-craft/rust';
+import { fakeAgentPubKey, serializeHash } from './utils';
 
 export const type: TypeDefinition<string, {}> = {
   name: 'AgentPubKey',
   description: 'The identifier of an Agent in Holochain',
 
-  sample: () => 'uhCAkr6pGIyV6_lr2MbT_Siw0DXZInPa0cgA9B9Sq1NtokBr0IiM2',
+  sample: () => serializeHash(fakeAgentPubKey()),
 };
 
 export const tsGenerator: TypescriptTypeGenerator = {

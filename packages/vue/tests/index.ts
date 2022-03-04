@@ -1,3 +1,4 @@
+import '@lit-labs/ssr/lib/render-with-global-dom-shim.js';
 import test from 'tape';
 import path from 'path';
 import { generateVueApp } from '../dist';

@@ -13,7 +13,7 @@
     "build:watch": "tsc -w --preserveWatchOutput"
   },
   "dependencies": {
-    "@holochain-open-dev/utils": "^0.0.5",
+    "@holochain/client": "^0.3.2",
     "@open-wc/scoped-elements": "github:guillemcordoba/open-wc#scoped-elements-build",
     "@source-craft/npm": "^0.0.3",
     "@source-craft/rust": "^0.0.1",
@@ -24,6 +24,7 @@
     "@type-craft/typescript": "^0.0.5",
     "@type-craft/vocabulary": "0.0.2",
     "@type-craft/web-components": "^0.0.4",
+    "js-base64": "^3.7.2",
     "lit": "^2.2.0"
   },
   "devDependencies": {
