@@ -24,6 +24,7 @@
     "@type-craft/typescript": "^0.0.5",
     "@type-craft/vocabulary": "0.0.2",
     "@type-craft/web-components": "^0.0.4",
+    "blakejs": "^1.1.1",
     "js-base64": "^3.7.2",
     "lit": "^2.2.0"
   },
