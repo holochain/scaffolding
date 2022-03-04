@@ -22,6 +22,11 @@ export function newEntryDef(name = 'entry_def_0'): EntryDefinition {
       configuration: {},
       type: 'Title',
     },
+    {
+      name: 'content',
+      configuration: {},
+      type: 'Content',
+    },
   ];
   return {
     create: true,
