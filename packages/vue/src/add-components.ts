@@ -21,10 +21,14 @@ export function addComponentsForEntryDef(
 ): ScDirectory {
   const srcDir = findByPath(vueApp, 'src') as ScDirectory;
 
-  const componentsDir: ScDirectory = {
-    type: ScNodeType.Directory,
-    children: {},
-  };
+  let componentsDir = findByPath(srcDir, 'components') as ScDirectory;
+
+  if (!componentsDir) {
+    componentsDir = {
+      type: ScNodeType.Directory,
+      children: {},
+    };
+  }
 
   srcDir.children['components'] = componentsDir;
 
