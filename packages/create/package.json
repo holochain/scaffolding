@@ -1,7 +1,7 @@
 {
   "name": "@holochain/create",
   "version": "0.0.27",
-  "description": "RAD tools for quickly scaffolding holochain apps",
+  "description": "Rapid Application Development tools build Holochain apps",
   "author": "guillem.cordoba@gmail.com",
   "scripts": {
     "start": "npm run build && concurrently \"webpack --config webpack.config.js --watch --mode development\" \"nodemon --config ./nodemon.config.json\" --raw",
