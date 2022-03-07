@@ -20,7 +20,7 @@
     "@source-craft/types": "^0.0.1",
     "@type-craft/rust": "^0.0.3",
     "@type-craft/typescript": "^0.0.5",
-    "@type-craft/vocabulary": "^0.0.2",
+    "@type-craft/vocabulary": "^0.0.3",
     "lodash-es": "^4.17.21"
   },
   "devDependencies": {

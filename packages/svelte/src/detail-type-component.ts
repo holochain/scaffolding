@@ -2,69 +2,58 @@ import { ScFile, ScNodeType } from '@source-craft/types';
 import { VocabularyElementsImportDeclarations } from '@type-craft/web-components';
 import { VocabularyTypescriptGenerators } from '@type-craft/typescript';
 import { FieldDefinition, TypeDefinition } from '@type-craft/vocabulary';
-import { camelCase, flatten, kebabCase, snakeCase, uniq, upperFirst } from 'lodash-es';
+import { camelCase, flatten, snakeCase, uniq, upperFirst } from 'lodash-es';
 
-export function generateTypeDetailLitComponent(
+export function generateTypeDetailSvelteComponent(
   typescriptGenerators: VocabularyTypescriptGenerators,
   elementsImports: VocabularyElementsImportDeclarations,
   type: TypeDefinition<any, any>,
   dnaName: string,
   zomeName: string,
 ): ScFile {
-  const detailWebComponent = `
-import { LitElement, html } from 'lit';
-import { state, customElement, property } from 'lit/decorators.js';
+  const detailWebComponent = `<script lang="ts">
+import { onMount, getContext } from 'svelte';
+import '@material/mwc-circular-progress';
 import { InstalledCell, AppWebsocket, InstalledAppInfo } from '@holochain/client';
-import { contextProvided } from '@holochain-open-dev/context';
 import { appInfoContext, appWebsocketContext } from '../../../contexts';
 import { ${upperFirst(camelCase(type.name))} } from '../../../types/${dnaName}/${zomeName}';
-import '@material/mwc-circular-progress';
 ${uniq(flatten(type.fields?.map(f => fieldImports(typescriptGenerators, elementsImports, f)))).join('\n')}
 
-@customElement('${kebabCase(type.name)}-detail')
-export class ${upperFirst(camelCase(type.name))}Detail extends LitElement {
-  @property()
-  entryHash!: string;
+export let entryHash: string;
 
-  @state()
-  _${camelCase(type.name)}: ${upperFirst(camelCase(type.name))} | undefined;
+let appInfo = getContext(appInfoContext).getAppInfo();
+let appWebsocket = getContext(appWebsocketContext).getAppWebsocket();
 
-  @contextProvided({ context: appWebsocketContext })
-  appWebsocket!: AppWebsocket;
+let ${camelCase(type.name)}: ${upperFirst(camelCase(type.name))} | undefined;
 
-  @contextProvided({ context: appInfoContext })
-  appInfo!: InstalledAppInfo;
+$: ${camelCase(type.name)};
 
-  async firstUpdated() {
-    const cellData = this.appInfo.cell_data.find((c: InstalledCell) => c.role_id === '${dnaName}')!;
+onMount(async () => {
+  const cellData = appInfo.cell_data.find((c: InstalledCell) => c.role_id === '${dnaName}')!;
 
-    this._${camelCase(type.name)} = await this.appWebsocket.callZome({
-      cap_secret: null,
-      cell_id: cellData.cell_id,
-      zome_name: '${zomeName}',
-      fn_name: 'get_${snakeCase(type.name)}',
-      payload: this.entryHash,
-      provenance: cellData.cell_id[1]
-    });
-  }
+  ${camelCase(type.name)} = await appWebsocket.callZome({
+    cap_secret: null,
+    cell_id: cellData.cell_id,
+    zome_name: '${zomeName}',
+    fn_name: 'get_${snakeCase(type.name)}',
+    payload: entryHash,
+    provenance: cellData.cell_id[1]
+  });
+});
+</script>
 
-  render() {
-    if (!this._${camelCase(type.name)}) {
-      return html\`<div style="display: flex; flex: 1; align-items: center; justify-content: center">
-        <mwc-circular-progress indeterminate></mwc-circular-progress>
-      </div>\`;
-    }
+{#if ${camelCase(type.name)}}
+  <div style="display: flex; flex-direction: column">
+    <span style="font-size: 18px">${upperFirst(camelCase(type.name))}</span>
 
-    return html\`
-      <div style="display: flex; flex-direction: column">
-        <span style="font-size: 18px">${upperFirst(camelCase(type.name))}</span>
+    ${type.fields.map(f => fieldDetailTemplate(type.name, elementsImports, f)).join('\n\n    ')}
 
-        ${type.fields.map(f => fieldDetailTemplate(type.name, elementsImports, f)).join('\n\n        ')}
-
-      </div>
-    \`;
-  }
-}
+  </div>
+{:else}
+  <div style="display: flex; flex: 1; align-items: center; justify-content: center">
+    <mwc-circular-progress indeterminate></mwc-circular-progress>
+  </div>
+{/if}
 `;
 
   return {
@@ -87,7 +76,7 @@ function fieldDetailTemplate(
     ${Object.entries(field.configuration)
       .map(([configPropName, configValue]) => `${configPropName}="${configValue}"`)
       .join(' ')}
-    .value=\${this._${camelCase(typeName)}.${camelCase(field.name)}}
+      value={${camelCase(typeName)}.${camelCase(field.name)}}
       style="margin-top: 16px"
     ></${fieldRenderers.detail.tagName}>`;
 }

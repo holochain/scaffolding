@@ -12,7 +12,8 @@ export const packageJson = ({happName}: {happName: string;}): ScFile => ({
   "scripts": {
     "start": "VITE_HC_PORT=\$HC_PORT vite",
     "build": "vue-tsc --noEmit && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "package": "npm run build && cd dist && bestzip ../dist.zip *"
   },
   "dependencies": {
     "@holochain/client": "^0.3.2",
@@ -24,6 +25,7 @@ export const packageJson = ({happName}: {happName: string;}): ScFile => ({
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^2.0.0",
+    "bestzip": "^2.2.0",
     "typescript": "^4.4.4",
     "vite": "^2.7.2",
     "vue-tsc": "^0.29.8"

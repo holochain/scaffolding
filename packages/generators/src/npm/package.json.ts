@@ -22,8 +22,7 @@ export const rootPackageJson = (happ: HappDefinition): ScFile => ({
     "start:happ": "concurrently \\"RUST_LOG=warn hc s generate ./workdir/${happ.name}.happ --run=$HC_PORT -a ${
     happ.name
   } network mdns\\" \\"npm run playground\\"",
-    "package": "npm run build:happ && npm run package:ui && hc web-app pack workdir",
-    "package:ui": "npm run build -w ${getUiPackageName(happ)} && cd ui/dist && bestzip ../dist.zip *",
+    "package": "npm run build:happ && npm run package -w ui && hc web-app pack workdir",
     "build:happ": "npm run build:dnas && hc app pack ./workdir",
     "build:dnas": "npm run build:zomes${mergeStrings(
       happ.dnas.map(dna => ` && hc dna pack ./${getDnaPath(happ, dna.name)}workdir`),
@@ -38,8 +37,7 @@ export const rootPackageJson = (happ: HappDefinition): ScFile => ({
     "cross-env": "^7.0.3",
     "new-port-cli": "^1.0.0",
     "rimraf": "^3.0.2",
-    "run-singleton-cli": "^0.0.5",
-    "bestzip": "^2.2.0"
+    "run-singleton-cli": "^0.0.5"
   },
   "engines": {
     "npm": ">=7.0.0"

@@ -81,8 +81,10 @@ function fieldDetailTemplate(
 
   return `
     <${fieldRenderers.detail.tagName}
-      field-name="${field.name}"
-      :value="${camelCase(typeName)}.${camelCase(field.name)}"
+    ${Object.entries(field.configuration)
+      .map(([configPropName, configValue]) => `${configPropName}="${configValue}"`)
+      .join(' ')}
+     :value="${camelCase(typeName)}.${camelCase(field.name)}"
       style="margin-top: 16px"
     ></${fieldRenderers.detail.tagName}>`;
 }

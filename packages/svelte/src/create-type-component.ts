@@ -8,76 +8,68 @@ import { VocabularyElementsImportDeclarations } from '@type-craft/web-components
 import { VocabularyTypescriptGenerators } from '@type-craft/typescript';
 import { kebabCase, uniq } from 'lodash-es';
 
-export function generateCreateTypeVueComponent(
+export function generateCreateTypeSvelteComponent(
   typescriptGenerators: VocabularyTypescriptGenerators,
   elementsImports: VocabularyElementsImportDeclarations,
   type: TypeDefinition<any, any>,
   dnaName: string,
   zomeName: string,
 ): ScFile {
-  const createWebComponent = `<template>
-  <div style="display: flex; flex-direction: column">
-    <span style="font-size: 18px">Create ${upperFirst(camelCase(type.name))}</span>
-
-    ${type.fields.map(f => createFieldTemplate(elementsImports, f)).join('\n\n    ')}
-
-    <mwc-button 
-      label="Create ${upperFirst(camelCase(type.name))}"
-      :disabled="!is${upperFirst(camelCase(type.name))}Valid()"
-      @click="create${upperFirst(camelCase(type.name))}()"
-    ></mwc-button>
-  </div>
-</template>
-<script lang="ts">
+  const createWebComponent = `<script lang="ts">
+import { createEventDispatcher, getContext } from 'svelte';
 import '@material/mwc-button';
-import { defineComponent, inject, ComputedRef } from 'vue';
 import { InstalledCell, AppWebsocket, InstalledAppInfo } from '@holochain/client';
+
+import { appWebsocketContext, appInfoContext } from '../../../contexts';
 import { ${upperFirst(camelCase(type.name))} } from '../../../types/${dnaName}/${zomeName}';
 ${uniq(flatten(type.fields?.map(f => fieldImports(typescriptGenerators, elementsImports, f)))).join('\n')}
 
-export default defineComponent({
-  data(): Partial<${upperFirst(camelCase(type.name))}> {
-    return {
-      ${type.fields?.map(f => `${camelCase(f.name)}: undefined`).join(',\n')}
-    }
-  },
+let appInfo = getContext(appInfoContext).getAppInfo();
+let appWebsocket = getContext(appWebsocketContext).getAppWebsocket();
 
-  methods: {
-    is${upperFirst(camelCase(type.name))}Valid() {
-      return ${Object.values(type.fields)
-        .map(f => `this.${camelCase(f.name)}`)
-        .join(' && \n      ')};
-    },
-    async create${upperFirst(camelCase(type.name))}() {
-      const cellData = this.appInfo.cell_data.find((c: InstalledCell) => c.role_id === '${dnaName}')!;
+const dispatch = createEventDispatcher();
 
-      const ${camelCase(type.name)}: ${upperFirst(camelCase(type.name))} = {
-        ${type.fields.map(field => fieldProperty(elementsImports, field)).join('\n        ')}
-      };
+${type.fields
+  ?.map(f => `let ${camelCase(f.name)}: ${typescriptGenerators[f.type].referenceType} | undefined;`)
+  .join('\n')}
 
-      const { entryHash } = await this.appWebsocket.callZome({
-        cap_secret: null,
-        cell_id: cellData.cell_id,
-        zome_name: '${zomeName}',
-        fn_name: 'create_${snakeCase(type.name)}',
-        payload: ${camelCase(type.name)},
-        provenance: cellData.cell_id[1]
-      });
+$: ${type.fields?.map(f => camelCase(f.name)).join(', ')};
 
-      this.$emit('${kebabCase(type.name)}-created', entryHash);
-    },
-  },
-  emits: ['${kebabCase(type.name)}-created'],
-  setup() {
-    const appWebsocket = (inject('appWebsocket') as ComputedRef<AppWebsocket>).value;
-    const appInfo = (inject('appInfo') as ComputedRef<InstalledAppInfo>).value;
-    return {
-      appInfo,
-      appWebsocket,
-    };
-  },
-})
-</script>`;
+async function create${upperFirst(camelCase(type.name))}() {
+  const cellData = appInfo.cell_data.find((c: InstalledCell) => c.role_id === '${dnaName}')!;
+
+  const ${camelCase(type.name)}: ${upperFirst(camelCase(type.name))} = {
+    ${type.fields.map(field => fieldProperty(elementsImports, field)).join('\n        ')}
+  };
+
+  
+  const { entryHash } = await appWebsocket.callZome({
+    cap_secret: null,
+    cell_id: cellData.cell_id,
+    zome_name: '${zomeName}',
+    fn_name: 'create_${snakeCase(type.name)}',
+    payload: ${camelCase(type.name)},
+    provenance: cellData.cell_id[1]
+  });
+
+  dispatch('${kebabCase(type.name)}-created', { entryHash })
+}
+
+</script>
+<div style="display: flex; flex-direction: column">
+  <span style="font-size: 18px">Create ${upperFirst(camelCase(type.name))}</span>
+
+  ${type.fields.map(f => createFieldTemplate(elementsImports, f)).join('\n\n  ')}
+
+  <mwc-button 
+    label="Create ${upperFirst(camelCase(type.name))}"
+    disabled={!(${Object.values(type.fields)
+      .map(f => `${camelCase(f.name)}`)
+      .join(' && ')})}
+    on:click="{() => create${upperFirst(camelCase(type.name))}()}"
+  ></mwc-button>
+</div>
+`;
 
   return {
     type: ScNodeType.File,
@@ -87,7 +79,7 @@ export default defineComponent({
 
 function fieldProperty(elementImports: VocabularyElementsImportDeclarations, field: FieldDefinition<any>): string {
   const imports = elementImports[field.type];
-  return `${camelCase(field.name)}: this.${camelCase(field.name)}!,${
+  return `${camelCase(field.name)}: ${camelCase(field.name)}!,${
     imports && imports.create ? '' : `    // TODO: set the ${field.name}`
   }`;
 }
@@ -100,11 +92,11 @@ function createFieldTemplate(
 
   if (!fieldRenderers || !fieldRenderers.create) return '';
 
-  return `<${fieldRenderers.create.tagName} 
+  return `<${fieldRenderers.create.tagName}
       ${Object.entries(field.configuration)
         .map(([configPropName, configValue]) => `${configPropName}="${configValue}"`)
         .join(' ')}
-      @change="${camelCase(field.name)} = $event.target.value"
+      on:change="{e => ${camelCase(field.name)} = e.target.value}"
       style="margin-top: 16px"
     ></${fieldRenderers.create.tagName}>`;
 }

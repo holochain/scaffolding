@@ -5,13 +5,13 @@ import { VocabularyTypescriptGenerators } from '@type-craft/typescript';
 import { getAllChildrenTypes, TypeDefinition, Vocabulary } from '@type-craft/vocabulary';
 import { camelCase, flatten, kebabCase, snakeCase, upperFirst } from 'lodash-es';
 
-import { generateTypeDetailLitComponent } from './detail-type-component';
-import { generateCreateTypeLitComponent } from './create-type-component';
+import { generateTypeDetailSvelteComponent } from './detail-type-component';
+import { generateCreateTypeSvelteComponent } from './create-type-component';
 
 const titleCase = (str: string) => upperFirst(camelCase(str));
 
 export function addComponentsForEntryDef(
-  litApp: ScDirectory,
+  svelteApp: ScDirectory,
   vocabulary: Vocabulary,
   typescriptGenerators: VocabularyTypescriptGenerators,
   elementsImports: VocabularyElementsImportDeclarations,
@@ -19,7 +19,7 @@ export function addComponentsForEntryDef(
   dnaName: string,
   zomeName: string,
 ): ScDirectory {
-  const srcDir = findByPath(litApp, 'src') as ScDirectory;
+  const srcDir = findByPath(svelteApp, 'src') as ScDirectory;
 
   const componentsDir: ScDirectory = {
     type: ScNodeType.Directory,
@@ -48,7 +48,7 @@ export function addComponentsForEntryDef(
     dnaComponentsDir.children[zomeName] = zomeComponentsDir;
   }
 
-  const createComponentFile = generateCreateTypeLitComponent(
+  const createComponentFile = generateCreateTypeSvelteComponent(
     typescriptGenerators,
     elementsImports,
     type,
@@ -56,7 +56,7 @@ export function addComponentsForEntryDef(
     zomeName,
   );
 
-  const detailComponentFile = generateTypeDetailLitComponent(
+  const detailComponentFile = generateTypeDetailSvelteComponent(
     typescriptGenerators,
     elementsImports,
     type,
@@ -64,10 +64,10 @@ export function addComponentsForEntryDef(
     zomeName,
   );
 
-  zomeComponentsDir.children[`create-${kebabCase(type.name)}.ts`] = createComponentFile;
-  zomeComponentsDir.children[`${kebabCase(type.name)}-detail.ts`] = detailComponentFile;
+  zomeComponentsDir.children[`Create${titleCase(type.name)}.svelte`] = createComponentFile;
+  zomeComponentsDir.children[`${titleCase(type.name)}Detail.svelte`] = detailComponentFile;
 
-  const packageJson = findByPath(litApp, 'package.json') as ScFile;
+  const packageJson = findByPath(svelteApp, 'package.json') as ScFile;
 
   const vocabularyForThisHapp: Vocabulary = {
     ...vocabulary,
@@ -83,5 +83,5 @@ export function addComponentsForEntryDef(
     packageJson.content = addNpmDependency(packageJson, i.packageName, i.version).content;
   }
 
-  return litApp;
+  return svelteApp;
 }

@@ -8,7 +8,7 @@ import { VocabularyElementsImportDeclarations } from '@type-craft/web-components
 import { VocabularyTypescriptGenerators } from '@type-craft/typescript';
 import { kebabCase, uniq } from 'lodash-es';
 
-export function generateCreateTypeVueComponent(
+export function generateCreateTypeLitComponent(
   typescriptGenerators: VocabularyTypescriptGenerators,
   elementsImports: VocabularyElementsImportDeclarations,
   type: TypeDefinition<any, any>,
@@ -109,7 +109,9 @@ function createFieldTemplate(
   if (!fieldRenderers || !fieldRenderers.create) return '';
 
   return `<${fieldRenderers.create.tagName} 
-      field-name="${field.name}"
+      ${Object.entries(field.configuration)
+        .map(([configPropName, configValue]) => `${configPropName}="${configValue}"`)
+        .join(' ')}
       @change=\${(e: Event) => this._${camelCase(field.name)} = (e.target as any).value}
       style="margin-top: 16px"
     ></${fieldRenderers.create.tagName}>`;
