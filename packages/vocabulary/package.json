@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@holochain/client": "^0.3.2",
-    "@open-wc/scoped-elements": "github:guillemcordoba/open-wc#scoped-elements-build",
+    "@open-wc/scoped-elements": "^2.0.1",
     "@source-craft/npm": "^0.0.3",
     "@source-craft/rust": "^0.0.1",
     "@type-craft/content": "^0.0.7",
