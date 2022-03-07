@@ -85,6 +85,8 @@ import { defineComponent } from 'vue';
 import { socket } from '../socket';
 import { ClientEventType } from '@holochain-scaffolding/events';
 import { generateVueApp } from '@holochain-scaffolding/vue';
+import { generateLitApp } from '@holochain-scaffolding/lit';
+import { generateSvelteApp } from '@holochain-scaffolding/svelte';
 import { webHapp } from '@holochain-scaffolding/generators';
 import { HappDefinition } from '@holochain-scaffolding/definitions';
 import AppDefinitionBuilder from './AppDefinitionBuilder.vue';
@@ -134,7 +136,12 @@ export default defineComponent({
     async generateFileChanges({ happ, uiTemplate }: { happ: HappDefinition; uiTemplate: string }) {
       if (uiTemplate === 'vue') {
         this.happDir = webHapp(happ, generateVueApp(happ));
-      }
+      } else if (uiTemplate === 'lit') {
+        this.happDir = webHapp(happ, generateLitApp(happ));
+        } else if (uiTemplate === 'vue') {
+        this.happDir = webHapp(happ, generateSvelteApp(happ));
+        }
+
       this.happName = happ.name;
       (this.$refs.dialog as Dialog).show();
     },

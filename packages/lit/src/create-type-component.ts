@@ -28,10 +28,12 @@ ${uniq(flatten(type.fields?.map(f => fieldImports(typescriptGenerators, elements
 @customElement('create-${kebabCase(type.name)}')
 export class Create${upperFirst(camelCase(type.name))} extends LitElement {
 
-  ${type.fields?.map(
-    f => `@state()
+  ${type.fields
+    ?.map(
+      f => `  @state()
   _${camelCase(f.name)}: ${typescriptGenerators[f.type].referenceType} | undefined;`,
-  )}
+    )
+    .join('\n\n')}
 
   is${upperFirst(camelCase(type.name))}Valid() {
     return ${Object.values(type.fields)

@@ -19,7 +19,7 @@
     appInfo = await appWebsocket.appInfo({
       installed_app_id: 'my-app',
     });
-    loading = true;
+    loading = false;
   });
 
   setContext(appWebsocketContext, {

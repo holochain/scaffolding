@@ -7,7 +7,7 @@ import { addComponentsForEntryDef } from './add-components';
 import { addNpmDependency } from '@source-craft/npm';
 import { camelCase, kebabCase, upperFirst } from 'lodash-es';
 
-export function generateLitApp(happDefinition: HappDefinition): ScDirectory {
+export function generateSvelteApp(happDefinition: HappDefinition): ScDirectory {
   const firstEntry = getFirstEntryDef(happDefinition);
 
   const firstType = firstEntry.entryDef.typeDefinition;

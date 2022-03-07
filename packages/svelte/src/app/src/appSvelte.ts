@@ -27,7 +27,7 @@ export const appSvelte = ({happName, subcomponentImports, appContent}: {happName
     appInfo = await appWebsocket.appInfo({
       installed_app_id: '${happName}',
     });
-    loading = true;
+    loading = false;
   });
 
   setContext(appWebsocketContext, {
