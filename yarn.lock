@@ -1991,16 +1991,13 @@
   resolved "https://registry.yarnpkg.com/@open-wc/dedupe-mixin/-/dedupe-mixin-1.3.0.tgz#0df5d438285fc3482838786ee81895318f0ff778"
   integrity sha512-UfdK1MPnR6T7f3svzzYBfu3qBkkZ/KsPhcpc3JYhsUY4hbpwNF9wEQtD4Z+/mRqMTJrKg++YSxIxE0FBhY3RIw==
 
-"@open-wc/dedupe-mixin@github:guillemcordoba/open-wc#dedupe-mixin-build":
-  version "1.3.1"
-  resolved "https://codeload.github.com/guillemcordoba/open-wc/tar.gz/58fde68b7af8ba7e5c64a6d46cae788baba9d051"
-
 "@open-wc/scoped-elements@^2.0.1":
   version "2.0.1"
-  resolved "https://codeload.github.com/guillemcordoba/open-wc/tar.gz/d62344e04c42c218eaf3afb7a467a7fccd1b1d32"
+  resolved "https://registry.yarnpkg.com/@open-wc/scoped-elements/-/scoped-elements-2.0.1.tgz#6b1c3535f809bd90710574db80093a81e3a1fc2d"
+  integrity sha512-JS6ozxUFwFX3+Er91v9yQzNIaFn7OnE0iESKTbFvkkKdNwvAPtp1fpckBKIvWk8Ae9ZcoI9DYZuT2DDbMPcadA==
   dependencies:
     "@lit/reactive-element" "^1.0.0"
-    "@open-wc/dedupe-mixin" "github:guillemcordoba/open-wc#dedupe-mixin-build"
+    "@open-wc/dedupe-mixin" "^1.3.0"
     "@webcomponents/scoped-custom-element-registry" "^0.0.3"
 
 "@polymer/iron-flex-layout@^3.0.0-pre.26":
