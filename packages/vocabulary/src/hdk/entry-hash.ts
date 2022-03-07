@@ -13,8 +13,8 @@ export const type: TypeDefinition<string, {}> = {
 
 export const tsGenerator: TypescriptTypeGenerator = {
   imports: [],
-  defineType: 'export type EntryHashB64 = string;',
-  referenceType: 'EntryHashB64',
+  defineType: '',
+  referenceType: 'string',
 };
 
 export function rustGenerator(hdkVersion: string): RustTypeGenerator {

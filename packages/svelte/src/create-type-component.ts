@@ -52,7 +52,7 @@ async function create${upperFirst(camelCase(type.name))}() {
     provenance: cellData.cell_id[1]
   });
 
-  dispatch('${kebabCase(type.name)}-created', { entryHash })
+  dispatch('${kebabCase(type.name)}-created', { entryHash });
 }
 
 </script>

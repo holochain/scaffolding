@@ -102,7 +102,7 @@ function createFieldTemplate(
 
   return `<${fieldRenderers.create.tagName} 
       ${Object.entries(field.configuration)
-        .map(([configPropName, configValue]) => `${configPropName}="${configValue}"`)
+        .map(([configPropName, configValue]) => `${kebabCase(configPropName)}="${configValue}"`)
         .join(' ')}
       @change="${camelCase(field.name)} = $event.target.value"
       style="margin-top: 16px"

@@ -138,7 +138,7 @@ export default defineComponent({
         this.happDir = webHapp(happ, generateVueApp(happ));
       } else if (uiTemplate === 'lit') {
         this.happDir = webHapp(happ, generateLitApp(happ));
-        } else if (uiTemplate === 'vue') {
+        } else if (uiTemplate === 'svelte') {
         this.happDir = webHapp(happ, generateSvelteApp(happ));
         }
 

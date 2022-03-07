@@ -13,8 +13,8 @@ export const type: TypeDefinition<string, {}> = {
 
 export const tsGenerator: TypescriptTypeGenerator = {
   imports: [],
-  defineType: 'export type AgentPubKeyB64 = string;',
-  referenceType: 'AgentPubKeyB64',
+  defineType: '',
+  referenceType: 'string',
 };
 
 export function rustGenerator(hdkVersion: string): RustTypeGenerator {

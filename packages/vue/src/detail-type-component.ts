@@ -2,7 +2,7 @@ import { ScFile, ScNodeType } from '@source-craft/types';
 import { VocabularyElementsImportDeclarations } from '@type-craft/web-components';
 import { VocabularyTypescriptGenerators } from '@type-craft/typescript';
 import { FieldDefinition, TypeDefinition } from '@type-craft/vocabulary';
-import { camelCase, flatten, snakeCase, uniq, upperFirst } from 'lodash-es';
+import { camelCase, flatten, kebabCase, snakeCase, uniq, upperFirst } from 'lodash-es';
 
 export function generateTypeDetailVueComponent(
   typescriptGenerators: VocabularyTypescriptGenerators,
@@ -82,7 +82,7 @@ function fieldDetailTemplate(
   return `
     <${fieldRenderers.detail.tagName}
     ${Object.entries(field.configuration)
-      .map(([configPropName, configValue]) => `${configPropName}="${configValue}"`)
+      .map(([configPropName, configValue]) => `${kebabCase(configPropName)}="${configValue}"`)
       .join(' ')}
      :value="${camelCase(typeName)}.${camelCase(field.name)}"
       style="margin-top: 16px"

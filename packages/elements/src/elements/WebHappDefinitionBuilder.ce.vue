@@ -39,7 +39,7 @@ export default defineComponent({
   },
   data(): { selectedUiTemplate: string } {
     return {
-      selectedUiTemplate: this.uitemplates ? this.uitemplates[0] : '',
+      selectedUiTemplate: this.uitemplates ? this.uitemplates.split(',')[0] : '',
     };
   },
   mounted() {
