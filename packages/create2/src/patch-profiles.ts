@@ -59,14 +59,14 @@ export function profilesZome(): ScDirectory {
         content: `[package]
 name = "profiles"
 version = "0.0.1"
-edition = "2018"
+edition = "2021"
 
 [lib]
 name = "profiles"
 crate-type = [ "cdylib", "rlib" ]
 
 [dependencies]
-hc_zome_profiles = {git = "https://github.com/holochain-open-dev/profiles", rev = "for-hc-v0.0.125"}
+hc_zome_profiles = {git = "https://github.com/holochain-open-dev/profiles", rev = "for-hc-v0.0.128"}
         `,
       },
       src: {
