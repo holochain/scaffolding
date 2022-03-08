@@ -27,7 +27,12 @@
     <mwc-button slot="primaryAction" dialogAction="close" @click="scaffoldApp()" label="Create"></mwc-button>
   </mwc-dialog>
 
-  <mwc-dialog ref="helpdialog" :heading="settingUp ? 'Next Steps' : 'App Scaffolded!'">
+  <mwc-dialog
+    ref="helpdialog"
+    :heading="settingUp ? 'Next Steps' : 'App Scaffolded!'"
+    scrimClickAction=""
+    escapeKeyAction=""
+  >
     <div v-if="!settingUp" class="column">
       <h3>Manual Setup</h3>
       <span
