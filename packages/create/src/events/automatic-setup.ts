@@ -7,7 +7,10 @@ import macosRelease from '../utils/macos-release';
 
 const installNixCommands = ['sh <(curl -L -k https://nixos.org/nix/install)', '. ~/.nix-profile/etc/profile.d/nix.sh'];
 
-const localCommands = ['nix-shell . --run "npm install"'];
+const localCommands = [
+  'nix-shell -I nixpkgs=https://github.com/NixOS/nixpkgs/archive/nixos-21.11.tar.gz -p niv --run "niv init && niv drop nixpkgs && niv drop niv && niv add -b main holochain/holonix"',
+  'nix-shell . --run "npm install"',
+];
 
 const globalCommands = ['nix-env -iA cachix -f https://cachix.org/api/v1/install', 'cachix use holochain-ci'];
 
@@ -22,7 +25,7 @@ export async function automaticSetup(happName: string) {
   console.log('');
 
   try {
-    let nixInstalled = isNixInstalled();
+    const nixInstalled = isNixInstalled();
     if (nixInstalled) {
       console.log(`> Automatic setup: nix is already installed, skipping`);
     } else {
@@ -138,7 +141,7 @@ function isNixInstalled(): boolean {
 
 export function isMacCatalinaOrMore() {
   if (os.platform() !== 'darwin') return false;
-  let [majorStr, minorStr] = macosRelease().version.split('.'); //'10.8.0'
+  const [majorStr, minorStr] = macosRelease().version.split('.'); //'10.8.0'
   const major = parseInt(majorStr);
   const minor = parseInt(minorStr);
   if (major === 10) return minor >= 15;

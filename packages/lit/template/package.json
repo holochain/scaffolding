@@ -29,7 +29,7 @@
     "@rollup/plugin-replace": "^3.0.0",
     "@typescript-eslint/eslint-plugin": "^4.29.2",
     "@typescript-eslint/parser": "^4.29.2",
-    "@web/dev-server": "^0.1.21",
+    "@web/dev-server": "0.1.21",
     "@web/dev-server-rollup": "^0.3.10",
     "@web/rollup-plugin-html": "^1.9.1",
     "@web/rollup-plugin-import-meta-assets": "^1.0.7",

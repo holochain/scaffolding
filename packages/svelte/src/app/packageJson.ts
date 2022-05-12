@@ -22,7 +22,7 @@ export const packageJson = (): ScFile => ({
     "@rollup/plugin-node-resolve": "^11.0.0",
     "@rollup/plugin-replace": "^3.0.0",
     "@rollup/plugin-typescript": "^8.0.0",
-    "@web/dev-server": "^0.1.24",
+    "@web/dev-server": "0.1.21",
     "@web/dev-server-rollup": "^0.3.10",
     "@tsconfig/svelte": "^2.0.0",
     "bestzip": "^2.2.0",

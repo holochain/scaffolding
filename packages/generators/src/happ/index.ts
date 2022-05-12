@@ -14,7 +14,7 @@ import { readme } from './README.md';
 import { npmRc } from '../npm/npmrc';
 import { rootPackageJson } from '../npm/package.json';
 
-export function happ(happDef: HappDefinition, hdkVersion = '0.0.124'): ScDirectory {
+export function happ(happDef: HappDefinition, hdkVersion = '0.0.130'): ScDirectory {
   const happDir: ScDirectory = {
     type: ScNodeType.Directory,
     children: {},
@@ -37,7 +37,7 @@ export function happ(happDef: HappDefinition, hdkVersion = '0.0.124'): ScDirecto
     type: ScNodeType.Directory,
     children: {
       ...happDir.children,
-      'default.nix': defaultNix('f23119746d05fda8c62fd0e8b3874335b0258447', 'v0_0_128'),
+      'default.nix': defaultNix('v0_0_136'),
       workdir: {
         type: ScNodeType.Directory,
         children: {

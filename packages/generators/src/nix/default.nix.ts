@@ -1,20 +1,18 @@
 import { ScFile, ScNodeType } from '@source-craft/types';
 
-export const defaultNix = (holonixRev: string, holochainVersion: string): ScFile => ({
+export const defaultNix = (holochainVersion: string): ScFile => ({
   type: ScNodeType.File,
   content: `let
-  holonixRev = "${holonixRev}";
-
-  holonixPath = builtins.fetchTarball "https://github.com/holochain/holonix/archive/\${holonixRev}.tar.gz";
+  holonixPath = (import ./nix/sources.nix).holonix; # points to the current state of the Holochain repository
   holonix = import (holonixPath) {
-    holochainVersionId = "${holochainVersion}";
+    holochainVersionId = "${holochainVersion}"; # specifies the Holochain version
   };
   nixpkgs = holonix.pkgs;
 in nixpkgs.mkShell {
   inputsFrom = [ holonix.main ];
   packages = with nixpkgs; [
-    # Additional packages go here
-    nodejs-16_x
+    niv
+    # any additional packages needed for this project, e. g. Nodejs
   ];
 }
 `,
