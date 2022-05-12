@@ -1,12 +1,12 @@
 {
   "name": "@holochain/create",
-  "version": "0.0.27",
+  "version": "0.0.28",
   "description": "Rapid Application Development tools build Holochain apps",
   "author": "guillem.cordoba@gmail.com",
   "scripts": {
     "start": "npm run build && concurrently \"webpack --config webpack.config.js --watch --mode development\" \"nodemon --config ./nodemon.config.json\" --raw",
     "build": "rimraf dist && webpack --config webpack.config.js && chmod +x dist/app.js",
-    "test": "npm run build && rimraf fixture && node ./dist/app.js init fixture && cd fixture && nix-shell -I nixpkgs=https://github.com/NixOS/nixpkgs/archive/nixos-21.11.tar.gz -p niv --run \"niv init && niv drop nixpkgs && niv drop niv && niv add -b main holochain/holonix\" && nix-shell . --run \"npm i && npm t && npm run package\""
+    "test": "rimraf fixture && npm run build && node ./dist/app.js init fixture && cd fixture && nix-shell -I nixpkgs=https://github.com/NixOS/nixpkgs/archive/nixos-21.11.tar.gz -p niv --run \"niv init && niv drop nixpkgs && niv drop niv && niv add -b main holochain/holonix\" && nix-shell . --run \"npm i && npm t && npm run package\""
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",

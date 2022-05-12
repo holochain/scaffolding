@@ -42,6 +42,7 @@
       <pre><code class="language-bash" style="word-break: break-all;">cd {{ currentDir }}/{{ happName }}
 nix-env -iA cachix -f https://cachix.org/api/v1/install
 cachix use holochain-ci
+nix-shell -I nixpkgs=https://github.com/NixOS/nixpkgs/archive/nixos-21.11.tar.gz -p niv --run "niv init && niv drop nixpkgs && niv drop niv && niv add -b main holochain/holonix"
 nix-shell
 npm install</code></pre>
       <span>After completing the manual setup, proceed to "Next Steps" to see relevant documentation.</span>
