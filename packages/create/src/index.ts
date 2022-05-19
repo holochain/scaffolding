@@ -1,9 +1,9 @@
-//@ts-ignore
 import semver from 'semver';
 import chalk from 'chalk';
 import { launchApp } from './app';
 import { init } from './init';
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const pkg = require('../package.json');
 
 console.log(`@holochain/create v${pkg.version}`);

@@ -14,7 +14,7 @@ const localCommands = [
 
 const globalCommands = ['nix-env -iA cachix -f https://cachix.org/api/v1/install', 'cachix use holochain-ci'];
 
-export async function automaticSetup(happName: string) {
+export async function automaticSetup(happName: string): Promise<void> {
   console.log('> Automatic Setup: we are about to execute these commands:');
   console.log('');
 
