@@ -8,10 +8,10 @@ To execute this, run:
 npm init @holochain
 ```
 
-If you want to make sure you are running the latest version, run this before running `npm init @holochain`:
+If you want to make sure you are running the latest version, run this:
 
 ```bash
-npx clear-npx-cache
+npx @holochain/create@latest
 ```
 
 You will get this output and a browser tab to guide you through scaffolding your first Holochain app.
