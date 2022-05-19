@@ -139,7 +139,7 @@ function isNixInstalled(): boolean {
   }
 }
 
-export function isMacCatalinaOrMore() {
+export function isMacCatalinaOrMore(): boolean {
   if (os.platform() !== 'darwin') return false;
   const [majorStr, minorStr] = macosRelease().version.split('.'); //'10.8.0'
   const major = parseInt(majorStr);
