@@ -20,7 +20,7 @@ export const tryoramaPackageJson = (tryoramaVersion: string): ScFile => ({
     "path": "^0.12.7",
     "tape": "^5.2.2",
     "ts-node": "^10.6.0",
-    "typescript": "4.3.5",
+    "typescript": "^4.5.5",
     "uuidv4": "^6.2.11"
   },
   "devDependencies": {

@@ -26,7 +26,7 @@ export const packageJson = ({happName}: {happName: string;}): ScFile => ({
   "devDependencies": {
     "@vitejs/plugin-vue": "^2.0.0",
     "bestzip": "^2.2.0",
-    "typescript": "^4.4.4",
+    "typescript": "^4.5.5",
     "vite": "^2.7.2",
     "vue-tsc": "^0.29.8"
   }

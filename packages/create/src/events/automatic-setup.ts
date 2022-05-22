@@ -8,11 +8,12 @@ import macosRelease from '../utils/macos-release';
 const installNixCommands = ['sh <(curl -L -k https://nixos.org/nix/install)', '. ~/.nix-profile/etc/profile.d/nix.sh'];
 
 const localCommands = [
+  'nix-shell -p cachix --run "cachix use holochain-ci"',
   'nix-shell -I nixpkgs=https://github.com/NixOS/nixpkgs/archive/nixos-21.11.tar.gz -p niv --run "niv init && niv drop nixpkgs && niv drop niv && niv add -b main holochain/holonix"',
   'nix-shell . --run "npm install"',
 ];
 
-const globalCommands = ['nix-env -iA cachix -f https://cachix.org/api/v1/install', 'cachix use holochain-ci'];
+const globalCommands = [];
 
 export async function automaticSetup(happName: string): Promise<void> {
   console.log('> Automatic Setup: we are about to execute these commands:');
