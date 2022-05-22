@@ -1,6 +1,6 @@
 {
   "name": "@holochain/create",
-  "version": "0.0.29",
+  "version": "0.0.30",
   "description": "Rapid Application Development tools build Holochain apps",
   "author": "guillem.cordoba@gmail.com",
   "scripts": {
