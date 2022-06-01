@@ -19,7 +19,7 @@ export function generateCreateTypeLitComponent(
 import { LitElement, html } from 'lit';
 import { state, customElement } from 'lit/decorators.js';
 import { InstalledCell, AppWebsocket, InstalledAppInfo } from '@holochain/client';
-import { contextProvided } from '@holochain-open-dev/context';
+import { contextProvided } from '@lit-labs/context';
 import { appWebsocketContext, appInfoContext } from '../../../contexts';
 import { ${upperFirst(camelCase(type.name))} } from '../../../types/${dnaName}/${zomeName}';
 import '@material/mwc-button';

@@ -22,9 +22,9 @@ export const packageJson = (): ScFile => ({
   },
   "dependencies": {
     "@holochain/client": "^0.3.2",
-    "@holochain-open-dev/context": "^0.0.3",
+    "@lit-labs/context": "^0.1.1",
     "@material/mwc-circular-progress": "^0.25.3",
-    "@webcomponents/scoped-custom-element-registry": "0.0.4",
+    "@webcomponents/scoped-custom-element-registry": "0.0.5",
     "lit": "^2.0.2"
   },
   "devDependencies": {
@@ -56,7 +56,7 @@ export const packageJson = (): ScFile => ({
     "rollup-plugin-workbox": "^6.2.0",
     "run-singleton-cli": "^0.0.5",
     "tslib": "^2.3.1",
-    "typescript": "^4.3.5"
+    "typescript": "^4.5.5"
   },
   "eslintConfig": {
     "parser": "@typescript-eslint/parser",

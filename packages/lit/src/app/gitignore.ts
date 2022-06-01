@@ -29,6 +29,7 @@ export const gitignore = (): ScFile => ({
 /out-tsc/
 
 storybook-static
-.rollup.cache`
+.rollup.cache
+*.tsbuildinfo`
 });
     

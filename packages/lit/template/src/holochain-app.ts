@@ -1,9 +1,13 @@
 import '@webcomponents/scoped-custom-element-registry';
 
 import { LitElement, css, html } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
-import { AppWebsocket, InstalledCell } from '@holochain/client';
-import { ContextProvider } from '@holochain-open-dev/context';
+import { customElement, property, state } from 'lit/decorators.js';
+import {
+  AppWebsocket,
+  InstalledAppInfo,
+  InstalledCell,
+} from '@holochain/client';
+import { contextProvider, ContextProvider } from '@lit-labs/context';
 import '@material/mwc-circular-progress';
 
 // TODO: Import the appropriate subcomponents
@@ -14,17 +18,22 @@ export class HolochainApp extends LitElement {
   @state() loading = true;
   @state() entryHash: string | undefined;
 
+  @contextProvider({ context: appWebsocketContext })
+  @property({ type: Object })
+  appWebsocket!: AppWebsocket;
+
+  @contextProvider({ context: appInfoContext })
+  @property({ type: Object })
+  appInfo!: InstalledAppInfo;
+
   async firstUpdated() {
-    const appWebsocket = await AppWebsocket.connect(
+    this.appWebsocket = await AppWebsocket.connect(
       `ws://localhost:${process.env.HC_PORT}`
     );
 
-    new ContextProvider(this, appWebsocketContext, appWebsocket);
-
-    const appInfo = await appWebsocket.appInfo({
-      installed_app_id: 'my-app'
+    this.appInfo = await this.appWebsocket.appInfo({
+      installed_app_id: 'my-app',
     });
-    new ContextProvider(this, appInfoContext, appInfo);
 
     this.loading = false;
   }

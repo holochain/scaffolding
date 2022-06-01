@@ -15,7 +15,7 @@ export function generateTypeDetailLitComponent(
 import { LitElement, html } from 'lit';
 import { state, customElement, property } from 'lit/decorators.js';
 import { InstalledCell, AppWebsocket, InstalledAppInfo } from '@holochain/client';
-import { contextProvided } from '@holochain-open-dev/context';
+import { contextProvided } from '@lit-labs/context';
 import { appInfoContext, appWebsocketContext } from '../../../contexts';
 import { ${upperFirst(camelCase(type.name))} } from '../../../types/${dnaName}/${zomeName}';
 import '@material/mwc-circular-progress';
