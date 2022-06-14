@@ -13,8 +13,8 @@ export const rootPackageJson = (happ: HappDefinition): ScFile => ({
     "tests"
   ],
   "scripts": {
-    "start": "npm run build:happ && npm run start:agent",
-    "network": "npm run build:happ && concurrently-repeat \\"npm run start:agent\\"",
+    "start": "npm run network 2",
+    "network": "hc s clean && npm run build:happ && concurrently-repeat \\"npm run start:agent\\"",
     "start:agent": "cross-env HC_PORT=$(port) concurrently -k \\"npm run start:happ\\" \\"sleep 5 && npm run start -w ${getUiPackageName(
       happ,
     )}\\"",
