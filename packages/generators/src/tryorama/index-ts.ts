@@ -13,7 +13,7 @@ ${mergeStrings(
     dna.zomes.map((zome: ZomeDefinition, zomeIndex: number) =>
       zome.entry_defs.map(
         entryDef =>
-          `import ${getCrateName(happ, dnaIndex, zomeIndex)}_${snakeCase(entryDef.typeDefinition.name)} from './${
+          `import './${
             dna.name
           }/${zome.name}/${entryDef.typeDefinition.name}';
 `,
@@ -21,22 +21,5 @@ ${mergeStrings(
     ),
   ),
 )}
-let orchestrator: Orchestrator<any>;
-
-${mergeStrings(
-  happ.dnas.map((dna: DnaDefinition, dnaIndex: number) =>
-    dna.zomes.map((zome: ZomeDefinition, zomeIndex: number) =>
-      zome.entry_defs.map(
-        entryDef =>
-          `orchestrator = new Orchestrator();
-${getCrateName(happ, dnaIndex, zomeIndex)}_${snakeCase(entryDef.typeDefinition.name)}(orchestrator);
-orchestrator.run();
-
-`,
-      ),
-    ),
-  ),
-)}
-
 `,
 });

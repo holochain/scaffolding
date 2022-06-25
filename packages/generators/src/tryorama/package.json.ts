@@ -24,6 +24,7 @@ export const tryoramaPackageJson = (tryoramaVersion: string): ScFile => ({
     "uuidv4": "^6.2.11"
   },
   "devDependencies": {
+    "@holochain/client": "0.3.2",
     "@holochain/tryorama": "${tryoramaVersion}",
     "@types/lodash": "^4.14.158",
     "@types/node": "^14.0.14"
