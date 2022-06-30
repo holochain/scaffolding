@@ -21,19 +21,5 @@ ${mergeStrings(
 
 export const config = Config.gen();
 
-export const installation: InstallAgentsHapps = [
-  // one agent
-  [
-    [${mergeStrings(
-      happ.dnas.map(
-        dna => `
-      ${camelCase(dna.name)}Dna, // contains this dna`,
-      ),
-    )}
-    ]
-  ]
-];
-
-export const sleep = (ms: number) => new Promise(resolve => setTimeout(() => resolve(null), ms));
 `,
 });
