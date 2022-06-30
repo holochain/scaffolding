@@ -13,11 +13,15 @@ export const tryoramaEntryTest = (dna: DnaDefinition, zome: ZomeDefinition, entr
   content: `
 import { DnaSource } from "@holochain/client";
 import { pause, Scenario } from "@holochain/tryorama";
-import { ${camelCase(dna.name)}Dna } from  "../utils";
+import pkg from 'tape-promise/tape';
+const { test } = pkg;
 
-export default () => test("${entryDef.typeDefinition.name}" CRUD tests", async (t) => {
+import { ${camelCase(dna.name)}Dna } from  "../../utils";
+
+
+export default () => test("${entryDef.typeDefinition.name} CRUD tests", async (t) => {
   ${entryCrudTests(dna, zome, entryDef)}
-}
+});
 `,
 });
 
@@ -133,7 +137,8 @@ export const entryCrudTests = (dna: DnaDefinition, zome: ZomeDefinition, entryDe
     }
 
   } catch (error) {
-    console.error("\nERROR: The following error occurred during the tests and THE TESTS COULD NOT COMPLETE.", error);
+    console.log("");
+    console.log("ERROR: The following error occurred during the tests and THE TESTS COULD NOT COMPLETE.", error);
   } finally {
     await scenario.cleanUp()
   }
