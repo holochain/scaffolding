@@ -15,7 +15,7 @@ ${mergeStrings(
           `import ${getCrateName(happ, dnaIndex, zomeIndex)}_${snakeCase(entryDef.typeDefinition.name)} from './${
             dna.name
           }/${zome.name}/${entryDef.typeDefinition.name}';
-          ${getCrateName(happ, dnaIndex, zomeIndex)}_${snakeCase(entryDef.typeDefinition.name)}();
+${getCrateName(happ, dnaIndex, zomeIndex)}_${snakeCase(entryDef.typeDefinition.name)}();
 
 `,
       ),
