@@ -17,8 +17,8 @@ integrity:
   zomes:
 ${mergeStrings(
 dna.zomes.map(
-  (zome: ZomeDefinition, zomeIndex: number) =>`
-    - name: ${zome.name}
+  (zome: ZomeDefinition, zomeIndex: number) =>
+`    - name: ${zome.name}
       bundled: ${pathToBase}target/wasm32-unknown-unknown/release/${getCrateName(happ, dnaIndex, zomeIndex)}.wasm
 `,
   ),
