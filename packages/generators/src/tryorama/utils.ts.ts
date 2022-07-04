@@ -6,8 +6,7 @@ import { getDnaBundlePath, mergeStrings } from '../utils';
 
 export const tryoramaUtilsTs = (happ: HappDefinition): ScFile => ({
   type: ScNodeType.File,
-  content: `import { Config, InstallAgentsHapps } from '@holochain/tryorama';
-import path from 'path'
+  content: `import path from 'path'
 import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -19,21 +18,6 @@ ${mergeStrings(
   ),
 )}
 
-export const config = Config.gen();
 
-export const installation: InstallAgentsHapps = [
-  // one agent
-  [
-    [${mergeStrings(
-      happ.dnas.map(
-        dna => `
-      ${camelCase(dna.name)}Dna, // contains this dna`,
-      ),
-    )}
-    ]
-  ]
-];
-
-export const sleep = (ms: number) => new Promise(resolve => setTimeout(() => resolve(null), ms));
 `,
 });

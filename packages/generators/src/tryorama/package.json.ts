@@ -27,7 +27,8 @@ export const tryoramaPackageJson = (tryoramaVersion: string): ScFile => ({
     "@holochain/client": "0.3.2",
     "@holochain/tryorama": "${tryoramaVersion}",
     "@types/lodash": "^4.14.158",
-    "@types/node": "^14.0.14"
+    "@types/node": "^14.0.14",
+    "tape-promise": "^4.0.0"
   },
   "type": "module"
 }

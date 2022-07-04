@@ -15,7 +15,7 @@ export function tryoramaTests(happ: HappDefinition): ScDirectory {
   return {
     type: ScNodeType.Directory,
     children: {
-      'package.json': tryoramaPackageJson('0.4.10'),
+      'package.json': tryoramaPackageJson('0.5.8'),
       'tsconfig.json': tryoramaTsConfig(),
       src: {
         type: ScNodeType.Directory,

@@ -11,52 +11,57 @@ import {
 export const tryoramaEntryTest = (dna: DnaDefinition, zome: ZomeDefinition, entryDef: EntryDefinition): ScFile => ({
   type: ScNodeType.File,
   content: `
-import { Orchestrator, Player, Cell } from "@holochain/tryorama";
-import { config, installation, sleep } from '../../utils';
+import { DnaSource } from "@holochain/client";
+import { pause, Scenario } from "@holochain/tryorama";
+import pkg from 'tape-promise/tape';
+const { test } = pkg;
 
-export default (orchestrator: Orchestrator<any>) =>  {
+import { ${camelCase(dna.name)}Dna } from  "../../utils";
+
+
+export default () => test("${entryDef.typeDefinition.name} CRUD tests", async (t) => {
   ${entryCrudTests(dna, zome, entryDef)}
-}
+});
 `,
 });
 
+
 export const entryCrudTests = (dna: DnaDefinition, zome: ZomeDefinition, entryDef: EntryDefinition) => `
-  orchestrator.registerScenario("${entryDef.typeDefinition.name} CRUD tests", async (s, t) => {
-    // Declare two players using the previously specified config, nicknaming them "alice" and "bob"
-    // note that the first argument to players is just an array conductor configs that that will
-    // be used to spin up the conductor processes which are returned in a matching array.
-    const [alice_player, bob_player]: Player[] = await s.players([config, config]);
+  const scenario = new Scenario();
 
-    // install your happs into the conductors and destructuring the returned happ data using the same
-    // array structure as you created in your installation array.
-    const [[alice_happ]] = await alice_player.installAgentsHapps(installation);
-    const [[bob_happ]] = await bob_player.installAgentsHapps(installation);
+  try {
 
-    await s.shareAllNodes([alice_player, bob_player]);
+    const dnas: DnaSource[] = [{path: ${camelCase(dna.name)}Dna }];
 
-    const alice = alice_happ.cells.find(cell => cell.cellRole.includes('/${dna.name}.dna')) as Cell;
-    const bob = bob_happ.cells.find(cell => cell.cellRole.includes('/${dna.name}.dna')) as Cell;
+    const [alice, bob]  = await scenario.addPlayersWithHapps([dnas, dnas]);
 
-    const entryContents = ${JSON.stringify(entryDef.typeDefinition.sample(), null, 2)};
+    await scenario.shareAllAgents();
+
+    const createInput = ${JSON.stringify(entryDef.typeDefinition.sample(), null, 2)};
+
 
     // Alice creates a ${entryDef.typeDefinition.name}
-    const create_output = await alice.call(
-        "${zome.name}",
-        "${createHandlerFnName(entryDef.typeDefinition.name)}",
-        entryContents
-    );
-    t.ok(create_output.headerHash);
-    t.ok(create_output.entryHash);
+    const createOutput: any = await alice.cells[0].callZome({
+      zome_name: "${zome.name}",
+      fn_name: "${createHandlerFnName(entryDef.typeDefinition.name)}",
+      payload: createInput,
+    });
+    t.ok(createOutput.headerHash);  // test 1
+    t.ok(createOutput.entryHash);   // test 2
 
-    await sleep(200);
+    // Wait for the created entry to be propagated to the other node.
+    await pause(100);
+
     ${
       entryDef.read
         ? `
     // Bob gets the created ${entryDef.typeDefinition.name}
-    const entry = await bob.call("${zome.name}", "${readHandlerFnName(
-            entryDef.typeDefinition.name,
-          )}", create_output.entryHash);
-    t.deepEqual(entry, entryContents);
+    const readOutput: typeof createInput = await bob.cells[0].callZome({
+      zome_name: "${zome.name}",
+      fn_name: "${readHandlerFnName(entryDef.typeDefinition.name)}",
+      payload: createOutput.entryHash,
+    });
+    t.deepEqual(readOutput, createInput); // test 3
     `
         : ``
     }
@@ -64,48 +69,78 @@ export const entryCrudTests = (dna: DnaDefinition, zome: ZomeDefinition, entryDe
       entryDef.update
         ? `
     // Alice updates the ${entryDef.typeDefinition.name}
-    const update_output = await alice.call(
-      "${zome.name}",
-      "${updateHandlerFnName(entryDef.typeDefinition.name)}",
-      {
-        originalHeaderHash: create_output.headerHash,
-        updated${upperFirst(camelCase(entryDef.typeDefinition.name))}: ${JSON.stringify(
-            entryDef.typeDefinition.sample(),
-            null,
-            2,
-          ).replace('\n', '\n        ')}
-      }
-    );
-    t.ok(update_output.headerHash);
-    t.ok(update_output.entryHash);
-    await sleep(200);
+    const contentUpdate = ${JSON.stringify(entryDef.typeDefinition.sample(), null, 2)}
 
-      `
+    const updateInput = {
+      originalHeaderHash: createOutput.headerHash,
+      updated${upperFirst(camelCase(entryDef.typeDefinition.name))}: contentUpdate,
+    }
+
+    const updateOutput: any = await alice.cells[0].callZome({
+      zome_name: "${zome.name}",
+      fn_name: "${updateHandlerFnName(entryDef.typeDefinition.name)}",
+      payload: updateInput,
+    });
+    t.ok(updateOutput.headerHash);  // test 4
+    t.ok(updateOutput.entryHash);   // test 5
+
+    // Wait for the updated entry to be propagated to the other node.
+    await pause(100);
+
+      ${
+        entryDef.read
+          ? `
+      // Bob gets the updated ${entryDef.typeDefinition.name}
+      const readUpdatedOutput: typeof createInput = await bob.cells[0].callZome({
+        zome_name: "${zome.name}",
+        fn_name: "${readHandlerFnName(entryDef.typeDefinition.name)}",
+        payload: updateOutput.entryHash,
+      });
+      t.deepEqual(readUpdatedOutput, contentUpdate);  // test 6
+          `
+          : ``
+      }
+    `
         : ``
     }
     ${
       entryDef.delete
         ? `
-    // Alice delete the ${entryDef.typeDefinition.name}
-    await alice.call(
-      "${zome.name}",
-      "${deleteHandlerFnName(entryDef.typeDefinition.name)}",
-      create_output.headerHash
-    );
-    await sleep(200);
+    // Alice deletes the ${entryDef.typeDefinition.name}
+    const deleteHeaderHash = await alice.cells[0].callZome({
+      zome_name: "${zome.name}",
+      fn_name: "${deleteHandlerFnName(entryDef.typeDefinition.name)}",
+      payload: createOutput.headerHash,
+    })
+    t.ok(deleteHeaderHash); // test 7
 
-    ${
-      entryDef.read
-        ? `
-    // Bob tries to get the deleted ${entryDef.typeDefinition.name}, but he doesn't get it because it has been deleted
-    const deletedEntry = await bob.call("${zome.name}", "${readHandlerFnName(
-            entryDef.typeDefinition.name,
-          )}", create_output.entryHash);
-    t.notOk(deletedEntry);`
+      ${
+        entryDef.read
+          ? `
+      // Wait for the deletion header to be propagated to the other node.
+      await pause(100);
+
+
+
+      // Bob tries to get the deleted ${entryDef.typeDefinition.name}, but he doesn't get it because it has been deleted
+      const readDeletedOutput = await bob.cells[0].callZome({
+        zome_name: "${zome.name}",
+        fn_name: "${readHandlerFnName(entryDef.typeDefinition.name)}",
+        payload: createOutput.entryHash,
+      });
+      t.notOk(readDeletedOutput); // test 8
+          `
+          : ``
+      }
+    `
         : ``
     }
-      `
-        : ``
-    }
-  });
-`;
+
+  } catch (error) {
+    console.log("");
+    console.log("ERROR: The following error occurred during the tests and THE TESTS COULD NOT COMPLETE.", error);
+  } finally {
+    await scenario.cleanUp()
+  }
+
+`
