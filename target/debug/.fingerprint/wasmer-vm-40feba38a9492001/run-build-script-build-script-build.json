@@ -1,0 +1,1 @@
+{"rustc":6064785002308032717,"features":"","target":0,"profile":0,"path":0,"deps":[[5783949577517023030,"build_script_build",false,11399698593807755782]],"local":[{"RerunIfChanged":{"output":"debug/build/wasmer-vm-40feba38a9492001/output","paths":["src/trap/handlers.c"]}}],"rustflags":[],"metadata":0,"config":0,"compile_kind":0}

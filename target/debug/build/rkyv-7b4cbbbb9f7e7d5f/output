@@ -1,0 +1,2 @@
+cargo:rustc-cfg=rkyv_atomic_64
+cargo:rustc-cfg=rkyv_atomic

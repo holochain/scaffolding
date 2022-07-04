@@ -1,0 +1,2 @@
+cargo:rustc-env=TYPENUM_BUILD_CONSTS=/home/matthias/code/holochain/holochain/scaffolding/target/debug/build/typenum-8b16b45ea7754f4f/out/consts.rs
+cargo:rustc-env=TYPENUM_BUILD_OP=/home/matthias/code/holochain/holochain/scaffolding/target/debug/build/typenum-8b16b45ea7754f4f/out/op.rs

@@ -53,7 +53,7 @@ test('create a vue component', async t => {
                   },
                   {
                     name: 'dna',
-                    type: 'HeaderHash',
+                    type: 'ActionHash',
                     configuration: {},
                   },
                 ]),
@@ -94,7 +94,7 @@ test('create a vue component', async t => {
                   },
                   {
                     name: 'dna',
-                    type: 'HeaderHash',
+                    type: 'ActionHash',
                     configuration: {},
                   },
                 ]),

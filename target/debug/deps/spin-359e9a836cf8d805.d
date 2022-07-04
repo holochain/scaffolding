@@ -1,0 +1,8 @@
+/home/matthias/code/holochain/holochain/scaffolding/target/debug/deps/spin-359e9a836cf8d805.rmeta: /home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/spin-0.5.2/src/lib.rs /home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/spin-0.5.2/src/mutex.rs /home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/spin-0.5.2/src/rw_lock.rs /home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/spin-0.5.2/src/once.rs
+
+/home/matthias/code/holochain/holochain/scaffolding/target/debug/deps/spin-359e9a836cf8d805.d: /home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/spin-0.5.2/src/lib.rs /home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/spin-0.5.2/src/mutex.rs /home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/spin-0.5.2/src/rw_lock.rs /home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/spin-0.5.2/src/once.rs
+
+/home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/spin-0.5.2/src/lib.rs:
+/home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/spin-0.5.2/src/mutex.rs:
+/home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/spin-0.5.2/src/rw_lock.rs:
+/home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/spin-0.5.2/src/once.rs:

@@ -14,21 +14,21 @@ import { readme } from './README.md';
 import { npmRc } from '../npm/npmrc';
 import { rootPackageJson } from '../npm/package.json';
 
-export function happ(happDef: HappDefinition, hdkVersion = '0.0.130'): ScDirectory {
+export function happ(happDef: HappDefinition, hdkVersion = '0.0.140', hdiVersion = '0.0.12'): ScDirectory {
   const happDir: ScDirectory = {
     type: ScNodeType.Directory,
     children: {},
   };
 
   if (happDef.dnas.length < 2) {
-    happDir.children['dna'] = dna(happDef, 0, '../../', hdkVersion);
+    happDir.children['dna'] = dna(happDef, 0, '../../', hdkVersion, hdiVersion);
   } else {
     const dnasDir: ScDirectory = {
       type: ScNodeType.Directory,
       children: {},
     };
     for (const [dnaIndex, dnaDef] of happDef.dnas.entries()) {
-      dnasDir.children[dnaDef.name] = dna(happDef, dnaIndex, '../../../', hdkVersion);
+      dnasDir.children[dnaDef.name] = dna(happDef, dnaIndex, '../../../', hdkVersion, hdiVersion);
     }
     happDir.children['dnas'] = dnasDir;
   }
@@ -37,7 +37,7 @@ export function happ(happDef: HappDefinition, hdkVersion = '0.0.130'): ScDirecto
     type: ScNodeType.Directory,
     children: {
       ...happDir.children,
-      'default.nix': defaultNix('v0_0_136'),
+      'default.nix': defaultNix('v0_0_147'),
       workdir: {
         type: ScNodeType.Directory,
         children: {

@@ -8,6 +8,7 @@ export const entryHandlers = (entryDef: EntryDefinition): ScFile => ({
   content: `use hdk::prelude::*;
 use hdk::prelude::holo_hash::*;
 use super::${titleCase(entryDef.typeDefinition.name)};
+use crate::EntryTypes;
 
 ${entryDef.read ? readHandler(entryDef.typeDefinition.name) : ''}
 ${
@@ -15,7 +16,7 @@ ${
     ? `#[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct ${newEntryOutput(entryDef.typeDefinition.name)} {
-  header_hash: HeaderHashB64,
+  action_hash: ActionHashB64,
   entry_hash: EntryHashB64,
 }
 `
@@ -34,11 +35,12 @@ pub fn ${readHandlerFnName(entryDefId)}(entry_hash: EntryHashB64) -> ExternResul
 
   match maybe_element {
     None => Ok(None),
-    Some(element) => {
-      let ${snakeCase(entryDefId)}: ${titleCase(entryDefId)} = element.entry()
-        .to_app_option()?
-        .ok_or(WasmError::Guest("Could not deserialize element to ${titleCase(entryDefId)}.".into()))?;
-    
+    Some(record) => {
+      let ${snakeCase(entryDefId)}: ${titleCase(entryDefId)} = record.entry()
+        .to_app_option()
+        .map_err(|error| wasm_error!(WasmErrorInner::Guest(format!("Could not deserialize Record to ${titleCase(entryDefId)}: {}", error))))?
+        .ok_or(wasm_error!(WasmErrorInner::Guest("No ${titleCase(entryDefId)} found for the given hash.".into())))?;
+
       Ok(Some(${snakeCase(entryDefId)}))
     }
   }
@@ -52,12 +54,12 @@ export const createHandler = (entryDefId: string) => `#[hdk_extern]
 pub fn ${createHandlerFnName(entryDefId)}(${snakeCase(entryDefId)}: ${titleCase(entryDefId)}) -> ExternResult<${newEntryOutput(
   entryDefId,
 )}> {
-  let header_hash = create_entry(&${snakeCase(entryDefId)})?;
+  let action_hash = create_entry(&EntryTypes::${titleCase(entryDefId)}(${snakeCase(entryDefId)}.clone()))?;
 
-  let entry_hash = hash_entry(&${snakeCase(entryDefId)})?;
+  let entry_hash = hash_entry(&EntryTypes::${titleCase(entryDefId)}(${snakeCase(entryDefId)}))?;
 
   let output = ${newEntryOutput(entryDefId)} {
-    header_hash: HeaderHashB64::from(header_hash),
+    action_hash: ActionHashB64::from(action_hash),
     entry_hash: EntryHashB64::from(entry_hash)
   };
 
@@ -71,7 +73,7 @@ export const updateHandlerFnName = (entryDefId: string) => `update_${snakeCase(e
 export const updateHandler = (entryDefId: string) => `#[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct Update${titleCase(entryDefId)}Input {
-  original_header_hash: HeaderHashB64,
+  original_action_hash: ActionHashB64,
   updated_${snakeCase(entryDefId)}: ${titleCase(entryDefId)}
 }
 
@@ -79,12 +81,12 @@ pub struct Update${titleCase(entryDefId)}Input {
 pub fn ${updateHandlerFnName(entryDefId)}(input: Update${titleCase(entryDefId)}Input) -> ExternResult<${newEntryOutput(
   entryDefId,
 )}> {
-  let header_hash = update_entry(HeaderHash::from(input.original_header_hash), &input.updated_${snakeCase(entryDefId)})?;
+  let action_hash = update_entry(ActionHash::from(input.original_action_hash), &input.updated_${snakeCase(entryDefId)})?;
 
   let entry_hash = hash_entry(&input.updated_${snakeCase(entryDefId)})?;
 
   let output = ${newEntryOutput(entryDefId)} {
-    header_hash: HeaderHashB64::from(header_hash),
+    action_hash: ActionHashB64::from(action_hash),
     entry_hash: EntryHashB64::from(entry_hash)
   };
 
@@ -96,8 +98,8 @@ pub fn ${updateHandlerFnName(entryDefId)}(input: Update${titleCase(entryDefId)}I
 export const deleteHandlerFnName = (entryDefId: string) => `delete_${snakeCase(entryDefId)}`;
 
 export const deleteHandler = (entryDefId: string) => `#[hdk_extern]
-pub fn ${deleteHandlerFnName(entryDefId)}(header_hash: HeaderHashB64) -> ExternResult<HeaderHash> {
-  delete_entry(HeaderHash::from(header_hash))
+pub fn ${deleteHandlerFnName(entryDefId)}(action_hash: ActionHashB64) -> ExternResult<ActionHash> {
+  delete_entry(ActionHash::from(action_hash))
 }
 
 `;

@@ -8,13 +8,13 @@ import { modRs } from './mod.rs';
 export * from './handlers.rs';
 export * from './entry.rs';
 
-export function generateEntryDef(entryDef: EntryDefinition, hdkVersion: string): ScDirectory {
+export function generateEntryDef(entryDef: EntryDefinition, hdkVersion: string, hdiVersion: string): ScDirectory {
   return {
     type: ScNodeType.Directory,
     children: {
       'mod.rs': modRs(),
       'handlers.rs': entryHandlers(entryDef),
-      'entry.rs': entryTypes(entryDef, hdkVersion),
+      'entry.rs': entryTypes(entryDef, hdkVersion, hdiVersion),
     },
   };
 }

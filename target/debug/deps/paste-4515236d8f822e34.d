@@ -1,0 +1,8 @@
+/home/matthias/code/holochain/holochain/scaffolding/target/debug/deps/libpaste-4515236d8f822e34.so: /home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/paste-1.0.5/src/lib.rs /home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/paste-1.0.5/src/attr.rs /home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/paste-1.0.5/src/error.rs /home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/paste-1.0.5/src/segment.rs
+
+/home/matthias/code/holochain/holochain/scaffolding/target/debug/deps/paste-4515236d8f822e34.d: /home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/paste-1.0.5/src/lib.rs /home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/paste-1.0.5/src/attr.rs /home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/paste-1.0.5/src/error.rs /home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/paste-1.0.5/src/segment.rs
+
+/home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/paste-1.0.5/src/lib.rs:
+/home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/paste-1.0.5/src/attr.rs:
+/home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/paste-1.0.5/src/error.rs:
+/home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/paste-1.0.5/src/segment.rs:

@@ -8,7 +8,7 @@ import { libRs } from './lib.rs';
 
 export * from './entry';
 
-export function zomeCode(zomeDefinition: ZomeDefinition, hdkVersion: string): ScDirectory {
+export function zomeCode(zomeDefinition: ZomeDefinition, hdkVersion: string, hdiVersion: string): ScDirectory {
   const zomeDir: ScDirectory = {
     type: ScNodeType.Directory,
     children: {
@@ -17,21 +17,21 @@ export function zomeCode(zomeDefinition: ZomeDefinition, hdkVersion: string): Sc
   };
 
   for (const entryDef of zomeDefinition.entry_defs) {
-    zomeDir.children[snakeCase(entryDef.typeDefinition.name)] = generateEntryDef(entryDef, hdkVersion);
+    zomeDir.children[snakeCase(entryDef.typeDefinition.name)] = generateEntryDef(entryDef, hdkVersion, hdiVersion);
   }
 
   return zomeDir;
 }
 
-export function zome(happ: HappDefinition, dnaIndex: number, zomeIndex: number, hdkVersion: string): ScDirectory {
+export function zome(happ: HappDefinition, dnaIndex: number, zomeIndex: number, hdkVersion: string, hdiVersion: string): ScDirectory {
   const crateName = getCrateName(happ, dnaIndex, zomeIndex);
   const zome = happ.dnas[dnaIndex].zomes[zomeIndex];
 
   return {
     type: ScNodeType.Directory,
     children: {
-      'Cargo.toml': zomeCargoToml(crateName, '<AUTHOR>', hdkVersion),
-      src: zomeCode(zome, hdkVersion),
+      'Cargo.toml': zomeCargoToml(crateName, '<AUTHOR>', hdkVersion, hdiVersion),
+      src: zomeCode(zome, hdkVersion, hdiVersion),
     },
   };
 }

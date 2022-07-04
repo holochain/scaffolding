@@ -1,0 +1,1 @@
+{"rustc":6064785002308032717,"features":"[]","target":4648113726348867708,"profile":4389369971772520967,"path":7410131206508045340,"deps":[],"local":[{"CheckDepInfo":{"dep_info":"debug/.fingerprint/fragile-589bcd50ff3888ac/dep-lib-fragile"}}],"rustflags":["-D","warnings","-C","codegen-units=10"],"metadata":3442696456172444875,"config":2202906307356721367,"compile_kind":0}

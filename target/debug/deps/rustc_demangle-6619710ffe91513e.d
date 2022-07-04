@@ -1,0 +1,7 @@
+/home/matthias/code/holochain/holochain/scaffolding/target/debug/deps/rustc_demangle-6619710ffe91513e.rmeta: /home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/rustc-demangle-0.1.21/src/lib.rs /home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/rustc-demangle-0.1.21/src/legacy.rs /home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/rustc-demangle-0.1.21/src/v0.rs
+
+/home/matthias/code/holochain/holochain/scaffolding/target/debug/deps/rustc_demangle-6619710ffe91513e.d: /home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/rustc-demangle-0.1.21/src/lib.rs /home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/rustc-demangle-0.1.21/src/legacy.rs /home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/rustc-demangle-0.1.21/src/v0.rs
+
+/home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/rustc-demangle-0.1.21/src/lib.rs:
+/home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/rustc-demangle-0.1.21/src/legacy.rs:
+/home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/rustc-demangle-0.1.21/src/v0.rs:

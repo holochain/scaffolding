@@ -1,0 +1,9 @@
+/home/matthias/code/holochain/holochain/scaffolding/target/debug/deps/autocfg-b903f59dba3dcf2d.rmeta: /home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/autocfg-1.1.0/src/lib.rs /home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/autocfg-1.1.0/src/error.rs /home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/autocfg-1.1.0/src/version.rs
+
+/home/matthias/code/holochain/holochain/scaffolding/target/debug/deps/libautocfg-b903f59dba3dcf2d.rlib: /home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/autocfg-1.1.0/src/lib.rs /home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/autocfg-1.1.0/src/error.rs /home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/autocfg-1.1.0/src/version.rs
+
+/home/matthias/code/holochain/holochain/scaffolding/target/debug/deps/autocfg-b903f59dba3dcf2d.d: /home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/autocfg-1.1.0/src/lib.rs /home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/autocfg-1.1.0/src/error.rs /home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/autocfg-1.1.0/src/version.rs
+
+/home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/autocfg-1.1.0/src/lib.rs:
+/home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/autocfg-1.1.0/src/error.rs:
+/home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/autocfg-1.1.0/src/version.rs:

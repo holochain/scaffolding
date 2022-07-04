@@ -1,0 +1,1 @@
+{"rustc":6064785002308032717,"features":"[]","target":1275909090222793381,"profile":4389369971772520967,"path":841677102600663261,"deps":[],"local":[{"CheckDepInfo":{"dep_info":"debug/.fingerprint/strsim-db624781b8cf3f3c/dep-lib-strsim"}}],"rustflags":["-D","warnings","-C","codegen-units=10"],"metadata":13471714363280858619,"config":2202906307356721367,"compile_kind":0}

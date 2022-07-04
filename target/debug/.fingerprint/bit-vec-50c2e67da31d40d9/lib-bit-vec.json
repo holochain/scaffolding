@@ -1,0 +1,1 @@
+{"rustc":6064785002308032717,"features":"[\"std\"]","target":2003354006900681288,"profile":12637318739757120569,"path":657987891710606883,"deps":[],"local":[{"CheckDepInfo":{"dep_info":"debug/.fingerprint/bit-vec-50c2e67da31d40d9/dep-lib-bit-vec"}}],"rustflags":["-D","warnings","-C","codegen-units=10"],"metadata":5453604409853202200,"config":2202906307356721367,"compile_kind":0}

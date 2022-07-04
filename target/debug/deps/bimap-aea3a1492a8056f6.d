@@ -1,0 +1,8 @@
+/home/matthias/code/holochain/holochain/scaffolding/target/debug/deps/bimap-aea3a1492a8056f6.rmeta: /home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/bimap-0.6.1/src/lib.rs /home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/bimap-0.6.1/src/mem.rs /home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/bimap-0.6.1/src/btree.rs /home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/bimap-0.6.1/src/hash.rs
+
+/home/matthias/code/holochain/holochain/scaffolding/target/debug/deps/bimap-aea3a1492a8056f6.d: /home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/bimap-0.6.1/src/lib.rs /home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/bimap-0.6.1/src/mem.rs /home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/bimap-0.6.1/src/btree.rs /home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/bimap-0.6.1/src/hash.rs
+
+/home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/bimap-0.6.1/src/lib.rs:
+/home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/bimap-0.6.1/src/mem.rs:
+/home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/bimap-0.6.1/src/btree.rs:
+/home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/bimap-0.6.1/src/hash.rs:

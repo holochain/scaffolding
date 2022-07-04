@@ -1,0 +1,1 @@
+{"rustc":6064785002308032717,"features":"[]","target":1488354670461685097,"profile":12637318739757120569,"path":1800092463077557459,"deps":[],"local":[{"CheckDepInfo":{"dep_info":"debug/.fingerprint/vcpkg-24e192e55843d6b6/dep-lib-vcpkg"}}],"rustflags":["-D","warnings","-C","codegen-units=10"],"metadata":17947694350758495060,"config":2202906307356721367,"compile_kind":0}

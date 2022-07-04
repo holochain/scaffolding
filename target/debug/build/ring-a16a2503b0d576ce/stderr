@@ -1,0 +1,1425 @@
+running "gcc" "-Os" "-ffunction-sections" "-fdata-sections" "-fPIC" "-g" "-fno-omit-frame-pointer" "-m64" "-I" "include" "-Wall" "-Wextra" "-pedantic" "-pedantic-errors" "-Wall" "-Wextra" "-Wcast-align" "-Wcast-qual" "-Wconversion" "-Wenum-compare" "-Wfloat-equal" "-Wformat=2" "-Winline" "-Winvalid-pch" "-Wmissing-field-initializers" "-Wmissing-include-dirs" "-Wredundant-decls" "-Wshadow" "-Wsign-compare" "-Wsign-conversion" "-Wundef" "-Wuninitialized" "-Wwrite-strings" "-fno-strict-aliasing" "-fvisibility=hidden" "-fstack-protector" "-g3" "-DNDEBUG" "-c" "-o/home/matthias/code/holochain/holochain/scaffolding/target/debug/build/ring-a16a2503b0d576ce/out/aesni-x86_64-elf.o" "/home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/ring-0.16.20/pregenerated/aesni-x86_64-elf.S"
+running "gcc" "-Os" "-ffunction-sections" "-fdata-sections" "-fPIC" "-g" "-fno-omit-frame-pointer" "-m64" "-I" "include" "-Wall" "-Wextra" "-pedantic" "-pedantic-errors" "-Wall" "-Wextra" "-Wcast-align" "-Wcast-qual" "-Wconversion" "-Wenum-compare" "-Wfloat-equal" "-Wformat=2" "-Winline" "-Winvalid-pch" "-Wmissing-field-initializers" "-Wmissing-include-dirs" "-Wredundant-decls" "-Wshadow" "-Wsign-compare" "-Wsign-conversion" "-Wundef" "-Wuninitialized" "-Wwrite-strings" "-fno-strict-aliasing" "-fvisibility=hidden" "-fstack-protector" "-g3" "-DNDEBUG" "-c" "-o/home/matthias/code/holochain/holochain/scaffolding/target/debug/build/ring-a16a2503b0d576ce/out/vpaes-x86_64-elf.o" "/home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/ring-0.16.20/pregenerated/vpaes-x86_64-elf.S"
+running "gcc" "-Os" "-ffunction-sections" "-fdata-sections" "-fPIC" "-g" "-fno-omit-frame-pointer" "-m64" "-I" "include" "-Wall" "-Wextra" "-pedantic" "-pedantic-errors" "-Wall" "-Wextra" "-Wcast-align" "-Wcast-qual" "-Wconversion" "-Wenum-compare" "-Wfloat-equal" "-Wformat=2" "-Winline" "-Winvalid-pch" "-Wmissing-field-initializers" "-Wmissing-include-dirs" "-Wredundant-decls" "-Wshadow" "-Wsign-compare" "-Wsign-conversion" "-Wundef" "-Wuninitialized" "-Wwrite-strings" "-fno-strict-aliasing" "-fvisibility=hidden" "-fstack-protector" "-g3" "-DNDEBUG" "-c" "-o/home/matthias/code/holochain/holochain/scaffolding/target/debug/build/ring-a16a2503b0d576ce/out/x86_64-mont-elf.o" "/home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/ring-0.16.20/pregenerated/x86_64-mont-elf.S"
+running "gcc" "-Os" "-ffunction-sections" "-fdata-sections" "-fPIC" "-g" "-fno-omit-frame-pointer" "-m64" "-I" "include" "-Wall" "-Wextra" "-pedantic" "-pedantic-errors" "-Wall" "-Wextra" "-Wcast-align" "-Wcast-qual" "-Wconversion" "-Wenum-compare" "-Wfloat-equal" "-Wformat=2" "-Winline" "-Winvalid-pch" "-Wmissing-field-initializers" "-Wmissing-include-dirs" "-Wredundant-decls" "-Wshadow" "-Wsign-compare" "-Wsign-conversion" "-Wundef" "-Wuninitialized" "-Wwrite-strings" "-fno-strict-aliasing" "-fvisibility=hidden" "-fstack-protector" "-g3" "-DNDEBUG" "-c" "-o/home/matthias/code/holochain/holochain/scaffolding/target/debug/build/ring-a16a2503b0d576ce/out/x86_64-mont5-elf.o" "/home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/ring-0.16.20/pregenerated/x86_64-mont5-elf.S"
+running "gcc" "-Os" "-ffunction-sections" "-fdata-sections" "-fPIC" "-g" "-fno-omit-frame-pointer" "-m64" "-I" "include" "-Wall" "-Wextra" "-pedantic" "-pedantic-errors" "-Wall" "-Wextra" "-Wcast-align" "-Wcast-qual" "-Wconversion" "-Wenum-compare" "-Wfloat-equal" "-Wformat=2" "-Winline" "-Winvalid-pch" "-Wmissing-field-initializers" "-Wmissing-include-dirs" "-Wredundant-decls" "-Wshadow" "-Wsign-compare" "-Wsign-conversion" "-Wundef" "-Wuninitialized" "-Wwrite-strings" "-fno-strict-aliasing" "-fvisibility=hidden" "-fstack-protector" "-g3" "-DNDEBUG" "-c" "-o/home/matthias/code/holochain/holochain/scaffolding/target/debug/build/ring-a16a2503b0d576ce/out/chacha-x86_64-elf.o" "/home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/ring-0.16.20/pregenerated/chacha-x86_64-elf.S"
+running "gcc" "-Os" "-ffunction-sections" "-fdata-sections" "-fPIC" "-g" "-fno-omit-frame-pointer" "-m64" "-I" "include" "-Wall" "-Wextra" "-pedantic" "-pedantic-errors" "-Wall" "-Wextra" "-Wcast-align" "-Wcast-qual" "-Wconversion" "-Wenum-compare" "-Wfloat-equal" "-Wformat=2" "-Winline" "-Winvalid-pch" "-Wmissing-field-initializers" "-Wmissing-include-dirs" "-Wredundant-decls" "-Wshadow" "-Wsign-compare" "-Wsign-conversion" "-Wundef" "-Wuninitialized" "-Wwrite-strings" "-fno-strict-aliasing" "-fvisibility=hidden" "-fstack-protector" "-g3" "-DNDEBUG" "-c" "-o/home/matthias/code/holochain/holochain/scaffolding/target/debug/build/ring-a16a2503b0d576ce/out/p256-x86_64-asm-elf.o" "/home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/ring-0.16.20/pregenerated/p256-x86_64-asm-elf.S"
+running "gcc" "-Os" "-ffunction-sections" "-fdata-sections" "-fPIC" "-g" "-fno-omit-frame-pointer" "-m64" "-I" "include" "-Wall" "-Wextra" "-pedantic" "-pedantic-errors" "-Wall" "-Wextra" "-Wcast-align" "-Wcast-qual" "-Wconversion" "-Wenum-compare" "-Wfloat-equal" "-Wformat=2" "-Winline" "-Winvalid-pch" "-Wmissing-field-initializers" "-Wmissing-include-dirs" "-Wredundant-decls" "-Wshadow" "-Wsign-compare" "-Wsign-conversion" "-Wundef" "-Wuninitialized" "-Wwrite-strings" "-fno-strict-aliasing" "-fvisibility=hidden" "-fstack-protector" "-g3" "-DNDEBUG" "-c" "-o/home/matthias/code/holochain/holochain/scaffolding/target/debug/build/ring-a16a2503b0d576ce/out/aesni-gcm-x86_64-elf.o" "/home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/ring-0.16.20/pregenerated/aesni-gcm-x86_64-elf.S"
+running "gcc" "-Os" "-ffunction-sections" "-fdata-sections" "-fPIC" "-g" "-fno-omit-frame-pointer" "-m64" "-I" "include" "-Wall" "-Wextra" "-pedantic" "-pedantic-errors" "-Wall" "-Wextra" "-Wcast-align" "-Wcast-qual" "-Wconversion" "-Wenum-compare" "-Wfloat-equal" "-Wformat=2" "-Winline" "-Winvalid-pch" "-Wmissing-field-initializers" "-Wmissing-include-dirs" "-Wredundant-decls" "-Wshadow" "-Wsign-compare" "-Wsign-conversion" "-Wundef" "-Wuninitialized" "-Wwrite-strings" "-fno-strict-aliasing" "-fvisibility=hidden" "-fstack-protector" "-g3" "-DNDEBUG" "-c" "-o/home/matthias/code/holochain/holochain/scaffolding/target/debug/build/ring-a16a2503b0d576ce/out/ghash-x86_64-elf.o" "/home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/ring-0.16.20/pregenerated/ghash-x86_64-elf.S"
+running "gcc" "-Os" "-ffunction-sections" "-fdata-sections" "-fPIC" "-g" "-fno-omit-frame-pointer" "-m64" "-I" "include" "-Wall" "-Wextra" "-pedantic" "-pedantic-errors" "-Wall" "-Wextra" "-Wcast-align" "-Wcast-qual" "-Wconversion" "-Wenum-compare" "-Wfloat-equal" "-Wformat=2" "-Winline" "-Winvalid-pch" "-Wmissing-field-initializers" "-Wmissing-include-dirs" "-Wredundant-decls" "-Wshadow" "-Wsign-compare" "-Wsign-conversion" "-Wundef" "-Wuninitialized" "-Wwrite-strings" "-fno-strict-aliasing" "-fvisibility=hidden" "-fstack-protector" "-g3" "-DNDEBUG" "-c" "-o/home/matthias/code/holochain/holochain/scaffolding/target/debug/build/ring-a16a2503b0d576ce/out/sha512-x86_64-elf.o" "/home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/ring-0.16.20/pregenerated/sha512-x86_64-elf.S"
+running "gcc" "-Os" "-ffunction-sections" "-fdata-sections" "-fPIC" "-g" "-fno-omit-frame-pointer" "-m64" "-I" "include" "-Wall" "-Wextra" "-pedantic" "-pedantic-errors" "-Wall" "-Wextra" "-Wcast-align" "-Wcast-qual" "-Wconversion" "-Wenum-compare" "-Wfloat-equal" "-Wformat=2" "-Winline" "-Winvalid-pch" "-Wmissing-field-initializers" "-Wmissing-include-dirs" "-Wredundant-decls" "-Wshadow" "-Wsign-compare" "-Wsign-conversion" "-Wundef" "-Wuninitialized" "-Wwrite-strings" "-fno-strict-aliasing" "-fvisibility=hidden" "-fstack-protector" "-g3" "-DNDEBUG" "-c" "-o/home/matthias/code/holochain/holochain/scaffolding/target/debug/build/ring-a16a2503b0d576ce/out/chacha20_poly1305_x86_64-elf.o" "/home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/ring-0.16.20/pregenerated/chacha20_poly1305_x86_64-elf.S"
+running "gcc" "-Os" "-ffunction-sections" "-fdata-sections" "-fPIC" "-g" "-fno-omit-frame-pointer" "-m64" "-I" "include" "-Wall" "-Wextra" "-pedantic" "-pedantic-errors" "-Wall" "-Wextra" "-Wcast-align" "-Wcast-qual" "-Wconversion" "-Wenum-compare" "-Wfloat-equal" "-Wformat=2" "-Winline" "-Winvalid-pch" "-Wmissing-field-initializers" "-Wmissing-include-dirs" "-Wredundant-decls" "-Wshadow" "-Wsign-compare" "-Wsign-conversion" "-Wundef" "-Wuninitialized" "-Wwrite-strings" "-fno-strict-aliasing" "-fvisibility=hidden" "-fstack-protector" "-g3" "-DNDEBUG" "-c" "-o/home/matthias/code/holochain/holochain/scaffolding/target/debug/build/ring-a16a2503b0d576ce/out/sha256-x86_64-elf.o" "/home/matthias/code/holochain/holochain/scaffolding/.cargo/registry/src/github.com-1ecc6299db9ec823/ring-0.16.20/pregenerated/sha256-x86_64-elf.S"
+running "gcc" "-Os" "-ffunction-sections" "-fdata-sections" "-fPIC" "-g" "-fno-omit-frame-pointer" "-m64" "-I" "include" "-Wall" "-Wextra" "-std=c1x" "-Wbad-function-cast" "-Wnested-externs" "-Wstrict-prototypes" "-pedantic" "-pedantic-errors" "-Wall" "-Wextra" "-Wcast-align" "-Wcast-qual" "-Wconversion" "-Wenum-compare" "-Wfloat-equal" "-Wformat=2" "-Winline" "-Winvalid-pch" "-Wmissing-field-initializers" "-Wmissing-include-dirs" "-Wredundant-decls" "-Wshadow" "-Wsign-compare" "-Wsign-conversion" "-Wundef" "-Wuninitialized" "-Wwrite-strings" "-fno-strict-aliasing" "-fvisibility=hidden" "-fstack-protector" "-g3" "-DNDEBUG" "-c" "-o/home/matthias/code/holochain/holochain/scaffolding/target/debug/build/ring-a16a2503b0d576ce/out/aes_nohw.o" "crypto/fipsmodule/aes/aes_nohw.c"
+crypto/fipsmodule/aes/aes_nohw.c: In function ‘aes_nohw_transpose’:
+crypto/fipsmodule/aes/aes_nohw.c:432:20: warning: inlining failed in call to ‘aes_nohw_swap_bits’: call is unlikely and code size would grow [-Winline]
+  432 | static inline void aes_nohw_swap_bits(aes_word_t *a, aes_word_t *b,
+      |                    ^~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:461:3: note: called from here
+  461 |   aes_nohw_swap_bits(&batch->w[5], &batch->w[7], 0x33333333, 2);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:432:20: warning: inlining failed in call to ‘aes_nohw_swap_bits’: call is unlikely and code size would grow [-Winline]
+  432 | static inline void aes_nohw_swap_bits(aes_word_t *a, aes_word_t *b,
+      |                    ^~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:460:3: note: called from here
+  460 |   aes_nohw_swap_bits(&batch->w[4], &batch->w[6], 0x33333333, 2);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:432:20: warning: inlining failed in call to ‘aes_nohw_swap_bits’: call is unlikely and code size would grow [-Winline]
+  432 | static inline void aes_nohw_swap_bits(aes_word_t *a, aes_word_t *b,
+      |                    ^~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:459:3: note: called from here
+  459 |   aes_nohw_swap_bits(&batch->w[1], &batch->w[3], 0x33333333, 2);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:432:20: warning: inlining failed in call to ‘aes_nohw_swap_bits’: call is unlikely and code size would grow [-Winline]
+  432 | static inline void aes_nohw_swap_bits(aes_word_t *a, aes_word_t *b,
+      |                    ^~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:458:3: note: called from here
+  458 |   aes_nohw_swap_bits(&batch->w[0], &batch->w[2], 0x33333333, 2);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:432:20: warning: inlining failed in call to ‘aes_nohw_swap_bits’: call is unlikely and code size would grow [-Winline]
+  432 | static inline void aes_nohw_swap_bits(aes_word_t *a, aes_word_t *b,
+      |                    ^~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:454:3: note: called from here
+  454 |   aes_nohw_swap_bits(&batch->w[6], &batch->w[7], 0x55555555, 1);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:432:20: warning: inlining failed in call to ‘aes_nohw_swap_bits’: call is unlikely and code size would grow [-Winline]
+  432 | static inline void aes_nohw_swap_bits(aes_word_t *a, aes_word_t *b,
+      |                    ^~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:453:3: note: called from here
+  453 |   aes_nohw_swap_bits(&batch->w[4], &batch->w[5], 0x55555555, 1);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:432:20: warning: inlining failed in call to ‘aes_nohw_swap_bits’: call is unlikely and code size would grow [-Winline]
+  432 | static inline void aes_nohw_swap_bits(aes_word_t *a, aes_word_t *b,
+      |                    ^~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:452:3: note: called from here
+  452 |   aes_nohw_swap_bits(&batch->w[2], &batch->w[3], 0x55555555, 1);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:432:20: warning: inlining failed in call to ‘aes_nohw_swap_bits’: call is unlikely and code size would grow [-Winline]
+  432 | static inline void aes_nohw_swap_bits(aes_word_t *a, aes_word_t *b,
+      |                    ^~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:451:3: note: called from here
+  451 |   aes_nohw_swap_bits(&batch->w[0], &batch->w[1], 0x55555555, 1);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c: In function ‘aes_nohw_encrypt_batch’:
+crypto/fipsmodule/aes/aes_nohw.c:691:26: warning: inlining failed in call to ‘aes_nohw_rotate_rows_twice’: call is unlikely and code size would grow [-Winline]
+  691 | static inline aes_word_t aes_nohw_rotate_rows_twice(aes_word_t v) {
+      |                          ^~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:748:7: note: called from here
+  748 |       aes_nohw_xor(aes_nohw_xor(a6_r6, r7), aes_nohw_rotate_rows_twice(a7_r7));
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:691:26: warning: inlining failed in call to ‘aes_nohw_rotate_rows_twice’: call is unlikely and code size would grow [-Winline]
+  691 | static inline aes_word_t aes_nohw_rotate_rows_twice(aes_word_t v) {
+      |                          ^~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:746:7: note: called from here
+  746 |       aes_nohw_xor(aes_nohw_xor(a5_r5, r6), aes_nohw_rotate_rows_twice(a6_r6));
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:691:26: warning: inlining failed in call to ‘aes_nohw_rotate_rows_twice’: call is unlikely and code size would grow [-Winline]
+  691 | static inline aes_word_t aes_nohw_rotate_rows_twice(aes_word_t v) {
+      |                          ^~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:744:7: note: called from here
+  744 |       aes_nohw_xor(aes_nohw_xor(a4_r4, r5), aes_nohw_rotate_rows_twice(a5_r5));
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:691:26: warning: inlining failed in call to ‘aes_nohw_rotate_rows_twice’: call is unlikely and code size would grow [-Winline]
+  691 | static inline aes_word_t aes_nohw_rotate_rows_twice(aes_word_t v) {
+      |                          ^~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:741:7: note: called from here
+  741 |       aes_nohw_xor(aes_nohw_xor(a3_r3, a7_r7),
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  742 |                    aes_nohw_xor(r4, aes_nohw_rotate_rows_twice(a4_r4)));
+      |                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:691:26: warning: inlining failed in call to ‘aes_nohw_rotate_rows_twice’: call is unlikely and code size would grow [-Winline]
+  691 | static inline aes_word_t aes_nohw_rotate_rows_twice(aes_word_t v) {
+      |                          ^~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:738:7: note: called from here
+  738 |       aes_nohw_xor(aes_nohw_xor(a2_r2, a7_r7),
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  739 |                    aes_nohw_xor(r3, aes_nohw_rotate_rows_twice(a3_r3)));
+      |                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:691:26: warning: inlining failed in call to ‘aes_nohw_rotate_rows_twice’: call is unlikely and code size would grow [-Winline]
+  691 | static inline aes_word_t aes_nohw_rotate_rows_twice(aes_word_t v) {
+      |                          ^~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:736:7: note: called from here
+  736 |       aes_nohw_xor(aes_nohw_xor(a1_r1, r2), aes_nohw_rotate_rows_twice(a2_r2));
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:691:26: warning: inlining failed in call to ‘aes_nohw_rotate_rows_twice’: call is unlikely and code size would grow [-Winline]
+  691 | static inline aes_word_t aes_nohw_rotate_rows_twice(aes_word_t v) {
+      |                          ^~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:733:7: note: called from here
+  733 |       aes_nohw_xor(aes_nohw_xor(a0_r0, a7_r7),
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  734 |                    aes_nohw_xor(r1, aes_nohw_rotate_rows_twice(a1_r1)));
+      |                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:691:26: warning: inlining failed in call to ‘aes_nohw_rotate_rows_twice’: call is unlikely and code size would grow [-Winline]
+  691 | static inline aes_word_t aes_nohw_rotate_rows_twice(aes_word_t v) {
+      |                          ^~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:731:7: note: called from here
+  731 |       aes_nohw_xor(aes_nohw_xor(a7_r7, r0), aes_nohw_rotate_rows_twice(a0_r0));
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:678:26: warning: inlining failed in call to ‘aes_nohw_rotate_rows_down’: call is unlikely and code size would grow [-Winline]
+  678 | static inline aes_word_t aes_nohw_rotate_rows_down(aes_word_t v) {
+      |                          ^~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:727:19: note: called from here
+  727 |   aes_word_t r7 = aes_nohw_rotate_rows_down(a7);
+      |                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:678:26: warning: inlining failed in call to ‘aes_nohw_rotate_rows_down’: call is unlikely and code size would grow [-Winline]
+  678 | static inline aes_word_t aes_nohw_rotate_rows_down(aes_word_t v) {
+      |                          ^~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:725:19: note: called from here
+  725 |   aes_word_t r6 = aes_nohw_rotate_rows_down(a6);
+      |                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:678:26: warning: inlining failed in call to ‘aes_nohw_rotate_rows_down’: call is unlikely and code size would grow [-Winline]
+  678 | static inline aes_word_t aes_nohw_rotate_rows_down(aes_word_t v) {
+      |                          ^~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:723:19: note: called from here
+  723 |   aes_word_t r5 = aes_nohw_rotate_rows_down(a5);
+      |                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:678:26: warning: inlining failed in call to ‘aes_nohw_rotate_rows_down’: call is unlikely and code size would grow [-Winline]
+  678 | static inline aes_word_t aes_nohw_rotate_rows_down(aes_word_t v) {
+      |                          ^~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:721:19: note: called from here
+  721 |   aes_word_t r4 = aes_nohw_rotate_rows_down(a4);
+      |                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:678:26: warning: inlining failed in call to ‘aes_nohw_rotate_rows_down’: call is unlikely and code size would grow [-Winline]
+  678 | static inline aes_word_t aes_nohw_rotate_rows_down(aes_word_t v) {
+      |                          ^~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:719:19: note: called from here
+  719 |   aes_word_t r3 = aes_nohw_rotate_rows_down(a3);
+      |                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:678:26: warning: inlining failed in call to ‘aes_nohw_rotate_rows_down’: call is unlikely and code size would grow [-Winline]
+  678 | static inline aes_word_t aes_nohw_rotate_rows_down(aes_word_t v) {
+      |                          ^~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:717:19: note: called from here
+  717 |   aes_word_t r2 = aes_nohw_rotate_rows_down(a2);
+      |                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:678:26: warning: inlining failed in call to ‘aes_nohw_rotate_rows_down’: call is unlikely and code size would grow [-Winline]
+  678 | static inline aes_word_t aes_nohw_rotate_rows_down(aes_word_t v) {
+      |                          ^~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:715:19: note: called from here
+  715 |   aes_word_t r1 = aes_nohw_rotate_rows_down(a1);
+      |                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:678:26: warning: inlining failed in call to ‘aes_nohw_rotate_rows_down’: call is unlikely and code size would grow [-Winline]
+  678 | static inline aes_word_t aes_nohw_rotate_rows_down(aes_word_t v) {
+      |                          ^~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:713:19: note: called from here
+  713 |   aes_word_t r0 = aes_nohw_rotate_rows_down(a0);
+      |                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/aes/aes_nohw.c:17:
+crypto/fipsmodule/aes/aes_nohw.c: In function ‘aes_nohw_expand_round_keys’:
+crypto/fipsmodule/aes/../../internal.h:266:21: warning: inlining failed in call to ‘GFp_memcpy’: call is unlikely and code size would grow [-Winline]
+  266 | static inline void *GFp_memcpy(void *dst, const void *src, size_t n) {
+      |                     ^~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:773:7: note: called from here
+  773 |       GFp_memcpy(tmp, key->rd_key + 4 * i, 16);
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/aes/aes_nohw.c:17:
+crypto/fipsmodule/aes/aes_nohw.c: In function ‘aes_nohw_from_batch’:
+crypto/fipsmodule/aes/../../internal.h:266:21: warning: inlining failed in call to ‘GFp_memcpy’: call is unlikely and code size would grow [-Winline]
+  266 | static inline void *GFp_memcpy(void *dst, const void *src, size_t n) {
+      |                     ^~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:386:3: note: called from here
+  386 |   GFp_memcpy(out + 8, &b1, 8);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/aes/aes_nohw.c:17:
+crypto/fipsmodule/aes/../../internal.h:266:21: warning: inlining failed in call to ‘GFp_memcpy’: call is unlikely and code size would grow [-Winline]
+  266 | static inline void *GFp_memcpy(void *dst, const void *src, size_t n) {
+      |                     ^~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:385:3: note: called from here
+  385 |   GFp_memcpy(out, &b0, 8);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:304:24: warning: inlining failed in call to ‘aes_nohw_uncompact_word’: call is unlikely and code size would grow [-Winline]
+  304 | static inline uint64_t aes_nohw_uncompact_word(uint64_t a) {
+      |                        ^~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:384:7: note: called from here
+  384 |       aes_nohw_uncompact_word((a1 & UINT64_C(0xffffffff00000000)) | (a0 >> 32));
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:304:24: warning: inlining failed in call to ‘aes_nohw_uncompact_word’: call is unlikely and code size would grow [-Winline]
+  304 | static inline uint64_t aes_nohw_uncompact_word(uint64_t a) {
+      |                        ^~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:382:7: note: called from here
+  382 |       aes_nohw_uncompact_word((a0 & UINT64_C(0x00000000ffffffff)) | (a1 << 32));
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c: In function ‘aes_nohw_compact_block’:
+crypto/fipsmodule/aes/aes_nohw.c:287:24: warning: inlining failed in call to ‘aes_nohw_compact_word’: call is unlikely and code size would grow [-Winline]
+  287 | static inline uint64_t aes_nohw_compact_word(uint64_t a) {
+      |                        ^~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:354:17: note: called from here
+  354 |   uint64_t a1 = aes_nohw_compact_word(out[1]);
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:287:24: warning: inlining failed in call to ‘aes_nohw_compact_word’: call is unlikely and code size would grow [-Winline]
+  287 | static inline uint64_t aes_nohw_compact_word(uint64_t a) {
+      |                        ^~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:353:17: note: called from here
+  353 |   uint64_t a0 = aes_nohw_compact_word(out[0]);
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/aes/aes_nohw.c:17:
+crypto/fipsmodule/aes/../../internal.h:266:21: warning: inlining failed in call to ‘GFp_memcpy’: call is unlikely and code size would grow [-Winline]
+  266 | static inline void *GFp_memcpy(void *dst, const void *src, size_t n) {
+      |                     ^~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:349:3: note: called from here
+  349 |   GFp_memcpy(out, in, 16);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c: In function ‘aes_nohw_to_batch’:
+crypto/fipsmodule/aes/aes_nohw.c:347:20: warning: inlining failed in call to ‘aes_nohw_compact_block’: call is unlikely and code size would grow [-Winline]
+  347 | static inline void aes_nohw_compact_block(aes_word_t out[AES_NOHW_BLOCK_WORDS],
+      |                    ^~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:482:5: note: called from here
+  482 |     aes_nohw_compact_block(block, in + 16 * i);
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/aes/aes_nohw.c:17:
+crypto/fipsmodule/aes/aes_nohw.c: In function ‘GFp_aes_nohw_set_encrypt_key’:
+crypto/fipsmodule/aes/../../internal.h:266:21: warning: inlining failed in call to ‘GFp_memcpy’: call is unlikely and code size would grow [-Winline]
+  266 | static inline void *GFp_memcpy(void *dst, const void *src, size_t n) {
+      |                     ^~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:810:3: note: called from here
+  810 |   GFp_memcpy(key->rd_key, block, 16);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:347:20: warning: inlining failed in call to ‘aes_nohw_compact_block’: call is unlikely and code size would grow [-Winline]
+  347 | static inline void aes_nohw_compact_block(aes_word_t out[AES_NOHW_BLOCK_WORDS],
+      |                    ^~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:809:3: note: called from here
+  809 |   aes_nohw_compact_block(block, in);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:678:26: warning: inlining failed in call to ‘aes_nohw_rotate_rows_down’: call is unlikely and code size would grow [-Winline]
+  678 | static inline aes_word_t aes_nohw_rotate_rows_down(aes_word_t v) {
+      |                          ^~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:819:18: note: called from here
+  819 |       block[j] = aes_nohw_xor(
+      |                  ^~~~~~~~~~~~~
+  820 |           block[j],
+      |           ~~~~~~~~~
+  821 |           aes_nohw_shift_right(aes_nohw_rotate_rows_down(sub[j]), 12));
+      |           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/aes/aes_nohw.c:17:
+crypto/fipsmodule/aes/../../internal.h:266:21: warning: inlining failed in call to ‘GFp_memcpy’: call is unlikely and code size would grow [-Winline]
+  266 | static inline void *GFp_memcpy(void *dst, const void *src, size_t n) {
+      |                     ^~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:829:5: note: called from here
+  829 |     GFp_memcpy(key->rd_key + 4 * i, block, 16);
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/aes/aes_nohw.c:17:
+crypto/fipsmodule/aes/../../internal.h:266:21: warning: inlining failed in call to ‘GFp_memcpy’: call is unlikely and code size would grow [-Winline]
+  266 | static inline void *GFp_memcpy(void *dst, const void *src, size_t n) {
+      |                     ^~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:842:3: note: called from here
+  842 |   GFp_memcpy(key->rd_key + 4, block2, 16);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:347:20: warning: inlining failed in call to ‘aes_nohw_compact_block’: call is unlikely and code size would grow [-Winline]
+  347 | static inline void aes_nohw_compact_block(aes_word_t out[AES_NOHW_BLOCK_WORDS],
+      |                    ^~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:841:3: note: called from here
+  841 |   aes_nohw_compact_block(block2, in + 16);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/aes/aes_nohw.c:17:
+crypto/fipsmodule/aes/../../internal.h:266:21: warning: inlining failed in call to ‘GFp_memcpy’: call is unlikely and code size would grow [-Winline]
+  266 | static inline void *GFp_memcpy(void *dst, const void *src, size_t n) {
+      |                     ^~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:839:3: note: called from here
+  839 |   GFp_memcpy(key->rd_key, block1, 16);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:347:20: warning: inlining failed in call to ‘aes_nohw_compact_block’: call is unlikely and code size would grow [-Winline]
+  347 | static inline void aes_nohw_compact_block(aes_word_t out[AES_NOHW_BLOCK_WORDS],
+      |                    ^~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:838:3: note: called from here
+  838 |   aes_nohw_compact_block(block1, in);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:678:26: warning: inlining failed in call to ‘aes_nohw_rotate_rows_down’: call is unlikely and code size would grow [-Winline]
+  678 | static inline aes_word_t aes_nohw_rotate_rows_down(aes_word_t v) {
+      |                          ^~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:851:19: note: called from here
+  851 |       block1[j] = aes_nohw_xor(
+      |                   ^~~~~~~~~~~~~
+  852 |           block1[j],
+      |           ~~~~~~~~~~
+  853 |           aes_nohw_shift_right(aes_nohw_rotate_rows_down(sub[j]), 12));
+      |           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/aes/aes_nohw.c:17:
+crypto/fipsmodule/aes/../../internal.h:266:21: warning: inlining failed in call to ‘GFp_memcpy’: call is unlikely and code size would grow [-Winline]
+  266 | static inline void *GFp_memcpy(void *dst, const void *src, size_t n) {
+      |                     ^~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:860:5: note: called from here
+  860 |     GFp_memcpy(key->rd_key + 4 * i, block1, 16);
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/aes/aes_nohw.c:17:
+crypto/fipsmodule/aes/../../internal.h:266:21: warning: inlining failed in call to ‘GFp_memcpy’: call is unlikely and code size would grow [-Winline]
+  266 | static inline void *GFp_memcpy(void *dst, const void *src, size_t n) {
+      |                     ^~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:876:5: note: called from here
+  876 |     GFp_memcpy(key->rd_key + 4 * (i + 1), block2, 16);
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/aes/aes_nohw.c:17:
+crypto/fipsmodule/aes/aes_nohw.c: In function ‘GFp_aes_nohw_ctr32_encrypt_blocks’:
+crypto/fipsmodule/aes/../../internal.h:266:21: warning: inlining failed in call to ‘GFp_memcpy’: call is unlikely and code size would grow [-Winline]
+  266 | static inline void *GFp_memcpy(void *dst, const void *src, size_t n) {
+      |                     ^~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:932:5: note: called from here
+  932 |     GFp_memcpy(ivs.u8 + 16 * i, ivec, 16);
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/aes/aes_nohw.c:17:
+crypto/fipsmodule/aes/../../internal.h:266:21: warning: inlining failed in call to ‘GFp_memcpy’: call is unlikely and code size would grow [-Winline]
+  266 | static inline void *GFp_memcpy(void *dst, const void *src, size_t n) {
+      |                     ^~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:912:5: note: called from here
+  912 |     GFp_memcpy(out + i, &x, sizeof(aes_word_t));
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/aes/aes_nohw.c:17:
+crypto/fipsmodule/aes/../../internal.h:266:21: warning: inlining failed in call to ‘GFp_memcpy’: call is unlikely and code size would grow [-Winline]
+  266 | static inline void *GFp_memcpy(void *dst, const void *src, size_t n) {
+      |                     ^~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:910:5: note: called from here
+  910 |     GFp_memcpy(&y, b + i, sizeof(aes_word_t));
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/aes/aes_nohw.c:17:
+crypto/fipsmodule/aes/../../internal.h:266:21: warning: inlining failed in call to ‘GFp_memcpy’: call is unlikely and code size would grow [-Winline]
+  266 | static inline void *GFp_memcpy(void *dst, const void *src, size_t n) {
+      |                     ^~~~~~~~~~
+crypto/fipsmodule/aes/aes_nohw.c:909:5: note: called from here
+  909 |     GFp_memcpy(&x, a + i, sizeof(aes_word_t));
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+running "gcc" "-Os" "-ffunction-sections" "-fdata-sections" "-fPIC" "-g" "-fno-omit-frame-pointer" "-m64" "-I" "include" "-Wall" "-Wextra" "-std=c1x" "-Wbad-function-cast" "-Wnested-externs" "-Wstrict-prototypes" "-pedantic" "-pedantic-errors" "-Wall" "-Wextra" "-Wcast-align" "-Wcast-qual" "-Wconversion" "-Wenum-compare" "-Wfloat-equal" "-Wformat=2" "-Winline" "-Winvalid-pch" "-Wmissing-field-initializers" "-Wmissing-include-dirs" "-Wredundant-decls" "-Wshadow" "-Wsign-compare" "-Wsign-conversion" "-Wundef" "-Wuninitialized" "-Wwrite-strings" "-fno-strict-aliasing" "-fvisibility=hidden" "-fstack-protector" "-g3" "-DNDEBUG" "-c" "-o/home/matthias/code/holochain/holochain/scaffolding/target/debug/build/ring-a16a2503b0d576ce/out/montgomery.o" "crypto/fipsmodule/bn/montgomery.c"
+running "gcc" "-Os" "-ffunction-sections" "-fdata-sections" "-fPIC" "-g" "-fno-omit-frame-pointer" "-m64" "-I" "include" "-Wall" "-Wextra" "-std=c1x" "-Wbad-function-cast" "-Wnested-externs" "-Wstrict-prototypes" "-pedantic" "-pedantic-errors" "-Wall" "-Wextra" "-Wcast-align" "-Wcast-qual" "-Wconversion" "-Wenum-compare" "-Wfloat-equal" "-Wformat=2" "-Winline" "-Winvalid-pch" "-Wmissing-field-initializers" "-Wmissing-include-dirs" "-Wredundant-decls" "-Wshadow" "-Wsign-compare" "-Wsign-conversion" "-Wundef" "-Wuninitialized" "-Wwrite-strings" "-fno-strict-aliasing" "-fvisibility=hidden" "-fstack-protector" "-g3" "-DNDEBUG" "-c" "-o/home/matthias/code/holochain/holochain/scaffolding/target/debug/build/ring-a16a2503b0d576ce/out/montgomery_inv.o" "crypto/fipsmodule/bn/montgomery_inv.c"
+running "gcc" "-Os" "-ffunction-sections" "-fdata-sections" "-fPIC" "-g" "-fno-omit-frame-pointer" "-m64" "-I" "include" "-Wall" "-Wextra" "-std=c1x" "-Wbad-function-cast" "-Wnested-externs" "-Wstrict-prototypes" "-pedantic" "-pedantic-errors" "-Wall" "-Wextra" "-Wcast-align" "-Wcast-qual" "-Wconversion" "-Wenum-compare" "-Wfloat-equal" "-Wformat=2" "-Winline" "-Winvalid-pch" "-Wmissing-field-initializers" "-Wmissing-include-dirs" "-Wredundant-decls" "-Wshadow" "-Wsign-compare" "-Wsign-conversion" "-Wundef" "-Wuninitialized" "-Wwrite-strings" "-fno-strict-aliasing" "-fvisibility=hidden" "-fstack-protector" "-g3" "-DNDEBUG" "-c" "-o/home/matthias/code/holochain/holochain/scaffolding/target/debug/build/ring-a16a2503b0d576ce/out/limbs.o" "crypto/limbs/limbs.c"
+In file included from crypto/limbs/limbs.h:20,
+                 from crypto/limbs/limbs.c:15:
+crypto/limbs/limbs.c: In function ‘LIMBS_are_zero’:
+crypto/limbs/../internal.h:206:27: warning: inlining failed in call to ‘constant_time_is_zero_w’: call is unlikely and code size would grow [-Winline]
+  206 | static inline crypto_word constant_time_is_zero_w(crypto_word a) {
+      |                           ^~~~~~~~~~~~~~~~~~~~~~~
+crypto/limbs/limbs.c:31:15: note: called from here
+   31 |     is_zero = constant_time_select_w(is_zero, constant_time_is_zero_w(a[i]),
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   32 |                                      is_zero);
+      |                                      ~~~~~~~~
+In file included from crypto/limbs/limbs.h:20,
+                 from crypto/limbs/limbs.c:15:
+crypto/limbs/../internal.h: In function ‘LIMBS_equal’:
+crypto/limbs/../internal.h:206:27: warning: inlining failed in call to ‘constant_time_is_zero_w’: call is unlikely and code size would grow [-Winline]
+  206 | static inline crypto_word constant_time_is_zero_w(crypto_word a) {
+      |                           ^~~~~~~~~~~~~~~~~~~~~~~
+crypto/limbs/../internal.h:228:10: note: called from here
+  228 |   return constant_time_is_zero_w(a ^ b);
+      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/limbs/limbs.c: In function ‘LIMBS_equal_limb’:
+crypto/limbs/../internal.h:206:27: warning: inlining failed in call to ‘constant_time_is_zero_w’: call is unlikely and code size would grow [-Winline]
+  206 | static inline crypto_word constant_time_is_zero_w(crypto_word a) {
+      |                           ^~~~~~~~~~~~~~~~~~~~~~~
+crypto/limbs/limbs.c:49:12: note: called from here
+   49 |     return constant_time_is_zero_w(b);
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/limbs/limbs.h:20,
+                 from crypto/limbs/limbs.c:15:
+crypto/limbs/../internal.h:206:27: warning: inlining failed in call to ‘constant_time_is_zero_w’: call is unlikely and code size would grow [-Winline]
+  206 | static inline crypto_word constant_time_is_zero_w(crypto_word a) {
+      |                           ^~~~~~~~~~~~~~~~~~~~~~~
+crypto/limbs/../internal.h:228:10: note: called from here
+  228 |   return constant_time_is_zero_w(a ^ b);
+      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/limbs/limbs.c: In function ‘LIMBS_are_even’:
+crypto/limbs/../internal.h:206:27: warning: inlining failed in call to ‘constant_time_is_zero_w’: call is unlikely and code size would grow [-Winline]
+  206 | static inline crypto_word constant_time_is_zero_w(crypto_word a) {
+      |                           ^~~~~~~~~~~~~~~~~~~~~~~
+crypto/limbs/limbs.c:66:10: note: called from here
+   66 |   return constant_time_is_zero_w(lo & 1);
+      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/limbs/limbs.h:20,
+                 from crypto/limbs/limbs.c:15:
+crypto/limbs/../internal.h: In function ‘LIMBS_less_than’:
+crypto/limbs/../internal.h:206:27: warning: inlining failed in call to ‘constant_time_is_zero_w’: call is unlikely and code size would grow [-Winline]
+  206 | static inline crypto_word constant_time_is_zero_w(crypto_word a) {
+      |                           ^~~~~~~~~~~~~~~~~~~~~~~
+crypto/limbs/../internal.h:222:11: note: called from here
+  222 |   return ~constant_time_is_zero_w(a);
+      |           ^~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/limbs/../internal.h: In function ‘LIMBS_less_than_limb’:
+crypto/limbs/../internal.h:206:27: warning: inlining failed in call to ‘constant_time_is_zero_w’: call is unlikely and code size would grow [-Winline]
+  206 | static inline crypto_word constant_time_is_zero_w(crypto_word a) {
+      |                           ^~~~~~~~~~~~~~~~~~~~~~~
+crypto/limbs/../internal.h:222:11: note: called from here
+  222 |   return ~constant_time_is_zero_w(a);
+      |           ^~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/limbs/../internal.h: In function ‘LIMBS_add_mod’:
+crypto/limbs/../internal.h:206:27: warning: inlining failed in call to ‘constant_time_is_zero_w’: call is unlikely and code size would grow [-Winline]
+  206 | static inline crypto_word constant_time_is_zero_w(crypto_word a) {
+      |                           ^~~~~~~~~~~~~~~~~~~~~~~
+crypto/limbs/../internal.h:222:11: note: called from here
+  222 |   return ~constant_time_is_zero_w(a);
+      |           ^~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/limbs/../internal.h: In function ‘LIMBS_sub_mod’:
+crypto/limbs/../internal.h:206:27: warning: inlining failed in call to ‘constant_time_is_zero_w’: call is unlikely and code size would grow [-Winline]
+  206 | static inline crypto_word constant_time_is_zero_w(crypto_word a) {
+      |                           ^~~~~~~~~~~~~~~~~~~~~~~
+crypto/limbs/../internal.h:222:11: note: called from here
+  222 |   return ~constant_time_is_zero_w(a);
+      |           ^~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/limbs/../internal.h: In function ‘LIMBS_shl_mod’:
+crypto/limbs/../internal.h:206:27: warning: inlining failed in call to ‘constant_time_is_zero_w’: call is unlikely and code size would grow [-Winline]
+  206 | static inline crypto_word constant_time_is_zero_w(crypto_word a) {
+      |                           ^~~~~~~~~~~~~~~~~~~~~~~
+crypto/limbs/../internal.h:222:11: note: called from here
+  222 |   return ~constant_time_is_zero_w(a);
+      |           ^~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/limbs/../internal.h: In function ‘LIMBS_select_512_32’:
+crypto/limbs/../internal.h:206:27: warning: inlining failed in call to ‘constant_time_is_zero_w’: call is unlikely and code size would grow [-Winline]
+  206 | static inline crypto_word constant_time_is_zero_w(crypto_word a) {
+      |                           ^~~~~~~~~~~~~~~~~~~~~~~
+crypto/limbs/../internal.h:228:10: note: called from here
+  228 |   return constant_time_is_zero_w(a ^ b);
+      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+running "gcc" "-Os" "-ffunction-sections" "-fdata-sections" "-fPIC" "-g" "-fno-omit-frame-pointer" "-m64" "-I" "include" "-Wall" "-Wextra" "-std=c1x" "-Wbad-function-cast" "-Wnested-externs" "-Wstrict-prototypes" "-pedantic" "-pedantic-errors" "-Wall" "-Wextra" "-Wcast-align" "-Wcast-qual" "-Wconversion" "-Wenum-compare" "-Wfloat-equal" "-Wformat=2" "-Winline" "-Winvalid-pch" "-Wmissing-field-initializers" "-Wmissing-include-dirs" "-Wredundant-decls" "-Wshadow" "-Wsign-compare" "-Wsign-conversion" "-Wundef" "-Wuninitialized" "-Wwrite-strings" "-fno-strict-aliasing" "-fvisibility=hidden" "-fstack-protector" "-g3" "-DNDEBUG" "-c" "-o/home/matthias/code/holochain/holochain/scaffolding/target/debug/build/ring-a16a2503b0d576ce/out/mem.o" "crypto/mem.c"
+running "gcc" "-Os" "-ffunction-sections" "-fdata-sections" "-fPIC" "-g" "-fno-omit-frame-pointer" "-m64" "-I" "include" "-Wall" "-Wextra" "-std=c1x" "-Wbad-function-cast" "-Wnested-externs" "-Wstrict-prototypes" "-pedantic" "-pedantic-errors" "-Wall" "-Wextra" "-Wcast-align" "-Wcast-qual" "-Wconversion" "-Wenum-compare" "-Wfloat-equal" "-Wformat=2" "-Winline" "-Winvalid-pch" "-Wmissing-field-initializers" "-Wmissing-include-dirs" "-Wredundant-decls" "-Wshadow" "-Wsign-compare" "-Wsign-conversion" "-Wundef" "-Wuninitialized" "-Wwrite-strings" "-fno-strict-aliasing" "-fvisibility=hidden" "-fstack-protector" "-g3" "-DNDEBUG" "-c" "-o/home/matthias/code/holochain/holochain/scaffolding/target/debug/build/ring-a16a2503b0d576ce/out/poly1305.o" "crypto/poly1305/poly1305.c"
+running "gcc" "-Os" "-ffunction-sections" "-fdata-sections" "-fPIC" "-g" "-fno-omit-frame-pointer" "-m64" "-I" "include" "-Wall" "-Wextra" "-std=c1x" "-Wbad-function-cast" "-Wnested-externs" "-Wstrict-prototypes" "-pedantic" "-pedantic-errors" "-Wall" "-Wextra" "-Wcast-align" "-Wcast-qual" "-Wconversion" "-Wenum-compare" "-Wfloat-equal" "-Wformat=2" "-Winline" "-Winvalid-pch" "-Wmissing-field-initializers" "-Wmissing-include-dirs" "-Wredundant-decls" "-Wshadow" "-Wsign-compare" "-Wsign-conversion" "-Wundef" "-Wuninitialized" "-Wwrite-strings" "-fno-strict-aliasing" "-fvisibility=hidden" "-fstack-protector" "-g3" "-DNDEBUG" "-c" "-o/home/matthias/code/holochain/holochain/scaffolding/target/debug/build/ring-a16a2503b0d576ce/out/crypto.o" "crypto/crypto.c"
+running "gcc" "-Os" "-ffunction-sections" "-fdata-sections" "-fPIC" "-g" "-fno-omit-frame-pointer" "-m64" "-I" "include" "-Wall" "-Wextra" "-std=c1x" "-Wbad-function-cast" "-Wnested-externs" "-Wstrict-prototypes" "-pedantic" "-pedantic-errors" "-Wall" "-Wextra" "-Wcast-align" "-Wcast-qual" "-Wconversion" "-Wenum-compare" "-Wfloat-equal" "-Wformat=2" "-Winline" "-Winvalid-pch" "-Wmissing-field-initializers" "-Wmissing-include-dirs" "-Wredundant-decls" "-Wshadow" "-Wsign-compare" "-Wsign-conversion" "-Wundef" "-Wuninitialized" "-Wwrite-strings" "-fno-strict-aliasing" "-fvisibility=hidden" "-fstack-protector" "-g3" "-DNDEBUG" "-c" "-o/home/matthias/code/holochain/holochain/scaffolding/target/debug/build/ring-a16a2503b0d576ce/out/curve25519.o" "crypto/curve25519/curve25519.c"
+In file included from crypto/curve25519/curve25519.c:24:
+crypto/curve25519/curve25519.c: In function ‘x25519_ge_p3_to_cached’:
+crypto/curve25519/internal.h:62:20: warning: inlining failed in call to ‘fe_limbs_copy’: call is unlikely and code size would grow [-Winline]
+   62 | static inline void fe_limbs_copy(fe_limb_t r[], const fe_limb_t a[]) {
+      |                    ^~~~~~~~~~~~~
+crypto/curve25519/curve25519.c:314:3: note: called from here
+  314 |   fe_limbs_copy(h->v, f->v);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/curve25519/curve25519.c:24:
+crypto/curve25519/curve25519.c: In function ‘ge_p3_dbl’:
+crypto/curve25519/internal.h:62:20: warning: inlining failed in call to ‘fe_limbs_copy’: call is unlikely and code size would grow [-Winline]
+   62 | static inline void fe_limbs_copy(fe_limb_t r[], const fe_limb_t a[]) {
+      |                    ^~~~~~~~~~~~~
+crypto/curve25519/curve25519.c:310:3: note: called from here
+  310 |   fe_limbs_copy(h->v, f->v);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/curve25519/curve25519.c:24:
+crypto/curve25519/internal.h:62:20: warning: inlining failed in call to ‘fe_limbs_copy’: call is unlikely and code size would grow [-Winline]
+   62 | static inline void fe_limbs_copy(fe_limb_t r[], const fe_limb_t a[]) {
+      |                    ^~~~~~~~~~~~~
+crypto/curve25519/curve25519.c:310:3: note: called from here
+  310 |   fe_limbs_copy(h->v, f->v);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/curve25519/curve25519.c:24:
+crypto/curve25519/internal.h:62:20: warning: inlining failed in call to ‘fe_limbs_copy’: call is unlikely and code size would grow [-Winline]
+   62 | static inline void fe_limbs_copy(fe_limb_t r[], const fe_limb_t a[]) {
+      |                    ^~~~~~~~~~~~~
+crypto/curve25519/curve25519.c:310:3: note: called from here
+  310 |   fe_limbs_copy(h->v, f->v);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/curve25519/curve25519.c:24:
+crypto/curve25519/curve25519.c: In function ‘table_select’:
+crypto/curve25519/internal.h:62:20: warning: inlining failed in call to ‘fe_limbs_copy’: call is unlikely and code size would grow [-Winline]
+   62 | static inline void fe_limbs_copy(fe_limb_t r[], const fe_limb_t a[]) {
+      |                    ^~~~~~~~~~~~~
+crypto/curve25519/curve25519.c:318:3: note: called from here
+  318 |   fe_limbs_copy(h->v, f->v);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/curve25519/curve25519.c:24:
+crypto/curve25519/internal.h:62:20: warning: inlining failed in call to ‘fe_limbs_copy’: call is unlikely and code size would grow [-Winline]
+   62 | static inline void fe_limbs_copy(fe_limb_t r[], const fe_limb_t a[]) {
+      |                    ^~~~~~~~~~~~~
+crypto/curve25519/curve25519.c:318:3: note: called from here
+  318 |   fe_limbs_copy(h->v, f->v);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/curve25519/curve25519.c:24:
+crypto/curve25519/internal.h:62:20: warning: inlining failed in call to ‘fe_limbs_copy’: call is unlikely and code size would grow [-Winline]
+   62 | static inline void fe_limbs_copy(fe_limb_t r[], const fe_limb_t a[]) {
+      |                    ^~~~~~~~~~~~~
+crypto/curve25519/curve25519.c:318:3: note: called from here
+  318 |   fe_limbs_copy(h->v, f->v);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/curve25519/curve25519.c:24:
+crypto/curve25519/internal.h:62:20: warning: inlining failed in call to ‘fe_limbs_copy’: call is unlikely and code size would grow [-Winline]
+   62 | static inline void fe_limbs_copy(fe_limb_t r[], const fe_limb_t a[]) {
+      |                    ^~~~~~~~~~~~~
+crypto/curve25519/curve25519.c:318:3: note: called from here
+  318 |   fe_limbs_copy(h->v, f->v);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/curve25519/curve25519.c:24:
+crypto/curve25519/curve25519.c: In function ‘GFp_x25519_scalar_mult_generic_masked’:
+crypto/curve25519/internal.h:62:20: warning: inlining failed in call to ‘fe_limbs_copy’: call is unlikely and code size would grow [-Winline]
+   62 | static inline void fe_limbs_copy(fe_limb_t r[], const fe_limb_t a[]) {
+      |                    ^~~~~~~~~~~~~
+crypto/curve25519/curve25519.c:310:3: note: called from here
+  310 |   fe_limbs_copy(h->v, f->v);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/curve25519/curve25519.c:24:
+crypto/curve25519/internal.h:62:20: warning: inlining failed in call to ‘fe_limbs_copy’: call is unlikely and code size would grow [-Winline]
+   62 | static inline void fe_limbs_copy(fe_limb_t r[], const fe_limb_t a[]) {
+      |                    ^~~~~~~~~~~~~
+crypto/curve25519/curve25519.c:310:3: note: called from here
+  310 |   fe_limbs_copy(h->v, f->v);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/curve25519/curve25519.c:24:
+crypto/curve25519/internal.h:62:20: warning: inlining failed in call to ‘fe_limbs_copy’: call is unlikely and code size would grow [-Winline]
+   62 | static inline void fe_limbs_copy(fe_limb_t r[], const fe_limb_t a[]) {
+      |                    ^~~~~~~~~~~~~
+crypto/curve25519/curve25519.c:314:3: note: called from here
+  314 |   fe_limbs_copy(h->v, f->v);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/curve25519/curve25519.c:24:
+crypto/curve25519/curve25519.c: In function ‘GFp_x25519_fe_invert’:
+crypto/curve25519/internal.h:62:20: warning: inlining failed in call to ‘fe_limbs_copy’: call is unlikely and code size would grow [-Winline]
+   62 | static inline void fe_limbs_copy(fe_limb_t r[], const fe_limb_t a[]) {
+      |                    ^~~~~~~~~~~~~
+crypto/curve25519/curve25519.c:314:3: note: called from here
+  314 |   fe_limbs_copy(h->v, f->v);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~
+running "gcc" "-Os" "-ffunction-sections" "-fdata-sections" "-fPIC" "-g" "-fno-omit-frame-pointer" "-m64" "-I" "include" "-Wall" "-Wextra" "-std=c1x" "-Wbad-function-cast" "-Wnested-externs" "-Wstrict-prototypes" "-pedantic" "-pedantic-errors" "-Wall" "-Wextra" "-Wcast-align" "-Wcast-qual" "-Wconversion" "-Wenum-compare" "-Wfloat-equal" "-Wformat=2" "-Winline" "-Winvalid-pch" "-Wmissing-field-initializers" "-Wmissing-include-dirs" "-Wredundant-decls" "-Wshadow" "-Wsign-compare" "-Wsign-conversion" "-Wundef" "-Wuninitialized" "-Wwrite-strings" "-fno-strict-aliasing" "-fvisibility=hidden" "-fstack-protector" "-g3" "-DNDEBUG" "-c" "-o/home/matthias/code/holochain/holochain/scaffolding/target/debug/build/ring-a16a2503b0d576ce/out/ecp_nistz.o" "crypto/fipsmodule/ec/ecp_nistz.c"
+running "gcc" "-Os" "-ffunction-sections" "-fdata-sections" "-fPIC" "-g" "-fno-omit-frame-pointer" "-m64" "-I" "include" "-Wall" "-Wextra" "-std=c1x" "-Wbad-function-cast" "-Wnested-externs" "-Wstrict-prototypes" "-pedantic" "-pedantic-errors" "-Wall" "-Wextra" "-Wcast-align" "-Wcast-qual" "-Wconversion" "-Wenum-compare" "-Wfloat-equal" "-Wformat=2" "-Winline" "-Winvalid-pch" "-Wmissing-field-initializers" "-Wmissing-include-dirs" "-Wredundant-decls" "-Wshadow" "-Wsign-compare" "-Wsign-conversion" "-Wundef" "-Wuninitialized" "-Wwrite-strings" "-fno-strict-aliasing" "-fvisibility=hidden" "-fstack-protector" "-g3" "-DNDEBUG" "-c" "-o/home/matthias/code/holochain/holochain/scaffolding/target/debug/build/ring-a16a2503b0d576ce/out/ecp_nistz256.o" "crypto/fipsmodule/ec/ecp_nistz256.c"
+In file included from crypto/fipsmodule/ec/ecp_nistz256.c:26:
+crypto/fipsmodule/ec/ecp_nistz256.c: In function ‘select_precomputed’:
+crypto/fipsmodule/ec/ecp_nistz.h:249:20: warning: inlining failed in call to ‘booth_recode’: call is unlikely and code size would grow [-Winline]
+  249 | static inline void booth_recode(crypto_word *is_negative, crypto_word *digit,
+      |                    ^~~~~~~~~~~~
+crypto/fipsmodule/ec/ecp_nistz256.c:294:3: note: called from here
+  294 |   booth_recode(&recoded_is_negative, &recoded, raw_wvalue, kWindowSize);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/ecp_nistz256.c:26:
+crypto/fipsmodule/ec/ecp_nistz256.c: In function ‘GFp_nistz256_point_mul’:
+crypto/fipsmodule/ec/ecp_nistz.h:249:20: warning: inlining failed in call to ‘booth_recode’: call is unlikely and code size would grow [-Winline]
+  249 | static inline void booth_recode(crypto_word *is_negative, crypto_word *digit,
+      |                    ^~~~~~~~~~~~
+crypto/fipsmodule/ec/ecp_nistz256.c:244:3: note: called from here
+  244 |   booth_recode(&recoded_is_negative, &recoded, raw_wvalue, kWindowSize);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/ecp_nistz256.c:28:
+crypto/fipsmodule/ec/../../limbs/limbs.inl:137:20: warning: inlining failed in call to ‘limbs_copy.constprop’: call is unlikely and code size would grow [-Winline]
+  137 | static inline void limbs_copy(Limb r[], const Limb a[], size_t num_limbs) {
+      |                    ^~~~~~~~~~
+crypto/fipsmodule/ec/ecp_nistz256.c:215:3: note: called from here
+  215 |   limbs_copy(row[1 - 1].Z, ONE, P256_LIMBS);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/ecp_nistz256.c:28:
+crypto/fipsmodule/ec/../../limbs/limbs.inl:137:20: warning: inlining failed in call to ‘limbs_copy.constprop’: call is unlikely and code size would grow [-Winline]
+  137 | static inline void limbs_copy(Limb r[], const Limb a[], size_t num_limbs) {
+      |                    ^~~~~~~~~~
+crypto/fipsmodule/ec/ecp_nistz256.c:214:3: note: called from here
+  214 |   limbs_copy(row[1 - 1].Y, p_y, P256_LIMBS);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/ecp_nistz256.c:28:
+crypto/fipsmodule/ec/../../limbs/limbs.inl:137:20: warning: inlining failed in call to ‘limbs_copy.constprop’: call is unlikely and code size would grow [-Winline]
+  137 | static inline void limbs_copy(Limb r[], const Limb a[], size_t num_limbs) {
+      |                    ^~~~~~~~~~
+crypto/fipsmodule/ec/ecp_nistz256.c:213:3: note: called from here
+  213 |   limbs_copy(row[1 - 1].X, p_x, P256_LIMBS);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/ecp_nistz256.c:26:
+crypto/fipsmodule/ec/ecp_nistz.h:249:20: warning: inlining failed in call to ‘booth_recode’: call is unlikely and code size would grow [-Winline]
+  249 | static inline void booth_recode(crypto_word *is_negative, crypto_word *digit,
+      |                    ^~~~~~~~~~~~
+crypto/fipsmodule/ec/ecp_nistz256.c:254:7: note: called from here
+  254 |       booth_recode(&recoded_is_negative, &recoded, raw_wvalue, kWindowSize);
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/ecp_nistz256.c:26:
+crypto/fipsmodule/ec/ecp_nistz.h:249:20: warning: inlining failed in call to ‘booth_recode’: call is unlikely and code size would grow [-Winline]
+  249 | static inline void booth_recode(crypto_word *is_negative, crypto_word *digit,
+      |                    ^~~~~~~~~~~~
+crypto/fipsmodule/ec/ecp_nistz256.c:276:3: note: called from here
+  276 |   booth_recode(&recoded_is_negative, &recoded, raw_wvalue, kWindowSize);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/ecp_nistz256.c:28:
+crypto/fipsmodule/ec/ecp_nistz256.c: In function ‘GFp_nistz256_point_mul_base’:
+crypto/fipsmodule/ec/../../limbs/limbs.inl:137:20: warning: inlining failed in call to ‘limbs_copy.constprop’: call is unlikely and code size would grow [-Winline]
+  137 | static inline void limbs_copy(Limb r[], const Limb a[], size_t num_limbs) {
+      |                    ^~~~~~~~~~
+crypto/fipsmodule/ec/ecp_nistz256.c:331:3: note: called from here
+  331 |   limbs_copy(p.Z, ONE, P256_LIMBS);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/ecp_nistz256.c:28:
+crypto/fipsmodule/ec/../../limbs/limbs.inl:137:20: warning: inlining failed in call to ‘limbs_copy.constprop’: call is unlikely and code size would grow [-Winline]
+  137 | static inline void limbs_copy(Limb r[], const Limb a[], size_t num_limbs) {
+      |                    ^~~~~~~~~~
+crypto/fipsmodule/ec/ecp_nistz256.c:330:3: note: called from here
+  330 |   limbs_copy(p.Y, t.Y, P256_LIMBS);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/ecp_nistz256.c:28:
+crypto/fipsmodule/ec/../../limbs/limbs.inl:137:20: warning: inlining failed in call to ‘limbs_copy.constprop’: call is unlikely and code size would grow [-Winline]
+  137 | static inline void limbs_copy(Limb r[], const Limb a[], size_t num_limbs) {
+      |                    ^~~~~~~~~~
+crypto/fipsmodule/ec/ecp_nistz256.c:329:3: note: called from here
+  329 |   limbs_copy(p.X, t.X, P256_LIMBS);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/ecp_nistz256.c:290:20: warning: inlining failed in call to ‘select_precomputed’: call is unlikely and code size would grow [-Winline]
+  290 | static inline void select_precomputed(P256_POINT_AFFINE *p, size_t i,
+      |                    ^~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/ecp_nistz256.c:326:3: note: called from here
+  326 |   select_precomputed(&t, 0, raw_wvalue);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/ecp_nistz256.c:290:20: warning: inlining failed in call to ‘select_precomputed’: call is unlikely and code size would grow [-Winline]
+  290 | static inline void select_precomputed(P256_POINT_AFFINE *p, size_t i,
+      |                    ^~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/ecp_nistz256.c:340:5: note: called from here
+  340 |     select_precomputed(&t, i, raw_wvalue);
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/ecp_nistz256.c:28:
+crypto/fipsmodule/ec/../../limbs/limbs.inl:137:20: warning: inlining failed in call to ‘limbs_copy.constprop’: call is unlikely and code size would grow [-Winline]
+  137 | static inline void limbs_copy(Limb r[], const Limb a[], size_t num_limbs) {
+      |                    ^~~~~~~~~~
+crypto/fipsmodule/ec/ecp_nistz256.c:346:3: note: called from here
+  346 |   limbs_copy(r->Z, p.Z, P256_LIMBS);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/ecp_nistz256.c:28:
+crypto/fipsmodule/ec/../../limbs/limbs.inl:137:20: warning: inlining failed in call to ‘limbs_copy.constprop’: call is unlikely and code size would grow [-Winline]
+  137 | static inline void limbs_copy(Limb r[], const Limb a[], size_t num_limbs) {
+      |                    ^~~~~~~~~~
+crypto/fipsmodule/ec/ecp_nistz256.c:345:3: note: called from here
+  345 |   limbs_copy(r->Y, p.Y, P256_LIMBS);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/ecp_nistz256.c:28:
+crypto/fipsmodule/ec/../../limbs/limbs.inl:137:20: warning: inlining failed in call to ‘limbs_copy.constprop’: call is unlikely and code size would grow [-Winline]
+  137 | static inline void limbs_copy(Limb r[], const Limb a[], size_t num_limbs) {
+      |                    ^~~~~~~~~~
+crypto/fipsmodule/ec/ecp_nistz256.c:344:3: note: called from here
+  344 |   limbs_copy(r->X, p.X, P256_LIMBS);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+running "gcc" "-Os" "-ffunction-sections" "-fdata-sections" "-fPIC" "-g" "-fno-omit-frame-pointer" "-m64" "-I" "include" "-Wall" "-Wextra" "-std=c1x" "-Wbad-function-cast" "-Wnested-externs" "-Wstrict-prototypes" "-pedantic" "-pedantic-errors" "-Wall" "-Wextra" "-Wcast-align" "-Wcast-qual" "-Wconversion" "-Wenum-compare" "-Wfloat-equal" "-Wformat=2" "-Winline" "-Winvalid-pch" "-Wmissing-field-initializers" "-Wmissing-include-dirs" "-Wredundant-decls" "-Wshadow" "-Wsign-compare" "-Wsign-conversion" "-Wundef" "-Wuninitialized" "-Wwrite-strings" "-fno-strict-aliasing" "-fvisibility=hidden" "-fstack-protector" "-g3" "-DNDEBUG" "-c" "-o/home/matthias/code/holochain/holochain/scaffolding/target/debug/build/ring-a16a2503b0d576ce/out/gfp_p256.o" "crypto/fipsmodule/ec/gfp_p256.c"
+running "gcc" "-Os" "-ffunction-sections" "-fdata-sections" "-fPIC" "-g" "-fno-omit-frame-pointer" "-m64" "-I" "include" "-Wall" "-Wextra" "-std=c1x" "-Wbad-function-cast" "-Wnested-externs" "-Wstrict-prototypes" "-pedantic" "-pedantic-errors" "-Wall" "-Wextra" "-Wcast-align" "-Wcast-qual" "-Wconversion" "-Wenum-compare" "-Wfloat-equal" "-Wformat=2" "-Winline" "-Winvalid-pch" "-Wmissing-field-initializers" "-Wmissing-include-dirs" "-Wredundant-decls" "-Wshadow" "-Wsign-compare" "-Wsign-conversion" "-Wundef" "-Wuninitialized" "-Wwrite-strings" "-fno-strict-aliasing" "-fvisibility=hidden" "-fstack-protector" "-g3" "-DNDEBUG" "-c" "-o/home/matthias/code/holochain/holochain/scaffolding/target/debug/build/ring-a16a2503b0d576ce/out/gfp_p384.o" "crypto/fipsmodule/ec/gfp_p384.c"
+crypto/fipsmodule/ec/gfp_p384.c: In function ‘elem_sqr_mont’:
+crypto/fipsmodule/ec/gfp_p384.c:157:20: warning: inlining failed in call to ‘elem_mul_mont’: call is unlikely and code size would grow [-Winline]
+  157 | static inline void elem_mul_mont(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:178:3: note: called from here
+  178 |   elem_mul_mont(r, a, a);
+      |   ^~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c: In function ‘elem_div_by_2’:
+crypto/fipsmodule/ec/gfp_p384.c:74:20: warning: inlining failed in call to ‘copy_conditional’: call is unlikely and code size would grow [-Winline]
+   74 | static inline void copy_conditional(Elem r, const Elem a,
+      |                    ^~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:154:3: note: called from here
+  154 |   copy_conditional(r, adjusted, is_odd);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:74:20: warning: inlining failed in call to ‘copy_conditional’: call is unlikely and code size would grow [-Winline]
+   74 | static inline void copy_conditional(Elem r, const Elem a,
+      |                    ^~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:154:3: note: called from here
+  154 |   copy_conditional(r, adjusted, is_odd);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:21:
+crypto/fipsmodule/ec/gfp_p384.c: In function ‘gfp_p384_point_select_w5’:
+crypto/fipsmodule/ec/../../limbs/limbs.inl:158:20: warning: inlining failed in call to ‘limbs_zero.constprop’: call is unlikely and code size would grow [-Winline]
+  158 | static inline void limbs_zero(Limb r[], size_t num_limbs) {
+      |                    ^~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:224:11: note: called from here
+  224 |   Elem z; limbs_zero(z, P384_LIMBS);
+      |           ^~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:21:
+crypto/fipsmodule/ec/../../limbs/limbs.inl:158:20: warning: inlining failed in call to ‘limbs_zero.constprop’: call is unlikely and code size would grow [-Winline]
+  158 | static inline void limbs_zero(Limb r[], size_t num_limbs) {
+      |                    ^~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:223:11: note: called from here
+  223 |   Elem y; limbs_zero(y, P384_LIMBS);
+      |           ^~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:21:
+crypto/fipsmodule/ec/../../limbs/limbs.inl:158:20: warning: inlining failed in call to ‘limbs_zero.constprop’: call is unlikely and code size would grow [-Winline]
+  158 | static inline void limbs_zero(Limb r[], size_t num_limbs) {
+      |                    ^~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:222:11: note: called from here
+  222 |   Elem x; limbs_zero(x, P384_LIMBS);
+      |           ^~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:21:
+crypto/fipsmodule/ec/../../limbs/limbs.inl:137:20: warning: inlining failed in call to ‘limbs_copy.constprop’: call is unlikely and code size would grow [-Winline]
+  137 | static inline void limbs_copy(Limb r[], const Limb a[], size_t num_limbs) {
+      |                    ^~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:238:3: note: called from here
+  238 |   limbs_copy(out->Z, z, P384_LIMBS);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:21:
+crypto/fipsmodule/ec/../../limbs/limbs.inl:137:20: warning: inlining failed in call to ‘limbs_copy.constprop’: call is unlikely and code size would grow [-Winline]
+  137 | static inline void limbs_copy(Limb r[], const Limb a[], size_t num_limbs) {
+      |                    ^~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:237:3: note: called from here
+  237 |   limbs_copy(out->Y, y, P384_LIMBS);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:21:
+crypto/fipsmodule/ec/../../limbs/limbs.inl:137:20: warning: inlining failed in call to ‘limbs_copy.constprop’: call is unlikely and code size would grow [-Winline]
+  137 | static inline void limbs_copy(Limb r[], const Limb a[], size_t num_limbs) {
+      |                    ^~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:236:3: note: called from here
+  236 |   limbs_copy(out->X, x, P384_LIMBS);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c: In function ‘GFp_p384_elem_sub’:
+crypto/fipsmodule/ec/gfp_p384.c:86:20: warning: inlining failed in call to ‘elem_sub’: call is unlikely and code size would grow [-Winline]
+   86 | static inline void elem_sub(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:186:3: note: called from here
+  186 |   elem_sub(r, a, b);
+      |   ^~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c: In function ‘GFp_p384_elem_mul_mont’:
+crypto/fipsmodule/ec/gfp_p384.c:157:20: warning: inlining failed in call to ‘elem_mul_mont’: call is unlikely and code size would grow [-Winline]
+  157 | static inline void elem_mul_mont(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:194:3: note: called from here
+  194 |   elem_mul_mont(r, a, b);
+      |   ^~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/ecp_nistz384.inl: In function ‘GFp_nistz384_point_double’:
+crypto/fipsmodule/ec/gfp_p384.c:86:20: warning: inlining failed in call to ‘elem_sub’: call is unlikely and code size would grow [-Winline]
+   86 | static inline void elem_sub(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:73:3: note: called from here
+   73 |   elem_sub(res_y, S, res_y);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:157:20: warning: inlining failed in call to ‘elem_mul_mont’: call is unlikely and code size would grow [-Winline]
+  157 | static inline void elem_mul_mont(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:72:3: note: called from here
+   72 |   elem_mul_mont(S, S, M);
+      |   ^~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:86:20: warning: inlining failed in call to ‘elem_sub’: call is unlikely and code size would grow [-Winline]
+   86 | static inline void elem_sub(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:70:3: note: called from here
+   70 |   elem_sub(S, S, res_x);
+      |   ^~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:86:20: warning: inlining failed in call to ‘elem_sub’: call is unlikely and code size would grow [-Winline]
+   86 | static inline void elem_sub(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:69:3: note: called from here
+   69 |   elem_sub(res_x, res_x, tmp0);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:176:20: warning: inlining failed in call to ‘elem_sqr_mont’: call is unlikely and code size would grow [-Winline]
+  176 | static inline void elem_sqr_mont(Elem r, const Elem a) {
+      |                    ^~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:67:3: note: called from here
+   67 |   elem_sqr_mont(res_x, M);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:157:20: warning: inlining failed in call to ‘elem_mul_mont’: call is unlikely and code size would grow [-Winline]
+  157 | static inline void elem_mul_mont(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:64:3: note: called from here
+   64 |   elem_mul_mont(S, S, in_x);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:157:20: warning: inlining failed in call to ‘elem_mul_mont’: call is unlikely and code size would grow [-Winline]
+  157 | static inline void elem_mul_mont(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:61:3: note: called from here
+   61 |   elem_mul_mont(M, M, Zsqr);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:176:20: warning: inlining failed in call to ‘elem_sqr_mont’: call is unlikely and code size would grow [-Winline]
+  176 | static inline void elem_sqr_mont(Elem r, const Elem a) {
+      |                    ^~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:58:3: note: called from here
+   58 |   elem_sqr_mont(res_y, S);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:86:20: warning: inlining failed in call to ‘elem_sub’: call is unlikely and code size would grow [-Winline]
+   86 | static inline void elem_sub(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:56:3: note: called from here
+   56 |   elem_sub(Zsqr, in_x, Zsqr);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:157:20: warning: inlining failed in call to ‘elem_mul_mont’: call is unlikely and code size would grow [-Winline]
+  157 | static inline void elem_mul_mont(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:52:3: note: called from here
+   52 |   elem_mul_mont(res_z, in_z, in_y);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:176:20: warning: inlining failed in call to ‘elem_sqr_mont’: call is unlikely and code size would grow [-Winline]
+  176 | static inline void elem_sqr_mont(Elem r, const Elem a) {
+      |                    ^~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:50:3: note: called from here
+   50 |   elem_sqr_mont(S, S);
+      |   ^~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:176:20: warning: inlining failed in call to ‘elem_sqr_mont’: call is unlikely and code size would grow [-Winline]
+  176 | static inline void elem_sqr_mont(Elem r, const Elem a) {
+      |                    ^~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:48:3: note: called from here
+   48 |   elem_sqr_mont(Zsqr, in_z);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:157:20: warning: inlining failed in call to ‘elem_mul_mont’: call is unlikely and code size would grow [-Winline]
+  157 | static inline void elem_mul_mont(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:52:3: note: called from here
+   52 |   elem_mul_mont(res_z, in_z, in_y);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:176:20: warning: inlining failed in call to ‘elem_sqr_mont’: call is unlikely and code size would grow [-Winline]
+  176 | static inline void elem_sqr_mont(Elem r, const Elem a) {
+      |                    ^~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:50:3: note: called from here
+   50 |   elem_sqr_mont(S, S);
+      |   ^~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:176:20: warning: inlining failed in call to ‘elem_sqr_mont’: call is unlikely and code size would grow [-Winline]
+  176 | static inline void elem_sqr_mont(Elem r, const Elem a) {
+      |                    ^~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:48:3: note: called from here
+   48 |   elem_sqr_mont(Zsqr, in_z);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:157:20: warning: inlining failed in call to ‘elem_mul_mont’: call is unlikely and code size would grow [-Winline]
+  157 | static inline void elem_mul_mont(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:61:3: note: called from here
+   61 |   elem_mul_mont(M, M, Zsqr);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:176:20: warning: inlining failed in call to ‘elem_sqr_mont’: call is unlikely and code size would grow [-Winline]
+  176 | static inline void elem_sqr_mont(Elem r, const Elem a) {
+      |                    ^~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:58:3: note: called from here
+   58 |   elem_sqr_mont(res_y, S);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:86:20: warning: inlining failed in call to ‘elem_sub’: call is unlikely and code size would grow [-Winline]
+   86 | static inline void elem_sub(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:56:3: note: called from here
+   56 |   elem_sub(Zsqr, in_x, Zsqr);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:157:20: warning: inlining failed in call to ‘elem_mul_mont’: call is unlikely and code size would grow [-Winline]
+  157 | static inline void elem_mul_mont(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:64:3: note: called from here
+   64 |   elem_mul_mont(S, S, in_x);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:86:20: warning: inlining failed in call to ‘elem_sub’: call is unlikely and code size would grow [-Winline]
+   86 | static inline void elem_sub(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:73:3: note: called from here
+   73 |   elem_sub(res_y, S, res_y);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:157:20: warning: inlining failed in call to ‘elem_mul_mont’: call is unlikely and code size would grow [-Winline]
+  157 | static inline void elem_mul_mont(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:72:3: note: called from here
+   72 |   elem_mul_mont(S, S, M);
+      |   ^~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:86:20: warning: inlining failed in call to ‘elem_sub’: call is unlikely and code size would grow [-Winline]
+   86 | static inline void elem_sub(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:70:3: note: called from here
+   70 |   elem_sub(S, S, res_x);
+      |   ^~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:86:20: warning: inlining failed in call to ‘elem_sub’: call is unlikely and code size would grow [-Winline]
+   86 | static inline void elem_sub(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:69:3: note: called from here
+   69 |   elem_sub(res_x, res_x, tmp0);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:176:20: warning: inlining failed in call to ‘elem_sqr_mont’: call is unlikely and code size would grow [-Winline]
+  176 | static inline void elem_sqr_mont(Elem r, const Elem a) {
+      |                    ^~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:67:3: note: called from here
+   67 |   elem_sqr_mont(res_x, M);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/ecp_nistz384.inl: In function ‘GFp_nistz384_point_add’:
+crypto/fipsmodule/ec/gfp_p384.c:86:20: warning: inlining failed in call to ‘elem_sub’: call is unlikely and code size would grow [-Winline]
+   86 | static inline void elem_sub(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:115:3: note: called from here
+  115 |   elem_sub(H, U2, U1);             /* H = U2 - U1 */
+      |   ^~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:157:20: warning: inlining failed in call to ‘elem_mul_mont’: call is unlikely and code size would grow [-Winline]
+  157 | static inline void elem_mul_mont(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:114:3: note: called from here
+  114 |   elem_mul_mont(U2, in2_x, Z1sqr); /* U2 = X2*Z1^2 */
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:157:20: warning: inlining failed in call to ‘elem_mul_mont’: call is unlikely and code size would grow [-Winline]
+  157 | static inline void elem_mul_mont(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:113:3: note: called from here
+  113 |   elem_mul_mont(U1, in1_x, Z2sqr); /* U1 = X1*Z2^2 */
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:86:20: warning: inlining failed in call to ‘elem_sub’: call is unlikely and code size would grow [-Winline]
+   86 | static inline void elem_sub(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:111:3: note: called from here
+  111 |   elem_sub(R, S2, S1);          /* R = S2 - S1 */
+      |   ^~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:157:20: warning: inlining failed in call to ‘elem_mul_mont’: call is unlikely and code size would grow [-Winline]
+  157 | static inline void elem_mul_mont(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:110:3: note: called from here
+  110 |   elem_mul_mont(S2, S2, in2_y); /* S2 = Y2*Z1^3 */
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:157:20: warning: inlining failed in call to ‘elem_mul_mont’: call is unlikely and code size would grow [-Winline]
+  157 | static inline void elem_mul_mont(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:109:3: note: called from here
+  109 |   elem_mul_mont(S1, S1, in1_y); /* S1 = Y1*Z2^3 */
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:157:20: warning: inlining failed in call to ‘elem_mul_mont’: call is unlikely and code size would grow [-Winline]
+  157 | static inline void elem_mul_mont(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:107:3: note: called from here
+  107 |   elem_mul_mont(S2, Z1sqr, in1_z); /* S2 = Z1^3 */
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:157:20: warning: inlining failed in call to ‘elem_mul_mont’: call is unlikely and code size would grow [-Winline]
+  157 | static inline void elem_mul_mont(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:106:3: note: called from here
+  106 |   elem_mul_mont(S1, Z2sqr, in2_z); /* S1 = Z2^3 */
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:176:20: warning: inlining failed in call to ‘elem_sqr_mont’: call is unlikely and code size would grow [-Winline]
+  176 | static inline void elem_sqr_mont(Elem r, const Elem a) {
+      |                    ^~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:104:3: note: called from here
+  104 |   elem_sqr_mont(Z1sqr, in1_z); /* Z1^2 */
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:176:20: warning: inlining failed in call to ‘elem_sqr_mont’: call is unlikely and code size would grow [-Winline]
+  176 | static inline void elem_sqr_mont(Elem r, const Elem a) {
+      |                    ^~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:103:3: note: called from here
+  103 |   elem_sqr_mont(Z2sqr, in2_z); /* Z2^2 */
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:86:20: warning: inlining failed in call to ‘elem_sub’: call is unlikely and code size would grow [-Winline]
+   86 | static inline void elem_sub(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:115:3: note: called from here
+  115 |   elem_sub(H, U2, U1);             /* H = U2 - U1 */
+      |   ^~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:157:20: warning: inlining failed in call to ‘elem_mul_mont’: call is unlikely and code size would grow [-Winline]
+  157 | static inline void elem_mul_mont(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:114:3: note: called from here
+  114 |   elem_mul_mont(U2, in2_x, Z1sqr); /* U2 = X2*Z1^2 */
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:157:20: warning: inlining failed in call to ‘elem_mul_mont’: call is unlikely and code size would grow [-Winline]
+  157 | static inline void elem_mul_mont(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:113:3: note: called from here
+  113 |   elem_mul_mont(U1, in1_x, Z2sqr); /* U1 = X1*Z2^2 */
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:86:20: warning: inlining failed in call to ‘elem_sub’: call is unlikely and code size would grow [-Winline]
+   86 | static inline void elem_sub(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:111:3: note: called from here
+  111 |   elem_sub(R, S2, S1);          /* R = S2 - S1 */
+      |   ^~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:157:20: warning: inlining failed in call to ‘elem_mul_mont’: call is unlikely and code size would grow [-Winline]
+  157 | static inline void elem_mul_mont(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:110:3: note: called from here
+  110 |   elem_mul_mont(S2, S2, in2_y); /* S2 = Y2*Z1^3 */
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:157:20: warning: inlining failed in call to ‘elem_mul_mont’: call is unlikely and code size would grow [-Winline]
+  157 | static inline void elem_mul_mont(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:109:3: note: called from here
+  109 |   elem_mul_mont(S1, S1, in1_y); /* S1 = Y1*Z2^3 */
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:157:20: warning: inlining failed in call to ‘elem_mul_mont’: call is unlikely and code size would grow [-Winline]
+  157 | static inline void elem_mul_mont(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:107:3: note: called from here
+  107 |   elem_mul_mont(S2, Z1sqr, in1_z); /* S2 = Z1^3 */
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:157:20: warning: inlining failed in call to ‘elem_mul_mont’: call is unlikely and code size would grow [-Winline]
+  157 | static inline void elem_mul_mont(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:106:3: note: called from here
+  106 |   elem_mul_mont(S1, Z2sqr, in2_z); /* S1 = Z2^3 */
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:176:20: warning: inlining failed in call to ‘elem_sqr_mont’: call is unlikely and code size would grow [-Winline]
+  176 | static inline void elem_sqr_mont(Elem r, const Elem a) {
+      |                    ^~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:104:3: note: called from here
+  104 |   elem_sqr_mont(Z1sqr, in1_z); /* Z1^2 */
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:176:20: warning: inlining failed in call to ‘elem_sqr_mont’: call is unlikely and code size would grow [-Winline]
+  176 | static inline void elem_sqr_mont(Elem r, const Elem a) {
+      |                    ^~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:103:3: note: called from here
+  103 |   elem_sqr_mont(Z2sqr, in2_z); /* Z2^2 */
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:21:
+crypto/fipsmodule/ec/../../limbs/limbs.inl:158:20: warning: inlining failed in call to ‘limbs_zero.constprop’: call is unlikely and code size would grow [-Winline]
+  158 | static inline void limbs_zero(Limb r[], size_t num_limbs) {
+      |                    ^~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:124:7: note: called from here
+  124 |       limbs_zero(r->Z, P384_LIMBS);
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:21:
+crypto/fipsmodule/ec/../../limbs/limbs.inl:158:20: warning: inlining failed in call to ‘limbs_zero.constprop’: call is unlikely and code size would grow [-Winline]
+  158 | static inline void limbs_zero(Limb r[], size_t num_limbs) {
+      |                    ^~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:123:7: note: called from here
+  123 |       limbs_zero(r->Y, P384_LIMBS);
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:21:
+crypto/fipsmodule/ec/../../limbs/limbs.inl:158:20: warning: inlining failed in call to ‘limbs_zero.constprop’: call is unlikely and code size would grow [-Winline]
+  158 | static inline void limbs_zero(Limb r[], size_t num_limbs) {
+      |                    ^~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:122:7: note: called from here
+  122 |       limbs_zero(r->X, P384_LIMBS);
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:21:
+crypto/fipsmodule/ec/../../limbs/limbs.inl:137:20: warning: inlining failed in call to ‘limbs_copy.constprop’: call is unlikely and code size would grow [-Winline]
+  137 | static inline void limbs_copy(Limb r[], const Limb a[], size_t num_limbs) {
+      |                    ^~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:157:3: note: called from here
+  157 |   limbs_copy(r->Z, res_z, P384_LIMBS);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:21:
+crypto/fipsmodule/ec/../../limbs/limbs.inl:137:20: warning: inlining failed in call to ‘limbs_copy.constprop’: call is unlikely and code size would grow [-Winline]
+  137 | static inline void limbs_copy(Limb r[], const Limb a[], size_t num_limbs) {
+      |                    ^~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:156:3: note: called from here
+  156 |   limbs_copy(r->Y, res_y, P384_LIMBS);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:21:
+crypto/fipsmodule/ec/../../limbs/limbs.inl:137:20: warning: inlining failed in call to ‘limbs_copy.constprop’: call is unlikely and code size would grow [-Winline]
+  137 | static inline void limbs_copy(Limb r[], const Limb a[], size_t num_limbs) {
+      |                    ^~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:155:3: note: called from here
+  155 |   limbs_copy(r->X, res_x, P384_LIMBS);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:74:20: warning: inlining failed in call to ‘copy_conditional’: call is unlikely and code size would grow [-Winline]
+   74 | static inline void copy_conditional(Elem r, const Elem a,
+      |                    ^~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:153:3: note: called from here
+  153 |   copy_conditional(res_z, in1_z, in2infty);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:74:20: warning: inlining failed in call to ‘copy_conditional’: call is unlikely and code size would grow [-Winline]
+   74 | static inline void copy_conditional(Elem r, const Elem a,
+      |                    ^~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:152:3: note: called from here
+  152 |   copy_conditional(res_y, in1_y, in2infty);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:74:20: warning: inlining failed in call to ‘copy_conditional’: call is unlikely and code size would grow [-Winline]
+   74 | static inline void copy_conditional(Elem r, const Elem a,
+      |                    ^~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:151:3: note: called from here
+  151 |   copy_conditional(res_x, in1_x, in2infty);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:74:20: warning: inlining failed in call to ‘copy_conditional’: call is unlikely and code size would grow [-Winline]
+   74 | static inline void copy_conditional(Elem r, const Elem a,
+      |                    ^~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:149:3: note: called from here
+  149 |   copy_conditional(res_z, in2_z, in1infty);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:74:20: warning: inlining failed in call to ‘copy_conditional’: call is unlikely and code size would grow [-Winline]
+   74 | static inline void copy_conditional(Elem r, const Elem a,
+      |                    ^~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:148:3: note: called from here
+  148 |   copy_conditional(res_y, in2_y, in1infty);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:74:20: warning: inlining failed in call to ‘copy_conditional’: call is unlikely and code size would grow [-Winline]
+   74 | static inline void copy_conditional(Elem r, const Elem a,
+      |                    ^~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:147:3: note: called from here
+  147 |   copy_conditional(res_x, in2_x, in1infty);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:86:20: warning: inlining failed in call to ‘elem_sub’: call is unlikely and code size would grow [-Winline]
+   86 | static inline void elem_sub(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:145:3: note: called from here
+  145 |   elem_sub(res_y, res_y, S2);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:157:20: warning: inlining failed in call to ‘elem_mul_mont’: call is unlikely and code size would grow [-Winline]
+  157 | static inline void elem_mul_mont(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:144:3: note: called from here
+  144 |   elem_mul_mont(res_y, R, res_y);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:157:20: warning: inlining failed in call to ‘elem_mul_mont’: call is unlikely and code size would grow [-Winline]
+  157 | static inline void elem_mul_mont(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:143:3: note: called from here
+  143 |   elem_mul_mont(S2, S1, Hcub);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:86:20: warning: inlining failed in call to ‘elem_sub’: call is unlikely and code size would grow [-Winline]
+   86 | static inline void elem_sub(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:141:3: note: called from here
+  141 |   elem_sub(res_y, U2, res_x);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:86:20: warning: inlining failed in call to ‘elem_sub’: call is unlikely and code size would grow [-Winline]
+   86 | static inline void elem_sub(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:139:3: note: called from here
+  139 |   elem_sub(res_x, res_x, Hcub);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:86:20: warning: inlining failed in call to ‘elem_sub’: call is unlikely and code size would grow [-Winline]
+   86 | static inline void elem_sub(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:138:3: note: called from here
+  138 |   elem_sub(res_x, Rsqr, Hsqr);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:157:20: warning: inlining failed in call to ‘elem_mul_mont’: call is unlikely and code size would grow [-Winline]
+  157 | static inline void elem_mul_mont(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:135:3: note: called from here
+  135 |   elem_mul_mont(U2, U1, Hsqr); /* U1*H^2 */
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:157:20: warning: inlining failed in call to ‘elem_mul_mont’: call is unlikely and code size would grow [-Winline]
+  157 | static inline void elem_mul_mont(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:133:3: note: called from here
+  133 |   elem_mul_mont(Hcub, Hsqr, H);       /* H^3 */
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:157:20: warning: inlining failed in call to ‘elem_mul_mont’: call is unlikely and code size would grow [-Winline]
+  157 | static inline void elem_mul_mont(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:132:3: note: called from here
+  132 |   elem_mul_mont(res_z, res_z, in2_z); /* Z3 = H*Z1*Z2 */
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:176:20: warning: inlining failed in call to ‘elem_sqr_mont’: call is unlikely and code size would grow [-Winline]
+  176 | static inline void elem_sqr_mont(Elem r, const Elem a) {
+      |                    ^~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:131:3: note: called from here
+  131 |   elem_sqr_mont(Hsqr, H);             /* H^2 */
+      |   ^~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:157:20: warning: inlining failed in call to ‘elem_mul_mont’: call is unlikely and code size would grow [-Winline]
+  157 | static inline void elem_mul_mont(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:130:3: note: called from here
+  130 |   elem_mul_mont(res_z, H, in1_z);     /* Z3 = H*Z1*Z2 */
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:176:20: warning: inlining failed in call to ‘elem_sqr_mont’: call is unlikely and code size would grow [-Winline]
+  176 | static inline void elem_sqr_mont(Elem r, const Elem a) {
+      |                    ^~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:129:3: note: called from here
+  129 |   elem_sqr_mont(Rsqr, R);             /* R^2 */
+      |   ^~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:21:
+crypto/fipsmodule/ec/../../limbs/limbs.inl:137:20: warning: inlining failed in call to ‘limbs_copy.constprop’: call is unlikely and code size would grow [-Winline]
+  137 | static inline void limbs_copy(Limb r[], const Limb a[], size_t num_limbs) {
+      |                    ^~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:157:3: note: called from here
+  157 |   limbs_copy(r->Z, res_z, P384_LIMBS);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:21:
+crypto/fipsmodule/ec/../../limbs/limbs.inl:137:20: warning: inlining failed in call to ‘limbs_copy.constprop’: call is unlikely and code size would grow [-Winline]
+  137 | static inline void limbs_copy(Limb r[], const Limb a[], size_t num_limbs) {
+      |                    ^~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:156:3: note: called from here
+  156 |   limbs_copy(r->Y, res_y, P384_LIMBS);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:21:
+crypto/fipsmodule/ec/../../limbs/limbs.inl:137:20: warning: inlining failed in call to ‘limbs_copy.constprop’: call is unlikely and code size would grow [-Winline]
+  137 | static inline void limbs_copy(Limb r[], const Limb a[], size_t num_limbs) {
+      |                    ^~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:155:3: note: called from here
+  155 |   limbs_copy(r->X, res_x, P384_LIMBS);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:74:20: warning: inlining failed in call to ‘copy_conditional’: call is unlikely and code size would grow [-Winline]
+   74 | static inline void copy_conditional(Elem r, const Elem a,
+      |                    ^~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:153:3: note: called from here
+  153 |   copy_conditional(res_z, in1_z, in2infty);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:74:20: warning: inlining failed in call to ‘copy_conditional’: call is unlikely and code size would grow [-Winline]
+   74 | static inline void copy_conditional(Elem r, const Elem a,
+      |                    ^~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:152:3: note: called from here
+  152 |   copy_conditional(res_y, in1_y, in2infty);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:74:20: warning: inlining failed in call to ‘copy_conditional’: call is unlikely and code size would grow [-Winline]
+   74 | static inline void copy_conditional(Elem r, const Elem a,
+      |                    ^~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:151:3: note: called from here
+  151 |   copy_conditional(res_x, in1_x, in2infty);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:74:20: warning: inlining failed in call to ‘copy_conditional’: call is unlikely and code size would grow [-Winline]
+   74 | static inline void copy_conditional(Elem r, const Elem a,
+      |                    ^~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:149:3: note: called from here
+  149 |   copy_conditional(res_z, in2_z, in1infty);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:74:20: warning: inlining failed in call to ‘copy_conditional’: call is unlikely and code size would grow [-Winline]
+   74 | static inline void copy_conditional(Elem r, const Elem a,
+      |                    ^~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:148:3: note: called from here
+  148 |   copy_conditional(res_y, in2_y, in1infty);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:74:20: warning: inlining failed in call to ‘copy_conditional’: call is unlikely and code size would grow [-Winline]
+   74 | static inline void copy_conditional(Elem r, const Elem a,
+      |                    ^~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:147:3: note: called from here
+  147 |   copy_conditional(res_x, in2_x, in1infty);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:86:20: warning: inlining failed in call to ‘elem_sub’: call is unlikely and code size would grow [-Winline]
+   86 | static inline void elem_sub(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:145:3: note: called from here
+  145 |   elem_sub(res_y, res_y, S2);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:157:20: warning: inlining failed in call to ‘elem_mul_mont’: call is unlikely and code size would grow [-Winline]
+  157 | static inline void elem_mul_mont(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:144:3: note: called from here
+  144 |   elem_mul_mont(res_y, R, res_y);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:157:20: warning: inlining failed in call to ‘elem_mul_mont’: call is unlikely and code size would grow [-Winline]
+  157 | static inline void elem_mul_mont(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:143:3: note: called from here
+  143 |   elem_mul_mont(S2, S1, Hcub);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:86:20: warning: inlining failed in call to ‘elem_sub’: call is unlikely and code size would grow [-Winline]
+   86 | static inline void elem_sub(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:141:3: note: called from here
+  141 |   elem_sub(res_y, U2, res_x);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:86:20: warning: inlining failed in call to ‘elem_sub’: call is unlikely and code size would grow [-Winline]
+   86 | static inline void elem_sub(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:139:3: note: called from here
+  139 |   elem_sub(res_x, res_x, Hcub);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/gfp_p384.c:86:20: warning: inlining failed in call to ‘elem_sub’: call is unlikely and code size would grow [-Winline]
+   86 | static inline void elem_sub(Elem r, const Elem a, const Elem b) {
+      |                    ^~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:138:3: note: called from here
+  138 |   elem_sub(res_x, Rsqr, Hsqr);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+crypto/fipsmodule/ec/ecp_nistz384.inl: In function ‘add_precomputed_w5’:
+crypto/fipsmodule/ec/gfp_p384.c:74:20: warning: inlining failed in call to ‘copy_conditional’: call is unlikely and code size would grow [-Winline]
+   74 | static inline void copy_conditional(Elem r, const Elem a,
+      |                    ^~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:171:3: note: called from here
+  171 |   copy_conditional(h.Y, tmp, recoded_is_negative);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/ecp_nistz384.inl:24,
+                 from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz.h:249:20: warning: inlining failed in call to ‘booth_recode.constprop’: call is unlikely and code size would grow [-Winline]
+  249 | static inline void booth_recode(crypto_word *is_negative, crypto_word *digit,
+      |                    ^~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:164:3: note: called from here
+  164 |   booth_recode(&recoded_is_negative, &recoded, wvalue, 5);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/ecp_nistz384.inl:24,
+                 from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl: In function ‘GFp_nistz384_point_mul’:
+crypto/fipsmodule/ec/ecp_nistz.h:249:20: warning: inlining failed in call to ‘booth_recode.constprop’: call is unlikely and code size would grow [-Winline]
+  249 | static inline void booth_recode(crypto_word *is_negative, crypto_word *digit,
+      |                    ^~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:226:3: note: called from here
+  226 |   booth_recode(&recoded_is_negative, &recoded, wvalue, 5);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:21:
+crypto/fipsmodule/ec/../../limbs/limbs.inl:137:20: warning: inlining failed in call to ‘limbs_copy.constprop’: call is unlikely and code size would grow [-Winline]
+  137 | static inline void limbs_copy(Limb r[], const Limb a[], size_t num_limbs) {
+      |                    ^~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:199:3: note: called from here
+  199 |   limbs_copy(row[1 - 1].Z, ONE, P384_LIMBS);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:21:
+crypto/fipsmodule/ec/../../limbs/limbs.inl:137:20: warning: inlining failed in call to ‘limbs_copy.constprop’: call is unlikely and code size would grow [-Winline]
+  137 | static inline void limbs_copy(Limb r[], const Limb a[], size_t num_limbs) {
+      |                    ^~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:198:3: note: called from here
+  198 |   limbs_copy(row[1 - 1].Y, p_y, P384_LIMBS);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:21:
+crypto/fipsmodule/ec/../../limbs/limbs.inl:137:20: warning: inlining failed in call to ‘limbs_copy.constprop’: call is unlikely and code size would grow [-Winline]
+  137 | static inline void limbs_copy(Limb r[], const Limb a[], size_t num_limbs) {
+      |                    ^~~~~~~~~~
+In file included from crypto/fipsmodule/ec/gfp_p384.c:242:
+crypto/fipsmodule/ec/ecp_nistz384.inl:197:3: note: called from here
+  197 |   limbs_copy(row[1 - 1].X, p_x, P384_LIMBS);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+running "gcc" "-Os" "-ffunction-sections" "-fdata-sections" "-fPIC" "-g" "-fno-omit-frame-pointer" "-m64" "-I" "include" "-Wall" "-Wextra" "-std=c1x" "-Wbad-function-cast" "-Wnested-externs" "-Wstrict-prototypes" "-pedantic" "-pedantic-errors" "-Wall" "-Wextra" "-Wcast-align" "-Wcast-qual" "-Wconversion" "-Wenum-compare" "-Wfloat-equal" "-Wformat=2" "-Winline" "-Winvalid-pch" "-Wmissing-field-initializers" "-Wmissing-include-dirs" "-Wredundant-decls" "-Wshadow" "-Wsign-compare" "-Wsign-conversion" "-Wundef" "-Wuninitialized" "-Wwrite-strings" "-fno-strict-aliasing" "-fvisibility=hidden" "-fstack-protector" "-g3" "-DNDEBUG" "-c" "-o/home/matthias/code/holochain/holochain/scaffolding/target/debug/build/ring-a16a2503b0d576ce/out/cpu-intel.o" "crypto/cpu-intel.c"
+running "gcc" "-Os" "-ffunction-sections" "-fdata-sections" "-fPIC" "-g" "-fno-omit-frame-pointer" "-m64" "-I" "include" "-Wall" "-Wextra" "-std=c1x" "-Wbad-function-cast" "-Wnested-externs" "-Wstrict-prototypes" "-pedantic" "-pedantic-errors" "-Wall" "-Wextra" "-Wcast-align" "-Wcast-qual" "-Wconversion" "-Wenum-compare" "-Wfloat-equal" "-Wformat=2" "-Winline" "-Winvalid-pch" "-Wmissing-field-initializers" "-Wmissing-include-dirs" "-Wredundant-decls" "-Wshadow" "-Wsign-compare" "-Wsign-conversion" "-Wundef" "-Wuninitialized" "-Wwrite-strings" "-fno-strict-aliasing" "-fvisibility=hidden" "-fstack-protector" "-g3" "-DNDEBUG" "-c" "-o/home/matthias/code/holochain/holochain/scaffolding/target/debug/build/ring-a16a2503b0d576ce/out/poly1305_vec.o" "crypto/poly1305/poly1305_vec.c"
+In file included from crypto/poly1305/poly1305_vec.c:24:
+crypto/poly1305/poly1305_vec.c: In function ‘load_u64_le’:
+crypto/poly1305/../internal.h:266:21: warning: inlining failed in call to ‘GFp_memcpy’: call is unlikely and code size would grow [-Winline]
+  266 | static inline void *GFp_memcpy(void *dst, const void *src, size_t n) {
+      |                     ^~~~~~~~~~
+crypto/poly1305/poly1305_vec.c:42:3: note: called from here
+   42 |   GFp_memcpy(&ret, in, 8);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/poly1305/poly1305_vec.c:24:
+crypto/poly1305/poly1305_vec.c: In function ‘GFp_poly1305_init’:
+crypto/poly1305/../internal.h:266:21: warning: inlining failed in call to ‘GFp_memcpy’: call is unlikely and code size would grow [-Winline]
+  266 | static inline void *GFp_memcpy(void *dst, const void *src, size_t n) {
+      |                     ^~~~~~~~~~
+crypto/poly1305/poly1305_vec.c:36:3: note: called from here
+   36 |   GFp_memcpy(&ret, in, 4);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/poly1305/poly1305_vec.c:24:
+crypto/poly1305/../internal.h:266:21: warning: inlining failed in call to ‘GFp_memcpy’: call is unlikely and code size would grow [-Winline]
+  266 | static inline void *GFp_memcpy(void *dst, const void *src, size_t n) {
+      |                     ^~~~~~~~~~
+crypto/poly1305/poly1305_vec.c:36:3: note: called from here
+   36 |   GFp_memcpy(&ret, in, 4);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/poly1305/poly1305_vec.c:24:
+crypto/poly1305/../internal.h:266:21: warning: inlining failed in call to ‘GFp_memcpy’: call is unlikely and code size would grow [-Winline]
+  266 | static inline void *GFp_memcpy(void *dst, const void *src, size_t n) {
+      |                     ^~~~~~~~~~
+crypto/poly1305/poly1305_vec.c:36:3: note: called from here
+   36 |   GFp_memcpy(&ret, in, 4);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/poly1305/poly1305_vec.c:24:
+crypto/poly1305/../internal.h:266:21: warning: inlining failed in call to ‘GFp_memcpy’: call is unlikely and code size would grow [-Winline]
+  266 | static inline void *GFp_memcpy(void *dst, const void *src, size_t n) {
+      |                     ^~~~~~~~~~
+crypto/poly1305/poly1305_vec.c:36:3: note: called from here
+   36 |   GFp_memcpy(&ret, in, 4);
+      |   ^~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/poly1305/poly1305_vec.c:24:
+crypto/poly1305/poly1305_vec.c: In function ‘GFp_poly1305_update’:
+crypto/poly1305/../internal.h:266:21: warning: inlining failed in call to ‘GFp_memcpy’: call is unlikely and code size would grow [-Winline]
+  266 | static inline void *GFp_memcpy(void *dst, const void *src, size_t n) {
+      |                     ^~~~~~~~~~
+crypto/poly1305/poly1305_vec.c:698:7: note: called from here
+  698 |       GFp_memcpy(st->buffer + st->leftover, m, want);
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/poly1305/poly1305_vec.c:24:
+crypto/poly1305/../internal.h:266:21: warning: inlining failed in call to ‘GFp_memcpy’: call is unlikely and code size would grow [-Winline]
+  266 | static inline void *GFp_memcpy(void *dst, const void *src, size_t n) {
+      |                     ^~~~~~~~~~
+crypto/poly1305/poly1305_vec.c:714:5: note: called from here
+  714 |     GFp_memcpy(st->buffer + st->leftover, m, want);
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/poly1305/poly1305_vec.c:24:
+crypto/poly1305/../internal.h:266:21: warning: inlining failed in call to ‘GFp_memcpy’: call is unlikely and code size would grow [-Winline]
+  266 | static inline void *GFp_memcpy(void *dst, const void *src, size_t n) {
+      |                     ^~~~~~~~~~
+crypto/poly1305/poly1305_vec.c:734:5: note: called from here
+  734 |     GFp_memcpy(st->buffer + st->leftover, m, bytes);
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/poly1305/poly1305_vec.c:24:
+crypto/poly1305/poly1305_vec.c: In function ‘GFp_poly1305_finish’:
+crypto/poly1305/../internal.h:266:21: warning: inlining failed in call to ‘GFp_memcpy’: call is unlikely and code size would grow [-Winline]
+  266 | static inline void *GFp_memcpy(void *dst, const void *src, size_t n) {
+      |                     ^~~~~~~~~~
+crypto/poly1305/poly1305_vec.c:47:3: note: called from here
+   47 |   GFp_memcpy(out, &v, 8);
+      |   ^~~~~~~~~~~~~~~~~~~~~~
+In file included from crypto/poly1305/poly1305_vec.c:24:
+crypto/poly1305/../internal.h:266:21: warning: inlining failed in call to ‘GFp_memcpy’: call is unlikely and code size would grow [-Winline]
+  266 | static inline void *GFp_memcpy(void *dst, const void *src, size_t n) {
+      |                     ^~~~~~~~~~
+crypto/poly1305/poly1305_vec.c:47:3: note: called from here
+   47 |   GFp_memcpy(out, &v, 8);
+      |   ^~~~~~~~~~~~~~~~~~~~~~
+running "gcc" "-Os" "-ffunction-sections" "-fdata-sections" "-fPIC" "-g" "-fno-omit-frame-pointer" "-m64" "-I" "include" "-Wall" "-Wextra" "-std=c1x" "-Wbad-function-cast" "-Wnested-externs" "-Wstrict-prototypes" "-pedantic" "-pedantic-errors" "-Wall" "-Wextra" "-Wcast-align" "-Wcast-qual" "-Wconversion" "-Wenum-compare" "-Wfloat-equal" "-Wformat=2" "-Winline" "-Winvalid-pch" "-Wmissing-field-initializers" "-Wmissing-include-dirs" "-Wredundant-decls" "-Wshadow" "-Wsign-compare" "-Wsign-conversion" "-Wundef" "-Wuninitialized" "-Wwrite-strings" "-fno-strict-aliasing" "-fvisibility=hidden" "-fstack-protector" "-g3" "-DNDEBUG" "-c" "-o/home/matthias/code/holochain/holochain/scaffolding/target/debug/build/ring-a16a2503b0d576ce/out/constant_time_test.o" "crypto/constant_time_test.c"

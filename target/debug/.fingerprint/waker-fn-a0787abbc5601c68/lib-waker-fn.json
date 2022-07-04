@@ -1,0 +1,1 @@
+{"rustc":6064785002308032717,"features":"[]","target":17565867637090634860,"profile":4389369971772520967,"path":10591553371521621793,"deps":[],"local":[{"CheckDepInfo":{"dep_info":"debug/.fingerprint/waker-fn-a0787abbc5601c68/dep-lib-waker-fn"}}],"rustflags":["-D","warnings","-C","codegen-units=10"],"metadata":2435454805425038942,"config":2202906307356721367,"compile_kind":0}
