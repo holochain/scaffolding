@@ -10,14 +10,16 @@ export const dnaYaml = (happ: HappDefinition, dnaIndex: number, pathToBase: stri
     content: `---
 manifest_version: "1"
 name: ${dna.name}
-uuid: 00000000-0000-0000-0000-000000000000
-properties: ~
-zomes: 
+integrity:
+  uuid: 00000000-0000-0000-0000-000000000000
+  properties: ~
+  origin_time: ${new Date().toISOString()}
+  zomes:
 ${mergeStrings(
-  dna.zomes.map(
-    (zome: ZomeDefinition, zomeIndex: number) =>
-      `  - name: ${zome.name}
-    bundled: ${pathToBase}target/wasm32-unknown-unknown/release/${getCrateName(happ, dnaIndex, zomeIndex)}.wasm
+dna.zomes.map(
+  (zome: ZomeDefinition, zomeIndex: number) =>
+`    - name: ${zome.name}
+      bundled: ${pathToBase}target/wasm32-unknown-unknown/release/${getCrateName(happ, dnaIndex, zomeIndex)}.wasm
 `,
   ),
 )}

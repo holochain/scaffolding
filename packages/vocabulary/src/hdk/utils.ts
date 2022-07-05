@@ -28,7 +28,7 @@ export function fakeAgentPubKey(): AgentPubKey {
   return new Uint8Array([0x84, 0x20, 0x24, ...fakeHoloHash()]);
 }
 
-export function fakeHeaderHash(): HeaderHash {
+export function fakeActionHash(): HeaderHash {
   return new Uint8Array([0x84, 0x29, 0x24, ...fakeHoloHash()]);
 }
 

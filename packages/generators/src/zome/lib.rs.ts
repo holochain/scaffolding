@@ -5,7 +5,7 @@ import { snakeCase } from 'lodash-es';
 
 export const libRs = (zomeDefinition: ZomeDefinition): ScFile => ({
   type: ScNodeType.File,
-  content: `use hdk::prelude::*;
+  content: `use holochain_deterministic_integrity::prelude::*;
 ${mergeStrings(
   zomeDefinition.entry_defs.map(
     entry_def => `
@@ -19,14 +19,17 @@ use ${snakeCase(entry_def.typeDefinition.name)}::${titleCase(entry_def.typeDefin
   ),
 )}
 
-entry_defs![${mergeStrings(
-    zomeDefinition.entry_defs.map(
-      entry_def => `
-  ${titleCase(entry_def.typeDefinition.name)}::entry_def()`,
-    ),
-    ',',
-  )}
-];
+#[hdk_entry_defs]
+#[unit_enum(UnitEntryTypes)]
+pub enum EntryTypes {
+${mergeStrings(
+  zomeDefinition.entry_defs.map(
+    entry_def => `#[entry_def(required_validations = 5)]
+${titleCase(entry_def.typeDefinition.name)}(${titleCase(entry_def.typeDefinition.name)}),
+`,
+  )
+)}
+}
 
 #[hdk_extern]
 pub fn validate(_op: Op) -> ExternResult<ValidateCallbackResult> {

@@ -5,7 +5,7 @@ import { zome } from '../zome';
 
 import { dnaYaml } from './dna.yaml';
 
-export function dna(happ: HappDefinition, dnaIndex: number, pathToBase: string, hdkVersion: string): ScDirectory {
+export function dna(happ: HappDefinition, dnaIndex: number, pathToBase: string, hdkVersion: string, hdiVersion: string): ScDirectory {
   const dna = happ.dnas[dnaIndex];
 
   const zomes: ScDirectory = {
@@ -14,7 +14,7 @@ export function dna(happ: HappDefinition, dnaIndex: number, pathToBase: string, 
   };
 
   for (const [zomeIndex, zomeDef] of dna.zomes.entries()) {
-    const z = zome(happ, dnaIndex, zomeIndex, hdkVersion);
+    const z = zome(happ, dnaIndex, zomeIndex, hdkVersion, hdiVersion);
     zomes.children[zomeDef.name] = z;
   }
 
