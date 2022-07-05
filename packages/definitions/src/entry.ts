@@ -42,17 +42,18 @@ export function holochainEntryRustTypeGenerator(
   typeName: string,
   fields: Array<FieldDefinition<any>>,
   hdkVersion: string,
+  hdiVersion: string,
 ): RustTypeGenerator {
-  const defineType = `#[hdk_entry(id = "${snakeCase(typeName)}")]
+  const defineType = `#[hdk_entry_helper]
 #[serde(rename_all = "camelCase")]
 ${defaultDefineType(happRustGenerators(hdkVersion), typeName, fields)}`;
 
   return {
     imports: [
       {
-        crateName: 'hdk',
-        importDeclaration: 'use hdk::prelude::*;',
-        version: hdkVersion,
+        crateName: 'holochain_deterministic_integrity',
+        importDeclaration: 'use holochain_deterministic_integrity::prelude::*;',
+        version: hdiVersion,
       },
     ],
     defineType,

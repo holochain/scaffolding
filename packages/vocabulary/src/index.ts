@@ -7,7 +7,7 @@ import * as DateTime from '@type-craft/date-time';
 import { Vocabulary } from '@type-craft/vocabulary';
 
 import * as EntryHash from './hdk/entry-hash';
-import * as HeaderHash from './hdk/header-hash';
+import * as ActionHash from './hdk/action-hash';
 import * as AgentPubKey from './hdk/agent-pub-key';
 
 export const happVocabulary: Vocabulary = {
@@ -15,7 +15,7 @@ export const happVocabulary: Vocabulary = {
   Content: Content.contentType,
   DateTime: DateTime.dateTimeType,
   EntryHash: EntryHash.type,
-  HeaderHash: HeaderHash.type,
+  ActionHash: ActionHash.type,
   AgentPubKey: AgentPubKey.type,
 };
 
@@ -25,7 +25,7 @@ export function happRustGenerators(hdkVersion: string): VocabularyRustGenerators
     Content: Content.rustGenerator,
     DateTime: DateTime.rustGenerator,
     EntryHash: EntryHash.rustGenerator(hdkVersion),
-    HeaderHash: HeaderHash.rustGenerator(hdkVersion),
+    ActionHash: ActionHash.rustGenerator(hdkVersion),
     AgentPubKey: AgentPubKey.rustGenerator(hdkVersion),
   };
 }
@@ -35,7 +35,7 @@ export const happTsGenerators: VocabularyTypescriptGenerators = {
   Content: Content.tsGenerator,
   DateTime: DateTime.tsGenerator,
   EntryHash: EntryHash.tsGenerator,
-  HeaderHash: HeaderHash.tsGenerator,
+  ActionHash: ActionHash.tsGenerator,
   AgentPubKey: AgentPubKey.tsGenerator,
 };
 
@@ -44,6 +44,6 @@ export const elementsImports: VocabularyElementsImportDeclarations = {
   Content: Content.elementImports,
   DateTime: DateTime.elementImports,
   EntryHash: EntryHash.elementsImports,
-  HeaderHash: HeaderHash.elementsImports,
+  ActionHash: ActionHash.elementsImports,
   AgentPubKey: AgentPubKey.elementsImports,
 };

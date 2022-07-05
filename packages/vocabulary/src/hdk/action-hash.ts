@@ -2,13 +2,13 @@ import { TypeDefinition } from '@type-craft/vocabulary';
 import { TypeElementsImportDeclarations } from '@type-craft/web-components';
 import { TypescriptTypeGenerator } from '@type-craft/typescript';
 import { RustTypeGenerator } from '@type-craft/rust';
-import { fakeHeaderHash, serializeHash } from './utils';
+import { fakeActionHash, serializeHash } from './utils';
 
 export const type: TypeDefinition<string, {}> = {
-  name: 'HeaderHash',
-  description: 'A hash of a Holochain header',
+  name: 'ActionHash',
+  description: 'A hash of a Holochain action',
 
-  sample: () => serializeHash(fakeHeaderHash()),
+  sample: () => serializeHash(fakeActionHash()),
 };
 
 export const tsGenerator: TypescriptTypeGenerator = {
@@ -22,12 +22,12 @@ export function rustGenerator(hdkVersion: string): RustTypeGenerator {
     imports: [
       {
         crateName: 'hdk',
-        importDeclaration: `use hdk::prelude::holo_hash::HeaderHashB64;`,
+        importDeclaration: `use hdk::prelude::holo_hash::ActionHashB64;`,
         version: hdkVersion,
       },
     ],
     defineType: '',
-    referenceType: 'HeaderHashB64',
+    referenceType: 'ActionHashB64',
   };
 }
 
