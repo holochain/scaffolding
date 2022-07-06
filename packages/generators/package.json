@@ -11,7 +11,7 @@
   "scripts": {
     "build": "tsc",
     "build:watch": "tsc -w --preserveWatchOutput",
-    "test": "npm run build && rimraf tests/.fixture && npm run generate:fixture && cd tests/.fixture && nix-shell -I nixpkgs=https://github.com/NixOS/nixpkgs/archive/nixos-21.11.tar.gz -p niv --run \"niv init && niv drop nixpkgs && niv drop niv && niv add -b main holochain/holonix\" && nix-shell . --run \"npm install && npm test\"",
+    "test": "rimraf tests/.fixture && npm run build && npm run generate:fixture && cd tests/.fixture && nix-shell -I nixpkgs=https://github.com/NixOS/nixpkgs/archive/nixos-21.11.tar.gz -p niv --run \"niv init && niv drop nixpkgs && niv drop niv && niv add -b main holochain/holonix\" && nix-shell . --run \"npm install && npm test\" && rimraf tests/.fixture",
     "generate:fixture": "node --loader ts-node/esm --experimental-specifier-resolution=node tests/index.ts | tap-diff"
   },
   "dependencies": {

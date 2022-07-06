@@ -16,7 +16,7 @@ export const packageJson = ({happName}: {happName: string;}): ScFile => ({
     "package": "npm run build && cd dist && bestzip ../dist.zip *"
   },
   "dependencies": {
-    "@holochain/client": "^0.3.2",
+    "@holochain/client": "^0.5.0",
     "@material/mwc-button": "^0.25.3",
     "@material/mwc-circular-progress": "^0.25.3",
     "@webcomponents/scoped-custom-element-registry": "0.0.5",
@@ -27,8 +27,8 @@ export const packageJson = ({happName}: {happName: string;}): ScFile => ({
     "@vitejs/plugin-vue": "^2.0.0",
     "bestzip": "^2.2.0",
     "typescript": "^4.5.5",
-    "vite": "^2.7.2",
-    "vue-tsc": "^0.29.8"
+    "vite": "^2.9.9",
+    "vue-tsc": "^0.34.15"
   }
 }
 `

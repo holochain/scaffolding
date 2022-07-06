@@ -14,7 +14,7 @@
     "start": "tsc -w",
     "build": "tsc",
     "build:watch": "tsc -w --preserveWatchOutput",
-    "test": "npm run build && rimraf tests/.fixture && node --loader ts-node/esm --experimental-specifier-resolution=node tests/index.ts | tap-diff && cd tests/.fixture && nix-shell -I nixpkgs=https://github.com/NixOS/nixpkgs/archive/nixos-21.11.tar.gz -p niv --run \"niv init && niv drop nixpkgs && niv drop niv && niv add -b main holochain/holonix\" && nix-shell --run \"npm install && npm run package\""
+    "test": "rimraf tests/.fixture && npm run build && node --loader ts-node/esm --experimental-specifier-resolution=node tests/index.ts | tap-diff && cd tests/.fixture && nix-shell -I nixpkgs=https://github.com/NixOS/nixpkgs/archive/nixos-21.11.tar.gz -p niv --run \"niv init && niv drop nixpkgs && niv drop niv && niv add -b main holochain/holonix\" && nix-shell --run \"npm install && npm run package\"  && rimraf tests/.fixture"
   },
   "dependencies": {
     "@holochain-scaffolding/definitions": "^0.0.1",

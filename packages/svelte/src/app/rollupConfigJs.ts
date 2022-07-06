@@ -31,9 +31,13 @@ export default {
   plugins: [
     production &&
       replace({
-        'process.env.HC_PORT': '8888',
+        'process.env.HC_PORT': JSON.stringify(process.env.HC_PORT),
         delimiters: ['', ''],
       }),
+    replace({
+      'node:': '',
+      delimiters: ['', ''],
+    }),
     svelte({
       compilerOptions: {
         // enable run-time checks when not in production
@@ -52,6 +56,7 @@ export default {
     // https://github.com/rollup/plugins/tree/master/packages/commonjs
     resolve({
       browser: true,
+      preferBuiltins: false,
       dedupe: ['svelte'],
     }),
     commonjs(),
@@ -64,9 +69,6 @@ export default {
     // instead of npm run start), minify
     production && terser(),
   ],
-  watch: {
-    clearScreen: false,
-  },
 };
 `
 });
