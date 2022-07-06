@@ -1,21 +1,28 @@
-import { HappDefinition, ZomeDefinition } from '@holochain-scaffolding/definitions';
+import { HappDefinition } from '@holochain-scaffolding/definitions';
 import { ScDirectory, ScNodeType } from '@source-craft/types';
 
-import { zome } from '../zome';
+import { integrityZome, coordinatorZome } from '../zomes';
 
 import { dnaYaml } from './dna.yaml';
 
 export function dna(happ: HappDefinition, dnaIndex: number, pathToBase: string, hdkVersion: string, hdiVersion: string): ScDirectory {
   const dna = happ.dnas[dnaIndex];
 
-  const zomes: ScDirectory = {
+  const zomeBundles: ScDirectory = {
     type: ScNodeType.Directory,
     children: {},
   };
 
-  for (const [zomeIndex, zomeDef] of dna.zomes.entries()) {
-    const z = zome(happ, dnaIndex, zomeIndex, hdkVersion, hdiVersion);
-    zomes.children[zomeDef.name] = z;
+  for (const [zomeIndex, zomeBundleDef] of dna.zomeBundles.entries()) {
+    const iz = integrityZome(happ, dnaIndex, zomeIndex, hdkVersion, hdiVersion);
+    const cz = coordinatorZome(happ, dnaIndex, zomeIndex, hdkVersion);
+    zomeBundles.children[zomeBundleDef.name] = {
+      type: ScNodeType.Directory,
+      children: {
+        "coordinator": cz,
+        "integrity": iz
+      }
+    }
   }
 
   return {
@@ -27,7 +34,7 @@ export function dna(happ: HappDefinition, dnaIndex: number, pathToBase: string, 
           'dna.yaml': dnaYaml(happ, dnaIndex, pathToBase),
         },
       },
-      zomes: zomes,
+      zomes: zomeBundles,
     },
   };
 }

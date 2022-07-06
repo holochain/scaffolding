@@ -22,12 +22,12 @@
       </div>
 
       <div style="display: flex; flex-direction: row; align-items: center">
-        <mwc-tab-bar :activeIndex="selectedZomeIndex">
+        <mwc-tab-bar :activeIndex="selectedZomeBundleIndex">
           <mwc-tab
-            v-for="(zome, zomeIndex) of dna.zomes"
-            :key="zome.name"
-            :label="zome.name"
-            @click="selectedZomeIndex = zomeIndex"
+            v-for="(zomeBundle, zomeBundleIndex) of dna.zomeBundles"
+            :key="zomeBundle.name"
+            :label="zomeBundle.name"
+            @click="selectedZomeBundleIndex = zomeBundleIndex"
           ></mwc-tab>
         </mwc-tab-bar>
 
@@ -39,16 +39,16 @@
     </div>
 
     <DefineZome
-      v-if="selectedZome"
-      :key="selectedZomeIndex"
-      :zome="selectedZome"
-      :otherZomesNames="otherZomesNames"
-      @zome-changed="emitChanged()"
+      v-if="selectedZomeBundle"
+      :key="selectedZomeBundleIndex"
+      :zomeBundle="selectedZomeBundle"
+      :otherZomeBundlesNames="otherZomeBundlesNames"
+      @zomeBundle-changed="emitChanged()"
       style="margin-top: 8px"
     >
       <mwc-button
         label="Remove Zome"
-        :disabled="dna.zomes.length < 2"
+        :disabled="dna.zomeBundles.length < 2"
         icon="delete"
         @click="deleteZome()"
         style="margin: 8px; --mdc-theme-primary: black"
@@ -59,7 +59,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import { DnaDefinition, newDnaDef, newZomeDef } from '@holochain-scaffolding/definitions';
+import { DnaDefinition, newDnaDef, newIntegrityZomeDef, newCoordinatorZomeDef, newZomeBundleDef } from '@holochain-scaffolding/definitions';
 import { TextField } from '@material/mwc-textfield';
 import { isSnakeCase } from '@holochain-scaffolding/generators';
 import DefineZome from './DefineZome.ce.vue';
@@ -75,25 +75,25 @@ export default defineComponent({
     dna: { type: Object as PropType<DnaDefinition>, required: false, default: newDnaDef() },
     otherDnaNames: { type: Array, required: false, default: [] },
   },
-  data(): { zomeCount: number; selectedZomeIndex: number } {
+  data(): { zomeBundleCount: number; selectedZomeBundleIndex: number } {
     return {
-      zomeCount: 1,
-      selectedZomeIndex: 0,
+      zomeBundleCount: 1,
+      selectedZomeBundleIndex: 0,
     };
   },
   computed: {
-    otherZomesNames() {
-      return this.dna.zomes.filter((_, index) => index !== this.selectedZomeIndex).map(entryDef => entryDef.name);
+    otherZomeBundlesNames() {
+      return this.dna.zomeBundles.filter((_, index) => index !== this.selectedZomeBundleIndex).map(zomeBundle => zomeBundle.name);
     },
-    selectedZome() {
-      if (this.selectedZomeIndex < 0) return undefined;
-      return this.dna.zomes[this.selectedZomeIndex];
+    selectedZomeBundle() {
+      if (this.selectedZomeBundleIndex < 0) return undefined;
+      return this.dna.zomeBundles[this.selectedZomeBundleIndex];
     },
   },
   watch: {
     dna() {
       this.updateDnaName();
-      this.selectedZomeIndex = 0;
+      this.selectedZomeBundleIndex = 0;
     },
   },
   mounted() {
@@ -134,16 +134,16 @@ export default defineComponent({
       };
     },
     deleteZome() {
-      this.dna.zomes.splice(this.selectedZomeIndex, 1);
-      this.selectedZomeIndex--;
-      if (this.selectedZomeIndex < 0) this.selectedZomeIndex = 0;
+      this.dna.zomeBundles.splice(this.selectedZomeBundleIndex, 1);
+      this.selectedZomeBundleIndex--;
+      if (this.selectedZomeBundleIndex < 0) this.selectedZomeBundleIndex = 0;
       this.emitChanged();
     },
     addZome() {
-      const name = `zome_${this.zomeCount++}`;
-
-      this.dna.zomes.push(newZomeDef(name));
-      this.selectedZomeIndex = this.dna.zomes.length - 1;
+      const name = `zome_${this.zomeBundleCount++}`;
+      const zomeBundleDef = newZomeBundleDef(`${name}`)
+      this.dna.zomeBundles.push(zomeBundleDef);
+      this.selectedZomeBundleIndex = this.dna.zomeBundles.length - 1;
 
       this.emitChanged();
     },

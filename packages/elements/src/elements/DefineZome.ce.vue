@@ -30,7 +30,7 @@
             <div style="max-height: 100%; overflow-y: auto">
               <mwc-list activatable>
                 <mwc-list-item
-                  v-for="(entryDef, entryDefIndex) of zome.entry_defs"
+                  v-for="(entryDef, entryDefIndex) of zomeBundle.integrityZome.entry_defs"
                   :key="entryDefIndex"
                   graphic="icon"
                   :activated="selectedEntryDefIndex === entryDefIndex"
@@ -60,7 +60,7 @@
       >
         <mwc-button
           label="Remove Entry Def"
-          :disabled="zome.entry_defs.length < 2"
+          :disabled="zomeBundle.integrityZome.entry_defs.length < 2"
           icon="delete"
           @click="deleteEntryDef()"
           style="margin: 8px; --mdc-theme-primary: black"
@@ -77,7 +77,7 @@
 import { defineComponent, PropType } from 'vue';
 import type { TextField } from '@material/mwc-textfield';
 import { isSnakeCase } from '@holochain-scaffolding/generators';
-import { ZomeDefinition, newEntryDef, newZomeDef } from '@holochain-scaffolding/definitions';
+import { ZomeBundleDefinition, newEntryDef, newZomeBundleDef } from '@holochain-scaffolding/definitions';
 import DefineEntry from './DefineEntry.ce.vue';
 
 export default defineComponent({
@@ -88,7 +88,7 @@ export default defineComponent({
   },
 
   props: {
-    zome: { type: Object as PropType<ZomeDefinition>, required: false, default: newZomeDef() },
+    zomeBundle: { type: Object as PropType<ZomeBundleDefinition>, required: false, default: newZomeBundleDef() },
     otherZomesNames: { type: Array, required: false, default: [] },
   },
   data(): { entryDefCount: number; selectedEntryDefIndex: number } {
@@ -99,13 +99,13 @@ export default defineComponent({
   },
   computed: {
     otherEntryDefsNames() {
-      return this.zome.entry_defs
+      return this.zomeBundle.integrityZome.entry_defs
         .filter((_, index) => index !== this.selectedEntryDefIndex)
-        .map(entryDef => entryDef.name);
+        .map(entryDef => entryDef.typeDefinition.name);
     },
     selectedEntryDef() {
       if (this.selectedEntryDefIndex === -1) return undefined;
-      else return this.zome.entry_defs[this.selectedEntryDefIndex];
+      else return this.zomeBundle.integrityZome.entry_defs[this.selectedEntryDefIndex];
     },
   },
   mounted() {
@@ -122,17 +122,17 @@ export default defineComponent({
       // setTimeout is a workaround for the mwc-textfield label bug
       setTimeout(() => {
         const field = this.$refs['zome-name'] as TextField;
-        field.value = this.zome.name;
+        field.value = this.zomeBundle.name;
       }, 1);
     },
     addEntryDef() {
       const name = `entry_def_${this.entryDefCount++}`;
-      this.zome.entry_defs.push(newEntryDef(name));
-      this.selectedEntryDefIndex = this.zome.entry_defs.length - 1;
+      this.zomeBundle.integrityZome.entry_defs.push(newEntryDef(name));
+      this.selectedEntryDefIndex = this.zomeBundle.integrityZome.entry_defs.length - 1;
       this.emitChanged();
     },
     deleteEntryDef() {
-      this.zome.entry_defs.splice(this.selectedEntryDefIndex, 1);
+      this.zomeBundle.integrityZome.entry_defs.splice(this.selectedEntryDefIndex, 1);
 
       this.selectedEntryDefIndex--;
       if (this.selectedEntryDefIndex < 0) this.selectedEntryDefIndex = 0;
@@ -169,13 +169,13 @@ export default defineComponent({
     },
     setZomeName(textfield: TextField) {
       if (textfield.validity.valid) {
-        this.zome.name = textfield.value;
+        this.zomeBundle.name = textfield.value;
       }
       this.emitChanged();
     },
     emitChanged() {
       this.$forceUpdate();
-      this.$emit('zome-changed', this.zome);
+      this.$emit('zome-changed', this.zomeBundle);
     },
   },
 });

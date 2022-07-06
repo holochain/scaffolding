@@ -1,4 +1,4 @@
-import { DnaDefinition, EntryDefinition, ZomeDefinition } from '@holochain-scaffolding/definitions';
+import { DnaDefinition, EntryDefinition, ZomeBundleDefinition } from '@holochain-scaffolding/definitions';
 import { ScFile, ScNodeType } from '@source-craft/types';
 import { camelCase, snakeCase, upperFirst } from 'lodash-es';
 import {
@@ -6,9 +6,9 @@ import {
   deleteHandlerFnName,
   readHandlerFnName,
   updateHandlerFnName,
-} from '../zome/entry/handlers.rs';
+} from '../zomes/coordinator/entry.rs';
 
-export const tryoramaEntryTest = (dna: DnaDefinition, zome: ZomeDefinition, entryDef: EntryDefinition): ScFile => ({
+export const tryoramaEntryTest = (dna: DnaDefinition, zomeBundle: ZomeBundleDefinition, entryDef: EntryDefinition): ScFile => ({
   type: ScNodeType.File,
   content: `
 import { DnaSource } from "@holochain/client";
@@ -20,13 +20,13 @@ import { ${camelCase(dna.name)}Dna } from  "../../utils";
 
 
 export default () => test("${entryDef.typeDefinition.name} CRUD tests", async (t) => {
-  ${entryCrudTests(dna, zome, entryDef)}
+  ${entryCrudTests(dna, zomeBundle, entryDef)}
 });
 `,
 });
 
 
-export const entryCrudTests = (dna: DnaDefinition, zome: ZomeDefinition, entryDef: EntryDefinition) => `
+export const entryCrudTests = (dna: DnaDefinition, zomeBundle: ZomeBundleDefinition, entryDef: EntryDefinition) => `
   const scenario = new Scenario();
 
   try {
@@ -42,7 +42,7 @@ export const entryCrudTests = (dna: DnaDefinition, zome: ZomeDefinition, entryDe
 
     // Alice creates a ${entryDef.typeDefinition.name}
     const createOutput: any = await alice.cells[0].callZome({
-      zome_name: "${zome.name}",
+      zome_name: "${zomeBundle.name}",
       fn_name: "${createHandlerFnName(entryDef.typeDefinition.name)}",
       payload: createInput,
     });
@@ -57,7 +57,7 @@ export const entryCrudTests = (dna: DnaDefinition, zome: ZomeDefinition, entryDe
         ? `
     // Bob gets the created ${entryDef.typeDefinition.name}
     const readOutput: typeof createInput = await bob.cells[0].callZome({
-      zome_name: "${zome.name}",
+      zome_name: "${zomeBundle.name}",
       fn_name: "${readHandlerFnName(entryDef.typeDefinition.name)}",
       payload: createOutput.entryHash,
     });
@@ -77,7 +77,7 @@ export const entryCrudTests = (dna: DnaDefinition, zome: ZomeDefinition, entryDe
     }
 
     const updateOutput: any = await alice.cells[0].callZome({
-      zome_name: "${zome.name}",
+      zome_name: "${zomeBundle.name}",
       fn_name: "${updateHandlerFnName(entryDef.typeDefinition.name)}",
       payload: updateInput,
     });
@@ -92,7 +92,7 @@ export const entryCrudTests = (dna: DnaDefinition, zome: ZomeDefinition, entryDe
           ? `
       // Bob gets the updated ${entryDef.typeDefinition.name}
       const readUpdatedOutput: typeof createInput = await bob.cells[0].callZome({
-        zome_name: "${zome.name}",
+        zome_name: "${zomeBundle.name}",
         fn_name: "${readHandlerFnName(entryDef.typeDefinition.name)}",
         payload: updateOutput.entryHash,
       });
@@ -108,7 +108,7 @@ export const entryCrudTests = (dna: DnaDefinition, zome: ZomeDefinition, entryDe
         ? `
     // Alice deletes the ${entryDef.typeDefinition.name}
     const deleteActionHash = await alice.cells[0].callZome({
-      zome_name: "${zome.name}",
+      zome_name: "${zomeBundle.name}",
       fn_name: "${deleteHandlerFnName(entryDef.typeDefinition.name)}",
       payload: createOutput.actionHash,
     })
@@ -124,7 +124,7 @@ export const entryCrudTests = (dna: DnaDefinition, zome: ZomeDefinition, entryDe
 
       // Bob tries to get the deleted ${entryDef.typeDefinition.name}, but he doesn't get it because it has been deleted
       const readDeletedOutput = await bob.cells[0].callZome({
-        zome_name: "${zome.name}",
+        zome_name: "${zomeBundle.name}",
         fn_name: "${readHandlerFnName(entryDef.typeDefinition.name)}",
         payload: createOutput.entryHash,
       });

@@ -1,13 +1,12 @@
-import { newZomeDef, ZomeDefinition } from './zome';
+import { newZomeBundleDef, ZomeBundleDefinition } from './zomes';
 
 export interface DnaDefinition {
   name: string;
-  zomes: ZomeDefinition[];
-}
+  zomeBundles: ZomeBundleDefinition[];}
 
 export function newDnaDef(name = 'dna_0'): DnaDefinition {
   return {
     name,
-    zomes: [newZomeDef()],
+    zomeBundles: [newZomeBundleDef()],
   };
 }

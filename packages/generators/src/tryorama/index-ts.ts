@@ -1,21 +1,21 @@
-import { ZomeDefinition, DnaDefinition, HappDefinition } from '@holochain-scaffolding/definitions';
+import { IntegrityZomeDefinition, DnaDefinition, HappDefinition, ZomeBundleDefinition } from '@holochain-scaffolding/definitions';
 import { ScFile, ScNodeType } from '@source-craft/types';
 import { snakeCase } from 'lodash-es';
 import { mergeStrings } from '../utils';
-import { getCrateName } from '../zome';
+import { getCoordinatorCrateName } from '../zomes';
 
 export const tryoramaIndexTs = (happ: HappDefinition): ScFile => ({
   type: ScNodeType.File,
   content: `
 ${mergeStrings(
   happ.dnas.map((dna: DnaDefinition, dnaIndex: number) =>
-    dna.zomes.map((zome: ZomeDefinition, zomeIndex: number) =>
-      zome.entry_defs.map(
+    dna.zomeBundles.map((zomeBundle: ZomeBundleDefinition, zomeBundleIndex: number) =>
+      zomeBundle.integrityZome.entry_defs.map(
         entryDef =>
-          `import ${getCrateName(happ, dnaIndex, zomeIndex)}_${snakeCase(entryDef.typeDefinition.name)} from './${
+          `import ${getCoordinatorCrateName(happ, dnaIndex, zomeBundleIndex)}_${snakeCase(entryDef.typeDefinition.name)} from './${
             dna.name
-          }/${zome.name}/${entryDef.typeDefinition.name}';
-${getCrateName(happ, dnaIndex, zomeIndex)}_${snakeCase(entryDef.typeDefinition.name)}();
+          }/${zomeBundle.name}/${entryDef.typeDefinition.name}';
+${getCoordinatorCrateName(happ, dnaIndex, zomeBundleIndex)}_${snakeCase(entryDef.typeDefinition.name)}();
 
 `,
       ),

@@ -30,8 +30,8 @@ import ${detail} from './components/${firstEntry.dna}/${firstEntry.zome}/${detai
   (app.children['src'] as ScDirectory).children['types'] = typesDir;
 
   for (const dna of happDefinition.dnas) {
-    for (const zome of dna.zomes) {
-      for (const entryDef of zome.entry_defs) {
+    for (const zomeBundle of dna.zomeBundles) {
+      for (const entryDef of zomeBundle.integrityZome.entry_defs) {
         app = addComponentsForEntryDef(
           app,
           happVocabulary,
@@ -39,7 +39,7 @@ import ${detail} from './components/${firstEntry.dna}/${firstEntry.zome}/${detai
           elementsImports,
           entryDef.typeDefinition,
           dna.name,
-          zome.name,
+          zomeBundle.name,
         );
       }
     }
@@ -54,11 +54,11 @@ import ${detail} from './components/${firstEntry.dna}/${firstEntry.zome}/${detai
 
 function getFirstEntryDef(happDefinition: HappDefinition): { zome: string; dna: string; entryDef: EntryDefinition } {
   for (const dna of happDefinition.dnas) {
-    for (const zome of dna.zomes) {
-      for (const entryDef of zome.entry_defs) {
+    for (const zomeBundle of dna.zomeBundles) {
+      for (const entryDef of zomeBundle.integrityZome.entry_defs) {
         return {
           dna: dna.name,
-          zome: zome.name,
+          zome: zomeBundle.name,
           entryDef,
         };
       }
