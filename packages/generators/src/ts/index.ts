@@ -1,4 +1,4 @@
-import { DnaDefinition, HappDefinition, ZomeDefinition } from '@holochain-scaffolding/definitions';
+import { DnaDefinition, HappDefinition, IntegrityZomeDefinition } from '@holochain-scaffolding/definitions';
 import { happVocabulary, happTsGenerators } from '@holochain-scaffolding/vocabulary';
 import { ScDirectory, ScFile, ScNodeType } from '@source-craft/types';
 import { generateTsTypesFile } from '@type-craft/typescript';
@@ -20,8 +20,8 @@ export function generateTsTypesForHapp(happ: HappDefinition): ScDirectory {
 export function generateTsTypesForDna(dna: DnaDefinition): ScDirectory {
   const files: Record<string, ScFile> = {};
 
-  for (const zome of dna.zomes) {
-    files[`${zome.name}.ts`] = tsTypesForZome(zome);
+  for (const integrityZome of dna.integrityZomes) {
+    files[`${integrityZome.name}.ts`] = tsTypesForZome(integrityZome);
   }
 
   return {
@@ -30,7 +30,7 @@ export function generateTsTypesForDna(dna: DnaDefinition): ScDirectory {
   };
 }
 
-export function tsTypesForZome(zome: ZomeDefinition): ScFile {
+export function tsTypesForZome(zome: IntegrityZomeDefinition): ScFile {
   const vocabulary: Vocabulary = {
     ...happVocabulary,
   };

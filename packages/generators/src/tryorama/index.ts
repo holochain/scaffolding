@@ -1,4 +1,4 @@
-import { ZomeDefinition, DnaDefinition, HappDefinition } from '@holochain-scaffolding/definitions';
+import { IntegrityZomeDefinition, DnaDefinition, HappDefinition, CoordinatorZomeDefinition } from '@holochain-scaffolding/definitions';
 import { ScDirectory, ScNodeType } from '@source-craft/types';
 
 import { tryoramaPackageJson } from './package.json';
@@ -41,22 +41,22 @@ function dnaTests(dnas: DnaDefinition[]): ScDirectory {
       children: {},
     };
 
-    for (const zome of dna.zomes) {
-      (dnatests.children[dna.name] as ScDirectory).children[zome.name] = zomeTests(dna, zome);
+    for (const [zomeIndex, integrityZome] of dna.integrityZomes.entries()) {
+      (dnatests.children[dna.name] as ScDirectory).children[integrityZome.name] = zomeTests(dna, integrityZome, dna.coordinatorZomes[zomeIndex]);
     }
   }
 
   return dnatests;
 }
 
-function zomeTests(dna: DnaDefinition, zome: ZomeDefinition): ScDirectory {
+function zomeTests(dna: DnaDefinition, integrityZome: IntegrityZomeDefinition, coordinatorZome: CoordinatorZomeDefinition): ScDirectory {
   const zometests: ScDirectory = {
     type: ScNodeType.Directory,
     children: {},
   };
 
-  for (const entryDef of zome.entry_defs) {
-    zometests.children[`${entryDef.typeDefinition.name}.ts`] = tryoramaEntryTest(dna, zome, entryDef);
+  for (const entryDef of integrityZome.entry_defs) {
+    zometests.children[`${entryDef.typeDefinition.name}.ts`] = tryoramaEntryTest(dna, coordinatorZome, entryDef);
   }
 
   return zometests;

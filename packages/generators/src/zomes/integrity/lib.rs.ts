@@ -1,21 +1,17 @@
-import { ZomeDefinition } from '@holochain-scaffolding/definitions';
+import { IntegrityZomeDefinition } from '@holochain-scaffolding/definitions';
 import { ScFile, ScNodeType } from '@source-craft/types';
-import { mergeStrings, titleCase } from '../utils';
+import { mergeStrings, titleCase } from '../../utils';
 import { snakeCase } from 'lodash-es';
 
-export const libRs = (zomeDefinition: ZomeDefinition): ScFile => ({
+export const libRs = (integrityZomeDefinition: IntegrityZomeDefinition): ScFile => ({
   type: ScNodeType.File,
   content: `use holochain_deterministic_integrity::prelude::*;
 ${mergeStrings(
-  zomeDefinition.entry_defs.map(
+  integrityZomeDefinition.entry_defs.map(
     entry_def => `
-mod ${snakeCase(entry_def.typeDefinition.name)};`,
-  ),
-)}
-${mergeStrings(
-  zomeDefinition.entry_defs.map(
-    entry_def => `
-use ${snakeCase(entry_def.typeDefinition.name)}::${titleCase(entry_def.typeDefinition.name)};`,
+mod ${snakeCase(entry_def.typeDefinition.name)};
+pub use ${snakeCase(entry_def.typeDefinition.name)}::${titleCase(entry_def.typeDefinition.name)};
+`,
   ),
 )}
 
@@ -23,7 +19,7 @@ use ${snakeCase(entry_def.typeDefinition.name)}::${titleCase(entry_def.typeDefin
 #[unit_enum(UnitEntryTypes)]
 pub enum EntryTypes {
 ${mergeStrings(
-  zomeDefinition.entry_defs.map(
+  integrityZomeDefinition.entry_defs.map(
     entry_def => `#[entry_def(required_validations = 5)]
 ${titleCase(entry_def.typeDefinition.name)}(${titleCase(entry_def.typeDefinition.name)}),
 `,

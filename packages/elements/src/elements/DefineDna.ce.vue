@@ -59,7 +59,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import { DnaDefinition, newDnaDef, newZomeDef } from '@holochain-scaffolding/definitions';
+import { DnaDefinition, newDnaDef, newIntegrityZomeDef, newCoordinatorZomeDef } from '@holochain-scaffolding/definitions';
 import { TextField } from '@material/mwc-textfield';
 import { isSnakeCase } from '@holochain-scaffolding/generators';
 import DefineZome from './DefineZome.ce.vue';
@@ -83,11 +83,11 @@ export default defineComponent({
   },
   computed: {
     otherZomesNames() {
-      return this.dna.zomes.filter((_, index) => index !== this.selectedZomeIndex).map(entryDef => entryDef.name);
+      return this.dna.coordinatorZomes.filter((_, index) => index !== this.selectedZomeIndex).map(entryDef => entryDef.name);
     },
     selectedZome() {
       if (this.selectedZomeIndex < 0) return undefined;
-      return this.dna.zomes[this.selectedZomeIndex];
+      return this.dna.coordinatorZomes[this.selectedZomeIndex];
     },
   },
   watch: {
@@ -134,16 +134,18 @@ export default defineComponent({
       };
     },
     deleteZome() {
-      this.dna.zomes.splice(this.selectedZomeIndex, 1);
+      this.dna.integrityZomes.splice(this.selectedZomeIndex, 1);
+      this.dna.coordinatorZomes.splice(this.selectedZomeIndex, 1);
       this.selectedZomeIndex--;
       if (this.selectedZomeIndex < 0) this.selectedZomeIndex = 0;
       this.emitChanged();
     },
     addZome() {
       const name = `zome_${this.zomeCount++}`;
-
-      this.dna.zomes.push(newZomeDef(name));
-      this.selectedZomeIndex = this.dna.zomes.length - 1;
+      const integrityZomeDef = newIntegrityZomeDef(`${name}_integrity`)
+      this.dna.integrityZomes.push(integrityZomeDef);
+      this.dna.coordinatorZomes.push(newCoordinatorZomeDef(name, [integrityZomeDef]))
+      this.selectedZomeIndex = this.dna.coordinatorZomes.length - 1;
 
       this.emitChanged();
     },

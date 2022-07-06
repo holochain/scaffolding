@@ -1,4 +1,4 @@
-import { DnaDefinition, EntryDefinition, ZomeDefinition } from '@holochain-scaffolding/definitions';
+import { DnaDefinition, EntryDefinition, IntegrityZomeDefinition, CoordinatorZomeDefinition } from '@holochain-scaffolding/definitions';
 import { ScFile, ScNodeType } from '@source-craft/types';
 import { camelCase, snakeCase, upperFirst } from 'lodash-es';
 import {
@@ -6,9 +6,9 @@ import {
   deleteHandlerFnName,
   readHandlerFnName,
   updateHandlerFnName,
-} from '../zome/entry/handlers.rs';
+} from '../zomes/coordinator/entry.rs';
 
-export const tryoramaEntryTest = (dna: DnaDefinition, zome: ZomeDefinition, entryDef: EntryDefinition): ScFile => ({
+export const tryoramaEntryTest = (dna: DnaDefinition, coordinatorZome: CoordinatorZomeDefinition, entryDef: EntryDefinition): ScFile => ({
   type: ScNodeType.File,
   content: `
 import { DnaSource } from "@holochain/client";
@@ -20,13 +20,13 @@ import { ${camelCase(dna.name)}Dna } from  "../../utils";
 
 
 export default () => test("${entryDef.typeDefinition.name} CRUD tests", async (t) => {
-  ${entryCrudTests(dna, zome, entryDef)}
+  ${entryCrudTests(dna, coordinatorZome, entryDef)}
 });
 `,
 });
 
 
-export const entryCrudTests = (dna: DnaDefinition, zome: ZomeDefinition, entryDef: EntryDefinition) => `
+export const entryCrudTests = (dna: DnaDefinition, zome: CoordinatorZomeDefinition, entryDef: EntryDefinition) => `
   const scenario = new Scenario();
 
   try {
