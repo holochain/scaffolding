@@ -6,6 +6,7 @@ import { coordinatorZome } from './coordinator';
 
 export * from './coordinator';
 export * from './integrity';
+export * from './utils';
 
 
 // currently unused

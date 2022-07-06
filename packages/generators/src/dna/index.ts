@@ -13,10 +13,10 @@ export function dna(happ: HappDefinition, dnaIndex: number, pathToBase: string, 
     children: {},
   };
 
-  for (const [zomeIndex, coordinatorZomeDef] of dna.coordinatorZomes.entries()) {
+  for (const [zomeIndex, zomeBundleDef] of dna.zomeBundles.entries()) {
     const iz = integrityZome(happ, dnaIndex, zomeIndex, hdkVersion, hdiVersion);
     const cz = coordinatorZome(happ, dnaIndex, zomeIndex, hdkVersion);
-    zomeBundles.children[coordinatorZomeDef.name] = {
+    zomeBundles.children[zomeBundleDef.name] = {
       type: ScNodeType.Directory,
       children: {
         "coordinator": cz,

@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@holochain-scaffolding/definitions": "0.0.1",
+    "@holochain-scaffolding/generators": "0.0.1",
     "@source-craft/npm": "^0.0.3",
     "@source-craft/types": "^0.0.1",
     "@type-craft/rust": "^0.0.3",

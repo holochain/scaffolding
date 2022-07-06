@@ -9,7 +9,7 @@ import { holochainEntryTypeDefinition } from '@holochain-scaffolding/definitions
 import { fileURLToPath } from 'url';
 import { ScNodeType } from '@source-craft/types';
 
-import { coordinatorZomesFromIntegrityZomes } from './utils';
+import { zomeBundlesForIntegrityZomes } from '../src/utils';
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
@@ -70,7 +70,7 @@ const integrityZomesDna1 = [
     ],
   },
 ];
-const coordinatorZomesDna1 = coordinatorZomesFromIntegrityZomes(integrityZomesDna1);
+const zomeBundlesDna1 = zomeBundlesForIntegrityZomes(integrityZomesDna1);
 
 
 const integrityZomesDna2 = [
@@ -93,7 +93,7 @@ const integrityZomesDna2 = [
     ],
   },
 ]
-const coordinatorZomesDna2 = coordinatorZomesFromIntegrityZomes(integrityZomesDna2);
+const zomeBundlesDna2 = zomeBundlesForIntegrityZomes(integrityZomesDna2);
 
 
 
@@ -104,13 +104,11 @@ test('generate a full blown happ', async t => {
       dnas: [
         {
           name: 'hehe',
-          integrityZomes: integrityZomesDna1,
-          coordinatorZomes: coordinatorZomesDna1,
+          zomeBundles: zomeBundlesDna1,
         },
         {
           name: 'hehe2',
-          integrityZomes: integrityZomesDna2,
-          coordinatorZomes: coordinatorZomesDna2,
+          zomeBundles: zomeBundlesDna2,
         },
       ],
     },

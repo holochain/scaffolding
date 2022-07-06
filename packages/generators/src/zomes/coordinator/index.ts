@@ -5,10 +5,11 @@ import { snakeCase } from 'lodash-es';
 import { coordinatorZomeCargoToml } from './Cargo.toml';
 import { libRs } from './lib.rs';
 import { entryHandlers } from './entry.rs';
+import { getCoordinatorCrateName, getIntegrityCrateName } from '../utils';
 
 export * from './entry.rs';
 
-export function coordinatorZomeCode(dependingIntegrityZome: IntegrityZomeDefinition): ScDirectory {
+export function coordinatorZomeCode(dependingIntegrityZome: IntegrityZomeDefinition, integrityCrateName: string): ScDirectory {
   const zomeDir: ScDirectory = {
     type: ScNodeType.Directory,
     children: {
@@ -17,45 +18,25 @@ export function coordinatorZomeCode(dependingIntegrityZome: IntegrityZomeDefinit
   };
 
   for (const entryDef of dependingIntegrityZome.entry_defs) {
-    zomeDir.children[snakeCase(entryDef.typeDefinition.name)] = entryHandlers(entryDef, dependingIntegrityZome.name);
+    zomeDir.children[`${snakeCase(entryDef.typeDefinition.name)}.rs`] = entryHandlers(entryDef, integrityCrateName);
   }
 
   return zomeDir;
 }
 
-export function coordinatorZome(happ: HappDefinition, dnaIndex: number, zomeIndex: number, hdkVersion: string): ScDirectory {
-  const crateName = getCoordinatorCrateName(happ, dnaIndex, zomeIndex);
-  const dependingIntegrityZome = happ.dnas[dnaIndex].integrityZomes[zomeIndex];
+export function coordinatorZome(happ: HappDefinition, dnaIndex: number, zomeBundleIndex: number, hdkVersion: string): ScDirectory {
+  const coordinatorCrateName = getCoordinatorCrateName(happ, dnaIndex, zomeBundleIndex);
+  const integrityCrateName = getIntegrityCrateName(happ, dnaIndex, zomeBundleIndex);
+  const zomeBundle = happ.dnas[dnaIndex].zomeBundles[zomeBundleIndex];
 
   return {
     type: ScNodeType.Directory,
     children: {
-      'Cargo.toml': coordinatorZomeCargoToml(crateName, '<AUTHOR>', hdkVersion),
-      src: coordinatorZomeCode(dependingIntegrityZome),
+      'Cargo.toml': coordinatorZomeCargoToml(coordinatorCrateName, integrityCrateName, '<AUTHOR>', hdkVersion),
+      src: coordinatorZomeCode(zomeBundle.integrityZome, integrityCrateName),
     },
   };
 }
 
 
 
-export function getCoordinatorCrateName(happ: HappDefinition, dnaIndex: number, zomeIndex: number): string {
-  let thereIsAnotherZomeInAnotherDnaWithTheSameName = false;
-  const zome = happ.dnas[dnaIndex].coordinatorZomes[zomeIndex];
-
-  for (let i = 0; i < happ.dnas.length; i++) {
-    const dna = happ.dnas[i];
-    for (let j = 0; j < dna.coordinatorZomes.length; j++) {
-      if (i !== dnaIndex || j !== zomeIndex) {
-        if (dna.coordinatorZomes[j].name === zome.name) {
-          thereIsAnotherZomeInAnotherDnaWithTheSameName = true;
-        }
-      }
-    }
-  }
-
-  if (thereIsAnotherZomeInAnotherDnaWithTheSameName) {
-    return `${snakeCase(happ.dnas[dnaIndex].name)}_${snakeCase(zome.name)}`;
-  } else {
-    return snakeCase(zome.name);
-  }
-}

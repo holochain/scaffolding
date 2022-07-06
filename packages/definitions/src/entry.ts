@@ -44,8 +44,7 @@ export function holochainEntryRustTypeGenerator(
   hdkVersion: string,
   hdiVersion: string,
 ): RustTypeGenerator {
-  const defineType = `#[derive(Clone)]
-#[hdk_entry_helper]
+  const defineType = `#[hdk_entry_helper]
 #[serde(rename_all = "camelCase")]
 ${defaultDefineType(happRustGenerators(hdkVersion), typeName, fields)}`;
 

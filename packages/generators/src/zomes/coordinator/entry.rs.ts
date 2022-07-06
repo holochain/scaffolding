@@ -3,12 +3,12 @@ import { ScFile, ScNodeType } from '@source-craft/types';
 import { snakeCase } from 'lodash-es';
 import { titleCase } from '../../utils';
 
-export const entryHandlers = (entryDef: EntryDefinition, zomeName: string): ScFile => ({
+export const entryHandlers = (entryDef: EntryDefinition, integrityCrateName: string): ScFile => ({
   type: ScNodeType.File,
   content: `use hdk::prelude::*;
 use hdk::prelude::holo_hash::*;
-use ${zomeName}_integrity::${titleCase(entryDef.typeDefinition.name)};
-use ${zomeName}_integrity::EntryTypes;
+use ${integrityCrateName}::${titleCase(entryDef.typeDefinition.name)};
+use ${integrityCrateName}::EntryTypes;
 
 ${entryDef.read ? readHandler(entryDef.typeDefinition.name) : ''}
 ${

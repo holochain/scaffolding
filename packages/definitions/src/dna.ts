@@ -1,15 +1,12 @@
-import { newIntegrityZomeDef, IntegrityZomeDefinition, newCoordinatorZomeDef, CoordinatorZomeDefinition } from './zomes';
+import { newZomeBundleDef, ZomeBundleDefinition } from './zomes';
 
 export interface DnaDefinition {
   name: string;
-  integrityZomes: IntegrityZomeDefinition[];
-  coordinatorZomes: CoordinatorZomeDefinition[];
-}
+  zomeBundles: ZomeBundleDefinition[];}
 
 export function newDnaDef(name = 'dna_0'): DnaDefinition {
   return {
     name,
-    integrityZomes: [newIntegrityZomeDef()],
-    coordinatorZomes: [newCoordinatorZomeDef()],
+    zomeBundles: [newZomeBundleDef()],
   };
 }

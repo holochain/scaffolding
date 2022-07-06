@@ -1,4 +1,4 @@
-import { IntegrityZomeDefinition, CoordinatorZomeDefinition, HappDefinition } from '@holochain-scaffolding/definitions';
+import { ZomeBundleDefinition, HappDefinition } from '@holochain-scaffolding/definitions';
 import { ScFile, ScNodeType } from '@source-craft/types';
 import { mergeStrings } from '../utils';
 import { getCoordinatorCrateName, getIntegrityCrateName } from '../zomes';
@@ -16,22 +16,24 @@ integrity:
   origin_time: ${new Date().toISOString()}
   zomes:
 ${mergeStrings(
-dna.integrityZomes.map(
-  (zome: IntegrityZomeDefinition, zomeIndex: number) =>
-`    - name: ${zome.name}
-      bundled: ${pathToBase}target/wasm32-unknown-unknown/release/${getIntegrityCrateName(happ, dnaIndex, zomeIndex)}.wasm
+dna.zomeBundles.map(
+  (zomeBundle: ZomeBundleDefinition, zomeBundleIndex: number) =>
+`    - name: ${zomeBundle.integrityZome.name}
+      bundled: ${pathToBase}target/wasm32-unknown-unknown/release/${getIntegrityCrateName(happ, dnaIndex, zomeBundleIndex)}.wasm
 `,
   ),
 )}
 coordinator:
   zomes:
 ${mergeStrings(
-  dna.coordinatorZomes.map(
-    (zome: CoordinatorZomeDefinition, zomeIndex: number) =>
-  `    - name: ${zome.name}
-        bundled: ${pathToBase}target/wasm32-unknown-unknown/release/${getCoordinatorCrateName(happ, dnaIndex, zomeIndex)}.wasm
-  `,
-  ),
+dna.zomeBundles.map(
+  (zomeBundle: ZomeBundleDefinition, zomeIndex: number) =>
+`    - name: ${zomeBundle.coordinatorZome.name}
+      bundled: ${pathToBase}target/wasm32-unknown-unknown/release/${getCoordinatorCrateName(happ, dnaIndex, zomeIndex)}.wasm
+      dependencies:
+        - name: ${zomeBundle.integrityZome.name}
+`,
+),
 )}
 `,
   };

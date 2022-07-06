@@ -20,7 +20,7 @@ pub use ${snakeCase(entry_def.typeDefinition.name)}::${titleCase(entry_def.typeD
 pub enum EntryTypes {
 ${mergeStrings(
   integrityZomeDefinition.entry_defs.map(
-    entry_def => `#[entry_def(required_validations = 5)]
+    entry_def => `#[entry_def()]
 ${titleCase(entry_def.typeDefinition.name)}(${titleCase(entry_def.typeDefinition.name)}),
 `,
   )

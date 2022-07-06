@@ -5,6 +5,7 @@ import { snakeCase } from 'lodash-es';
 import { integrityZomeCargoToml } from './Cargo.toml';
 import { libRs } from './lib.rs';
 import { generateEntryDef } from './definition';
+import { getIntegrityCrateName } from '../utils';
 
 export * from './definition';
 
@@ -23,39 +24,17 @@ export function integrityZomeCode(integrityZomeDefinition: IntegrityZomeDefiniti
   return zomeDir;
 }
 
-export function integrityZome(happ: HappDefinition, dnaIndex: number, zomeIndex: number, hdkVersion: string, hdiVersion: string): ScDirectory {
-  const crateName = getIntegrityCrateName(happ, dnaIndex, zomeIndex);
-  const dependingIntegrityZome = happ.dnas[dnaIndex].integrityZomes[zomeIndex];
+export function integrityZome(happ: HappDefinition, dnaIndex: number, zomeBundleIndex: number, hdkVersion: string, hdiVersion: string): ScDirectory {
+  const crateName = getIntegrityCrateName(happ, dnaIndex, zomeBundleIndex);
+  const integrityZome = happ.dnas[dnaIndex].zomeBundles[zomeBundleIndex].integrityZome;
 
   return {
     type: ScNodeType.Directory,
     children: {
-      'Cargo.toml': integrityZomeCargoToml(crateName, '<AUTHOR>', hdiVersion),
-      src: integrityZomeCode(dependingIntegrityZome, hdkVersion, hdiVersion),
+      'Cargo.toml': integrityZomeCargoToml(crateName, '<AUTHOR>', hdkVersion, hdiVersion),
+      src: integrityZomeCode(integrityZome, hdkVersion, hdiVersion),
     },
   };
 }
 
 
-
-export function getIntegrityCrateName(happ: HappDefinition, dnaIndex: number, zomeIndex: number): string {
-  let thereIsAnotherZomeInAnotherDnaWithTheSameName = false;
-  const zome = happ.dnas[dnaIndex].integrityZomes[zomeIndex];
-
-  for (let i = 0; i < happ.dnas.length; i++) {
-    const dna = happ.dnas[i];
-    for (let j = 0; j < dna.integrityZomes.length; j++) {
-      if (i !== dnaIndex || j !== zomeIndex) {
-        if (dna.integrityZomes[j].name === zome.name) {
-          thereIsAnotherZomeInAnotherDnaWithTheSameName = true;
-        }
-      }
-    }
-  }
-
-  if (thereIsAnotherZomeInAnotherDnaWithTheSameName) {
-    return `${snakeCase(happ.dnas[dnaIndex].name)}_${snakeCase(zome.name)}`;
-  } else {
-    return snakeCase(zome.name);
-  }
-}
