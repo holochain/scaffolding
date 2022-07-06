@@ -30,7 +30,7 @@
             <div style="max-height: 100%; overflow-y: auto">
               <mwc-list activatable>
                 <mwc-list-item
-                  v-for="(entryDef, entryDefIndex) of zome.entry_defs"
+                  v-for="(entryDef, entryDefIndex) of zomeBundle.integrityZome.entry_defs"
                   :key="entryDefIndex"
                   graphic="icon"
                   :activated="selectedEntryDefIndex === entryDefIndex"
@@ -60,7 +60,7 @@
       >
         <mwc-button
           label="Remove Entry Def"
-          :disabled="zome.entry_defs.length < 2"
+          :disabled="zomeBundle.integrityZome.entry_defs.length < 2"
           icon="delete"
           @click="deleteEntryDef()"
           style="margin: 8px; --mdc-theme-primary: black"
