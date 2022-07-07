@@ -1,4 +1,4 @@
-import { AppInfoResponse, CellId, EntryHash, AgentPubKey, HeaderHash } from '@holochain/client';
+import { AppInfoResponse, CellId, EntryHash, AgentPubKey, ActionHash } from '@holochain/client';
 import { Base64 } from 'js-base64';
 import blake from 'blakejs';
 
@@ -28,7 +28,7 @@ export function fakeAgentPubKey(): AgentPubKey {
   return new Uint8Array([0x84, 0x20, 0x24, ...fakeHoloHash()]);
 }
 
-export function fakeActionHash(): HeaderHash {
+export function fakeActionHash(): ActionHash {
   return new Uint8Array([0x84, 0x29, 0x24, ...fakeHoloHash()]);
 }
 

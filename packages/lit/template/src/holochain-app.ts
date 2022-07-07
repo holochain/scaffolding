@@ -4,10 +4,10 @@ import { LitElement, css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import {
   AppWebsocket,
+  EntryHash,
   InstalledAppInfo,
-  InstalledCell,
 } from '@holochain/client';
-import { contextProvider, ContextProvider } from '@lit-labs/context';
+import { contextProvider } from '@lit-labs/context';
 import '@material/mwc-circular-progress';
 
 // TODO: Import the appropriate subcomponents
@@ -16,7 +16,7 @@ import { appWebsocketContext, appInfoContext } from './contexts';
 @customElement('holochain-app')
 export class HolochainApp extends LitElement {
   @state() loading = true;
-  @state() entryHash: string | undefined;
+  @state() entryHash: EntryHash | undefined;
 
   @contextProvider({ context: appWebsocketContext })
   @property({ type: Object })

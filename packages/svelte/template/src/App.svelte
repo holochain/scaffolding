@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, setContext } from 'svelte';
-  import { AppWebsocket, InstalledAppInfo } from '@holochain/client';
+  import { AppWebsocket, EntryHash, InstalledAppInfo } from '@holochain/client';
   import '@material/mwc-circular-progress';
 
   import { appWebsocketContext, appInfoContext } from './contexts';
@@ -9,7 +9,7 @@
   let appWebsocket: AppWebsocket | undefined;
   let appInfo: InstalledAppInfo | undefined;
   let loading = true;
-  let entryHash: string | undefined;
+  let entryHash: EntryHash | undefined;
 
   $: appWebsocket, appInfo, entryHash, loading;
 

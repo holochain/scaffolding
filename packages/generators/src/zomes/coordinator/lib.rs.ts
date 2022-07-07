@@ -7,9 +7,10 @@ export const libRs = (integrityZomeDefinition: IntegrityZomeDefinition): ScFile 
   type: ScNodeType.File,
   content: `${mergeStrings(
     integrityZomeDefinition.entry_defs.map(
-    entry_def => `
+      entry_def => `
 mod ${snakeCase(entry_def.typeDefinition.name)};
 pub use ${snakeCase(entry_def.typeDefinition.name)}::*;
-`))
-}`
+`,
+    ),
+  )}`,
 });

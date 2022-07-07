@@ -32,7 +32,7 @@ import '@material/mwc-circular-progress';
 export default defineComponent({
   props: {
     entryHash: {
-      type: String,
+      type: Object,
       required: true
     }
   },

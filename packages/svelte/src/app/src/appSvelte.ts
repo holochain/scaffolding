@@ -8,7 +8,7 @@ export const appSvelte = ({happName, subcomponentImports, appContent}: {happName
   type: ScNodeType.File,
   content: `<script lang="ts">
   import { onMount, setContext } from 'svelte';
-  import { AppWebsocket, InstalledAppInfo } from '@holochain/client';
+  import { AppWebsocket, EntryHash, InstalledAppInfo } from '@holochain/client';
   import '@material/mwc-circular-progress';
 
   import { appWebsocketContext, appInfoContext } from './contexts';
@@ -17,7 +17,7 @@ export const appSvelte = ({happName, subcomponentImports, appContent}: {happName
   let appWebsocket: AppWebsocket | undefined;
   let appInfo: InstalledAppInfo | undefined;
   let loading = true;
-  let entryHash: string | undefined;
+  let entryHash: EntryHash | undefined;
 
   \$: appWebsocket, appInfo, entryHash, loading;
 

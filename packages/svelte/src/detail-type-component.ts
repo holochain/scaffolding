@@ -14,12 +14,12 @@ export function generateTypeDetailSvelteComponent(
   const detailWebComponent = `<script lang="ts">
 import { onMount, getContext } from 'svelte';
 import '@material/mwc-circular-progress';
-import { InstalledCell, AppWebsocket, InstalledAppInfo } from '@holochain/client';
+import { InstalledCell, EntryHash, AppWebsocket, InstalledAppInfo } from '@holochain/client';
 import { appInfoContext, appWebsocketContext } from '../../../contexts';
 import { ${upperFirst(camelCase(type.name))} } from '../../../types/${dnaName}/${zomeName}';
 ${uniq(flatten(type.fields?.map(f => fieldImports(typescriptGenerators, elementsImports, f)))).join('\n')}
 
-export let entryHash: string;
+export let entryHash: EntryHash;
 
 let appInfo = getContext(appInfoContext).getAppInfo();
 let appWebsocket = getContext(appWebsocketContext).getAppWebsocket();

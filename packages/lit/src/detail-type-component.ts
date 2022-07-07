@@ -14,7 +14,7 @@ export function generateTypeDetailLitComponent(
   const detailWebComponent = `
 import { LitElement, html } from 'lit';
 import { state, customElement, property } from 'lit/decorators.js';
-import { InstalledCell, AppWebsocket, InstalledAppInfo } from '@holochain/client';
+import { InstalledCell, AppWebsocket, EntryHash, InstalledAppInfo } from '@holochain/client';
 import { contextProvided } from '@lit-labs/context';
 import { appInfoContext, appWebsocketContext } from '../../../contexts';
 import { ${upperFirst(camelCase(type.name))} } from '../../../types/${dnaName}/${zomeName}';
@@ -24,7 +24,7 @@ ${uniq(flatten(type.fields?.map(f => fieldImports(typescriptGenerators, elements
 @customElement('${kebabCase(type.name)}-detail')
 export class ${upperFirst(camelCase(type.name))}Detail extends LitElement {
   @property()
-  entryHash!: string;
+  entryHash!: EntryHash;
 
   @state()
   _${camelCase(type.name)}: ${upperFirst(camelCase(type.name))} | undefined;
