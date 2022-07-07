@@ -19,14 +19,14 @@ export const happVocabulary: Vocabulary = {
   AgentPubKey: AgentPubKey.type,
 };
 
-export function happRustGenerators(hdkVersion: string): VocabularyRustGenerators {
+export function happRustGenerators(hdiVersion: string): VocabularyRustGenerators {
   return {
     Title: Title.rustGenerator,
     Content: Content.rustGenerator,
     DateTime: DateTime.rustGenerator,
-    EntryHash: EntryHash.rustGenerator(hdkVersion),
-    ActionHash: ActionHash.rustGenerator(hdkVersion),
-    AgentPubKey: AgentPubKey.rustGenerator(hdkVersion),
+    EntryHash: EntryHash.rustGenerator(hdiVersion),
+    ActionHash: ActionHash.rustGenerator(hdiVersion),
+    AgentPubKey: AgentPubKey.rustGenerator(hdiVersion),
   };
 }
 

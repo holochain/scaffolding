@@ -2,13 +2,14 @@ import { TypeDefinition } from '@type-craft/vocabulary';
 import { TypeElementsImportDeclarations } from '@type-craft/web-components';
 import { TypescriptTypeGenerator } from '@type-craft/typescript';
 import { RustTypeGenerator } from '@type-craft/rust';
-import { fakeActionHash, serializeHash } from './utils';
+import { ActionHash } from '@holochain/client';
+import { fakeActionHash } from './utils';
 
-export const type: TypeDefinition<string, {}> = {
+export const type: TypeDefinition<ActionHash, {}> = {
   name: 'ActionHash',
   description: 'A hash of a Holochain action',
 
-  sample: () => serializeHash(fakeActionHash()),
+  sample: () => fakeActionHash(),
 };
 
 export const tsGenerator: TypescriptTypeGenerator = {
@@ -17,17 +18,17 @@ export const tsGenerator: TypescriptTypeGenerator = {
   referenceType: 'string',
 };
 
-export function rustGenerator(hdkVersion: string): RustTypeGenerator {
+export function rustGenerator(hdiVersion: string): RustTypeGenerator {
   return {
     imports: [
       {
-        crateName: 'hdk',
-        importDeclaration: `use hdk::prelude::holo_hash::ActionHashB64;`,
-        version: hdkVersion,
+        crateName: 'holochain_deterministic_integrity',
+        importDeclaration: `use holochain_deterministic_integrity::prelude::*;`,
+        version: hdiVersion,
       },
     ],
     defineType: '',
-    referenceType: 'ActionHashB64',
+    referenceType: 'ActionHash',
   };
 }
 

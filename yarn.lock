@@ -2232,10 +2232,23 @@
   dependencies:
     "@source-craft/types" "^0.0.1"
 
+"@source-craft/rust@^0.0.5":
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/@source-craft/rust/-/rust-0.0.5.tgz#2d787c3f4e9f1d2b32710c64a43c2478f09459cc"
+  integrity sha512-Fy/+8vGrByEBwZIojP4KPx5k55CNMcrcbKdkKH81lDuCjaca6oYmHmOMHlsioVhaDa6kPmE1rDVWUqAHy2xPCg==
+  dependencies:
+    "@source-craft/types" "0.0.2"
+    lodash-es "^4.17.21"
+
 "@source-craft/types@0.0.1", "@source-craft/types@^0.0.1":
   version "0.0.1"
   resolved "https://registry.npmjs.org/@source-craft/types/-/types-0.0.1.tgz"
   integrity sha512-clDPy1u7M6ERWRvxyvgrJRUK31E5igat4SlV7miaV9lgCmYlWv0ouZPdbjBWq/etZAaPhX3Su2HshZ4ZUcClow==
+
+"@source-craft/types@0.0.2":
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/@source-craft/types/-/types-0.0.2.tgz#28610f17b7944bc81f9b442a44910dbda9199824"
+  integrity sha512-qjggK7Ahh08RYRsekbL8prgPLpE9H7Xh3kNXujVX9qVjWm1GMLVZN1vflnDbTFJP3CkjeQTwXjlXWgTQz093iw==
 
 "@szmarczak/http-timer@^1.1.2":
   version "1.1.2"
@@ -2312,6 +2325,15 @@
   dependencies:
     "@source-craft/rust" "^0.0.1"
     "@type-craft/vocabulary" "^0.0.2"
+    lodash-es "^4.17.21"
+
+"@type-craft/rust@^0.0.4":
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/@type-craft/rust/-/rust-0.0.4.tgz#d8d1618b20da276461da069b13f99ca312956e7b"
+  integrity sha512-j8W3kSI2qIHMT/PyV8kzcIHIjUPsw3gNkI7kFNiWqz5Zr2tQ+IaGNq9LUAHvtaNbOraT0hT/c7DFbKQCtlJWIw==
+  dependencies:
+    "@source-craft/rust" "^0.0.5"
+    "@type-craft/vocabulary" "^0.0.3"
     lodash-es "^4.17.21"
 
 "@type-craft/title@^0.0.8":
@@ -8114,6 +8136,11 @@ json-buffer@3.0.0:
   version "3.0.0"
   resolved "https://registry.npmjs.org/json-buffer/-/json-buffer-3.0.0.tgz"
   integrity sha1-Wx85evx11ne96Lz8Dkfh+aPZqJg=
+
+json-es6@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/json-es6/-/json-es6-1.0.0.tgz#1054f0cf2a29d28872da1232e17746ba2ca3b267"
+  integrity sha512-WhTusxr4X5D2TM5AmKCSr82GpTgjziQQB6fKEefHz5gRvZt10h17rAneHhsJ/Yxgb/kwTOPXk0SNRAeSjKzusQ==
 
 json-parse-better-errors@^1.0.1, json-parse-better-errors@^1.0.2:
   version "1.0.2"

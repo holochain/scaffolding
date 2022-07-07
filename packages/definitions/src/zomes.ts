@@ -1,12 +1,10 @@
 import { EntryDefinition, newEntryDef } from './entry';
 
-
 export interface ZomeBundleDefinition {
   name: string;
   integrityZome: IntegrityZomeDefinition;
   coordinatorZome: CoordinatorZomeDefinition;
 }
-
 
 export interface IntegrityZomeDefinition {
   name: string;
@@ -18,14 +16,14 @@ export interface CoordinatorZomeDefinition {
   dependencies: IntegrityZomeDefinition[];
 }
 
-export const hdkTypes = ['AgentPubKeyB64', 'EntryHashB64', 'ActionHashB64'];
+export const hdkTypes = ['AgentPubKey', 'EntryHash', 'ActionHash'];
 
 export function newZomeBundleDef(name = 'zome_0'): ZomeBundleDefinition {
   return {
     name,
     integrityZome: newIntegrityZomeDef(`${name}_integrity`),
     coordinatorZome: newCoordinatorZomeDef(name, [newIntegrityZomeDef(`${name}_integrity`)]),
-  }
+  };
 }
 
 export function newIntegrityZomeDef(name: string): IntegrityZomeDefinition {

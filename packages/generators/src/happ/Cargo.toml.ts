@@ -1,19 +1,14 @@
 import { HappDefinition } from '@holochain-scaffolding/definitions';
 import { ScFile, ScNodeType } from '@source-craft/types';
-import { mergeStrings } from '../utils';
 
 export const workspaceCargoToml = (happ: HappDefinition): ScFile => ({
   type: ScNodeType.File,
   content: `[workspace]
 resolver = "2"
 members = [
-${mergeStrings(
-  happ.dnas.map(dna =>
-      `    "${happ.dnas.length > 1 ? `dnas/${dna.name}` : 'dna'}/zomes/*/integrity",
-    "${happ.dnas.length > 1 ? `dnas/${dna.name}` : 'dna'}/zomes/*/coordinator",
-`,
-  ),
-)}]
+  "${happ.dnas.length > 1 ? `dnas/*` : 'dna'}/integrity_zomes/*",
+  "${happ.dnas.length > 1 ? `dnas/*` : 'dna'}/coordinator_zomes/*"
+]
 
 [profile.dev]
 opt-level = "z"

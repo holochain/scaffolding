@@ -2,7 +2,13 @@ import { ZomeBundleDefinition } from '@holochain-scaffolding/definitions';
 import { ScFile, ScNodeType } from '@source-craft/types';
 import { getCoordinatorCrateName } from '../utils';
 
-export const coordinatorZomeCargoToml = (coordinatorCrateName: string, integrityCrateName: string, author: string, hdkVersion: string): ScFile => ({
+export const coordinatorZomeCargoToml = (
+  zomeName: string,
+  coordinatorCrateName: string,
+  integrityCrateName: string,
+  author: string,
+  hdkVersion: string,
+): ScFile => ({
   type: ScNodeType.File,
   content: `[package]
 edition = "2021"
@@ -16,8 +22,8 @@ name = "${coordinatorCrateName}"
 [dependencies]
 serde = "1"
 derive_more = "0"
-${integrityCrateName} = { path = "../integrity" }
+${integrityCrateName} = { path = "../../integrity_zomes/${zomeName}" }
 
-hdk = {version="${hdkVersion}", features = ["encoding"]}
+hdk = "${hdkVersion}"
 `,
 });

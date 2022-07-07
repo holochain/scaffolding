@@ -6,12 +6,12 @@ import { modRs } from './mod.rs';
 
 export * from './definition.rs';
 
-export function generateEntryDef(entryDef: EntryDefinition, hdkVersion: string, hdiVersion: string): ScDirectory {
+export function generateEntryDef(entryDef: EntryDefinition, hdiVersion: string): ScDirectory {
   return {
     type: ScNodeType.Directory,
     children: {
       'mod.rs': modRs(),
-      'definition.rs': entryDefinition(entryDef, hdkVersion, hdiVersion),
+      'definition.rs': entryDefinition(entryDef, hdiVersion),
     },
   };
 }

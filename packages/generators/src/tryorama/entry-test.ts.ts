@@ -1,6 +1,7 @@
 import { DnaDefinition, EntryDefinition, ZomeBundleDefinition } from '@holochain-scaffolding/definitions';
 import { ScFile, ScNodeType } from '@source-craft/types';
 import { camelCase, snakeCase, upperFirst } from 'lodash-es';
+import {json} from 'json-es6'
 import {
   createHandlerFnName,
   deleteHandlerFnName,
@@ -8,11 +9,15 @@ import {
   updateHandlerFnName,
 } from '../zomes/coordinator/entry.rs';
 
-export const tryoramaEntryTest = (dna: DnaDefinition, zomeBundle: ZomeBundleDefinition, entryDef: EntryDefinition): ScFile => ({
+export const tryoramaEntryTest = (
+  dna: DnaDefinition,
+  zomeBundle: ZomeBundleDefinition,
+  entryDef: EntryDefinition,
+): ScFile => ({
   type: ScNodeType.File,
   content: `
 import { DnaSource } from "@holochain/client";
-import { pause, Scenario } from "@holochain/tryorama";
+import { pause, runScenario } from "@holochain/tryorama";
 import pkg from 'tape-promise/tape';
 const { test } = pkg;
 
@@ -25,11 +30,23 @@ export default () => test("${entryDef.typeDefinition.name} CRUD tests", async (t
 `,
 });
 
+function stringifySample(sample: any): string {
+  if (ArrayBuffer.isView(sample)) {
+    return `new Uint8Array([${sample}])`;
+  } else if (typeof sample === 'object') {
+    for (const key of Object.keys(sample)) {
+      sample[key] = stringifySample(sample[key]);
+    }
+  }
 
-export const entryCrudTests = (dna: DnaDefinition, zomeBundle: ZomeBundleDefinition, entryDef: EntryDefinition) => `
-  const scenario = new Scenario();
+  return JSON.stringify(sample, null, 2);
+}
 
-  try {
+export const entryCrudTests = (
+  dna: DnaDefinition,
+  zomeBundle: ZomeBundleDefinition,
+  entryDef: EntryDefinition,
+) => `await runScenario(async scenario => {
 
     const dnas: DnaSource[] = [{path: ${camelCase(dna.name)}Dna }];
 
@@ -37,7 +54,7 @@ export const entryCrudTests = (dna: DnaDefinition, zomeBundle: ZomeBundleDefinit
 
     await scenario.shareAllAgents();
 
-    const createInput = ${JSON.stringify(entryDef.typeDefinition.sample(), null, 2)};
+    const createInput = ${json.stringify(entryDef.typeDefinition.sample())};
 
 
     // Alice creates a ${entryDef.typeDefinition.name}
@@ -69,7 +86,7 @@ export const entryCrudTests = (dna: DnaDefinition, zomeBundle: ZomeBundleDefinit
       entryDef.update
         ? `
     // Alice updates the ${entryDef.typeDefinition.name}
-    const contentUpdate = ${JSON.stringify(entryDef.typeDefinition.sample(), null, 2)}
+    const contentUpdate = ${json.stringify(entryDef.typeDefinition.sample(), null, 2)}
 
     const updateInput = {
       originalActionHash: createOutput.actionHash,
@@ -135,12 +152,7 @@ export const entryCrudTests = (dna: DnaDefinition, zomeBundle: ZomeBundleDefinit
     `
         : ``
     }
+  });
 
-  } catch (error) {
-    console.log("");
-    console.log("ERROR: The following error occurred during the tests and THE TESTS COULD NOT COMPLETE.", error);
-  } finally {
-    await scenario.cleanUp()
-  }
 
-`
+`;

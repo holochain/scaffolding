@@ -9,7 +9,7 @@ import { getIntegrityCrateName } from '../utils';
 
 export * from './definition';
 
-export function integrityZomeCode(integrityZomeDefinition: IntegrityZomeDefinition, hdkVersion: string, hdiVersion: string): ScDirectory {
+export function integrityZomeCode(integrityZomeDefinition: IntegrityZomeDefinition, hdiVersion: string): ScDirectory {
   const zomeDir: ScDirectory = {
     type: ScNodeType.Directory,
     children: {
@@ -18,13 +18,19 @@ export function integrityZomeCode(integrityZomeDefinition: IntegrityZomeDefiniti
   };
 
   for (const entryDef of integrityZomeDefinition.entry_defs) {
-    zomeDir.children[snakeCase(entryDef.typeDefinition.name)] = generateEntryDef(entryDef, hdkVersion, hdiVersion);
+    zomeDir.children[snakeCase(entryDef.typeDefinition.name)] = generateEntryDef(entryDef, hdiVersion);
   }
 
   return zomeDir;
 }
 
-export function integrityZome(happ: HappDefinition, dnaIndex: number, zomeBundleIndex: number, hdkVersion: string, hdiVersion: string): ScDirectory {
+export function integrityZome(
+  happ: HappDefinition,
+  dnaIndex: number,
+  zomeBundleIndex: number,
+  hdkVersion: string,
+  hdiVersion: string,
+): ScDirectory {
   const crateName = getIntegrityCrateName(happ, dnaIndex, zomeBundleIndex);
   const integrityZome = happ.dnas[dnaIndex].zomeBundles[zomeBundleIndex].integrityZome;
 
@@ -32,9 +38,7 @@ export function integrityZome(happ: HappDefinition, dnaIndex: number, zomeBundle
     type: ScNodeType.Directory,
     children: {
       'Cargo.toml': integrityZomeCargoToml(crateName, '<AUTHOR>', hdkVersion, hdiVersion),
-      src: integrityZomeCode(integrityZome, hdkVersion, hdiVersion),
+      src: integrityZomeCode(integrityZome, hdiVersion),
     },
   };
 }
-
-

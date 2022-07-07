@@ -5,24 +5,23 @@ import { integrityZome, coordinatorZome } from '../zomes';
 
 import { dnaYaml } from './dna.yaml';
 
-export function dna(happ: HappDefinition, dnaIndex: number, pathToBase: string, hdkVersion: string, hdiVersion: string): ScDirectory {
+export function dna(
+  happ: HappDefinition,
+  dnaIndex: number,
+  pathToBase: string,
+  hdkVersion: string,
+  hdiVersion: string,
+): ScDirectory {
   const dna = happ.dnas[dnaIndex];
 
-  const zomeBundles: ScDirectory = {
-    type: ScNodeType.Directory,
-    children: {},
-  };
+  const integrity_zomes: ScDirectory = { type: ScNodeType.Directory, children: {} };
+  const coordinator_zomes: ScDirectory = { type: ScNodeType.Directory, children: {} };
 
   for (const [zomeIndex, zomeBundleDef] of dna.zomeBundles.entries()) {
     const iz = integrityZome(happ, dnaIndex, zomeIndex, hdkVersion, hdiVersion);
     const cz = coordinatorZome(happ, dnaIndex, zomeIndex, hdkVersion);
-    zomeBundles.children[zomeBundleDef.name] = {
-      type: ScNodeType.Directory,
-      children: {
-        "coordinator": cz,
-        "integrity": iz
-      }
-    }
+    integrity_zomes.children[zomeBundleDef.name] = iz;
+    coordinator_zomes.children[zomeBundleDef.name] = cz;
   }
 
   return {
@@ -34,7 +33,8 @@ export function dna(happ: HappDefinition, dnaIndex: number, pathToBase: string, 
           'dna.yaml': dnaYaml(happ, dnaIndex, pathToBase),
         },
       },
-      zomes: zomeBundles,
+      integrity_zomes,
+      coordinator_zomes,
     },
   };
 }

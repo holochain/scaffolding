@@ -1,6 +1,5 @@
 import { FieldDefinition, TypeDefinition, defaultSample } from '@type-craft/vocabulary';
 
-import snakeCase from 'lodash-es/snakeCase';
 import camelCase from 'lodash-es/camelCase';
 import upperFirst from 'lodash-es/upperFirst';
 import { RustTypeGenerator, defaultDefineType } from '@type-craft/rust';
@@ -41,12 +40,11 @@ export function newEntryDef(name = 'entry_def_0'): EntryDefinition {
 export function holochainEntryRustTypeGenerator(
   typeName: string,
   fields: Array<FieldDefinition<any>>,
-  hdkVersion: string,
   hdiVersion: string,
 ): RustTypeGenerator {
   const defineType = `#[hdk_entry_helper]
 #[serde(rename_all = "camelCase")]
-${defaultDefineType(happRustGenerators(hdkVersion), typeName, fields)}`;
+${defaultDefineType(happRustGenerators(hdiVersion), typeName, fields)}`;
 
   return {
     imports: [

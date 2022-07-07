@@ -1,14 +1,16 @@
 import { TypeDefinition } from '@type-craft/vocabulary';
 import { TypeElementsImportDeclarations } from '@type-craft/web-components';
 import { TypescriptTypeGenerator } from '@type-craft/typescript';
-import { fakeEntryHash, serializeHash } from './utils';
 import { RustTypeGenerator } from '@type-craft/rust';
+import { EntryHash } from '@holochain/client';
+import { fakeEntryHash } from './utils';
 
-export const type: TypeDefinition<string, {}> = {
+
+export const type: TypeDefinition<EntryHash, {}> = {
   name: 'EntryHash',
   description: 'A hash of a Holochain entry',
 
-  sample: () => serializeHash(fakeEntryHash()),
+  sample: () => fakeEntryHash(),
 };
 
 export const tsGenerator: TypescriptTypeGenerator = {
@@ -17,17 +19,17 @@ export const tsGenerator: TypescriptTypeGenerator = {
   referenceType: 'string',
 };
 
-export function rustGenerator(hdkVersion: string): RustTypeGenerator {
+export function rustGenerator(hdiVersion: string): RustTypeGenerator {
   return {
     imports: [
       {
-        crateName: 'hdk',
-        importDeclaration: `use hdk::prelude::holo_hash::EntryHashB64;`,
-        version: hdkVersion,
+        crateName: 'holochain_deterministic_integrity',
+        importDeclaration: `use holochain_deterministic_integrity::prelude::*;`,
+        version: hdiVersion,
       },
     ],
     defineType: '',
-    referenceType: 'EntryHashB64',
+    referenceType: 'EntryHash',
   };
 }
 
