@@ -1,7 +1,7 @@
 import { DnaDefinition, EntryDefinition, ZomeBundleDefinition } from '@holochain-scaffolding/definitions';
 import { ScFile, ScNodeType } from '@source-craft/types';
 import { camelCase, snakeCase, upperFirst } from 'lodash-es';
-import {json} from 'json-es6'
+import { json } from 'json-es6';
 import {
   createHandlerFnName,
   deleteHandlerFnName,
@@ -30,16 +30,17 @@ export default () => test("${entryDef.typeDefinition.name} CRUD tests", async (t
 `,
 });
 
-function stringifySample(sample: any): string {
-  if (ArrayBuffer.isView(sample)) {
-    return `new Uint8Array([${sample}])`;
-  } else if (typeof sample === 'object') {
-    for (const key of Object.keys(sample)) {
-      sample[key] = stringifySample(sample[key]);
-    }
+function replacer(key, value) {
+  if (ArrayBuffer.isView(value)) {
+    return `Buffer.from(new Uint8Array([${value}]))`;
+  } else {
+    return value;
   }
+}
 
-  return JSON.stringify(sample, null, 2);
+function stringify(sample): string {
+  const s = JSON.stringify(sample, replacer, 2);
+  return s.replace(/"(Buffer\.from\(new Uint8Array\(\[[0-9]*(?:,[0-9]*)*\]\)\))"/gm, '$1');
 }
 
 export const entryCrudTests = (
@@ -54,8 +55,7 @@ export const entryCrudTests = (
 
     await scenario.shareAllAgents();
 
-    const createInput = ${json.stringify(entryDef.typeDefinition.sample())};
-
+    const createInput = ${stringify(entryDef.typeDefinition.sample())};
 
     // Alice creates a ${entryDef.typeDefinition.name}
     const createOutput: any = await alice.cells[0].callZome({
@@ -86,7 +86,7 @@ export const entryCrudTests = (
       entryDef.update
         ? `
     // Alice updates the ${entryDef.typeDefinition.name}
-    const contentUpdate = ${json.stringify(entryDef.typeDefinition.sample(), null, 2)}
+    const contentUpdate = ${stringify(entryDef.typeDefinition.sample())}
 
     const updateInput = {
       originalActionHash: createOutput.actionHash,
@@ -107,14 +107,14 @@ export const entryCrudTests = (
       ${
         entryDef.read
           ? `
-      // Bob gets the updated ${entryDef.typeDefinition.name}
-      const readUpdatedOutput: typeof createInput = await bob.cells[0].callZome({
-        zome_name: "${zomeBundle.name}",
-        fn_name: "${readHandlerFnName(entryDef.typeDefinition.name)}",
-        payload: updateOutput.entryHash,
-      });
-      t.deepEqual(readUpdatedOutput, contentUpdate);  // test 6
-          `
+    // Bob gets the updated ${entryDef.typeDefinition.name}
+    const readUpdatedOutput: typeof createInput = await bob.cells[0].callZome({
+      zome_name: "${zomeBundle.name}",
+      fn_name: "${readHandlerFnName(entryDef.typeDefinition.name)}",
+      payload: updateOutput.entryHash,
+    });
+    t.deepEqual(readUpdatedOutput, contentUpdate);  // test 6
+`
           : ``
       }
     `
@@ -134,19 +134,17 @@ export const entryCrudTests = (
       ${
         entryDef.read
           ? `
-      // Wait for the deletion action to be propagated to the other node.
-      await pause(100);
+    // Wait for the deletion action to be propagated to the other node.
+    await pause(100);
 
-
-
-      // Bob tries to get the deleted ${entryDef.typeDefinition.name}, but he doesn't get it because it has been deleted
-      const readDeletedOutput = await bob.cells[0].callZome({
-        zome_name: "${zomeBundle.name}",
-        fn_name: "${readHandlerFnName(entryDef.typeDefinition.name)}",
-        payload: createOutput.entryHash,
-      });
-      t.notOk(readDeletedOutput); // test 8
-          `
+    // Bob tries to get the deleted ${entryDef.typeDefinition.name}, but he doesn't get it because it has been deleted
+    const readDeletedOutput = await bob.cells[0].callZome({
+      zome_name: "${zomeBundle.name}",
+      fn_name: "${readHandlerFnName(entryDef.typeDefinition.name)}",
+      payload: createOutput.entryHash,
+    });
+    t.notOk(readDeletedOutput); // test 8
+`
           : ``
       }
     `
