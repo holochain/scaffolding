@@ -3,7 +3,6 @@ import { ScFile, ScNodeType } from '@source-craft/types';
 export const integrityZomeCargoToml = (
   integrityZomeName: string,
   author: string,
-  hdkVersion: string,
   hdiVersion: string,
 ): ScFile => ({
   type: ScNodeType.File,
@@ -20,6 +19,6 @@ name = "${integrityZomeName}"
 serde = "1"
 derive_more = "0"
 
-holochain_deterministic_integrity = "${hdiVersion}"
+hdi = "${hdiVersion}"
 `,
 });

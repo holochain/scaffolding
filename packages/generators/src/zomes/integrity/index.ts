@@ -28,7 +28,6 @@ export function integrityZome(
   happ: HappDefinition,
   dnaIndex: number,
   zomeBundleIndex: number,
-  hdkVersion: string,
   hdiVersion: string,
 ): ScDirectory {
   const crateName = getIntegrityCrateName(happ, dnaIndex, zomeBundleIndex);
@@ -37,7 +36,7 @@ export function integrityZome(
   return {
     type: ScNodeType.Directory,
     children: {
-      'Cargo.toml': integrityZomeCargoToml(crateName, '<AUTHOR>', hdkVersion, hdiVersion),
+      'Cargo.toml': integrityZomeCargoToml(crateName, '<AUTHOR>', hdiVersion),
       src: integrityZomeCode(integrityZome, hdiVersion),
     },
   };

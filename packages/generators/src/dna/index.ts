@@ -18,7 +18,7 @@ export function dna(
   const coordinator_zomes: ScDirectory = { type: ScNodeType.Directory, children: {} };
 
   for (const [zomeIndex, zomeBundleDef] of dna.zomeBundles.entries()) {
-    const iz = integrityZome(happ, dnaIndex, zomeIndex, hdkVersion, hdiVersion);
+    const iz = integrityZome(happ, dnaIndex, zomeIndex, hdiVersion);
     const cz = coordinatorZome(happ, dnaIndex, zomeIndex, hdkVersion);
     integrity_zomes.children[zomeBundleDef.name] = iz;
     coordinator_zomes.children[zomeBundleDef.name] = cz;

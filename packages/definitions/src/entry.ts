@@ -49,8 +49,8 @@ ${defaultDefineType(happRustGenerators(hdiVersion), typeName, fields)}`;
   return {
     imports: [
       {
-        crateName: 'holochain_deterministic_integrity',
-        importDeclaration: 'use holochain_deterministic_integrity::prelude::*;',
+        crateName: 'hdi',
+        importDeclaration: 'use hdi::prelude::*;',
         version: hdiVersion,
       },
     ],

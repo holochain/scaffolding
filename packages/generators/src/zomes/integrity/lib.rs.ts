@@ -5,7 +5,7 @@ import { snakeCase } from 'lodash-es';
 
 export const libRs = (integrityZomeDefinition: IntegrityZomeDefinition): ScFile => ({
   type: ScNodeType.File,
-  content: `use holochain_deterministic_integrity::prelude::*;
+  content: `use hdi::prelude::*;
 ${mergeStrings(
   integrityZomeDefinition.entry_defs.map(
     entry_def => `

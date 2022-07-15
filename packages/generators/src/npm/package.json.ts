@@ -31,7 +31,7 @@ export const rootPackageJson = (happ: HappDefinition): ScFile => ({
     "playground": "run-singleton \\"holochain-playground\\""
   },
   "devDependencies": {
-    "@holochain-playground/cli": "^0.0.10",
+    "@holochain-playground/cli": "^0.0.11",
     "concurrently": "^6.2.1",
     "concurrently-repeat": "^0.0.1",
     "cross-env": "^7.0.3",
