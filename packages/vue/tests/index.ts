@@ -6,13 +6,12 @@ import { writeDirectoryTree } from '@source-craft/fs';
 
 import { fileURLToPath } from 'url';
 import { HappDefinition, holochainEntryTypeDefinition, newHappDef } from '@holochain-scaffolding/definitions';
-import { webHapp, zomeBundlesForIntegrityZomes } from '@holochain-scaffolding/generators';
+import { webHapp } from '@holochain-scaffolding/generators';
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
 
 const integrityZomesDna1 = [
   {
@@ -97,9 +96,7 @@ const integrityZomesDna1 = [
       },
     ],
   },
-]
-
-const zomeBundlesDna1 = zomeBundlesForIntegrityZomes(integrityZomesDna1);
+];
 
 test('create a vue component', async t => {
   const happDef: HappDefinition = {
@@ -107,7 +104,11 @@ test('create a vue component', async t => {
     dnas: [
       {
         name: 'dna_1',
-        zomeBundles: zomeBundlesDna1,
+        integrity_zomes: integrityZomesDna1,
+        coordinator_zomes: integrityZomesDna1.map(iz => ({
+          name: iz.name.slice(0, iz.name.length - 10),
+          dependencies: [iz.name],
+        })),
       },
     ],
   };

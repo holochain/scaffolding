@@ -4,11 +4,9 @@ import { webHapp } from '@holochain-scaffolding/generators';
 import { writeDirectoryTree } from '@source-craft/fs';
 import { automaticSetup } from './events/automatic-setup';
 
-import { zomeBundlesForIntegrityZomes } from '@holochain-scaffolding/generators';
-
 const integrityZomesDna1 = [
   {
-    name: 'zome_1_integrity', // CAUTION: the "_integrity" part is required for zomeBundlesForIntegrityZomes() to work correctly
+    name: 'zome_1_integrity', 
     entry_defs: [
       {
         create: true,
@@ -32,17 +30,17 @@ const integrityZomesDna1 = [
   },
 ];
 
-const zomeBundlesDna1 = zomeBundlesForIntegrityZomes(integrityZomesDna1);
-
-
-
 export async function init(appName: string): Promise<void> {
   const happDef: HappDefinition = {
     name: appName,
     dnas: [
       {
         name: 'dna_1',
-        zomeBundles: zomeBundlesDna1,
+        integrity_zomes: integrityZomesDna1,
+        coordinator_zomes: integrityZomesDna1.map(iz => ({
+          name: iz.name.slice(0, iz.name.length - 10),
+          dependencies: [iz.name],
+        })),
       },
     ],
   };
