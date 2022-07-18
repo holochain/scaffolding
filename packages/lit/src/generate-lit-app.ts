@@ -31,8 +31,9 @@ import './components/${firstEntry.dna}/${firstEntry.zome}/${detail}';`,
   (app.children['src'] as ScDirectory).children['types'] = typesDir;
 
   for (const dna of happDefinition.dnas) {
-    for (const zomeBundle of dna.zomeBundles) {
-      for (const entryDef of zomeBundle.integrityZome.entry_defs) {
+    for (const coordinatorZome of dna.coordinator_zomes) {
+      const integrityZome = dna.integrity_zomes.find(iz => coordinatorZome.dependencies.includes(iz.name));
+      for (const entryDef of integrityZome.entry_defs) {
         app = addComponentsForEntryDef(
           app,
           happVocabulary,
@@ -40,7 +41,7 @@ import './components/${firstEntry.dna}/${firstEntry.zome}/${detail}';`,
           elementsImports,
           entryDef.typeDefinition,
           dna.name,
-          zomeBundle.name,
+          coordinatorZome.name,
         );
       }
     }
@@ -55,11 +56,13 @@ import './components/${firstEntry.dna}/${firstEntry.zome}/${detail}';`,
 
 function getFirstEntryDef(happDefinition: HappDefinition): { zome: string; dna: string; entryDef: EntryDefinition } {
   for (const dna of happDefinition.dnas) {
-    for (const zomeBundle of dna.zomeBundles) {
-      for (const entryDef of zomeBundle.integrityZome.entry_defs) {
+    for (const coordinatorZome of dna.coordinator_zomes) {
+      const integrityZome = dna.integrity_zomes.find(iz => coordinatorZome.dependencies.includes(iz.name));
+
+      for (const entryDef of integrityZome.entry_defs) {
         return {
           dna: dna.name,
-          zome: zomeBundle.name,
+          zome: coordinatorZome.name,
           entryDef,
         };
       }

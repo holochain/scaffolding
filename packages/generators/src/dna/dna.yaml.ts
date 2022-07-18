@@ -1,7 +1,7 @@
-import { ZomeBundleDefinition, HappDefinition } from '@holochain-scaffolding/definitions';
+import { HappDefinition, IntegrityZomeDefinition, CoordinatorZomeDefinition } from '@holochain-scaffolding/definitions';
 import { ScFile, ScNodeType } from '@source-craft/types';
 import { mergeStrings } from '../utils';
-import { getCoordinatorCrateName, getIntegrityCrateName } from '../zomes';
+import { getCoordinatorCrateName, getIntegrityCrateName } from '../zomes/utils';
 
 export const dnaYaml = (happ: HappDefinition, dnaIndex: number, pathToBase: string): ScFile => {
   const dna = happ.dnas[dnaIndex];
@@ -16,24 +16,34 @@ integrity:
   origin_time: ${new Date().toISOString()}
   zomes:
 ${mergeStrings(
-dna.zomeBundles.map(
-  (zomeBundle: ZomeBundleDefinition, zomeBundleIndex: number) =>
-`    - name: ${zomeBundle.integrityZome.name}
-      bundled: ${pathToBase}target/wasm32-unknown-unknown/release/${getIntegrityCrateName(happ, dnaIndex, zomeBundleIndex)}.wasm
+  dna.integrity_zomes.map(
+    (integrityZome: IntegrityZomeDefinition, integrityZomeIndex: number) =>
+      `    - name: ${integrityZome.name}
+      bundled: ${pathToBase}target/wasm32-unknown-unknown/release/${getIntegrityCrateName(
+        happ,
+        dnaIndex,
+        integrityZomeIndex,
+      )}.wasm
 `,
   ),
 )}
 coordinator:
   zomes:
 ${mergeStrings(
-dna.zomeBundles.map(
-  (zomeBundle: ZomeBundleDefinition, zomeIndex: number) =>
-`    - name: ${zomeBundle.coordinatorZome.name}
-      bundled: ${pathToBase}target/wasm32-unknown-unknown/release/${getCoordinatorCrateName(happ, dnaIndex, zomeIndex)}.wasm
-      dependencies:
-        - name: ${zomeBundle.integrityZome.name}
+  dna.coordinator_zomes.map(
+    (coordinatorZome: CoordinatorZomeDefinition, zomeIndex: number) =>
+      `    - name: ${coordinatorZome.name}
+      bundled: ${pathToBase}target/wasm32-unknown-unknown/release/${getCoordinatorCrateName(
+        happ,
+        dnaIndex,
+        zomeIndex,
+      )}.wasm
+      dependencies:${coordinatorZome.dependencies.map(
+        d => `
+        - name: ${d}`,
+      )}
 `,
-),
+  ),
 )}
 `,
   };

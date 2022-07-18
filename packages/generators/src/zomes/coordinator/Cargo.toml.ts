@@ -1,4 +1,3 @@
-import { ZomeBundleDefinition } from '@holochain-scaffolding/definitions';
 import { ScFile, ScNodeType } from '@source-craft/types';
 import { getCoordinatorCrateName } from '../utils';
 

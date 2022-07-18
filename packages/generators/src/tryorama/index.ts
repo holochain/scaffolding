@@ -1,4 +1,9 @@
-import { IntegrityZomeDefinition, DnaDefinition, HappDefinition, ZomeBundleDefinition } from '@holochain-scaffolding/definitions';
+import {
+  IntegrityZomeDefinition,
+  DnaDefinition,
+  HappDefinition,
+  CoordinatorZomeDefinition,
+} from '@holochain-scaffolding/definitions';
 import { ScDirectory, ScNodeType } from '@source-craft/types';
 
 import { tryoramaPackageJson } from './package.json';
@@ -8,7 +13,6 @@ import { tryoramaEntryTest } from './entry-test.ts';
 import { tryoramaUtilsTs } from './utils.ts';
 
 export function tryoramaTests(happ: HappDefinition): ScDirectory {
-
   const tests = dnaTests(happ.dnas);
 
   tests.children['index'];
@@ -42,22 +46,36 @@ function dnaTests(dnas: DnaDefinition[]): ScDirectory {
       children: {},
     };
 
-    for (const [zomeBundleIndex, zomeBundle] of dna.zomeBundles.entries()) {
-      (dnatests.children[dna.name] as ScDirectory).children[zomeBundle.name] = zomeTests(dna, zomeBundle);
+    for (const [coordinatorZomeIndex, coordinatorZome] of dna.coordinator_zomes.entries()) {
+      const integrityZome = dna.integrity_zomes.find(iz => coordinatorZome.dependencies.includes(iz.name));
+      (dnatests.children[dna.name] as ScDirectory).children[coordinatorZome.name] = zomeTests(
+        dna,
+        coordinatorZome,
+        integrityZome,
+      );
     }
   }
 
   return dnatests;
 }
 
-function zomeTests(dna: DnaDefinition, zomeBundle: ZomeBundleDefinition): ScDirectory {
+function zomeTests(
+  dna: DnaDefinition,
+  coordinatorZome: CoordinatorZomeDefinition,
+  integrityZome: IntegrityZomeDefinition,
+): ScDirectory {
   const zometests: ScDirectory = {
     type: ScNodeType.Directory,
     children: {},
   };
 
-  for (const entryDef of zomeBundle.integrityZome.entry_defs) {
-    zometests.children[`${entryDef.typeDefinition.name}.ts`] = tryoramaEntryTest(dna, zomeBundle, entryDef);
+  for (const entryDef of integrityZome.entry_defs) {
+    zometests.children[`${entryDef.typeDefinition.name}.ts`] = tryoramaEntryTest(
+      dna,
+      integrityZome,
+      coordinatorZome,
+      entryDef,
+    );
   }
 
   return zometests;

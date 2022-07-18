@@ -1,4 +1,4 @@
-import { HappDefinition, CoordinatorZomeDefinition, IntegrityZomeDefinition } from '@holochain-scaffolding/definitions';
+import { HappDefinition, IntegrityZomeDefinition } from '@holochain-scaffolding/definitions';
 import { ScDirectory, ScNodeType } from '@source-craft/types';
 import { snakeCase } from 'lodash-es';
 
@@ -27,11 +27,11 @@ export function integrityZomeCode(integrityZomeDefinition: IntegrityZomeDefiniti
 export function integrityZome(
   happ: HappDefinition,
   dnaIndex: number,
-  zomeBundleIndex: number,
+  integrityZomeIndex: number,
   hdiVersion: string,
 ): ScDirectory {
-  const crateName = getIntegrityCrateName(happ, dnaIndex, zomeBundleIndex);
-  const integrityZome = happ.dnas[dnaIndex].zomeBundles[zomeBundleIndex].integrityZome;
+  const crateName = getIntegrityCrateName(happ, dnaIndex, integrityZomeIndex);
+  const integrityZome = happ.dnas[dnaIndex].integrity_zomes[integrityZomeIndex];
 
   return {
     type: ScNodeType.Directory,

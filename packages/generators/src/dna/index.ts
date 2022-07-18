@@ -1,7 +1,8 @@
 import { HappDefinition } from '@holochain-scaffolding/definitions';
 import { ScDirectory, ScNodeType } from '@source-craft/types';
 
-import { integrityZome, coordinatorZome } from '../zomes';
+import { integrityZome } from '../zomes/integrity';
+import { coordinatorZome } from '../zomes/coordinator';
 
 import { dnaYaml } from './dna.yaml';
 
@@ -17,11 +18,13 @@ export function dna(
   const integrity_zomes: ScDirectory = { type: ScNodeType.Directory, children: {} };
   const coordinator_zomes: ScDirectory = { type: ScNodeType.Directory, children: {} };
 
-  for (const [zomeIndex, zomeBundleDef] of dna.zomeBundles.entries()) {
-    const iz = integrityZome(happ, dnaIndex, zomeIndex, hdiVersion);
-    const cz = coordinatorZome(happ, dnaIndex, zomeIndex, hdkVersion);
-    integrity_zomes.children[zomeBundleDef.name] = iz;
-    coordinator_zomes.children[zomeBundleDef.name] = cz;
+  for (const [integrityZomeIndex, integrityZomeDef] of dna.integrity_zomes.entries()) {
+    const iz = integrityZome(happ, dnaIndex, integrityZomeIndex, hdiVersion);
+    integrity_zomes.children[integrityZomeDef.name] = iz;
+  }
+  for (const [coordinatorZomeIndex, coordinatorZomeDef] of dna.coordinator_zomes.entries()) {
+    const cz = coordinatorZome(happ, dnaIndex, coordinatorZomeIndex, hdkVersion);
+    coordinator_zomes.children[coordinatorZomeDef.name] = cz;
   }
 
   return {

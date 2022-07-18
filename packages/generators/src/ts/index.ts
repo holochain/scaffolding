@@ -20,8 +20,12 @@ export function generateTsTypesForHapp(happ: HappDefinition): ScDirectory {
 export function generateTsTypesForDna(dna: DnaDefinition): ScDirectory {
   const files: Record<string, ScFile> = {};
 
-  for (const zomeBundle of dna.zomeBundles) {
-    files[`${zomeBundle.name}.ts`] = tsTypesForZome(zomeBundle.integrityZome);
+  for (const integrityZome of dna.integrity_zomes) {
+    let name = integrityZome.name;
+
+    if (name.endsWith('_integrity')) name = name.slice(-10);
+
+    files[`${name}.ts`] = tsTypesForZome(integrityZome);
   }
 
   return {

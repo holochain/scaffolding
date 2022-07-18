@@ -30,24 +30,25 @@ export function coordinatorZomeCode(
 export function coordinatorZome(
   happ: HappDefinition,
   dnaIndex: number,
-  zomeBundleIndex: number,
+  coordinatorZomeIndex: number,
   hdkVersion: string,
 ): ScDirectory {
-  const coordinatorCrateName = getCoordinatorCrateName(happ, dnaIndex, zomeBundleIndex);
-  const integrityCrateName = getIntegrityCrateName(happ, dnaIndex, zomeBundleIndex);
-  const zomeBundle = happ.dnas[dnaIndex].zomeBundles[zomeBundleIndex];
+  const coordinatorCrateName = getCoordinatorCrateName(happ, dnaIndex, coordinatorZomeIndex);
+  const integrityCrateName = getIntegrityCrateName(happ, dnaIndex, coordinatorZomeIndex);
+  const coordinatorZome = happ.dnas[dnaIndex].coordinator_zomes[coordinatorZomeIndex];
+  const integrityZome = happ.dnas[dnaIndex].integrity_zomes.find(iz => coordinatorZome.dependencies.includes(iz.name));
 
   return {
     type: ScNodeType.Directory,
     children: {
       'Cargo.toml': coordinatorZomeCargoToml(
-        zomeBundle.name,
+        integrityZome.name,
         coordinatorCrateName,
         integrityCrateName,
         '<AUTHOR>',
         hdkVersion,
       ),
-      src: coordinatorZomeCode(zomeBundle.integrityZome, integrityCrateName),
+      src: coordinatorZomeCode(integrityZome, integrityCrateName),
     },
   };
 }

@@ -2,8 +2,6 @@ import flattenDeep from 'lodash-es/flattenDeep';
 import camelCase from 'lodash-es/camelCase';
 import upperFirst from 'lodash-es/upperFirst';
 import { HappDefinition } from '@holochain-scaffolding/definitions';
-import { IntegrityZomeDefinition, CoordinatorZomeDefinition, ZomeBundleDefinition } from '@holochain-scaffolding/definitions';
-
 
 export function getDnaBundlePath(happ: HappDefinition, dnaName: string): string {
   return `${getDnaPath(happ, dnaName)}workdir/${dnaName}.dna`;
@@ -41,26 +39,3 @@ const snakeCaseRegex = /^([a-z]{1,})(_[a-z0-9]{1,})*$/;
 export function isSnakeCase(input: string): boolean {
   return snakeCaseRegex.test(input);
 }
-
-export function zomeBundlesForIntegrityZomes(integrityZomes: IntegrityZomeDefinition[]): ZomeBundleDefinition[] {
-
-  let zomeBundles: ZomeBundleDefinition[] = [];
-
-  for (const integrityZome of integrityZomes) {
-    const coordinatorZome: CoordinatorZomeDefinition = {
-      name: integrityZome.name.slice(0, -10), // cutting off the "_integrity" part of the name
-      dependencies: [integrityZome]
-    }
-    const zomeBundle: ZomeBundleDefinition = {
-      name: integrityZome.name.slice(0, -10),
-      integrityZome,
-      coordinatorZome,
-    }
-
-    zomeBundles.push(zomeBundle);
-  }
-
-  return zomeBundles;
-};
-
-

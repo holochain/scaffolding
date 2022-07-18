@@ -9,14 +9,10 @@ import { holochainEntryTypeDefinition } from '@holochain-scaffolding/definitions
 import { fileURLToPath } from 'url';
 import { ScNodeType } from '@source-craft/types';
 
-import { zomeBundlesForIntegrityZomes } from '../src/utils';
-
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-
 
 // generate zomes
 const integrityZomesDna1 = [
@@ -70,8 +66,6 @@ const integrityZomesDna1 = [
     ],
   },
 ];
-const zomeBundlesDna1 = zomeBundlesForIntegrityZomes(integrityZomesDna1);
-
 
 const integrityZomesDna2 = [
   {
@@ -92,10 +86,7 @@ const integrityZomesDna2 = [
       },
     ],
   },
-]
-const zomeBundlesDna2 = zomeBundlesForIntegrityZomes(integrityZomesDna2);
-
-
+];
 
 test('generate a full blown happ', async t => {
   const happChanges = webHapp(
@@ -104,11 +95,27 @@ test('generate a full blown happ', async t => {
       dnas: [
         {
           name: 'hehe',
-          zomeBundles: zomeBundlesDna1,
+          integrity_zomes: integrityZomesDna1,
+          coordinator_zomes: [
+            {
+              name: 'hihi',
+              dependencies: ['hihi_integrity'],
+            },
+            {
+              name: 'hihi2',
+              dependencies: ['hihi2_integrity'],
+            },
+          ],
         },
         {
           name: 'hehe2',
-          zomeBundles: zomeBundlesDna2,
+          integrity_zomes: integrityZomesDna2,
+          coordinator_zomes: [
+            {
+              name: 'hihi',
+              dependencies: ['hihi_integrity'],
+            },
+          ],
         },
       ],
     },
@@ -123,8 +130,3 @@ test('generate a full blown happ', async t => {
   t.equal(1, 1);
   t.end();
 });
-
-
-
-
-
