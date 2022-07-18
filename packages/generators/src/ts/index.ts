@@ -23,7 +23,7 @@ export function generateTsTypesForDna(dna: DnaDefinition): ScDirectory {
   for (const integrityZome of dna.integrity_zomes) {
     let name = integrityZome.name;
 
-    if (name.endsWith('_integrity')) name = name.slice(-10);
+    if (name.endsWith('_integrity')) name = name.slice(0, name.length - 10);
 
     files[`${name}.ts`] = tsTypesForZome(integrityZome);
   }
