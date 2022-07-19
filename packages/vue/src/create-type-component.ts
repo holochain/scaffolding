@@ -55,7 +55,7 @@ export default defineComponent({
         ${type.fields.map(field => fieldProperty(elementsImports, field)).join('\n        ')}
       };
 
-      const { entryHash } = await this.appWebsocket.callZome({
+      const actionHash = await this.appWebsocket.callZome({
         cap_secret: null,
         cell_id: cellData.cell_id,
         zome_name: '${zomeName}',
@@ -64,7 +64,7 @@ export default defineComponent({
         provenance: cellData.cell_id[1]
       });
 
-      this.$emit('${kebabCase(type.name)}-created', entryHash);
+      this.$emit('${kebabCase(type.name)}-created', actionHash);
     },
   },
   emits: ['${kebabCase(type.name)}-created'],
@@ -87,7 +87,7 @@ export default defineComponent({
 
 function fieldProperty(elementImports: VocabularyElementsImportDeclarations, field: FieldDefinition<any>): string {
   const imports = elementImports[field.type];
-  return `${camelCase(field.name)}: this.${camelCase(field.name)}!,${
+  return `${field.name}: this.${camelCase(field.name)}!,${
     imports && imports.create ? '' : `    // TODO: set the ${field.name}`
   }`;
 }

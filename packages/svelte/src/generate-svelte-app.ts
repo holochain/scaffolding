@@ -19,10 +19,10 @@ export function generateSvelteApp(happDefinition: HappDefinition): ScDirectory {
     happName: happDefinition.name,
     subcomponentImports: `import ${create} from './components/${firstEntry.dna}/${firstEntry.zome}/${create}.svelte';
 import ${detail} from './components/${firstEntry.dna}/${firstEntry.zome}/${detail}.svelte';`,
-    appContent: `<${create} on:${kebabCase(firstType.name)}-created="{e => entryHash = e.detail.entryHash}"></${create}>
+    appContent: `<${create} on:${kebabCase(firstType.name)}-created="{e => actionHash = e.detail.actionHash}"></${create}>
 
-    {#if entryHash}
-      <${detail} entryHash={entryHash}></${detail}>
+    {#if actionHash}
+      <${detail} actionHash={actionHash}></${detail}>
     {/if}`,
   });
   const typesDir = generateTsTypesForHapp(happDefinition);

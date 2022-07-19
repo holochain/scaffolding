@@ -14,7 +14,7 @@ export function generateTypeDetailLitComponent(
   const detailWebComponent = `
 import { LitElement, html } from 'lit';
 import { state, customElement, property } from 'lit/decorators.js';
-import { InstalledCell, AppWebsocket, EntryHash, InstalledAppInfo } from '@holochain/client';
+import { InstalledCell, AppWebsocket, Record, ActionHash, InstalledAppInfo } from '@holochain/client';
 import { contextProvided } from '@lit-labs/context';
 import { appInfoContext, appWebsocketContext } from '../../../contexts';
 import { ${upperFirst(camelCase(type.name))} } from '../../../types/${dnaName}/${zomeName}';
@@ -24,7 +24,7 @@ ${uniq(flatten(type.fields?.map(f => fieldImports(typescriptGenerators, elements
 @customElement('${kebabCase(type.name)}-detail')
 export class ${upperFirst(camelCase(type.name))}Detail extends LitElement {
   @property()
-  entryHash!: EntryHash;
+  actionHash!: ActionHash;
 
   @state()
   _${camelCase(type.name)}: ${upperFirst(camelCase(type.name))} | undefined;
@@ -38,14 +38,18 @@ export class ${upperFirst(camelCase(type.name))}Detail extends LitElement {
   async firstUpdated() {
     const cellData = this.appInfo.cell_data.find((c: InstalledCell) => c.role_id === '${dnaName}')!;
 
-    this._${camelCase(type.name)} = await this.appWebsocket.callZome({
+    const record: Record | undefined = await this.appWebsocket.callZome({
       cap_secret: null,
       cell_id: cellData.cell_id,
       zome_name: '${zomeName}',
       fn_name: 'get_${snakeCase(type.name)}',
-      payload: this.entryHash,
+      payload: this.actionHash,
       provenance: cellData.cell_id[1]
     });
+
+    if (record) {
+      this._${camelCase(type.name)} = decode((record.entry as any).Present.entry) as ${upperFirst(camelCase(type.name))};
+    }
   }
 
   render() {
@@ -87,7 +91,7 @@ function fieldDetailTemplate(
     ${Object.entries(field.configuration)
       .map(([configPropName, configValue]) => `${configPropName}="${configValue}"`)
       .join(' ')}
-    .value=\${this._${camelCase(typeName)}.${camelCase(field.name)}}
+    .value=\${this._${camelCase(typeName)}.${field.name}}
       style="margin-top: 16px"
     ></${fieldRenderers.detail.tagName}>`;
 }

@@ -16,7 +16,7 @@ export const appVue = ({happName, appContent, appSubcomponents, subcomponentsImp
 </template>
 <script lang="ts">
 import { defineComponent, computed } from 'vue';
-import { AppWebsocket, EntryHash, InstalledAppInfo } from '@holochain/client';
+import { AppWebsocket, ActionHash, InstalledAppInfo } from '@holochain/client';
 import '@material/mwc-circular-progress';
 ${subcomponentsImports}
 
@@ -28,13 +28,13 @@ export default defineComponent({
     appWebsocket: AppWebsocket | undefined;
     loading: boolean;
     appInfo: InstalledAppInfo | undefined;
-    entryHash: EntryHash | undefined;
+    actionHash: ActionHash | undefined;
   } {
     return {
       appWebsocket: undefined,
       loading: true,
       appInfo: undefined,
-      entryHash: undefined,
+      actionHash: undefined,
     };
   },
   async mounted() {

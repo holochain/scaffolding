@@ -24,14 +24,15 @@ ${type.fields.map(f => fieldDetailTemplate(type.name, elementsImports, f)).join(
 </template>
 <script lang="ts">
 import { defineComponent, inject, ComputedRef } from 'vue';
-import { InstalledCell, AppWebsocket, InstalledAppInfo } from '@holochain/client';
+import { decode } from '@msgpack/msgpack';
+import { InstalledCell, AppWebsocket, InstalledAppInfo, Record } from '@holochain/client';
 import { ${upperFirst(camelCase(type.name))} } from '../../../types/${dnaName}/${zomeName}';
 ${uniq(flatten(type.fields?.map(f => fieldImports(typescriptGenerators, elementsImports, f)))).join('\n')}
 import '@material/mwc-circular-progress';
 
 export default defineComponent({
   props: {
-    entryHash: {
+    actionHash: {
       type: Object,
       required: true
     }
@@ -44,14 +45,18 @@ export default defineComponent({
   async mounted() {
     const cellData = this.appInfo.cell_data.find((c: InstalledCell) => c.role_id === '${dnaName}')!;
 
-    this.${camelCase(type.name)} = await this.appWebsocket.callZome({
+    const record: Record | undefined = await this.appWebsocket.callZome({
       cap_secret: null,
       cell_id: cellData.cell_id,
       zome_name: '${zomeName}',
       fn_name: 'get_${snakeCase(type.name)}',
-      payload: this.entryHash,
+      payload: this.actionHash,
       provenance: cellData.cell_id[1]
     });
+    
+    if (record) {
+      this.${camelCase(type.name)} = decode((record.entry as any).Present.entry) as ${upperFirst(camelCase(type.name))};
+    }
   },
   setup() {
     const appWebsocket = (inject('appWebsocket') as ComputedRef<AppWebsocket>).value;
@@ -84,7 +89,7 @@ function fieldDetailTemplate(
     ${Object.entries(field.configuration)
       .map(([configPropName, configValue]) => `${kebabCase(configPropName)}="${configValue}"`)
       .join(' ')}
-     :value="${camelCase(typeName)}.${camelCase(field.name)}"
+     :value="${camelCase(typeName)}.${field.name}"
       style="margin-top: 16px"
     ></${fieldRenderers.detail.tagName}>`;
 }

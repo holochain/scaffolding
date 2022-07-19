@@ -21,9 +21,9 @@ export function generateLitApp(happDefinition: HappDefinition): ScDirectory {
 import './components/${firstEntry.dna}/${firstEntry.zome}/${detail}';`,
     appContent: `<${create} @${kebabCase(
       firstType.name,
-    )}-created=\${(e: CustomEvent) => this.entryHash = e.detail.entryHash}></${create}>
-    \${this.entryHash ? html\`
-      <${detail} .entryHash=\${this.entryHash}></${detail}>
+    )}-created=\${(e: CustomEvent) => this.actionHash = e.detail.actionHash}></${create}>
+    \${this.actionHash ? html\`
+      <${detail} .actionHash=\${this.actionHash}></${detail}>
     \` : html\`\`}`,
   });
   const typesDir = generateTsTypesForHapp(happDefinition);

@@ -39,7 +39,7 @@ export const packageJson = (): ScFile => ({
   "dependencies": {
     "@holochain/client": "^0.5.0",
     "@material/mwc-circular-progress": "^0.25.3",    
-    "@webcomponents/scoped-custom-element-registry": "0.0.4"
+    "@msgpack/msgpack": "^2.7.2"
   }
 }
 `

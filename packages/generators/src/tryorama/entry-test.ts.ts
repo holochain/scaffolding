@@ -22,8 +22,9 @@ export const tryoramaEntryTest = (
 ): ScFile => ({
   type: ScNodeType.File,
   content: `
-import { DnaSource } from "@holochain/client";
+import { DnaSource, Record, ActionHash } from "@holochain/client";
 import { pause, runScenario } from "@holochain/tryorama";
+import { decode } from '@msgpack/msgpack';
 import pkg from 'tape-promise/tape';
 const { test } = pkg;
 
@@ -65,13 +66,12 @@ export const entryCrudTests = (
     const createInput = ${stringify(entryDef.typeDefinition.sample())};
 
     // Alice creates a ${entryDef.typeDefinition.name}
-    const createOutput: any = await alice.cells[0].callZome({
+    const createActionHash: ActionHash = await alice.cells[0].callZome({
       zome_name: "${coordinatorZome.name}",
       fn_name: "${createHandlerFnName(entryDef.typeDefinition.name)}",
       payload: createInput,
     });
-    t.ok(createOutput.actionHash);  // test 1
-    t.ok(createOutput.entryHash);   // test 2
+    t.ok(createActionHash);
 
     // Wait for the created entry to be propagated to the other node.
     await pause(100);
@@ -80,12 +80,12 @@ export const entryCrudTests = (
       entryDef.read
         ? `
     // Bob gets the created ${entryDef.typeDefinition.name}
-    const readOutput: typeof createInput = await bob.cells[0].callZome({
+    const createReadOutput: Record = await bob.cells[0].callZome({
       zome_name: "${coordinatorZome.name}",
       fn_name: "${readHandlerFnName(entryDef.typeDefinition.name)}",
-      payload: createOutput.entryHash,
+      payload: createActionHash,
     });
-    t.deepEqual(readOutput, createInput); // test 3
+    t.deepEqual(createInput, decode((createReadOutput.entry as any).Present.entry) as any);
     `
         : ``
     }
@@ -96,17 +96,16 @@ export const entryCrudTests = (
     const contentUpdate = ${stringify(entryDef.typeDefinition.sample())}
 
     const updateInput = {
-      originalActionHash: createOutput.actionHash,
-      updated${upperFirst(camelCase(entryDef.typeDefinition.name))}: contentUpdate,
-    }
+      original_action_hash: createActionHash,
+      updated_${snakeCase(entryDef.typeDefinition.name)}: contentUpdate,
+    };
 
-    const updateOutput: any = await alice.cells[0].callZome({
+    const updateActionHash: ActionHash = await alice.cells[0].callZome({
       zome_name: "${coordinatorZome.name}",
       fn_name: "${updateHandlerFnName(entryDef.typeDefinition.name)}",
       payload: updateInput,
     });
-    t.ok(updateOutput.actionHash);  // test 4
-    t.ok(updateOutput.entryHash);   // test 5
+    t.ok(updateActionHash); 
 
     // Wait for the updated entry to be propagated to the other node.
     await pause(100);
@@ -115,12 +114,12 @@ export const entryCrudTests = (
         entryDef.read
           ? `
     // Bob gets the updated ${entryDef.typeDefinition.name}
-    const readUpdatedOutput: typeof createInput = await bob.cells[0].callZome({
+    const readUpdatedOutput: Record = await bob.cells[0].callZome({
       zome_name: "${coordinatorZome.name}",
       fn_name: "${readHandlerFnName(entryDef.typeDefinition.name)}",
-      payload: updateOutput.entryHash,
+      payload: updateActionHash,
     });
-    t.deepEqual(readUpdatedOutput, contentUpdate);  // test 6
+    t.deepEqual(contentUpdate, decode((readUpdatedOutput.entry as any).Present.entry) as any); 
 `
           : ``
       }
@@ -134,9 +133,9 @@ export const entryCrudTests = (
     const deleteActionHash = await alice.cells[0].callZome({
       zome_name: "${coordinatorZome.name}",
       fn_name: "${deleteHandlerFnName(entryDef.typeDefinition.name)}",
-      payload: createOutput.actionHash,
-    })
-    t.ok(deleteActionHash); // test 7
+      payload: createActionHash,
+    });
+    t.ok(deleteActionHash); 
 
       ${
         entryDef.read
@@ -148,9 +147,9 @@ export const entryCrudTests = (
     const readDeletedOutput = await bob.cells[0].callZome({
       zome_name: "${coordinatorZome.name}",
       fn_name: "${readHandlerFnName(entryDef.typeDefinition.name)}",
-      payload: createOutput.entryHash,
+      payload: createActionHash,
     });
-    t.notOk(readDeletedOutput); // test 8
+    t.notOk(readDeletedOutput);
 `
           : ``
       }

@@ -43,7 +43,7 @@ async function create${upperFirst(camelCase(type.name))}() {
   };
 
   
-  const { entryHash } = await appWebsocket.callZome({
+  const actionHash = await appWebsocket.callZome({
     cap_secret: null,
     cell_id: cellData.cell_id,
     zome_name: '${zomeName}',
@@ -52,7 +52,7 @@ async function create${upperFirst(camelCase(type.name))}() {
     provenance: cellData.cell_id[1]
   });
 
-  dispatch('${kebabCase(type.name)}-created', { entryHash });
+  dispatch('${kebabCase(type.name)}-created', { actionHash });
 }
 
 </script>
@@ -79,7 +79,7 @@ async function create${upperFirst(camelCase(type.name))}() {
 
 function fieldProperty(elementImports: VocabularyElementsImportDeclarations, field: FieldDefinition<any>): string {
   const imports = elementImports[field.type];
-  return `${camelCase(field.name)}: ${camelCase(field.name)}!,${
+  return `${field.name}: ${camelCase(field.name)}!,${
     imports && imports.create ? '' : `    // TODO: set the ${field.name}`
   }`;
 }

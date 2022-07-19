@@ -54,7 +54,7 @@ export class Create${upperFirst(camelCase(type.name))} extends LitElement {
       ${type.fields.map(field => fieldProperty(elementsImports, field)).join('\n        ')}
     };
 
-    const { entryHash } = await this.appWebsocket.callZome({
+    const actionHash = await this.appWebsocket.callZome({
       cap_secret: null,
       cell_id: cellData.cell_id,
       zome_name: '${zomeName}',
@@ -67,7 +67,7 @@ export class Create${upperFirst(camelCase(type.name))} extends LitElement {
       composed: true,
       bubbles: true,
       detail: {
-        entryHash
+        actionHash
       }
     }));
   }
@@ -97,7 +97,7 @@ export class Create${upperFirst(camelCase(type.name))} extends LitElement {
 
 function fieldProperty(elementImports: VocabularyElementsImportDeclarations, field: FieldDefinition<any>): string {
   const imports = elementImports[field.type];
-  return `${camelCase(field.name)}: this._${camelCase(field.name)}!,${
+  return `${field.name}: this._${camelCase(field.name)}!,${
     imports && imports.create ? '' : `    // TODO: set the ${field.name}`
   }`;
 }

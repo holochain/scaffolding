@@ -14,12 +14,13 @@ export function generateTypeDetailSvelteComponent(
   const detailWebComponent = `<script lang="ts">
 import { onMount, getContext } from 'svelte';
 import '@material/mwc-circular-progress';
-import { InstalledCell, EntryHash, AppWebsocket, InstalledAppInfo } from '@holochain/client';
+import { decode } from '@msgpack/msgpack';
+import { InstalledCell, Record, ActionHash, AppWebsocket, InstalledAppInfo } from '@holochain/client';
 import { appInfoContext, appWebsocketContext } from '../../../contexts';
 import { ${upperFirst(camelCase(type.name))} } from '../../../types/${dnaName}/${zomeName}';
 ${uniq(flatten(type.fields?.map(f => fieldImports(typescriptGenerators, elementsImports, f)))).join('\n')}
 
-export let entryHash: EntryHash;
+export let actionHash: ActionHash;
 
 let appInfo = getContext(appInfoContext).getAppInfo();
 let appWebsocket = getContext(appWebsocketContext).getAppWebsocket();
@@ -31,14 +32,18 @@ $: ${camelCase(type.name)};
 onMount(async () => {
   const cellData = appInfo.cell_data.find((c: InstalledCell) => c.role_id === '${dnaName}')!;
 
-  ${camelCase(type.name)} = await appWebsocket.callZome({
+  const record: Record | undefined = await appWebsocket.callZome({
     cap_secret: null,
     cell_id: cellData.cell_id,
     zome_name: '${zomeName}',
     fn_name: 'get_${snakeCase(type.name)}',
-    payload: entryHash,
+    payload: actionHash,
     provenance: cellData.cell_id[1]
   });
+
+  if (record) {
+    ${camelCase(type.name)} = decode((record.entry as any).Present.entry) as ${upperFirst(camelCase(type.name))};
+  }
 });
 </script>
 
@@ -76,7 +81,7 @@ function fieldDetailTemplate(
     ${Object.entries(field.configuration)
       .map(([configPropName, configValue]) => `${configPropName}="${configValue}"`)
       .join(' ')}
-      value={${camelCase(typeName)}.${camelCase(field.name)}}
+      value={${camelCase(typeName)}.${field.name}}
       style="margin-top: 16px"
     ></${fieldRenderers.detail.tagName}>`;
 }

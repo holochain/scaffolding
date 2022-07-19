@@ -18,8 +18,8 @@ export function generateVueApp(happDefinition: HappDefinition): ScDirectory {
   let app = vueApp({
     happName: happDefinition.name,
     appContent: `
-    <${create} @${kebabCase(firstType.name)}-created="entryHash = $event"/>
-    <${detail} v-if="entryHash" :entry-hash="entryHash" />
+    <${create} @${kebabCase(firstType.name)}-created="actionHash = $event"/>
+    <${detail} v-if="actionHash" :action-hash="actionHash" />
     `,
     appSubcomponents: `${create}, ${detail}`,
     subcomponentsImports: `import ${create} from './components/${firstEntry.dna}/${firstEntry.zome}/${create}.vue';

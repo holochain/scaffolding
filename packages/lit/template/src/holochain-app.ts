@@ -1,10 +1,8 @@
-import '@webcomponents/scoped-custom-element-registry';
-
 import { LitElement, css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import {
   AppWebsocket,
-  EntryHash,
+  ActionHash,
   InstalledAppInfo,
 } from '@holochain/client';
 import { contextProvider } from '@lit-labs/context';
@@ -16,7 +14,7 @@ import { appWebsocketContext, appInfoContext } from './contexts';
 @customElement('holochain-app')
 export class HolochainApp extends LitElement {
   @state() loading = true;
-  @state() entryHash: EntryHash | undefined;
+  @state() actionHash: ActionHash | undefined;
 
   @contextProvider({ context: appWebsocketContext })
   @property({ type: Object })

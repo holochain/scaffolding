@@ -6,8 +6,7 @@ import snakeCase from 'lodash-es/snakeCase';
 
 export const mainTs = (): ScFile => ({
   type: ScNodeType.File,
-  content: `import '@webcomponents/scoped-custom-element-registry';
-import App from './App.svelte';
+  content: `import App from './App.svelte';
 
 const app = new App({
   target: document.body,
