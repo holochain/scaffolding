@@ -19,7 +19,8 @@ crate-type = ["cdylib", "rlib"]
 name = "${coordinatorCrateName}"
 
 [dependencies]
-serde = "1"
+serde = "=1.0.136"
+chrono = "=0.4.19"
 derive_more = "0"
 ${integrityCrateName} = { path = "../../integrity_zomes/${zomeName}" }
 

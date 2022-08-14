@@ -53,7 +53,6 @@ export async function automaticSetup(happName: string): Promise<void> {
   
     cd ${happName}
     nix-shell
-    npm run build:happ
     npm start
 `);
 

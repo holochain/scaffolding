@@ -16,7 +16,8 @@ crate-type = ["cdylib", "rlib"]
 name = "${integrityZomeName}"
 
 [dependencies]
-serde = "1"
+serde = "=1.0.136"
+chrono = "=0.4.19"
 derive_more = "0"
 
 hdi = "${hdiVersion}"
