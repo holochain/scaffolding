@@ -82,6 +82,9 @@ export default defineComponent({
       selectedDnaIndex: 0,
     };
   },
+  beforeCreate() {
+    this.happ.dnas[0].integrity_zomes[0].name = "zome_0"; // currently hard-coded to overwrite the default of newDnaDef()
+  },
   mounted() {
     setTimeout(() => {
       const field = this.$refs['happ-name'] as TextField;
@@ -120,7 +123,6 @@ export default defineComponent({
     },
     emitChanged() {
       this.$forceUpdate();
-
       this.$emit('happ-changed', this.happ);
     },
   },

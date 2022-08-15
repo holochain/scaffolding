@@ -38,7 +38,7 @@
       <span style="width: 100%; height: 1px; background-color: lightgrey"></span>
     </div>
 
-    <DefineZome
+    <DefineIntegrityZome
       v-if="selectedIntegrityZome"
       :key="selectedIntegrityZomeIndex"
       :integrityZome="selectedIntegrityZome"
@@ -53,7 +53,7 @@
         @click="deleteZome()"
         style="margin: 8px; --mdc-theme-primary: black"
       ></mwc-button>
-    </DefineZome>
+    </DefineIntegrityZome>
   </div>
 </template>
 
@@ -67,13 +67,13 @@ import {
 } from '@holochain-scaffolding/definitions';
 import { TextField } from '@material/mwc-textfield';
 import { isSnakeCase } from '@holochain-scaffolding/generators';
-import DefineZome from './DefineZome.ce.vue';
+import DefineIntegrityZome from './DefineIntegrityZome.ce.vue';
 
 export default defineComponent({
   name: 'DefineDna',
 
   components: {
-    DefineZome,
+    DefineIntegrityZome,
   },
 
   props: {
@@ -162,21 +162,8 @@ export default defineComponent({
     },
     emitChanged() {
       this.$forceUpdate();
-      this.dna.coordinator_zomes;
 
-      const dna: DnaDefinition = {
-        name: this.dna,
-        coordinator_zomes: this.dna.integrity_zomes.map(iz => ({
-          name: iz.name,
-          dependencies: `${iz.name}_integrity`,
-        })),
-        integrity_zomes: this.dna.integrity_zomes.map(iz => ({
-          name: `${iz.name}_integrity`,
-          entry_defs: iz.entry_defs,
-        })),
-      };
-
-      this.$emit('dna-changed', dna);
+      this.$emit('dna-changed', this.dna);
     },
   },
 });
