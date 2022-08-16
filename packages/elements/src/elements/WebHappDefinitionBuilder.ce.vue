@@ -1,6 +1,6 @@
 <template>
   <mwc-card style="display: flex; flex: 1; flex-direction: row">
-    <DefineHapp :happ="happ" @happ-changed="emitChanged()">
+    <DefineHapp :happ="happ" @happ-changed="(e) => this.handleHappChange(e)">
       <mwc-select
         v-if="uitemplates"
         outlined
@@ -17,7 +17,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import { HappDefinition, newHappDef } from '@holochain-scaffolding/definitions';
+import { DnaDefinition, HappDefinition, newHappDef } from '@holochain-scaffolding/definitions';
 import DefineHapp from './DefineHapp.ce.vue';
 
 export default defineComponent({
@@ -46,12 +46,38 @@ export default defineComponent({
     (this.$refs['uiTemplateSelect'] as any).value = this.selectedUiTemplate;
   },
   methods: {
+    handleHappChange(happ: HappDefinition) {
+      this.happ.name = happ.name;
+      this.happ.dnas = happ.dnas;
+      this.emitChanged();
+    },
     onSelect(index: number) {
       this.selectedUiTemplate = this.uitemplates.split(',')[index];
       this.emitChanged();
     },
     emitChanged() {
-      this.$emit('happ-changed', { happ: this.happ, uiTemplate: this.selectedUiTemplate });
+
+      const outDnas = this.happ.dnas.map((dna) => {
+        const outDna: DnaDefinition = {
+          name: dna.name,
+          coordinator_zomes: dna.integrity_zomes.map(iz => ({
+            name: iz.name,
+            dependencies: [`${iz.name}_integrity`],
+          })),
+          integrity_zomes: dna.integrity_zomes.map(iz => ({
+            name: `${iz.name}_integrity`,
+            entry_defs: iz.entry_defs,
+          })),
+        }
+        return outDna;
+      })
+
+      const outHapp: HappDefinition = {
+        name: this.happ.name,
+        dnas: outDnas,
+      };
+
+      this.$emit('happ-changed', { happ: outHapp, uiTemplate: this.selectedUiTemplate });
     },
   },
 });
