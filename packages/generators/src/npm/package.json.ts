@@ -19,7 +19,7 @@ export const rootPackageJson = (happ: HappDefinition): ScFile => ({
       happ,
     )}\\"",
     "test": "npm run build:happ && npm t -w tests",
-    "start:happ": "concurrently \\"RUST_LOG=warn echo \"pass\" | hc s --piped generate ./workdir/${happ.name}.happ --run=$HC_PORT -a ${
+    "start:happ": "concurrently \\"RUST_LOG=warn echo \\"pass\\" | hc s --piped generate ./workdir/${happ.name}.happ --run=$HC_PORT -a ${
     happ.name
   } network mdns\\" \\"npm run playground\\"",
     "package": "npm run build:happ && npm run package -w ui && hc web-app pack workdir",
