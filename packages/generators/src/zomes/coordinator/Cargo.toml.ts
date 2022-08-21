@@ -20,7 +20,7 @@ name = "${coordinatorCrateName}"
 
 [dependencies]
 serde = "=1.0.136"
-chrono = "=0.4.19"
+chrono = { version = "0.4.22", default-features = false, features = ["clock", "std", "oldtime", "serde"], optional = true }
 derive_more = "0"
 ${integrityCrateName} = { path = "../../integrity_zomes/${zomeName}" }
 
