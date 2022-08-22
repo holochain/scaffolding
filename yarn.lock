@@ -986,10 +986,10 @@
   dependencies:
     "@hapi/hoek" "^8.3.0"
 
-"@holochain/client@^0.5.0":
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/@holochain/client/-/client-0.5.0.tgz#d42c51817365d154828cabce1efd857d67851239"
-  integrity sha512-4wUKBmyjAUipnhFvUl+k0254t+gi700Zpzz974muXfQFU5AYKfxXzR2xY2dVfqEP5L9mCBsGXW3wbjl8nXe64g==
+"@holochain/client@^0.7.0":
+  version "0.7.0"
+  resolved "https://registry.npmjs.org/@holochain/client/-/client-0.7.0.tgz"
+  integrity sha512-+rrKu8Fr/g/zcNM8vRZ+jZ8RF1E9oMGwaxukrvZ4kIuoDg0pfOqtZ/PaPWnAQsnF1dX1IVG+QPrDCSRNGRnpwQ==
   dependencies:
     "@msgpack/msgpack" "^2.7.2"
     cross-fetch "^3.1.5"
@@ -1937,7 +1937,7 @@
 
 "@microsoft/tsdoc-config@0.16.1":
   version "0.16.1"
-  resolved "https://registry.yarnpkg.com/@microsoft/tsdoc-config/-/tsdoc-config-0.16.1.tgz#4de11976c1202854c4618f364bf499b4be33e657"
+  resolved "https://registry.npmjs.org/@microsoft/tsdoc-config/-/tsdoc-config-0.16.1.tgz"
   integrity sha512-2RqkwiD4uN6MLnHFljqBlZIXlt/SaUT6cuogU1w2ARw4nKuuppSmR0+s+NC+7kXBQykd9zzu0P4HtBpZT5zBpQ==
   dependencies:
     "@microsoft/tsdoc" "0.14.1"
@@ -1947,7 +1947,7 @@
 
 "@microsoft/tsdoc@0.14.1":
   version "0.14.1"
-  resolved "https://registry.yarnpkg.com/@microsoft/tsdoc/-/tsdoc-0.14.1.tgz#155ef21065427901994e765da8a0ba0eaae8b8bd"
+  resolved "https://registry.npmjs.org/@microsoft/tsdoc/-/tsdoc-0.14.1.tgz"
   integrity sha512-6Wci+Tp3CgPt/B9B0a3J4s3yMgLNSku6w5TV6mN+61C71UqsRBv2FUibBf3tPGlNxebgPHMEUzKpb1ggE8KCKw==
 
 "@mrmlnc/readdir-enhanced@^2.2.1":
@@ -1960,7 +1960,7 @@
 
 "@msgpack/msgpack@^2.7.2":
   version "2.7.2"
-  resolved "https://registry.yarnpkg.com/@msgpack/msgpack/-/msgpack-2.7.2.tgz#f34b8aa0c49f0dd55eb7eba577081299cbf3f90b"
+  resolved "https://registry.npmjs.org/@msgpack/msgpack/-/msgpack-2.7.2.tgz"
   integrity sha512-rYEi46+gIzufyYUAoHDnRzkWGxajpD9vVXFQ3g1vbjrBm6P7MBmm+s/fqPa46sxa+8FOUdEuRQKaugo5a4JWpw==
 
 "@nodelib/fs.scandir@2.1.5":
@@ -2234,7 +2234,7 @@
 
 "@source-craft/rust@^0.0.5":
   version "0.0.5"
-  resolved "https://registry.yarnpkg.com/@source-craft/rust/-/rust-0.0.5.tgz#2d787c3f4e9f1d2b32710c64a43c2478f09459cc"
+  resolved "https://registry.npmjs.org/@source-craft/rust/-/rust-0.0.5.tgz"
   integrity sha512-Fy/+8vGrByEBwZIojP4KPx5k55CNMcrcbKdkKH81lDuCjaca6oYmHmOMHlsioVhaDa6kPmE1rDVWUqAHy2xPCg==
   dependencies:
     "@source-craft/types" "0.0.2"
@@ -2247,7 +2247,7 @@
 
 "@source-craft/types@0.0.2":
   version "0.0.2"
-  resolved "https://registry.yarnpkg.com/@source-craft/types/-/types-0.0.2.tgz#28610f17b7944bc81f9b442a44910dbda9199824"
+  resolved "https://registry.npmjs.org/@source-craft/types/-/types-0.0.2.tgz"
   integrity sha512-qjggK7Ahh08RYRsekbL8prgPLpE9H7Xh3kNXujVX9qVjWm1GMLVZN1vflnDbTFJP3CkjeQTwXjlXWgTQz093iw==
 
 "@szmarczak/http-timer@^1.1.2":
@@ -2329,7 +2329,7 @@
 
 "@type-craft/rust@^0.0.4":
   version "0.0.4"
-  resolved "https://registry.yarnpkg.com/@type-craft/rust/-/rust-0.0.4.tgz#d8d1618b20da276461da069b13f99ca312956e7b"
+  resolved "https://registry.npmjs.org/@type-craft/rust/-/rust-0.0.4.tgz"
   integrity sha512-j8W3kSI2qIHMT/PyV8kzcIHIjUPsw3gNkI7kFNiWqz5Zr2tQ+IaGNq9LUAHvtaNbOraT0hT/c7DFbKQCtlJWIw==
   dependencies:
     "@source-craft/rust" "^0.0.5"
@@ -5161,7 +5161,7 @@ create-require@^1.1.0:
 
 cross-fetch@^3.1.5:
   version "3.1.5"
-  resolved "https://registry.yarnpkg.com/cross-fetch/-/cross-fetch-3.1.5.tgz#e1389f44d9e7ba767907f7af8454787952ab534f"
+  resolved "https://registry.npmjs.org/cross-fetch/-/cross-fetch-3.1.5.tgz"
   integrity sha512-lvb1SBsI0Z7GDwmuid+mU3kWVBwTVUbe7S0H52yaaAdQOXq2YktTCZdlAcNKFzE6QtRz0snpw9bNiPeOIkkQvw==
   dependencies:
     node-fetch "2.6.7"
@@ -6030,7 +6030,7 @@ eslint-config-prettier@^6.0.0:
 
 eslint-config-prettier@^8.5.0:
   version "8.5.0"
-  resolved "https://registry.yarnpkg.com/eslint-config-prettier/-/eslint-config-prettier-8.5.0.tgz#5a81680ec934beca02c7b1a61cf8ca34b66feab1"
+  resolved "https://registry.npmjs.org/eslint-config-prettier/-/eslint-config-prettier-8.5.0.tgz"
   integrity sha512-obmWKLUNCnhtQRKc+tmnYuQl0pFU1ibYJQ5BGhTVB08bHe9wC8qUeG7c08dj9XX+AuPj1YSGSQIHl1pnDHZR0Q==
 
 eslint-loader@^2.2.1:
@@ -6053,14 +6053,14 @@ eslint-plugin-prettier@^3.3.1:
 
 eslint-plugin-prettier@^4.0.0:
   version "4.2.1"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-prettier/-/eslint-plugin-prettier-4.2.1.tgz#651cbb88b1dab98bfd42f017a12fa6b2d993f94b"
+  resolved "https://registry.npmjs.org/eslint-plugin-prettier/-/eslint-plugin-prettier-4.2.1.tgz"
   integrity sha512-f/0rXLXUt0oFYs8ra4w49wYZBG5GKZpAYsJSm6rnYL5uVDjd+zowwMwVZHnAjf4edNrKpCDYfXDgmRE/Ak7QyQ==
   dependencies:
     prettier-linter-helpers "^1.0.0"
 
 eslint-plugin-tsdoc@^0.2.16:
   version "0.2.16"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-tsdoc/-/eslint-plugin-tsdoc-0.2.16.tgz#a3d31fb9c7955faa3c66a43dd43da7635f1c5e0d"
+  resolved "https://registry.npmjs.org/eslint-plugin-tsdoc/-/eslint-plugin-tsdoc-0.2.16.tgz"
   integrity sha512-F/RWMnyDQuGlg82vQEFHQtGyWi7++XJKdYNn0ulIbyMOFqYIjoJOUdE6olORxgwgLkpJxsCJpJbTHgxJ/ggfXw==
   dependencies:
     "@microsoft/tsdoc" "0.14.1"
@@ -7725,7 +7725,7 @@ is-color-stop@^1.0.0:
 
 is-core-module@^2.1.0:
   version "2.9.0"
-  resolved "https://registry.yarnpkg.com/is-core-module/-/is-core-module-2.9.0.tgz#e1c34429cd51c6dd9e09e0799e396e27b19a9c69"
+  resolved "https://registry.npmjs.org/is-core-module/-/is-core-module-2.9.0.tgz"
   integrity sha512-+5FPy5PnwmO3lvfMb0AsoPaBG+5KHUI0wYFXOtYPnVVVspTFUuMZNfNaNVRt3FZadstu2c8x23vykRW/NBoU6A==
   dependencies:
     has "^1.0.3"
@@ -8079,7 +8079,7 @@ jeffsum@^1.1.1:
 
 jju@~1.4.0:
   version "1.4.0"
-  resolved "https://registry.yarnpkg.com/jju/-/jju-1.4.0.tgz#a3abe2718af241a2b2904f84a625970f389ae32a"
+  resolved "https://registry.npmjs.org/jju/-/jju-1.4.0.tgz"
   integrity sha512-8wb9Yw966OSxApiCt0K3yNJL8pnNeIv+OEq2YMidz4FKP6nonSRoOXc80iXY4JaN2FC11B9qsNmDsm+ZOfMROA==
 
 js-base64@^3.7.2:
@@ -8139,7 +8139,7 @@ json-buffer@3.0.0:
 
 json-es6@^1.0.0:
   version "1.0.0"
-  resolved "https://registry.yarnpkg.com/json-es6/-/json-es6-1.0.0.tgz#1054f0cf2a29d28872da1232e17746ba2ca3b267"
+  resolved "https://registry.npmjs.org/json-es6/-/json-es6-1.0.0.tgz"
   integrity sha512-WhTusxr4X5D2TM5AmKCSr82GpTgjziQQB6fKEefHz5gRvZt10h17rAneHhsJ/Yxgb/kwTOPXk0SNRAeSjKzusQ==
 
 json-parse-better-errors@^1.0.1, json-parse-better-errors@^1.0.2:
@@ -8897,9 +8897,9 @@ mz@^2.4.0:
     thenify-all "^1.0.0"
 
 nan@^2.12.1:
-  version "2.15.0"
-  resolved "https://registry.yarnpkg.com/nan/-/nan-2.15.0.tgz#3f34a473ff18e15c1b5626b62903b5ad6e665fee"
-  integrity sha512-8ZtvEnA2c5aYCZYd1cvgdnU6cqwixRoYg70xPLWUws5ORTa/lnw+u4amixRS/Ac5U5mQVgp9pnlSUnbNWFaWZQ==
+  version "2.16.0"
+  resolved "https://registry.yarnpkg.com/nan/-/nan-2.16.0.tgz#664f43e45460fb98faf00edca0bb0d7b8dce7916"
+  integrity sha512-UdAqHyFngu7TfQKsCBgAA6pWDkT8MAO7d0jyOecVhN5354xbLqdn8mV9Tat9gepAupm0bt2DbeaSC8vS52MuFA==
 
 nanoid@^3.3.1:
   version "3.3.1"
@@ -10064,7 +10064,7 @@ prettier@^1.19.1:
 
 prettier@^2.6.2:
   version "2.7.1"
-  resolved "https://registry.yarnpkg.com/prettier/-/prettier-2.7.1.tgz#e235806850d057f97bb08368a4f7d899f7760c64"
+  resolved "https://registry.npmjs.org/prettier/-/prettier-2.7.1.tgz"
   integrity sha512-ujppO+MkdPqoVINuDFDRLClm7D78qbDt0/NR+wp5FqEZOoTNAjPHWj17QRhu7geIHJfcNhRk1XVQmF8Bp3ye+g==
 
 pretty-error@^2.0.2:
@@ -10614,7 +10614,7 @@ resolve@^2.0.0-next.3:
 
 resolve@~1.19.0:
   version "1.19.0"
-  resolved "https://registry.yarnpkg.com/resolve/-/resolve-1.19.0.tgz#1af5bf630409734a067cae29318aac7fa29a267c"
+  resolved "https://registry.npmjs.org/resolve/-/resolve-1.19.0.tgz"
   integrity sha512-rArEXAgsBG4UgRGcynxWIWKFvh/XZCcS8UJdHhwy91zwAvCZIbcs+vAbflgBnNjYMs/i/i+/Ux6IZhML1yPvxg==
   dependencies:
     is-core-module "^2.1.0"

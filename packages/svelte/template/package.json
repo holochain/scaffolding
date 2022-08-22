@@ -29,8 +29,8 @@
     "svelte-preprocess": "^4.10.4"
   },
   "dependencies": {
-    "@holochain/client": "^0.5.0",
-    "@material/mwc-circular-progress": "^0.25.3",    
+    "@holochain/client": "^0.7.0",
+    "@material/mwc-circular-progress": "^0.25.3",
     "@msgpack/msgpack": "^2.7.2"
   }
 }

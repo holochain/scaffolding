@@ -21,7 +21,7 @@ export const packageJson = (): ScFile => ({
     "package": "npm run build && cd dist && bestzip ../dist.zip *"
   },
   "dependencies": {
-    "@holochain/client": "^0.5.0",
+    "@holochain/client": "^0.7.0",
     "@lit-labs/context": "^0.1.2",
     "@material/mwc-circular-progress": "^0.25.3",
     "@msgpack/msgpack": "^2.7.2",
@@ -100,4 +100,3 @@ export const packageJson = (): ScFile => ({
 }
 `
 });
-    
