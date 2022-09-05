@@ -37,7 +37,7 @@ export const packageJson = (): ScFile => ({
     "svelte-preprocess": "^4.10.4"
   },
   "dependencies": {
-    "@holochain/client": "^0.7.0",
+    "@holochain/client": "^0.8.0",
     "@material/mwc-circular-progress": "^0.25.3",
     "@msgpack/msgpack": "^2.7.2"
   }

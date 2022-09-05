@@ -986,10 +986,10 @@
   dependencies:
     "@hapi/hoek" "^8.3.0"
 
-"@holochain/client@^0.7.0":
-  version "0.7.0"
-  resolved "https://registry.npmjs.org/@holochain/client/-/client-0.7.0.tgz"
-  integrity sha512-+rrKu8Fr/g/zcNM8vRZ+jZ8RF1E9oMGwaxukrvZ4kIuoDg0pfOqtZ/PaPWnAQsnF1dX1IVG+QPrDCSRNGRnpwQ==
+"@holochain/client@^0.8.0":
+  version "0.8.0"
+  resolved "https://registry.yarnpkg.com/@holochain/client/-/client-0.8.0.tgz#83ed3e541a3332d2d6aaa8b575c5ec9a3479167a"
+  integrity sha512-xnIcQeLPXSYnJxpVxskDj1D1RisFoujZRoYmDvy5g6HzWb0bh+t+53zfe/hwd6TUNf0Hv5bL+BmO5uupaUUsmA==
   dependencies:
     "@msgpack/msgpack" "^2.7.2"
     cross-fetch "^3.1.5"

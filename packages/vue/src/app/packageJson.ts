@@ -16,7 +16,7 @@ export const packageJson = ({happName}: {happName: string;}): ScFile => ({
     "package": "npm run build && cd dist && bestzip ../dist.zip *"
   },
   "dependencies": {
-    "@holochain/client": "^0.7.0",
+    "@holochain/client": "^0.8.0",
     "@material/mwc-button": "^0.25.3",
     "@material/mwc-circular-progress": "^0.25.3",
     "@msgpack/msgpack": "^2.7.2",
