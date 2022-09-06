@@ -37,7 +37,7 @@ export function happ(happDef: HappDefinition, hdkVersion = '0.0.147', hdiVersion
     type: ScNodeType.Directory,
     children: {
       ...happDir.children,
-      'default.nix': defaultNix('v0_0_155'),
+      'default.nix': defaultNix('v0_0_157'),
       workdir: {
         type: ScNodeType.Directory,
         children: {
