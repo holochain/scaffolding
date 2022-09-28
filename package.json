@@ -3,7 +3,8 @@
   "private": true,
   "version": "0.0.1",
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "crates/*/pkg"
   ],
   "scripts": {
     "start": "concurrently -k \"yarn workspace @holochain-scaffolding/vocabulary run build:watch\" \"yarn workspace @holochain-scaffolding/definitions run build:watch\" \"yarn workspace @holochain-scaffolding/generators run build:watch\" \"yarn workspace @holochain-scaffolding/elements run build:watch\" \"yarn workspace @holochain-scaffolding/events run build:watch\" \"yarn workspace @holochain-scaffolding/vue run build:watch\" \"yarn workspace @holochain-scaffolding/ui run build:watch\" \"yarn workspace @holochain/create run start\"",
