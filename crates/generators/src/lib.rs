@@ -1,9 +1,17 @@
-use vfs::{FileSystem, MemoryFS};
+use holochain_scaffolding_utils::*;
 
-pub fn generate_web_app_skeleton() -> MemoryFS {
-    let memfs = MemoryFS::new();
+use workdir::generate_web_happ_workdir;
 
-    memfs.create_file("hey").unwrap().write("buf".as_bytes()).unwrap();
+mod workdir;
 
-    memfs
+pub fn web_app_skeleton(app_name: &String) -> FileTree {
+    dir! {
+        "workdir" => generate_web_happ_workdir(app_name, &String::from("ui"))
+    }
 }
+
+pub enum GenerateDnaError {}
+pub fn generate_dna(web_app_dir_tree: FileTree) -> Result<FileTree, GenerateDnaError> {
+    Ok(web_app_dir_tree)
+}
+

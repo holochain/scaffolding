@@ -1,20 +1,26 @@
-use holochain_scaffolding_utils::load_dir_into_memory;
+use std::path::PathBuf;
 
-use vfs::{VfsResult, VfsPath};
+use build_fs_tree::{dir, file};
+use holochain_scaffolding_utils::*;
+
+fn fixture_path() -> PathBuf {
+    std::env::current_dir().unwrap().join("tests/fixture")
+}
+
+fn fixture_tree() -> FileTree {
+    dir! {
+        "example.sh" => file!(""),
+        "dir" => dir! {
+            "some_script.sh" => file!("Hello!")
+        }
+    }
+}
 
 #[test]
 fn test_load_dir_into_memory() {
-    let result = load_dir_into_memory(std::env::current_dir().unwrap().join("tests/fixture")).unwrap();
+    let result = load_directory_into_memory(&fixture_path()).unwrap();
 
-    let root_path = VfsPath::new(result);
+    let expected = fixture_tree();
 
-    let mut directories = root_path.walk_dir().unwrap().collect::<VfsResult<Vec<_>>>().unwrap();
-    directories.sort_by_key(|path| path.as_str().to_string());
-
-    let expected = vec!["dir", "dir/some_script.sh", "example.sh"]
-        .iter()
-        .map(|path| root_path.join(path))
-        .collect::<VfsResult<Vec<_>>>().unwrap();
-
-    assert_eq!(directories, expected);
+    assert_eq!(result, expected);
 }

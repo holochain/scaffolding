@@ -14,3 +14,4 @@ import '@ui5/webcomponents/dist/Card.js';
 customElements.define('webhapp-definition-builder', WebHappDefinitionBuilder);
 
 createApp(App).mount('#app');
+import('holochain_scaffolding_wasm').then(w => console.log(w.greet()))
