@@ -2,7 +2,6 @@ use std::collections::BTreeMap;
 use std::{fs, io, path::PathBuf};
 
 use build_fs_tree::FileSystemTree;
-pub use build_fs_tree::{dir, file, Build};
 
 pub type FileTree = FileSystemTree<String, String>;
 

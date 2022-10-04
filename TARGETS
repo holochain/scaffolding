@@ -1,0 +1,13 @@
+hc scaffold web-app --ui vue forum
+hc scaffold dna forum
+hc scaffold --dna forum zome posts 
+
+hc scaffold --dna forum --zome posts entry-def post --field title:String --field content:String --read false --update false --delete false
+hc scaffold --dna forum --zome posts index-global post --link-to-entry-hash
+
+hc scaffold --dna forum --zome posts index-by-author post --link-to-entry-hash
+
+hc scaffold --dna forum --zome posts entry-def comment --field comment:String
+hc scaffold --dna forum --zome posts link-type posts comments --link-from-entry-hash --link-to-entry-hash
+
+hc scaffold --dna forum --zome posts link-type comment agent --link-from-entry-hash --link-to-entry-hash

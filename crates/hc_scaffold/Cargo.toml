@@ -1,0 +1,30 @@
+[package]
+edition = "2021"
+name = "holochain_cli_scaffold"
+version = "0.1.0"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[[bin]]
+name = "hc-scaffold"
+path = "src/bin/hc-scaffold.rs"
+
+[lib]
+name = "holochain_cli_scaffold"
+path = "src/lib.rs"
+
+[dependencies]
+anyhow = "1.0"
+dialoguer = "0.10.2"
+holochain_scaffolding_utils = {path = "../utils"}
+holochain_types = {git = "https://github.com/guillemcordoba/holochain", rev = "ce26b49dceedb9916eafd22fad3c4800ef3f32cb"}
+holochain_util = {features = ["backtrace"], version = "0.0.12"}
+mr_bundle = "0.0.16"
+serde_yaml = "0.8"
+structopt = "0.3.11"
+thiserror = "1.0.22"
+tokio = {version = "1.11", features = ["full"]}
+build-fs-tree = "0.4.0"
+
+[dev-dependencies]
+assert_cmd = "1.0"
