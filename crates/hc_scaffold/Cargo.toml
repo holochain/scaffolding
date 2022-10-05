@@ -17,9 +17,10 @@ path = "src/lib.rs"
 anyhow = "1.0"
 dialoguer = "0.10.2"
 holochain_scaffolding_utils = {path = "../utils"}
-holochain_types = {git = "https://github.com/guillemcordoba/holochain", rev = "ce26b49dceedb9916eafd22fad3c4800ef3f32cb"}
+holochain_types = {git = "https://github.com/guillemcordoba/holochain", rev = "38cfb4527e666dc361691563d1f48edbbfdff1a9"}
+holochain_cli_bundle = {git = "https://github.com/guillemcordoba/holochain", rev = "38cfb4527e666dc361691563d1f48edbbfdff1a9"}
 holochain_util = {features = ["backtrace"], version = "0.0.12"}
-mr_bundle = "0.0.16"
+mr_bundle = {git = "https://github.com/guillemcordoba/holochain", rev = "38cfb4527e666dc361691563d1f48edbbfdff1a9"}
 serde_yaml = "0.8"
 structopt = "0.3.11"
 thiserror = "1.0.22"

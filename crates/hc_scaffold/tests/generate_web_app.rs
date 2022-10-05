@@ -8,8 +8,8 @@ fn generate_web_app_and_test_it() {
     cmd.assert().success();
 
     let mut cmd = Command::new("nix-shell");
-    let cmd= cmd.current_dir("./tests/fixtures");
+    let cmd= cmd.current_dir("./tests/fixtures/forum");
     let cmd = cmd
-        .args(&["--run", "\"npm i && npm t\""]);
+        .args(&["--run", "npm i && npm t"]);
     cmd.assert().success();
 }
