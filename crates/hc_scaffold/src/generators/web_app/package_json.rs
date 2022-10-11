@@ -16,7 +16,7 @@ pub fn workspace_package_json(
         "start": "npm run network 2",
         "network": "hc s clean && npm run build:happ && concurrently-repeat \"npm run start:agent\"",
         "start:agent": "cross-env HC_PORT=$(port) concurrently -k \"npm run start:happ\" \"sleep 5 && npm run start -w {}\"",
-        "test": "hc-scaffold pack web-app workdir && npm t -w tests",
+        "test": "hc-scaffold pack app workdir && npm t -w tests",
         "start:happ": "concurrently \"RUST_LOG=warn echo \"pass\" | hc s --piped generate {}/{}.happ --run=$HC_PORT -a {} network mdns\" \"npm run playground\"",
         "package": "npm run build:happ && npm run package -w {} && hc web-app pack {}",
         "build:happ": "npm run build:zomes && hc-scaffold pack app {}",

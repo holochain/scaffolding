@@ -1,8 +1,9 @@
 use crate::generators::{self, dna::scaffold_dna};
-use build_fs_tree::{MergeableFileSystemTree, Build};
+use build_fs_tree::{Build, MergeableFileSystemTree};
 use holochain_scaffolding_utils::load_directory_into_memory;
 use holochain_types::{prelude::AppManifest, web_app::WebAppManifest};
-use mr_bundle::{Bundle, Location};
+use holochain_util::ffs;
+use mr_bundle::{Bundle, Location, Manifest};
 use std::{path::PathBuf, process::Command};
 use structopt::StructOpt;
 
@@ -19,11 +20,8 @@ pub enum HcScaffold {
         description: Option<String>,
     },
     Dna {
-        #[structopt(long)]
-        app: Option<String>,
-
-        #[structopt(subcommand)]
-        command: HcScaffoldDna,
+        /// Name of the DNA being scaffolded
+        name: String,
     },
     Pack(Pack),
 }
@@ -65,11 +63,11 @@ impl HcScaffold {
                         .output()?;
                 };
             }
-            HcScaffold::Dna { app, command } => {
+            HcScaffold::Dna { name } => {
                 let current_dir = std::env::current_dir()?;
 
                 let app_file_tree = load_directory_into_memory(&current_dir)?;
-                let file_tree = scaffold_dna(app_file_tree, command.name)?;
+                let file_tree = scaffold_dna(app_file_tree, name)?;
 
                 let file_tree = MergeableFileSystemTree::<String, String>::from(file_tree);
 
@@ -84,12 +82,19 @@ impl HcScaffold {
 }
 
 async fn web_app_pack_all_bundled(web_app_bundle_path: PathBuf) -> anyhow::Result<()> {
-    let bundle: Bundle<WebAppManifest> = Bundle::read_from_file(&web_app_bundle_path).await?;
+    let web_app_bundle_path = ffs::canonicalize(web_app_bundle_path).await?;
 
-    let location = bundle.manifest().happ_bundle_location();
+    let f = std::fs::File::open(web_app_bundle_path.join(WebAppManifest::path()))?;
+
+    let manifest: WebAppManifest = serde_yaml::from_reader(f)?;
+
+    let location = manifest.happ_bundle_location();
 
     if let Location::Bundled(mut bundled_location) = location {
         bundled_location.pop();
+        bundled_location = PathBuf::new()
+            .join(web_app_bundle_path.clone())
+            .join(bundled_location);
 
         app_pack_all_bundled(bundled_location).await?;
     }
@@ -105,9 +110,13 @@ async fn web_app_pack_all_bundled(web_app_bundle_path: PathBuf) -> anyhow::Resul
 }
 
 async fn app_pack_all_bundled(app_bundle_path: PathBuf) -> anyhow::Result<()> {
-    let bundle: Bundle<AppManifest> = Bundle::read_from_file(&app_bundle_path).await?;
+    let app_bundle_path = ffs::canonicalize(app_bundle_path).await?;
 
-    for app_role in bundle.manifest().app_roles() {
+    let f = std::fs::File::open(app_bundle_path.join(AppManifest::path()))?;
+
+    let manifest: AppManifest = serde_yaml::from_reader(f)?;
+
+    for app_role in manifest.app_roles() {
         if let Some(Location::Bundled(mut bundled_location)) = app_role.dna.location {
             bundled_location.pop();
 

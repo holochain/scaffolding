@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use anyhow::anyhow;
 use build_fs_tree::{dir, file, MergeableFileSystemTree};
-use holochain_scaffolding_utils::{override_file_contents, FileTree};
+use holochain_scaffolding_utils::{insert_tree_in_path, override_file_contents, FileTree};
 use holochain_types::prelude::{
     AppManifest, AppManifestCurrentBuilder, AppRoleDnaManifest, AppRoleManifest, CellProvisioning,
     DnaModifiers, DnaModifiersOpt, SerializedBytes, Timestamp, UnsafeBytes,
@@ -28,16 +28,21 @@ pub fn scaffold_dna(mut app_file_tree: FileTree, dna_name: String) -> anyhow::Re
     }?;
 
     let new_dna_file_tree: FileTree = dir! {
-      "dnas" => dir! {
-        dna_name.clone()=>dir!{
+        dna_name.clone() => dir!{
           "integrity_zomes" => dir! {},
           "coordinator_zomes"=> dir! {},
           "workdir" => dir! {
             "dna.yaml" => file!(empty_dna_manifest(dna_name.clone())?)
           }
-        }
       }
     };
+
+    insert_tree_in_path(
+        &mut app_file_tree,
+        new_dna_file_tree,
+        &PathBuf::new().join("dnas"),
+    )
+    .map_err(|e| anyhow!(e))?;
 
     let mut dna_location = PathBuf::new();
 
@@ -47,7 +52,8 @@ pub fn scaffold_dna(mut app_file_tree: FileTree, dna_name: String) -> anyhow::Re
     dna_location = dna_location
         .join("dnas")
         .join(dna_name.clone())
-        .join("workdir");
+        .join("workdir")
+        .join(format!("{}.happ", dna_name));
 
     let app_manifest: AppManifest = serde_yaml::from_str(contents.as_str())?;
     let mut roles = app_manifest.app_roles();

@@ -34,26 +34,80 @@ pub fn load_directory_into_memory(path: &PathBuf) -> io::Result<FileTree> {
 }
 
 #[derive(Debug)]
-pub enum OverrideFileContentsError {
-    FileNotFound,
+pub enum FsUtilsError {
+    PathNotFound,
+    PathIsEmpty,
 }
 
-impl Display for OverrideFileContentsError {
+impl Display for FsUtilsError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         todo!()
     }
 }
+
+pub fn insert_tree_in_path(
+    file_tree: &mut FileTree,
+    tree_to_insert: FileTree,
+    path_to_insert_in: &PathBuf,
+) -> Result<(), FsUtilsError> {
+    let mut current_tree = file_tree;
+
+    let maybe_parent = path_to_insert_in.parent();
+
+    if let Some(parent) = maybe_parent {
+        for component in parent.components() {
+            let directory_folder = component
+                .as_os_str()
+                .to_str()
+                .ok_or(FsUtilsError::PathNotFound)?
+                .to_string();
+
+            match current_tree {
+                FileSystemTree::Directory(directory_contents) => {
+                    current_tree = directory_contents
+                        .get_mut(&directory_folder)
+                        .ok_or(FsUtilsError::PathNotFound)?;
+                }
+                FileSystemTree::File(_) => {
+                    return Err(FsUtilsError::PathNotFound);
+                }
+            }
+        }
+    }
+
+    let last_component = path_to_insert_in
+        .components()
+        .last()
+        .ok_or(FsUtilsError::PathIsEmpty)?;
+    let tree_name = last_component
+        .as_os_str()
+        .to_str()
+        .ok_or(FsUtilsError::PathNotFound)?
+        .to_string();
+
+    match current_tree {
+        FileTree::Directory(directory_contents) => {
+            directory_contents.insert(tree_name, tree_to_insert);
+        }
+        FileTree::File(contents) => {
+            return Err(FsUtilsError::PathNotFound)?;
+        }
+    }
+
+    Ok(())
+}
+
 /// Overrides the contents of the file found in the given `file_path` with the given `new_contents`
 pub fn override_file_contents(
     file_tree: &mut FileTree,
     file_path: &PathBuf,
     new_contents: &String,
-) -> Result<(), OverrideFileContentsError> {
+) -> Result<(), FsUtilsError> {
     let file_name = file_path
         .file_name()
-        .ok_or(OverrideFileContentsError::FileNotFound)?
+        .ok_or(FsUtilsError::PathNotFound)?
         .to_str()
-        .ok_or(OverrideFileContentsError::FileNotFound)?
+        .ok_or(FsUtilsError::PathNotFound)?
         .to_string();
     let mut current_tree = file_tree;
 
@@ -64,17 +118,17 @@ pub fn override_file_contents(
             let directory_folder = component
                 .as_os_str()
                 .to_str()
-                .ok_or(OverrideFileContentsError::FileNotFound)?
+                .ok_or(FsUtilsError::PathNotFound)?
                 .to_string();
 
             match current_tree {
                 FileSystemTree::Directory(directory_contents) => {
                     current_tree = directory_contents
                         .get_mut(&directory_folder)
-                        .ok_or(OverrideFileContentsError::FileNotFound)?;
+                        .ok_or(FsUtilsError::PathNotFound)?;
                 }
                 FileSystemTree::File(_) => {
-                    return Err(OverrideFileContentsError::FileNotFound);
+                    return Err(FsUtilsError::PathNotFound);
                 }
             }
         }
@@ -85,12 +139,9 @@ pub fn override_file_contents(
             directory_contents.insert(file_name, FileTree::File(new_contents.clone()));
         }
         FileSystemTree::File(_) => {
-            return Err(OverrideFileContentsError::FileNotFound);
+            return Err(FsUtilsError::PathNotFound);
         }
     }
-    let dir_content = current_tree
-        .dir_content()
-        .ok_or(OverrideFileContentsError::FileNotFound)?;
 
     Ok(())
 }
