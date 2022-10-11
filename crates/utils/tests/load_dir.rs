@@ -24,3 +24,18 @@ fn test_load_dir_into_memory() {
 
     assert_eq!(result, expected);
 }
+
+#[test]
+fn test_find_files() {
+    let file_tree = fixture_tree();
+
+    let paths = find_files_by_name(&file_tree, &PathBuf::new().join("some_script.sh"));
+
+    assert_eq!(
+        paths
+            .get(&PathBuf::new().join("dir").join("some_script.sh"))
+            .unwrap()
+            .clone(),
+        String::from("Hello!")
+    );
+}

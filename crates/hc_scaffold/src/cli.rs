@@ -1,4 +1,6 @@
-use crate::generators;
+use crate::generators::{self, dna::scaffold_dna};
+use build_fs_tree::{MergeableFileSystemTree, Build};
+use holochain_scaffolding_utils::load_directory_into_memory;
 use holochain_types::{prelude::AppManifest, web_app::WebAppManifest};
 use mr_bundle::{Bundle, Location};
 use std::{path::PathBuf, process::Command};
@@ -16,7 +18,21 @@ pub enum HcScaffold {
         /// [OPTIONAL] Description of the app to scaffold
         description: Option<String>,
     },
+    Dna {
+        #[structopt(long)]
+        app: Option<String>,
+
+        #[structopt(subcommand)]
+        command: HcScaffoldDna,
+    },
     Pack(Pack),
+}
+
+#[derive(Debug, StructOpt)]
+#[structopt(setting = structopt::clap::AppSettings::InferSubcommands)]
+pub struct HcScaffoldDna {
+    /// Name of the DNA being scaffolded
+    name: String,
 }
 
 /// The list of subcommands for `hc sandbox`
@@ -48,6 +64,16 @@ impl HcScaffold {
                         .args(["-I", "nixpkgs=https://github.com/NixOS/nixpkgs/archive/nixos-21.11.tar.gz", "-p", "niv", "--run", "niv init && niv drop nixpkgs && niv drop niv && niv add -b main holochain/holonix"])
                         .output()?;
                 };
+            }
+            HcScaffold::Dna { app, command } => {
+                let current_dir = std::env::current_dir()?;
+
+                let app_file_tree = load_directory_into_memory(&current_dir)?;
+                let file_tree = scaffold_dna(app_file_tree, command.name)?;
+
+                let file_tree = MergeableFileSystemTree::<String, String>::from(file_tree);
+
+                file_tree.build(&".".into())?;
             }
             HcScaffold::Pack(Pack::WebApp { path }) => web_app_pack_all_bundled(path).await?,
             HcScaffold::Pack(Pack::App { path }) => app_pack_all_bundled(path).await?,
