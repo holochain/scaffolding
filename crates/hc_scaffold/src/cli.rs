@@ -1,5 +1,7 @@
-use crate::{error::ScaffoldResult, generators};
-use std::{path::PathBuf, process::Command, time::Duration};
+use crate::generators;
+use holochain_types::{prelude::AppManifest, web_app::WebAppManifest};
+use mr_bundle::{Bundle, Location};
+use std::{path::PathBuf, process::Command};
 use structopt::StructOpt;
 
 /// The list of subcommands for `hc sandbox`
@@ -33,7 +35,7 @@ pub enum Pack {
 }
 
 impl HcScaffold {
-    pub fn run(self) -> anyhow::Result<()> {
+    pub async fn run(self) -> anyhow::Result<()> {
         match self {
             HcScaffold::WebApp { name, description } => {
                 generators::web_app::scaffold_web_app(name.clone(), description)?;
@@ -47,20 +49,57 @@ impl HcScaffold {
                         .output()?;
                 };
             }
-            HcScaffold::Pack(Pack::WebApp { path }) => {
-                // Go through apps
-                // Go through DNAs
-                // Pack DNAs
-                // Pack apps
-                // Pack web-app
-            }
-            HcScaffold::Pack(Pack::App { path }) => {
-                // Go through DNAs
-                // Pack DNAs
-                // Pack app
-            }
+            HcScaffold::Pack(Pack::WebApp { path }) => web_app_pack_all_bundled(path).await?,
+            HcScaffold::Pack(Pack::App { path }) => app_pack_all_bundled(path).await?,
         }
 
         Ok(())
     }
+}
+
+async fn web_app_pack_all_bundled(web_app_bundle_path: PathBuf) -> anyhow::Result<()> {
+    let bundle: Bundle<WebAppManifest> = Bundle::read_from_file(&web_app_bundle_path).await?;
+
+    let location = bundle.manifest().happ_bundle_location();
+
+    if let Location::Bundled(mut bundled_location) = location {
+        bundled_location.pop();
+
+        app_pack_all_bundled(bundled_location).await?;
+    }
+
+    holochain_cli_bundle::HcWebAppBundle::Pack {
+        path: web_app_bundle_path,
+        output: None,
+    }
+    .run()
+    .await?;
+
+    Ok(())
+}
+
+async fn app_pack_all_bundled(app_bundle_path: PathBuf) -> anyhow::Result<()> {
+    let bundle: Bundle<AppManifest> = Bundle::read_from_file(&app_bundle_path).await?;
+
+    for app_role in bundle.manifest().app_roles() {
+        if let Some(Location::Bundled(mut bundled_location)) = app_role.dna.location {
+            bundled_location.pop();
+
+            holochain_cli_bundle::HcDnaBundle::Pack {
+                path: bundled_location,
+                output: None,
+            }
+            .run()
+            .await?;
+        }
+    }
+
+    holochain_cli_bundle::HcAppBundle::Pack {
+        path: app_bundle_path,
+        output: None,
+    }
+    .run()
+    .await?;
+
+    Ok(())
 }

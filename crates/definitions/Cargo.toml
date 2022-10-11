@@ -6,3 +6,8 @@ version = "0.1.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+convert_case = "0.1.0"
+proc-macro2 = "*"
+quote = "*"
+rand = "0.8.5"
+syn = {version = "*", features = ["full"]}

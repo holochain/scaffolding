@@ -15,17 +15,18 @@ path = "src/lib.rs"
 
 [dependencies]
 anyhow = "1.0"
+build-fs-tree = "0.4.0"
 dialoguer = "0.10.2"
+holochain_cli_bundle = {git = "https://github.com/holochain/holochain", rev = "9426206f457d0ecd807892863670c77f37bd831d"}
+holochain_scaffolding_definitions = {path = "../definitions"}
 holochain_scaffolding_utils = {path = "../utils"}
-holochain_types = {git = "https://github.com/guillemcordoba/holochain", rev = "38cfb4527e666dc361691563d1f48edbbfdff1a9"}
-holochain_cli_bundle = {git = "https://github.com/guillemcordoba/holochain", rev = "38cfb4527e666dc361691563d1f48edbbfdff1a9"}
+holochain_types = {git = "https://github.com/holochain/holochain", rev = "9426206f457d0ecd807892863670c77f37bd831d"}
 holochain_util = {features = ["backtrace"], version = "0.0.12"}
-mr_bundle = {git = "https://github.com/guillemcordoba/holochain", rev = "38cfb4527e666dc361691563d1f48edbbfdff1a9"}
+mr_bundle = {git = "https://github.com/holochain/holochain", rev = "9426206f457d0ecd807892863670c77f37bd831d"}
 serde_yaml = "0.8"
 structopt = "0.3.11"
 thiserror = "1.0.22"
 tokio = {version = "1.11", features = ["full"]}
-build-fs-tree = "0.4.0"
 
 [dev-dependencies]
 assert_cmd = "1.0"
