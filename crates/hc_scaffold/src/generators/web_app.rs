@@ -1,3 +1,5 @@
+use std::ffi::OsString;
+
 use build_fs_tree::{dir, file, Build, MergeableFileSystemTree};
 use holochain_scaffolding_utils::FileTree;
 
@@ -36,7 +38,7 @@ fn web_app_skeleton(app_name: String, description: Option<String>) -> ScaffoldRe
 }
 
 pub fn scaffold_web_app(app_name: String, description: Option<String>) -> anyhow::Result<()> {
-    let file_tree = MergeableFileSystemTree::<String, String>::from(dir! {
+    let file_tree = MergeableFileSystemTree::<OsString, String>::from(dir! {
       app_name.clone() => web_app_skeleton(app_name, description)?
     });
 

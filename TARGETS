@@ -1,13 +1,73 @@
+## NEWCOMER USERS
+hc scaffold hello-world
+# Scaffolds a sample DNA, a sample zome, a sample UI (vanilla js), a sample test
+# npm i && npm start -> playground
+
+## INTERMEDIATE USERS
+
+hc scaffold template forum
+hc scaffold template todo-app # profiles module is being used
+hc scaffold template inventory
+
+## ADVANCED USERS
+
 hc scaffold web-app --ui vue forum
+# Scaffolds an empty web-app (without DNAs)
+# At the end it says: "Start to create DNAs with hc scaffold dna forum"
+
 hc scaffold dna forum
-hc scaffold --dna forum zome posts 
 
-hc scaffold --dna forum --zome posts entry-def post --field title:String --field content:String --read false --update false --delete false
-hc scaffold --dna forum --zome posts index-global post --link-to-entry-hash
+hc scaffold zome-pair posts --dna forum
+# Scaffolds both integrity and coordinator
 
-hc scaffold --dna forum --zome posts index-by-author post --link-to-entry-hash
+hc scaffold integrity-zome posts_integrity --dna forum
+hc scaffold coordinator-zome posts --dependencies posts_integrity --dna forum
 
-hc scaffold --dna forum --zome posts entry-def comment --field comment:String
-hc scaffold --dna forum --zome posts link-type posts comments --link-from-entry-hash --link-to-entry-hash
+hc scaffold entry-def post
+# Prompt: Which DNA? Selector of DNAs
 
-hc scaffold --dna forum --zome posts link-type comment agent --link-from-entry-hash --link-to-entry-hash
+hc scaffold entry-def post # works if you only have one DNA and one zome
+# Scaffold UI components
+
+hc scaffold entry-def post --dna forum --zome posts --field title:String --field content:String --read false --update false --delete false
+
+hc scaffold index-globally post --dna forum --zome posts
+# If you have a "create_post" function, just add the create_link at the end of it
+# If not, ask the developer: Which function is creating the post?
+
+hc scaffold index-by-author post --link-to-entry-hash --dna forum --zome posts
+hc scaffold index-by-time post --link-to-entry-hash --dna forum --zome posts
+
+hc scaffold entry-def comment --field comment:String --dna forum --zome posts
+hc scaffold link-type posts comments  --dna forum --zome posts
+# Add link_type
+# get_comments_for_post(action_hash) -> Vec<Record>
+# add_comment_to_post(action_hash, Comment) -> Vec<Record>
+# Create UI element <comments-for-post>
+
+hc scaffold link-type comment agent --link-from-entry-hash --link-to-entry-hash --dna forum --zome posts
+
+# OUT OF SCOPE FOR NOW
+
+hc scaffold validation-rule only-author-can-update --dna forum --zome posts --entry-def post
+hc scaffold validation-rule only-author-can-delete --dna forum --zome posts --entry-def post
+hc scaffold coutnersigning-entry --dna forum --zome posts
+
+## DOCS
+
+hc scaffold list-dnas
+hc scaffold generate-docs
+
+## MODULE INTEGRATION
+
+# Integration with DevHub?
+
+# TOML
+
+# Versioning
+
+hc scaffold bump-version # Bump nix-shell, holochain version, HDI, HDK, @holochain/client, @holochain/tryorama
+
+# Try to guess where the code should go, otherwise offer it to copy and paste
+
+# 2 sections in each file? One with a big warning: "PLEASE DON'T TOUCH"

@@ -7,3 +7,4 @@ version = "0.0.1"
 
 [dependencies]
 build-fs-tree = "0.4.0"
+thiserror = "1.0.22"

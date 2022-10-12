@@ -1,48 +1,49 @@
-use std::path::PathBuf;
+use std::{
+    ffi::OsString,
+    path::{Path, PathBuf},
+};
 
-use anyhow::anyhow;
-use build_fs_tree::{dir, file, MergeableFileSystemTree};
-use holochain_scaffolding_utils::{insert_tree_in_path, override_file_contents, FileTree};
+use build_fs_tree::{dir, file};
+use holochain_scaffolding_utils::FileTree;
 use holochain_types::prelude::{
     AppManifest, AppManifestCurrentBuilder, AppRoleDnaManifest, AppRoleManifest, CellProvisioning,
-    DnaModifiers, DnaModifiersOpt, SerializedBytes, Timestamp, UnsafeBytes,
+    DnaModifiersOpt,
 };
 use mr_bundle::Location;
 
 pub mod manifest;
+pub mod utils;
 
-use super::app::utils::find_happ_manifests;
+use crate::error::{ScaffoldError, ScaffoldResult};
+
+use super::app::utils::get_or_choose_app_manifest;
 use manifest::empty_dna_manifest;
 
-pub fn scaffold_dna(mut app_file_tree: FileTree, dna_name: String) -> anyhow::Result<FileTree> {
-    let manifest_paths = find_happ_manifests(&app_file_tree);
-
-    if manifest_paths.len() > 1 {
-        todo!();
-    }
-    let (app_manifest_path, contents) = match manifest_paths.into_iter().last() {
-        Some(contents) => Ok(contents),
-        None => Err(anyhow!(
-            "No happ.yaml manifests found in this directory tree."
-        )),
-    }?;
+pub fn scaffold_dna(
+    mut app_file_tree: FileTree,
+    app_name: Option<String>,
+    dna_name: String,
+) -> ScaffoldResult<FileTree> {
+    let (app_manifest_path, app_manifest) = get_or_choose_app_manifest(&app_file_tree, app_name)?;
 
     let new_dna_file_tree: FileTree = dir! {
-        dna_name.clone() => dir!{
-          "integrity_zomes" => dir! {},
-          "coordinator_zomes"=> dir! {},
-          "workdir" => dir! {
-            "dna.yaml" => file!(empty_dna_manifest(dna_name.clone())?)
-          }
+        "integrity_zomes" => dir! {},
+        "coordinator_zomes"=> dir! {},
+        "workdir" => dir! {
+        "dna.yaml" => file!(empty_dna_manifest(dna_name.clone())?)
       }
     };
 
-    insert_tree_in_path(
-        &mut app_file_tree,
-        new_dna_file_tree,
-        &PathBuf::new().join("dnas"),
-    )
-    .map_err(|e| anyhow!(e))?;
+    let dnas_path = PathBuf::new().join("dnas");
+
+    let v: Vec<OsString> = dnas_path.iter().map(|s| s.to_os_string()).collect();
+
+    app_file_tree
+        .path_mut(&mut v.iter())
+        .ok_or(ScaffoldError::PathNotFound(dnas_path))?
+        .dir_content_mut()
+        .ok_or(ScaffoldError::DnaManifestNotFound)?
+        .insert(OsString::from(dna_name.clone()), new_dna_file_tree);
 
     let mut dna_location = PathBuf::new();
 
@@ -60,7 +61,6 @@ pub fn scaffold_dna(mut app_file_tree: FileTree, dna_name: String) -> anyhow::Re
         .join("workdir")
         .join(format!("{}.dna", dna_name));
 
-    let app_manifest: AppManifest = serde_yaml::from_str(contents.as_str())?;
     let mut roles = app_manifest.app_roles();
 
     roles.push(AppRoleManifest {
@@ -86,12 +86,13 @@ pub fn scaffold_dna(mut app_file_tree: FileTree, dna_name: String) -> anyhow::Re
         .unwrap()
         .into();
 
-    override_file_contents(
-        &mut app_file_tree,
-        &app_manifest_path,
-        &serde_yaml::to_string(&new_manifest)?,
-    )
-    .map_err(|e| anyhow!(e))?;
+    let v: Vec<OsString> = app_manifest_path.iter().map(|s| s.to_os_string()).collect();
+
+    *app_file_tree
+        .path_mut(&mut v.iter())
+        .ok_or(ScaffoldError::PathNotFound(app_manifest_path.clone()))?
+        .file_content_mut()
+        .unwrap() = serde_yaml::to_string(&new_manifest)?;
 
     Ok(app_file_tree)
 }
