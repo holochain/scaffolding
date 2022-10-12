@@ -21,12 +21,12 @@ pub fn load_directory_into_memory(path: &PathBuf) -> io::Result<FileTree> {
                 subdirectory,
             );
         } else {
-            let contents = fs::read_to_string(path.join(entry.file_name()))?;
-
-            dir_contents.insert(
-                entry.file_name().to_str().unwrap().to_string(),
-                FileSystemTree::File(contents),
-            );
+            if let Ok(contents) = fs::read_to_string(path.join(entry.file_name())) {
+                dir_contents.insert(
+                    entry.file_name().to_str().unwrap().to_string(),
+                    FileSystemTree::File(contents),
+                );
+            }
         }
     }
 

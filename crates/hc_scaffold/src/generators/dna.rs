@@ -46,14 +46,19 @@ pub fn scaffold_dna(mut app_file_tree: FileTree, dna_name: String) -> anyhow::Re
 
     let mut dna_location = PathBuf::new();
 
-    for _path_segment in app_manifest_path.components() {
-        dna_location = dna_location.join("..");
+    let app_workdir_path = app_manifest_path.parent();
+
+    if let Some(path) = app_workdir_path {
+        for _path_segment in path.components() {
+            dna_location = dna_location.join("..");
+        }
     }
+
     dna_location = dna_location
         .join("dnas")
         .join(dna_name.clone())
         .join("workdir")
-        .join(format!("{}.happ", dna_name));
+        .join(format!("{}.dna", dna_name));
 
     let app_manifest: AppManifest = serde_yaml::from_str(contents.as_str())?;
     let mut roles = app_manifest.app_roles();
@@ -73,11 +78,13 @@ pub fn scaffold_dna(mut app_file_tree: FileTree, dna_name: String) -> anyhow::Re
         provisioning: Some(CellProvisioning::Create { deferred: false }),
     });
 
-    let new_manifest = AppManifestCurrentBuilder::default()
+    let new_manifest: AppManifest = AppManifestCurrentBuilder::default()
         .name(app_manifest.app_name().to_string().clone())
+        .description(None)
         .roles(roles)
         .build()
-        .map_err(|e| anyhow!(e))?;
+        .unwrap()
+        .into();
 
     override_file_contents(
         &mut app_file_tree,

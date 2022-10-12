@@ -36,8 +36,8 @@ fn scaffold_web_app_and_dna_and_test_it() {
     cmd.assert().success();
 
     let mut cmd = Command::new("nix-shell");
-    let cmd = cmd.current_dir("./tests/fixtures/forum");
-    let cmd = cmd.args(&["--run", "npm i && npm t"]);
+    let cmd = cmd.current_dir("./tests/fixtures/forum2");
+    let cmd = cmd.args(&["--run", "npm t"]);
     cmd.assert().success();
 
 }

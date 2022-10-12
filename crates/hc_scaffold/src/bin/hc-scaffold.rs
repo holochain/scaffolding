@@ -1,5 +1,5 @@
 use structopt::StructOpt;
-use holochain_cli_scaffold::cli::HcScaffold;
+use holochain_scaffolding_cli::cli::HcScaffold;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {

@@ -119,6 +119,9 @@ async fn app_pack_all_bundled(app_bundle_path: PathBuf) -> anyhow::Result<()> {
     for app_role in manifest.app_roles() {
         if let Some(Location::Bundled(mut bundled_location)) = app_role.dna.location {
             bundled_location.pop();
+            bundled_location = PathBuf::new()
+                .join(app_bundle_path.clone())
+                .join(bundled_location);
 
             holochain_cli_bundle::HcDnaBundle::Pack {
                 path: bundled_location,
