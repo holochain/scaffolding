@@ -4,8 +4,7 @@ pub fn workspace_cargo_toml() -> String {
   format!(r#"[workspace]
 resolver = "2"
 members = [
-  "dnas/*/integrity_zomes/*",
-  "dnas/*/coordinator_zomes/*",
+  "dnas/*/zomes/*",
 ]
 
 [profile.dev]

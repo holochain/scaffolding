@@ -29,14 +29,26 @@ pub enum ScaffoldError {
     #[error("YAML serialization error: {0}")]
     SerdeYamlError(#[from] serde_yaml::Error),
 
-    #[error("No app manifest (happ.yaml) was found in this directory tree")]
-    AppManifestNotFound,
-
     #[error("Path was not found: {0}")]
     PathNotFound(PathBuf),
 
-    #[error("No dna manifest (dna.yaml) was found in this directory tree")]
-    DnaManifestNotFound,
+    #[error("No app manifest (happ.yaml) was found in this directory tree")]
+    AppManifestNotFound,
+
+    #[error("App \"{0}\" already exists in this directory tree")]
+    AppAlreadyExists(String),
+
+    #[error("DNA \"{0}\" was not found for this app")]
+    DnaNotFound(String),
+
+    #[error("No DNAs were found for this app")]
+    NoDnasFound,
+
+    #[error("DNA \"{0}\" already exists for app \"{1}\"")]
+    DnaAlreadyExists(String, String),
+
+    #[error("Zome \"{0}\" already exists for app \"{1}\" and dna \"{2}\"")]
+    ZomeAlreadyExists(String, String, String),
 
     /// anything else
     #[error("Unknown error: {0}")]

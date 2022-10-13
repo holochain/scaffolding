@@ -24,8 +24,7 @@ pub fn scaffold_dna(
     let (app_manifest_path, app_manifest) = get_or_choose_app_manifest(&app_file_tree, app_name)?;
 
     let new_dna_file_tree: FileTree = dir! {
-        "integrity_zomes" => dir! {},
-        "coordinator_zomes"=> dir! {},
+        "zomes" => dir! {},
         "workdir" => dir! {
             "dna.yaml" => file!(empty_dna_manifest(dna_name.clone())?)
         }
@@ -37,9 +36,9 @@ pub fn scaffold_dna(
 
     app_file_tree
         .path_mut(&mut v.iter())
-        .ok_or(ScaffoldError::PathNotFound(dnas_path))?
+        .ok_or(ScaffoldError::PathNotFound(dnas_path.clone()))?
         .dir_content_mut()
-        .ok_or(ScaffoldError::DnaManifestNotFound)?
+        .ok_or(ScaffoldError::PathNotFound(dnas_path))?
         .insert(OsString::from(dna_name.clone()), new_dna_file_tree);
 
     let mut dna_location = PathBuf::new();
@@ -59,6 +58,13 @@ pub fn scaffold_dna(
         .join(format!("{}.dna", dna_name));
 
     let mut roles = app_manifest.app_roles();
+
+    if let Some(_) = roles.iter().find(|r| r.id.eq(&dna_name)) {
+        return Err(ScaffoldError::DnaAlreadyExists(
+            dna_name,
+            app_manifest.app_name().to_string(),
+        ));
+    }
 
     roles.push(AppRoleManifest {
         id: dna_name,

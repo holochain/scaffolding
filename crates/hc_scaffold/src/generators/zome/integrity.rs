@@ -9,6 +9,7 @@ use super::utils::zome_wasm_location;
 
 pub fn add_integrity_zome_to_manifest(
     mut app_file_tree: FileTree,
+    app_name: String,
     dna_manifest_path: &PathBuf,
     zome_name: String,
 ) -> ScaffoldResult<FileTree> {
@@ -24,6 +25,18 @@ pub fn add_integrity_zome_to_manifest(
     let zome_wasm_location = zome_wasm_location(dna_manifest_path, &zome_name);
 
     let mut integrity_manifest = dna_manifest.integrity_manifest();
+
+    if let Some(_) = integrity_manifest
+        .zomes
+        .iter()
+        .find(|z| z.name.to_string().eq(&zome_name))
+    {
+        return Err(ScaffoldError::ZomeAlreadyExists(
+            zome_name,
+            app_name,
+            dna_manifest.name(),
+        ));
+    }
 
     integrity_manifest.zomes.push(ZomeManifest {
         dependencies: None,
@@ -50,4 +63,21 @@ pub fn add_integrity_zome_to_manifest(
         serde_yaml::to_string(&new_manifest)?;
 
     Ok(app_file_tree)
+}
+
+pub fn initial_lib_rs() -> String {
+    format!(
+        r#"use hdi::prelude::*;
+
+#[hdk_entry_defs]
+#[unit_enum(UnitEntryTypes)]
+pub enum EntryTypes {{
+}}
+
+#[hdk_extern]
+pub fn validate(_op: Op) -> ExternResult<ValidateCallbackResult> {{
+  Ok(ValidateCallbackResult::Valid)
+}}
+"#
+    )
 }

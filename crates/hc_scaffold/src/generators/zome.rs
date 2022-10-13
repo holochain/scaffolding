@@ -23,16 +23,18 @@ pub fn scaffold_zome(
 
     let integrity_zome_name = format!("{}_integrity", zome_name);
 
-    let app_file_tree = add_integrity_zome_to_manifest(
-        app_file_tree,
-        &dna_manifest_path,
-        integrity_zome_name.clone(),
-    )?;
     let app_file_tree = add_coordinator_zome_to_manifest(
         app_file_tree,
+        app_manifest.1.app_name().to_string(),
         &dna_manifest_path,
         zome_name,
-        Some(vec![integrity_zome_name]),
+        Some(vec![integrity_zome_name.clone()]),
+    )?;
+    let app_file_tree = add_integrity_zome_to_manifest(
+        app_file_tree,
+        app_manifest.1.app_name().to_string(),
+        &dna_manifest_path,
+        integrity_zome_name,
     )?;
 
     Ok(app_file_tree)
@@ -48,7 +50,12 @@ pub fn scaffold_integrity_zome(
     let (dna_manifest_path, _dna_manifest) =
         get_or_choose_dna_manifest(&app_file_tree, &app_manifest, dna_name)?;
 
-    add_integrity_zome_to_manifest(app_file_tree, &dna_manifest_path, zome_name)
+    add_integrity_zome_to_manifest(
+        app_file_tree,
+        app_manifest.1.app_name().to_string(),
+        &dna_manifest_path,
+        zome_name,
+    )
 }
 
 pub fn scaffold_coordinator_zome(
@@ -62,5 +69,11 @@ pub fn scaffold_coordinator_zome(
     let (dna_manifest_path, _dna_manifest) =
         get_or_choose_dna_manifest(&app_file_tree, &app_manifest, dna_name)?;
 
-    add_coordinator_zome_to_manifest(app_file_tree, &dna_manifest_path, zome_name, dependencies)
+    add_coordinator_zome_to_manifest(
+        app_file_tree,
+        app_manifest.1.app_name().to_string(),
+        &dna_manifest_path,
+        zome_name,
+        dependencies,
+    )
 }

@@ -11,6 +11,7 @@ use super::utils::zome_wasm_location;
 
 pub fn add_coordinator_zome_to_manifest(
     mut app_file_tree: FileTree,
+    app_name: String,
     dna_manifest_path: &PathBuf,
     zome_name: String,
     dependencies: Option<Vec<String>>,
@@ -28,6 +29,18 @@ pub fn add_coordinator_zome_to_manifest(
     let zome_wasm_location = zome_wasm_location(dna_manifest_path, &zome_name);
 
     let mut coordinator_manifest = dna_manifest.coordinator_manifest();
+
+    if let Some(_) = coordinator_manifest
+        .zomes
+        .iter()
+        .find(|z| z.name.to_string().eq(&zome_name))
+    {
+        return Err(ScaffoldError::ZomeAlreadyExists(
+            zome_name,
+            app_name,
+            dna_manifest.name(),
+        ));
+    }
 
     coordinator_manifest.zomes.push(ZomeManifest {
         dependencies: dependencies.map(|d| {

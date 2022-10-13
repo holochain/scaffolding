@@ -65,15 +65,15 @@ pub fn get_or_choose_dna_manifest(
         .collect::<ScaffoldResult<Vec<(PathBuf, DnaManifest)>>>()?;
 
     match (dna_manifests.len(), dna_name) {
-        (0, None) => Err(ScaffoldError::DnaManifestNotFound),
+        (0, None) => Err(ScaffoldError::NoDnasFound),
         (1, None) => dna_manifests
             .into_iter()
             .last()
-            .ok_or(ScaffoldError::DnaManifestNotFound),
+            .ok_or(ScaffoldError::NoDnasFound),
         (_, None) => choose_dna(dna_manifests),
         (_, Some(name)) => dna_manifests
             .into_iter()
             .find(|(_, m)| m.name().to_string().eq(&name))
-            .ok_or(ScaffoldError::AppManifestNotFound),
+            .ok_or(ScaffoldError::DnaNotFound(name)),
     }
 }
