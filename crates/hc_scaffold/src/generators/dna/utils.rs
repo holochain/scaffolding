@@ -52,17 +52,15 @@ pub fn get_or_choose_dna_manifest(
     app_manifest: &(PathBuf, AppManifest),
     dna_name: Option<String>,
 ) -> ScaffoldResult<(PathBuf, DnaManifest)> {
-    let dna_locations = bundled_dnas_locations(&app_manifest.0, &app_manifest.1);
+    let dna_workdir_locations = bundled_dnas_locations(&app_manifest.0, &app_manifest.1);
 
-    let dna_manifests = dna_locations
+    let dna_manifests = dna_workdir_locations
         .into_iter()
-        .map(|dna_location| {
-            let manifest = read_dna_manifest(
-                app_file_tree,
-                dna_location.join(ValidatedDnaManifest::path()),
-            )?;
+        .map(|dna_workdir_location| {
+            let dna_manifest_location = dna_workdir_location.join(ValidatedDnaManifest::path());
+            let manifest = read_dna_manifest(app_file_tree, dna_manifest_location.clone())?;
 
-            Ok((dna_location, manifest))
+            Ok((dna_manifest_location, manifest))
         })
         .collect::<ScaffoldResult<Vec<(PathBuf, DnaManifest)>>>()?;
 

@@ -17,12 +17,12 @@ path = "src/lib.rs"
 anyhow = "1.0"
 build-fs-tree = "0.4.0"
 dialoguer = "0.10.2"
-holochain_cli_bundle = {git = "https://github.com/holochain/holochain", rev = "9426206f457d0ecd807892863670c77f37bd831d"}
+holochain_cli_bundle = {git = "https://github.com/holochain/holochain", rev = "c88b9faf3124b960cd38e370a92de463e43fffa8"}
 holochain_scaffolding_definitions = {path = "../definitions"}
 holochain_scaffolding_utils = {path = "../utils"}
-holochain_types = {git = "https://github.com/holochain/holochain", rev = "9426206f457d0ecd807892863670c77f37bd831d"}
+holochain_types = {git = "https://github.com/holochain/holochain", rev = "c88b9faf3124b960cd38e370a92de463e43fffa8"}
 holochain_util = {features = ["backtrace"], version = "0.0.12"}
-mr_bundle = {git = "https://github.com/holochain/holochain", rev = "9426206f457d0ecd807892863670c77f37bd831d"}
+mr_bundle = {git = "https://github.com/holochain/holochain", rev = "c88b9faf3124b960cd38e370a92de463e43fffa8"}
 path-clean = "0.1.0"
 serde_yaml = "0.8"
 structopt = "0.3.11"

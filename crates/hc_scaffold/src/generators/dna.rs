@@ -1,7 +1,4 @@
-use std::{
-    ffi::OsString,
-    path::{Path, PathBuf},
-};
+use std::{ffi::OsString, path::PathBuf};
 
 use build_fs_tree::{dir, file};
 use holochain_scaffolding_utils::FileTree;
@@ -30,8 +27,8 @@ pub fn scaffold_dna(
         "integrity_zomes" => dir! {},
         "coordinator_zomes"=> dir! {},
         "workdir" => dir! {
-        "dna.yaml" => file!(empty_dna_manifest(dna_name.clone())?)
-      }
+            "dna.yaml" => file!(empty_dna_manifest(dna_name.clone())?)
+        }
     };
 
     let dnas_path = PathBuf::new().join("dnas");

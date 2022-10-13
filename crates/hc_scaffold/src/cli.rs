@@ -1,12 +1,15 @@
 use crate::generators::{
-    self, app::utils::bundled_dnas_locations, dna::scaffold_dna, zome::scaffold_integrity_zome,
+    self,
+    app::utils::bundled_dnas_locations,
+    dna::scaffold_dna,
+    zome::{scaffold_coordinator_zome, scaffold_integrity_zome, scaffold_zome},
 };
 use build_fs_tree::{Build, MergeableFileSystemTree};
 use holochain_scaffolding_utils::load_directory_into_memory;
 use holochain_types::{prelude::AppManifest, web_app::WebAppManifest};
 use holochain_util::ffs;
 use mr_bundle::{Location, Manifest};
-use std::{path::PathBuf, process::Command, ffi::OsString};
+use std::{ffi::OsString, path::PathBuf, process::Command};
 use structopt::StructOpt;
 
 /// The list of subcommands for `hc sandbox`
@@ -21,6 +24,7 @@ pub enum HcScaffold {
         /// [OPTIONAL] Description of the app to scaffold
         description: Option<String>,
     },
+    /// Scaffold a DNA into an existing app
     Dna {
         #[structopt(long)]
         /// Name of the app you want to scaffold the DNA into
@@ -29,6 +33,7 @@ pub enum HcScaffold {
         /// Name of the DNA being scaffolded
         name: String,
     },
+    /// Scaffold an integrity-coordinator zome pair into an existing DNA
     Zome {
         #[structopt(long)]
         /// Name of the app you want to scaffold the zome into
@@ -41,14 +46,36 @@ pub enum HcScaffold {
         /// Name of the zome being scaffolded
         name: String,
     },
-    Pack(Pack),
-}
+    /// Scaffold a zome into an existing DNA
+    IntegrityZome {
+        #[structopt(long)]
+        /// Name of the app you want to scaffold the zome into
+        app: Option<String>,
 
-#[derive(Debug, StructOpt)]
-#[structopt(setting = structopt::clap::AppSettings::InferSubcommands)]
-pub struct HcScaffoldDna {
-    /// Name of the DNA being scaffolded
-    name: String,
+        #[structopt(long)]
+        /// Name of the dna you want to scaffold the zome into
+        dna: Option<String>,
+
+        /// Name of the zome being scaffolded
+        name: String,
+    },
+    /// Scaffold a zome into an existing DNA
+    CoordinatorZome {
+        #[structopt(long)]
+        /// Name of the app you want to scaffold the zome into
+        app: Option<String>,
+
+        #[structopt(long)]
+        /// Name of the dna you want to scaffold the zome into
+        dna: Option<String>,
+
+        /// Name of the zome being scaffolded
+        name: String,
+
+        #[structopt(long, value_delimiter = ",")]
+        dependencies: Option<Vec<String>>,
+    },
+    Pack(Pack),
 }
 
 /// The list of subcommands for `hc sandbox`
@@ -70,7 +97,12 @@ impl HcScaffold {
     pub async fn run(self) -> anyhow::Result<()> {
         match self {
             HcScaffold::WebApp { name, description } => {
-                generators::web_app::scaffold_web_app(name.clone(), description)?;
+                let app_file_tree =
+                    generators::web_app::scaffold_web_app(name.clone(), description)?;
+
+                let file_tree = MergeableFileSystemTree::<OsString, String>::from(app_file_tree);
+
+                file_tree.build(&".".into())?;
 
                 if cfg!(target_os = "windows") {
                     return Err(anyhow::anyhow!("Windows doesn't support nix"));
@@ -95,7 +127,37 @@ impl HcScaffold {
                 let current_dir = std::env::current_dir()?;
 
                 let app_file_tree = load_directory_into_memory(&current_dir)?;
-                scaffold_integrity_zome(app_file_tree, app, dna, name)?;
+                let app_file_tree = scaffold_zome(app_file_tree, app, dna, name)?;
+
+                let file_tree = MergeableFileSystemTree::<OsString, String>::from(app_file_tree);
+
+                file_tree.build(&".".into())?;
+            }
+            HcScaffold::IntegrityZome { app, dna, name } => {
+                let current_dir = std::env::current_dir()?;
+
+                let app_file_tree = load_directory_into_memory(&current_dir)?;
+                let app_file_tree = scaffold_integrity_zome(app_file_tree, app, dna, name)?;
+
+                let file_tree = MergeableFileSystemTree::<OsString, String>::from(app_file_tree);
+
+                file_tree.build(&".".into())?;
+            }
+            HcScaffold::CoordinatorZome {
+                app,
+                dna,
+                name,
+                dependencies,
+            } => {
+                let current_dir = std::env::current_dir()?;
+
+                let app_file_tree = load_directory_into_memory(&current_dir)?;
+                let app_file_tree =
+                    scaffold_coordinator_zome(app_file_tree, app, dna, name, dependencies)?;
+
+                let file_tree = MergeableFileSystemTree::<OsString, String>::from(app_file_tree);
+
+                file_tree.build(&".".into())?;
             }
             HcScaffold::Pack(Pack::WebApp { path }) => web_app_pack_all_bundled(path).await?,
             HcScaffold::Pack(Pack::App { path }) => app_pack_all_bundled(path).await?,

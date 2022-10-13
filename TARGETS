@@ -17,7 +17,7 @@ hc scaffold web-app --ui vue forum
 
 hc scaffold dna forum
 
-hc scaffold zome-pair posts --dna forum
+hc scaffold zome posts --dna forum
 # Scaffolds both integrity and coordinator
 
 hc scaffold integrity-zome posts_integrity --dna forum

@@ -1,8 +1,8 @@
 use dialoguer::{theme::ColorfulTheme, Select};
 use holochain_scaffolding_utils::{find_files_by_name, FileTree};
 use holochain_types::prelude::AppManifest;
-use path_clean::{clean, PathClean};
 use mr_bundle::{Location, Manifest};
+use path_clean::PathClean;
 use std::{collections::BTreeMap, path::PathBuf};
 
 use crate::error::{ScaffoldError, ScaffoldResult};
@@ -76,7 +76,9 @@ pub fn bundled_dnas_locations(
     for app_role in app_manifest.app_roles() {
         if let Some(Location::Bundled(mut bundled_location)) = app_role.dna.location {
             bundled_location.pop();
-            bundled_location = PathBuf::new().join(&app_workdir_location).join(bundled_location);
+            bundled_location = PathBuf::new()
+                .join(&app_workdir_location)
+                .join(bundled_location);
 
             dna_locations.push(bundled_location.clean());
         }
