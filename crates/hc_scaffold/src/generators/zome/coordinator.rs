@@ -28,8 +28,13 @@ pub fn add_coordinator_zome_to_manifest(
 
     let zome_wasm_location = zome_wasm_location(dna_manifest_path, &zome_name);
 
-    let mut coordinator_manifest = dna_manifest.coordinator_manifest();
-
+    let mut integrity_manifest = match dna_manifest.clone() {
+        DnaManifest::V1(m) => m.integrity,
+    };
+    let mut coordinator_manifest = match dna_manifest.clone() {
+        DnaManifest::V1(m) => m.coordinator,
+    };
+    
     if let Some(_) = coordinator_manifest
         .zomes
         .iter()
@@ -57,7 +62,7 @@ pub fn add_coordinator_zome_to_manifest(
 
     let new_manifest: DnaManifest = DnaManifestCurrentBuilder::default()
         .coordinator(coordinator_manifest)
-        .integrity(dna_manifest.integrity_manifest())
+        .integrity(integrity_manifest)
         .name(dna_manifest.name())
         .build()
         .unwrap()
