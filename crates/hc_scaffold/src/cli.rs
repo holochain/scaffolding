@@ -124,7 +124,7 @@ impl HcScaffold {
                 } else {
                     Command::new("nix-shell")
                         .current_dir(std::env::current_dir()?.join(name))
-                        .args(["-I", "nixpkgs=https://github.com/NixOS/nixpkgs/archive/nixos-21.11.tar.gz", "-p", "niv", "--run", "niv init && niv drop nixpkgs && niv drop niv && niv add -b main holochain/holonix"])
+                        .args(["-I", "nixpkgs=https://github.com/NixOS/nixpkgs/archive/nixos-22.05.tar.gz", "-p", "niv", "--run", "niv init && niv drop nixpkgs && niv add -b main holochain/holonix"])
                         .output()?;
                 };
             }

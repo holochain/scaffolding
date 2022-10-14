@@ -77,12 +77,14 @@ name = "{}"
 version = "0.0.1"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+crate-type = ["cdylib", "rlib"]
+name = "{}"
 
 [dependencies]
 hdi = "{}"     
 "#,
-        zome_name, hdi_version,
+        zome_name, zome_name, hdi_version,
     )
 }
 

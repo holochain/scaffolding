@@ -39,7 +39,7 @@ test('create {}', async t => {{
   await runScenario(async scenario => {{
     // Construct proper paths for your DNAs.
     // This assumes DNA files created by the `hc dna pack` command.
-    const testDnaPath = process.cwd() + '{}';
+    const testAppPath = process.cwd() + '{}';
 
     // Set up the array of DNAs to be installed, which only consists of the
     // test DNA referenced by path.

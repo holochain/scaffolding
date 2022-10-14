@@ -87,12 +87,14 @@ name = "{}"
 version = "0.0.1"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+crate-type = ["cdylib", "rlib"]
+name = "{}"
 
 [dependencies]
 hdk = "{}"     
 "#,
-        zome_name, hdk_version,
+        zome_name, zome_name, hdk_version,
     )
 }
 
@@ -102,7 +104,7 @@ pub fn initial_lib_rs() -> String {
 
 #[hdk_extern]
 pub fn init(_: ()) -> ExternResult<InitCallbackResult> {{
-  Ok(InitCallbackResult::Valid)
+  Ok(InitCallbackResult::Pass)
 }}
 "#
     )
