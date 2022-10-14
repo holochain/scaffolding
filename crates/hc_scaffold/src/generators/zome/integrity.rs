@@ -9,9 +9,9 @@ use super::utils::zome_wasm_location;
 
 pub fn add_integrity_zome_to_manifest(
     mut app_file_tree: FileTree,
-    app_name: String,
+    app_name: &String,
     dna_manifest_path: &PathBuf,
-    zome_name: String,
+    zome_name: &String,
 ) -> ScaffoldResult<FileTree> {
     let v: Vec<OsString> = dna_manifest_path.iter().map(|s| s.to_os_string()).collect();
     let dna_manifest: DnaManifest = serde_yaml::from_str(
@@ -27,18 +27,18 @@ pub fn add_integrity_zome_to_manifest(
     let mut integrity_manifest = match dna_manifest.clone() {
         DnaManifest::V1(m) => m.integrity,
     };
-    let mut coordinator_manifest = match dna_manifest.clone() {
+    let coordinator_manifest = match dna_manifest.clone() {
         DnaManifest::V1(m) => m.coordinator,
     };
 
     if let Some(_) = integrity_manifest
         .zomes
         .iter()
-        .find(|z| z.name.to_string().eq(&zome_name))
+        .find(|z| z.name.to_string().eq(zome_name))
     {
         return Err(ScaffoldError::ZomeAlreadyExists(
-            zome_name,
-            app_name,
+            zome_name.clone(),
+            app_name.clone(),
             dna_manifest.name(),
         ));
     }
@@ -46,7 +46,7 @@ pub fn add_integrity_zome_to_manifest(
     integrity_manifest.zomes.push(ZomeManifest {
         dependencies: None,
         hash: None,
-        name: zome_name.into(),
+        name: zome_name.clone().into(),
         location: zome_wasm_location,
     });
 
@@ -68,6 +68,22 @@ pub fn add_integrity_zome_to_manifest(
         serde_yaml::to_string(&new_manifest)?;
 
     Ok(app_file_tree)
+}
+
+pub fn initial_cargo_toml(zome_name: &String, hdi_version: &String) -> String {
+    format!(
+        r#"[package]
+name = "{}"
+version = "0.0.1"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+hdi = "{}"     
+"#,
+        zome_name, hdi_version,
+    )
 }
 
 pub fn initial_lib_rs() -> String {

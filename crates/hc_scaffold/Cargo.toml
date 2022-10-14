@@ -16,6 +16,7 @@ path = "src/lib.rs"
 [dependencies]
 anyhow = "1.0"
 build-fs-tree = "0.4.0"
+cargo_metadata = "0.15.0"
 dialoguer = "0.10.2"
 holochain_cli_bundle = {git = "https://github.com/holochain/holochain", rev = "9426206f457d0ecd807892863670c77f37bd831d"}
 holochain_scaffolding_definitions = {path = "../definitions"}
@@ -24,10 +25,12 @@ holochain_types = {git = "https://github.com/holochain/holochain", rev = "942620
 holochain_util = {features = ["backtrace"], version = "0.0.12"}
 mr_bundle = {git = "https://github.com/holochain/holochain", rev = "9426206f457d0ecd807892863670c77f37bd831d"}
 path-clean = "0.1.0"
+regex = "1.6.0"
 serde_yaml = "0.8"
 structopt = "0.3.11"
 thiserror = "1.0.22"
 tokio = {version = "1.11", features = ["full"]}
+toml = "0.5.9"
 
 [dev-dependencies]
 assert_cmd = "1.0"

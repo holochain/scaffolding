@@ -1,8 +1,11 @@
-use crate::generators::{
-    self,
-    app::utils::bundled_dnas_locations,
-    dna::scaffold_dna,
-    zome::{scaffold_coordinator_zome, scaffold_integrity_zome, scaffold_zome},
+use crate::{
+    generators::{
+        self,
+        app::utils::{bundled_dnas_locations, get_or_choose_app_manifest},
+        dna::{scaffold_dna, utils::get_or_choose_dna_manifest},
+        zome::{scaffold_coordinator_zome, scaffold_integrity_zome, scaffold_zome_pair},
+    },
+    utils::choose_directory_path,
 };
 use build_fs_tree::{Build, MergeableFileSystemTree};
 use holochain_scaffolding_utils::load_directory_into_memory;
@@ -45,6 +48,10 @@ pub enum HcScaffold {
 
         /// Name of the zome being scaffolded
         name: String,
+
+        #[structopt(long)]
+        /// The path in which you want to scaffold the zome
+        path: Option<PathBuf>,
     },
     /// Scaffold a zome into an existing DNA
     IntegrityZome {
@@ -58,6 +65,10 @@ pub enum HcScaffold {
 
         /// Name of the zome being scaffolded
         name: String,
+
+        #[structopt(long)]
+        /// The path in which you want to scaffold the zome
+        path: Option<PathBuf>,
     },
     /// Scaffold a zome into an existing DNA
     CoordinatorZome {
@@ -71,6 +82,10 @@ pub enum HcScaffold {
 
         /// Name of the zome being scaffolded
         name: String,
+
+        #[structopt(long)]
+        /// The path in which you want to scaffold the zome
+        path: Option<PathBuf>,
 
         #[structopt(long, value_delimiter = ",")]
         dependencies: Option<Vec<String>>,
@@ -123,21 +138,55 @@ impl HcScaffold {
 
                 file_tree.build(&".".into())?;
             }
-            HcScaffold::Zome { app, dna, name } => {
+            HcScaffold::Zome {
+                app,
+                dna,
+                name,
+                path,
+            } => {
                 let current_dir = std::env::current_dir()?;
 
                 let app_file_tree = load_directory_into_memory(&current_dir)?;
-                let app_file_tree = scaffold_zome(app_file_tree, app, dna, name)?;
+                let app_manifest = get_or_choose_app_manifest(&app_file_tree, app)?;
+                let (dna_manifest_path, _dna_manifest) =
+                    get_or_choose_dna_manifest(&app_file_tree, &app_manifest, dna)?;
+
+                let app_file_tree = scaffold_zome_pair(
+                    app_file_tree,
+                    &app_manifest.1,
+                    &dna_manifest_path,
+                    &name,
+                    &String::from("0.1.0"),
+                    &String::from("0.0.155"),
+                    &path,
+                )?;
 
                 let file_tree = MergeableFileSystemTree::<OsString, String>::from(app_file_tree);
 
                 file_tree.build(&".".into())?;
             }
-            HcScaffold::IntegrityZome { app, dna, name } => {
+            HcScaffold::IntegrityZome {
+                app,
+                dna,
+                name,
+                path,
+            } => {
                 let current_dir = std::env::current_dir()?;
 
                 let app_file_tree = load_directory_into_memory(&current_dir)?;
-                let app_file_tree = scaffold_integrity_zome(app_file_tree, app, dna, name)?;
+
+                let app_manifest = get_or_choose_app_manifest(&app_file_tree, app)?;
+                let (dna_manifest_path, _dna_manifest) =
+                    get_or_choose_dna_manifest(&app_file_tree, &app_manifest, dna)?;
+
+                let app_file_tree = scaffold_integrity_zome(
+                    app_file_tree,
+                    &app_manifest.1,
+                    &dna_manifest_path,
+                    &name,
+                    &String::from("0.1.0"),
+                    &path,
+                )?;
 
                 let file_tree = MergeableFileSystemTree::<OsString, String>::from(app_file_tree);
 
@@ -148,12 +197,24 @@ impl HcScaffold {
                 dna,
                 name,
                 dependencies,
+                path,
             } => {
                 let current_dir = std::env::current_dir()?;
 
                 let app_file_tree = load_directory_into_memory(&current_dir)?;
-                let app_file_tree =
-                    scaffold_coordinator_zome(app_file_tree, app, dna, name, dependencies)?;
+
+                let app_manifest = get_or_choose_app_manifest(&app_file_tree, app)?;
+                let (dna_manifest_path, _dna_manifest) =
+                    get_or_choose_dna_manifest(&app_file_tree, &app_manifest, dna)?;
+                let app_file_tree = scaffold_coordinator_zome(
+                    app_file_tree,
+                    &app_manifest.1,
+                    &dna_manifest_path,
+                    &name,
+                    &String::from("0.0.155"),
+                    &dependencies,
+                    &path,
+                )?;
 
                 let file_tree = MergeableFileSystemTree::<OsString, String>::from(app_file_tree);
 

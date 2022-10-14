@@ -5,3 +5,4 @@ use holochain_scaffolding_utils::*;
 pub mod error;
 pub mod generators;
 pub mod cli;
+pub mod utils;

@@ -29,6 +29,9 @@ pub enum ScaffoldError {
     #[error("YAML serialization error: {0}")]
     SerdeYamlError(#[from] serde_yaml::Error),
 
+    #[error("TOML deserialization error: {0}")]
+    TomlError(#[from] toml::de::Error),
+
     #[error("Path was not found: {0}")]
     PathNotFound(PathBuf),
 
@@ -38,16 +41,19 @@ pub enum ScaffoldError {
     #[error("App \"{0}\" already exists in this directory tree")]
     AppAlreadyExists(String),
 
-    #[error("DNA \"{0}\" was not found for this app")]
+    #[error("DNA \"{0}\" was not found in this app")]
     DnaNotFound(String),
 
-    #[error("No DNAs were found for this app")]
+    #[error("No DNAs were found in this app")]
     NoDnasFound,
 
-    #[error("DNA \"{0}\" already exists for app \"{1}\"")]
+    #[error("Malformed file {0}: ")]
+    MalformedFile(PathBuf, String),
+
+    #[error("DNA \"{0}\" already exists in app \"{1}\"")]
     DnaAlreadyExists(String, String),
 
-    #[error("Zome \"{0}\" already exists for app \"{1}\" and dna \"{2}\"")]
+    #[error("Zome \"{0}\" already exists in app \"{1}\" and dna \"{2}\"")]
     ZomeAlreadyExists(String, String, String),
 
     /// anything else
