@@ -1,4 +1,4 @@
-use dialoguer::{Confirm, theme::ColorfulTheme};
+use dialoguer::{theme::ColorfulTheme, Confirm};
 use regex::Regex;
 use std::{ffi::OsString, path::PathBuf};
 
