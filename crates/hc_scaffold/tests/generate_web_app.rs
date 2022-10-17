@@ -11,7 +11,7 @@ fn scaffold_full_web_app_and_test_it() {
 
     let mut cmd = Command::new("nix-shell");
     let cmd = cmd.current_dir("./tests/fixtures/forum");
-    let cmd = cmd.args(&["--run", "npm i && npm t"]);
+    let cmd = cmd.args(&["--run", "npm i"]);
     cmd.assert().success();
 
     let mut cmd = Command::cargo_bin("hc-scaffold").unwrap();
@@ -19,14 +19,14 @@ fn scaffold_full_web_app_and_test_it() {
     let cmd = cmd.args(&["dna", "forum"]);
     cmd.assert().success();
 
-    let mut cmd = Command::new("nix-shell");
+    let mut cmd = Command::cargo_bin("hc-scaffold").unwrap();
     let cmd = cmd.current_dir("./tests/fixtures/forum");
-    let cmd = cmd.args(&["--run", "npm t"]);
+    let cmd = cmd.args(&["zome", "posts", "--path", "dnas/forum/zomes"]);
     cmd.assert().success();
 
     let mut cmd = Command::cargo_bin("hc-scaffold").unwrap();
     let cmd = cmd.current_dir("./tests/fixtures/forum");
-    let cmd = cmd.args(&["zome", "posts", "--path", "dnas/forum/zomes"]);
+    let cmd = cmd.args(&["entry_def", "post"]);
     cmd.assert().success();
 
     let mut cmd = Command::new("nix-shell");

@@ -46,7 +46,7 @@ fn choose_app(
 
 pub fn get_or_choose_app_manifest(
     app_file_tree: &FileTree,
-    app_name: Option<String>,
+    app_name: &Option<String>,
 ) -> ScaffoldResult<(PathBuf, AppManifest)> {
     let app_manifests = find_happ_manifests(&app_file_tree)?;
 
@@ -59,8 +59,8 @@ pub fn get_or_choose_app_manifest(
         (_, None) => choose_app(app_manifests),
         (_, Some(name)) => app_manifests
             .into_iter()
-            .find(|(_, m)| m.app_name().to_string().eq(&name))
-            .ok_or(ScaffoldError::AppManifestNotFound),
+            .find(|(_, m)| m.app_name().to_string().eq(name))
+            .ok_or_else(|| ScaffoldError::AppManifestNotFound),
     }
 }
 

@@ -3,11 +3,15 @@ use crate::{
         self,
         app::utils::{bundled_dnas_locations, get_or_choose_app_manifest},
         dna::{scaffold_dna, utils::get_or_choose_dna_manifest},
-        zome::{scaffold_coordinator_zome, scaffold_integrity_zome, scaffold_zome_pair},
+        zome::{
+            integrity_zome_name, scaffold_coordinator_zome, scaffold_integrity_zome,
+            scaffold_zome_pair,
+        },
     },
     utils::choose_directory_path,
 };
 use build_fs_tree::{Build, MergeableFileSystemTree};
+use dialoguer::{theme::ColorfulTheme, Input};
 use holochain_scaffolding_utils::load_directory_into_memory;
 use holochain_types::{prelude::AppManifest, web_app::WebAppManifest};
 use holochain_util::ffs;
@@ -22,7 +26,7 @@ pub enum HcScaffold {
     /// Scaffold a new web app
     WebApp {
         /// Name of the app to scaffold
-        name: String,
+        name: Option<String>,
 
         /// [OPTIONAL] Description of the app to scaffold
         description: Option<String>,
@@ -30,58 +34,58 @@ pub enum HcScaffold {
     /// Scaffold a DNA into an existing app
     Dna {
         #[structopt(long)]
-        /// Name of the app you want to scaffold the DNA into
+        /// Name of the app in which you want to scaffold the DNA
         app: Option<String>,
 
         /// Name of the DNA being scaffolded
-        name: String,
+        name: Option<String>,
     },
     /// Scaffold an integrity-coordinator zome pair into an existing DNA
     Zome {
         #[structopt(long)]
-        /// Name of the app you want to scaffold the zome into
+        /// Name of the app in which you want to scaffold the zome
         app: Option<String>,
 
         #[structopt(long)]
-        /// Name of the dna you want to scaffold the zome into
+        /// Name of the dna in which you want to scaffold the zome
         dna: Option<String>,
 
         /// Name of the zome being scaffolded
-        name: String,
+        name: Option<String>,
 
         #[structopt(long)]
         /// The path in which you want to scaffold the zome
         path: Option<PathBuf>,
     },
-    /// Scaffold a zome into an existing DNA
+    /// Scaffold an integrity zome into an existing DNA
     IntegrityZome {
         #[structopt(long)]
-        /// Name of the app you want to scaffold the zome into
+        /// Name of the app in which you want to scaffold the zome
         app: Option<String>,
 
         #[structopt(long)]
-        /// Name of the dna you want to scaffold the zome into
+        /// Name of the dna in which you want to scaffold the zome
         dna: Option<String>,
 
         /// Name of the zome being scaffolded
-        name: String,
+        name: Option<String>,
 
         #[structopt(long)]
         /// The path in which you want to scaffold the zome
         path: Option<PathBuf>,
     },
-    /// Scaffold a zome into an existing DNA
+    /// Scaffold a coordinator zome into an existing DNA
     CoordinatorZome {
         #[structopt(long)]
-        /// Name of the app you want to scaffold the zome into
+        /// Name of the app in which you want to scaffold the zome
         app: Option<String>,
 
         #[structopt(long)]
-        /// Name of the dna you want to scaffold the zome into
+        /// Name of the dna in which you want to scaffold the zome
         dna: Option<String>,
 
         /// Name of the zome being scaffolded
-        name: String,
+        name: Option<String>,
 
         #[structopt(long)]
         /// The path in which you want to scaffold the zome
@@ -90,7 +94,75 @@ pub enum HcScaffold {
         #[structopt(long, value_delimiter = ",")]
         dependencies: Option<Vec<String>>,
     },
+
+    /// Scaffold an integrity zome into an existing DNA
+    EntryDef {
+        #[structopt(long)]
+        /// Name of the app in which you want to scaffold the zome
+        app: Option<String>,
+
+        #[structopt(long)]
+        /// Name of the dna in which you want to scaffold the zome
+        dna: Option<String>,
+
+        #[structopt(long)]
+        /// Name of the integrity zome in which you want to scaffold the entry definition
+        zome: Option<String>,
+
+        /// Name of the zome being scaffolded
+        name: Option<String>,
+
+        #[structopt(long)]
+        /// The path in which you want to scaffold the zome
+        path: Option<PathBuf>,
+
+        #[structopt(long, parse(try_from_str = parse_crud))]
+        /// Whether to create a read zome call function for this entry definition
+        crud: Option<Crud>,
+    },
     Pack(Pack),
+}
+
+#[derive(Debug)]
+pub struct Crud {
+    // We don't include create because create must always exist
+    pub read: bool,
+    pub update: bool,
+    pub delete: bool,
+}
+
+fn parse_crud(crud_str: &str) -> Result<Crud, String> {
+    if !crud_str.contains('c') {
+        return Err(String::from("create ('c') must be present"));
+    }
+
+    let mut crud = Crud {
+        read: false,
+        update: false,
+        delete: false,
+    };
+
+    for c in crud_str.chars() {
+        match c {
+            'c' => {}
+            'r' => {
+                crud.read = true;
+            }
+            'u' => {
+                crud.update = true;
+            }
+            'd' => {
+                crud.delete = true;
+            }
+            _ => {
+                return Err(String::from(
+                    "Only 'c', 'r', 'u' and 'd' are allowed in the crud argument",
+                ));
+            }
+        }
+    }
+
+    Ok(crud)
 }
 
 /// The list of subcommands for `hc sandbox`
@@ -112,6 +184,13 @@ impl HcScaffold {
     pub async fn run(self) -> anyhow::Result<()> {
         match self {
             HcScaffold::WebApp { name, description } => {
+                let name: String = match name {
+                    Some(n) => n,
+                    None => Input::with_theme(&ColorfulTheme::default())
+                        .with_prompt("App name:")
+                        .interact_text()?,
+                };
+
                 let app_file_tree =
                     generators::web_app::scaffold_web_app(name.clone(), description)?;
 
@@ -123,20 +202,51 @@ impl HcScaffold {
                     return Err(anyhow::anyhow!("Windows doesn't support nix"));
                 } else {
                     Command::new("nix-shell")
-                        .current_dir(std::env::current_dir()?.join(name))
+                        .current_dir(std::env::current_dir()?.join(&name))
                         .args(["-I", "nixpkgs=https://github.com/NixOS/nixpkgs/archive/nixos-21.11.tar.gz", "-p", "niv", "--run", "niv init && niv drop nixpkgs && niv drop niv && niv add -b main holochain/holonix"])
                         .output()?;
                 };
+
+                println!(
+                    r#"Web hApp "{}" scaffolded!
+To set up your development environment, run:
+
+  cd {}
+  nix-shell
+  npm install
+
+Then, add new DNAs to your app with:
+
+  hc-scaffold dna
+"#,
+                    name, name
+                );
             }
             HcScaffold::Dna { app, name } => {
+                let name: String = match name {
+                    Some(n) => n,
+                    None => Input::with_theme(&ColorfulTheme::default())
+                        .with_prompt("DNA name:")
+                        .interact_text()?,
+                };
+
                 let current_dir = std::env::current_dir()?;
 
                 let app_file_tree = load_directory_into_memory(&current_dir)?;
-                let file_tree = scaffold_dna(app_file_tree, app, name)?;
+                let file_tree = scaffold_dna(app_file_tree, &app, &name)?;
 
                 let file_tree = MergeableFileSystemTree::<OsString, String>::from(file_tree);
 
                 file_tree.build(&".".into())?;
+
+                println!(
+                    r#"DNA "{}" scaffolded!
+Add new zomes to your DNA with:
+
+  hc-scaffold zome
+"#,
+                    name
+                );
             }
             HcScaffold::Zome {
                 app,
@@ -144,10 +254,17 @@ impl HcScaffold {
                 name,
                 path,
             } => {
+                let name: String = match name {
+                    Some(n) => n,
+                    None => Input::with_theme(&ColorfulTheme::default())
+                        .with_prompt("Zome name:")
+                        .interact_text()?,
+                };
+
                 let current_dir = std::env::current_dir()?;
 
                 let app_file_tree = load_directory_into_memory(&current_dir)?;
-                let app_manifest = get_or_choose_app_manifest(&app_file_tree, app)?;
+                let app_manifest = get_or_choose_app_manifest(&app_file_tree, &app)?;
                 let (dna_manifest_path, _dna_manifest) =
                     get_or_choose_dna_manifest(&app_file_tree, &app_manifest, dna)?;
 
@@ -164,6 +281,18 @@ impl HcScaffold {
                 let file_tree = MergeableFileSystemTree::<OsString, String>::from(app_file_tree);
 
                 file_tree.build(&".".into())?;
+
+                println!(
+                    r#"Integrity zome "{}" and coordinator zome "{}" scaffolded!
+
+Warning: right now the application won't compile because the scaffolded integrity zome has no entry definitions.
+Add new entry definitions to your zome with:
+
+  hc-scaffold entry_def
+"#,
+                    integrity_zome_name(&name),
+                    name
+                );
             }
             HcScaffold::IntegrityZome {
                 app,
@@ -171,11 +300,18 @@ impl HcScaffold {
                 name,
                 path,
             } => {
+                let name: String = match name {
+                    Some(n) => n,
+                    None => Input::with_theme(&ColorfulTheme::default())
+                        .with_prompt("Integrity zome name:")
+                        .interact_text()?,
+                };
+
                 let current_dir = std::env::current_dir()?;
 
                 let app_file_tree = load_directory_into_memory(&current_dir)?;
 
-                let app_manifest = get_or_choose_app_manifest(&app_file_tree, app)?;
+                let app_manifest = get_or_choose_app_manifest(&app_file_tree, &app)?;
                 let (dna_manifest_path, _dna_manifest) =
                     get_or_choose_dna_manifest(&app_file_tree, &app_manifest, dna)?;
 
@@ -191,6 +327,15 @@ impl HcScaffold {
                 let file_tree = MergeableFileSystemTree::<OsString, String>::from(app_file_tree);
 
                 file_tree.build(&".".into())?;
+
+                println!(
+                    r#"Integrity zome "{}" scaffolded!
+Add new entry definitions to your zome with:
+
+  hc-scaffold entry_def
+"#,
+                    name
+                );
             }
             HcScaffold::CoordinatorZome {
                 app,
@@ -199,11 +344,18 @@ impl HcScaffold {
                 dependencies,
                 path,
             } => {
+                let name: String = match name {
+                    Some(n) => n,
+                    None => Input::with_theme(&ColorfulTheme::default())
+                        .with_prompt("Coordinator zome name:")
+                        .interact_text()?,
+                };
+
                 let current_dir = std::env::current_dir()?;
 
                 let app_file_tree = load_directory_into_memory(&current_dir)?;
 
-                let app_manifest = get_or_choose_app_manifest(&app_file_tree, app)?;
+                let app_manifest = get_or_choose_app_manifest(&app_file_tree, &app)?;
                 let (dna_manifest_path, _dna_manifest) =
                     get_or_choose_dna_manifest(&app_file_tree, &app_manifest, dna)?;
                 let app_file_tree = scaffold_coordinator_zome(
@@ -219,7 +371,53 @@ impl HcScaffold {
                 let file_tree = MergeableFileSystemTree::<OsString, String>::from(app_file_tree);
 
                 file_tree.build(&".".into())?;
+
+                println!(
+                    r#"Coordinator zome "{}" scaffolded!
+Add new entry definitions to your zome with:
+
+  hc-scaffold entry_def
+"#,
+                    name
+                );
             }
+            HcScaffold::EntryDef {
+                app,
+                dna,
+                zome,
+                name,
+                path,
+                crud,
+            } => {
+                let name: String = match name {
+                    Some(n) => n,
+                    None => Input::with_theme(&ColorfulTheme::default())
+                        .with_prompt("Entry definition name:")
+                        .interact_text()?,
+                };
+
+                let current_dir = std::env::current_dir()?;
+
+                let app_file_tree = load_directory_into_memory(&current_dir)?;
+
+                let app_manifest = get_or_choose_app_manifest(&app_file_tree, &app)?;
+                let (dna_manifest_path, _dna_manifest) =
+                    get_or_choose_dna_manifest(&app_file_tree, &app_manifest, dna)?;
+
+                let file_tree = MergeableFileSystemTree::<OsString, String>::from(app_file_tree);
+
+                file_tree.build(&".".into())?;
+
+                println!(
+                    r#"Coordinator zome "{}" scaffolded!
+Add new entry definitions to your zome with:
+
+  hc-scaffold entry_def
+"#,
+                    name
+                );
+            }
+            //            HcScaffold:HcScaffold::Dna { app, name
             HcScaffold::Pack(Pack::WebApp { path }) => web_app_pack_all_bundled(path).await?,
             HcScaffold::Pack(Pack::App { path }) => app_pack_all_bundled(path).await?,
         }

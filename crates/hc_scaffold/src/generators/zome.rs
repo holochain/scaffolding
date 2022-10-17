@@ -20,6 +20,10 @@ use integrity::add_integrity_zome_to_manifest;
 
 use super::app::cargo::{get_workspace_members, get_workspace_packages_locations};
 
+pub fn integrity_zome_name(coordinator_zome_name: &String) -> String {
+    format!("{}_integrity", coordinator_zome_name)
+}
+
 pub fn scaffold_zome_pair(
     app_file_tree: FileTree,
     app_manifest: &AppManifest,
@@ -29,7 +33,7 @@ pub fn scaffold_zome_pair(
     hdk_version: &String,
     path: &Option<PathBuf>,
 ) -> ScaffoldResult<FileTree> {
-    let integrity_zome_name = format!("{}_integrity", zome_name);
+    let integrity_zome_name = integrity_zome_name(zome_name);
 
     let app_file_tree = scaffold_coordinator_zome(
         app_file_tree,
@@ -64,6 +68,24 @@ fn try_to_guess_zomes_location(
 ) -> ScaffoldResult<Option<PathBuf>> {
     let maybe_packages_paths = get_workspace_packages_locations(&app_file_tree)?;
 
+    let members = get_workspace_members(app_file_tree)?;
+
+    if members.len() == 1 {
+        let re = Regex::new(r"\A(?P<a>([^/*]*/)*)\*/(?P<b>([^/*]*/)*)\*\z").unwrap();
+
+        if re.is_match(members[0].as_str()) {
+            let new_path = re.replace(members[0].as_str(), format!("${{a}}{}/${{b}}", dna_name));
+            return Ok(Some(PathBuf::from(new_path.to_string())));
+        }
+
+        let re = Regex::new(r"\A(?P<a>([^/*]*/)*)\*\z").unwrap();
+
+        if re.is_match(members[0].as_str()) {
+            let new_path = re.replace(members[0].as_str(), r"${a}");
+            return Ok(Some(PathBuf::from(new_path.to_string())));
+        }
+    }
+
     match maybe_packages_paths {
         Some(mut packages_paths) if packages_paths.len() != 0 => {
             for p in packages_paths.iter_mut() {
@@ -86,27 +108,7 @@ fn try_to_guess_zomes_location(
                 Ok(None)
             }
         }
-        _ => {
-            let members = get_workspace_members(app_file_tree)?;
-
-            if members.len() == 1 {
-                let re = Regex::new(r"\A(?P<a>([^/*]*/)*)\*/(?P<b>([^/*]*/)*)\*\z").unwrap();
-                if re.is_match(members[0].as_str()) {
-                    let new_path =
-                        re.replace(members[0].as_str(), format!("${{a}}{}/${{b}}", dna_name));
-                    return Ok(Some(PathBuf::from(new_path.to_string())));
-                }
-
-                let re = Regex::new(r"\A(?P<a>([^/*]*/)*)\*\z").unwrap();
-
-                if re.is_match(members[0].as_str()) {
-                    let new_path = re.replace(members[0].as_str(), r"${a}");
-                    return Ok(Some(PathBuf::from(new_path.to_string())));
-                }
-            }
-
-            Ok(None)
-        }
+        _ => Ok(None),
     }
 }
 
@@ -191,7 +193,6 @@ pub fn scaffold_coordinator_zome(
         zome_name,
         dependencies,
     )?;
-
     let zome: FileTree = dir! {
         "Cargo.toml" => file!(coordinator::initial_cargo_toml(zome_name, hdk_version)),
         "src" => dir! {

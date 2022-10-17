@@ -18,8 +18,8 @@ use manifest::empty_dna_manifest;
 
 pub fn scaffold_dna(
     mut app_file_tree: FileTree,
-    app_name: Option<String>,
-    dna_name: String,
+    app_name: &Option<String>,
+    dna_name: &String,
 ) -> ScaffoldResult<FileTree> {
     let (app_manifest_path, app_manifest) = get_or_choose_app_manifest(&app_file_tree, app_name)?;
 
@@ -59,15 +59,15 @@ pub fn scaffold_dna(
 
     let mut roles = app_manifest.app_roles();
 
-    if let Some(_) = roles.iter().find(|r| r.id.eq(&dna_name)) {
+    if let Some(_) = roles.iter().find(|r| r.id.eq(dna_name)) {
         return Err(ScaffoldError::DnaAlreadyExists(
-            dna_name,
+            dna_name.clone(),
             app_manifest.app_name().to_string(),
         ));
     }
 
     roles.push(AppRoleManifest {
-        id: dna_name,
+        id: dna_name.clone(),
         dna: AppRoleDnaManifest {
             location: Some(Location::Bundled(dna_location)),
             modifiers: DnaModifiersOpt {
