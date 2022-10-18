@@ -38,7 +38,6 @@ pub fn add_integrity_zome_to_manifest(
     {
         return Err(ScaffoldError::ZomeAlreadyExists(
             zome_name.clone(),
-            app_name.clone(),
             dna_manifest.name(),
         ));
     }

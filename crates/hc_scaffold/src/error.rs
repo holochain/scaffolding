@@ -44,8 +44,8 @@ pub enum ScaffoldError {
     #[error("DNA \"{0}\" was not found in this app")]
     DnaNotFound(String),
 
-    #[error("No DNAs were found in this app")]
-    NoDnasFound,
+    #[error("No DNAs were found in app \"{0}\"")]
+    NoDnasFound(String),
 
     #[error("Malformed file {0}: ")]
     MalformedFile(PathBuf, String),
@@ -53,8 +53,20 @@ pub enum ScaffoldError {
     #[error("DNA \"{0}\" already exists in app \"{1}\"")]
     DnaAlreadyExists(String, String),
 
-    #[error("Zome \"{0}\" already exists in app \"{1}\" and dna \"{2}\"")]
-    ZomeAlreadyExists(String, String, String),
+    #[error("Zome \"{0}\" already exists in dna \"{1}\"")]
+    ZomeAlreadyExists(String, String),
+
+    #[error("Integrity zome \"{0}\" was not found in dna \"{1}\"")]
+    IntegrityZomeNotFound(String, String),
+
+    #[error("Coordinator zome \"{0}\" was not found in dna \"{1}\"")]
+    CoordinatorZomeNotFound(String, String),
+
+    #[error("No integrity zomes were found in dna \"{0}\"")]
+    NoIntegrityZomesFound(String),
+
+    #[error("No coordinator zomes were found in dna \"{0}\"")]
+    NoCoordinatorZomesFound(String),
 
     /// anything else
     #[error("Unknown error: {0}")]

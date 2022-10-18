@@ -3,9 +3,10 @@ use crate::{
         self,
         app::utils::{bundled_dnas_locations, get_or_choose_app_manifest},
         dna::{scaffold_dna, utils::get_or_choose_dna_manifest},
+        entry_def::scaffold_entry_def,
         zome::{
             integrity_zome_name, scaffold_coordinator_zome, scaffold_integrity_zome,
-            scaffold_zome_pair,
+            scaffold_zome_pair, utils::get_or_choose_integrity_zome,
         },
     },
     utils::choose_directory_path,
@@ -209,6 +210,7 @@ impl HcScaffold {
 
                 println!(
                     r#"Web hApp "{}" scaffolded!
+
 To set up your development environment, run:
 
   cd {}
@@ -241,6 +243,7 @@ Then, add new DNAs to your app with:
 
                 println!(
                     r#"DNA "{}" scaffolded!
+
 Add new zomes to your DNA with:
 
   hc-scaffold zome
@@ -330,6 +333,7 @@ Add new entry definitions to your zome with:
 
                 println!(
                     r#"Integrity zome "{}" scaffolded!
+
 Add new entry definitions to your zome with:
 
   hc-scaffold entry_def
@@ -374,6 +378,7 @@ Add new entry definitions to your zome with:
 
                 println!(
                     r#"Coordinator zome "{}" scaffolded!
+
 Add new entry definitions to your zome with:
 
   hc-scaffold entry_def
@@ -401,8 +406,18 @@ Add new entry definitions to your zome with:
                 let app_file_tree = load_directory_into_memory(&current_dir)?;
 
                 let app_manifest = get_or_choose_app_manifest(&app_file_tree, &app)?;
-                let (dna_manifest_path, _dna_manifest) =
+                let (dna_manifest_path, dna_manifest) =
                     get_or_choose_dna_manifest(&app_file_tree, &app_manifest, dna)?;
+
+                let integrity_zome_name = get_or_choose_integrity_zome(&dna_manifest, &zome)?;
+
+                let app_file_tree = scaffold_entry_def(
+                    app_file_tree,
+                    &app_manifest.1,
+                    &dna_manifest,
+                    &integrity_zome_name,
+                    &name,
+                )?;
 
                 let file_tree = MergeableFileSystemTree::<OsString, String>::from(app_file_tree);
 
@@ -410,6 +425,7 @@ Add new entry definitions to your zome with:
 
                 println!(
                     r#"Coordinator zome "{}" scaffolded!
+
 Add new entry definitions to your zome with:
 
   hc-scaffold entry_def
@@ -417,7 +433,6 @@ Add new entry definitions to your zome with:
                     name
                 );
             }
-            //            HcScaffold:HcScaffold::Dna { app, name
             HcScaffold::Pack(Pack::WebApp { path }) => web_app_pack_all_bundled(path).await?,
             HcScaffold::Pack(Pack::App { path }) => app_pack_all_bundled(path).await?,
         }

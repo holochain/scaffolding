@@ -96,13 +96,6 @@ fn try_to_guess_zomes_location(
             }
 
             if let Some(mut p) = iter_all_eq(packages_paths) {
-                let current_dir = std::env::current_dir()?;
-
-                p = p
-                    .into_iter()
-                    .skip(current_dir.components().count())
-                    .collect();
-
                 Ok(Some(p))
             } else {
                 Ok(None)

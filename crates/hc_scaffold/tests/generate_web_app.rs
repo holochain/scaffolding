@@ -26,7 +26,7 @@ fn scaffold_full_web_app_and_test_it() {
 
     let mut cmd = Command::cargo_bin("hc-scaffold").unwrap();
     let cmd = cmd.current_dir("./tests/fixtures/forum");
-    let cmd = cmd.args(&["entry_def", "post"]);
+    let cmd = cmd.args(&["entry-def", "post"]);
     cmd.assert().success();
 
     let mut cmd = Command::new("nix-shell");

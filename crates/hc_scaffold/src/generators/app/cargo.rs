@@ -29,7 +29,8 @@ fn workspace_cargo_toml_path(_app_file_tree: &FileTree) -> PathBuf {
 pub fn get_workspace_packages_locations(
     app_file_tree: &FileTree,
 ) -> ScaffoldResult<Option<Vec<PathBuf>>> {
-    let path = std::env::current_dir()?
+    let current_dir = std::env::current_dir()?;
+    let path = current_dir
         .join(workspace_cargo_toml_path(&app_file_tree))
         .canonicalize()?;
     let command_result = MetadataCommand::new().manifest_path(path).exec();
@@ -39,9 +40,42 @@ pub fn get_workspace_packages_locations(
             let packages_paths: Vec<PathBuf> = metadata
                 .workspace_packages()
                 .into_iter()
-                .map(|p| PathBuf::from(p.manifest_path.as_std_path()))
+                .map(|p| {
+                    PathBuf::from(p.manifest_path.as_std_path())
+                        .into_iter()
+                        .skip(current_dir.components().count())
+                        .collect()
+                })
                 .collect();
             Ok(Some(packages_paths))
+        }
+        Err(_) => Ok(None),
+    }
+}
+
+pub fn workspace_package_path(
+    app_file_tree: &FileTree,
+    crate_name: &String,
+) -> ScaffoldResult<Option<PathBuf>> {
+    let current_dir = std::env::current_dir()?;
+    let path = current_dir
+        .join(workspace_cargo_toml_path(&app_file_tree))
+        .canonicalize()?;
+    let command_result = MetadataCommand::new().manifest_path(path).exec();
+
+    match command_result {
+        Ok(metadata) => {
+            let package_path: Option<PathBuf> = metadata
+                .workspace_packages()
+                .into_iter()
+                .find(|p| p.name.eq(crate_name))
+                .map(|p| {
+                    PathBuf::from(p.manifest_path.as_std_path())
+                        .into_iter()
+                        .skip(current_dir.components().count())
+                        .collect()
+                });
+            Ok(package_path)
         }
         Err(_) => Ok(None),
     }
