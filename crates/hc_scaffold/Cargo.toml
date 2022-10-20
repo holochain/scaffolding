@@ -15,9 +15,6 @@ path = "src/lib.rs"
 
 [dependencies]
 
-holochain_scaffolding_definitions = {path = "../definitions"}
-holochain_scaffolding_utils = {path = "../utils"}
-
 anyhow = "1.0"
 build-fs-tree = "0.4.0"
 cargo_metadata = "0.15.0"
@@ -34,7 +31,11 @@ thiserror = "1.0.22"
 tokio = {version = "1.11", features = ["full"]}
 toml = "0.5.9"
 convert_case = "0.1.0"
-
+syn = "1.0.102"
+quote = "1.0.21"
+prettyplease = "0.1.21"
+proc-macro2 = "*"
+rand = "0.8.5"
 
 [dev-dependencies]
 assert_cmd = "1.0"

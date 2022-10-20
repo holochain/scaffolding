@@ -1,5 +1,5 @@
+use crate::file_tree::FileTree;
 use build_fs_tree::{dir, file};
-use holochain_scaffolding_utils::FileTree;
 
 use crate::error::ScaffoldResult;
 

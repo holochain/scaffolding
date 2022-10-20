@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use holochain_scaffolding_definitions::EntryDefinition;
+use crate::definitions::EntryDefinition;
 
 pub fn entry_crud_tests(
     entry_definition: &EntryDefinition,

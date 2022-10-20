@@ -1732,17 +1732,21 @@ dependencies = [
  "assert_cmd",
  "build-fs-tree",
  "cargo_metadata",
+ "convert_case 0.1.0",
  "dialoguer",
  "holochain_cli_bundle",
- "holochain_scaffolding_definitions",
- "holochain_scaffolding_utils",
  "holochain_types",
  "holochain_util 0.0.12 (registry+https://github.com/rust-lang/crates.io-index)",
  "mr_bundle",
  "path-clean",
+ "prettyplease",
+ "proc-macro2",
+ "quote",
+ "rand 0.8.5",
  "regex",
  "serde_yaml 0.8.26",
  "structopt",
+ "syn",
  "thiserror",
  "tokio",
  "toml",
@@ -3513,6 +3517,16 @@ dependencies = [
  "diff",
  "output_vt100",
  "yansi",
+]
+
+[[package]]
+name = "prettyplease"
+version = "0.1.21"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c142c0e46b57171fe0c528bee8c5b7569e80f0c17e377cd0e30ea57dbc11bb51"
+dependencies = [
+ "proc-macro2",
+ "syn",
 ]
 
 [[package]]

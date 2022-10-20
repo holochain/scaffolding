@@ -1,7 +1,7 @@
 use std::{ffi::OsString, path::PathBuf};
 
+use crate::file_tree::FileTree;
 use cargo_metadata::{Metadata, MetadataCommand};
-use holochain_scaffolding_utils::FileTree;
 
 use crate::error::{ScaffoldError, ScaffoldResult};
 

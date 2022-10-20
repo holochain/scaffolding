@@ -1,5 +1,5 @@
+use crate::file_tree::FileTree;
 use dialoguer::{theme::ColorfulTheme, Select};
-use holochain_scaffolding_utils::FileTree;
 use holochain_types::prelude::{AppManifest, DnaManifest, ValidatedDnaManifest};
 use mr_bundle::Manifest;
 use std::{ffi::OsString, path::PathBuf};

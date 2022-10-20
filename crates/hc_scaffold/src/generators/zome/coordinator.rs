@@ -1,6 +1,6 @@
 use std::{ffi::OsString, path::PathBuf};
 
-use holochain_scaffolding_utils::FileTree;
+use crate::file_tree::FileTree;
 use holochain_types::prelude::{
     DnaManifest, DnaManifestCurrentBuilder, ZomeDependency, ZomeManifest, ZomeName,
 };
@@ -79,7 +79,20 @@ pub fn add_coordinator_zome_to_manifest(
     Ok(app_file_tree)
 }
 
-pub fn initial_cargo_toml(zome_name: &String, hdk_version: &String) -> String {
+pub fn initial_cargo_toml(
+    zome_name: &String,
+    hdk_version: &String,
+    dependencies: &Option<Vec<String>>,
+) -> String {
+    let deps = match dependencies {
+        Some(d) => d
+            .into_iter()
+            .map(|d| format!(r#"{} = {{ workspace = true }}"#, d))
+            .collect::<Vec<String>>()
+            .join("\n"),
+        None => String::from(""),
+    };
+
     format!(
         r#"[package]
 name = "{}"
@@ -91,9 +104,12 @@ crate-type = ["cdylib", "rlib"]
 name = "{}"
 
 [dependencies]
-hdk = "{}"     
+hdk = "{}"
+serde = "1"
+
+{} 
 "#,
-        zome_name, zome_name, hdk_version,
+        zome_name, zome_name, hdk_version, deps
     )
 }
 

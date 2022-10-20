@@ -1,5 +1,5 @@
+use crate::file_tree::{find_files_by_name, FileTree};
 use dialoguer::{theme::ColorfulTheme, Select};
-use holochain_scaffolding_utils::{find_files_by_name, FileTree};
 use holochain_types::prelude::AppManifest;
 use mr_bundle::{Location, Manifest};
 use path_clean::PathClean;

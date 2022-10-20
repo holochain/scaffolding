@@ -1,7 +1,7 @@
 use std::{ffi::OsString, path::PathBuf};
 
+use crate::file_tree::FileTree;
 use build_fs_tree::{dir, file};
-use holochain_scaffolding_utils::FileTree;
 use holochain_types::prelude::{
     AppManifest, AppManifestCurrentBuilder, AppRoleDnaManifest, AppRoleManifest, CellProvisioning,
     DnaModifiersOpt,

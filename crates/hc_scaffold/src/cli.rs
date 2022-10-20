@@ -1,3 +1,4 @@
+use crate::file_tree::load_directory_into_memory;
 use crate::{
     generators::{
         self,
@@ -13,7 +14,6 @@ use crate::{
 };
 use build_fs_tree::{Build, MergeableFileSystemTree};
 use dialoguer::{theme::ColorfulTheme, Input};
-use holochain_scaffolding_utils::load_directory_into_memory;
 use holochain_types::{prelude::AppManifest, web_app::WebAppManifest};
 use holochain_util::ffs;
 use mr_bundle::{Location, Manifest};
@@ -124,7 +124,7 @@ pub enum HcScaffold {
     Pack(Pack),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Crud {
     // We don't include create because create must always exist
     pub read: bool,
@@ -291,7 +291,7 @@ Add new zomes to your DNA with:
 Warning: right now the application won't compile because the scaffolded integrity zome has no entry definitions.
 Add new entry definitions to your zome with:
 
-  hc-scaffold entry_def
+  hc-scaffold entry-def
 "#,
                     integrity_zome_name(&name),
                     name
@@ -417,6 +417,7 @@ Add new entry definitions to your zome with:
                     &dna_manifest,
                     &integrity_zome_name,
                     &name,
+                    &crud,
                 )?;
 
                 let file_tree = MergeableFileSystemTree::<OsString, String>::from(app_file_tree);
@@ -424,7 +425,7 @@ Add new entry definitions to your zome with:
                 file_tree.build(&".".into())?;
 
                 println!(
-                    r#"Coordinator zome "{}" scaffolded!
+                    r#"Entry definition "{}" scaffolded!
 
 Add new entry definitions to your zome with:
 

@@ -1,8 +1,6 @@
-use holochain_scaffolding_utils::*;
-
-//use workdir::generate_web_happ_workdir;
-
-pub mod error;
-pub mod generators;
 pub mod cli;
+pub mod definitions;
+pub mod error;
+pub mod file_tree;
+pub mod generators;
 pub mod utils;

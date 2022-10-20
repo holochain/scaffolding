@@ -68,6 +68,9 @@ pub enum ScaffoldError {
     #[error("No coordinator zomes were found in dna \"{0}\"")]
     NoCoordinatorZomesFound(String),
 
+    #[error("No coordinator zomes were found in dna \"{0}\" for the integrity zome \"{1}\"")]
+    NoCoordinatorZomesFoundForIntegrityZome(String, String),
+
     /// anything else
     #[error("Unknown error: {0}")]
     MiscError(#[from] Box<dyn std::error::Error + Send + Sync>),

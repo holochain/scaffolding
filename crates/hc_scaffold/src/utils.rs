@@ -1,9 +1,9 @@
 use std::{ffi::OsString, path::PathBuf, vec};
 
 use dialoguer::{theme::ColorfulTheme, Select};
-use holochain_scaffolding_utils::FileTree;
 
 use crate::error::ScaffoldResult;
+use crate::file_tree::FileTree;
 
 pub fn choose_directory_path(prompt: &String, app_file_tree: &FileTree) -> ScaffoldResult<PathBuf> {
     let mut chosen_directory: Option<PathBuf> = None;

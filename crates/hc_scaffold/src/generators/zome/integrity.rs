@@ -1,6 +1,6 @@
 use std::{ffi::OsString, path::PathBuf};
 
-use holochain_scaffolding_utils::FileTree;
+use crate::file_tree::FileTree;
 use holochain_types::prelude::{DnaManifest, DnaManifestCurrentBuilder, ZomeManifest};
 
 use crate::error::{ScaffoldError, ScaffoldResult};
@@ -81,7 +81,9 @@ crate-type = ["cdylib", "rlib"]
 name = "{}"
 
 [dependencies]
-hdi = "{}"     
+serde = "1" 
+
+hdi = "{}"
 "#,
         zome_name, zome_name, hdi_version,
     )

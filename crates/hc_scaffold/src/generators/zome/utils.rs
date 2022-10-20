@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
+use crate::file_tree::FileTree;
 use dialoguer::{theme::ColorfulTheme, Select};
-use holochain_scaffolding_utils::FileTree;
 use holochain_types::prelude::{DnaManifest, ZomeManifest};
 use mr_bundle::Location;
 
@@ -93,5 +93,25 @@ pub fn get_or_choose_integrity_zome(
                 name.clone(),
                 dna_manifest.name(),
             )),
+    }
+}
+
+pub fn get_coordinator_zomes_for_integrity(
+    dna_manifest: &DnaManifest,
+    integrity_zome_name: &String,
+) -> Vec<ZomeManifest> {
+    match dna_manifest {
+        DnaManifest::V1(v1) => v1
+            .coordinator
+            .zomes
+            .clone()
+            .into_iter()
+            .filter(|z| match &z.dependencies {
+                Some(d) => d
+                    .iter()
+                    .any(|zome_dep| zome_dep.name.0.eq(integrity_zome_name)),
+                None => false,
+            })
+            .collect(),
     }
 }

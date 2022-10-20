@@ -1,6 +1,5 @@
-use holochain_scaffolding_utils::*;
-use build_fs_tree::{file};
-
+use crate::file_tree::*;
+use build_fs_tree::file;
 
 pub fn default_nix(holochain_version: String) -> FileTree {
     file!(format!(
