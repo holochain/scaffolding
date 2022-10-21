@@ -79,11 +79,7 @@ pub fn add_coordinator_zome_to_manifest(
     Ok(app_file_tree)
 }
 
-pub fn initial_cargo_toml(
-    zome_name: &String,
-    hdk_version: &String,
-    dependencies: &Option<Vec<String>>,
-) -> String {
+pub fn initial_cargo_toml(zome_name: &String, dependencies: &Option<Vec<String>>) -> String {
     let deps = match dependencies {
         Some(d) => d
             .into_iter()
@@ -104,12 +100,12 @@ crate-type = ["cdylib", "rlib"]
 name = "{}"
 
 [dependencies]
-hdk = "{}"
-serde = "1"
+hdk = {{ workspace = true }}
+serde = {{ workspace = true }}
 
 {} 
 "#,
-        zome_name, zome_name, hdk_version, deps
+        zome_name, zome_name, deps
     )
 }
 

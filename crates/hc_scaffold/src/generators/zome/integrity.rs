@@ -69,7 +69,7 @@ pub fn add_integrity_zome_to_manifest(
     Ok(app_file_tree)
 }
 
-pub fn initial_cargo_toml(zome_name: &String, hdi_version: &String) -> String {
+pub fn initial_cargo_toml(zome_name: &String) -> String {
     format!(
         r#"[package]
 name = "{}"
@@ -81,11 +81,10 @@ crate-type = ["cdylib", "rlib"]
 name = "{}"
 
 [dependencies]
-serde = "1" 
-
-hdi = "{}"
+hdi = {{ workspace = true }}
+serde = {{ workspace = true }}
 "#,
-        zome_name, zome_name, hdi_version,
+        zome_name, zome_name,
     )
 }
 

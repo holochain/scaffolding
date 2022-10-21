@@ -1,4 +1,7 @@
-use std::{ffi::OsString, path::PathBuf};
+use std::{
+    ffi::{OsStr, OsString},
+    path::PathBuf,
+};
 
 use crate::file_tree::FileTree;
 use build_fs_tree::file;
@@ -16,6 +19,7 @@ pub fn initial_entry_def_file(entry_def: &String) -> String {
         r#"use hdi::prelude::*;
 
 #[hdk_entry_helper]
+#[derive(Clone)]
 pub struct {} {{
 }}
 "#,
@@ -32,7 +36,9 @@ pub fn add_entry_def_to_integrity_zome(
 ) -> ScaffoldResult<FileTree> {
     let integrity_zome = match dna_manifest {
         DnaManifest::V1(v1) => v1
-            .all_zomes()
+            .integrity
+            .zomes
+            .clone()
             .into_iter()
             .find(|z| z.name.0.eq(integrity_zome_name)),
     }
@@ -40,6 +46,7 @@ pub fn add_entry_def_to_integrity_zome(
         integrity_zome_name.clone(),
         dna_manifest.name(),
     ))?;
+
     let mut manifest_path = zome_manifest_path(&app_file_tree, &integrity_zome)?.ok_or(
         ScaffoldError::IntegrityZomeNotFound(integrity_zome_name.clone(), dna_manifest.name()),
     )?;
@@ -75,8 +82,10 @@ pub fn add_entry_def_to_integrity_zome(
             0,
             format!(
                 r#"pub mod {};
+pub use {}::*;
+
 "#,
-                snake_entry_def_name,
+                snake_entry_def_name, snake_entry_def_name,
             )
             .as_str(),
         );
@@ -90,7 +99,7 @@ pub fn add_entry_def_to_integrity_zome(
         app_file_tree
             .path_mut(&mut crate_src_path_iter.iter())
             .ok_or(ScaffoldError::PathNotFound(crate_src_path.clone()))?,
-        |_file_path, mut file| {
+        |file_path, mut file| {
             let mut found = false;
 
             file.items =
@@ -116,14 +125,9 @@ pub fn add_entry_def_to_integrity_zome(
                     })
                     .collect();
 
-            if found {
-                file.items.insert(
-                    0,
-                    syn::parse_str::<syn::Item>(
-                        format!("use crate::{}::*;", snake_entry_def_name).as_str(),
-                    )
-                    .unwrap(),
-                );
+            if found && file_path.file_name() != Some(OsString::from("lib.rs").as_os_str()) {
+                file.items
+                    .insert(0, syn::parse_str::<syn::Item>("use crate::*;").unwrap());
             }
 
             Ok(file)

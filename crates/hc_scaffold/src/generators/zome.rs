@@ -18,7 +18,10 @@ pub mod utils;
 use coordinator::add_coordinator_zome_to_manifest;
 use integrity::add_integrity_zome_to_manifest;
 
-use super::app::cargo::{get_workspace_members, get_workspace_packages_locations};
+use super::app::cargo::{
+    add_workspace_external_dependency, add_workspace_path_dependency, get_workspace_members,
+    get_workspace_packages_locations,
+};
 
 pub fn integrity_zome_name(coordinator_zome_name: &String) -> String {
     format!("{}_integrity", coordinator_zome_name)
@@ -114,17 +117,24 @@ pub fn scaffold_integrity_zome_with_path(
     hdi_version: &String,
     path: &PathBuf,
 ) -> ScaffoldResult<FileTree> {
-    let mut app_file_tree = add_integrity_zome_to_manifest(
+    let app_file_tree = add_integrity_zome_to_manifest(
         app_file_tree,
         &app_manifest.app_name().to_string(),
         &dna_manifest_path,
         zome_name,
     )?;
 
+    let app_file_tree =
+        add_workspace_external_dependency(app_file_tree, &"hdi".to_string(), hdi_version)?;
+    let app_file_tree =
+        add_workspace_external_dependency(app_file_tree, &"serde".to_string(), &"1".to_string())?;
+    let mut app_file_tree =
+        add_workspace_path_dependency(app_file_tree, zome_name, &path.join(zome_name))?;
+
     // Add zome to workspace Cargo.toml
 
     let zome: FileTree = dir! {
-        "Cargo.toml" => file!(integrity::initial_cargo_toml(zome_name, hdi_version)),
+        "Cargo.toml" => file!(integrity::initial_cargo_toml(zome_name)),
         "src" => dir! {
             "lib.rs" => file!(integrity::initial_lib_rs())
         }
@@ -194,7 +204,7 @@ pub fn scaffold_coordinator_zome_in_path(
     dependencies: &Option<Vec<String>>,
     path: &PathBuf,
 ) -> ScaffoldResult<FileTree> {
-    let mut app_file_tree = add_coordinator_zome_to_manifest(
+    let app_file_tree = add_coordinator_zome_to_manifest(
         app_file_tree,
         &app_manifest.app_name().to_string(),
         &dna_manifest_path,
@@ -204,8 +214,15 @@ pub fn scaffold_coordinator_zome_in_path(
 
     // Add zome to workspace Cargo.toml
 
+    let app_file_tree =
+        add_workspace_external_dependency(app_file_tree, &"hdk".to_string(), hdk_version)?;
+    let app_file_tree =
+        add_workspace_external_dependency(app_file_tree, &"serde".to_string(), &"1".to_string())?;
+    let mut app_file_tree =
+        add_workspace_path_dependency(app_file_tree, zome_name, &path.join(zome_name))?;
+
     let zome: FileTree = dir! {
-        "Cargo.toml" => file!(coordinator::initial_cargo_toml(zome_name, hdk_version, dependencies)),
+        "Cargo.toml" => file!(coordinator::initial_cargo_toml(zome_name, dependencies)),
         "src" => dir! {
             "lib.rs" => file!(coordinator::initial_lib_rs())
         }
@@ -266,6 +283,6 @@ pub fn scaffold_coordinator_zome(
         zome_name,
         hdk_version,
         dependencies,
-        &path,
+        &path_to_scaffold_in,
     )
 }

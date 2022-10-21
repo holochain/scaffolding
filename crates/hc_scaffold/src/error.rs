@@ -16,6 +16,10 @@ pub enum ScaffoldError {
     #[error(transparent)]
     MrBundleError(#[from] mr_bundle::error::MrBundleError),
 
+    /// MrBundleError
+    #[error(transparent)]
+    CargoMetadataError(#[from] cargo_metadata::Error),
+
     /*
     /// DnaError
     #[error("DNA error: {0}")]
@@ -30,7 +34,10 @@ pub enum ScaffoldError {
     SerdeYamlError(#[from] serde_yaml::Error),
 
     #[error("TOML deserialization error: {0}")]
-    TomlError(#[from] toml::de::Error),
+    TomlDeError(#[from] toml::de::Error),
+
+    #[error("TOML serialization error: {0}")]
+    TomlSerError(#[from] toml::ser::Error),
 
     #[error("Path was not found: {0}")]
     PathNotFound(PathBuf),
