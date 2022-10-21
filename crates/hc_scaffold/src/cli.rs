@@ -1,3 +1,4 @@
+use crate::definitions::FieldType;
 use crate::file_tree::load_directory_into_memory;
 use crate::{
     generators::{
@@ -17,6 +18,7 @@ use dialoguer::{theme::ColorfulTheme, Input};
 use holochain_types::{prelude::AppManifest, web_app::WebAppManifest};
 use holochain_util::ffs;
 use mr_bundle::{Location, Manifest};
+use std::collections::BTreeMap;
 use std::{ffi::OsString, path::PathBuf, process::Command};
 use structopt::StructOpt;
 
@@ -93,6 +95,7 @@ pub enum HcScaffold {
         path: Option<PathBuf>,
 
         #[structopt(long, value_delimiter = ",")]
+        /// The integrity zome dependencies for the coordinator zome
         dependencies: Option<Vec<String>>,
     },
 
@@ -120,8 +123,15 @@ pub enum HcScaffold {
         #[structopt(long, parse(try_from_str = parse_crud))]
         /// Whether to create a read zome call function for this entry definition
         crud: Option<Crud>,
+
+        #[structopt(long, value_delimiter = ",", parse(try_from_str = parse_fields))]
+        fields: Option<Vec<(String, FieldType)>>,
     },
     Pack(Pack),
+}
+
+pub fn parse_fields(fields_str: &str) -> Result<(String, FieldType), String> {
+    Err(String::from("TODO!"))
 }
 
 #[derive(Debug, Clone)]
@@ -393,6 +403,7 @@ Add new entry definitions to your zome with:
                 name,
                 path,
                 crud,
+                fields,
             } => {
                 let name: String = match name {
                     Some(n) => n,
@@ -411,6 +422,9 @@ Add new entry definitions to your zome with:
 
                 let integrity_zome_name = get_or_choose_integrity_zome(&dna_manifest, &zome)?;
 
+                let fields: Option<BTreeMap<String, FieldType>> =
+                    fields.map(|f| f.into_iter().collect());
+
                 let app_file_tree = scaffold_entry_def(
                     app_file_tree,
                     &app_manifest.1,
@@ -418,6 +432,7 @@ Add new entry definitions to your zome with:
                     &integrity_zome_name,
                     &name,
                     &crud,
+                    &fields,
                 )?;
 
                 let file_tree = MergeableFileSystemTree::<OsString, String>::from(app_file_tree);

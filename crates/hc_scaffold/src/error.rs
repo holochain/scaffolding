@@ -78,6 +78,9 @@ pub enum ScaffoldError {
     #[error("No coordinator zomes were found in dna \"{0}\" for the integrity zome \"{1}\"")]
     NoCoordinatorZomesFoundForIntegrityZome(String, String),
 
+    #[error("Invalid field type \"{0}\", here are all valid field types: \"{1}\"")]
+    InvalidFieldType(String, String),
+
     /// anything else
     #[error("Unknown error: {0}")]
     MiscError(#[from] Box<dyn std::error::Error + Send + Sync>),

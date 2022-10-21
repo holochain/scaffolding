@@ -4,7 +4,7 @@ use crate::definitions::EntryDefinition;
 
 pub fn entry_crud_tests(
     entry_definition: &EntryDefinition,
-    happ_bundle_location_from_tests_root: &String,
+    happ_bundle_location_from_tests_root: &PathBuf,
     coordinator_zome: &String,
     create_function_name: &String,
 ) -> String {
@@ -29,7 +29,7 @@ import {{ fileURLToPath }} from 'node:url';
 
 pub fn create_entry_test(
     entry_definition: &EntryDefinition,
-    happ_bundle_location_from_tests_root: &String,
+    happ_bundle_location_from_tests_root: &PathBuf,
     coordinator_zome: &String,
     create_function_name: &String,
 ) -> String {
@@ -39,7 +39,7 @@ test('create {}', async t => {{
   await runScenario(async scenario => {{
     // Construct proper paths for your DNAs.
     // This assumes DNA files created by the `hc dna pack` command.
-    const testAppPath = process.cwd() + '{}';
+    const testAppPath = process.cwd() + '{:?}';
 
     // Set up the array of DNAs to be installed, which only consists of the
     // test DNA referenced by path.

@@ -4,6 +4,9 @@ use quote::quote;
 use rand::Rng;
 use std::collections::BTreeMap;
 
+use crate::error::{ScaffoldError, ScaffoldResult};
+
+#[derive(Debug, Clone)]
 pub enum Widget {
     TextField { label: String },
     TextArea { label: String },
@@ -75,6 +78,7 @@ impl Widget {
     }
 }
 
+#[derive(Debug, Clone)]
 pub enum HdkType {
     AgentPubKey,
     EntryHash,
@@ -91,10 +95,12 @@ impl HiddenType {
     }
 }
 
+#[derive(Debug, Clone)]
 pub enum HiddenType {
     HdkType(HdkType),
 }
 
+#[derive(Debug, Clone)]
 pub enum FieldType {
     // This field will be visible in the UI when rendering this entry type
     Visible(Widget),
@@ -116,6 +122,74 @@ impl FieldType {
             // TODO: finish this
             _ => String::from(""),
         }
+    }
+
+    pub fn list_names() -> Vec<String> {
+        vec![
+            "TextArea",
+            "TextField",
+            "DateAndTime",
+            "Date",
+            "Time",
+            "Slider",
+            "RadioButton",
+            "Checkbox",
+            "Switch",
+            "AgentPubKey",
+            "EntryHash",
+            "ActionHash",
+        ]
+        .into_iter()
+        .map(|s| s.to_string())
+        .collect()
+    }
+
+    pub fn from_name(name: &String) -> ScaffoldResult<FieldType> {
+        match name.as_str() {
+            "TextField" => Ok(FieldType::Visible(Widget::TextField {
+                label: String::from(""),
+            })),
+            "TextArea" => Ok(FieldType::Visible(Widget::TextArea {
+                label: String::from(""),
+            })),
+            "DateAndTime" => Ok(FieldType::Visible(Widget::DateAndTime {
+                label: String::from(""),
+            })),
+            "Date" => Ok(FieldType::Visible(Widget::Date {
+                label: String::from(""),
+            })),
+            "Time" => Ok(FieldType::Visible(Widget::Time {
+                label: String::from(""),
+            })),
+            "Slider" => Ok(FieldType::Visible(Widget::Slider {
+                label: String::from(""),
+                min: 0,
+                max: 10,
+            })),
+            "RadioButton" => Ok(FieldType::Visible(Widget::RadioButton {
+                label: String::from(""),
+                options: vec![],
+            })),
+            "Checkbox" => Ok(FieldType::Visible(Widget::Checkbox {
+                label: String::from(""),
+            })),
+            "Switch" => Ok(FieldType::Visible(Widget::Switch {
+                label: String::from(""),
+            })),
+            "AgentPubKey" => Ok(FieldType::Hidden(HiddenType::HdkType(HdkType::AgentPubKey))),
+            "EntryHash" => Ok(FieldType::Hidden(HiddenType::HdkType(HdkType::EntryHash))),
+            "ActionHash" => Ok(FieldType::Hidden(HiddenType::HdkType(HdkType::ActionHash))),
+            _ => Err(ScaffoldError::InvalidFieldType(
+                name.clone(),
+                FieldType::list_names().join(", "),
+            )),
+        }
+    }
+
+    /// This function offers a dialoguer to the user to further configure the field type
+    pub fn choose_from_name(name: &String) -> ScaffoldResult<FieldType> {
+        // TODO: actually implement this
+        FieldType::from_name(name)
     }
 }
 
@@ -150,7 +224,7 @@ impl EntryDefinition {
             .collect();
 
         quote! {
-          use hdk::prelude::*;
+          use hdi::prelude::*;
 
           #(#type_definitions)*
 
