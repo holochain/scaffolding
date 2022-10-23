@@ -3,28 +3,59 @@ use std::{
     path::PathBuf,
 };
 
-use crate::file_tree::FileTree;
+use crate::{
+    definitions::{EntryDefinition, FieldRepresentation, FieldType},
+    file_tree::FileTree,
+};
 use build_fs_tree::file;
 use convert_case::{Case, Casing};
 use holochain_types::prelude::{AppManifest, DnaManifest};
 use prettyplease::unparse;
+use proc_macro2::TokenStream;
+use quote::quote;
 
 use crate::{
     error::{ScaffoldError, ScaffoldResult},
     generators::zome::utils::zome_manifest_path,
 };
 
-pub fn initial_entry_def_file(entry_def: &String) -> String {
-    format!(
-        r#"use hdi::prelude::*;
+pub fn render_entry_definition_file(entry_def: &EntryDefinition) -> ScaffoldResult<syn::File> {
+    let type_definitions: Vec<TokenStream> = entry_def
+        .fields
+        .values()
+        .filter_map(|field_type| match field_type.representation.clone() {
+            FieldRepresentation::Visible(widget) => widget.rust_type_definition(),
+            _ => None,
+        })
+        .collect();
 
-#[hdk_entry_helper]
-#[derive(Clone)]
-pub struct {} {{
-}}
-"#,
-        entry_def.to_case(Case::Title)
-    )
+    let name: syn::Expr = syn::parse_str(entry_def.name.to_case(Case::Title).as_str())?;
+
+    let fields: Vec<TokenStream> = entry_def
+        .fields
+        .iter()
+        .map(|(key, value)| {
+            let name: syn::Expr = syn::parse_str(key.to_case(Case::Snake).as_str())?;
+            let rust_type = value.rust_type();
+            Ok(quote! {  #name: #rust_type })
+        })
+        .collect::<ScaffoldResult<Vec<TokenStream>>>()?;
+
+    let token_stream = quote! {
+      use hdi::prelude::*;
+
+      #(#type_definitions)*
+
+      #[hdk_entry_helper]
+      #[derive(Clone)]
+      pub struct #name {
+        #(#fields),*
+      }
+    };
+
+    let file = syn::parse_file(token_stream.to_string().as_str())?;
+
+    Ok(file)
 }
 
 pub fn add_entry_def_to_integrity_zome(
@@ -32,7 +63,7 @@ pub fn add_entry_def_to_integrity_zome(
     app_manifest: &AppManifest,
     dna_manifest: &DnaManifest,
     integrity_zome_name: &String,
-    entry_def_name: &String,
+    entry_def: &EntryDefinition,
 ) -> ScaffoldResult<FileTree> {
     let integrity_zome = match dna_manifest {
         DnaManifest::V1(v1) => v1
@@ -53,7 +84,8 @@ pub fn add_entry_def_to_integrity_zome(
 
     manifest_path.pop();
 
-    let snake_entry_def_name = entry_def_name.to_case(Case::Snake);
+    let snake_entry_def_name = entry_def.name.to_case(Case::Snake);
+    let entry_def_file = render_entry_definition_file(entry_def)?;
 
     // 1. Create an ENTRY_DEF_NAME.rs in "src/", with the entry definition struct
     let crate_src_path = manifest_path.join("src");
@@ -66,7 +98,7 @@ pub fn add_entry_def_to_integrity_zome(
         .ok_or(ScaffoldError::PathNotFound(crate_src_path.clone()))?
         .insert(
             OsString::from(format!("{}.rs", snake_entry_def_name.clone())),
-            file!(initial_entry_def_file(entry_def_name)),
+            file!(unparse(&entry_def_file)),
         );
 
     // 2. Add this file as a module in the entry point for the crate
@@ -90,7 +122,7 @@ pub use {}::*;
             .as_str(),
         );
 
-    let title_entry_def_name = entry_def_name.to_case(Case::Title);
+    let title_entry_def_name = entry_def.name.to_case(Case::Title);
 
     // 3. Find the #[hdk_entry_defs] macro
     // 3.1 Import the new struct
@@ -125,6 +157,7 @@ pub use {}::*;
                     })
                     .collect();
 
+            // If the file is lib.rs, we already have the entry struct imported so no need to import it again
             if found && file_path.file_name() != Some(OsString::from("lib.rs").as_os_str()) {
                 file.items
                     .insert(0, syn::parse_str::<syn::Item>("use crate::*;").unwrap());

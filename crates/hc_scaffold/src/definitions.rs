@@ -101,95 +101,69 @@ pub enum HiddenType {
 }
 
 #[derive(Debug, Clone)]
-pub enum FieldType {
+pub enum FieldRepresentation {
     // This field will be visible in the UI when rendering this entry type
     Visible(Widget),
     // This field won't be visible in the UI when rendering this entry type
     Hidden(HiddenType),
 }
 
-impl FieldType {
+impl FieldRepresentation {
     pub fn rust_type(&self) -> TokenStream {
         match self {
-            FieldType::Visible(v) => v.rust_type(),
-            FieldType::Hidden(hidden) => hidden.rust_type(),
+            FieldRepresentation::Visible(v) => v.rust_type(),
+            FieldRepresentation::Hidden(hidden) => hidden.rust_type(),
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct FieldType {
+    pub representation: FieldRepresentation,
+    vector: bool,
+}
+
+impl FieldType {
+    pub fn new_single(representation: FieldRepresentation) -> FieldType {
+        FieldType {
+            representation,
+            vector: false,
+        }
+    }
+
+    pub fn new_vector(representation: FieldRepresentation) -> FieldType {
+        FieldType {
+            representation,
+            vector: true,
+        }
+    }
+
+    pub fn rust_type(&self) -> TokenStream {
+        match self.vector {
+            false => self.representation.rust_type(),
+            true => {
+                let rust_representation_type = self.representation.rust_type();
+
+                quote! {Vec<#rust_representation_type>}
+            }
         }
     }
 
     pub fn js_sample_value(&self) -> String {
-        match self {
-            FieldType::Visible(v) => v.js_sample_value(),
+        match (self.vector, self.representation.clone()) {
+            (false, FieldRepresentation::Visible(v)) => v.js_sample_value(),
+            (true, FieldRepresentation::Visible(v)) => format!(
+                "[{}]",
+                vec![
+                    v.js_sample_value(),
+                    v.js_sample_value(),
+                    v.js_sample_value()
+                ]
+                .join(", ")
+            ),
             // TODO: finish this
             _ => String::from(""),
         }
-    }
-
-    pub fn list_names() -> Vec<String> {
-        vec![
-            "TextArea",
-            "TextField",
-            "DateAndTime",
-            "Date",
-            "Time",
-            "Slider",
-            "RadioButton",
-            "Checkbox",
-            "Switch",
-            "AgentPubKey",
-            "EntryHash",
-            "ActionHash",
-        ]
-        .into_iter()
-        .map(|s| s.to_string())
-        .collect()
-    }
-
-    pub fn from_name(name: &String) -> ScaffoldResult<FieldType> {
-        match name.as_str() {
-            "TextField" => Ok(FieldType::Visible(Widget::TextField {
-                label: String::from(""),
-            })),
-            "TextArea" => Ok(FieldType::Visible(Widget::TextArea {
-                label: String::from(""),
-            })),
-            "DateAndTime" => Ok(FieldType::Visible(Widget::DateAndTime {
-                label: String::from(""),
-            })),
-            "Date" => Ok(FieldType::Visible(Widget::Date {
-                label: String::from(""),
-            })),
-            "Time" => Ok(FieldType::Visible(Widget::Time {
-                label: String::from(""),
-            })),
-            "Slider" => Ok(FieldType::Visible(Widget::Slider {
-                label: String::from(""),
-                min: 0,
-                max: 10,
-            })),
-            "RadioButton" => Ok(FieldType::Visible(Widget::RadioButton {
-                label: String::from(""),
-                options: vec![],
-            })),
-            "Checkbox" => Ok(FieldType::Visible(Widget::Checkbox {
-                label: String::from(""),
-            })),
-            "Switch" => Ok(FieldType::Visible(Widget::Switch {
-                label: String::from(""),
-            })),
-            "AgentPubKey" => Ok(FieldType::Hidden(HiddenType::HdkType(HdkType::AgentPubKey))),
-            "EntryHash" => Ok(FieldType::Hidden(HiddenType::HdkType(HdkType::EntryHash))),
-            "ActionHash" => Ok(FieldType::Hidden(HiddenType::HdkType(HdkType::ActionHash))),
-            _ => Err(ScaffoldError::InvalidFieldType(
-                name.clone(),
-                FieldType::list_names().join(", "),
-            )),
-        }
-    }
-
-    /// This function offers a dialoguer to the user to further configure the field type
-    pub fn choose_from_name(name: &String) -> ScaffoldResult<FieldType> {
-        // TODO: actually implement this
-        FieldType::from_name(name)
     }
 }
 
@@ -199,41 +173,6 @@ pub struct EntryDefinition {
 }
 
 impl EntryDefinition {
-    pub fn render_definition_file(&self) -> TokenStream {
-        let type_definitions: Vec<TokenStream> = self
-            .fields
-            .values()
-            .filter_map(|field_type| match field_type {
-                FieldType::Visible(widget) => widget.rust_type_definition(),
-                _ => None,
-            })
-            .collect();
-
-        let name: syn::Expr =
-            syn::parse_str(self.name.to_case(Case::Title).as_str()).expect("Unable to parse");
-
-        let fields: Vec<TokenStream> = self
-            .fields
-            .iter()
-            .map(|(key, value)| {
-                let name: syn::Expr =
-                    syn::parse_str(key.to_case(Case::Snake).as_str()).expect("Unable to parse");
-                let rust_type = value.rust_type();
-                quote! {  #name: #rust_type }
-            })
-            .collect();
-
-        quote! {
-          use hdi::prelude::*;
-
-          #(#type_definitions)*
-
-          struct #name {
-            #(#fields)*
-          }
-        }
-    }
-
     pub fn js_sample_object(&self) -> String {
         let fields_samples: Vec<String> = self
             .fields

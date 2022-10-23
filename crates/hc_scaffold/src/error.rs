@@ -39,6 +39,9 @@ pub enum ScaffoldError {
     #[error("TOML serialization error: {0}")]
     TomlSerError(#[from] toml::ser::Error),
 
+    #[error(transparent)]
+    SynError(#[from] syn::Error),
+
     #[error("Path was not found: {0}")]
     PathNotFound(PathBuf),
 

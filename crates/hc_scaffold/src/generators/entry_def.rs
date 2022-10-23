@@ -15,52 +15,15 @@ use crate::{
 };
 
 use self::{
-    coordinator::add_crud_functions_to_coordinator, integrity::add_entry_def_to_integrity_zome,
+    coordinator::add_crud_functions_to_coordinator, fields::choose_fields,
+    integrity::add_entry_def_to_integrity_zome,
 };
 
 use super::zome::utils::{get_coordinator_zomes_for_integrity, zome_manifest_path};
 
 pub mod coordinator;
+pub mod fields;
 pub mod integrity;
-
-fn choose_field() -> ScaffoldResult<(String, FieldType)> {
-    let field_name: String = Input::with_theme(&ColorfulTheme::default())
-        .with_prompt("Field name:")
-        .interact_text()
-        .unwrap();
-
-    let field_type_names = FieldType::list_names();
-
-    let selection = Select::with_theme(&ColorfulTheme::default())
-        .with_prompt("Choose field type:")
-        .default(0)
-        .items(&field_type_names[..])
-        .interact()?;
-
-    let field_type = FieldType::choose_from_name(&field_type_names[selection])?;
-
-    Ok((field_name, field_type))
-}
-
-fn choose_fields() -> ScaffoldResult<BTreeMap<String, FieldType>> {
-    println!("Which fields should the entry contain?");
-
-    let mut fields: BTreeMap<String, FieldType> = BTreeMap::new();
-
-    let mut finished = false;
-
-    while !finished {
-        let (field_name, field_type) = choose_field()?;
-
-        fields.insert(field_name, field_type);
-
-        finished = !Confirm::with_theme(&ColorfulTheme::default())
-            .with_prompt("Add another field to the entry?")
-            .interact()?;
-    }
-
-    Ok(fields)
-}
 
 pub fn scaffold_entry_def(
     mut app_file_tree: FileTree,
@@ -76,7 +39,7 @@ pub fn scaffold_entry_def(
         None => choose_fields()?,
     };
 
-    let entry_definition = EntryDefinition {
+    let entry_def = EntryDefinition {
         name: entry_def_name.clone(),
         fields,
     };
@@ -86,7 +49,7 @@ pub fn scaffold_entry_def(
         app_manifest,
         dna_manifest,
         integrity_zome_name,
-        &entry_def_name,
+        &entry_def,
     )?;
 
     let coordinator_zomes_for_integrity =
