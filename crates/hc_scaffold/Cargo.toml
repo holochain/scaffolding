@@ -36,6 +36,7 @@ quote = "1.0.21"
 prettyplease = "0.1.21"
 proc-macro2 = "*"
 rand = "0.8.5"
+Inflector = "*"
 
 [dev-dependencies]
 assert_cmd = "1.0"

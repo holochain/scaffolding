@@ -3,6 +3,16 @@
 version = 3
 
 [[package]]
+name = "Inflector"
+version = "0.11.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fe438c63458706e03479442743baae6c88256498e6431708f6dfc520a26515d3"
+dependencies = [
+ "lazy_static",
+ "regex",
+]
+
+[[package]]
 name = "addr2line"
 version = "0.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1728,6 +1738,7 @@ dependencies = [
 name = "holochain_scaffolding_cli"
 version = "0.0.1"
 dependencies = [
+ "Inflector",
  "anyhow",
  "assert_cmd",
  "build-fs-tree",
