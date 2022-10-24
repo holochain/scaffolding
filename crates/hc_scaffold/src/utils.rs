@@ -69,26 +69,32 @@ fn get_folders_names(file_tree: &FileTree) -> Vec<String> {
 }
 
 
-pub fn input_snake_case(prompt: &String) -> anyhow::Result<String> {
+pub fn input_snake_case(prompt: &String) -> ScaffoldResult<String> {
     let input: String = Input::with_theme(&ColorfulTheme::default())
-    .with_prompt(prompt)
-    .interact_text()?;
+        .with_prompt(prompt)
+        .validate_with(|input: &String| -> Result<(), &str> {
+            match input.is_snake_case() {
+                false => Err("Input must be snake_case."),
+                true => Ok(()),
+            }
+        })
+        .interact_text()?;
 
-    match input.is_snake_case() {
-        true => Ok(input),
-        false => input_snake_case(&format!("Input must be snake_case.\n{}", prompt)),
-    }
+    Ok(input)
 }
 
-pub fn input_no_whitespace(prompt: &String) -> anyhow::Result<String> {
-    let input: String = Input::with_theme(&ColorfulTheme::default())
-    .with_prompt(prompt)
-    .interact_text()?;
+pub fn input_no_whitespace(prompt: &String) -> ScaffoldResult<String> {
+    let input = Input::with_theme(&ColorfulTheme::default())
+        .with_prompt(prompt)
+        .validate_with(|input: &String| -> Result<(), &str> {
+            match input.as_str().contains(char::is_whitespace) {
+                true => Err("Input must *not* contain white spaces."),
+                false => Ok(()),
+            }
+        })
+        .interact_text()?;
 
-    match input.as_str().contains(char::is_whitespace) {
-        false => input_snake_case(&format!("Input must *not* contain white spaces.\n{}", prompt)),
-        true => Ok(input),
-    }
+    Ok(input)
 }
 
 /// Raises an error if input is not snake_case
