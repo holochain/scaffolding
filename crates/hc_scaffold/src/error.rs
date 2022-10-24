@@ -87,6 +87,10 @@ pub enum ScaffoldError {
     #[error("Invalid field type \"{0}\", here are all valid field types: \"{1}\"")]
     InvalidFieldType(String, String),
 
+    #[error("Invalid string format: \"{0}\"")]
+    InvalidStringFormat(String),
+
+
     /// anything else
     #[error("Unknown error: {0}")]
     MiscError(#[from] Box<dyn std::error::Error + Send + Sync>),

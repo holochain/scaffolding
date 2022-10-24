@@ -1,4 +1,5 @@
 use crate::definitions::FieldType;
+use crate::utils::{input_snake_case, input_no_whitespace, check_snake_case, check_no_whitespace};
 use crate::file_tree::load_directory_into_memory;
 use crate::{
     generators::{
@@ -21,6 +22,7 @@ use mr_bundle::{Location, Manifest};
 use std::collections::BTreeMap;
 use std::{ffi::OsString, path::PathBuf, process::Command};
 use structopt::StructOpt;
+
 
 /// The list of subcommands for `hc sandbox`
 #[derive(Debug, StructOpt)]
@@ -195,11 +197,10 @@ impl HcScaffold {
     pub async fn run(self) -> anyhow::Result<()> {
         match self {
             HcScaffold::WebApp { name, description } => {
+                let prompt = String::from("App name (no whitespaces):");
                 let name: String = match name {
-                    Some(n) => n,
-                    None => Input::with_theme(&ColorfulTheme::default())
-                        .with_prompt("App name:")
-                        .interact_text()?,
+                    Some(n) => check_no_whitespace(n, "app name")?,
+                    None => input_no_whitespace(&prompt)?
                 };
 
                 let app_file_tree =
@@ -235,11 +236,10 @@ Then, add new DNAs to your app with:
                 );
             }
             HcScaffold::Dna { app, name } => {
+                let prompt = String::from("DNA name (snake_case):");
                 let name: String = match name {
-                    Some(n) => n,
-                    None => Input::with_theme(&ColorfulTheme::default())
-                        .with_prompt("DNA name:")
-                        .interact_text()?,
+                    Some(n) => check_snake_case(n, "dna name")?,
+                    None => input_snake_case(&prompt)?,
                 };
 
                 let current_dir = std::env::current_dir()?;
@@ -267,11 +267,10 @@ Add new zomes to your DNA with:
                 name,
                 path,
             } => {
+                let prompt = String::from("Zome name (snake_case):");
                 let name: String = match name {
-                    Some(n) => n,
-                    None => Input::with_theme(&ColorfulTheme::default())
-                        .with_prompt("Zome name:")
-                        .interact_text()?,
+                    Some(n) => check_snake_case(n, "zome names")?,
+                    None => input_snake_case(&prompt)?,
                 };
 
                 let current_dir = std::env::current_dir()?;
@@ -313,11 +312,10 @@ Add new entry definitions to your zome with:
                 name,
                 path,
             } => {
+                let prompt = String::from("Integrity zome name (snake_case):");
                 let name: String = match name {
-                    Some(n) => n,
-                    None => Input::with_theme(&ColorfulTheme::default())
-                        .with_prompt("Integrity zome name:")
-                        .interact_text()?,
+                    Some(n) => check_snake_case(n, "zome names")?,
+                    None => input_snake_case(&prompt)?,
                 };
 
                 let current_dir = std::env::current_dir()?;
@@ -358,11 +356,10 @@ Add new entry definitions to your zome with:
                 dependencies,
                 path,
             } => {
+                let prompt = String::from("Coordinator zome name (snake_case):");
                 let name: String = match name {
-                    Some(n) => n,
-                    None => Input::with_theme(&ColorfulTheme::default())
-                        .with_prompt("Coordinator zome name:")
-                        .interact_text()?,
+                    Some(n) => check_snake_case(n, "zome names")?,
+                    None => input_snake_case(&prompt)?,
                 };
 
                 let current_dir = std::env::current_dir()?;
@@ -405,11 +402,10 @@ Add new entry definitions to your zome with:
                 crud,
                 fields,
             } => {
+                let prompt = String::from("Entry definition name (snake_case):");
                 let name: String = match name {
-                    Some(n) => n,
-                    None => Input::with_theme(&ColorfulTheme::default())
-                        .with_prompt("Entry definition name:")
-                        .interact_text()?,
+                    Some(n) => check_snake_case(n, "entry definition name")?,
+                    None => input_snake_case(&prompt)?
                 };
 
                 let current_dir = std::env::current_dir()?;
