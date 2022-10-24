@@ -26,25 +26,25 @@ pub fn load_directory_into_memory(path: &PathBuf) -> ScaffoldResult<FileTree> {
         if fs::metadata(&path.join(&dir_entry))?.is_dir() {
             create_dir_all(&mut file_tree, &dir_entry)?;
         } else {
-            let contents = fs::read_to_string(&path.join(&dir_entry))?;
+            if let Ok(contents) = fs::read_to_string(&path.join(&dir_entry)) {
+                let mut folder_path = dir_entry.clone();
+                folder_path.pop();
 
-            let mut folder_path = dir_entry.clone();
-            folder_path.pop();
-
-            let v: Vec<OsString> = folder_path
-                .clone()
-                .iter()
-                .map(|s| s.to_os_string())
-                .collect();
-            file_tree
-                .path_mut(&mut v.iter())
-                .ok_or(ScaffoldError::PathNotFound(folder_path.clone()))?
-                .dir_content_mut()
-                .ok_or(ScaffoldError::PathNotFound(folder_path.clone()))?
-                .insert(
-                    dir_entry.file_name().unwrap().to_os_string(),
-                    file!(contents),
-                );
+                let v: Vec<OsString> = folder_path
+                    .clone()
+                    .iter()
+                    .map(|s| s.to_os_string())
+                    .collect();
+                file_tree
+                    .path_mut(&mut v.iter())
+                    .ok_or(ScaffoldError::PathNotFound(folder_path.clone()))?
+                    .dir_content_mut()
+                    .ok_or(ScaffoldError::PathNotFound(folder_path.clone()))?
+                    .insert(
+                        dir_entry.file_name().unwrap().to_os_string(),
+                        file!(contents),
+                    );
+            }
         }
     }
 

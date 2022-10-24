@@ -92,11 +92,6 @@ pub fn initial_lib_rs() -> String {
     format!(
         r#"use hdi::prelude::*;
 
-#[hdk_entry_defs]
-#[unit_enum(UnitEntryTypes)]
-pub enum EntryTypes {{
-}}
-
 #[hdk_extern]
 pub fn validate(_op: Op) -> ExternResult<ValidateCallbackResult> {{
   Ok(ValidateCallbackResult::Valid)

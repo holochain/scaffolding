@@ -122,6 +122,13 @@ pub use {}::*;
             .as_str(),
         );
 
+    let entry_types = get_all_entry_types(
+        &app_file_tree,
+        app_manifest,
+        dna_manifest,
+        integrity_zome_name,
+    )?;
+
     let title_entry_def_name = entry_def.name.to_case(Case::Title);
 
     // 3. Find the #[hdk_entry_defs] macro
@@ -134,6 +141,16 @@ pub use {}::*;
         |file_path, mut file| {
             let mut found = false;
 
+            // If there are no entry types definitions in this zome, first add the empty enum
+            if entry_types.is_none() && file_path == PathBuf::from("lib.rs") {
+                file.items.push(syn::parse_str::<syn::Item>(
+                    "#[hdk_entry_defs]
+                     #[unit_enum(UnitEntryTypes)]
+                      pub enum EntryTypes {}
+                        ",
+                )?);
+            }
+
             file.items =
                 file.items
                     .into_iter()
@@ -142,6 +159,18 @@ pub use {}::*;
                             if item_enum.attrs.iter().any(|a| {
                                 a.path.segments.iter().any(|s| s.ident.eq("hdk_entry_defs"))
                             }) {
+                                if item_enum
+                                    .variants
+                                    .iter()
+                                    .any(|v| v.ident.to_string().eq(&title_entry_def_name))
+                                {
+                                    return Err(ScaffoldError::EntryTypeAlreadyExists(
+                                        title_entry_def_name.clone(),
+                                        dna_manifest.name(),
+                                        integrity_zome_name.clone(),
+                                    ));
+                                }
+
                                 found = true;
                                 let new_variant = syn::parse_str::<syn::Variant>(
                                     format!("{}({})", title_entry_def_name, title_entry_def_name)
@@ -149,13 +178,13 @@ pub use {}::*;
                                 )
                                 .unwrap();
                                 item_enum.variants.push(new_variant);
-                                return syn::Item::Enum(item_enum);
+                                return Ok(syn::Item::Enum(item_enum));
                             }
                         }
 
-                        i
+                        Ok(i)
                     })
-                    .collect();
+                    .collect::<ScaffoldResult<Vec<syn::Item>>>()?;
 
             // If the file is lib.rs, we already have the entry struct imported so no need to import it again
             if found && file_path.file_name() != Some(OsString::from("lib.rs").as_os_str()) {
@@ -181,7 +210,7 @@ pub fn get_all_entry_types(
     app_manifest: &AppManifest,
     dna_manifest: &DnaManifest,
     integrity_zome_name: &String,
-) -> ScaffoldResult<Vec<String>> {
+) -> ScaffoldResult<Option<Vec<String>>> {
     let integrity_zome = match dna_manifest {
         DnaManifest::V1(v1) => v1
             .integrity
@@ -225,7 +254,7 @@ pub fn get_all_entry_types(
     );
 
     match entry_defs_instances.len() {
-        0 => Ok(vec![]),
+        0 => Ok(None),
         1 => {
             let entry_def_enum = entry_defs_instances.values().next().unwrap();
 
@@ -236,9 +265,9 @@ pub fn get_all_entry_types(
                 .map(|v| v.ident.to_string())
                 .collect();
 
-            Ok(variants)
+            Ok(Some(variants))
         }
-        _ => Err(ScaffoldError::MultipleEntryDefsFoundForIntegrityZome(
+        _ => Err(ScaffoldError::MultipleEntryTypesDefsFoundForIntegrityZome(
             dna_manifest.name(),
             integrity_zome_name.clone(),
         )),

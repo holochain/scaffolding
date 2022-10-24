@@ -93,16 +93,17 @@ pub enum ScaffoldError {
     #[error("Invalid string format: \"{0}\"")]
     InvalidStringFormat(String),
 
-    #[error("No entry definitions (#[hdk_entry_defs]) were found in dna \"{0}\" for the integrity zome \"{1}\"")]
-    NoEntryDefsFoundForIntegrityZome(String, String),
+    #[error("No entry type definitions (#[hdk_entry_defs]) were found in dna \"{0}\" for the integrity zome \"{1}\"")]
+    NoEntryTypesDefFoundForIntegrityZome(String, String),
 
-    #[error("Multiple entry definitions (#[hdk_entry_defs]) were found in dna \"{0}\" for the integrity zome \"{1}\"")]
-    MultipleEntryDefsFoundForIntegrityZome(String, String),
+    #[error("Entry type \"{0}\" already exists in dna \"{1}\" for the integrity zome \"{2}\"")]
+    EntryTypeAlreadyExists(String, String, String),
 
-    #[error(
-        "Entry definition \"{0}\" was not found in dna \"{1}\" for the integrity zome \"{2}\""
-    )]
-    EntryDefNotFound(String, String, String),
+    #[error("Multiple entry type definitions (#[hdk_entry_defs]) were found in dna \"{0}\" for the integrity zome \"{1}\"")]
+    MultipleEntryTypesDefsFoundForIntegrityZome(String, String),
+
+    #[error("Entry type \"{0}\" was not found in dna \"{1}\" for the integrity zome \"{2}\"")]
+    EntryTypeNotFound(String, String, String),
 
     #[error("Link type \"{0}\" already exists in dna \"{1}\" for the integrity zome \"{2}\"")]
     LinkTypeAlreadyExists(String, String, String),

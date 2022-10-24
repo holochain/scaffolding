@@ -21,7 +21,7 @@ pub fn get_or_choose_entry_type(
     prompt: &String,
 ) -> ScaffoldResult<String> {
     match (all_entries.len(), entry_type) {
-        (0, None) => Err(ScaffoldError::NoEntryDefsFoundForIntegrityZome(
+        (0, None) => Err(ScaffoldError::NoEntryTypesDefFoundForIntegrityZome(
             dna_manifest.name(),
             zome_name.clone(),
         )),
@@ -30,7 +30,7 @@ pub fn get_or_choose_entry_type(
             .into_iter()
             .find(|et| et.eq(&name))
             .cloned()
-            .ok_or(ScaffoldError::EntryDefNotFound(
+            .ok_or(ScaffoldError::EntryTypeNotFound(
                 name.clone(),
                 dna_manifest.name(),
                 zome_name.clone(),

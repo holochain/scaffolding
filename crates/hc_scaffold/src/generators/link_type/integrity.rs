@@ -73,6 +73,7 @@ pub fn add_link_type_to_integrity_zome(
                         ",
                 )?);
             }
+
             file.items =
                 file.items
                     .into_iter()

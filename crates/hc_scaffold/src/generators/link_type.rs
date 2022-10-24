@@ -22,7 +22,7 @@ pub mod coordinator;
 pub mod integrity;
 
 pub fn scaffold_link_type(
-    mut app_file_tree: FileTree,
+    app_file_tree: FileTree,
     app_manifest: &(PathBuf, AppManifest),
     dna_manifest: &DnaManifest,
     integrity_zome_name: &String,
@@ -36,7 +36,8 @@ pub fn scaffold_link_type(
         &app_manifest.1,
         dna_manifest,
         integrity_zome_name,
-    )?;
+    )?
+    .unwrap_or_else(|| vec![]);
 
     let from_entry_type = get_or_choose_entry_type(
         dna_manifest,

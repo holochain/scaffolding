@@ -1,29 +1,25 @@
 use crate::definitions::FieldType;
-use crate::utils::{input_snake_case, input_no_whitespace, check_snake_case, check_no_whitespace};
 use crate::file_tree::load_directory_into_memory;
 use crate::generators::link_type::scaffold_link_type;
-use crate::{
-    generators::{
-        self,
-        app::utils::{bundled_dnas_locations, get_or_choose_app_manifest},
-        dna::{scaffold_dna, utils::get_or_choose_dna_manifest},
-        entry_def::scaffold_entry_def,
-        zome::{
-            integrity_zome_name, scaffold_coordinator_zome, scaffold_integrity_zome,
-            scaffold_zome_pair, utils::get_or_choose_integrity_zome,
-        },
+use crate::generators::{
+    self,
+    app::utils::{bundled_dnas_locations, get_or_choose_app_manifest},
+    dna::{scaffold_dna, utils::get_or_choose_dna_manifest},
+    entry_def::scaffold_entry_def,
+    zome::{
+        integrity_zome_name, scaffold_coordinator_zome, scaffold_integrity_zome,
+        scaffold_zome_pair, utils::get_or_choose_integrity_zome,
     },
-    utils::choose_directory_path,
 };
+use crate::utils::{check_no_whitespace, check_snake_case, input_no_whitespace, input_snake_case};
+
 use build_fs_tree::{Build, MergeableFileSystemTree};
-use dialoguer::{theme::ColorfulTheme, Input};
 use holochain_types::{prelude::AppManifest, web_app::WebAppManifest};
 use holochain_util::ffs;
 use mr_bundle::{Location, Manifest};
 use std::collections::BTreeMap;
 use std::{ffi::OsString, path::PathBuf, process::Command};
 use structopt::StructOpt;
-
 
 /// The list of subcommands for `hc sandbox`
 #[derive(Debug, StructOpt)]
@@ -102,8 +98,8 @@ pub enum HcScaffold {
         dependencies: Option<Vec<String>>,
     },
 
-    /// Scaffold an entry definition and CRUD functions into an existing zome
-    EntryDef {
+    /// Scaffold an entry type and CRUD functions into an existing zome
+    EntryType {
         #[structopt(long)]
         /// Name of the app in which you want to scaffold the zome
         app: Option<String>,
@@ -116,14 +112,15 @@ pub enum HcScaffold {
         /// Name of the integrity zome in which you want to scaffold the entry definition
         zome: Option<String>,
 
-        /// Name of the entry definition being scaffolded
+        /// Name of the entry type being scaffolded
         name: Option<String>,
 
         #[structopt(long, parse(try_from_str = parse_crud))]
-        /// Whether to create a read zome call function for this entry definition
+        /// Whether to create a read zome call function for this entry type
         crud: Option<Crud>,
 
         #[structopt(long, value_delimiter = ",", parse(try_from_str = parse_fields))]
+        /// The fields that the entry type struct should contain
         fields: Option<Vec<(String, FieldType)>>,
     },
     /// Scaffold a link type and its appropriate zome functions into an existing zome
@@ -225,7 +222,7 @@ impl HcScaffold {
                 let prompt = String::from("App name (no whitespaces):");
                 let name: String = match name {
                     Some(n) => check_no_whitespace(n, "app name")?,
-                    None => input_no_whitespace(&prompt)?
+                    None => input_no_whitespace(&prompt)?,
                 };
 
                 let app_file_tree =
@@ -322,7 +319,6 @@ Add new zomes to your DNA with:
                 println!(
                     r#"Integrity zome "{}" and coordinator zome "{}" scaffolded!
 
-Warning: right now the application won't compile because the scaffolded integrity zome has no entry definitions.
 Add new entry definitions to your zome with:
 
   hc-scaffold entry-def
@@ -418,7 +414,7 @@ Add new entry definitions to your zome with:
                     name
                 );
             }
-            HcScaffold::EntryDef {
+            HcScaffold::EntryType {
                 app,
                 dna,
                 zome,
@@ -429,7 +425,7 @@ Add new entry definitions to your zome with:
                 let prompt = String::from("Entry definition name (snake_case):");
                 let name: String = match name {
                     Some(n) => check_snake_case(n, "entry definition name")?,
-                    None => input_snake_case(&prompt)?
+                    None => input_snake_case(&prompt)?,
                 };
 
                 let current_dir = std::env::current_dir()?;
