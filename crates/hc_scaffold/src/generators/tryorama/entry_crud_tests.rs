@@ -76,7 +76,7 @@ fn common_setup(happ_bundle_path_from_tests_root: &PathBuf, dna_role_id: &String
         r#"
     // Construct proper paths for your app.
     // This assumes app bundle created by the `hc app pack` command.
-    const testAppPath = process.cwd() + {:?};
+    const testAppPath = process.cwd() + '/' + {:?};
 
     // Set up the array of DNAs to be installed, which only consists of the
     // test DNA referenced by path.
