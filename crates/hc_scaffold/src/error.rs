@@ -45,6 +45,9 @@ pub enum ScaffoldError {
     #[error("Path was not found: {0}")]
     PathNotFound(PathBuf),
 
+    #[error("Invalid path {0}: {1}")]
+    InvalidPath(PathBuf, String),
+
     #[error("No app manifest (happ.yaml) was found in this directory tree")]
     AppManifestNotFound,
 

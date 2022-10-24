@@ -27,11 +27,11 @@ fn scaffold_full_web_app_and_test_it() {
 
     let mut cmd = Command::cargo_bin("hc-scaffold").unwrap();
     let cmd = cmd.current_dir("./tests/fixtures/forum");
-    let cmd = cmd.args(&["entry-def", "post", "--crud", "crud"]);
+    let cmd = cmd.args(&["entry-def", "post", "--crud", "crud", "--fields"]);
     cmd.assert().success();
 
-    let mut cmd = NativeCommand::new("nix-shell");
+    let mut cmd = Command::new("nix-shell");
     let cmd = cmd.current_dir("./tests/fixtures/forum");
-    let cmd = cmd.args(&["--run", "npm t"]);
-    cmd.output().unwrap();
+    let cmd = cmd.args(&["--run", "npm i && npm t"]);
+    cmd.assert().success();
 }

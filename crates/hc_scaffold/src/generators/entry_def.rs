@@ -19,7 +19,10 @@ use self::{
     integrity::add_entry_def_to_integrity_zome,
 };
 
-use super::zome::utils::{get_coordinator_zomes_for_integrity, zome_manifest_path};
+use super::{
+    tryorama::add_tryorama_tests_for_entry_def,
+    zome::utils::{get_coordinator_zomes_for_integrity, zome_manifest_path},
+};
 
 pub mod coordinator;
 pub mod fields;
@@ -27,7 +30,7 @@ pub mod integrity;
 
 pub fn scaffold_entry_def(
     mut app_file_tree: FileTree,
-    app_manifest: &AppManifest,
+    app_manifest: &(PathBuf, AppManifest),
     dna_manifest: &DnaManifest,
     integrity_zome_name: &String,
     entry_def_name: &String,
@@ -46,7 +49,7 @@ pub fn scaffold_entry_def(
 
     let app_file_tree = add_entry_def_to_integrity_zome(
         app_file_tree,
-        app_manifest,
+        &app_manifest.1,
         dna_manifest,
         integrity_zome_name,
         &entry_def,
@@ -89,7 +92,14 @@ pub fn scaffold_entry_def(
         &crud,
     )?;
 
-    //    let app_file_tree = add_tryorama_tests_for_entry_def
+    let app_file_tree = add_tryorama_tests_for_entry_def(
+        app_file_tree,
+        app_manifest,
+        &dna_manifest.name(),
+        &coordinator_zome.name.0.to_string(),
+        &entry_def,
+        &crud,
+    )?;
 
     Ok(app_file_tree)
 }

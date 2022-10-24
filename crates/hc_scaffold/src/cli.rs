@@ -427,7 +427,7 @@ Add new entry definitions to your zome with:
 
                 let app_file_tree = scaffold_entry_def(
                     app_file_tree,
-                    &app_manifest.1,
+                    &app_manifest,
                     &dna_manifest,
                     &integrity_zome_name,
                     &name,
