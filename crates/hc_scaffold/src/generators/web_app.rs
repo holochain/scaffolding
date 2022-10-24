@@ -7,6 +7,7 @@ use super::{
     app::{
         cargo::workspace_cargo_toml,
         default_nix::default_nix,
+        gitignore::gitignore,
         manifests::{empty_happ_manifest, web_happ_manifest},
     },
     tryorama::package_json::tryorama_package_json,
@@ -17,6 +18,7 @@ use package_json::workspace_package_json;
 
 fn web_app_skeleton(app_name: String, description: Option<String>) -> ScaffoldResult<FileTree> {
     Ok(dir! {
+      ".gitignore" => file!(gitignore())
       "default.nix" => default_nix("main".into())
       "workdir" => dir!{
         "happ.yaml" => file!(empty_happ_manifest(app_name.clone(), description)?)

@@ -27,6 +27,7 @@ use super::{
 pub mod coordinator;
 pub mod fields;
 pub mod integrity;
+pub mod utils;
 
 pub fn scaffold_entry_def(
     mut app_file_tree: FileTree,

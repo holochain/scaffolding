@@ -1,6 +1,7 @@
 use crate::definitions::FieldType;
 use crate::utils::{input_snake_case, input_no_whitespace, check_snake_case, check_no_whitespace};
 use crate::file_tree::load_directory_into_memory;
+use crate::generators::link_type::scaffold_link_type;
 use crate::{
     generators::{
         self,
@@ -101,7 +102,7 @@ pub enum HcScaffold {
         dependencies: Option<Vec<String>>,
     },
 
-    /// Scaffold an integrity zome into an existing DNA
+    /// Scaffold an entry definition and CRUD functions into an existing zome
     EntryDef {
         #[structopt(long)]
         /// Name of the app in which you want to scaffold the zome
@@ -115,12 +116,8 @@ pub enum HcScaffold {
         /// Name of the integrity zome in which you want to scaffold the entry definition
         zome: Option<String>,
 
-        /// Name of the zome being scaffolded
+        /// Name of the entry definition being scaffolded
         name: Option<String>,
-
-        #[structopt(long)]
-        /// The path in which you want to scaffold the zome
-        path: Option<PathBuf>,
 
         #[structopt(long, parse(try_from_str = parse_crud))]
         /// Whether to create a read zome call function for this entry definition
@@ -128,6 +125,34 @@ pub enum HcScaffold {
 
         #[structopt(long, value_delimiter = ",", parse(try_from_str = parse_fields))]
         fields: Option<Vec<(String, FieldType)>>,
+    },
+    /// Scaffold a link type and its appropriate zome functions into an existing zome
+    LinkType {
+        #[structopt(long)]
+        /// Name of the app in which you want to scaffold the zome
+        app: Option<String>,
+
+        #[structopt(long)]
+        /// Name of the dna in which you want to scaffold the zome
+        dna: Option<String>,
+
+        #[structopt(long)]
+        /// Name of the integrity zome in which you want to scaffold the link type
+        zome: Option<String>,
+
+        /// Entry type used as the base for the links
+        from_entry_type: Option<String>,
+
+        /// Entry type used as the target for the links
+        to_entry_type: Option<String>,
+
+        #[structopt(long)]
+        /// Use the entry hash as the base for the links, instead of the action hash
+        link_from_entry_hash: bool,
+
+        #[structopt(long)]
+        /// Use the entry hash as the target for the links, instead of the action hash
+        link_to_entry_hash: bool,
     },
     Pack(Pack),
 }
@@ -398,7 +423,6 @@ Add new entry definitions to your zome with:
                 dna,
                 zome,
                 name,
-                path,
                 crud,
                 fields,
             } => {
@@ -438,11 +462,51 @@ Add new entry definitions to your zome with:
                 println!(
                     r#"Entry definition "{}" scaffolded!
 
-Add new entry definitions to your zome with:
+Add new indexes for that entry definition with:
 
-  hc-scaffold entry_def
+  hc-scaffold index
 "#,
                     name
+                );
+            }
+            HcScaffold::LinkType {
+                app,
+                dna,
+                zome,
+                from_entry_type,
+                to_entry_type,
+                link_from_entry_hash,
+                link_to_entry_hash,
+            } => {
+                let current_dir = std::env::current_dir()?;
+
+                let app_file_tree = load_directory_into_memory(&current_dir)?;
+
+                let app_manifest = get_or_choose_app_manifest(&app_file_tree, &app)?;
+                let (dna_manifest_path, dna_manifest) =
+                    get_or_choose_dna_manifest(&app_file_tree, &app_manifest, dna)?;
+
+                let integrity_zome_name = get_or_choose_integrity_zome(&dna_manifest, &zome)?;
+
+                let (app_file_tree, link_type_name) = scaffold_link_type(
+                    app_file_tree,
+                    &app_manifest,
+                    &dna_manifest,
+                    &integrity_zome_name,
+                    &from_entry_type,
+                    &to_entry_type,
+                    link_from_entry_hash,
+                    link_to_entry_hash,
+                )?;
+
+                let file_tree = MergeableFileSystemTree::<OsString, String>::from(app_file_tree);
+
+                file_tree.build(&".".into())?;
+
+                println!(
+                    r#"Link type "{}" scaffolded!
+"#,
+                    link_type_name
                 );
             }
             HcScaffold::Pack(Pack::WebApp { path }) => web_app_pack_all_bundled(path).await?,

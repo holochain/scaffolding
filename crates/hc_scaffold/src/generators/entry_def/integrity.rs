@@ -5,7 +5,7 @@ use std::{
 
 use crate::{
     definitions::{EntryDefinition, FieldRepresentation, FieldType},
-    file_tree::FileTree,
+    file_tree::{find_files, find_map_rust_files, map_rust_files, FileTree},
 };
 use build_fs_tree::file;
 use convert_case::{Case, Casing};
@@ -176,54 +176,71 @@ pub use {}::*;
     Ok(app_file_tree)
 }
 
-pub fn map_rust_files<F: Fn(PathBuf, syn::File) -> ScaffoldResult<syn::File> + Clone>(
-    file_tree: &mut FileTree,
-    map_fn: F,
-) -> ScaffoldResult<()> {
-    map_all_files(file_tree, |file_path, s| {
-        if let Some(extension) = file_path.extension() {
-            if extension == "rs" {
-                let rust_file: syn::File = syn::parse_str(s.as_str()).map_err(|e| {
-                    ScaffoldError::MalformedFile(file_path.clone(), format!("{}", e))
-                })?;
-
-                let new_file = map_fn(file_path, rust_file)?;
-
-                return Ok(unparse(&new_file));
-            }
-        }
-
-        Ok(s)
-    })
-}
-
-pub fn map_all_files<F: Fn(PathBuf, String) -> ScaffoldResult<String> + Clone>(
-    file_tree: &mut FileTree,
-    map_fn: F,
-) -> ScaffoldResult<()> {
-    map_all_files_rec(file_tree, PathBuf::new(), map_fn)
-}
-
-fn map_all_files_rec<F: Fn(PathBuf, String) -> ScaffoldResult<String> + Clone>(
-    file_tree: &mut FileTree,
-    current_path: PathBuf,
-    map_fn: F,
-) -> ScaffoldResult<()> {
-    if let Some(c) = file_tree.dir_content_mut() {
-        for (key, mut tree) in c.clone().into_iter() {
-            let child_path = current_path.join(&key);
-            match tree.clone() {
-                FileTree::Directory(_dir_contents) => {
-                    map_all_files_rec(&mut tree, child_path, map_fn.clone())?;
-                }
-                FileTree::File(file_contents) => {
-                    *tree.file_content_mut().unwrap() = map_fn(child_path, file_contents)?;
-                }
-            }
-
-            c.insert(key.clone(), tree.clone());
-        }
+pub fn get_all_entry_types(
+    app_file_tree: &FileTree,
+    app_manifest: &AppManifest,
+    dna_manifest: &DnaManifest,
+    integrity_zome_name: &String,
+) -> ScaffoldResult<Vec<String>> {
+    let integrity_zome = match dna_manifest {
+        DnaManifest::V1(v1) => v1
+            .integrity
+            .zomes
+            .clone()
+            .into_iter()
+            .find(|z| z.name.0.eq(integrity_zome_name)),
     }
+    .ok_or(ScaffoldError::IntegrityZomeNotFound(
+        integrity_zome_name.clone(),
+        dna_manifest.name(),
+    ))?;
 
-    Ok(())
+    let mut manifest_path = zome_manifest_path(&app_file_tree, &integrity_zome)?.ok_or(
+        ScaffoldError::IntegrityZomeNotFound(integrity_zome_name.clone(), dna_manifest.name()),
+    )?;
+    manifest_path.pop();
+
+    let crate_src_path = manifest_path.join("src");
+    let crate_src_path_iter: Vec<OsString> =
+        crate_src_path.iter().map(|s| s.to_os_string()).collect();
+    let entry_defs_instances = find_map_rust_files(
+        app_file_tree
+            .path(&mut crate_src_path_iter.iter())
+            .ok_or(ScaffoldError::PathNotFound(crate_src_path.clone()))?,
+        &|file_path, rust_file| {
+            rust_file.items.iter().find_map(|i| {
+                if let syn::Item::Enum(mut item_enum) = i.clone() {
+                    if item_enum
+                        .attrs
+                        .iter()
+                        .any(|a| a.path.segments.iter().any(|s| s.ident.eq("hdk_entry_defs")))
+                    {
+                        return Some(item_enum.clone());
+                    }
+                }
+
+                None
+            })
+        },
+    );
+
+    match entry_defs_instances.len() {
+        0 => Ok(vec![]),
+        1 => {
+            let entry_def_enum = entry_defs_instances.values().next().unwrap();
+
+            let variants: Vec<String> = entry_def_enum
+                .clone()
+                .variants
+                .into_iter()
+                .map(|v| v.ident.to_string())
+                .collect();
+
+            Ok(variants)
+        }
+        _ => Err(ScaffoldError::MultipleEntryDefsFoundForIntegrityZome(
+            dna_manifest.name(),
+            integrity_zome_name.clone(),
+        )),
+    }
 }
