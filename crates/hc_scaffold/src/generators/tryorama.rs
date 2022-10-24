@@ -10,6 +10,7 @@ use crate::{
 pub mod entry_crud_tests;
 pub mod link_type_tests;
 pub mod package_json;
+pub mod tsconfig_json;
 pub mod utils;
 
 use build_fs_tree::file;

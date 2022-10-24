@@ -10,7 +10,7 @@ use super::{
         gitignore::gitignore,
         manifests::{empty_happ_manifest, web_happ_manifest},
     },
-    tryorama::package_json::tryorama_package_json,
+    tryorama::{package_json::tryorama_package_json, tsconfig_json::tryorama_tsconfig},
 };
 
 mod package_json;
@@ -28,6 +28,7 @@ fn web_app_skeleton(app_name: String, description: Option<String>) -> ScaffoldRe
       "package.json" => file!(workspace_package_json(app_name, String::from("ui"), String::from("workdir"), String::from("workdir")))
       "tests" => dir!{
         "package.json" => file!(tryorama_package_json(String::from("^0.9.0")))
+        "tsconfig.json" => file!(tryorama_tsconfig())
         "src" => dir! {
 
         }

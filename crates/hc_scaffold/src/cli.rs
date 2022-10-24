@@ -321,7 +321,7 @@ Add new zomes to your DNA with:
 
 Add new entry definitions to your zome with:
 
-  hc-scaffold entry-def
+  hc-scaffold entry-type
 "#,
                     integrity_zome_name(&name),
                     name
