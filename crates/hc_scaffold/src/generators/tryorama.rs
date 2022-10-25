@@ -16,7 +16,9 @@ pub mod utils;
 use build_fs_tree::file;
 use convert_case::{Case, Casing};
 use entry_crud_tests::entry_crud_tests;
-use holochain_types::prelude::AppManifest;
+use holochain_types::prelude::{AppManifest, ZomeManifest};
+
+use super::zome::coordinator::find_extern_function_or_choose;
 
 fn find_or_choose_tryorama_package_path(app_file_tree: &FileTree) -> ScaffoldResult<PathBuf> {
     // TODO: Actually implement this
@@ -30,6 +32,7 @@ pub fn add_tryorama_tests_for_entry_def(
     coordinator_zome: &String,
     entry_def: &EntryDefinition,
     crud: &Crud,
+    create_fns_for_depends_on: &BTreeMap<String, (ZomeManifest, String)>,
 ) -> ScaffoldResult<FileTree> {
     let tryorama_path = find_or_choose_tryorama_package_path(&app_file_tree)?;
 
@@ -53,6 +56,7 @@ pub fn add_tryorama_tests_for_entry_def(
         dna_role_id,
         coordinator_zome,
         crud,
+        &create_fns_for_depends_on,
     );
 
     let test_path = tryorama_path

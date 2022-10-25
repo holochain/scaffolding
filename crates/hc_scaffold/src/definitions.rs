@@ -161,6 +161,17 @@ impl FieldType {
                 ]
                 .join(", ")
             ),
+            (false, FieldRepresentation::Hidden(HiddenType::HdkType(HdkType::ActionHash))) => {
+                format!(
+                    "Buffer.from(new Uint8Array([{}]))",
+                    vec![0x84, 0x29, 0x24]
+                        .into_iter()
+                        .chain(vec![0x00; 36].into_iter())
+                        .map(|i| i.to_string())
+                        .collect::<Vec<String>>()
+                        .join(", ")
+                )
+            }
             // TODO: finish this
             _ => String::from(""),
         }

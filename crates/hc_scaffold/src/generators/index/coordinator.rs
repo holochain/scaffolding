@@ -9,7 +9,7 @@ use crate::{
     error::{ScaffoldError, ScaffoldResult},
     file_tree::{map_rust_files, FileTree},
     generators::zome::{
-        coordinator::find_all_extern_functions,
+        coordinator::{find_all_extern_functions, find_extern_function_or_choose},
         utils::{get_coordinator_zomes_for_integrity, zome_manifest_path},
     },
 };
@@ -91,72 +91,6 @@ pub fn get_{}(author: AgentPubKey) -> ExternResult<Vec<Record>> {{
     )
 }
 
-fn choose_entry_type_create_function(
-    functions_by_zome: &BTreeMap<String, Vec<String>>,
-    entry_type: &String,
-) -> ScaffoldResult<(String, String)> {
-    let all_functions: Vec<(String, String)> = functions_by_zome
-        .iter()
-        .map(|(z, fns)| {
-            fns.iter()
-                .map(|f| (z.clone(), f.clone()))
-                .collect::<Vec<(String, String)>>()
-        })
-        .flatten()
-        .collect();
-    let all_fns_str: Vec<String> = all_functions
-        .iter()
-        .map(|(z, f)| format!(r#""{}", in zome "{}""#, f, z))
-        .collect();
-
-    let selection = Select::with_theme(&ColorfulTheme::default())
-        .with_prompt(format!(
-            "At the end of which function should the {} entries be indexed?",
-            entry_type
-        ))
-        .default(0)
-        .items(&all_fns_str[..])
-        .interact()?;
-
-    Ok(all_functions[selection].clone())
-}
-
-fn get_or_choose_entry_type_create_function(
-    app_file_tree: &FileTree,
-    dna_manifest: &DnaManifest,
-    coordinator_zomes_for_integrity: &Vec<ZomeManifest>,
-    entry_type: &String,
-) -> ScaffoldResult<(ZomeManifest, String)> {
-    let default_fn_name = format!("create_{}", entry_type.to_case(Case::Snake));
-
-    let mut functions_by_zome: BTreeMap<String, Vec<String>> = BTreeMap::new();
-
-    for coordinator_zome in coordinator_zomes_for_integrity {
-        let all_extern_functions =
-            find_all_extern_functions(&app_file_tree, dna_manifest, coordinator_zome)?;
-
-        if all_extern_functions.contains(&default_fn_name) {
-            return Ok((coordinator_zome.clone(), default_fn_name));
-        }
-
-        functions_by_zome.insert(coordinator_zome.name.to_string(), all_extern_functions);
-    }
-
-    let (zome_name, fn_name) = choose_entry_type_create_function(&functions_by_zome, &entry_type)?;
-
-    let chosen_zome = coordinator_zomes_for_integrity
-        .iter()
-        .find(|z| z.name.to_string().eq(&zome_name));
-
-    match chosen_zome {
-        Some(z) => Ok((z.clone(), fn_name)),
-        None => Err(ScaffoldError::CoordinatorZomeNotFound(
-            zome_name.clone(),
-            dna_manifest.name(),
-        )),
-    }
-}
-
 fn add_create_link_in_create_function(
     mut app_file_tree: FileTree,
     dna_manifest: &DnaManifest,
@@ -167,11 +101,15 @@ fn add_create_link_in_create_function(
     entry_type: &String,
     link_to_entry_hash: bool,
 ) -> ScaffoldResult<FileTree> {
-    let (chosen_coordinator_zome, fn_name) = get_or_choose_entry_type_create_function(
+    let (chosen_coordinator_zome, fn_name) = find_extern_function_or_choose(
         &app_file_tree,
         dna_manifest,
         coordinator_zomes_for_integrity,
-        entry_type,
+        &format!("create_{}", entry_type.to_case(Case::Snake)),
+        &format!(
+            "At the end of which function should the {} entries be indexed?",
+            entry_type
+        ),
     )?;
 
     let mut manifest_path = zome_manifest_path(&app_file_tree, &chosen_coordinator_zome)?.ok_or(

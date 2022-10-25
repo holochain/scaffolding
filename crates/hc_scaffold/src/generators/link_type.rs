@@ -21,6 +21,14 @@ use super::{
 pub mod coordinator;
 pub mod integrity;
 
+pub fn link_type_name(from_entry_type: &String, to_entry_type: &String) -> String {
+    format!(
+        "{}To{}",
+        from_entry_type.to_case(Case::Pascal),
+        to_entry_type.to_case(Case::Pascal)
+    )
+}
+
 pub fn scaffold_link_type(
     app_file_tree: FileTree,
     app_manifest: &(PathBuf, AppManifest),
@@ -55,11 +63,7 @@ pub fn scaffold_link_type(
         &String::from("Link to which entry type?"),
     )?;
 
-    let link_type_name = format!(
-        "{}To{}",
-        from_entry_type.to_case(Case::Pascal),
-        to_entry_type.to_case(Case::Pascal)
-    );
+    let link_type_name = link_type_name(&from_entry_type, &to_entry_type);
 
     let app_file_tree = add_link_type_to_integrity_zome(
         app_file_tree,

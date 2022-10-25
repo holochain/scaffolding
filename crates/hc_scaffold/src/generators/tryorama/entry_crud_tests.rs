@@ -1,6 +1,10 @@
-use std::path::PathBuf;
+use std::{collections::BTreeMap, path::PathBuf};
 
-use crate::{cli::Crud, definitions::EntryDefinition};
+use holochain_types::prelude::ZomeManifest;
+
+use crate::{
+    cli::Crud, definitions::EntryDefinition, generators::entry_def::coordinator::create_handler,
+};
 
 use super::utils::common_tests_setup;
 
@@ -10,6 +14,7 @@ pub fn entry_crud_tests(
     dna_role_id: &String,
     coordinator_zome: &String,
     crud: &Crud,
+    create_fns_of_entry_type_this_entry_type_depends_on: &BTreeMap<String, (ZomeManifest, String)>,
 ) -> String {
     let mut initial_test_file = format!(
         r#"
@@ -27,6 +32,7 @@ import {{ decode }} from '@msgpack/msgpack';
             happ_bundle_location_from_tests_root,
             dna_role_id,
             coordinator_zome,
+            create_fns_of_entry_type_this_entry_type_depends_on
         )
     );
 
@@ -71,18 +77,29 @@ import {{ decode }} from '@msgpack/msgpack';
     initial_test_file
 }
 
-pub fn create_entry_test(
+fn create_depends_on_entries(
+    _dna_role_id: &String,
+    create_fns_of_entry_type_this_entry_type_depends_on: &BTreeMap<String, (ZomeManifest, String)>,
+) -> String {
+    let mut initial_str = String::from("");
+
+    // TODO: actually implement this
+    for (_entry_type, (_zome, _fn_name)) in create_fns_of_entry_type_this_entry_type_depends_on {
+        let create = format!(r#""#);
+        initial_str.push_str(create.as_str());
+    }
+
+    initial_str
+}
+
+fn alice_create_entry(
     entry_definition: &EntryDefinition,
-    happ_bundle_location_from_tests_root: &PathBuf,
     dna_role_id: &String,
     coordinator_zome: &String,
+    create_fns_of_entry_type_this_entry_type_depends_on: &BTreeMap<String, (ZomeManifest, String)>,
 ) -> String {
     format!(
-        r#"
-test('create {}', async t => {{
-  await runScenario(async scenario => {{
-{}
-
+        r#"{}
     const createInput = {};
 
     // Alice creates a {}
@@ -92,15 +109,43 @@ test('create {}', async t => {{
       payload: createInput,
     }});
     assert.ok(record);
-  }});
-}});"#,
-        entry_definition.name,
-        common_tests_setup(happ_bundle_location_from_tests_root, dna_role_id),
+"#,
+        create_depends_on_entries(
+            dna_role_id,
+            create_fns_of_entry_type_this_entry_type_depends_on
+        ),
         entry_definition.js_sample_object(),
         entry_definition.name,
         dna_role_id,
         coordinator_zome,
         entry_definition.name
+    )
+}
+
+pub fn create_entry_test(
+    entry_definition: &EntryDefinition,
+    happ_bundle_location_from_tests_root: &PathBuf,
+    dna_role_id: &String,
+    coordinator_zome: &String,
+    create_fns_of_entry_type_this_entry_type_depends_on: &BTreeMap<String, (ZomeManifest, String)>,
+) -> String {
+    format!(
+        r#"
+test('create {}', async t => {{
+  await runScenario(async scenario => {{
+{}
+
+{}
+  }});
+}});"#,
+        entry_definition.name,
+        common_tests_setup(happ_bundle_location_from_tests_root, dna_role_id),
+        alice_create_entry(
+            entry_definition,
+            dna_role_id,
+            coordinator_zome,
+            create_fns_of_entry_type_this_entry_type_depends_on
+        )
     )
 }
 

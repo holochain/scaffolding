@@ -1,6 +1,7 @@
-use std::{ffi::OsString, path::PathBuf};
+use std::{collections::BTreeMap, ffi::OsString, path::PathBuf};
 
 use crate::file_tree::{find_map_rust_files, FileTree};
+use dialoguer::{theme::ColorfulTheme, Select};
 use holochain_types::prelude::{
     DnaManifest, DnaManifestCurrentBuilder, ZomeDependency, ZomeManifest, ZomeName,
 };
@@ -119,6 +120,68 @@ pub fn init(_: ()) -> ExternResult<InitCallbackResult> {{
 }}
 "#
     )
+}
+
+fn choose_extern_function(
+    functions_by_zome: &BTreeMap<String, Vec<String>>,
+    prompt: &String,
+) -> ScaffoldResult<(String, String)> {
+    let all_functions: Vec<(String, String)> = functions_by_zome
+        .iter()
+        .map(|(z, fns)| {
+            fns.iter()
+                .map(|f| (z.clone(), f.clone()))
+                .collect::<Vec<(String, String)>>()
+        })
+        .flatten()
+        .collect();
+    let all_fns_str: Vec<String> = all_functions
+        .iter()
+        .map(|(z, f)| format!(r#""{}", in zome "{}""#, f, z))
+        .collect();
+
+    let selection = Select::with_theme(&ColorfulTheme::default())
+        .with_prompt(prompt.as_str())
+        .default(0)
+        .items(&all_fns_str[..])
+        .interact()?;
+
+    Ok(all_functions[selection].clone())
+}
+
+pub fn find_extern_function_or_choose(
+    app_file_tree: &FileTree,
+    dna_manifest: &DnaManifest,
+    coordinator_zomes: &Vec<ZomeManifest>,
+    fn_name_to_find: &String,
+    prompt: &String,
+) -> ScaffoldResult<(ZomeManifest, String)> {
+    let mut functions_by_zome: BTreeMap<String, Vec<String>> = BTreeMap::new();
+
+    for coordinator_zome in coordinator_zomes {
+        let all_extern_functions =
+            find_all_extern_functions(&app_file_tree, dna_manifest, coordinator_zome)?;
+
+        if all_extern_functions.contains(&fn_name_to_find) {
+            return Ok((coordinator_zome.clone(), fn_name_to_find.clone()));
+        }
+
+        functions_by_zome.insert(coordinator_zome.name.to_string(), all_extern_functions);
+    }
+
+    let (zome_name, fn_name) = choose_extern_function(&functions_by_zome, &prompt)?;
+
+    let chosen_zome = coordinator_zomes
+        .iter()
+        .find(|z| z.name.to_string().eq(&zome_name));
+
+    match chosen_zome {
+        Some(z) => Ok((z.clone(), fn_name)),
+        None => Err(ScaffoldError::CoordinatorZomeNotFound(
+            zome_name.clone(),
+            dna_manifest.name(),
+        )),
+    }
 }
 
 pub fn find_all_extern_functions(

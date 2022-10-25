@@ -129,6 +129,10 @@ pub enum HcScaffold {
         /// Whether to create a read zome call function for this entry type
         crud: Option<Crud>,
 
+        #[structopt(long, value_delimiter = ",")]
+        /// The entry types that the new entry type depends on
+        depends_on: Option<Vec<String>>,
+
         #[structopt(long, value_delimiter = ",", parse(try_from_str = parse_fields))]
         /// The fields that the entry type struct should contain
         fields: Option<Vec<(String, FieldType)>>,
@@ -499,6 +503,7 @@ Add new entry definitions to your zome with:
                 zome,
                 name,
                 crud,
+                depends_on,
                 fields,
             } => {
                 let prompt = String::from("Entry definition name (snake_case):");
@@ -527,6 +532,7 @@ Add new entry definitions to your zome with:
                     &integrity_zome_name,
                     &name,
                     &crud,
+                    &depends_on,
                     &fields,
                 )?;
 

@@ -19,16 +19,7 @@ use crate::{
     generators::zome::utils::zome_manifest_path,
 };
 
-pub fn render_entry_definition_file(entry_def: &EntryDefinition) -> ScaffoldResult<syn::File> {
-    let type_definitions: Vec<TokenStream> = entry_def
-        .fields
-        .values()
-        .filter_map(|field_type| match field_type.representation.clone() {
-            FieldRepresentation::Visible(widget) => widget.rust_type_definition(),
-            _ => None,
-        })
-        .collect();
-
+pub fn render_entry_definition_struct(entry_def: &EntryDefinition) -> ScaffoldResult<TokenStream> {
     let name: syn::Expr = syn::parse_str(entry_def.name.to_case(Case::Pascal).as_str())?;
 
     let fields: Vec<TokenStream> = entry_def
@@ -40,6 +31,25 @@ pub fn render_entry_definition_file(entry_def: &EntryDefinition) -> ScaffoldResu
             Ok(quote! {  #name: #rust_type })
         })
         .collect::<ScaffoldResult<Vec<TokenStream>>>()?;
+    Ok(quote! {
+
+      pub struct #name {
+        #(pub #fields),*
+      }
+    })
+}
+
+pub fn render_entry_definition_file(entry_def: &EntryDefinition) -> ScaffoldResult<syn::File> {
+    let entry_def_token_stream = render_entry_definition_struct(entry_def)?;
+
+    let type_definitions: Vec<TokenStream> = entry_def
+        .fields
+        .values()
+        .filter_map(|field_type| match field_type.representation.clone() {
+            FieldRepresentation::Visible(widget) => widget.rust_type_definition(),
+            _ => None,
+        })
+        .collect();
 
     let token_stream = quote! {
       use hdi::prelude::*;
@@ -48,9 +58,7 @@ pub fn render_entry_definition_file(entry_def: &EntryDefinition) -> ScaffoldResu
 
       #[hdk_entry_helper]
       #[derive(Clone)]
-      pub struct #name {
-        #(#fields),*
-      }
+      #entry_def_token_stream
     };
 
     let file = syn::parse_file(token_stream.to_string().as_str())?;

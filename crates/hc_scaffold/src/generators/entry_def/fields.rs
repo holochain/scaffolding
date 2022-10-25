@@ -1,10 +1,12 @@
 use std::collections::BTreeMap;
 
 use dialoguer::{theme::ColorfulTheme, Confirm, Input, Select};
+use quote::quote;
 
 use crate::{
-    definitions::{FieldRepresentation, FieldType, Widget},
+    definitions::{EntryDefinition, FieldRepresentation, FieldType, Widget},
     error::{ScaffoldError, ScaffoldResult},
+    generators::entry_def::integrity::render_entry_definition_struct,
 };
 
 fn list_names() -> Vec<String> {
@@ -72,8 +74,8 @@ pub fn choose_from_name(name: &String) -> ScaffoldResult<Widget> {
 pub fn choose_field() -> ScaffoldResult<(String, FieldType)> {
     let field_name: String = Input::with_theme(&ColorfulTheme::default())
         .with_prompt("Field name:")
-        .interact_text()
-        .unwrap();
+        .report(false)
+        .interact_text()?;
 
     let field_type_names = list_names();
 
@@ -82,6 +84,7 @@ pub fn choose_field() -> ScaffoldResult<(String, FieldType)> {
         .default(0)
         .items(&field_type_names[..])
         .item("Vector")
+        .report(false)
         .interact()?;
 
     // If user selected vector
@@ -90,6 +93,7 @@ pub fn choose_field() -> ScaffoldResult<(String, FieldType)> {
             .with_prompt("Vector of which field type?")
             .default(0)
             .items(&field_type_names[..])
+            .report(false)
             .interact()?;
 
         let field_widget = choose_from_name(&field_type_names[selection])?;
@@ -108,22 +112,52 @@ pub fn choose_field() -> ScaffoldResult<(String, FieldType)> {
     }
 }
 
-pub fn choose_fields() -> ScaffoldResult<BTreeMap<String, FieldType>> {
-    println!("Which fields should the entry contain?");
-
-    let mut fields: BTreeMap<String, FieldType> = BTreeMap::new();
+pub fn choose_fields(
+    mut initial_fields: BTreeMap<String, FieldType>,
+) -> ScaffoldResult<BTreeMap<String, FieldType>> {
+    println!("\nWhich fields should the entry contain?\n");
 
     let mut finished = false;
+
+    if initial_fields.len() > 0 {
+        finished = !Confirm::with_theme(&ColorfulTheme::default())
+            .with_prompt(format!(
+                "Add another field to the entry? Current fields: {}",
+                initial_fields
+                    .keys()
+                    .cloned()
+                    .collect::<Vec<String>>()
+                    .join(", ")
+            ))
+            .report(false)
+            .interact()?;
+    }
 
     while !finished {
         let (field_name, field_type) = choose_field()?;
 
-        fields.insert(field_name, field_type);
-
+        initial_fields.insert(field_name, field_type);
         finished = !Confirm::with_theme(&ColorfulTheme::default())
-            .with_prompt("Add another field to the entry?")
+            .with_prompt(format!(
+                "Add another field to the entry? Current fields: {}",
+                initial_fields
+                    .keys()
+                    .cloned()
+                    .collect::<Vec<String>>()
+                    .join(", ")
+            ))
+            .report(false)
             .interact()?;
     }
 
-    Ok(fields)
+    println!(
+        "Chosen fields: {}",
+        initial_fields
+            .keys()
+            .cloned()
+            .collect::<Vec<String>>()
+            .join(", ")
+    );
+
+    Ok(initial_fields)
 }
