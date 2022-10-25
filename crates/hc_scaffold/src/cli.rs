@@ -14,6 +14,7 @@ use crate::generators::{
 use crate::utils::{check_no_whitespace, check_snake_case, input_no_whitespace, input_snake_case};
 
 use build_fs_tree::{Build, MergeableFileSystemTree};
+use dialoguer::{theme::ColorfulTheme, Input, Select};
 use holochain_types::{prelude::AppManifest, web_app::WebAppManifest};
 use holochain_util::ffs;
 use mr_bundle::{Location, Manifest};
@@ -32,6 +33,10 @@ pub enum HcScaffold {
 
         /// [OPTIONAL] Description of the app to scaffold
         description: Option<String>,
+
+        /// Skip setup of nix development environment
+        #[structopt(long)]
+        skip_nix: bool,
     },
     /// Scaffold a DNA into an existing app
     Dna {
@@ -218,27 +223,41 @@ pub enum Pack {
 impl HcScaffold {
     pub async fn run(self) -> anyhow::Result<()> {
         match self {
-            HcScaffold::WebApp { name, description } => {
+            HcScaffold::WebApp { name, description , skip_nix} => {
                 let prompt = String::from("App name (no whitespaces):");
                 let name: String = match name {
                     Some(n) => check_no_whitespace(n, "app name")?,
                     None => input_no_whitespace(&prompt)?,
                 };
 
+
+                let skip_nix = match Select::with_theme(&ColorfulTheme::default())
+                    .with_prompt("Do you want to set up a nix development environment (recommended)?")
+                    .default(0)
+                    .items(&["yes", "no"])
+                    .clear(true)
+                    .interact()? {
+                        1 => true,
+                        _ => false,
+                };
+
                 let app_file_tree =
-                    generators::web_app::scaffold_web_app(name.clone(), description)?;
+                    generators::web_app::scaffold_web_app(name.clone(), description, skip_nix)?;
 
                 let file_tree = MergeableFileSystemTree::<OsString, String>::from(app_file_tree);
 
                 file_tree.build(&".".into())?;
 
+                let mut maybe_nix = "";
+
                 if cfg!(target_os = "windows") {
                     return Err(anyhow::anyhow!("Windows doesn't support nix"));
-                } else {
+                } else if skip_nix == false {
                     Command::new("nix-shell")
                         .current_dir(std::env::current_dir()?.join(&name))
                         .args(["-I", "nixpkgs=https://github.com/NixOS/nixpkgs/archive/nixos-21.11.tar.gz", "-p", "niv", "--run", "niv init && niv drop nixpkgs && niv drop niv && niv add -b main holochain/holonix"])
                         .output()?;
+                    maybe_nix = "\n  nix-shell";
                 };
 
                 println!(
@@ -246,15 +265,14 @@ impl HcScaffold {
 
 To set up your development environment, run:
 
-  cd {}
-  nix-shell
+  cd {}{}
   npm install
 
 Then, add new DNAs to your app with:
 
   hc-scaffold dna
 "#,
-                    name, name
+                    name, name, maybe_nix
                 );
             }
             HcScaffold::Dna { app, name } => {

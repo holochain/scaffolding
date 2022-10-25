@@ -16,7 +16,7 @@ use super::{
 mod package_json;
 use package_json::workspace_package_json;
 
-fn web_app_skeleton(app_name: String, description: Option<String>) -> ScaffoldResult<FileTree> {
+fn web_app_skeleton(app_name: String, description: Option<String>, skip_nix: bool) -> ScaffoldResult<FileTree> {
     Ok(dir! {
       ".gitignore" => file!(gitignore())
       "default.nix" => default_nix("main".into())
@@ -31,15 +31,15 @@ fn web_app_skeleton(app_name: String, description: Option<String>) -> ScaffoldRe
         "tsconfig.json" => file!(tryorama_tsconfig())
         "src" => dir! {
 
-        }
-      }
-      "Cargo.toml" => file!(workspace_cargo_toml())
-      "dnas" => dir! {}
-    })
+            }
+          }
+          "Cargo.toml" => file!(workspace_cargo_toml())
+          "dnas" => dir! {}
+        })
 }
 
-pub fn scaffold_web_app(app_name: String, description: Option<String>) -> ScaffoldResult<FileTree> {
+pub fn scaffold_web_app(app_name: String, description: Option<String>, skip_nix: bool) -> ScaffoldResult<FileTree> {
     Ok(dir! {
-      app_name.clone() => web_app_skeleton(app_name, description)?
+      app_name.clone() => web_app_skeleton(app_name, description, skip_nix)?
     })
 }
