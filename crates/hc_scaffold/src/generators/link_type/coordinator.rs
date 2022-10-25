@@ -26,8 +26,8 @@ fn initial_link_type_handlers(
         true => String::from("EntryHash"),
         false => String::from("ActionHash"),
     };
-    let title_from_entry_type = from_entry_type.to_case(Case::Title);
-    let title_to_entry_type = to_entry_type.to_case(Case::Title);
+    let pascal_from_entry_type = from_entry_type.to_case(Case::Pascal);
+    let pascal_to_entry_type = to_entry_type.to_case(Case::Pascal);
     let snake_from_entry_type = from_entry_type.to_case(Case::Snake);
     let snake_to_entry_type = to_entry_type.to_case(Case::Snake);
 
@@ -64,16 +64,16 @@ pub fn get_{}_for_{}({}_hash: {}) -> ExternResult<Vec<Record>> {{
 }}
 "#,
         integrity_zome_name,
-        title_to_entry_type,
-        title_from_entry_type,
+        pascal_to_entry_type,
+        pascal_from_entry_type,
         snake_from_entry_type,
         from_hash_type,
         snake_to_entry_type,
         to_hash_type,
         snake_to_entry_type,
         snake_from_entry_type,
-        title_to_entry_type,
-        title_from_entry_type,
+        pascal_to_entry_type,
+        pascal_from_entry_type,
         snake_from_entry_type,
         snake_to_entry_type,
         link_type_name,

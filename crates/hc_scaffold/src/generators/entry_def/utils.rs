@@ -1,4 +1,4 @@
-use dialoguer::{theme::ColorfulTheme, Select};
+use dialoguer::{theme::ColorfulTheme, MultiSelect, Select};
 use holochain_types::prelude::DnaManifest;
 
 use crate::error::{ScaffoldError, ScaffoldResult};
@@ -11,6 +11,23 @@ pub fn choose_entry_type(all_entries: &Vec<String>, prompt: &String) -> Scaffold
         .interact()?;
 
     Ok(all_entries[selection].clone())
+}
+
+pub fn choose_multiple_entry_types(
+    all_entries: &Vec<String>,
+    prompt: &String,
+) -> ScaffoldResult<Vec<String>> {
+    let selection = MultiSelect::with_theme(&ColorfulTheme::default())
+        .with_prompt(prompt.clone())
+        .items(&all_entries[..])
+        .interact()?;
+
+    let chosen_entry_types = selection
+        .into_iter()
+        .map(|i| all_entries[i].clone())
+        .collect();
+
+    Ok(chosen_entry_types)
 }
 
 pub fn get_or_choose_entry_type(

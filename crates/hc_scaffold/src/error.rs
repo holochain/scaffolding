@@ -93,6 +93,9 @@ pub enum ScaffoldError {
     #[error("Invalid string format: \"{0}\"")]
     InvalidStringFormat(String),
 
+    #[error("Invalid index type: \"{0}\". Allowed index types: \"{1}\"")]
+    InvalidIndexType(String, String),
+
     #[error("No entry type definitions (#[hdk_entry_defs]) were found in dna \"{0}\" for the integrity zome \"{1}\"")]
     NoEntryTypesDefFoundForIntegrityZome(String, String),
 

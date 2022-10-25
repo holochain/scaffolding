@@ -27,15 +27,23 @@ pub fn get_{}(action_hash: ActionHash) -> ExternResult<Option<Record>> {{
 pub fn create_handler(entry_def_name: &String) -> String {
     format!(
         r#"#[hdk_extern]
-pub fn create_{}({}: {}) -> ExternResult<ActionHash> {{
-  create_entry(&EntryTypes::{}({}.clone()))
+pub fn create_{}({}: {}) -> ExternResult<Record> {{
+  let {}_hash = create_entry(&EntryTypes::{}({}.clone()))?;
+    
+  let record = get({}_hash.clone(), GetOptions::default())?
+        .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("Could not find the newly created {}"))))?;
+
+  Ok(record)
 }}
 "#,
         entry_def_name.to_case(Case::Snake),
         entry_def_name.to_case(Case::Snake),
-        entry_def_name.to_case(Case::Title),
-        entry_def_name.to_case(Case::Title),
-        entry_def_name.to_case(Case::Snake)
+        entry_def_name.to_case(Case::Pascal),
+        entry_def_name.to_case(Case::Snake),
+        entry_def_name.to_case(Case::Pascal),
+        entry_def_name.to_case(Case::Snake),
+        entry_def_name.to_case(Case::Snake),
+        entry_def_name.to_case(Case::Pascal)
     )
 }
 
@@ -52,11 +60,11 @@ pub fn update_{}(input: Update{}Input) -> ExternResult<ActionHash> {{
   update_entry(input.original_action_hash, &input.updated_{})
 }}
 "#,
-        entry_def_name.to_case(Case::Title),
+        entry_def_name.to_case(Case::Pascal),
         entry_def_name.to_case(Case::Snake),
-        entry_def_name.to_case(Case::Title),
+        entry_def_name.to_case(Case::Pascal),
         entry_def_name.to_case(Case::Snake),
-        entry_def_name.to_case(Case::Title),
+        entry_def_name.to_case(Case::Pascal),
         entry_def_name.to_case(Case::Snake)
     )
 }

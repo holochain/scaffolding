@@ -1,5 +1,6 @@
 use std::{ffi::OsString, path::PathBuf};
 
+use convert_case::{Case, Casing};
 use holochain_types::prelude::{AppManifest, DnaManifest};
 use quote::quote;
 
@@ -59,6 +60,8 @@ pub fn add_link_type_to_integrity_zome(
         },
     );
 
+    let pascal_case_link_type_name = link_type_name.to_case(Case::Pascal);
+
     // Find the #[hdk_link_types] macro and add the new link type to it
     map_rust_files(
         app_file_tree
@@ -85,7 +88,7 @@ pub fn add_link_type_to_integrity_zome(
                                 if item_enum
                                     .variants
                                     .iter()
-                                    .any(|v| v.ident.to_string().eq(link_type_name))
+                                    .any(|v| v.ident.to_string().eq(&pascal_case_link_type_name))
                                 {
                                     return Err(ScaffoldError::LinkTypeAlreadyExists(
                                         link_type_name.clone(),
@@ -95,9 +98,8 @@ pub fn add_link_type_to_integrity_zome(
                                 }
 
                                 let new_variant = syn::parse_str::<syn::Variant>(
-                                    format!("{}", link_type_name).as_str(),
-                                )
-                                .unwrap();
+                                    format!("{}", pascal_case_link_type_name).as_str(),
+                                )?;
                                 item_enum.variants.push(new_variant);
                                 return Ok(syn::Item::Enum(item_enum));
                             }

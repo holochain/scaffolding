@@ -1,13 +1,13 @@
 use std::{ffi::OsString, path::PathBuf};
 
-use crate::file_tree::FileTree;
+use crate::file_tree::{find_map_rust_files, FileTree};
 use holochain_types::prelude::{
     DnaManifest, DnaManifestCurrentBuilder, ZomeDependency, ZomeManifest, ZomeName,
 };
 
 use crate::error::{ScaffoldError, ScaffoldResult};
 
-use super::utils::zome_wasm_location;
+use super::utils::{zome_manifest_path, zome_wasm_location};
 
 pub fn add_coordinator_zome_to_manifest(
     mut app_file_tree: FileTree,
@@ -119,4 +119,45 @@ pub fn init(_: ()) -> ExternResult<InitCallbackResult> {{
 }}
 "#
     )
+}
+
+pub fn find_all_extern_functions(
+    app_file_tree: &FileTree,
+    dna_manifest: &DnaManifest,
+    coordinator_zome: &ZomeManifest,
+) -> ScaffoldResult<Vec<String>> {
+    let mut manifest_path = zome_manifest_path(&app_file_tree, &coordinator_zome)?.ok_or(
+        ScaffoldError::CoordinatorZomeNotFound(
+            coordinator_zome.name.0.to_string(),
+            dna_manifest.name(),
+        ),
+    )?;
+
+    manifest_path.pop();
+
+    let crate_src_path = manifest_path.join("src");
+    let crate_src_path_iter: Vec<OsString> =
+        crate_src_path.iter().map(|s| s.to_os_string()).collect();
+    let hdk_extern_instances = find_map_rust_files(
+        app_file_tree
+            .path(&mut crate_src_path_iter.iter())
+            .ok_or(ScaffoldError::PathNotFound(crate_src_path.clone()))?,
+        &|file_path, rust_file| {
+            rust_file.items.iter().find_map(|i| {
+                if let syn::Item::Fn(item_fn) = i.clone() {
+                    if item_fn
+                        .attrs
+                        .iter()
+                        .any(|a| a.path.segments.iter().any(|s| s.ident.eq("hdk_extern")))
+                    {
+                        return Some(item_fn.sig.ident.to_string());
+                    }
+                }
+
+                None
+            })
+        },
+    );
+
+    Ok(hdk_extern_instances.values().cloned().collect())
 }

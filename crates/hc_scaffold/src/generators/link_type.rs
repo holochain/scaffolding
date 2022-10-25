@@ -57,8 +57,8 @@ pub fn scaffold_link_type(
 
     let link_type_name = format!(
         "{}To{}",
-        from_entry_type.to_case(Case::Title),
-        to_entry_type.to_case(Case::Title)
+        from_entry_type.to_case(Case::Pascal),
+        to_entry_type.to_case(Case::Pascal)
     );
 
     let app_file_tree = add_link_type_to_integrity_zome(

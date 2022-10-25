@@ -1,6 +1,8 @@
 use crate::definitions::FieldType;
+use crate::error::{ScaffoldError, ScaffoldResult};
 use crate::file_tree::load_directory_into_memory;
 use crate::generators::app::cargo::exec_metadata;
+use crate::generators::index::{scaffold_index, IndexType};
 use crate::generators::link_type::scaffold_link_type;
 use crate::generators::{
     self,
@@ -21,6 +23,7 @@ use holochain_util::ffs;
 use mr_bundle::{Location, Manifest};
 use std::collections::BTreeMap;
 use std::process::Stdio;
+use std::str::FromStr;
 use std::{ffi::OsString, path::PathBuf, process::Command};
 use structopt::StructOpt;
 
@@ -153,6 +156,34 @@ pub enum HcScaffold {
         #[structopt(long)]
         /// Use the entry hash as the base for the links, instead of the action hash
         link_from_entry_hash: bool,
+
+        #[structopt(long)]
+        /// Use the entry hash as the target for the links, instead of the action hash
+        link_to_entry_hash: bool,
+    },
+    /// Scaffold an indexing link-type and appropriate zome functions to index entries into an existing zome
+    Index {
+        #[structopt(long)]
+        /// Name of the app in which you want to scaffold the zome
+        app: Option<String>,
+
+        #[structopt(long)]
+        /// Name of the dna in which you want to scaffold the zome
+        dna: Option<String>,
+
+        #[structopt(long)]
+        /// Name of the integrity zome in which you want to scaffold the link type
+        zome: Option<String>,
+
+        /// Index type: "global" or "by-author"
+        index_type: Option<IndexType>,
+
+        /// Index name, just to differentiate it from other indexes
+        index_name: Option<String>,
+
+        #[structopt(long, value_delimiter = ",")]
+        /// Entry types that are going to be indexed by this index
+        entry_types: Option<Vec<String>>,
 
         #[structopt(long)]
         /// Use the entry hash as the target for the links, instead of the action hash
@@ -553,6 +584,52 @@ Add new indexes for that entry type with:
 Link type "{}" scaffolded!
 "#,
                     link_type_name
+                );
+            }
+            HcScaffold::Index {
+                app,
+                dna,
+                zome,
+                index_name,
+                index_type,
+                entry_types,
+                link_to_entry_hash,
+            } => {
+                let prompt = String::from("Index name (snake_case, eg. \"all_posts\"):");
+                let name: String = match index_name {
+                    Some(n) => check_snake_case(n, "index name")?,
+                    None => input_snake_case(&prompt)?,
+                };
+
+                let current_dir = std::env::current_dir()?;
+                let app_file_tree = load_directory_into_memory(&current_dir)?;
+
+                let app_manifest = get_or_choose_app_manifest(&app_file_tree, &app)?;
+                let (dna_manifest_path, dna_manifest) =
+                    get_or_choose_dna_manifest(&app_file_tree, &app_manifest, dna)?;
+
+                let integrity_zome_name = get_or_choose_integrity_zome(&dna_manifest, &zome)?;
+
+                let app_file_tree = scaffold_index(
+                    app_file_tree,
+                    &app_manifest,
+                    &dna_manifest,
+                    &integrity_zome_name,
+                    &name,
+                    &index_type,
+                    &entry_types,
+                    link_to_entry_hash,
+                )?;
+
+                let file_tree = MergeableFileSystemTree::<OsString, String>::from(app_file_tree);
+
+                file_tree.build(&".".into())?;
+
+                println!(
+                    r#"
+Index "{}" scaffolded!
+"#,
+                    name
                 );
             }
             HcScaffold::Pack(Pack::WebApp { path }) => web_app_pack_all_bundled(path).await?,

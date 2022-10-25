@@ -44,7 +44,7 @@ impl Widget {
                     .iter()
                     .cloned()
                     .map(|option| {
-                        let e: syn::Expr = syn::parse_str(option.to_case(Case::Title).as_str())
+                        let e: syn::Expr = syn::parse_str(option.to_case(Case::Pascal).as_str())
                             .expect("Unable to parse");
                         e
                     })
@@ -73,7 +73,7 @@ impl Widget {
                 let mut rng = rand::thread_rng();
                 format!("{}", rng.gen_range(min.clone()..max.clone()))
             },
-            Widget::RadioButton {options,..} => options[0].to_case(Case::Title),
+            Widget::RadioButton {options,..} => options[0].to_case(Case::Pascal),
         }
     }
 }

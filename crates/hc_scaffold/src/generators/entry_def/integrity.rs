@@ -29,7 +29,7 @@ pub fn render_entry_definition_file(entry_def: &EntryDefinition) -> ScaffoldResu
         })
         .collect();
 
-    let name: syn::Expr = syn::parse_str(entry_def.name.to_case(Case::Title).as_str())?;
+    let name: syn::Expr = syn::parse_str(entry_def.name.to_case(Case::Pascal).as_str())?;
 
     let fields: Vec<TokenStream> = entry_def
         .fields
@@ -129,7 +129,7 @@ pub use {}::*;
         integrity_zome_name,
     )?;
 
-    let title_entry_def_name = entry_def.name.to_case(Case::Title);
+    let pascal_entry_def_name = entry_def.name.to_case(Case::Pascal);
 
     // 3. Find the #[hdk_entry_defs] macro
     // 3.1 Import the new struct
@@ -162,10 +162,10 @@ pub use {}::*;
                                 if item_enum
                                     .variants
                                     .iter()
-                                    .any(|v| v.ident.to_string().eq(&title_entry_def_name))
+                                    .any(|v| v.ident.to_string().eq(&pascal_entry_def_name))
                                 {
                                     return Err(ScaffoldError::EntryTypeAlreadyExists(
-                                        title_entry_def_name.clone(),
+                                        pascal_entry_def_name.clone(),
                                         dna_manifest.name(),
                                         integrity_zome_name.clone(),
                                     ));
@@ -173,7 +173,7 @@ pub use {}::*;
 
                                 found = true;
                                 let new_variant = syn::parse_str::<syn::Variant>(
-                                    format!("{}({})", title_entry_def_name, title_entry_def_name)
+                                    format!("{}({})", pascal_entry_def_name, pascal_entry_def_name)
                                         .as_str(),
                                 )
                                 .unwrap();
