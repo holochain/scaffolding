@@ -9,8 +9,8 @@ use crate::{
 
 fn list_names() -> Vec<String> {
     vec![
-        "TextArea",
         "TextField",
+        "TextArea",
         "DateAndTime",
         "Date",
         "Time",

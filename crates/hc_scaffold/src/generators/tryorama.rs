@@ -4,11 +4,14 @@ use crate::{
     cli::Crud,
     definitions::EntryDefinition,
     error::{ScaffoldError, ScaffoldResult},
-    file_tree::FileTree,
+    file_tree::{create_dir_all, FileTree},
 };
 
 pub mod entry_crud_tests;
+pub mod link_type_tests;
 pub mod package_json;
+pub mod tsconfig_json;
+pub mod utils;
 
 use build_fs_tree::file;
 use convert_case::{Case, Casing};
@@ -72,35 +75,4 @@ pub fn add_tryorama_tests_for_entry_def(
         );
 
     Ok(app_file_tree)
-}
-
-pub fn create_dir_all(file_tree: &mut FileTree, path: &PathBuf) -> ScaffoldResult<()> {
-    let mut current_path = PathBuf::new();
-
-    for c in path.components() {
-        let v: Vec<OsString> = current_path
-            .clone()
-            .iter()
-            .map(|s| s.to_os_string())
-            .collect();
-        if let Some(contents) = file_tree
-            .path_mut(&mut v.iter())
-            .ok_or(ScaffoldError::PathNotFound(current_path.clone()))?
-            .dir_content_mut()
-        {
-            let component_key = c.as_os_str().to_os_string();
-            if !contents.contains_key(&component_key) {
-                contents.insert(component_key, FileTree::Directory(BTreeMap::new()));
-            }
-        } else {
-            return Err(ScaffoldError::InvalidPath(
-                path.clone(),
-                String::from("given path is a file, and we expected it to be a directory"),
-            ));
-        }
-
-        current_path.push(c);
-    }
-
-    Ok(())
 }
