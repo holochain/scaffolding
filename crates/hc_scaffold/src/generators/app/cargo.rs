@@ -1,7 +1,7 @@
-use std::{ffi::OsString, path::PathBuf};
+use std::{ffi::OsString, path::PathBuf, process::Stdio, str::from_utf8};
 
 use crate::file_tree::FileTree;
-use cargo_metadata::{Metadata, MetadataCommand};
+use cargo_metadata::{semver::Error, Metadata, MetadataCommand};
 
 use crate::error::{ScaffoldError, ScaffoldResult};
 
@@ -115,6 +115,7 @@ pub fn get_workspace_packages_locations(
     app_file_tree: &FileTree,
 ) -> ScaffoldResult<Option<Vec<PathBuf>>> {
     let current_dir = std::env::current_dir()?;
+
     let path = current_dir
         .join(workspace_cargo_toml_path(&app_file_tree))
         .canonicalize()?;
@@ -143,10 +144,10 @@ pub fn workspace_package_path(
     crate_name: &String,
 ) -> ScaffoldResult<Option<PathBuf>> {
     let current_dir = std::env::current_dir()?;
+
     let path = current_dir
         .join(workspace_cargo_toml_path(&app_file_tree))
         .canonicalize()?;
-
     let metadata = MetadataCommand::new().manifest_path(path).exec()?;
 
     let package_path: Option<PathBuf> = metadata
@@ -213,4 +214,26 @@ pub fn get_workspace_cargo_toml(app_file_tree: &FileTree) -> ScaffoldResult<toml
     let v = toml::from_str(cargo_toml_str.as_str())?;
 
     Ok(v)
+}
+
+pub fn exec_metadata(app_file_tree: &FileTree) -> Result<Metadata, cargo_metadata::Error> {
+    let current_dir = std::env::current_dir()?;
+    let path = current_dir
+        .join(workspace_cargo_toml_path(&app_file_tree))
+        .canonicalize()?;
+    let output = MetadataCommand::new()
+        .manifest_path(path)
+        .cargo_command()
+        .stderr(Stdio::inherit())
+        .output()?;
+    if !output.status.success() {
+        return Err(cargo_metadata::Error::CargoMetadata {
+            stderr: String::from_utf8(output.stderr)?,
+        });
+    }
+    let stdout = from_utf8(&output.stdout)?
+        .lines()
+        .find(|line| line.starts_with('{'))
+        .ok_or(cargo_metadata::Error::NoJson)?;
+    MetadataCommand::parse(stdout)
 }

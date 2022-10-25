@@ -24,23 +24,21 @@ fn web_app_skeleton(
     skip_nix: bool,
 ) -> ScaffoldResult<FileTree> {
     let mut app_file_tree = dir! {
-    ".gitignore" => file!(gitignore())
-    "workdir" => dir!{
-      "happ.yaml" => file!(empty_happ_manifest(app_name.clone(), description)?)
-      "web-happ.yaml" => file!(web_happ_manifest(app_name.clone(), format!("./{}.happ", app_name), String::from("./ui/dist.zip"))?)
-    }
-    "ui" => dir! {}
-    "package.json" => file!(workspace_package_json(app_name, String::from("ui"), String::from("workdir"), String::from("workdir")))
-    "tests" => dir!{
-      "package.json" => file!(tryorama_package_json(String::from("^0.9.0")))
-      "tsconfig.json" => file!(tryorama_tsconfig())
-      "src" => dir! {
-
-          }
-        }
-        "Cargo.toml" => file!(workspace_cargo_toml())
-        "dnas" => dir! {}
-      };
+      ".gitignore" => file!(gitignore())
+      "workdir" => dir!{
+        "happ.yaml" => file!(empty_happ_manifest(app_name.clone(), description)?)
+        "web-happ.yaml" => file!(web_happ_manifest(app_name.clone(), format!("./{}.happ", app_name), String::from("./ui/dist.zip"))?)
+      }
+      "ui" => dir! {}
+      "package.json" => file!(workspace_package_json(app_name, String::from("ui"), String::from("workdir"), String::from("workdir")))
+      "tests" => dir!{
+        "package.json" => file!(tryorama_package_json(String::from("^0.9.0")))
+        "tsconfig.json" => file!(tryorama_tsconfig())
+        "src" => dir! {}
+      }
+      "Cargo.toml" => file!(workspace_cargo_toml())
+      "dnas" => dir! {}
+    };
 
     if !skip_nix {
         app_file_tree

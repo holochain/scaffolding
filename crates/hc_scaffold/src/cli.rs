@@ -1,5 +1,6 @@
 use crate::definitions::FieldType;
 use crate::file_tree::load_directory_into_memory;
+use crate::generators::app::cargo::exec_metadata;
 use crate::generators::link_type::scaffold_link_type;
 use crate::generators::{
     self,
@@ -19,6 +20,7 @@ use holochain_types::{prelude::AppManifest, web_app::WebAppManifest};
 use holochain_util::ffs;
 use mr_bundle::{Location, Manifest};
 use std::collections::BTreeMap;
+use std::process::Stdio;
 use std::{ffi::OsString, path::PathBuf, process::Command};
 use structopt::StructOpt;
 
@@ -48,7 +50,7 @@ pub enum HcScaffold {
         name: Option<String>,
     },
     /// Scaffold an integrity-coordinator zome pair into an existing DNA
-    Zome {
+    Zomes {
         #[structopt(long)]
         /// Name of the app in which you want to scaffold the zome
         app: Option<String>,
@@ -236,10 +238,9 @@ impl HcScaffold {
 
                 if !skip_nix {
                     skip_nix = match Select::with_theme(&ColorfulTheme::default())
-                        .with_prompt("Do you want to set up a nix development environment?")
+                        .with_prompt("Do you want to set up the holonix development environment for this project?")
                         .default(0)
                         .items(&["Yes (recommended)", "No"])
-                        .clear(true)
                         .interact()?
                     {
                         1 => true,
@@ -256,18 +257,22 @@ impl HcScaffold {
 
                 let mut maybe_nix = "";
 
-                if cfg!(target_os = "windows") {
-                    return Err(anyhow::anyhow!("Windows doesn't support nix"));
-                } else if skip_nix == false {
-                    Command::new("nix-shell")
+                if !skip_nix {
+                    if cfg!(target_os = "windows") {
+                        return Err(anyhow::anyhow!("Windows doesn't support nix"));
+                    } else {
+                        Command::new("nix-shell")
+                        .stdout(Stdio::inherit())
                         .current_dir(std::env::current_dir()?.join(&name))
                         .args(["-I", "nixpkgs=https://github.com/NixOS/nixpkgs/archive/nixos-21.11.tar.gz", "-p", "niv", "--run", "niv init && niv drop nixpkgs && niv drop niv && niv add -b main holochain/holonix"])
                         .output()?;
-                    maybe_nix = "\n  nix-shell";
-                };
+                        maybe_nix = "\n  nix-shell";
+                    };
+                }
 
                 println!(
-                    r#"Web hApp "{}" scaffolded!
+                    r#"
+Web hApp "{}" scaffolded!
 
 To set up your development environment, run:
 
@@ -298,16 +303,17 @@ Then, add new DNAs to your app with:
                 file_tree.build(&".".into())?;
 
                 println!(
-                    r#"DNA "{}" scaffolded!
+                    r#"
+DNA "{}" scaffolded!
 
 Add new zomes to your DNA with:
 
-  hc-scaffold zome
+  hc-scaffold zomes
 "#,
                     name
                 );
             }
-            HcScaffold::Zome {
+            HcScaffold::Zomes {
                 app,
                 dna,
                 name,
@@ -331,17 +337,23 @@ Add new zomes to your DNA with:
                     &app_manifest.1,
                     &dna_manifest_path,
                     &name,
-                    &String::from("0.1.0"),
+                    &String::from("0.1"),
                     &String::from("0.0.155"),
                     &path,
                 )?;
 
                 let file_tree = MergeableFileSystemTree::<OsString, String>::from(app_file_tree);
 
+                let f = file_tree.clone();
+
                 file_tree.build(&".".into())?;
 
+                // Execute cargo metadata to set up the cargo workspace in case this zome is the first crate
+                exec_metadata(&f)?;
+
                 println!(
-                    r#"Integrity zome "{}" and coordinator zome "{}" scaffolded!
+                    r#"
+Integrity zome "{}" and coordinator zome "{}" scaffolded!
 
 Add new entry definitions to your zome with:
 
@@ -382,10 +394,16 @@ Add new entry definitions to your zome with:
 
                 let file_tree = MergeableFileSystemTree::<OsString, String>::from(app_file_tree);
 
+                let f = file_tree.clone();
+
                 file_tree.build(&".".into())?;
 
+                // Execute cargo metadata to set up the cargo workspace in case this zome is the first crate
+                exec_metadata(&f)?;
+
                 println!(
-                    r#"Integrity zome "{}" scaffolded!
+                    r#"
+Integrity zome "{}" scaffolded!
 
 Add new entry definitions to your zome with:
 
@@ -426,10 +444,16 @@ Add new entry definitions to your zome with:
 
                 let file_tree = MergeableFileSystemTree::<OsString, String>::from(app_file_tree);
 
+                let f = file_tree.clone();
+
                 file_tree.build(&".".into())?;
 
+                // Execute cargo metadata to set up the cargo workspace in case this zome is the first crate
+                exec_metadata(&f)?;
+
                 println!(
-                    r#"Coordinator zome "{}" scaffolded!
+                    r#"
+Coordinator zome "{}" scaffolded!
 
 Add new entry definitions to your zome with:
 
@@ -480,9 +504,10 @@ Add new entry definitions to your zome with:
                 file_tree.build(&".".into())?;
 
                 println!(
-                    r#"Entry definition "{}" scaffolded!
+                    r#"
+Entry type "{}" scaffolded!
 
-Add new indexes for that entry definition with:
+Add new indexes for that entry type with:
 
   hc-scaffold index
 "#,
@@ -524,7 +549,8 @@ Add new indexes for that entry definition with:
                 file_tree.build(&".".into())?;
 
                 println!(
-                    r#"Link type "{}" scaffolded!
+                    r#"
+Link type "{}" scaffolded!
 "#,
                     link_type_name
                 );

@@ -19,8 +19,8 @@ use coordinator::add_coordinator_zome_to_manifest;
 use integrity::add_integrity_zome_to_manifest;
 
 use super::app::cargo::{
-    add_workspace_external_dependency, add_workspace_path_dependency, get_workspace_members,
-    get_workspace_packages_locations,
+    add_workspace_external_dependency, add_workspace_path_dependency, exec_metadata,
+    get_workspace_members, get_workspace_packages_locations,
 };
 
 pub fn integrity_zome_name(coordinator_zome_name: &String) -> String {
@@ -146,6 +146,7 @@ pub fn scaffold_integrity_zome_with_path(
         .dir_content_mut()
         .ok_or(ScaffoldError::PathNotFound(path.clone()))?
         .insert(OsString::from(zome_name), zome);
+
     Ok(app_file_tree)
 }
 
