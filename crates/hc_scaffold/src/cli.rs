@@ -34,8 +34,8 @@ pub enum HcScaffold {
         /// [OPTIONAL] Description of the app to scaffold
         description: Option<String>,
 
-        /// Skip setup of nix development environment
         #[structopt(long)]
+        /// Skip setup of nix development environment
         skip_nix: bool,
     },
     /// Scaffold a DNA into an existing app
@@ -223,23 +223,29 @@ pub enum Pack {
 impl HcScaffold {
     pub async fn run(self) -> anyhow::Result<()> {
         match self {
-            HcScaffold::WebApp { name, description , skip_nix} => {
+            HcScaffold::WebApp {
+                name,
+                description,
+                mut skip_nix,
+            } => {
                 let prompt = String::from("App name (no whitespaces):");
                 let name: String = match name {
                     Some(n) => check_no_whitespace(n, "app name")?,
                     None => input_no_whitespace(&prompt)?,
                 };
 
-
-                let skip_nix = match Select::with_theme(&ColorfulTheme::default())
-                    .with_prompt("Do you want to set up a nix development environment (recommended)?")
-                    .default(0)
-                    .items(&["yes", "no"])
-                    .clear(true)
-                    .interact()? {
+                if !skip_nix {
+                    skip_nix = match Select::with_theme(&ColorfulTheme::default())
+                        .with_prompt("Do you want to set up a nix development environment?")
+                        .default(0)
+                        .items(&["Yes (recommended)", "No"])
+                        .clear(true)
+                        .interact()?
+                    {
                         1 => true,
                         _ => false,
-                };
+                    };
+                }
 
                 let app_file_tree =
                     generators::web_app::scaffold_web_app(name.clone(), description, skip_nix)?;
