@@ -56,8 +56,13 @@ pub struct Update{}Input {{
 }}
 
 #[hdk_extern]
-pub fn update_{}(input: Update{}Input) -> ExternResult<ActionHash> {{
-  update_entry(input.original_action_hash, &input.updated_{})
+pub fn update_{}(input: Update{}Input) -> ExternResult<Record> {{
+  let updated_{}_hash = update_entry(input.original_action_hash, &input.updated_{})?;
+
+  let record = get(updated_{}_hash.clone(), GetOptions::default())?
+        .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("Could not find the newly updated {}"))))?;
+    
+  Ok(record)
 }}
 "#,
         entry_def_name.to_case(Case::Pascal),
@@ -65,7 +70,10 @@ pub fn update_{}(input: Update{}Input) -> ExternResult<ActionHash> {{
         entry_def_name.to_case(Case::Pascal),
         entry_def_name.to_case(Case::Snake),
         entry_def_name.to_case(Case::Pascal),
-        entry_def_name.to_case(Case::Snake)
+        entry_def_name.to_case(Case::Snake),
+        entry_def_name.to_case(Case::Snake),
+        entry_def_name.to_case(Case::Snake),
+        entry_def_name.to_case(Case::Pascal)
     )
 }
 

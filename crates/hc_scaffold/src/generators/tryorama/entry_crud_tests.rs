@@ -86,12 +86,12 @@ test('create {}', async t => {{
     const createInput = {};
 
     // Alice creates a {}
-    const createActionHash = await alice_{}_cell.callZome({{
+    const record: Record = await alice_{}_cell.callZome({{
       zome_name: "{}",
       fn_name: "create_{}",
       payload: createInput,
     }});
-    assert.ok(createActionHash);
+    assert.ok(record);
   }});
 }});"#,
         entry_definition.name,
@@ -119,12 +119,12 @@ test('create and read {}', async t => {{
     const createInput: any = {};
 
     // Alice creates a {}
-    const createActionHash = await alice_{}_cell.callZome({{
+    const record: Record = await alice_{}_cell.callZome({{
       zome_name: "{}",
       fn_name: "create_{}",
       payload: createInput,
     }});
-    assert.ok(createActionHash);
+    assert.ok(record);
     
     // Wait for the created entry to be propagated to the other node.
     await pause(300);
@@ -133,7 +133,7 @@ test('create and read {}', async t => {{
     const createReadOutput: Record = await bob_{}_cell.callZome({{
       zome_name: "{}",
       fn_name: "get_{}",
-      payload: createActionHash,
+      payload: record.signed_action.hashed.hash,
     }});
     assert.deepEqual(createInput, decode((createReadOutput.entry as any).Present.entry) as any);
   }});
@@ -170,7 +170,7 @@ pub fn update_entry_test(
     const readUpdatedOutput: Record = await bob_{}_cell.callZome({{
       zome_name: "{}",
       fn_name: "get_{}",
-      payload: updateActionHash,
+      payload: record.signed_action.hashed.hash,
     }});
     assert.deepEqual(contentUpdate, decode((readUpdatedOutput.entry as any).Present.entry) as any);
 "#,
@@ -187,27 +187,27 @@ test('create and update {}', async t => {{
     const createInput = {};
 
     // Alice creates a {}
-    const createActionHash = await alice_{}_cell.callZome({{
+    const record: Record = await alice_{}_cell.callZome({{
       zome_name: "{}",
       fn_name: "create_{}",
       payload: createInput,
     }});
-    assert.ok(createActionHash);
+    assert.ok(record);
  
     // Alice updates the {}
     const contentUpdate: any = {};
 
     const updateInput = {{
-      original_action_hash: createActionHash,
+      original_action_hash: record.signed_action.hashed.hash,
       updated_{}: contentUpdate,
     }};
 
-    const updateActionHash: ActionHash = await alice_{}_cell.callZome({{
+    const updatedRecord: Record = await alice_{}_cell.callZome({{
       zome_name: "{}",
       fn_name: "update_{}",
       payload: updateInput,
     }});
-    assert.ok(updateActionHash);
+    assert.ok(updatedRecord);
 
 {}
   }});
@@ -247,7 +247,7 @@ pub fn delete_entry_test(
     const readDeletedOutput = await bob_{}_cell.callZome({{
       zome_name: "{}",
       fn_name: "get_{}",
-      payload: createActionHash,
+      payload: record.signed_action.hashed.hash,
     }});
     assert.equal(readDeletedOutput, undefined);
 "#,
@@ -263,18 +263,18 @@ test('create and delete {}', async t => {{
     const createInput = {};
 
     // Alice creates a {}
-    const createActionHash = await alice_{}_cell.callZome({{
+    const record: Record = await alice_{}_cell.callZome({{
       zome_name: "{}",
       fn_name: "create_{}",
       payload: createInput,
     }});
-    assert.ok(createActionHash);
+    assert.ok(record);
         
     // Alice deletes the {}
     const deleteActionHash = await alice_{}_cell.callZome({{
       zome_name: "{}",
       fn_name: "delete_{}",
-      payload: createActionHash,
+      payload: record.signed_action.hashed.hash,
     }});
     assert.ok(deleteActionHash);
 

@@ -111,7 +111,7 @@ fn choose_entry_type_create_function(
 
     let selection = Select::with_theme(&ColorfulTheme::default())
         .with_prompt(format!(
-            "In which function should the {} entries be indexed?",
+            "At the end of which function should the {} entries be indexed?",
             entry_type
         ))
         .default(0)
