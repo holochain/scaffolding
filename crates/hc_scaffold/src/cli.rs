@@ -353,7 +353,6 @@ Add new zomes to your DNA with:
 
                 let name_prompt = match selected_option {
                     0 => String::from("Coordinator zome name (snake_case):\n (The integrity zome will automatically be named '{name of coordinator zome}_integrity')\n"),
-                    1 => String::from("Enter zome name (snake_case):\n (the appendix _integrity will be added to the name automatically)\n"),
                     _ => String::from("Enter zome name (snake_case):"),
                 };
 
@@ -382,7 +381,7 @@ Add new zomes to your DNA with:
                         app_file_tree,
                         &app_manifest.1,
                         &dna_manifest_path,
-                        &integrity_zome_name(&name),
+                        &name,
                         &path,
                     )?,
                     2 => scaffold_coordinator_zome(
@@ -412,7 +411,7 @@ Add new zomes to your DNA with:
                 exec_metadata(&f)?;
 
                 let headline = match selected_option {
-                    1 => format!(r#"Integrity zome "{}" scaffolded!"#, integrity_zome_name(&name)),
+                    1 => format!(r#"Integrity zome "{}" scaffolded!"#, name),
                     2 =>  format!(r#"Coordinator zome "{}" scaffolded!"#, name),
                     _ => format!(r#"Integrity zome "{}" and coordinator zome "{}" scaffolded!"#, integrity_zome_name(&name), name),
                 };
