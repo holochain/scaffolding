@@ -27,11 +27,11 @@ use std::str::FromStr;
 use std::{ffi::OsString, path::PathBuf, process::Command};
 use structopt::StructOpt;
 
-/// The list of subcommands for `hc sandbox`
+/// The list of subcommands for `hc scaffold`
 #[derive(Debug, StructOpt)]
 #[structopt(setting = structopt::clap::AppSettings::InferSubcommands)]
 pub enum HcScaffold {
-    /// Scaffold a new web app
+    /// Scaffold a new, empty web app
     WebApp {
         /// Name of the app to scaffold
         name: Option<String>,
@@ -242,15 +242,16 @@ fn parse_crud(crud_str: &str) -> Result<Crud, String> {
     Ok(crud)
 }
 
-/// The list of subcommands for `hc sandbox`
+/// Packaging of apps
 #[derive(Debug, StructOpt)]
 #[structopt(setting = structopt::clap::AppSettings::InferSubcommands)]
 pub enum Pack {
-    /// Scaffold a new web app
+    /// Package a web app
     WebApp {
         /// The path to the working directory containing a `web-happ.yaml` manifest
         path: PathBuf,
     },
+    /// Package an app
     App {
         /// The path to the working directory containing a `happ.yaml` manifest
         path: PathBuf,

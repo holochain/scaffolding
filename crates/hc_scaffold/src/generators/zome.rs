@@ -169,11 +169,11 @@ pub fn scaffold_integrity_zome(
                     .file_content()
                     .ok_or(ScaffoldError::PathNotFound(dna_manifest_path.clone()))?,
             )?;
-            let prompt = String::from("Where should the integrity zome be scaffolded?");
+            let prompt = String::from("Where should the integrity zome be scaffolded instead?");
             match try_to_guess_zomes_location(&app_file_tree, &dna_manifest.name())? {
                 Some(p) => {
                     if Confirm::with_theme(&ColorfulTheme::default())
-                        .with_prompt(format!("Scaffold integrity zome in {:?}?", p))
+                        .with_prompt(format!("Scaffold integrity zome in folder {:?}?", p))
                         .interact()?
                     {
                         p

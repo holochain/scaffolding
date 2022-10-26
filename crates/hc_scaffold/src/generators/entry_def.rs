@@ -215,7 +215,7 @@ pub fn scaffold_entry_def(
 
 fn choose_crud() -> Crud {
     let selections = MultiSelect::with_theme(&ColorfulTheme::default())
-        .with_prompt("Which CRUD functions should be scaffolded?")
+        .with_prompt("Which CRUD functions should be scaffolded?\n (SPACE to select/unselect, ENTER to continue)")
         .item_checked("Read", true)
         .item_checked("Update", true)
         .item_checked("Delete", true)
