@@ -31,8 +31,56 @@ pub fn get_templates() -> Handlebars<'static> {
     handlebars
 }
 
-pub fn scaffold_file<T: Serialize>(template_path: &PathBuf, data: &T) -> ScaffoldResult<String> {
-    let h = get_templates();
+pub fn register_all_partials_in_dir<'a>(
+    mut h: Handlebars<'a>,
+    dir_path: &PathBuf,
+) -> ScaffoldResult<Handlebars<'a>> {
+    let partials_dir_map = walk_dir(
+        TEMPLATES_DIR
+            .get_dir(dir_path)
+            .ok_or(ScaffoldError::PathNotFound(dir_path.clone()))?,
+    );
+
+    for (path, content) in partials_dir_map {
+        if let Some(e) = path.extension() {
+            if e == "hbs" {
+                h.register_partial(
+                    path.with_extension("").as_os_str().to_str().unwrap(),
+                    content,
+                )
+                .unwrap();
+            }
+        }
+    }
+
+    Ok(h)
+}
+
+pub fn scaffold_file<T: Serialize>(
+    h: &Handlebars,
+    template_path: &PathBuf,
+    data: &T,
+) -> ScaffoldResult<String> {
+    let mut h = h.clone();
+
+    let content = TEMPLATES_DIR
+        .get_file(template_path)
+        .ok_or(ScaffoldError::PathNotFound(template_path.clone()))?
+        .contents_utf8()
+        .unwrap()
+        .to_string();
+    if let Some(e) = template_path.extension() {
+        if e == "hbs" {
+            h.register_template_string(
+                template_path
+                    .with_extension("")
+                    .as_os_str()
+                    .to_str()
+                    .unwrap(),
+                content,
+            )?;
+        }
+    }
 
     let s = h.render(template_path.as_os_str().to_str().unwrap(), data)?;
 

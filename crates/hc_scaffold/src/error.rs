@@ -48,6 +48,9 @@ pub enum ScaffoldError {
     #[error(transparent)]
     HandlebarsRenderError(#[from] handlebars::RenderError),
 
+    #[error(transparent)]
+    HandlebarsTemplateError(#[from] handlebars::TemplateError),
+
     #[error("Path was not found: {0}")]
     PathNotFound(PathBuf),
 

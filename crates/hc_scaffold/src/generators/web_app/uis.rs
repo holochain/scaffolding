@@ -63,6 +63,8 @@ pub fn scaffold_web_app_ui(framework: &UiFramework, app_name: &String) -> Scaffo
     };
     match framework {
         UiFramework::Lit => lit::scaffold_lit_web_app(&data),
-        _ => Ok(dir! {}),
+        UiFramework::Vanilla => vanilla::scaffold_vanilla_web_app(&data),
+        UiFramework::Svelte => svelte::scaffold_svelte_web_app(&data),
+        UiFramework::Vue => vue::scaffold_vue_web_app(&data),
     }
 }
