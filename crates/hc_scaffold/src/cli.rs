@@ -4,6 +4,7 @@ use crate::file_tree::load_directory_into_memory;
 use crate::generators::app::cargo::exec_metadata;
 use crate::generators::index::{scaffold_index, IndexType};
 use crate::generators::link_type::scaffold_link_type;
+use crate::generators::web_app::uis::UiFramework;
 use crate::generators::{
     self,
     app::utils::{bundled_dnas_locations, get_or_choose_app_manifest},
@@ -14,7 +15,9 @@ use crate::generators::{
         scaffold_zome_pair, utils::get_or_choose_integrity_zome,
     },
 };
-use crate::utils::{check_no_whitespace, check_snake_case, input_no_whitespace, input_snake_case, input_yes_or_no};
+use crate::utils::{
+    check_no_whitespace, check_snake_case, input_no_whitespace, input_snake_case, input_yes_or_no,
+};
 
 use build_fs_tree::{Build, MergeableFileSystemTree};
 use dialoguer::{theme::ColorfulTheme, Input, Select};
@@ -23,7 +26,6 @@ use holochain_util::ffs;
 use mr_bundle::{Location, Manifest};
 use std::collections::BTreeMap;
 use std::process::Stdio;
-use std::str::FromStr;
 use std::{ffi::OsString, path::PathBuf, process::Command};
 use structopt::StructOpt;
 
@@ -42,6 +44,10 @@ pub enum HcScaffold {
         #[structopt(long)]
         /// Skip setup of nix development environment
         skip_nix: bool,
+
+        #[structopt(long)]
+        /// The UI framework to use as the template for this web-app
+        ui: Option<UiFramework>,
     },
     /// Scaffold a DNA into an existing app
     Dna {
@@ -265,6 +271,7 @@ impl HcScaffold {
                 name,
                 description,
                 mut skip_nix,
+                ui,
             } => {
                 let prompt = String::from("App name (no whitespaces):");
                 let name: String = match name {
@@ -277,8 +284,12 @@ impl HcScaffold {
                     skip_nix = input_yes_or_no(&holonix_prompt, Some(true))?;
                 }
 
-                let app_file_tree =
-                    generators::web_app::scaffold_web_app(name.clone(), description, skip_nix)?;
+                let app_file_tree = generators::web_app::scaffold_web_app(
+                    name.clone(),
+                    description,
+                    skip_nix,
+                    &ui,
+                )?;
 
                 let file_tree = MergeableFileSystemTree::<OsString, String>::from(app_file_tree);
 

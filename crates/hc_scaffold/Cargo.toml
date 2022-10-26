@@ -38,6 +38,9 @@ prettyplease = "0.1.21"
 proc-macro2 = "*"
 rand = "0.8.5"
 Inflector = "*"
+handlebars = "4.3.5"
+include_dir = "0.7.3"
+serde = "1"
 
 [dev-dependencies]
 assert_cmd = "1.0"

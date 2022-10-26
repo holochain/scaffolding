@@ -45,6 +45,9 @@ pub enum ScaffoldError {
     #[error(transparent)]
     IgnoreError(#[from] ignore::Error),
 
+    #[error(transparent)]
+    HandlebarsRenderError(#[from] handlebars::RenderError),
+
     #[error("Path was not found: {0}")]
     PathNotFound(PathBuf),
 
@@ -89,6 +92,9 @@ pub enum ScaffoldError {
 
     #[error("Invalid field type \"{0}\", here are all valid field types: \"{1}\"")]
     InvalidFieldType(String, String),
+
+    #[error("Invalid UI framework \"{0}\", here are all valid UI frameworks: \"{1}\"")]
+    InvalidUiFramework(String, String),
 
     #[error("Invalid string format: \"{0}\"")]
     InvalidStringFormat(String),
