@@ -41,7 +41,7 @@ impl Widget {
                     .iter()
                     .cloned()
                     .map(|option| {
-                        let e: syn::Expr = syn::parse_str(option.to_case(Case::Title).as_str())
+                        let e: syn::Expr = syn::parse_str(option.to_case(Case::Pascal).as_str())
                             .expect("Unable to parse");
                         e
                     })
@@ -70,7 +70,7 @@ impl Widget {
                 let mut rng = rand::thread_rng();
                 format!("{}", rng.gen_range(min.clone()..max.clone()))
             },
-            Widget::RadioButton {options,..} => options[0].to_case(Case::Title),
+            Widget::RadioButton {options,..} => options[0].to_case(Case::Pascal),
         }
     }
 }
@@ -125,41 +125,6 @@ pub struct EntryDefinition {
 }
 
 impl EntryDefinition {
-    pub fn render_definition_file(&self) -> TokenStream {
-        let type_definitions: Vec<TokenStream> = self
-            .fields
-            .values()
-            .filter_map(|field_type| match field_type {
-                FieldType::Visible(widget) => widget.rust_type_definition(),
-                _ => None,
-            })
-            .collect();
-
-        let name: syn::Expr =
-            syn::parse_str(self.name.to_case(Case::Title).as_str()).expect("Unable to parse");
-
-        let fields: Vec<TokenStream> = self
-            .fields
-            .iter()
-            .map(|(key, value)| {
-                let name: syn::Expr =
-                    syn::parse_str(key.to_case(Case::Snake).as_str()).expect("Unable to parse");
-                let rust_type = value.rust_type();
-                quote! {  #name: #rust_type }
-            })
-            .collect();
-
-        quote! {
-          use hdk::prelude::*;
-
-          #(#type_definitions)*
-
-          struct #name {
-            #(#fields)*
-          }
-        }
-    }
-
     pub fn js_sample_object(&self) -> String {
         let fields_samples: Vec<String> = self
             .fields

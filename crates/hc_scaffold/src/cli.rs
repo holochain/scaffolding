@@ -330,26 +330,29 @@ Add new zomes to your DNA with:
                 integrity,
                 coordinator,
             } => {
-
                 if let Some(n) = name.clone() {
                     check_snake_case(n, "zome name")?;
                 }
 
-
-                let selected_option = match (integrity, coordinator) {
-                    (false, false) => Select::with_theme(&ColorfulTheme::default())
-                        .with_prompt("What do you want to add?")
-                        .default(0)
-                        .items(&["integrity/coordinator zome-pair", "integrity zome", "coordinator zome"])
-                        .interact()?,
-                    (true, false) => 1,
-                    (false, true) => 2,
-                    (true, true) => return Err(anyhow::Error::from(
-                        ScaffoldError::InvalidArguments(
-                            String::from("The --integrity and --coordinator flags are mutually exclusive.")
-                        )
-                    )),
-                };
+                let selected_option =
+                    match (integrity, coordinator) {
+                        (false, false) => Select::with_theme(&ColorfulTheme::default())
+                            .with_prompt("What do you want to add?")
+                            .default(0)
+                            .items(&[
+                                "integrity/coordinator zome-pair",
+                                "integrity zome",
+                                "coordinator zome",
+                            ])
+                            .interact()?,
+                        (true, false) => 1,
+                        (false, true) => 2,
+                        (true, true) => return Err(anyhow::Error::from(
+                            ScaffoldError::InvalidArguments(String::from(
+                                "The --integrity and --coordinator flags are mutually exclusive.",
+                            )),
+                        )),
+                    };
 
                 let name_prompt = match selected_option {
                     0 => String::from("Coordinator zome name (snake_case):\n (The integrity zome will automatically be named '{name of coordinator zome}_integrity')\n"),
@@ -412,8 +415,12 @@ Add new zomes to your DNA with:
 
                 let headline = match selected_option {
                     1 => format!(r#"Integrity zome "{}" scaffolded!"#, name),
-                    2 =>  format!(r#"Coordinator zome "{}" scaffolded!"#, name),
-                    _ => format!(r#"Integrity zome "{}" and coordinator zome "{}" scaffolded!"#, integrity_zome_name(&name), name),
+                    2 => format!(r#"Coordinator zome "{}" scaffolded!"#, name),
+                    _ => format!(
+                        r#"Integrity zome "{}" and coordinator zome "{}" scaffolded!"#,
+                        integrity_zome_name(&name),
+                        name
+                    ),
                 };
 
                 println!(
@@ -424,9 +431,8 @@ Add new entry definitions to your zome with:
 
   hc-scaffold entry-type
 "#,
-                headline
+                    headline
                 );
-
             }
             HcScaffold::EntryType {
                 app,

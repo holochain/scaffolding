@@ -4,7 +4,7 @@ use std::{
 };
 
 use crate::{
-    definitions::{EntryDefinition, FieldRepresentation, FieldType},
+    definitions::{EntryDefinition, FieldType},
     file_tree::{find_files, find_map_rust_files, map_rust_files, FileTree},
 };
 use build_fs_tree::file;
@@ -45,10 +45,7 @@ pub fn render_entry_definition_file(entry_def: &EntryDefinition) -> ScaffoldResu
     let type_definitions: Vec<TokenStream> = entry_def
         .fields
         .values()
-        .filter_map(|field_type| match field_type.representation.clone() {
-            FieldRepresentation::Visible(widget) => widget.rust_type_definition(),
-            _ => None,
-        })
+        .filter_map(|field_def| field_def.field_type.rust_type_definition())
         .collect();
 
     let token_stream = quote! {
