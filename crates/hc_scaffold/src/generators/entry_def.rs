@@ -71,6 +71,7 @@ fn get_or_choose_depends_on(
                 true => choose_multiple_entry_types(
                     &entry_types,
                     &String::from("Which existing entry types does the new entry type depend on?"),
+                    false,
                 ),
                 false => Ok(vec![]),
             }
@@ -215,7 +216,7 @@ pub fn scaffold_entry_def(
 
 fn choose_crud() -> Crud {
     let selections = MultiSelect::with_theme(&ColorfulTheme::default())
-        .with_prompt("Which CRUD functions should be scaffolded?\n (SPACE to select/unselect, ENTER to continue)")
+        .with_prompt("Which CRUD functions should be scaffolded (SPACE to select/unselect, ENTER to continue)?")
         .item_checked("Read", true)
         .item_checked("Update", true)
         .item_checked("Delete", true)

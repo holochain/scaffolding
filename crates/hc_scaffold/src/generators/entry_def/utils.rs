@@ -16,16 +16,20 @@ pub fn choose_entry_type(all_entries: &Vec<String>, prompt: &String) -> Scaffold
 pub fn choose_multiple_entry_types(
     all_entries: &Vec<String>,
     prompt: &String,
+    allow_empty_selection: bool,
 ) -> ScaffoldResult<Vec<String>> {
     let selection = MultiSelect::with_theme(&ColorfulTheme::default())
         .with_prompt(prompt.clone())
         .items(&all_entries[..])
         .interact()?;
 
-    let chosen_entry_types = selection
-        .into_iter()
-        .map(|i| all_entries[i].clone())
-        .collect();
+    let chosen_entry_types = match (selection.len(), allow_empty_selection) {
+        (0, false) => choose_multiple_entry_types(all_entries, &String::from("X You must choose at least one entry type to index. Press SPACE to select/unselect an entry type:"), false)?,
+        _ => selection
+                .into_iter()
+                .map(|i| all_entries[i].clone())
+                .collect()
+    };
 
     Ok(chosen_entry_types)
 }
