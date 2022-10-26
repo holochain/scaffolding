@@ -2,7 +2,10 @@ use dialoguer::{theme::ColorfulTheme, Confirm};
 use regex::Regex;
 use std::{ffi::OsString, path::PathBuf};
 
-use crate::file_tree::FileTree;
+use crate::{
+    file_tree::FileTree,
+    versions::{hdi_version, hdk_version},
+};
 use build_fs_tree::{dir, file};
 use holochain_types::prelude::{AppManifest, DnaManifest};
 
@@ -32,8 +35,6 @@ pub fn scaffold_zome_pair(
     app_manifest: &AppManifest,
     dna_manifest_path: &PathBuf,
     zome_name: &String,
-    hdi_version: &String,
-    hdk_version: &String,
     path: &Option<PathBuf>,
 ) -> ScaffoldResult<FileTree> {
     let integrity_zome_name = integrity_zome_name(zome_name);
@@ -43,7 +44,6 @@ pub fn scaffold_zome_pair(
         &app_manifest,
         &dna_manifest_path,
         &integrity_zome_name,
-        &hdi_version,
         &path,
     )?;
 
@@ -52,7 +52,6 @@ pub fn scaffold_zome_pair(
         app_manifest,
         &dna_manifest_path,
         zome_name,
-        hdk_version,
         &Some(vec![integrity_zome_name.clone()]),
         &path,
     )?;
@@ -114,7 +113,6 @@ pub fn scaffold_integrity_zome_with_path(
     app_manifest: &AppManifest,
     dna_manifest_path: &PathBuf,
     zome_name: &String,
-    hdi_version: &String,
     path: &PathBuf,
 ) -> ScaffoldResult<FileTree> {
     let app_file_tree = add_integrity_zome_to_manifest(
@@ -125,7 +123,7 @@ pub fn scaffold_integrity_zome_with_path(
     )?;
 
     let app_file_tree =
-        add_workspace_external_dependency(app_file_tree, &"hdi".to_string(), hdi_version)?;
+        add_workspace_external_dependency(app_file_tree, &"hdi".to_string(), &hdi_version())?;
     let app_file_tree =
         add_workspace_external_dependency(app_file_tree, &"serde".to_string(), &"1".to_string())?;
     let mut app_file_tree =
@@ -155,7 +153,6 @@ pub fn scaffold_integrity_zome(
     app_manifest: &AppManifest,
     dna_manifest_path: &PathBuf,
     zome_name: &String,
-    hdi_version: &String,
     path: &Option<PathBuf>,
 ) -> ScaffoldResult<FileTree> {
     let path_to_scaffold_in = match path {
@@ -191,7 +188,6 @@ pub fn scaffold_integrity_zome(
         app_manifest,
         dna_manifest_path,
         zome_name,
-        hdi_version,
         &path_to_scaffold_in,
     )
 }
@@ -201,7 +197,6 @@ pub fn scaffold_coordinator_zome_in_path(
     app_manifest: &AppManifest,
     dna_manifest_path: &PathBuf,
     zome_name: &String,
-    hdk_version: &String,
     dependencies: &Option<Vec<String>>,
     path: &PathBuf,
 ) -> ScaffoldResult<FileTree> {
@@ -216,7 +211,7 @@ pub fn scaffold_coordinator_zome_in_path(
     // Add zome to workspace Cargo.toml
 
     let app_file_tree =
-        add_workspace_external_dependency(app_file_tree, &"hdk".to_string(), hdk_version)?;
+        add_workspace_external_dependency(app_file_tree, &"hdk".to_string(), &hdk_version())?;
     let app_file_tree =
         add_workspace_external_dependency(app_file_tree, &"serde".to_string(), &"1".to_string())?;
     let mut app_file_tree =
@@ -244,7 +239,6 @@ pub fn scaffold_coordinator_zome(
     app_manifest: &AppManifest,
     dna_manifest_path: &PathBuf,
     zome_name: &String,
-    hdk_version: &String,
     dependencies: &Option<Vec<String>>,
     path: &Option<PathBuf>,
 ) -> ScaffoldResult<FileTree> {
@@ -282,7 +276,6 @@ pub fn scaffold_coordinator_zome(
         app_manifest,
         dna_manifest_path,
         zome_name,
-        hdk_version,
         dependencies,
         &path_to_scaffold_in,
     )

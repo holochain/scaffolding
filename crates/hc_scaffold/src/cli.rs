@@ -377,8 +377,6 @@ Add new zomes to your DNA with:
                     &app_manifest.1,
                     &dna_manifest_path,
                     &name,
-                    &String::from("0.1"),
-                    &String::from("0.0.155"),
                     &path,
                 )?;
 
@@ -428,7 +426,6 @@ Add new entry definitions to your zome with:
                     &app_manifest.1,
                     &dna_manifest_path,
                     &name,
-                    &String::from("0.1.0"),
                     &path,
                 )?;
 
@@ -477,7 +474,6 @@ Add new entry definitions to your zome with:
                     &app_manifest.1,
                     &dna_manifest_path,
                     &name,
-                    &String::from("0.0.155"),
                     &dependencies,
                     &path,
                 )?;

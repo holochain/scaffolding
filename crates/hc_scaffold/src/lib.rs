@@ -5,3 +5,4 @@ pub mod file_tree;
 pub mod generators;
 pub mod templates;
 pub mod utils;
+pub mod versions;

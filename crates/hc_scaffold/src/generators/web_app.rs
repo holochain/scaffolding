@@ -33,10 +33,10 @@ fn web_app_skeleton(
         "happ.yaml" => file!(empty_happ_manifest(app_name.clone(), description)?)
         "web-happ.yaml" => file!(web_happ_manifest(app_name.clone(), format!("./{}.happ", app_name), String::from("./ui/dist.zip"))?)
       }
-      "ui" => scaffold_web_app_ui(ui_framework, &app_name, &String::from("^0.9.2"))?
+      "ui" => scaffold_web_app_ui(ui_framework, &app_name)?
       "package.json" => file!(workspace_package_json(app_name, String::from("ui"), String::from("workdir"), String::from("workdir")))
       "tests" => dir!{
-        "package.json" => file!(tryorama_package_json(String::from("^0.9.0")))
+        "package.json" => file!(tryorama_package_json())
         "tsconfig.json" => file!(tryorama_tsconfig())
         "src" => dir! {}
       }
@@ -48,7 +48,7 @@ fn web_app_skeleton(
         app_file_tree
             .dir_content_mut()
             .ok_or(ScaffoldError::PathNotFound(PathBuf::new()))?
-            .insert(OsString::from("default.nix"), default_nix("main".into()));
+            .insert(OsString::from("default.nix"), default_nix());
     }
 
     Ok(app_file_tree)

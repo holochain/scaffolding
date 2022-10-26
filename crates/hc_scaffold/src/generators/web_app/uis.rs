@@ -6,6 +6,7 @@ use dialoguer::{theme::ColorfulTheme, Select};
 use crate::{
     error::{ScaffoldError, ScaffoldResult},
     file_tree::FileTree,
+    versions::holochain_client_version,
 };
 
 pub mod lit;
@@ -48,14 +49,10 @@ pub struct ScaffoldWebAppData {
     holochain_client_version: String,
 }
 
-pub fn scaffold_web_app_ui(
-    framework: &UiFramework,
-    app_name: &String,
-    holochain_client_version: &String,
-) -> ScaffoldResult<FileTree> {
+pub fn scaffold_web_app_ui(framework: &UiFramework, app_name: &String) -> ScaffoldResult<FileTree> {
     let data = ScaffoldWebAppData {
         app_name: app_name.clone(),
-        holochain_client_version: holochain_client_version.clone(),
+        holochain_client_version: holochain_client_version(),
     };
     match framework {
         UiFramework::Lit => lit::scaffold_lit_web_app(&data),

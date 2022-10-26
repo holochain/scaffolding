@@ -1,4 +1,6 @@
-pub fn tryorama_package_json(tryorama_version: String) -> String {
+use crate::versions::{holochain_client_version, tryorama_version};
+
+pub fn tryorama_package_json() -> String {
     format!(
         r#"{{
   "name": "tests",
@@ -12,12 +14,13 @@ pub fn tryorama_package_json(tryorama_version: String) -> String {
   "license": "CAL-1.0",
   "dependencies": {{
     "@msgpack/msgpack": "^2.7.0",
-    "@holochain/client": "^0.9.2",
+    "@holochain/client": "{}",
     "@holochain/tryorama": "{}",
     "ts-node-test": "^0.2.0"
   }},
   "type": "module"
 }}"#,
-        tryorama_version
+        holochain_client_version(),
+        tryorama_version()
     )
 }
