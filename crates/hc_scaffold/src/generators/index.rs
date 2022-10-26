@@ -94,6 +94,7 @@ pub fn scaffold_index(
         None => choose_multiple_entry_types(
             &all_entries,
             &"Which entry types should be indexed?".to_string(),
+            false,
         ),
     }?;
 
