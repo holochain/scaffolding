@@ -4,7 +4,7 @@ use dialoguer::{theme::ColorfulTheme, Confirm, Input, Select};
 use quote::quote;
 
 use crate::{
-    definitions::{EntryDefinition, FieldRepresentation, FieldType, Widget},
+    definitions::{EntryDefinition, FieldDefinition, FieldType},
     error::{ScaffoldError, ScaffoldResult},
     generators::entry_def::integrity::render_entry_definition_struct,
 };
@@ -15,49 +15,34 @@ fn list_names() -> Vec<String> {
         "TextArea",
         "DateAndTime",
         "Date",
-        "Time",
         "Slider",
-        "RadioButton",
         "Checkbox",
         "Switch",
+        "AgentPubKey",
+        "ActionHash",
+        "EntryHash",
     ]
     .into_iter()
     .map(|s| s.to_string())
     .collect()
 }
 
-fn from_name(name: &String) -> ScaffoldResult<Widget> {
+fn from_name(name: &String) -> ScaffoldResult<FieldType> {
     match name.as_str() {
-        "TextField" => Ok(Widget::TextField {
-            label: String::from(""),
-        }),
-        "TextArea" => Ok(Widget::TextArea {
-            label: String::from(""),
-        }),
-        "DateAndTime" => Ok(Widget::DateAndTime {
-            label: String::from(""),
-        }),
-        "Date" => Ok(Widget::Date {
-            label: String::from(""),
-        }),
-        "Time" => Ok(Widget::Time {
-            label: String::from(""),
-        }),
-        "Slider" => Ok(Widget::Slider {
-            label: String::from(""),
-            min: 0,
-            max: 10,
-        }),
-        "RadioButton" => Ok(Widget::RadioButton {
-            label: String::from(""),
-            options: vec![],
-        }),
-        "Checkbox" => Ok(Widget::Checkbox {
-            label: String::from(""),
-        }),
-        "Switch" => Ok(Widget::Switch {
-            label: String::from(""),
-        }),
+        "TextField" => Ok(FieldType::TextField),
+        "TextArea" => Ok(FieldType::TextArea),
+        "DateAndTime" => Ok(FieldType::DateAndTime),
+        "Date" => Ok(FieldType::Date),
+        "Slider" => Ok(FieldType::Slider { min: 0, max: 10 }),
+        // "RadioButton" => Ok(Widget::RadioButton {
+        //     label: String::from(""),
+        //     options: vec![],
+        // }),
+        "Checkbox" => Ok(FieldType::Checkbox),
+        "Switch" => Ok(FieldType::Switch),
+        "ActionHash" => Ok(FieldType::ActionHash),
+        "EntryHash" => Ok(FieldType::EntryHash),
+        "AgentPubKey" => Ok(FieldType::AgentPubKey),
         _ => Err(ScaffoldError::InvalidFieldType(
             name.clone(),
             list_names().join(", "),
@@ -66,12 +51,12 @@ fn from_name(name: &String) -> ScaffoldResult<Widget> {
 }
 
 /// This function offers a dialoguer to the user to further configure the field type
-pub fn choose_from_name(name: &String) -> ScaffoldResult<Widget> {
+pub fn choose_from_name(name: &String) -> ScaffoldResult<FieldType> {
     // TODO: actually implement this
     from_name(name)
 }
 
-pub fn choose_field() -> ScaffoldResult<(String, FieldType)> {
+pub fn choose_field() -> ScaffoldResult<(String, FieldDefinition)> {
     let field_name: String = Input::with_theme(&ColorfulTheme::default())
         .with_prompt("Field name:")
         .report(false)
@@ -96,25 +81,33 @@ pub fn choose_field() -> ScaffoldResult<(String, FieldType)> {
             .report(false)
             .interact()?;
 
-        let field_widget = choose_from_name(&field_type_names[selection])?;
+        let field_type = choose_from_name(&field_type_names[selection])?;
 
         Ok((
             field_name,
-            FieldType::new_vector(FieldRepresentation::Visible(field_widget)),
+            FieldDefinition {
+                label: String::from(""),
+                field_type,
+                vector: true,
+            },
         ))
     } else {
-        let field_widget = choose_from_name(&field_type_names[selection])?;
+        let field_type = choose_from_name(&field_type_names[selection])?;
 
         Ok((
             field_name,
-            FieldType::new_single(FieldRepresentation::Visible(field_widget)),
+            FieldDefinition {
+                label: String::from(""),
+                field_type,
+                vector: false,
+            },
         ))
     }
 }
 
 pub fn choose_fields(
-    mut initial_fields: BTreeMap<String, FieldType>,
-) -> ScaffoldResult<BTreeMap<String, FieldType>> {
+    mut initial_fields: BTreeMap<String, FieldDefinition>,
+) -> ScaffoldResult<BTreeMap<String, FieldDefinition>> {
     println!("\nWhich fields should the entry contain?\n");
 
     let mut finished = false;

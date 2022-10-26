@@ -1,19 +1,42 @@
 use build_fs_tree::{file, serde::Serialize};
-use handlebars::{Context, Handlebars};
+use convert_case::{Case, Casing};
+use handlebars::{handlebars_helper, Context, Handlebars};
 use include_dir::{include_dir, Dir};
 use std::collections::BTreeMap;
 use std::ffi::OsString;
 use std::path::PathBuf;
 
+use crate::definitions::FieldType;
 use crate::error::{ScaffoldError, ScaffoldResult};
 use crate::file_tree::{create_dir_all, FileTree};
 
-static TEMPLATES_DIR: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/templates");
+pub fn register_ts_type_helper<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
+    handlebars_helper!(ts_type: |json: Json| serde_json::from_str::<FieldType>(json.to_string().as_str())?.ts_type());
+    h.register_helper("ts_type", Box::new(ts_type));
 
-pub fn get_templates() -> Handlebars<'static> {
+    h
+}
+
+pub fn register_case_helpers<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
+    handlebars_helper!(snake_case: |s: String| s.to_case(Case::Snake));
+    h.register_helper("snake_case", Box::new(snake_case));
+
+    handlebars_helper!(kebab_case: |s: String| s.to_case(Case::Kebab));
+    h.register_helper("kebab_case", Box::new(kebab_case));
+
+    handlebars_helper!(camel_case: |s: String| s.to_case(Case::Camel));
+    h.register_helper("camel_case", Box::new(camel_case));
+
+    handlebars_helper!(pascal_case: |s: String| s.to_case(Case::Pascal));
+    h.register_helper("pascal_case", Box::new(pascal_case));
+
+    h
+}
+
+pub fn get_templates(dir: &Dir<'_>) -> Handlebars<'static> {
     let mut handlebars = Handlebars::new();
 
-    let templates_dir_map = walk_dir(&TEMPLATES_DIR);
+    let templates_dir_map = walk_dir(dir);
 
     for (path, content) in templates_dir_map {
         if let Some(e) = path.extension() {
@@ -33,13 +56,9 @@ pub fn get_templates() -> Handlebars<'static> {
 
 pub fn register_all_partials_in_dir<'a>(
     mut h: Handlebars<'a>,
-    dir_path: &PathBuf,
+    dir: &Dir<'_>,
 ) -> ScaffoldResult<Handlebars<'a>> {
-    let partials_dir_map = walk_dir(
-        TEMPLATES_DIR
-            .get_dir(dir_path)
-            .ok_or(ScaffoldError::PathNotFound(dir_path.clone()))?,
-    );
+    let partials_dir_map = walk_dir(dir);
 
     for (path, content) in partials_dir_map {
         if let Some(e) = path.extension() {
@@ -56,63 +75,27 @@ pub fn register_all_partials_in_dir<'a>(
     Ok(h)
 }
 
-pub fn scaffold_file<T: Serialize>(
-    h: &Handlebars,
-    template_path: &PathBuf,
-    data: &T,
-) -> ScaffoldResult<String> {
-    let mut h = h.clone();
-
-    let content = TEMPLATES_DIR
-        .get_file(template_path)
-        .ok_or(ScaffoldError::PathNotFound(template_path.clone()))?
-        .contents_utf8()
-        .unwrap()
-        .to_string();
-    if let Some(e) = template_path.extension() {
-        if e == "hbs" {
-            h.register_template_string(
-                template_path
-                    .with_extension("")
-                    .as_os_str()
-                    .to_str()
-                    .unwrap(),
-                content,
-            )?;
-        }
-    }
-
-    let s = h.render(template_path.as_os_str().to_str().unwrap(), data)?;
-
-    Ok(s)
-}
-
-pub fn scaffold_dir<T: Serialize>(template_path: &PathBuf, data: &T) -> ScaffoldResult<FileTree> {
-    let h = get_templates();
+pub fn scaffold_dir<T: Serialize>(dir: &Dir<'_>, data: &T) -> ScaffoldResult<FileTree> {
+    let h = get_templates(dir);
 
     let mut file_tree = FileTree::Directory(BTreeMap::new());
 
     for (name, _template) in h.get_templates() {
-        if name.starts_with(template_path.as_os_str().to_str().unwrap()) {
-            let mut p: PathBuf = PathBuf::from(name)
-                .into_iter()
-                .skip(template_path.iter().count())
-                .collect();
-            let file_name = p.file_name().unwrap().to_os_string();
-            p.pop();
+        let mut p = PathBuf::from(name);
+        let file_name = p.file_name().unwrap().to_os_string();
+        p.pop();
 
-            let s = h.render(name, data)?;
+        let s = h.render(name, data)?;
 
-            create_dir_all(&mut file_tree, &p)?;
+        create_dir_all(&mut file_tree, &p)?;
 
-            let v: Vec<OsString> = p.iter().map(|s| s.to_os_string()).collect();
-            file_tree
-                .path_mut(&mut v.iter())
-                .ok_or(ScaffoldError::PathNotFound(p.clone()))?
-                .dir_content_mut()
-                .ok_or(ScaffoldError::PathNotFound(p.clone()))?
-                .insert(file_name.to_os_string(), file!(s));
-        }
+        let v: Vec<OsString> = p.iter().map(|s| s.to_os_string()).collect();
+        file_tree
+            .path_mut(&mut v.iter())
+            .ok_or(ScaffoldError::PathNotFound(p.clone()))?
+            .dir_content_mut()
+            .ok_or(ScaffoldError::PathNotFound(p.clone()))?
+            .insert(file_name.to_os_string(), file!(s));
     }
     Ok(file_tree)
 }

@@ -1,7 +1,7 @@
 use std::{collections::BTreeMap, ffi::OsString, path::PathBuf};
 
 use crate::{
-    definitions::{EntryDefinition, FieldRepresentation, FieldType, HdkType, HiddenType},
+    definitions::{EntryDefinition, FieldDefinition, FieldType},
     file_tree::FileTree,
 };
 use build_fs_tree::file;
@@ -24,6 +24,7 @@ use self::{
 use super::{
     link_type::{integrity::add_link_type_to_integrity_zome, link_type_name},
     tryorama::add_tryorama_tests_for_entry_def,
+    web_app::uis::add_entry_components,
     zome::{
         coordinator::find_extern_function_or_choose,
         utils::{get_coordinator_zomes_for_integrity, zome_manifest_path},
@@ -99,28 +100,43 @@ pub fn scaffold_entry_def(
 
     let fields = match maybe_fields {
         Some(f) => {
-            let mut fields = f.clone();
+            let mut fields: BTreeMap<String, FieldDefinition> = BTreeMap::new();
+
+            for (field_name, field_type) in f {
+                fields.insert(
+                    field_name.clone(),
+                    FieldDefinition {
+                        label: String::from(""),
+                        vector: false,
+                        field_type: field_type.clone(),
+                    },
+                );
+            }
             for d in depends_on.clone() {
                 let field_name = format!("{}_hash", d.to_case(Case::Snake));
                 fields.insert(
                     field_name,
-                    FieldType::new_single(FieldRepresentation::Hidden(HiddenType::HdkType(
-                        HdkType::ActionHash,
-                    ))),
+                    FieldDefinition {
+                        label: String::from(""),
+                        vector: false,
+                        field_type: FieldType::ActionHash,
+                    },
                 );
             }
             fields
         }
         None => {
-            let mut initial_fields: BTreeMap<String, FieldType> = BTreeMap::new();
+            let mut initial_fields: BTreeMap<String, FieldDefinition> = BTreeMap::new();
 
             for d in depends_on.clone() {
                 let field_name = format!("{}_hash", d.to_case(Case::Snake));
                 initial_fields.insert(
                     field_name,
-                    FieldType::new_single(FieldRepresentation::Hidden(HiddenType::HdkType(
-                        HdkType::ActionHash,
-                    ))),
+                    FieldDefinition {
+                        label: String::from(""),
+                        vector: false,
+                        field_type: FieldType::ActionHash,
+                    },
                 );
             }
             choose_fields(initial_fields)?
@@ -209,6 +225,13 @@ pub fn scaffold_entry_def(
         &entry_def,
         &crud,
         &create_fns_for_depends_on,
+    )?;
+
+    let app_file_tree = add_entry_components(
+        app_file_tree,
+        &entry_def,
+        &dna_manifest.name(),
+        &coordinator_zome.name.0.to_string(),
     )?;
 
     Ok(app_file_tree)
