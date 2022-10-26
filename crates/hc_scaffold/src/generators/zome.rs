@@ -125,7 +125,7 @@ fn try_to_guess_integrity_zomes_location(
 
     // if there is a workspace member string containing an expression with the word integrity followed by /*, pick this one
     // and add the right dna name to the path
-    let re = Regex::new(r"\A(?P<a>([^/*]*/)*)\*/(?P<b>(zomes/[^/*]integrity[^*/]/)\*\z)").unwrap();
+    let re = Regex::new(r"\A(?P<a>([^/*]*/)*)\*/(?P<b>(zomes/[^/*]*integrity[^/*]*/))\*\z").unwrap();
     for member in members.clone() {
         if re.is_match(member.as_str()) { // if there is a zomes/[something with "integrity"]/* pattern
             let new_path = re.replace(member.as_str(), format!("${{a}}{}/${{b}}", dna_name));
@@ -133,7 +133,7 @@ fn try_to_guess_integrity_zomes_location(
         }
     }
 
-    let re = Regex::new(r"\A(?P<a>([^/*]*/)*)\*/(?P<b>([^/*]integrity[^*/]/)\*\z)").unwrap();
+    let re = Regex::new(r"\A(?P<a>([^/*]*/)*)\*/(?P<b>([^/*]*integrity[^/*]*/))\*\z").unwrap();
     for member in members.clone() {
         if re.is_match(member.as_str()) { // if there is a [something with "integrity"]/* pattern
             let new_path = re.replace(member.as_str(), format!("${{a}}{}/${{b}}", dna_name));
@@ -198,7 +198,7 @@ fn try_to_guess_coordinator_zomes_location(
 
     // if there is a workspace member string containing an expression with the word integrity followed by /*, pick this one
     // and add the right dna name to the path
-    let re = Regex::new(r"\A(?P<a>([^/*]*/)*)\*/(?P<b>(zomes/[^/*]coordinator[^*/]/)\*\z)").unwrap();
+    let re = Regex::new(r"\A(?P<a>([^/*]*/)*)\*/(?P<b>(zomes/[^/*]*coordinator[^/*]*/))\*\z").unwrap();
     for member in members.clone() {
         if re.is_match(member.as_str()) { // if there is a zomes/[something with "coordinator"]/* pattern
             let new_path = re.replace(member.as_str(), format!("${{a}}{}/${{b}}", dna_name));
@@ -206,7 +206,7 @@ fn try_to_guess_coordinator_zomes_location(
         }
     }
 
-    let re = Regex::new(r"\A(?P<a>([^/*]*/)*)\*/(?P<b>([^/*]coordinator[^*/]/)\*\z)").unwrap();
+    let re = Regex::new(r"\A(?P<a>([^/*]*/)*)\*/(?P<b>([^/*]*coordinator[^/*]*/))\*\z").unwrap();
     for member in members.clone() {
         if re.is_match(member.as_str()) { // if there is a [something with "coordinator"]/* pattern
             let new_path = re.replace(member.as_str(), format!("${{a}}{}/${{b}}", dna_name));
@@ -294,7 +294,7 @@ pub fn scaffold_integrity_zome(
                     .file_content()
                     .ok_or(ScaffoldError::PathNotFound(dna_manifest_path.clone()))?,
             )?;
-            let prompt = String::from("Where should the integrity zome be scaffolded instead?");
+
             match try_to_guess_integrity_zomes_location(&app_file_tree, &dna_manifest.name())? {
                 Some(p) => {
                     if Confirm::with_theme(&ColorfulTheme::default())
@@ -303,10 +303,16 @@ pub fn scaffold_integrity_zome(
                     {
                         p
                     } else {
-                        choose_directory_path(&prompt, &app_file_tree)?
+                        choose_directory_path(
+                            &String::from("Where should the integrity zome be scaffolded instead?"),
+                            &app_file_tree
+                        )?
                     }
                 }
-                None => choose_directory_path(&prompt, &app_file_tree)?,
+                None => choose_directory_path(
+                    &String::from("Where should the integrity zome be scaffolded?"),
+                    &app_file_tree
+                )?,
             }
         }
     };

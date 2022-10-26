@@ -9,8 +9,8 @@ pub fn workspace_cargo_toml() -> String {
     format!(
         r#"[workspace]
 members = [
-  "dnas/*/zomes/coordinator_zomes/*",
-  "dnas/*/zomes/integrity_zomes/*",
+  "dnas/*/zomes/coordinator/*",
+  "dnas/*/zomes/integrity/*",
 ]
 
 [profile.dev]
