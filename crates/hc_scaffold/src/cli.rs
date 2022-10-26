@@ -14,7 +14,7 @@ use crate::generators::{
         scaffold_zome_pair, utils::get_or_choose_integrity_zome,
     },
 };
-use crate::utils::{check_no_whitespace, check_snake_case, input_no_whitespace, input_snake_case};
+use crate::utils::{check_no_whitespace, check_snake_case, input_no_whitespace, input_snake_case, input_yes_or_no};
 
 use build_fs_tree::{Build, MergeableFileSystemTree};
 use dialoguer::{theme::ColorfulTheme, Input, Select};
@@ -272,15 +272,8 @@ impl HcScaffold {
                 };
 
                 if !skip_nix {
-                    skip_nix = match Select::with_theme(&ColorfulTheme::default())
-                        .with_prompt("Do you want to set up the holonix development environment for this project?")
-                        .default(0)
-                        .items(&["Yes (recommended)", "No"])
-                        .interact()?
-                    {
-                        1 => true,
-                        _ => false,
-                    };
+                    let holonix_prompt = String::from("Do you want to set up the holonix development environment for this project?");
+                    skip_nix = input_yes_or_no(&holonix_prompt, Some(true))?;
                 }
 
                 let app_file_tree =

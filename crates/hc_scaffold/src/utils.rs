@@ -68,6 +68,27 @@ fn get_folders_names(file_tree: &FileTree) -> Vec<String> {
     }
 }
 
+/// "yes" or "no" input dialog, with the option to specify a recommended answer (yes = true, no = false)
+pub fn input_yes_or_no(prompt: &String, recommended: Option<bool>) -> ScaffoldResult<bool> {
+    let mut yes_recommended = "";
+    let mut no_recommended = "";
+
+    match recommended {
+        Some(true) => yes_recommended = " (recommended)",
+        Some(false) => no_recommended = " (recommended)",
+        None => (),
+    }
+
+    match Select::with_theme(&ColorfulTheme::default())
+        .with_prompt(prompt)
+        .default(0)
+        .items(&[format!("Yes{}", yes_recommended), format!("No{}", no_recommended)])
+        .interact()?
+    {
+        1 => Ok(true),
+        _ => Ok(false),
+    }
+}
 
 pub fn input_snake_case(prompt: &String) -> ScaffoldResult<String> {
     let input: String = Input::with_theme(&ColorfulTheme::default())
