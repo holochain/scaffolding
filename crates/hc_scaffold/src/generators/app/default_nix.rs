@@ -1,7 +1,9 @@
-use crate::file_tree::*;
 use build_fs_tree::file;
 
-pub fn default_nix(holochain_version: String) -> FileTree {
+use crate::file_tree::*;
+use crate::versions::holochain_nix_version;
+
+pub fn default_nix() -> FileTree {
     file!(format!(
         r#"let
   holonixPath = (import ./nix/sources.nix).holonix; # points to the current state of the Holochain repository
@@ -22,6 +24,6 @@ in nixpkgs.mkShell {{
     # any additional packages needed for this project, e. g. Nodejs
   ];
 }}"#,
-        holochain_version
+        holochain_nix_version()
     ))
 }
