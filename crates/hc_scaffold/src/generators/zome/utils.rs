@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use crate::file_tree::FileTree;
-use dialoguer::{theme::ColorfulTheme, Select};
+use dialoguer::{theme::ColorfulTheme, Select, MultiSelect};
 use holochain_types::prelude::{DnaManifest, ZomeManifest};
 use mr_bundle::Location;
 
@@ -94,6 +94,44 @@ pub fn get_or_choose_integrity_zome(
                 dna_manifest.name(),
             )),
     }
+}
+
+/// Prompts a MultiSelect dialog to select one or multimple integrity zomes
+///
+/// Returns empty array if no integrity zomes are present.
+pub fn select_integrity_zomes(
+    dna_manifest: &DnaManifest,
+    prompt: Option<&String>,
+) -> ScaffoldResult<Vec<String>> {
+    let integrity_zomes: Vec<String> = match dna_manifest {
+        DnaManifest::V1(v1) => v1
+            .integrity
+            .zomes
+            .clone()
+            .into_iter()
+            .map(|z| z.name.0.to_string())
+            .collect(),
+    };
+
+    if integrity_zomes.len() == 0 {
+        return Ok(vec![]);
+    }
+
+    let prompt = match prompt {
+        Some(p) => p,
+        None => "Select integrity zome (SPACE to select/unselect):"
+    };
+
+    let selected_options = MultiSelect::with_theme(&ColorfulTheme::default())
+            .with_prompt(prompt)
+            .items(&integrity_zomes)
+            .interact()?;
+
+    let selected_zomes = selected_options.iter()
+        .map(|i| integrity_zomes[i.to_owned()].clone())
+        .collect::<Vec<String>>();
+
+    Ok(selected_zomes)
 }
 
 pub fn get_coordinator_zomes_for_integrity(

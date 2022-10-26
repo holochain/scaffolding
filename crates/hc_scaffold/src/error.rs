@@ -120,6 +120,10 @@ pub enum ScaffoldError {
     #[error("Link type \"{0}\" already exists in dna \"{1}\" for the integrity zome \"{2}\"")]
     LinkTypeAlreadyExists(String, String, String),
 
+    #[error("Invalid arguments: \"{0}\"")]
+    InvalidArguments(String),
+
+
     /// anything else
     #[error("Unknown error: {0}")]
     MiscError(#[from] Box<dyn std::error::Error + Send + Sync>),
