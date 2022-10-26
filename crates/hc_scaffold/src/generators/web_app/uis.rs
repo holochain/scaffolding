@@ -10,11 +10,16 @@ use crate::{
 };
 
 pub mod lit;
+pub mod svelte;
+pub mod vanilla;
+pub mod vue;
 
 #[derive(Debug, Clone)]
 pub enum UiFramework {
     Vanilla,
     Lit,
+    Svelte,
+    Vue,
 }
 
 impl FromStr for UiFramework {
@@ -22,18 +27,20 @@ impl FromStr for UiFramework {
 
     fn from_str(s: &str) -> ScaffoldResult<UiFramework> {
         match s {
-            "lit" => Ok(UiFramework::Lit),
             "vanilla" => Ok(UiFramework::Vanilla),
+            "svelte" => Ok(UiFramework::Svelte),
+            "vue" => Ok(UiFramework::Vue),
+            "lit" => Ok(UiFramework::Lit),
             _ => Err(ScaffoldError::InvalidUiFramework(
                 s.to_string(),
-                "lit, vanilla".to_string(),
+                "vanilla, lit, svelte, vue".to_string(),
             )),
         }
     }
 }
 
 pub fn choose_ui_framework() -> ScaffoldResult<UiFramework> {
-    let frameworks = vec!["Vanilla", "Lit"];
+    let frameworks = vec!["Vanilla", "Lit", "Svelte", "Vue"];
     let selection = Select::with_theme(&ColorfulTheme::default())
         .with_prompt("Choose UI framework:")
         .default(0)
