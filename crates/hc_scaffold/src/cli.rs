@@ -11,7 +11,7 @@ use crate::generators::{
     entry_def::scaffold_entry_def,
     zome::{
         integrity_zome_name, scaffold_coordinator_zome, scaffold_integrity_zome,
-        scaffold_zome_pair, utils::get_or_choose_integrity_zome,
+        scaffold_zome_pair, utils::get_or_choose_integrity_zome, utils::select_integrity_zomes,
     },
 };
 use crate::utils::{check_no_whitespace, check_snake_case, input_no_whitespace, input_snake_case, input_yes_or_no};
@@ -52,42 +52,8 @@ pub enum HcScaffold {
         /// Name of the DNA being scaffolded
         name: Option<String>,
     },
-    /// Scaffold an integrity-coordinator zome pair into an existing DNA
-    Zomes {
-        #[structopt(long)]
-        /// Name of the app in which you want to scaffold the zome
-        app: Option<String>,
-
-        #[structopt(long)]
-        /// Name of the dna in which you want to scaffold the zome
-        dna: Option<String>,
-
-        /// Name of the zome being scaffolded
-        name: Option<String>,
-
-        #[structopt(long)]
-        /// The path in which you want to scaffold the zome
-        path: Option<PathBuf>,
-    },
-    /// Scaffold an integrity zome into an existing DNA
-    IntegrityZome {
-        #[structopt(long)]
-        /// Name of the app in which you want to scaffold the zome
-        app: Option<String>,
-
-        #[structopt(long)]
-        /// Name of the dna in which you want to scaffold the zome
-        dna: Option<String>,
-
-        /// Name of the zome being scaffolded
-        name: Option<String>,
-
-        #[structopt(long)]
-        /// The path in which you want to scaffold the zome
-        path: Option<PathBuf>,
-    },
-    /// Scaffold a coordinator zome into an existing DNA
-    CoordinatorZome {
+    /// Scaffold one or multiple zomes into an existing DNA
+    Zome {
         #[structopt(long)]
         /// Name of the app in which you want to scaffold the zome
         app: Option<String>,
@@ -103,11 +69,14 @@ pub enum HcScaffold {
         /// The path in which you want to scaffold the zome
         path: Option<PathBuf>,
 
-        #[structopt(long, value_delimiter = ",")]
-        /// The integrity zome dependencies for the coordinator zome
-        dependencies: Option<Vec<String>>,
-    },
+        #[structopt(long)]
+        /// create an integrity zome only
+        integrity: bool,
 
+        #[structopt(long)]
+        /// create a coordinator zome only
+        coordinator: bool,
+    },
     /// Scaffold an entry type and CRUD functions into an existing zome
     EntryType {
         #[structopt(long)]
@@ -342,34 +311,90 @@ Add new zomes to your DNA with:
                     name
                 );
             }
-            HcScaffold::Zomes {
+            HcScaffold::Zome {
                 app,
                 dna,
                 name,
                 path,
+                integrity,
+                coordinator,
+
             } => {
-                let prompt = String::from("Zome name (snake_case):");
+
+                if let Some(n) = name.clone() {
+                    check_snake_case(n, "zome name")?;
+                }
+
+
+                let selected_option = match (integrity, coordinator) {
+                    (false, false) => Select::with_theme(&ColorfulTheme::default())
+                        .with_prompt("What do you want to add?")
+                        .default(0)
+                        .items(&["integrity/coordinator zome-pair", "integrity zome", "coordinator zome"])
+                        .interact()?,
+                    (true, false) => 1,
+                    (false, true) => 2,
+                    (true, true) => return Err(anyhow::Error::from(
+                        ScaffoldError::InvalidArguments(
+                            String::from("The --integrity and --coordinator flags are mutually exclusive.")
+                        )
+                    )),
+                };
+
+                let name_prompt = match selected_option {
+                    0 => String::from("Coordinator zome name (snake_case):\n (The integrity zome will automatically be named '{name of coordinator zome}_integrity')\n"),
+                    1 => String::from("Enter zome name (snake_case):\n (the appendix _integrity will be added to the name automatically)\n"),
+                    _ => String::from("Enter zome name (snake_case):"),
+                };
+
                 let name: String = match name {
-                    Some(n) => check_snake_case(n, "zome names")?,
-                    None => input_snake_case(&prompt)?,
+                    Some(n) => n,
+                    None => input_snake_case(&name_prompt)?,
                 };
 
                 let current_dir = std::env::current_dir()?;
 
                 let app_file_tree = load_directory_into_memory(&current_dir)?;
                 let app_manifest = get_or_choose_app_manifest(&app_file_tree, &app)?;
-                let (dna_manifest_path, _dna_manifest) =
+                let (dna_manifest_path, dna_manifest) =
                     get_or_choose_dna_manifest(&app_file_tree, &app_manifest, dna)?;
 
-                let app_file_tree = scaffold_zome_pair(
-                    app_file_tree,
-                    &app_manifest.1,
-                    &dna_manifest_path,
-                    &name,
-                    &String::from("0.1"),
-                    &String::from("0.0.155"),
-                    &path,
-                )?;
+                let mut dependencies = None;
+                if selected_option == 2 {
+                    dependencies = Some(select_integrity_zomes(&dna_manifest, Some(&String::from(
+                        "Select integrity zome(s) this coordinator zome depends on (SPACE to select/unselect, ENTER to continue):"
+                        )))?
+                    );
+                }
+
+                let app_file_tree = match selected_option {
+                    1 => scaffold_integrity_zome(
+                        app_file_tree,
+                        &app_manifest.1,
+                        &dna_manifest_path,
+                        &integrity_zome_name(&name),
+                        &String::from("0.1.0"),
+                        &path,
+                    )?,
+                    2 => scaffold_coordinator_zome(
+                        app_file_tree,
+                        &app_manifest.1,
+                        &dna_manifest_path,
+                        &name,
+                        &String::from("0.0.155"),
+                        &dependencies,
+                        &path,
+                    )?,
+                    _ => scaffold_zome_pair(
+                        app_file_tree,
+                        &app_manifest.1,
+                        &dna_manifest_path,
+                        &name,
+                        &String::from("0.1"),
+                        &String::from("0.0.155"),
+                        &path,
+                    )?,
+                };
 
                 let file_tree = MergeableFileSystemTree::<OsString, String>::from(app_file_tree);
 
@@ -380,116 +405,23 @@ Add new zomes to your DNA with:
                 // Execute cargo metadata to set up the cargo workspace in case this zome is the first crate
                 exec_metadata(&f)?;
 
+                let headline = match selected_option {
+                    1 => format!(r#"Integrity zome "{}" scaffolded!"#, integrity_zome_name(&name)),
+                    2 =>  format!(r#"Coordinator zome "{}" scaffolded!"#, name),
+                    _ => format!(r#"Integrity zome "{}" and coordinator zome "{}" scaffolded!"#, integrity_zome_name(&name), name),
+                };
+
                 println!(
                     r#"
-Integrity zome "{}" and coordinator zome "{}" scaffolded!
+{}
 
 Add new entry definitions to your zome with:
 
   hc-scaffold entry-type
 "#,
-                    integrity_zome_name(&name),
-                    name
+                headline
                 );
-            }
-            HcScaffold::IntegrityZome {
-                app,
-                dna,
-                name,
-                path,
-            } => {
-                let prompt = String::from("Integrity zome name (snake_case):");
-                let name: String = match name {
-                    Some(n) => check_snake_case(n, "zome names")?,
-                    None => input_snake_case(&prompt)?,
-                };
 
-                let current_dir = std::env::current_dir()?;
-
-                let app_file_tree = load_directory_into_memory(&current_dir)?;
-
-                let app_manifest = get_or_choose_app_manifest(&app_file_tree, &app)?;
-                let (dna_manifest_path, _dna_manifest) =
-                    get_or_choose_dna_manifest(&app_file_tree, &app_manifest, dna)?;
-
-                let app_file_tree = scaffold_integrity_zome(
-                    app_file_tree,
-                    &app_manifest.1,
-                    &dna_manifest_path,
-                    &name,
-                    &String::from("0.1.0"),
-                    &path,
-                )?;
-
-                let file_tree = MergeableFileSystemTree::<OsString, String>::from(app_file_tree);
-
-                let f = file_tree.clone();
-
-                file_tree.build(&".".into())?;
-
-                // Execute cargo metadata to set up the cargo workspace in case this zome is the first crate
-                exec_metadata(&f)?;
-
-                println!(
-                    r#"
-Integrity zome "{}" scaffolded!
-
-Add new entry definitions to your zome with:
-
-  hc-scaffold entry_def
-"#,
-                    name
-                );
-            }
-            HcScaffold::CoordinatorZome {
-                app,
-                dna,
-                name,
-                dependencies,
-                path,
-            } => {
-                let prompt = String::from("Coordinator zome name (snake_case):");
-                let name: String = match name {
-                    Some(n) => check_snake_case(n, "zome names")?,
-                    None => input_snake_case(&prompt)?,
-                };
-
-                let current_dir = std::env::current_dir()?;
-
-                let app_file_tree = load_directory_into_memory(&current_dir)?;
-
-                let app_manifest = get_or_choose_app_manifest(&app_file_tree, &app)?;
-                let (dna_manifest_path, _dna_manifest) =
-                    get_or_choose_dna_manifest(&app_file_tree, &app_manifest, dna)?;
-                let app_file_tree = scaffold_coordinator_zome(
-                    app_file_tree,
-                    &app_manifest.1,
-                    &dna_manifest_path,
-                    &name,
-                    &String::from("0.0.155"),
-                    &dependencies,
-                    &path,
-                )?;
-
-                let file_tree = MergeableFileSystemTree::<OsString, String>::from(app_file_tree);
-
-                let f = file_tree.clone();
-
-                file_tree.build(&".".into())?;
-
-                // Execute cargo metadata to set up the cargo workspace in case this zome is the first crate
-                exec_metadata(&f)?;
-
-                println!(
-                    r#"
-Coordinator zome "{}" scaffolded!
-
-Add new entry definitions to your zome with:
-
-  hc-scaffold entry_def
-"#,
-                    name
-                );
             }
             HcScaffold::EntryType {
                 app,
