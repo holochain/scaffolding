@@ -33,6 +33,9 @@ pub enum ScaffoldError {
     #[error("YAML serialization error: {0}")]
     SerdeYamlError(#[from] serde_yaml::Error),
 
+    #[error("JSON serialization error: {0}")]
+    SerdeJsonError(#[from] serde_json::Error),
+
     #[error("TOML deserialization error: {0}")]
     TomlDeError(#[from] toml::de::Error),
 
@@ -122,7 +125,6 @@ pub enum ScaffoldError {
 
     #[error("Invalid arguments: \"{0}\"")]
     InvalidArguments(String),
-
 
     /// anything else
     #[error("Unknown error: {0}")]

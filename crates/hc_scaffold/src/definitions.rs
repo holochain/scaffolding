@@ -22,6 +22,25 @@ pub enum FieldType {
     EntryHash,
 }
 
+impl ToString for FieldType {
+    fn to_string(&self) -> String {
+        use FieldType::*;
+        match self {
+            TextField => "TextField",
+            TextArea => "TextArea",
+            DateAndTime => "DateAndTime",
+            Date => "Date",
+            Slider { .. } => "Slider",
+            Checkbox => "Checkbox",
+            Switch => "Switch",
+            ActionHash => "ActionHash",
+            EntryHash => "EntryHash",
+            AgentPubKey => "AgentPubKey",
+        }
+        .into()
+    }
+}
+
 impl FieldType {
     pub fn rust_type(&self) -> TokenStream {
         use FieldType::*;
