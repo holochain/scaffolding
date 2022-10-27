@@ -24,7 +24,10 @@ pub fn scaffold_dna(
     let (app_manifest_path, app_manifest) = get_or_choose_app_manifest(&app_file_tree, app_name)?;
 
     let new_dna_file_tree: FileTree = dir! {
-        "zomes" => dir! {},
+        "zomes" => dir! {
+            "coordinator" => dir! {},
+            "integrity" => dir! {},
+        },
         "workdir" => dir! {
             "dna.yaml" => file!(empty_dna_manifest(dna_name.clone())?)
         }

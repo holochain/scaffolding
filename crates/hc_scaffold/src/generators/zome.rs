@@ -65,13 +65,44 @@ pub fn iter_all_eq<T: PartialEq>(iter: impl IntoIterator<Item = T>) -> Option<T>
     iter.all(|elem| elem == first).then(|| first)
 }
 
-fn try_to_guess_zomes_location(
+
+
+
+/// Tries to guess the location of the integrity zomes
+///
+/// Procedure:
+/// 1. If there is a workspace member string with [anything]*/zomes/[something with "integrity"], pick it and replace the star with the dna name
+/// 2. If there is a workspace member string with [anything]*/[something with "integrity"], pick it and replace the star with the dna name
+/// 3. If there is only one workspace member string and it contains a * somewhere in the middle, replace the * with the dna name
+/// 4. If there is only one workspace member string and it only contains a * at the end, take that folder (without the *)
+/// 5. If all package paths without the [crate name]/Cargo.toml ending are equal, assume this is the zomes folder
+///    and it is not being differentiated between integrity and coordinator zomes in that project
+///
+fn try_to_guess_integrity_zomes_location(
     app_file_tree: &FileTree,
     dna_name: &String,
 ) -> ScaffoldResult<Option<PathBuf>> {
-    let maybe_packages_paths = get_workspace_packages_locations(&app_file_tree)?;
 
     let members = get_workspace_members(app_file_tree)?;
+
+    // if there is a workspace member string containing an expression with the word integrity followed by /*, pick this one
+    // and add the right dna name to the path
+    let re = Regex::new(r"\A(?P<a>([^/*]*/)*)\*/(?P<b>(zomes/[^/*]*integrity[^/*]*/))\*\z").unwrap();
+    for member in members.clone() {
+        if re.is_match(member.as_str()) { // if there is a zomes/[something with "integrity"]/* pattern
+            let new_path = re.replace(member.as_str(), format!("${{a}}{}/${{b}}", dna_name));
+            return Ok(Some(PathBuf::from(new_path.to_string())));
+        }
+    }
+
+    let re = Regex::new(r"\A(?P<a>([^/*]*/)*)\*/(?P<b>([^/*]*integrity[^/*]*/))\*\z").unwrap();
+    for member in members.clone() {
+        if re.is_match(member.as_str()) { // if there is a [something with "integrity"]/* pattern
+            let new_path = re.replace(member.as_str(), format!("${{a}}{}/${{b}}", dna_name));
+            return Ok(Some(PathBuf::from(new_path.to_string())));
+        }
+    }
+
 
     if members.len() == 1 {
         let re = Regex::new(r"\A(?P<a>([^/*]*/)*)\*/(?P<b>([^/*]*/)*)\*\z").unwrap();
@@ -89,6 +120,9 @@ fn try_to_guess_zomes_location(
         }
     }
 
+
+    let maybe_packages_paths = get_workspace_packages_locations(&app_file_tree)?;
+
     match maybe_packages_paths {
         Some(mut packages_paths) if packages_paths.len() != 0 => {
             for p in packages_paths.iter_mut() {
@@ -98,7 +132,7 @@ fn try_to_guess_zomes_location(
                 p.pop();
             }
 
-            if let Some(mut p) = iter_all_eq(packages_paths) {
+            if let Some(p) = iter_all_eq(packages_paths) {
                 Ok(Some(p))
             } else {
                 Ok(None)
@@ -107,6 +141,81 @@ fn try_to_guess_zomes_location(
         _ => Ok(None),
     }
 }
+
+/// Tries to guess the location of the coordinator zomes
+///
+/// Procedure:
+/// 1. If there is a workspace member string with [anything]*/zomes/[something with "coordinator"], pick it and replace the star with the dna name
+/// 2. If there is a workspace member string with [anything]*/[something with "coordinator"], pick it and replace the star with the dna name
+/// 3. If there is only one workspace member string and it contains a * somewhere in the middle, replace the * with the dna name
+/// 4. If there is only one workspace member string and it only contains a * at the end, take that folder (without the *)
+/// 5. If all package paths without the [crate name]/Cargo.toml ending are equal, assume this is the zomes folder
+///    and it is not being differentiated between integrity and coordinator zomes in that project
+///
+fn try_to_guess_coordinator_zomes_location(
+    app_file_tree: &FileTree,
+    dna_name: &String,
+) -> ScaffoldResult<Option<PathBuf>> {
+
+    let members = get_workspace_members(app_file_tree)?;
+
+    // if there is a workspace member string containing an expression with the word integrity followed by /*, pick this one
+    // and add the right dna name to the path
+    let re = Regex::new(r"\A(?P<a>([^/*]*/)*)\*/(?P<b>(zomes/[^/*]*coordinator[^/*]*/))\*\z").unwrap();
+    for member in members.clone() {
+        if re.is_match(member.as_str()) { // if there is a zomes/[something with "coordinator"]/* pattern
+            let new_path = re.replace(member.as_str(), format!("${{a}}{}/${{b}}", dna_name));
+            return Ok(Some(PathBuf::from(new_path.to_string())));
+        }
+    }
+
+    let re = Regex::new(r"\A(?P<a>([^/*]*/)*)\*/(?P<b>([^/*]*coordinator[^/*]*/))\*\z").unwrap();
+    for member in members.clone() {
+        if re.is_match(member.as_str()) { // if there is a [something with "coordinator"]/* pattern
+            let new_path = re.replace(member.as_str(), format!("${{a}}{}/${{b}}", dna_name));
+            return Ok(Some(PathBuf::from(new_path.to_string())));
+        }
+    }
+
+
+    if members.len() == 1 {
+        let re = Regex::new(r"\A(?P<a>([^/*]*/)*)\*/(?P<b>([^/*]*/)*)\*\z").unwrap();
+
+        if re.is_match(members[0].as_str()) {
+            let new_path = re.replace(members[0].as_str(), format!("${{a}}{}/${{b}}", dna_name));
+            return Ok(Some(PathBuf::from(new_path.to_string())));
+        }
+
+        let re = Regex::new(r"\A(?P<a>([^/*]*/)*)\*\z").unwrap();
+
+        if re.is_match(members[0].as_str()) {
+            let new_path = re.replace(members[0].as_str(), r"${a}");
+            return Ok(Some(PathBuf::from(new_path.to_string())));
+        }
+    }
+
+
+    let maybe_packages_paths = get_workspace_packages_locations(&app_file_tree)?;
+
+    match maybe_packages_paths {
+        Some(mut packages_paths) if packages_paths.len() != 0 => {
+            for p in packages_paths.iter_mut() {
+                // Pop the "Cargo.toml" component
+                p.pop();
+                // Pop crate's folder component
+                p.pop();
+            }
+
+            if let Some(p) = iter_all_eq(packages_paths) {
+                Ok(Some(p))
+            } else {
+                Ok(None)
+            }
+        }
+        _ => Ok(None),
+    }
+}
+
 
 pub fn scaffold_integrity_zome_with_path(
     app_file_tree: FileTree,
@@ -166,8 +275,8 @@ pub fn scaffold_integrity_zome(
                     .file_content()
                     .ok_or(ScaffoldError::PathNotFound(dna_manifest_path.clone()))?,
             )?;
-            let prompt = String::from("Where should the integrity zome be scaffolded instead?");
-            match try_to_guess_zomes_location(&app_file_tree, &dna_manifest.name())? {
+
+            match try_to_guess_integrity_zomes_location(&app_file_tree, &dna_manifest.name())? {
                 Some(p) => {
                     if Confirm::with_theme(&ColorfulTheme::default())
                         .with_prompt(format!("Scaffold integrity zome in folder {:?}?", p))
@@ -175,10 +284,16 @@ pub fn scaffold_integrity_zome(
                     {
                         p
                     } else {
-                        choose_directory_path(&prompt, &app_file_tree)?
+                        choose_directory_path(
+                            &String::from("Where should the integrity zome be scaffolded instead?"),
+                            &app_file_tree
+                        )?
                     }
                 }
-                None => choose_directory_path(&prompt, &app_file_tree)?,
+                None => choose_directory_path(
+                    &String::from("Where should the integrity zome be scaffolded?"),
+                    &app_file_tree
+                )?,
             }
         }
     };
@@ -255,7 +370,7 @@ pub fn scaffold_coordinator_zome(
                     .file_content()
                     .ok_or(ScaffoldError::PathNotFound(dna_manifest_path.clone()))?,
             )?;
-            match try_to_guess_zomes_location(&app_file_tree, &dna_manifest.name())? {
+            match try_to_guess_coordinator_zomes_location(&app_file_tree, &dna_manifest.name())? {
                 Some(p) => {
                     if Confirm::with_theme(&ColorfulTheme::default())
                         .with_prompt(format!("Scaffold coordinator zome in {:?}?", p))
