@@ -1,14 +1,16 @@
 <template>
   <div style="display: flex; flex-direction: column">
 
-    <span style="font-size: 18px">Create ${upperFirst(camelCase(type.name))}</span>
+    <span style="font-size: 18px">Create {{pascal_case entry_type.name}}</span>
   
-    ${type.fields.map(f => createFieldTemplate(elementsImports, f)).join('\n\n    ')}
+    {{#each entry_type.fields}}
+      {{> (concat field_type.type "/ui/create/render") }}
+    {{/each}}
   
     <mwc-button 
-      label="Create ${upperFirst(camelCase(type.name))}"
-      :disabled="!is${upperFirst(camelCase(type.name))}Valid()"
-      @click="create${upperFirst(camelCase(type.name))}()"
+      label="Create {{pascal_case entry_type.name}}"
+      :disabled="!is{{pascal_case entry_type.name}}Valid()"
+      @click="create{{pascal_case entry_type.name}}()"
     ></mwc-button>
   </div>
 </template>
@@ -18,7 +20,7 @@ import { InstalledCell, AppWebsocket, InstalledAppInfo, Record } from '@holochai
 import { {{pascal_case entry_type.name}} } from './{{kebab_case entry_type.name}}';
 import '@material/mwc-button';
 {{#each entry_type.fields}}
-{{> (create_imports_partial field_type.type) }}
+{{> (concat field_type.type "/ui/create/imports") }}
 {{/each}}
 
 export default defineComponent({
