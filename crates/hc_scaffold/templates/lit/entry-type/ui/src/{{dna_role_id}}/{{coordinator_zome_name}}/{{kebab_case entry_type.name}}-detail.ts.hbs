@@ -3,7 +3,7 @@ import { state, customElement, property } from 'lit/decorators.js';
 import { InstalledCell, AppWebsocket, Record, ActionHash, InstalledAppInfo } from '@holochain/client';
 import { contextProvided } from '@lit-labs/context';
 import { decode } from '@msgpack/msgpack';
-import { appInfoContext, appWebsocketContext } from '../../../contexts';
+import { appInfoContext, appWebsocketContext } from '../../contexts';
 import { {{pascal_case entry_type.name}} } from './{{kebab_case entry_type.name}}';
 import '@material/mwc-circular-progress';
 {{#each entry_type.fields}}
@@ -37,6 +37,7 @@ export class {{pascal_case entry_type.name}}Detail extends LitElement {
       this._{{camel_case entry_type.name}} = decode((record.entry as any).Present.entry) as {{pascal_case entry_type.name}};
     }
   }
+
   render() {
     if (!this._{{camel_case entry_type.name}}) {
       return html`<div style="display: flex; flex: 1; align-items: center; justify-content: center">

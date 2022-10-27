@@ -42,8 +42,8 @@ pub enum HcScaffold {
         description: Option<String>,
 
         #[structopt(long)]
-        /// Skip setup of nix development environment
-        skip_nix: bool,
+        /// Whether to setup the holonix development environment for this web-app
+        setup_nix: Option<bool>,
 
         #[structopt(long)]
         /// The UI framework to use as the template for this web-app
@@ -168,7 +168,6 @@ pub enum HcScaffold {
         /// Use the entry hash as the target for the links, instead of the action hash
         link_to_entry_hash: bool,
     },
-    Pack(Pack),
 }
 
 pub fn parse_fields(fields_str: &str) -> Result<(String, FieldType), String> {
@@ -217,29 +216,13 @@ fn parse_crud(crud_str: &str) -> Result<Crud, String> {
     Ok(crud)
 }
 
-/// Packaging of apps
-#[derive(Debug, StructOpt)]
-#[structopt(setting = structopt::clap::AppSettings::InferSubcommands)]
-pub enum Pack {
-    /// Package a web app
-    WebApp {
-        /// The path to the working directory containing a `web-happ.yaml` manifest
-        path: PathBuf,
-    },
-    /// Package an app
-    App {
-        /// The path to the working directory containing a `happ.yaml` manifest
-        path: PathBuf,
-    },
-}
-
 impl HcScaffold {
     pub async fn run(self) -> anyhow::Result<()> {
         match self {
             HcScaffold::WebApp {
                 name,
                 description,
-                mut skip_nix,
+                setup_nix,
                 ui,
             } => {
                 let prompt = String::from("App name (no whitespaces):");
@@ -248,15 +231,18 @@ impl HcScaffold {
                     None => input_no_whitespace(&prompt)?,
                 };
 
-                if !skip_nix {
-                    let holonix_prompt = String::from("Do you want to set up the holonix development environment for this project?");
-                    skip_nix = input_yes_or_no(&holonix_prompt, Some(true))?;
-                }
+                let setup_nix = match setup_nix {
+                    Some(s) => s,
+                    None => {
+                        let holonix_prompt = String::from("Do you want to set up the holonix development environment for this project?");
+                        input_yes_or_no(&holonix_prompt, Some(true))?
+                    }
+                };
 
                 let app_file_tree = generators::web_app::scaffold_web_app(
                     name.clone(),
                     description,
-                    skip_nix,
+                    !setup_nix,
                     &ui,
                 )?;
 
@@ -266,7 +252,7 @@ impl HcScaffold {
 
                 let mut maybe_nix = "";
 
-                if !skip_nix {
+                if setup_nix {
                     if cfg!(target_os = "windows") {
                         return Err(anyhow::anyhow!("Windows doesn't support nix"));
                     } else {
@@ -317,7 +303,7 @@ DNA "{}" scaffolded!
 
 Add new zomes to your DNA with:
 
-  hc-scaffold zomes
+  hc-scaffold zome
 "#,
                     name
                 );
@@ -575,67 +561,8 @@ Index "{}" scaffolded!
                     name
                 );
             }
-            HcScaffold::Pack(Pack::WebApp { path }) => web_app_pack_all_bundled(path).await?,
-            HcScaffold::Pack(Pack::App { path }) => app_pack_all_bundled(path).await?,
         }
 
         Ok(())
     }
-}
-
-async fn web_app_pack_all_bundled(web_app_bundle_path: PathBuf) -> anyhow::Result<()> {
-    let web_app_bundle_path = ffs::canonicalize(web_app_bundle_path).await?;
-
-    let f = std::fs::File::open(web_app_bundle_path.join(WebAppManifest::path()))?;
-
-    let manifest: WebAppManifest = serde_yaml::from_reader(f)?;
-
-    let location = manifest.happ_bundle_location();
-
-    if let Location::Bundled(mut bundled_location) = location {
-        bundled_location.pop();
-        bundled_location = PathBuf::new()
-            .join(web_app_bundle_path.clone())
-            .join(bundled_location);
-
-        app_pack_all_bundled(bundled_location).await?;
-    }
-
-    holochain_cli_bundle::HcWebAppBundle::Pack {
-        path: web_app_bundle_path,
-        output: None,
-    }
-    .run()
-    .await?;
-
-    Ok(())
-}
-
-async fn app_pack_all_bundled(app_workdir_path: PathBuf) -> anyhow::Result<()> {
-    let app_workdir_path = ffs::canonicalize(app_workdir_path).await?;
-
-    let app_manifest_path = app_workdir_path.join(AppManifest::path());
-    let f = std::fs::File::open(&app_manifest_path)?;
-
-    let manifest: AppManifest = serde_yaml::from_reader(f)?;
-
-    let dna_locations = bundled_dnas_locations(&app_manifest_path, &manifest);
-
-    for bundled_location in dna_locations {
-        holochain_cli_bundle::HcDnaBundle::Pack {
-            path: ffs::canonicalize(bundled_location).await?,
-            output: None,
-        }
-        .run()
-        .await?;
-    }
-
-    holochain_cli_bundle::HcAppBundle::Pack {
-        path: app_workdir_path,
-        output: None,
-    }
-    .run()
-    .await?;
-
-    Ok(())
 }

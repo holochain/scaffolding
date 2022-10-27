@@ -3,6 +3,7 @@ use std::{path::PathBuf, str::FromStr};
 use convert_case::{Case, Casing};
 use dialoguer::{theme::ColorfulTheme, Select};
 use holochain_types::prelude::{AppManifest, DnaManifest};
+use serde::Serialize;
 
 use crate::{
     error::{ScaffoldError, ScaffoldResult},
@@ -14,12 +15,14 @@ use self::coordinator::add_index_to_coordinators;
 use super::{
     entry_def::{integrity::get_all_entry_types, utils::choose_multiple_entry_types},
     link_type::integrity::add_link_type_to_integrity_zome,
+    web_app::uis::scaffold_index_templates,
     zome::utils::get_coordinator_zomes_for_integrity,
 };
 
 pub mod coordinator;
 
-#[derive(Debug, Clone)]
+#[derive(Serialize, Debug, Clone)]
+#[serde(tag = "type")]
 pub enum IndexType {
     Global,
     ByAuthor,
@@ -107,7 +110,7 @@ pub fn scaffold_index(
         &link_type_name,
     )?;
 
-    let app_file_tree = add_index_to_coordinators(
+    let (app_file_tree, coordinator_zome) = add_index_to_coordinators(
         app_file_tree,
         dna_manifest,
         integrity_zome_name,
@@ -116,6 +119,15 @@ pub fn scaffold_index(
         &index_type,
         &entry_types,
         link_to_entry_hash,
+    )?;
+
+    let app_file_tree = scaffold_index_templates(
+        app_file_tree,
+        &dna_manifest.name(),
+        &coordinator_zome.name.0.to_string(),
+        &index_type,
+        index_name,
+        &entry_types,
     )?;
 
     Ok(app_file_tree)

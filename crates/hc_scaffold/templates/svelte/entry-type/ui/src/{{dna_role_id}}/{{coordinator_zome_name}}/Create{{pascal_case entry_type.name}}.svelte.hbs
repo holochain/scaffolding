@@ -1,7 +1,7 @@
 <script lang="ts">
 import { createEventDispatcher, getContext } from 'svelte';
 import { InstalledCell, AppWebsocket, InstalledAppInfo } from '@holochain/client';
-import { appWebsocketContext, appInfoContext } from '../../../contexts';
+import { appWebsocketContext, appInfoContext } from '../../contexts';
 import { {{pascal_case entry_type.name}} } from './{{kebab_case entry_type.name}}';
 import '@material/mwc-button';
 {{#each entry_type.fields}}

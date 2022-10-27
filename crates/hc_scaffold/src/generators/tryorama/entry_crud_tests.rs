@@ -215,7 +215,7 @@ pub fn update_entry_test(
     const readUpdatedOutput: Record = await bob_{}_cell.callZome({{
       zome_name: "{}",
       fn_name: "get_{}",
-      payload: record.signed_action.hashed.hash,
+      payload: updatedRecord.signed_action.hashed.hash,
     }});
     assert.deepEqual(contentUpdate, decode((readUpdatedOutput.entry as any).Present.entry) as any);
 "#,

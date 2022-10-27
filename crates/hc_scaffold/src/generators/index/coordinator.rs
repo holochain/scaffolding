@@ -216,7 +216,7 @@ pub fn add_index_to_coordinators(
     index_type: &IndexType,
     entry_types: &Vec<String>,
     link_to_entry_hash: bool,
-) -> ScaffoldResult<FileTree> {
+) -> ScaffoldResult<(FileTree, ZomeManifest)> {
     let coordinator_zomes_for_integrity =
         get_coordinator_zomes_for_integrity(dna_manifest, integrity_zome_name);
 
@@ -315,5 +315,5 @@ pub fn add_index_to_coordinators(
         )?;
     }
 
-    Ok(app_file_tree)
+    Ok((app_file_tree, coordinator_zome))
 }

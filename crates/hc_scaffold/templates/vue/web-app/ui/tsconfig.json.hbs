@@ -1,20 +1,15 @@
 {
   "compilerOptions": {
-    "target": "es2018",
+    "target": "esnext",
+    "useDefineForClassFields": true,
     "module": "esnext",
     "moduleResolution": "node",
-    "noEmitOnError": true,
-    "lib": ["es2017", "dom"],
     "strict": true,
-    "esModuleInterop": false,
-    "allowSyntheticDefaultImports": true,
-    "experimentalDecorators": true,
-    "importHelpers": true,
-    "outDir": "out-tsc",
+    "jsx": "preserve",
     "sourceMap": true,
-    "inlineSources": true,
-    "rootDir": "./src",
-    "incremental": true
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "lib": ["esnext", "dom"]
   },
-  "include": ["**/*.ts"]
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"]
 }

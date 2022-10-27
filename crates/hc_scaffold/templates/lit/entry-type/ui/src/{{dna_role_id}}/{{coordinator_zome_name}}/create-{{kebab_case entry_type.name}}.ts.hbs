@@ -1,8 +1,8 @@
 import { LitElement, html } from 'lit';
 import { state, customElement } from 'lit/decorators.js';
-import { InstalledCell, Record, AppWebsocket, InstalledAppInfo } from '@holochain/client';
+import { InstalledCell, ActionHash, Record, AppWebsocket, InstalledAppInfo } from '@holochain/client';
 import { contextProvided } from '@lit-labs/context';
-import { appWebsocketContext, appInfoContext } from '../../../contexts';
+import { appWebsocketContext, appInfoContext } from '../../contexts';
 import { {{pascal_case entry_type.name}} } from './{{kebab_case entry_type.name}}';
 import '@material/mwc-button';
 {{#each entry_type.fields}}
@@ -31,7 +31,7 @@ export class Create{{pascal_case entry_type.name}} extends LitElement {
     const cellData = this.appInfo.cell_data.find((c: InstalledCell) => c.role_id === '{{dna_role_id}}')!;
 
     const {{camel_case entry_type.name}}: {{pascal_case entry_type.name}} = { {{#each entry_type.fields}}
-      {{snake_case @key}}: this._{{camel_case @key}},
+      {{snake_case @key}}: this._{{camel_case @key}}!,
 {{/each}}
     };
 

@@ -9,6 +9,7 @@ use crate::{
     definitions::EntryDefinition,
     error::{ScaffoldError, ScaffoldResult},
     file_tree::{create_dir_all, dir_to_file_tree, FileTree},
+    generators::index::IndexType,
     templates::{
         register_all_partials_in_dir, register_case_helpers, register_concat_helper,
         render_template_file_tree, render_template_file_tree_and_merge_with_existing,
@@ -63,13 +64,6 @@ pub struct ScaffoldWebAppData {
     holochain_client_version: String,
 }
 
-#[derive(Serialize)]
-pub struct AddEntryTypeComponentsData {
-    dna_role_id: String,
-    coordinator_zome_name: String,
-    entry_type: EntryDefinition,
-}
-
 fn get_templates(framework: &UiFramework) -> ScaffoldResult<FileTree> {
     let dir = match framework {
         UiFramework::Lit => &LIT_TEMPLATES,
@@ -93,6 +87,8 @@ pub fn build_handlebars<'a>(templates_dir: &FileTree) -> ScaffoldResult<Handleba
     if let Some(field_types_templates) = templates_dir.path(&mut v.iter()) {
         h = register_all_partials_in_dir(h, field_types_templates)?;
     }
+
+    h.register_escape_fn(|s| s.replace(r#"\{"#, r#"{"#).replace(r#"\}"#, r#"}"#));
 
     Ok(h)
 }
@@ -126,46 +122,45 @@ pub fn scaffold_web_app_ui(
     Ok(app_file_tree)
 }
 
-fn guess_or_choose_ui_package_path() -> PathBuf {
-    PathBuf::from("ui")
-}
-
-fn guess_or_choose_framework() -> ScaffoldResult<UiFramework> {
-    Ok(UiFramework::Lit)
-}
-
-pub fn render_typescript_definition(entry_def: &EntryDefinition) -> String {
-    let fields_types: Vec<String> = entry_def
-        .fields
+fn guess_or_choose_framework(app_file_tree: &FileTree) -> ScaffoldResult<UiFramework> {
+    let ui_package_json_path = PathBuf::from("ui/package.json");
+    let v: Vec<OsString> = ui_package_json_path
         .iter()
-        .map(|(field_name, field_def)| {
-            format!("{}: {};", field_name, field_def.field_type.ts_type())
-        })
+        .map(|s| s.to_os_string())
         .collect();
+    let ui_package_json = app_file_tree
+        .path(&mut v.iter())
+        .ok_or(ScaffoldError::PathNotFound(ui_package_json_path.clone()))?
+        .file_content()
+        .ok_or(ScaffoldError::PathNotFound(ui_package_json_path.clone()))?
+        .clone();
 
-    format!(
-        r#"import {{ ActionHash, AgentPubKey, EntryHash }} from '@holochain/client';
+    if ui_package_json.contains("lit") {
+        return Ok(UiFramework::Lit);
+    } else if ui_package_json.contains("svelte") {
+        return Ok(UiFramework::Svelte);
+    } else if ui_package_json.contains("vue") {
+        return Ok(UiFramework::Vue);
+    }
 
-export interface {} {{
-  {}
-}}
-"#,
-        entry_def.name.to_case(Case::Pascal),
-        fields_types.join("\n")
-    )
+    choose_ui_framework()
 }
 
-pub fn add_entry_components(
+#[derive(Serialize)]
+pub struct ScaffoldEntryTypeData {
+    dna_role_id: String,
+    coordinator_zome_name: String,
+    entry_type: EntryDefinition,
+}
+pub fn scaffold_entry_type_templates(
     mut app_file_tree: FileTree,
     entry_def: &EntryDefinition,
     dna_role_id: &String,
     coordinator_zome_name: &String,
 ) -> ScaffoldResult<FileTree> {
-    let ui_package_path = guess_or_choose_ui_package_path();
+    let framework = guess_or_choose_framework(&app_file_tree)?;
 
-    let framework = guess_or_choose_framework()?;
-
-    let data = AddEntryTypeComponentsData {
+    let data = ScaffoldEntryTypeData {
         entry_type: entry_def.clone(),
         dna_role_id: dna_role_id.clone(),
         coordinator_zome_name: coordinator_zome_name.clone(),
@@ -176,6 +171,51 @@ pub fn add_entry_components(
     let h = build_handlebars(&templates)?;
 
     let field_types_path = PathBuf::from("entry-type");
+    let v: Vec<OsString> = field_types_path.iter().map(|s| s.to_os_string()).collect();
+
+    if let Some(web_app_template) = templates.path(&mut v.iter()) {
+        app_file_tree = render_template_file_tree_and_merge_with_existing(
+            app_file_tree,
+            &h,
+            web_app_template,
+            &data,
+        )?;
+    }
+
+    Ok(app_file_tree)
+}
+
+#[derive(Serialize)]
+pub struct ScaffoldIndexData {
+    dna_role_id: String,
+    coordinator_zome_name: String,
+    index_type: IndexType,
+    index_name: String,
+    entry_types: Vec<String>,
+}
+pub fn scaffold_index_templates(
+    mut app_file_tree: FileTree,
+    dna_role_id: &String,
+    coordinator_zome_name: &String,
+    index_type: &IndexType,
+    index_name: &String,
+    entry_types: &Vec<String>,
+) -> ScaffoldResult<FileTree> {
+    let framework = guess_or_choose_framework(&app_file_tree)?;
+
+    let data = ScaffoldIndexData {
+        entry_types: entry_types.clone(),
+        dna_role_id: dna_role_id.clone(),
+        coordinator_zome_name: coordinator_zome_name.clone(),
+        index_name: index_name.clone(),
+        index_type: index_type.clone(),
+    };
+
+    let templates = get_templates(&framework)?;
+
+    let h = build_handlebars(&templates)?;
+
+    let field_types_path = PathBuf::from("index");
     let v: Vec<OsString> = field_types_path.iter().map(|s| s.to_os_string()).collect();
 
     if let Some(web_app_template) = templates.path(&mut v.iter()) {

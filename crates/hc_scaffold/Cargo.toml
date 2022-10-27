@@ -20,10 +20,10 @@ anyhow = "1.0"
 build-fs-tree = "0.4.0"
 cargo_metadata = "0.15.0"
 dialoguer = "0.10.2"
-holochain_cli_bundle = {git = "https://github.com/holochain/holochain", rev = "9426206f457d0ecd807892863670c77f37bd831d"}
-holochain_types = {git = "https://github.com/holochain/holochain", rev = "9426206f457d0ecd807892863670c77f37bd831d"}
+holochain_cli_bundle = "0.0.59"
+holochain_types = "0.0.63"
 holochain_util = {features = ["backtrace"], version = "0.0.12"}
-mr_bundle = {git = "https://github.com/holochain/holochain", rev = "9426206f457d0ecd807892863670c77f37bd831d"}
+mr_bundle = "0.0.17"
 path-clean = "0.1.0"
 regex = "1.6.0"
 serde_yaml = "0.8"

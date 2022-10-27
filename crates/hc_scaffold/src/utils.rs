@@ -1,9 +1,9 @@
 use std::{ffi::OsString, path::PathBuf, vec};
 
-use dialoguer::{theme::ColorfulTheme, Select, Input};
+use dialoguer::{theme::ColorfulTheme, Input, Select};
 use inflector::Inflector;
 
-use crate::error::{ScaffoldResult, ScaffoldError};
+use crate::error::{ScaffoldError, ScaffoldResult};
 use crate::file_tree::FileTree;
 
 pub fn choose_directory_path(prompt: &String, app_file_tree: &FileTree) -> ScaffoldResult<PathBuf> {
@@ -82,11 +82,14 @@ pub fn input_yes_or_no(prompt: &String, recommended: Option<bool>) -> ScaffoldRe
     match Select::with_theme(&ColorfulTheme::default())
         .with_prompt(prompt)
         .default(0)
-        .items(&[format!("Yes{}", yes_recommended), format!("No{}", no_recommended)])
+        .items(&[
+            format!("Yes{}", yes_recommended),
+            format!("No{}", no_recommended),
+        ])
         .interact()?
     {
-        1 => Ok(true),
-        _ => Ok(false),
+        1 => Ok(false),
+        _ => Ok(true),
     }
 }
 
@@ -122,14 +125,20 @@ pub fn input_no_whitespace(prompt: &String) -> ScaffoldResult<String> {
 pub fn check_snake_case(input: String, identifier: &str) -> ScaffoldResult<String> {
     match input.is_snake_case() {
         true => Ok(input),
-        false => Err(ScaffoldError::InvalidStringFormat(format!("{} must be snake_case", identifier))),
+        false => Err(ScaffoldError::InvalidStringFormat(format!(
+            "{} must be snake_case",
+            identifier
+        ))),
     }
 }
 
 /// Raises an error if input is contains white spaces
 pub fn check_no_whitespace(input: String, identifier: &str) -> ScaffoldResult<String> {
     match input.as_str().contains(char::is_whitespace) {
-        true => Err(ScaffoldError::InvalidStringFormat(format!("{} must *not* contain whitespaces.", identifier))),
+        true => Err(ScaffoldError::InvalidStringFormat(format!(
+            "{} must *not* contain whitespaces.",
+            identifier
+        ))),
         false => Ok(input),
     }
 }

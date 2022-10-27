@@ -1,83 +1,64 @@
-import nodeResolve from '@rollup/plugin-node-resolve';
+import svelte from 'rollup-plugin-svelte';
 import commonjs from '@rollup/plugin-commonjs';
-import babel from '@rollup/plugin-babel';
-import html from '@web/rollup-plugin-html';
-import { importMetaAssets } from '@web/rollup-plugin-import-meta-assets';
+import resolve from '@rollup/plugin-node-resolve';
+import typescript from '@rollup/plugin-typescript';
 import { terser } from 'rollup-plugin-terser';
+import sveltePreprocess from 'svelte-preprocess';
+import css from 'rollup-plugin-css-only';
 import replace from '@rollup/plugin-replace';
 
-export default {
-  input: 'index.html',
-  output: {
-    entryFileNames: '[hash].js',
-    chunkFileNames: '[hash].js',
-    assetFileNames: '[hash][extname]',
-    format: 'es',
-    dir: 'dist',
-  },
-  preserveEntrySignatures: false,
+const production = !process.env.ROLLUP_WATCH;
 
+export default {
+  input: 'src/main.ts',
+  output: {
+    sourcemap: true,
+    format: 'iife',
+    name: 'app',
+    file: 'public/build/bundle.js',
+  },
   watch: {
     clearScreen: false,
   },
-
   plugins: [
-    /** Enable using HTML as rollup entrypoint */
+    production &&
+      replace({
+        'process.env.HC_PORT': JSON.stringify(process.env.HC_PORT),
+        delimiters: ['', ''],
+      }),
     replace({
-      'process.env.HC_PORT': '8888',
+      'node:': '',
       delimiters: ['', ''],
     }),
-    html({
-      minify: true,
-      injectServiceWorker: true,
-      serviceWorkerPath: 'dist/sw.js',
+    svelte({
+      compilerOptions: {
+        // enable run-time checks when not in production
+        dev: !production,
+      },
+      preprocess: sveltePreprocess({ sourceMap: !production }),
     }),
-    /** Resolve bare module imports */
-    nodeResolve({
+    // we'll extract any component CSS out into
+    // a separate file - better for performance
+    css({ output: 'bundle.css' }),
+
+    // If you have external dependencies installed from
+    // npm, you'll most likely need these plugins. In
+    // some cases you'll need additional configuration -
+    // consult the documentation for details:
+    // https://github.com/rollup/plugins/tree/master/packages/commonjs
+    resolve({
       browser: true,
+      preferBuiltins: false,
+      dedupe: ['svelte'],
     }),
     commonjs(),
-    /** Minify JS */
-    terser(),
-    /** Bundle assets references via import.meta.url */
-    importMetaAssets(),
-    /** Compile JS to a lower language target */
-    babel({
-      babelHelpers: 'bundled',
-      presets: [
-        [
-          require.resolve('@babel/preset-env'),
-          {
-            targets: [
-              'last 3 Chrome major versions',
-              'last 3 Firefox major versions',
-              'last 3 Edge major versions',
-              'last 3 Safari major versions',
-            ],
-            modules: false,
-            bugfixes: true,
-          },
-        ],
-      ],
-      plugins: [
-        [
-          require.resolve('babel-plugin-template-html-minifier'),
-          {
-            modules: {
-              lit: ['html', { name: 'css', encapsulation: 'style' }],
-            },
-            failOnError: false,
-            strictCSS: true,
-            htmlMinifier: {
-              collapseWhitespace: true,
-              conservativeCollapse: true,
-              removeComments: true,
-              caseSensitive: true,
-              minifyCSS: true,
-            },
-          },
-        ],
-      ],
+    typescript({
+      sourceMap: !production,
+      inlineSources: !production,
     }),
+
+    // If we're building for production (npm run build
+    // instead of npm run start), minify
+    production && terser(),
   ],
 };

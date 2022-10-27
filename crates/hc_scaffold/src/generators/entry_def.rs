@@ -24,7 +24,7 @@ use self::{
 use super::{
     link_type::{integrity::add_link_type_to_integrity_zome, link_type_name},
     tryorama::add_tryorama_tests_for_entry_def,
-    web_app::uis::add_entry_components,
+    web_app::uis::scaffold_entry_type_templates,
     zome::{
         coordinator::find_extern_function_or_choose,
         utils::{get_coordinator_zomes_for_integrity, zome_manifest_path},
@@ -227,7 +227,7 @@ pub fn scaffold_entry_def(
         &create_fns_for_depends_on,
     )?;
 
-    let app_file_tree = add_entry_components(
+    let app_file_tree = scaffold_entry_type_templates(
         app_file_tree,
         &entry_def,
         &dna_manifest.name(),

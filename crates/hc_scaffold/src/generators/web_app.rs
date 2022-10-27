@@ -31,7 +31,7 @@ fn web_app_skeleton(
       ".gitignore" => file!(gitignore())
       "workdir" => dir!{
         "happ.yaml" => file!(empty_happ_manifest(app_name.clone(), description)?)
-        "web-happ.yaml" => file!(web_happ_manifest(app_name.clone(), format!("./{}.happ", app_name), String::from("./ui/dist.zip"))?)
+        "web-happ.yaml" => file!(web_happ_manifest(app_name.clone(), format!("./{}.happ", app_name), String::from("../ui/dist.zip"))?)
       }
       "package.json" => file!(workspace_package_json(&app_name, &String::from("ui"), &String::from("workdir"), &String::from("workdir")))
       "tests" => dir!{

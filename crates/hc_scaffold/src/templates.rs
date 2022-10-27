@@ -2,6 +2,7 @@ use build_fs_tree::{file, serde::Serialize};
 use convert_case::{Case, Casing};
 use handlebars::{handlebars_helper, Context, Handlebars};
 use include_dir::{include_dir, Dir};
+use regex::Regex;
 use serde_json::Value;
 use std::collections::BTreeMap;
 use std::ffi::OsString;
@@ -57,8 +58,7 @@ pub fn register_all_partials_in_dir<'a>(
         h.register_partial(
             path.with_extension("").as_os_str().to_str().unwrap(),
             content,
-        )
-        .unwrap();
+        )?;
     }
 
     Ok(h)
@@ -77,7 +77,21 @@ pub fn render_template_file_tree<'a, T: Serialize>(
 
     for (path, contents) in flattened_templates {
         if let Some(e) = path.extension() {
-            if e == "hbs" {
+            let re = Regex::new(r"\A(?P<a>(.)*).hbs.\{\{#each (?P<b>(.)*)\}\}\z").unwrap();
+
+            if re.is_match(path.to_str().unwrap()) {
+                let new_path =
+                    re.replace(path.to_str().unwrap(), "{{#each ${b} }}${a}.hbs{{/each}}");
+                let all_paths = h.render_template(new_path.to_string().as_str(), data)?;
+
+                let files_to_create: Vec<String> =
+                    all_paths.split(".hbs").map(|s| s.to_string()).collect();
+
+                for f in files_to_create {
+                    let new_contents = h.render_template(contents.as_str(), data)?;
+                    transformed_templates.insert(PathBuf::from(f).with_extension(""), new_contents);
+                }
+            } else if e == "hbs" {
                 let new_path = h.render_template(path.as_os_str().to_str().unwrap(), data)?;
                 let new_contents = h.render_template(contents.as_str(), data)?;
 

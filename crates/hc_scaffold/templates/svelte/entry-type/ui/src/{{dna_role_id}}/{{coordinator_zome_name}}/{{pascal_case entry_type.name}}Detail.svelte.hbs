@@ -3,7 +3,7 @@ import { onMount, getContext } from 'svelte';
 import '@material/mwc-circular-progress';
 import { decode } from '@msgpack/msgpack';
 import { InstalledCell, Record, ActionHash, AppWebsocket, InstalledAppInfo } from '@holochain/client';
-import { appInfoContext, appWebsocketContext } from '../../../contexts';
+import { appInfoContext, appWebsocketContext } from '../../contexts';
 import { {{pascal_case entry_type.name}} } from './{{kebab_case entry_type.name}}';
 {{#each entry_type.fields}}
 {{> (concat field_type.type "ui/detail/imports") }}
