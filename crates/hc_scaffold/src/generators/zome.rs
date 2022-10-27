@@ -65,55 +65,17 @@ pub fn iter_all_eq<T: PartialEq>(iter: impl IntoIterator<Item = T>) -> Option<T>
     iter.all(|elem| elem == first).then(|| first)
 }
 
-fn try_to_guess_zomes_location(
-    app_file_tree: &FileTree,
-    dna_name: &String,
-) -> ScaffoldResult<Option<PathBuf>> {
-    let maybe_packages_paths = get_workspace_packages_locations(&app_file_tree)?;
 
-    let members = get_workspace_members(app_file_tree)?;
 
-    if members.len() == 1 {
-        let re = Regex::new(r"\A(?P<a>([^/*]*/)*)\*/(?P<b>([^/*]*/)*)\*\z").unwrap();
-
-        if re.is_match(members[0].as_str()) {
-            let new_path = re.replace(members[0].as_str(), format!("${{a}}{}/${{b}}", dna_name));
-            return Ok(Some(PathBuf::from(new_path.to_string())));
-        }
-
-        let re = Regex::new(r"\A(?P<a>([^/*]*/)*)\*\z").unwrap();
-
-        if re.is_match(members[0].as_str()) {
-            let new_path = re.replace(members[0].as_str(), r"${a}");
-            return Ok(Some(PathBuf::from(new_path.to_string())));
-        }
-    }
-
-    match maybe_packages_paths {
-        Some(mut packages_paths) if packages_paths.len() != 0 => {
-            for p in packages_paths.iter_mut() {
-                // Pop the "Cargo.toml" component
-                p.pop();
-                // Pop crate's folder component
-                p.pop();
-            }
-
-            if let Some(mut p) = iter_all_eq(packages_paths) {
-                Ok(Some(p))
-            } else {
-                Ok(None)
-            }
-        }
-        _ => Ok(None),
-    }
-}
 
 /// Tries to guess the location of the integrity zomes
 ///
 /// Procedure:
 /// 1. If there is a folder [anything]/zomes/[something with "integrity"], pick it
 /// 2. If there is a folder [anything]/[something with "integrity"] pick it
-/// 3. If all package paths without the [crate name]/Cargo.toml ending are equal, assume this is the zomes folder
+/// 3. If there is only one workspace member string and it contains a * somewhere in the middle, replace the * with the dna name
+/// 4. If there is only one workspace member string and it only contains a * at the end, take that folder (without the *)
+/// 5. If all package paths without the [crate name]/Cargo.toml ending are equal, assume this is the zomes folder
 ///    and it is not being differentiated between integrity and coordinator zomes in that project
 ///
 fn try_to_guess_integrity_zomes_location(
@@ -142,23 +104,22 @@ fn try_to_guess_integrity_zomes_location(
     }
 
 
-    // "[blabla/*/asdas]*/[blabla/*/]*"
-    // e.g. "dnas/*/zomes/*" or "subfolder/*/dnas/*/"
-    // if members.len() == 1 {
-    //     let re = Regex::new(r"\A(?P<a>([^/*]*/)*)\*/(?P<b>([^/*]*/)*)\*\z").unwrap();
+    if members.len() == 1 {
+        let re = Regex::new(r"\A(?P<a>([^/*]*/)*)\*/(?P<b>([^/*]*/)*)\*\z").unwrap();
 
-    //     if re.is_match(members[0].as_str()) {
-    //         let new_path = re.replace(members[0].as_str(), format!("${{a}}{}/${{b}}", dna_name));
-    //         return Ok(Some(PathBuf::from(new_path.to_string())));
-    //     }
+        if re.is_match(members[0].as_str()) {
+            let new_path = re.replace(members[0].as_str(), format!("${{a}}{}/${{b}}", dna_name));
+            return Ok(Some(PathBuf::from(new_path.to_string())));
+        }
 
-    //     let re = Regex::new(r"\A(?P<a>([^/*]*/)*)\*\z").unwrap();
+        let re = Regex::new(r"\A(?P<a>([^/*]*/)*)\*\z").unwrap();
 
-    //     if re.is_match(members[0].as_str()) {
-    //         let new_path = re.replace(members[0].as_str(), r"${a}");
-    //         return Ok(Some(PathBuf::from(new_path.to_string())));
-    //     }
-    // }
+        if re.is_match(members[0].as_str()) {
+            let new_path = re.replace(members[0].as_str(), r"${a}");
+            return Ok(Some(PathBuf::from(new_path.to_string())));
+        }
+    }
+
 
     let maybe_packages_paths = get_workspace_packages_locations(&app_file_tree)?;
 
@@ -186,7 +147,9 @@ fn try_to_guess_integrity_zomes_location(
 /// Procedure:
 /// 1. If there is a folder [anything]/zomes/[something with "coordinator"], pick it
 /// 2. If there is a folder [anything]/[something with "coordinator"] pick it
-/// 3. If all package paths without the [crate name]/Cargo.toml ending are equal, assume this is the zomes folder
+/// 3. If there is only one workspace member string and it contains a * somewhere in the middle, replace the * with the dna name
+/// 4. If there is only one workspace member string and it only contains a * at the end, take that folder (without the *)
+/// 5. If all package paths without the [crate name]/Cargo.toml ending are equal, assume this is the zomes folder
 ///    and it is not being differentiated between integrity and coordinator zomes in that project
 ///
 fn try_to_guess_coordinator_zomes_location(
@@ -213,6 +176,24 @@ fn try_to_guess_coordinator_zomes_location(
             return Ok(Some(PathBuf::from(new_path.to_string())));
         }
     }
+
+
+    if members.len() == 1 {
+        let re = Regex::new(r"\A(?P<a>([^/*]*/)*)\*/(?P<b>([^/*]*/)*)\*\z").unwrap();
+
+        if re.is_match(members[0].as_str()) {
+            let new_path = re.replace(members[0].as_str(), format!("${{a}}{}/${{b}}", dna_name));
+            return Ok(Some(PathBuf::from(new_path.to_string())));
+        }
+
+        let re = Regex::new(r"\A(?P<a>([^/*]*/)*)\*\z").unwrap();
+
+        if re.is_match(members[0].as_str()) {
+            let new_path = re.replace(members[0].as_str(), r"${a}");
+            return Ok(Some(PathBuf::from(new_path.to_string())));
+        }
+    }
+
 
     let maybe_packages_paths = get_workspace_packages_locations(&app_file_tree)?;
 
