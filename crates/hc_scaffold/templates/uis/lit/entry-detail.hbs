@@ -47,7 +47,7 @@ export class {{pascal_case entry_type.name}}Detail extends LitElement {
       <div style="display: flex; flex-direction: column">
         <span style="font-size: 18px">{{pascal_case entry_type.name}}</span>
 		{{#each entry_type.fields}}
-		  {{> (detail_render_partial field_type.type) entry_type=../entry_type field_name=@key field_type=this}}
+		  {{> (detail_render_partial field_type.type) entry_type=../entry_type field_name=@key}}
 		{{/each}}
       </div>
     `;

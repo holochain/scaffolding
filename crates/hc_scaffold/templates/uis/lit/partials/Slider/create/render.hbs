@@ -1,0 +1,5 @@
+<div style="display: flex; flex-direction: row">
+  <span style="margin-right: 4px">{{label}}</span>
+
+  <mwc-slider @input=${(e: CustomEvent) => { this._{{camel_case field_name}} = e.detail.value}; }></mwc-slider>
+</div>
