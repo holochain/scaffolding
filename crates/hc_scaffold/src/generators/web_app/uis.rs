@@ -87,8 +87,7 @@ pub fn build_handlebars<'a>(templates_dir: &FileTree) -> ScaffoldResult<Handleba
     if let Some(field_types_templates) = templates_dir.path(&mut v.iter()) {
         h = register_all_partials_in_dir(h, field_types_templates)?;
     }
-
-    h.register_escape_fn(|s| s.replace(r#"\{"#, r#"{"#).replace(r#"\}"#, r#"}"#));
+    h.register_escape_fn(handlebars::no_escape);
 
     Ok(h)
 }
