@@ -4,7 +4,7 @@
     <span style="font-size: 18px">Create {{pascal_case entry_type.name}}</span>
   
     {{#each entry_type.fields}}
-      {{> (concat field_type.type "/ui/create/render") }}
+      {{> (concat field_type.type "/ui/create/render") entry_type=../entry_type field_name=@key field_type=this }}
     {{/each}}
   
     <mwc-button 
