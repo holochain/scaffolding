@@ -71,8 +71,8 @@ pub fn iter_all_eq<T: PartialEq>(iter: impl IntoIterator<Item = T>) -> Option<T>
 /// Tries to guess the location of the integrity zomes
 ///
 /// Procedure:
-/// 1. If there is a folder [anything]/zomes/[something with "integrity"], pick it
-/// 2. If there is a folder [anything]/[something with "integrity"] pick it
+/// 1. If there is a workspace member string with [anything]*/zomes/[something with "integrity"], pick it and replace the star with the dna name
+/// 2. If there is a workspace member string with [anything]*/[something with "integrity"], pick it and replace the star with the dna name
 /// 3. If there is only one workspace member string and it contains a * somewhere in the middle, replace the * with the dna name
 /// 4. If there is only one workspace member string and it only contains a * at the end, take that folder (without the *)
 /// 5. If all package paths without the [crate name]/Cargo.toml ending are equal, assume this is the zomes folder
@@ -145,8 +145,8 @@ fn try_to_guess_integrity_zomes_location(
 /// Tries to guess the location of the coordinator zomes
 ///
 /// Procedure:
-/// 1. If there is a folder [anything]/zomes/[something with "coordinator"], pick it
-/// 2. If there is a folder [anything]/[something with "coordinator"] pick it
+/// 1. If there is a workspace member string with [anything]*/zomes/[something with "coordinator"], pick it and replace the star with the dna name
+/// 2. If there is a workspace member string with [anything]*/[something with "coordinator"], pick it and replace the star with the dna name
 /// 3. If there is only one workspace member string and it contains a * somewhere in the middle, replace the * with the dna name
 /// 4. If there is only one workspace member string and it only contains a * at the end, take that folder (without the *)
 /// 5. If all package paths without the [crate name]/Cargo.toml ending are equal, assume this is the zomes folder
