@@ -1,0 +1,72 @@
+import { LitElement, html } from 'lit';
+import { state, customElement } from 'lit/decorators.js';
+import { InstalledCell, Record, AppWebsocket, InstalledAppInfo } from '@holochain/client';
+import { contextProvided } from '@lit-labs/context';
+import { appWebsocketContext, appInfoContext } from '../../../contexts';
+import { {{pascal_case entry_type.name}} } from './{{kebab_case entry_type.name}}';
+import '@material/mwc-button';
+{{#each entry_type.fields}}
+{{> (concat field_type.type "/ui/create/imports") }}
+{{/each}}
+
+@customElement('create-{{kebab_case entry_type.name}}')
+export class Create{{pascal_case entry_type.name}} extends LitElement {
+
+  {{#each entry_type.fields}}
+  @state()
+  _{{camel_case @key}}: {{> (concat field_type.type "/ui/type") }} | undefined;
+
+  {{/each}}
+  is{{pascal_case entry_type.name}}Valid() {
+    return {{#each entry_type.fields}}this._{{camel_case @key}}{{#unless @last}} && {{/unless}}{{/each}};
+  }
+
+  @contextProvided({ context: appWebsocketContext })
+  appWebsocket!: AppWebsocket;
+
+  @contextProvided({ context: appInfoContext })
+  appInfo!: InstalledAppInfo;
+
+  async create{{pascal_case entry_type.name}}() {
+    const cellData = this.appInfo.cell_data.find((c: InstalledCell) => c.role_id === '{{dna_role_id}}')!;
+
+    const {{camel_case entry_type.name}}: {{pascal_case entry_type.name}} = { {{#each entry_type.fields}}
+      {{snake_case @key}}: this._{{camel_case @key}},
+{{/each}}
+    };
+
+    const record: Record = await this.appWebsocket.callZome({
+      cap_secret: null,
+      cell_id: cellData.cell_id,
+      zome_name: '{{coordinator_zome_name}}',
+      fn_name: 'create_{{snake_case entry_type.name}}',
+      payload: {{camel_case entry_type.name}},
+      provenance: cellData.cell_id[1]
+    });
+
+    this.dispatchEvent(new CustomEvent('{{kebab_case entry_type.name}}-created', {
+      composed: true,
+      bubbles: true,
+      detail: {
+        actionHash: record.signed_action.hashed.hash
+      }
+    }));
+  }
+
+  render() {
+    return html`
+      <div style="display: flex; flex-direction: column">
+        <span style="font-size: 18px">Create {{pascal_case entry_type.name}}</span>
+
+        {{#each entry_type.fields}}
+          {{> (concat field_type.type "/ui/create/render") entry_type=../entry_type field_name=@key field_type=this }}
+        {{/each}}
+
+        <mwc-button 
+          label="Create {{pascal_case entry_type.name}}"
+          .disabled=${!this.is{{pascal_case entry_type.name}}Valid()}
+          @click=${() => this.create{{pascal_case entry_type.name}}()}
+        ></mwc-button>
+    </div>`;
+  }
+}

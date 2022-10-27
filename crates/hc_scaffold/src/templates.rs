@@ -2,53 +2,21 @@ use build_fs_tree::{file, serde::Serialize};
 use convert_case::{Case, Casing};
 use handlebars::{handlebars_helper, Context, Handlebars};
 use include_dir::{include_dir, Dir};
+use serde_json::Value;
 use std::collections::BTreeMap;
 use std::ffi::OsString;
 use std::path::PathBuf;
 
 use crate::definitions::FieldType;
 use crate::error::{ScaffoldError, ScaffoldResult};
-use crate::file_tree::{create_dir_all, FileTree};
+use crate::file_tree::{
+    create_dir_all, find_files, find_map_files, flatten_file_tree, map_all_files,
+    unflatten_file_tree, FileTree,
+};
 
 pub fn register_concat_helper<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
-    handlebars_helper!(concat: |s: Vec<String>| s.join(""));
+    handlebars_helper!(concat: |s1: String, s2: String| format!("{}{}", s1, s2));
     h.register_helper("concat", Box::new(concat));
-
-    h
-}
-
-pub fn register_partials_helpers<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
-    handlebars_helper!(create_imports_partial: |s: String| {
-        let mut s2 = s.clone();
-        s2.push_str("/create/imports");
-        s2
-    });
-    h.register_helper("create_imports_partial", Box::new(create_imports_partial));
-    handlebars_helper!(create_render_partial: |s: String| {
-        let mut s2 = s.clone();
-        s2.push_str("/create/render");
-        s2
-    });
-    h.register_helper("create_render_partial", Box::new(create_render_partial));
-    handlebars_helper!(detail_imports_partial: |s: String| {
-        let mut s2 = s.clone();
-        s2.push_str("/detail/imports");
-        s2
-    });
-    h.register_helper("detail_imports_partial", Box::new(detail_imports_partial));
-    handlebars_helper!(detail_render_partial: |s: String| {
-        let mut s2 = s.clone();
-        s2.push_str("/detail/render");
-        s2
-    });
-    h.register_helper("detail_render_partial", Box::new(detail_render_partial));
-
-    h
-}
-
-pub fn register_ts_type_helper<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
-    handlebars_helper!(ts_type: |json: Json| serde_json::from_str::<FieldType>(json.to_string().as_str())?.ts_type());
-    h.register_helper("ts_type", Box::new(ts_type));
 
     h
 }
@@ -72,84 +40,68 @@ pub fn register_case_helpers<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
     h
 }
 
-pub fn get_templates(dir: &Dir<'_>) -> Handlebars<'static> {
-    let mut handlebars = Handlebars::new();
-
-    let templates_dir_map = walk_dir(dir);
-
-    for (path, content) in templates_dir_map {
-        if let Some(e) = path.extension() {
-            if e == "hbs" {
-                handlebars
-                    .register_template_string(
-                        path.with_extension("").as_os_str().to_str().unwrap(),
-                        content,
-                    )
-                    .unwrap();
-            }
-        }
-    }
-
-    handlebars
-}
-
 pub fn register_all_partials_in_dir<'a>(
     mut h: Handlebars<'a>,
-    dir: &Dir<'_>,
+    file_tree: &FileTree,
 ) -> ScaffoldResult<Handlebars<'a>> {
-    let partials_dir_map = walk_dir(dir);
-
-    for (path, content) in partials_dir_map {
-        if let Some(e) = path.extension() {
+    let partials = find_files(file_tree, &|path, contents| {
+        if let Some(e) = PathBuf::from(path).extension() {
             if e == "hbs" {
-                h.register_partial(
-                    path.with_extension("").as_os_str().to_str().unwrap(),
-                    content,
-                )
-                .unwrap();
+                return true;
             }
         }
+        return false;
+    });
+
+    for (path, content) in partials {
+        h.register_partial(
+            path.with_extension("").as_os_str().to_str().unwrap(),
+            content,
+        )
+        .unwrap();
     }
 
     Ok(h)
 }
 
-pub fn scaffold_dir<T: Serialize>(dir: &Dir<'_>, data: &T) -> ScaffoldResult<FileTree> {
-    let h = get_templates(dir);
+pub fn render_template_file_tree<'a, T: Serialize>(
+    h: &Handlebars<'a>,
+    templates_file_tree: &FileTree,
+    data: &T,
+) -> ScaffoldResult<FileTree> {
+    let mut file_tree = templates_file_tree.clone();
 
-    let mut file_tree = FileTree::Directory(BTreeMap::new());
+    let flattened_templates = flatten_file_tree(templates_file_tree);
 
-    for (name, _template) in h.get_templates() {
-        let mut p = PathBuf::from(name);
-        let file_name = p.file_name().unwrap().to_os_string();
-        p.pop();
+    let mut transformed_templates: BTreeMap<PathBuf, String> = BTreeMap::new();
 
-        let s = h.render(name, data)?;
+    for (path, contents) in flattened_templates {
+        if let Some(e) = path.extension() {
+            if e == "hbs" {
+                let new_path = h.render_template(path.as_os_str().to_str().unwrap(), data)?;
+                let new_contents = h.render_template(contents.as_str(), data)?;
 
-        create_dir_all(&mut file_tree, &p)?;
-
-        let v: Vec<OsString> = p.iter().map(|s| s.to_os_string()).collect();
-        file_tree
-            .path_mut(&mut v.iter())
-            .ok_or(ScaffoldError::PathNotFound(p.clone()))?
-            .dir_content_mut()
-            .ok_or(ScaffoldError::PathNotFound(p.clone()))?
-            .insert(file_name.to_os_string(), file!(s));
-    }
-    Ok(file_tree)
-}
-
-fn walk_dir(dir: &Dir<'_>) -> BTreeMap<PathBuf, String> {
-    let mut contents: BTreeMap<PathBuf, String> = BTreeMap::new();
-
-    for f in dir.files() {
-        if let Some(s) = f.contents_utf8() {
-            contents.insert(f.path().to_path_buf(), s.to_string());
+                transformed_templates
+                    .insert(PathBuf::from(new_path).with_extension(""), new_contents);
+            }
         }
     }
-    for d in dir.dirs() {
-        contents.extend(walk_dir(d));
-    }
 
-    contents
+    unflatten_file_tree(&transformed_templates)
+}
+
+pub fn render_template_file_tree_and_merge_with_existing<'a, T: Serialize>(
+    app_file_tree: FileTree,
+    h: &Handlebars<'a>,
+    template_file_tree: &FileTree,
+    data: &T,
+) -> ScaffoldResult<FileTree> {
+    let rendered_templates = render_template_file_tree(h, template_file_tree, data)?;
+
+    let mut flattened_app_file_tree = flatten_file_tree(&app_file_tree);
+    let flattened_templates = flatten_file_tree(&rendered_templates);
+
+    flattened_app_file_tree.extend(flattened_templates);
+
+    unflatten_file_tree(&flattened_app_file_tree)
 }

@@ -1,19 +1,25 @@
 use build_fs_tree::{dir, file, serde::Serialize};
 use convert_case::{Case, Casing};
 use dialoguer::{theme::ColorfulTheme, Select};
+use handlebars::Handlebars;
+use include_dir::{include_dir, Dir};
 use std::{ffi::OsString, path::PathBuf, str::FromStr};
 
 use crate::{
     definitions::EntryDefinition,
     error::{ScaffoldError, ScaffoldResult},
-    file_tree::{create_dir_all, FileTree},
+    file_tree::{create_dir_all, dir_to_file_tree, FileTree},
+    templates::{
+        register_all_partials_in_dir, register_case_helpers, register_concat_helper,
+        render_template_file_tree, render_template_file_tree_and_merge_with_existing,
+    },
     versions::holochain_client_version,
 };
 
-pub mod lit;
-pub mod svelte;
-pub mod vanilla;
-pub mod vue;
+static LIT_TEMPLATES: Dir<'static> = include_dir!("$CARGO_MANIFEST_DIR/templates/lit");
+static SVELTE_TEMPLATES: Dir<'static> = include_dir!("$CARGO_MANIFEST_DIR/templates/svelte");
+static VUE_TEMPLATES: Dir<'static> = include_dir!("$CARGO_MANIFEST_DIR/templates/vue");
+static VANILLA_TEMPLATES: Dir<'static> = include_dir!("$CARGO_MANIFEST_DIR/templates/vanilla");
 
 #[derive(Debug, Clone)]
 pub enum UiFramework {
@@ -59,22 +65,65 @@ pub struct ScaffoldWebAppData {
 
 #[derive(Serialize)]
 pub struct AddEntryTypeComponentsData {
-    entry_type: EntryDefinition,
     dna_role_id: String,
     coordinator_zome_name: String,
+    entry_type: EntryDefinition,
 }
 
-pub fn scaffold_web_app_ui(framework: &UiFramework, app_name: &String) -> ScaffoldResult<FileTree> {
+fn get_templates(framework: &UiFramework) -> ScaffoldResult<FileTree> {
+    let dir = match framework {
+        UiFramework::Lit => &LIT_TEMPLATES,
+        UiFramework::Vanilla => &VANILLA_TEMPLATES,
+        UiFramework::Svelte => &SVELTE_TEMPLATES,
+        UiFramework::Vue => &VUE_TEMPLATES,
+    };
+
+    dir_to_file_tree(dir)
+}
+
+pub fn build_handlebars<'a>(templates_dir: &FileTree) -> ScaffoldResult<Handlebars<'a>> {
+    let h = Handlebars::new();
+
+    let h = register_concat_helper(h);
+    let mut h = register_case_helpers(h);
+
+    let field_types_path = PathBuf::from("field-types");
+    let v: Vec<OsString> = field_types_path.iter().map(|s| s.to_os_string()).collect();
+
+    if let Some(field_types_templates) = templates_dir.path(&mut v.iter()) {
+        h = register_all_partials_in_dir(h, field_types_templates)?;
+    }
+
+    Ok(h)
+}
+
+pub fn scaffold_web_app_ui(
+    mut app_file_tree: FileTree,
+    framework: &UiFramework,
+    app_name: &String,
+) -> ScaffoldResult<FileTree> {
     let data = ScaffoldWebAppData {
         app_name: app_name.clone(),
         holochain_client_version: holochain_client_version(),
     };
-    match framework {
-        UiFramework::Vanilla => vanilla::scaffold_vanilla_web_app(&data),
-        UiFramework::Lit => lit::scaffold_lit_web_app(&data),
-        UiFramework::Svelte => svelte::scaffold_svelte_web_app(&data),
-        UiFramework::Vue => vue::scaffold_vue_web_app(&data),
+
+    let templates = get_templates(framework)?;
+
+    let h = build_handlebars(&templates)?;
+
+    let field_types_path = PathBuf::from("web-app");
+    let v: Vec<OsString> = field_types_path.iter().map(|s| s.to_os_string()).collect();
+
+    if let Some(web_app_template) = templates.path(&mut v.iter()) {
+        app_file_tree = render_template_file_tree_and_merge_with_existing(
+            app_file_tree,
+            &h,
+            web_app_template,
+            &data,
+        )?;
     }
+
+    Ok(app_file_tree)
 }
 
 fn guess_or_choose_ui_package_path() -> PathBuf {
@@ -116,28 +165,27 @@ pub fn add_entry_components(
 
     let framework = guess_or_choose_framework()?;
 
-    match framework {
-        UiFramework::Lit => lit::add_entry_components(
+    let data = AddEntryTypeComponentsData {
+        entry_type: entry_def.clone(),
+        dna_role_id: dna_role_id.clone(),
+        coordinator_zome_name: coordinator_zome_name.clone(),
+    };
+
+    let templates = get_templates(&framework)?;
+
+    let h = build_handlebars(&templates)?;
+
+    let field_types_path = PathBuf::from("entry-type");
+    let v: Vec<OsString> = field_types_path.iter().map(|s| s.to_os_string()).collect();
+
+    if let Some(web_app_template) = templates.path(&mut v.iter()) {
+        app_file_tree = render_template_file_tree_and_merge_with_existing(
             app_file_tree,
-            &ui_package_path,
-            &dna_role_id,
-            coordinator_zome_name,
-            entry_def,
-        ),
-        UiFramework::Svelte => svelte::add_entry_components(
-            app_file_tree,
-            &ui_package_path,
-            &dna_role_id,
-            coordinator_zome_name,
-            entry_def,
-        ),
-        UiFramework::Vue => vue::add_entry_components(
-            app_file_tree,
-            &ui_package_path,
-            &dna_role_id,
-            coordinator_zome_name,
-            entry_def,
-        ),
-        UiFramework::Vanilla => Ok(app_file_tree),
+            &h,
+            web_app_template,
+            &data,
+        )?;
     }
+
+    Ok(app_file_tree)
 }

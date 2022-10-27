@@ -1,0 +1,55 @@
+import { LitElement, html } from 'lit';
+import { state, customElement, property } from 'lit/decorators.js';
+import { InstalledCell, AppWebsocket, Record, ActionHash, InstalledAppInfo } from '@holochain/client';
+import { contextProvided } from '@lit-labs/context';
+import { decode } from '@msgpack/msgpack';
+import { appInfoContext, appWebsocketContext } from '../../../contexts';
+import { {{pascal_case entry_type.name}} } from './{{kebab_case entry_type.name}}';
+import '@material/mwc-circular-progress';
+{{#each entry_type.fields}}
+{{> (concat field_type.type "/ui/detail/imports") }}
+{{/each}}
+
+@customElement('{{kebab_case entry_type.name}}-detail')
+export class {{pascal_case entry_type.name}}Detail extends LitElement {
+  @property()
+  actionHash!: ActionHash;
+
+  @state()
+  _{{camel_case entry_type.name}}: {{pascal_case entry_type.name}} | undefined;
+
+  @contextProvided({ context: appWebsocketContext })
+  appWebsocket!: AppWebsocket;
+  @contextProvided({ context: appInfoContext })
+  appInfo!: InstalledAppInfo;
+
+  async firstUpdated() {
+    const cellData = this.appInfo.cell_data.find((c: InstalledCell) => c.role_id === '{{dna_role_id}}')!;
+    const record: Record | undefined = await this.appWebsocket.callZome({
+      cap_secret: null,
+      cell_id: cellData.cell_id,
+      zome_name: '{{coordinator_zome_name}}',
+      fn_name: 'get_{{snake_case entry_type.name}}',
+      payload: this.actionHash,
+      provenance: cellData.cell_id[1]
+    });
+    if (record) {
+      this._{{camel_case entry_type.name}} = decode((record.entry as any).Present.entry) as {{pascal_case entry_type.name}};
+    }
+  }
+  render() {
+    if (!this._{{camel_case entry_type.name}}) {
+      return html`<div style="display: flex; flex: 1; align-items: center; justify-content: center">
+        <mwc-circular-progress indeterminate></mwc-circular-progress>
+      </div>`;
+    }
+    return html`
+      <div style="display: flex; flex-direction: column">
+        <span style="font-size: 18px">{{pascal_case entry_type.name}}</span>
+		{{#each entry_type.fields}}
+		  {{> (concat field_type.type "/ui/detail/render") entry_type=../entry_type field_name=@key}}
+		{{/each}}
+      </div>
+    `;
+  }
+}

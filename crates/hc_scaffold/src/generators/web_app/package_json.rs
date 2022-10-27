@@ -1,8 +1,8 @@
 pub fn workspace_package_json(
-    app_name: String,
-    ui_package_name: String,
-    web_app_workdir_path: String,
-    app_workdir_path: String,
+    app_name: &String,
+    ui_package_name: &String,
+    web_app_workdir_path: &String,
+    app_workdir_path: &String,
 ) -> String {
     format!(
         r#"{{

@@ -1,5 +1,6 @@
 use build_fs_tree::{dir, file, FileSystemTree};
 use ignore::{Walk, WalkBuilder};
+use include_dir::Dir;
 use prettyplease::unparse;
 use std::collections::BTreeMap;
 use std::ffi::{OsStr, OsString};
@@ -150,6 +151,35 @@ pub fn map_rust_files<F: Fn(PathBuf, syn::File) -> ScaffoldResult<syn::File> + C
     })
 }
 
+pub fn flatten_file_tree(file_tree: &FileTree) -> BTreeMap<PathBuf, String> {
+    find_files(file_tree, &|_, _| true)
+}
+
+pub fn unflatten_file_tree(flattened_tree: &BTreeMap<PathBuf, String>) -> ScaffoldResult<FileTree> {
+    let mut file_tree: FileTree = FileTree::Directory(BTreeMap::new());
+
+    for (path, contents) in flattened_tree.iter() {
+        let mut folder_path = path.clone();
+        folder_path.pop();
+
+        create_dir_all(&mut file_tree, &folder_path)?;
+
+        let v: Vec<OsString> = folder_path
+            .clone()
+            .iter()
+            .map(|s| s.to_os_string())
+            .collect();
+        file_tree
+            .path_mut(&mut v.iter())
+            .ok_or(ScaffoldError::PathNotFound(folder_path.clone()))?
+            .dir_content_mut()
+            .ok_or(ScaffoldError::PathNotFound(folder_path.clone()))?
+            .insert(path.file_name().unwrap().to_os_string(), file!(contents));
+    }
+
+    Ok(file_tree)
+}
+
 pub fn map_all_files<F: Fn(PathBuf, String) -> ScaffoldResult<String> + Clone>(
     file_tree: &mut FileTree,
     map_fn: F,
@@ -210,4 +240,25 @@ pub fn create_dir_all(file_tree: &mut FileTree, path: &PathBuf) -> ScaffoldResul
     }
 
     Ok(())
+}
+
+pub fn dir_to_file_tree(dir: &Dir<'_>) -> ScaffoldResult<FileTree> {
+    let flattened = walk_dir(dir);
+
+    unflatten_file_tree(&flattened)
+}
+
+fn walk_dir(dir: &Dir<'_>) -> BTreeMap<PathBuf, String> {
+    let mut contents: BTreeMap<PathBuf, String> = BTreeMap::new();
+
+    for f in dir.files() {
+        if let Some(s) = f.contents_utf8() {
+            contents.insert(f.path().to_path_buf(), s.to_string());
+        }
+    }
+    for d in dir.dirs() {
+        contents.extend(walk_dir(d));
+    }
+
+    contents
 }
