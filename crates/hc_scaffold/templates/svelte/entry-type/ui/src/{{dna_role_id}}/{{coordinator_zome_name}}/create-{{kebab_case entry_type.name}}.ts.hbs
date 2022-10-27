@@ -5,7 +5,7 @@ import { appWebsocketContext, appInfoContext } from '../../../contexts';
 import { {{pascal_case entry_type.name}} } from './{{kebab_case entry_type.name}}';
 import '@material/mwc-button';
 {{#each entry_type.fields}}
-{{> (create_imports_partial field_type.type) }}
+{{> (concat field_type.type "ui/create/imports") }}
 {{/each}}
 
 let appInfo = getContext(appInfoContext).getAppInfo();
@@ -14,7 +14,7 @@ let appWebsocket = getContext(appWebsocketContext).getAppWebsocket();
 const dispatch = createEventDispatcher();
 
 {{#each entry_type.fields}}
-let {{camel_case @key}}: {{ts_type field_type}} | undefined;
+let {{camel_case @key}}: {{> (concat field_type.type "ui/type")}} | undefined;
 {{/each}}
 
 $: {{#each entry_type.fields}}{{camel_case @key}}{{#unless @last}}, {{/unless}}{{/each}};
@@ -38,7 +38,11 @@ async function create{{pascal_case entry_type.name}}() {
 </script>
 <div style="display: flex; flex-direction: column">
   <span style="font-size: 18px">Create {{pascal_case entry_type.name}}</span>
-  ${type.fields.map(f => createFieldTemplate(elementsImports, f)).join('\n\n  ')}
+  
+  {{#each entry_type.fields}}
+    {{> (concat field_type.type "ui/create/render")}}
+  {{/each}}
+
   <mwc-button 
     label="Create {{pascal_case entry_type.name}}"
     disabled={!( {{#each entry_type.fields}}{{camel_case @key}}{{#unless @last}} && {{/unless}}{{/each}} )}
