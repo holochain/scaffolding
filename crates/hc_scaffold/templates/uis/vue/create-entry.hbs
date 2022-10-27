@@ -1,0 +1,63 @@
+<template>
+  <div style="display: flex; flex-direction: column">
+
+    <span style="font-size: 18px">Create ${upperFirst(camelCase(type.name))}</span>
+  
+    ${type.fields.map(f => createFieldTemplate(elementsImports, f)).join('\n\n    ')}
+  
+    <mwc-button 
+      label="Create ${upperFirst(camelCase(type.name))}"
+      :disabled="!is${upperFirst(camelCase(type.name))}Valid()"
+      @click="create${upperFirst(camelCase(type.name))}()"
+    ></mwc-button>
+  </div>
+</template>
+<script lang="ts">
+import { defineComponent, inject, ComputedRef } from 'vue';
+import { InstalledCell, AppWebsocket, InstalledAppInfo, Record } from '@holochain/client';
+import { {{pascal_case entry_type.name}} } from './{{kebab_case entry_type.name}}';
+import '@material/mwc-button';
+{{#each entry_type.fields}}
+{{> (create_imports_partial field_type.type) }}
+{{/each}}
+
+export default defineComponent({
+  data(): Partial<{{pascal_case entry_type.name}}> {
+    return { {{#each entry_type.fields}}
+      {{camel_case @key}}: undefined,
+  {{/each}} }
+  },
+  methods: {
+    is{{pascal_case entry_type.name}}Valid() {
+      return {{#each entry_type.fields}}
+        this.{{camel_case @key}} {{#unless @last}} && {{/unless}}
+{{/each}}  
+    },
+    async create{{pascal_case entry_type.name}}() {
+      const cellData = this.appInfo.cell_data.find((c: InstalledCell) => c.role_id === '{{dna_role_id}}')!;
+      const {{camel_case entry_type.name}}: {{pascal_case entry_type.name}} = { {{#each entry_type.fields}}
+        {{snake_case @key}}: this.{{camel_case @key}}!,
+  {{/each}}
+      };
+      const record: Record = await this.appWebsocket.callZome({
+        cap_secret: null,
+        cell_id: cellData.cell_id,
+        zome_name: '{{coordinator_zome_name}}',
+        fn_name: 'create_{{snake_case entry_type.name}}',
+        payload: {{camel_case entry_type.name}},
+        provenance: cellData.cell_id[1]
+      });
+      this.$emit('{{kebab_case entry_type.name}}-created', record.signed_action.hashed.hash);
+    },
+  },
+  emits: ['{{kebab_case entry_type.name}}-created'],
+  setup() {
+    const appWebsocket = (inject('appWebsocket') as ComputedRef<AppWebsocket>).value;
+    const appInfo = (inject('appInfo') as ComputedRef<InstalledAppInfo>).value;
+    return {
+      appInfo,
+      appWebsocket,
+    };
+  },
+})
+</script>

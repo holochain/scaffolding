@@ -1,5 +1,25 @@
-node_modules
+## editors
+/.idea
+/.vscode
+
+## system files
 .DS_Store
-dist
-dist-ssr
-*.local
+
+## npm
+/node_modules/
+/npm-debug.log
+
+## testing
+/coverage/
+
+## temp folders
+/.tmp/
+
+# build
+/_site/
+/dist/
+/out-tsc/
+
+storybook-static
+.rollup.cache
+*.tsbuildinfo

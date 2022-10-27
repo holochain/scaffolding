@@ -10,6 +10,42 @@ use crate::definitions::FieldType;
 use crate::error::{ScaffoldError, ScaffoldResult};
 use crate::file_tree::{create_dir_all, FileTree};
 
+pub fn register_concat_helper<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
+    handlebars_helper!(concat: |s: Vec<String>| s.join(""));
+    h.register_helper("concat", Box::new(concat));
+
+    h
+}
+
+pub fn register_partials_helpers<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
+    handlebars_helper!(create_imports_partial: |s: String| {
+        let mut s2 = s.clone();
+        s2.push_str("/create/imports");
+        s2
+    });
+    h.register_helper("create_imports_partial", Box::new(create_imports_partial));
+    handlebars_helper!(create_render_partial: |s: String| {
+        let mut s2 = s.clone();
+        s2.push_str("/create/render");
+        s2
+    });
+    h.register_helper("create_render_partial", Box::new(create_render_partial));
+    handlebars_helper!(detail_imports_partial: |s: String| {
+        let mut s2 = s.clone();
+        s2.push_str("/detail/imports");
+        s2
+    });
+    h.register_helper("detail_imports_partial", Box::new(detail_imports_partial));
+    handlebars_helper!(detail_render_partial: |s: String| {
+        let mut s2 = s.clone();
+        s2.push_str("/detail/render");
+        s2
+    });
+    h.register_helper("detail_render_partial", Box::new(detail_render_partial));
+
+    h
+}
+
 pub fn register_ts_type_helper<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
     handlebars_helper!(ts_type: |json: Json| serde_json::from_str::<FieldType>(json.to_string().as_str())?.ts_type());
     h.register_helper("ts_type", Box::new(ts_type));
@@ -18,6 +54,9 @@ pub fn register_ts_type_helper<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
 }
 
 pub fn register_case_helpers<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
+    handlebars_helper!(title_case: |s: String| s.to_case(Case::Title));
+    h.register_helper("title_case", Box::new(title_case));
+
     handlebars_helper!(snake_case: |s: String| s.to_case(Case::Snake));
     h.register_helper("snake_case", Box::new(snake_case));
 

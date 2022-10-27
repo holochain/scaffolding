@@ -5,7 +5,9 @@ import { contextProvided } from '@lit-labs/context';
 import { appWebsocketContext, appInfoContext } from '../../../contexts';
 import { {{pascal_case entry_type.name}} } from './{{kebab_case entry_type.name}}';
 import '@material/mwc-button';
-${uniq(flatten(type.fields?.map(f => fieldImports(typescriptGenerators, elementsImports, f)))).join('\n')}
+{{#each entry_type.fields}}
+{{> (create_imports_partial field_type.type) }}
+{{/each}}
 
 @customElement('create-{{kebab_case entry_type.name}}')
 export class Create{{pascal_case entry_type.name}} extends LitElement {
@@ -56,7 +58,9 @@ export class Create{{pascal_case entry_type.name}} extends LitElement {
       <div style="display: flex; flex-direction: column">
         <span style="font-size: 18px">Create {{pascal_case entry_type.name}}</span>
 
-        ${type.fields.map(f => createFieldTemplate(elementsImports, f)).join('\n\n        ')}
+        {{#each entry_type.fields}}
+          {{> (create_render_partial field_type.type) entry_type=../entry_type field_name=@key field_type=this }}
+        {{/each}}
 
         <mwc-button 
           label="Create {{pascal_case entry_type.name}}"

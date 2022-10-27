@@ -1,0 +1,47 @@
+<script lang="ts">
+import { createEventDispatcher, getContext } from 'svelte';
+import { InstalledCell, AppWebsocket, InstalledAppInfo } from '@holochain/client';
+import { appWebsocketContext, appInfoContext } from '../../../contexts';
+import { {{pascal_case entry_type.name}} } from './{{kebab_case entry_type.name}}';
+import '@material/mwc-button';
+{{#each entry_type.fields}}
+{{> (create_imports_partial field_type.type) }}
+{{/each}}
+
+let appInfo = getContext(appInfoContext).getAppInfo();
+let appWebsocket = getContext(appWebsocketContext).getAppWebsocket();
+
+const dispatch = createEventDispatcher();
+
+{{#each entry_type.fields}}
+let {{camel_case @key}}: {{ts_type field_type}} | undefined;
+{{/each}}
+
+$: {{#each entry_type.fields}}{{camel_case @key}}{{#unless @last}}, {{/unless}}{{/each}};
+
+async function create{{pascal_case entry_type.name}}() {
+  const cellData = appInfo.cell_data.find((c: InstalledCell) => c.role_id === '{{dna_role_id}}')!;
+  const {{camel_case entry_type.name}}: {{pascal_case entry_type.name}} = { {{#each entry_type.fields}}
+    {{snake_case @key}}: {{camel_case @key}}!,
+ {{/each}} };
+  
+  const record: Record = await appWebsocket.callZome({
+    cap_secret: null,
+    cell_id: cellData.cell_id,
+    zome_name: '{{coordinator_zome_name}}',
+    fn_name: 'create_{{snake_case entry_type.name}}',
+    payload: {{camel_case entry_type.name}},
+    provenance: cellData.cell_id[1]
+  });
+  dispatch('{{kebab_case entry_type.name}}-created', { actionHash: record.signed_action.hashed.hash });
+}
+</script>
+<div style="display: flex; flex-direction: column">
+  <span style="font-size: 18px">Create {{pascal_case entry_type.name}}</span>
+  ${type.fields.map(f => createFieldTemplate(elementsImports, f)).join('\n\n  ')}
+  <mwc-button 
+    label="Create {{pascal_case entry_type.name}}"
+    disabled={!( {{#each entry_type.fields}}{{camel_case @key}}{{#unless @last}} && {{/unless}}{{/each}} )}
+    on:click="{() => create{{pascal_case entry_type.name}}()}"
+  ></mwc-button>
+</div>

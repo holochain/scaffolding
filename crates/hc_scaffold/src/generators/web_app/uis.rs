@@ -85,7 +85,7 @@ fn guess_or_choose_framework() -> ScaffoldResult<UiFramework> {
     Ok(UiFramework::Lit)
 }
 
-fn render_typescript_definition(entry_def: &EntryDefinition) -> String {
+pub fn render_typescript_definition(entry_def: &EntryDefinition) -> String {
     let fields_types: Vec<String> = entry_def
         .fields
         .iter()
@@ -112,53 +112,32 @@ pub fn add_entry_components(
     dna_role_id: &String,
     coordinator_zome_name: &String,
 ) -> ScaffoldResult<FileTree> {
-    let data = AddEntryTypeComponentsData {
-        entry_type: entry_def.clone(),
-        dna_role_id: dna_role_id.clone(),
-        coordinator_zome_name: coordinator_zome_name.clone(),
-    };
-
     let ui_package_path = guess_or_choose_ui_package_path();
 
     let framework = guess_or_choose_framework()?;
 
-    let create_entry_component = match framework {
-        UiFramework::Lit => lit::create_entry_component(&data),
-        UiFramework::Vanilla => vanilla::create_entry_component(&data),
-        UiFramework::Svelte => svelte::create_entry_component(&data),
-        UiFramework::Vue => vue::create_entry_component(&data),
-    }?;
-
-    let folder_path = ui_package_path
-        .join("src")
-        .join(dna_role_id)
-        .join(coordinator_zome_name);
-
-    create_dir_all(&mut app_file_tree, &folder_path)?;
-
-    let v: Vec<OsString> = folder_path
-        .clone()
-        .iter()
-        .map(|s| s.to_os_string())
-        .collect();
-    app_file_tree
-        .path_mut(&mut v.iter())
-        .ok_or(ScaffoldError::PathNotFound(folder_path.clone()))?
-        .dir_content_mut()
-        .ok_or(ScaffoldError::PathNotFound(folder_path.clone()))?
-        .insert(
-            OsString::from(format!("create-{}.ts", entry_def.name.to_case(Case::Kebab))),
-            file!(create_entry_component),
-        );
-    app_file_tree
-        .path_mut(&mut v.iter())
-        .ok_or(ScaffoldError::PathNotFound(folder_path.clone()))?
-        .dir_content_mut()
-        .ok_or(ScaffoldError::PathNotFound(folder_path.clone()))?
-        .insert(
-            OsString::from(format!("{}.ts", entry_def.name.to_case(Case::Kebab))),
-            file!(render_typescript_definition(&entry_def)),
-        );
-
-    Ok(app_file_tree)
+    match framework {
+        UiFramework::Lit => lit::add_entry_components(
+            app_file_tree,
+            &ui_package_path,
+            &dna_role_id,
+            coordinator_zome_name,
+            entry_def,
+        ),
+        UiFramework::Svelte => svelte::add_entry_components(
+            app_file_tree,
+            &ui_package_path,
+            &dna_role_id,
+            coordinator_zome_name,
+            entry_def,
+        ),
+        UiFramework::Vue => vue::add_entry_components(
+            app_file_tree,
+            &ui_package_path,
+            &dna_role_id,
+            coordinator_zome_name,
+            entry_def,
+        ),
+        UiFramework::Vanilla => Ok(app_file_tree),
+    }
 }
