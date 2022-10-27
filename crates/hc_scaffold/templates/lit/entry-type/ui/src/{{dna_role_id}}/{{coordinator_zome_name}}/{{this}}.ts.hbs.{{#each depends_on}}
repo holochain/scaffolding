@@ -4,17 +4,13 @@ import { InstalledCell, Record, AppWebsocket, InstalledAppInfo } from '@holochai
 import { deserializeHash } from '@holochain-open-dev/utils';
 import { contextProvided } from '@lit-labs/context';
 import { appWebsocketContext, appInfoContext } from '../../contexts';
-{{#each entry_types}}
-import './{{kebab_case this}}-detail';
-{{/}}
+import './{{kebab_case entry_type.name}}-detail';
 
-@customElement('{{kebab_case index_name}}')
-export class {{pascal_case index_name}} extends LitElement {
+@customElement('{{kebab_case entry_type.name}}-for-{{kebab_case (lookup @index depends_on)}}')
+export class {{pascal_case entry_type.name}}For{{pascal_case (lookup @index depends_on)}} extends LitElement {
 
-  {{#if (eq index_type "ByAuthor")}}
   @property()
-  author: string; // This must be a base 64 serialized string to be compatible with the automatic Lit updates 
-  {{/if}}
+  actionHash: string; // This must be a base 64 serialized string to be compatible with the automatic Lit updates 
 
   @state()
   _allRecords: Array<Record> | undefined;
@@ -47,7 +43,7 @@ export class {{pascal_case index_name}} extends LitElement {
     return html`
       <div style="display: flex; flex-direction: column">
         ${this._allRecords.map(r => 
-          html`<{{kebab_case (lookup entry_types 0)}} .actionHash=${r.signed_action.hashed.hash}></{{kebab_case (lookup entry_types 0)}}>`
+          html`<{{kebab_case entry_type.name}} .actionHash=${r.signed_action.hashed.hash}></{{kebab_case entry_type.name}}>`
         )}
       </div>
     `;

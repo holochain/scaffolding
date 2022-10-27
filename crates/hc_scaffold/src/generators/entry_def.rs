@@ -205,7 +205,7 @@ pub fn scaffold_entry_def(
 
     let mut create_fns_for_depends_on: BTreeMap<String, (ZomeManifest, String)> = BTreeMap::new();
 
-    for d in depends_on {
+    for d in depends_on.clone() {
         let (zome, fn_name) = find_extern_function_or_choose(
             &app_file_tree,
             dna_manifest,
@@ -229,9 +229,10 @@ pub fn scaffold_entry_def(
 
     let app_file_tree = scaffold_entry_type_templates(
         app_file_tree,
-        &entry_def,
         &dna_manifest.name(),
         &coordinator_zome.name.0.to_string(),
+        &entry_def,
+        &depends_on,
     )?;
 
     Ok(app_file_tree)

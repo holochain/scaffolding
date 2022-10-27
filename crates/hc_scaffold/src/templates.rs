@@ -3,7 +3,7 @@ use convert_case::{Case, Casing};
 use handlebars::{handlebars_helper, Context, Handlebars};
 use include_dir::{include_dir, Dir};
 use regex::Regex;
-use serde_json::Value;
+use serde_json::{json, Value};
 use std::collections::BTreeMap;
 use std::ffi::OsString;
 use std::path::PathBuf;
@@ -69,7 +69,7 @@ pub fn render_template_file_tree<'a, T: Serialize>(
     templates_file_tree: &FileTree,
     data: &T,
 ) -> ScaffoldResult<FileTree> {
-    let mut file_tree = templates_file_tree.clone();
+    let file_tree = templates_file_tree.clone();
 
     let flattened_templates = flatten_file_tree(templates_file_tree);
 
@@ -84,12 +84,25 @@ pub fn render_template_file_tree<'a, T: Serialize>(
                     re.replace(path.to_str().unwrap(), "{{#each ${b} }}${a}.hbs{{/each}}");
                 let all_paths = h.render_template(new_path.to_string().as_str(), data)?;
 
-                let files_to_create: Vec<String> =
-                    all_paths.split(".hbs").map(|s| s.to_string()).collect();
+                let files_to_create: Vec<String> = all_paths
+                    .split(".hbs")
+                    .map(|s| s.to_string())
+                    .filter(|s| !s.is_empty())
+                    .collect();
 
-                for f in files_to_create {
-                    let new_contents = h.render_template(contents.as_str(), data)?;
-                    transformed_templates.insert(PathBuf::from(f).with_extension(""), new_contents);
+                println!("asdf{:?} {:?}", all_paths, new_path);
+
+                for (i, f) in files_to_create.into_iter().enumerate() {
+                    let new_data = serde_json::to_string(data)?;
+                    let mut value: serde_json::Value = serde_json::from_str(new_data.as_str())?;
+
+                    value
+                        .as_object_mut()
+                        .unwrap()
+                        .insert(String::from("@index"), json!(i));
+
+                    let new_contents = h.render_template(contents.as_str(), &value)?;
+                    transformed_templates.insert(PathBuf::from(f), new_contents);
                 }
             } else if e == "hbs" {
                 let new_path = h.render_template(path.as_os_str().to_str().unwrap(), data)?;

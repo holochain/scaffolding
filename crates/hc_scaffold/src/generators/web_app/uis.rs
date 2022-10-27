@@ -150,19 +150,22 @@ pub struct ScaffoldEntryTypeData {
     dna_role_id: String,
     coordinator_zome_name: String,
     entry_type: EntryDefinition,
+    depends_on: Vec<String>,
 }
 pub fn scaffold_entry_type_templates(
     mut app_file_tree: FileTree,
-    entry_def: &EntryDefinition,
     dna_role_id: &String,
     coordinator_zome_name: &String,
+    entry_def: &EntryDefinition,
+    depends_on: &Vec<String>,
 ) -> ScaffoldResult<FileTree> {
     let framework = guess_or_choose_framework(&app_file_tree)?;
 
     let data = ScaffoldEntryTypeData {
-        entry_type: entry_def.clone(),
         dna_role_id: dna_role_id.clone(),
         coordinator_zome_name: coordinator_zome_name.clone(),
+        entry_type: entry_def.clone(),
+        depends_on: depends_on.clone(),
     };
 
     let templates = get_templates(&framework)?;
