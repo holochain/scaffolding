@@ -68,7 +68,7 @@ pub fn render_template_file_tree<'a, T: Serialize>(
     let mut transformed_templates: BTreeMap<PathBuf, String> = BTreeMap::new();
 
     for (path, contents) in flattened_templates {
-        let path = PathBuf::from(path.to_str().unwrap().replace('\\', "/"));
+        let path = PathBuf::from(path.to_str().unwrap().replace('¡', "/"));
 
         let re = Regex::new(
             r"(?P<c>(.)*)/\{\{#each (?P<b>([^\{\}])*)\}\}(?P<a>(.)*).hbs\{\{/each\}\}\z",
