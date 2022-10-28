@@ -1,7 +1,7 @@
 use assert_cmd::Command;
 use temp_dir::TempDir;
 
-#[test]
+// #[test]
 fn scaffold_full_web_app_and_test_it() {
     let tempdir = TempDir::new().unwrap();
 
