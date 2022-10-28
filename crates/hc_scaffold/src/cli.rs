@@ -1,5 +1,5 @@
 use crate::definitions::FieldType;
-use crate::error::{ScaffoldError, ScaffoldResult};
+use crate::error::ScaffoldError;
 use crate::file_tree::load_directory_into_memory;
 use crate::generators::app::cargo::exec_metadata;
 use crate::generators::index::{scaffold_index, IndexType};
@@ -7,7 +7,7 @@ use crate::generators::link_type::scaffold_link_type;
 use crate::generators::web_app::uis::UiFramework;
 use crate::generators::{
     self,
-    app::utils::{bundled_dnas_locations, get_or_choose_app_manifest},
+    app::utils::get_or_choose_app_manifest,
     dna::{scaffold_dna, utils::get_or_choose_dna_manifest},
     entry_def::scaffold_entry_def,
     zome::{
@@ -20,10 +20,7 @@ use crate::utils::{
 };
 
 use build_fs_tree::{Build, MergeableFileSystemTree};
-use dialoguer::{theme::ColorfulTheme, Input, Select};
-use holochain_types::{prelude::AppManifest, web_app::WebAppManifest};
-use holochain_util::ffs;
-use mr_bundle::{Location, Manifest};
+use dialoguer::{theme::ColorfulTheme, Select};
 use std::collections::BTreeMap;
 use std::process::Stdio;
 use std::{ffi::OsString, path::PathBuf, process::Command};
@@ -170,7 +167,7 @@ pub enum HcScaffold {
     },
 }
 
-pub fn parse_fields(fields_str: &str) -> Result<(String, FieldType), String> {
+pub fn parse_fields(_fields_str: &str) -> Result<(String, FieldType), String> {
     Err(String::from("TODO!"))
 }
 
@@ -366,28 +363,15 @@ Add new zomes to your DNA with:
                 }
 
                 let app_file_tree = match selected_option {
-                    1 => scaffold_integrity_zome(
-                        app_file_tree,
-                        &app_manifest.1,
-                        &dna_manifest_path,
-                        &name,
-                        &path,
-                    )?,
+                    1 => scaffold_integrity_zome(app_file_tree, &dna_manifest_path, &name, &path)?,
                     2 => scaffold_coordinator_zome(
                         app_file_tree,
-                        &app_manifest.1,
                         &dna_manifest_path,
                         &name,
                         &dependencies,
                         &path,
                     )?,
-                    _ => scaffold_zome_pair(
-                        app_file_tree,
-                        &app_manifest.1,
-                        &dna_manifest_path,
-                        &name,
-                        &path,
-                    )?,
+                    _ => scaffold_zome_pair(app_file_tree, &dna_manifest_path, &name, &path)?,
                 };
 
                 let file_tree = MergeableFileSystemTree::<OsString, String>::from(app_file_tree);
@@ -440,7 +424,7 @@ Add new entry definitions to your zome with:
                 let app_file_tree = load_directory_into_memory(&current_dir)?;
 
                 let app_manifest = get_or_choose_app_manifest(&app_file_tree, &app)?;
-                let (dna_manifest_path, dna_manifest) =
+                let (_dna_manifest_path, dna_manifest) =
                     get_or_choose_dna_manifest(&app_file_tree, &app_manifest, dna)?;
 
                 let integrity_zome_name = get_or_choose_integrity_zome(&dna_manifest, &zome)?;
@@ -488,14 +472,13 @@ Add new indexes for that entry type with:
                 let app_file_tree = load_directory_into_memory(&current_dir)?;
 
                 let app_manifest = get_or_choose_app_manifest(&app_file_tree, &app)?;
-                let (dna_manifest_path, dna_manifest) =
+                let (_dna_manifest_path, dna_manifest) =
                     get_or_choose_dna_manifest(&app_file_tree, &app_manifest, dna)?;
 
                 let integrity_zome_name = get_or_choose_integrity_zome(&dna_manifest, &zome)?;
 
                 let (app_file_tree, link_type_name) = scaffold_link_type(
                     app_file_tree,
-                    &app_manifest,
                     &dna_manifest,
                     &integrity_zome_name,
                     &from_entry_type,
@@ -534,14 +517,13 @@ Link type "{}" scaffolded!
                 let app_file_tree = load_directory_into_memory(&current_dir)?;
 
                 let app_manifest = get_or_choose_app_manifest(&app_file_tree, &app)?;
-                let (dna_manifest_path, dna_manifest) =
+                let (_dna_manifest_path, dna_manifest) =
                     get_or_choose_dna_manifest(&app_file_tree, &app_manifest, dna)?;
 
                 let integrity_zome_name = get_or_choose_integrity_zome(&dna_manifest, &zome)?;
 
                 let app_file_tree = scaffold_index(
                     app_file_tree,
-                    &app_manifest,
                     &dna_manifest,
                     &integrity_zome_name,
                     &name,

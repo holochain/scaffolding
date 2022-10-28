@@ -1,11 +1,8 @@
-use convert_case::{Case, Casing};
 use proc_macro2::TokenStream;
 use quote::quote;
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
-
-use crate::error::{ScaffoldError, ScaffoldResult};
 
 #[derive(Deserialize, Debug, Clone, Serialize)]
 #[serde(tag = "type")]
@@ -49,7 +46,7 @@ impl FieldType {
             TextArea => quote!(String),
             DateAndTime => quote!(u32),
             Date => quote!(u32),
-            Slider { min, max } => quote!(u32),
+            Slider { .. } => quote!(u32),
             Checkbox => quote!(bool),
             Switch => quote!(bool),
             ActionHash => quote!(ActionHash),

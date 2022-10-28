@@ -1,4 +1,4 @@
-use std::{collections::BTreeMap, ffi::OsString};
+use std::ffi::OsString;
 
 use build_fs_tree::file;
 use convert_case::{Case, Casing};
@@ -9,7 +9,7 @@ use crate::{
     error::{ScaffoldError, ScaffoldResult},
     file_tree::{map_rust_files, FileTree},
     generators::zome::{
-        coordinator::{find_all_extern_functions, find_extern_function_or_choose},
+        coordinator::find_extern_function_or_choose,
         utils::{get_coordinator_zomes_for_integrity, zome_manifest_path},
     },
 };

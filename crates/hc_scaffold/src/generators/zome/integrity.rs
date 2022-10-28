@@ -9,7 +9,6 @@ use super::utils::zome_wasm_location;
 
 pub fn add_integrity_zome_to_manifest(
     mut app_file_tree: FileTree,
-    app_name: &String,
     dna_manifest_path: &PathBuf,
     zome_name: &String,
 ) -> ScaffoldResult<FileTree> {

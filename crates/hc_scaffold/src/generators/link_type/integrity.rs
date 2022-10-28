@@ -1,11 +1,9 @@
 use std::{ffi::OsString, path::PathBuf};
 
 use convert_case::{Case, Casing};
-use holochain_types::prelude::{AppManifest, DnaManifest};
-use quote::quote;
+use holochain_types::prelude::DnaManifest;
 
 use crate::{
-    definitions::EntryDefinition,
     error::{ScaffoldError, ScaffoldResult},
     file_tree::{find_map_rust_files, map_rust_files, FileTree},
     generators::zome::utils::zome_manifest_path,
@@ -44,7 +42,7 @@ pub fn add_link_type_to_integrity_zome(
         app_file_tree
             .path(&mut crate_src_path_iter.iter())
             .ok_or(ScaffoldError::PathNotFound(crate_src_path.clone()))?,
-        &|path, file| {
+        &|_path, file| {
             file.items.clone().into_iter().find(|i| {
                 if let syn::Item::Enum(item_enum) = i.clone() {
                     if item_enum

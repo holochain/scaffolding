@@ -34,10 +34,6 @@ fn scaffold_full_web_app_and_test_it() {
     let cmd = cmd.args(&["entry-type", "post", "--crud", "crud", "--fields"]);
     cmd.assert().success();
 
-    let mut cmd = Command::new("which");
-    let cmd = cmd.current_dir(&apptempdir);
-    let cmd = cmd.args(&["nix-shell"]);
-
     let mut cmd = Command::new("nix-shell");
     let cmd = cmd.current_dir(&apptempdir);
     let cmd = cmd.args(&["--run", "npm i && npm t"]);

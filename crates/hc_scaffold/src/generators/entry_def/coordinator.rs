@@ -2,9 +2,7 @@ use std::ffi::OsString;
 
 use build_fs_tree::file;
 use convert_case::{Case, Casing};
-use dialoguer::{theme::ColorfulTheme, MultiSelect};
 use holochain_types::prelude::{DnaManifest, ZomeManifest};
-use quote::{__private::TokenStream, quote};
 
 use crate::{
     cli::Crud,

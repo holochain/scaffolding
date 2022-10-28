@@ -1,19 +1,15 @@
-use std::{
-    ffi::{OsStr, OsString},
-    path::PathBuf,
-};
-
-use crate::{
-    definitions::{EntryDefinition, FieldType},
-    file_tree::{find_files, find_map_rust_files, map_rust_files, FileTree},
-};
 use build_fs_tree::file;
 use convert_case::{Case, Casing};
-use holochain_types::prelude::{AppManifest, DnaManifest};
+use holochain_types::prelude::DnaManifest;
 use prettyplease::unparse;
 use proc_macro2::TokenStream;
 use quote::quote;
+use std::{ffi::OsString, path::PathBuf};
 
+use crate::{
+    definitions::EntryDefinition,
+    file_tree::{find_map_rust_files, map_rust_files, FileTree},
+};
 use crate::{
     error::{ScaffoldError, ScaffoldResult},
     generators::zome::utils::zome_manifest_path,
@@ -65,7 +61,6 @@ pub fn render_entry_definition_file(entry_def: &EntryDefinition) -> ScaffoldResu
 
 pub fn add_entry_def_to_integrity_zome(
     mut app_file_tree: FileTree,
-    app_manifest: &AppManifest,
     dna_manifest: &DnaManifest,
     integrity_zome_name: &String,
     entry_def: &EntryDefinition,
@@ -127,12 +122,7 @@ pub use {}::*;
             .as_str(),
         );
 
-    let entry_types = get_all_entry_types(
-        &app_file_tree,
-        app_manifest,
-        dna_manifest,
-        integrity_zome_name,
-    )?;
+    let entry_types = get_all_entry_types(&app_file_tree, dna_manifest, integrity_zome_name)?;
 
     let pascal_entry_def_name = entry_def.name.to_case(Case::Pascal);
 
@@ -212,7 +202,6 @@ pub use {}::*;
 
 pub fn get_all_entry_types(
     app_file_tree: &FileTree,
-    app_manifest: &AppManifest,
     dna_manifest: &DnaManifest,
     integrity_zome_name: &String,
 ) -> ScaffoldResult<Option<Vec<String>>> {
@@ -241,9 +230,9 @@ pub fn get_all_entry_types(
         app_file_tree
             .path(&mut crate_src_path_iter.iter())
             .ok_or(ScaffoldError::PathNotFound(crate_src_path.clone()))?,
-        &|file_path, rust_file| {
+        &|_file_path, rust_file| {
             rust_file.items.iter().find_map(|i| {
-                if let syn::Item::Enum(mut item_enum) = i.clone() {
+                if let syn::Item::Enum(item_enum) = i.clone() {
                     if item_enum
                         .attrs
                         .iter()

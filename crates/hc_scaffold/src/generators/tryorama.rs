@@ -18,9 +18,7 @@ use convert_case::{Case, Casing};
 use entry_crud_tests::entry_crud_tests;
 use holochain_types::prelude::{AppManifest, ZomeManifest};
 
-use super::zome::coordinator::find_extern_function_or_choose;
-
-fn find_or_choose_tryorama_package_path(app_file_tree: &FileTree) -> ScaffoldResult<PathBuf> {
+fn find_or_choose_tryorama_package_path(_app_file_tree: &FileTree) -> ScaffoldResult<PathBuf> {
     // TODO: Actually implement this
     Ok(PathBuf::from("tests"))
 }

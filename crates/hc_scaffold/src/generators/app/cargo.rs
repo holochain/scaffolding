@@ -1,7 +1,7 @@
 use std::{ffi::OsString, path::PathBuf, process::Stdio, str::from_utf8};
 
 use crate::file_tree::FileTree;
-use cargo_metadata::{semver::Error, Metadata, MetadataCommand};
+use cargo_metadata::{Metadata, MetadataCommand};
 
 use crate::error::{ScaffoldError, ScaffoldResult};
 
@@ -23,7 +23,7 @@ opt-level = "z"
 }
 
 pub fn add_workspace_external_dependency(
-    mut app_file_tree: FileTree,
+    app_file_tree: FileTree,
     crate_name: &String,
     crate_version: &String,
 ) -> ScaffoldResult<FileTree> {
@@ -35,7 +35,7 @@ pub fn add_workspace_external_dependency(
 }
 
 pub fn add_workspace_path_dependency(
-    mut app_file_tree: FileTree,
+    app_file_tree: FileTree,
     crate_name: &String,
     path_from_workspace_root: &PathBuf,
 ) -> ScaffoldResult<FileTree> {

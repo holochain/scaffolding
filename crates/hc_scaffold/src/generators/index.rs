@@ -1,8 +1,8 @@
-use std::{path::PathBuf, str::FromStr};
+use std::str::FromStr;
 
 use convert_case::{Case, Casing};
 use dialoguer::{theme::ColorfulTheme, Select};
-use holochain_types::prelude::{AppManifest, DnaManifest};
+use holochain_types::prelude::DnaManifest;
 use serde::Serialize;
 
 use crate::{
@@ -16,7 +16,6 @@ use super::{
     entry_def::{integrity::get_all_entry_types, utils::choose_multiple_entry_types},
     link_type::integrity::add_link_type_to_integrity_zome,
     web_app::uis::scaffold_index_templates,
-    zome::utils::get_coordinator_zomes_for_integrity,
 };
 
 pub mod coordinator;
@@ -61,7 +60,6 @@ pub fn choose_index_type() -> ScaffoldResult<IndexType> {
 
 pub fn scaffold_index(
     app_file_tree: FileTree,
-    app_manifest: &(PathBuf, AppManifest),
     dna_manifest: &DnaManifest,
     integrity_zome_name: &String,
     index_name: &String,
@@ -69,16 +67,11 @@ pub fn scaffold_index(
     maybe_entry_types: &Option<Vec<String>>,
     link_to_entry_hash: bool,
 ) -> ScaffoldResult<FileTree> {
-    let all_entries = get_all_entry_types(
-        &app_file_tree,
-        &app_manifest.1,
-        dna_manifest,
-        integrity_zome_name,
-    )?
-    .ok_or(ScaffoldError::NoEntryTypesDefFoundForIntegrityZome(
-        integrity_zome_name.clone(),
-        dna_manifest.name(),
-    ))?;
+    let all_entries = get_all_entry_types(&app_file_tree, dna_manifest, integrity_zome_name)?
+        .ok_or(ScaffoldError::NoEntryTypesDefFoundForIntegrityZome(
+            integrity_zome_name.clone(),
+            dna_manifest.name(),
+        ))?;
 
     let index_type = match maybe_index_type {
         Some(t) => Ok(t.clone()),

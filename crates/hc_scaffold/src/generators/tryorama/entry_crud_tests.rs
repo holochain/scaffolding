@@ -2,9 +2,7 @@ use std::{collections::BTreeMap, path::PathBuf};
 
 use holochain_types::prelude::ZomeManifest;
 
-use crate::{
-    cli::Crud, definitions::EntryDefinition, generators::entry_def::coordinator::create_handler,
-};
+use crate::{cli::Crud, definitions::EntryDefinition};
 
 use super::utils::common_tests_setup;
 

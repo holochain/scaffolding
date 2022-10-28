@@ -1,12 +1,10 @@
 use build_fs_tree::{dir, file, FileSystemTree};
-use ignore::{Walk, WalkBuilder};
+use ignore::WalkBuilder;
 use include_dir::Dir;
 use prettyplease::unparse;
 use std::collections::BTreeMap;
-use std::ffi::{OsStr, OsString};
-use std::fmt::Display;
-use std::path::Iter;
-use std::{fs, io, path::PathBuf};
+use std::ffi::OsString;
+use std::{fs, path::PathBuf};
 
 use crate::error::{ScaffoldError, ScaffoldResult};
 

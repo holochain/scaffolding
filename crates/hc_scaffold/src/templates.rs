@@ -1,19 +1,13 @@
-use build_fs_tree::{file, serde::Serialize};
+use build_fs_tree::serde::Serialize;
 use convert_case::{Case, Casing};
-use handlebars::{handlebars_helper, Context, Handlebars};
-use include_dir::{include_dir, Dir};
+use handlebars::{handlebars_helper, Handlebars};
 use regex::Regex;
-use serde_json::{json, Value};
+use serde_json::json;
 use std::collections::BTreeMap;
-use std::ffi::OsString;
 use std::path::PathBuf;
 
-use crate::definitions::FieldType;
-use crate::error::{ScaffoldError, ScaffoldResult};
-use crate::file_tree::{
-    create_dir_all, find_files, find_map_files, flatten_file_tree, map_all_files,
-    unflatten_file_tree, FileTree,
-};
+use crate::error::ScaffoldResult;
+use crate::file_tree::{find_files, flatten_file_tree, unflatten_file_tree, FileTree};
 
 pub fn register_concat_helper<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
     handlebars_helper!(concat: |s1: String, s2: String| format!("{}{}", s1, s2));
@@ -45,7 +39,7 @@ pub fn register_all_partials_in_dir<'a>(
     mut h: Handlebars<'a>,
     file_tree: &FileTree,
 ) -> ScaffoldResult<Handlebars<'a>> {
-    let partials = find_files(file_tree, &|path, contents| {
+    let partials = find_files(file_tree, &|path, _contents| {
         if let Some(e) = PathBuf::from(path).extension() {
             if e == "hbs" {
                 return true;
@@ -69,8 +63,6 @@ pub fn render_template_file_tree<'a, T: Serialize>(
     templates_file_tree: &FileTree,
     data: &T,
 ) -> ScaffoldResult<FileTree> {
-    let file_tree = templates_file_tree.clone();
-
     let flattened_templates = flatten_file_tree(templates_file_tree);
 
     let mut transformed_templates: BTreeMap<PathBuf, String> = BTreeMap::new();

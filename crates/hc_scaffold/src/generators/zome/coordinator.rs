@@ -12,7 +12,6 @@ use super::utils::{zome_manifest_path, zome_wasm_location};
 
 pub fn add_coordinator_zome_to_manifest(
     mut app_file_tree: FileTree,
-    app_name: &String,
     dna_manifest_path: &PathBuf,
     zome_name: &String,
     dependencies: &Option<Vec<String>>,
@@ -205,7 +204,7 @@ pub fn find_all_extern_functions(
         app_file_tree
             .path(&mut crate_src_path_iter.iter())
             .ok_or(ScaffoldError::PathNotFound(crate_src_path.clone()))?,
-        &|file_path, rust_file| {
+        &|_file_path, rust_file| {
             rust_file.items.iter().find_map(|i| {
                 if let syn::Item::Fn(item_fn) = i.clone() {
                     if item_fn

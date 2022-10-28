@@ -1,12 +1,11 @@
-use std::{collections::BTreeMap, ffi::OsString, path::PathBuf};
+use std::{collections::BTreeMap, path::PathBuf};
 
 use crate::{
     definitions::{EntryDefinition, FieldDefinition, FieldType},
     file_tree::FileTree,
 };
-use build_fs_tree::file;
 use convert_case::{Case, Casing};
-use dialoguer::{theme::ColorfulTheme, Confirm, Input, MultiSelect, Select};
+use dialoguer::{theme::ColorfulTheme, Confirm, MultiSelect, Select};
 use holochain_types::prelude::{AppManifest, DnaManifest, ZomeManifest};
 
 use crate::{
@@ -26,8 +25,7 @@ use super::{
     tryorama::add_tryorama_tests_for_entry_def,
     web_app::uis::scaffold_entry_type_templates,
     zome::{
-        coordinator::find_extern_function_or_choose,
-        utils::{get_coordinator_zomes_for_integrity, zome_manifest_path},
+        coordinator::find_extern_function_or_choose, utils::get_coordinator_zomes_for_integrity,
     },
 };
 
@@ -38,18 +36,12 @@ pub mod utils;
 
 fn get_or_choose_depends_on(
     app_file_tree: &FileTree,
-    app_manifest: &AppManifest,
     dna_manifest: &DnaManifest,
     integrity_zome_name: &String,
     depends_on: &Option<Vec<String>>,
 ) -> ScaffoldResult<Vec<String>> {
-    let entry_types = get_all_entry_types(
-        app_file_tree,
-        app_manifest,
-        dna_manifest,
-        integrity_zome_name,
-    )?
-    .unwrap_or_else(|| vec![]);
+    let entry_types = get_all_entry_types(app_file_tree, dna_manifest, integrity_zome_name)?
+        .unwrap_or_else(|| vec![]);
 
     if entry_types.len() == 0 {
         return Ok(vec![]);
@@ -81,7 +73,7 @@ fn get_or_choose_depends_on(
 }
 
 pub fn scaffold_entry_def(
-    mut app_file_tree: FileTree,
+    app_file_tree: FileTree,
     app_manifest: &(PathBuf, AppManifest),
     dna_manifest: &DnaManifest,
     integrity_zome_name: &String,
@@ -92,7 +84,6 @@ pub fn scaffold_entry_def(
 ) -> ScaffoldResult<FileTree> {
     let depends_on: Vec<String> = get_or_choose_depends_on(
         &app_file_tree,
-        &app_manifest.1,
         dna_manifest,
         integrity_zome_name,
         maybe_depends_on,
@@ -150,7 +141,6 @@ pub fn scaffold_entry_def(
 
     let mut app_file_tree = add_entry_def_to_integrity_zome(
         app_file_tree,
-        &app_manifest.1,
         dna_manifest,
         integrity_zome_name,
         &entry_def,

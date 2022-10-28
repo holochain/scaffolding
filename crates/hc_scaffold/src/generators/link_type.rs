@@ -1,8 +1,6 @@
-use std::path::PathBuf;
-
 use convert_case::{Case, Casing};
 use dialoguer::{theme::ColorfulTheme, Select};
-use holochain_types::prelude::{AppManifest, DnaManifest};
+use holochain_types::prelude::DnaManifest;
 
 use crate::{
     error::{ScaffoldError, ScaffoldResult},
@@ -31,7 +29,6 @@ pub fn link_type_name(from_entry_type: &String, to_entry_type: &String) -> Strin
 
 pub fn scaffold_link_type(
     app_file_tree: FileTree,
-    app_manifest: &(PathBuf, AppManifest),
     dna_manifest: &DnaManifest,
     integrity_zome_name: &String,
     from_entry_type: &Option<String>,
@@ -39,13 +36,8 @@ pub fn scaffold_link_type(
     link_from_entry_hash: bool,
     link_to_entry_hash: bool,
 ) -> ScaffoldResult<(FileTree, String)> {
-    let all_entries = get_all_entry_types(
-        &app_file_tree,
-        &app_manifest.1,
-        dna_manifest,
-        integrity_zome_name,
-    )?
-    .unwrap_or_else(|| vec![]);
+    let all_entries = get_all_entry_types(&app_file_tree, dna_manifest, integrity_zome_name)?
+        .unwrap_or_else(|| vec![]);
 
     let from_entry_type = get_or_choose_entry_type(
         dna_manifest,

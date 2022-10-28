@@ -1,5 +1,4 @@
-use build_fs_tree::{dir, file, serde::Serialize};
-use convert_case::{Case, Casing};
+use build_fs_tree::serde::Serialize;
 use dialoguer::{theme::ColorfulTheme, Select};
 use handlebars::Handlebars;
 use include_dir::{include_dir, Dir};
@@ -8,11 +7,11 @@ use std::{ffi::OsString, path::PathBuf, str::FromStr};
 use crate::{
     definitions::EntryDefinition,
     error::{ScaffoldError, ScaffoldResult},
-    file_tree::{create_dir_all, dir_to_file_tree, FileTree},
+    file_tree::{dir_to_file_tree, FileTree},
     generators::index::IndexType,
     templates::{
         register_all_partials_in_dir, register_case_helpers, register_concat_helper,
-        render_template_file_tree, render_template_file_tree_and_merge_with_existing,
+        render_template_file_tree_and_merge_with_existing,
     },
     versions::holochain_client_version,
 };

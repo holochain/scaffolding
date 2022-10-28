@@ -7,7 +7,7 @@ use crate::{
     versions::{hdi_version, hdk_version},
 };
 use build_fs_tree::{dir, file};
-use holochain_types::prelude::{AppManifest, DnaManifest};
+use holochain_types::prelude::DnaManifest;
 
 use crate::{
     error::{ScaffoldError, ScaffoldResult},
@@ -22,8 +22,8 @@ use coordinator::add_coordinator_zome_to_manifest;
 use integrity::add_integrity_zome_to_manifest;
 
 use super::app::cargo::{
-    add_workspace_external_dependency, add_workspace_path_dependency, exec_metadata,
-    get_workspace_members, get_workspace_packages_locations,
+    add_workspace_external_dependency, add_workspace_path_dependency, get_workspace_members,
+    get_workspace_packages_locations,
 };
 
 pub fn integrity_zome_name(coordinator_zome_name: &String) -> String {
@@ -32,7 +32,6 @@ pub fn integrity_zome_name(coordinator_zome_name: &String) -> String {
 
 pub fn scaffold_zome_pair(
     app_file_tree: FileTree,
-    app_manifest: &AppManifest,
     dna_manifest_path: &PathBuf,
     zome_name: &String,
     path: &Option<PathBuf>,
@@ -41,7 +40,6 @@ pub fn scaffold_zome_pair(
 
     let app_file_tree = scaffold_integrity_zome(
         app_file_tree,
-        &app_manifest,
         &dna_manifest_path,
         &integrity_zome_name,
         &path,
@@ -49,7 +47,6 @@ pub fn scaffold_zome_pair(
 
     let app_file_tree = scaffold_coordinator_zome(
         app_file_tree,
-        app_manifest,
         &dna_manifest_path,
         zome_name,
         &Some(vec![integrity_zome_name.clone()]),
@@ -65,9 +62,6 @@ pub fn iter_all_eq<T: PartialEq>(iter: impl IntoIterator<Item = T>) -> Option<T>
     iter.all(|elem| elem == first).then(|| first)
 }
 
-
-
-
 /// Tries to guess the location of the integrity zomes
 ///
 /// Procedure:
@@ -82,14 +76,15 @@ fn try_to_guess_integrity_zomes_location(
     app_file_tree: &FileTree,
     dna_name: &String,
 ) -> ScaffoldResult<Option<PathBuf>> {
-
     let members = get_workspace_members(app_file_tree)?;
 
     // if there is a workspace member string containing an expression with the word integrity followed by /*, pick this one
     // and add the right dna name to the path
-    let re = Regex::new(r"\A(?P<a>([^/*]*/)*)\*/(?P<b>(zomes/[^/*]*integrity[^/*]*/))\*\z").unwrap();
+    let re =
+        Regex::new(r"\A(?P<a>([^/*]*/)*)\*/(?P<b>(zomes/[^/*]*integrity[^/*]*/))\*\z").unwrap();
     for member in members.clone() {
-        if re.is_match(member.as_str()) { // if there is a zomes/[something with "integrity"]/* pattern
+        if re.is_match(member.as_str()) {
+            // if there is a zomes/[something with "integrity"]/* pattern
             let new_path = re.replace(member.as_str(), format!("${{a}}{}/${{b}}", dna_name));
             return Ok(Some(PathBuf::from(new_path.to_string())));
         }
@@ -97,12 +92,12 @@ fn try_to_guess_integrity_zomes_location(
 
     let re = Regex::new(r"\A(?P<a>([^/*]*/)*)\*/(?P<b>([^/*]*integrity[^/*]*/))\*\z").unwrap();
     for member in members.clone() {
-        if re.is_match(member.as_str()) { // if there is a [something with "integrity"]/* pattern
+        if re.is_match(member.as_str()) {
+            // if there is a [something with "integrity"]/* pattern
             let new_path = re.replace(member.as_str(), format!("${{a}}{}/${{b}}", dna_name));
             return Ok(Some(PathBuf::from(new_path.to_string())));
         }
     }
-
 
     if members.len() == 1 {
         let re = Regex::new(r"\A(?P<a>([^/*]*/)*)\*/(?P<b>([^/*]*/)*)\*\z").unwrap();
@@ -119,7 +114,6 @@ fn try_to_guess_integrity_zomes_location(
             return Ok(Some(PathBuf::from(new_path.to_string())));
         }
     }
-
 
     let maybe_packages_paths = get_workspace_packages_locations(&app_file_tree)?;
 
@@ -156,14 +150,15 @@ fn try_to_guess_coordinator_zomes_location(
     app_file_tree: &FileTree,
     dna_name: &String,
 ) -> ScaffoldResult<Option<PathBuf>> {
-
     let members = get_workspace_members(app_file_tree)?;
 
     // if there is a workspace member string containing an expression with the word integrity followed by /*, pick this one
     // and add the right dna name to the path
-    let re = Regex::new(r"\A(?P<a>([^/*]*/)*)\*/(?P<b>(zomes/[^/*]*coordinator[^/*]*/))\*\z").unwrap();
+    let re =
+        Regex::new(r"\A(?P<a>([^/*]*/)*)\*/(?P<b>(zomes/[^/*]*coordinator[^/*]*/))\*\z").unwrap();
     for member in members.clone() {
-        if re.is_match(member.as_str()) { // if there is a zomes/[something with "coordinator"]/* pattern
+        if re.is_match(member.as_str()) {
+            // if there is a zomes/[something with "coordinator"]/* pattern
             let new_path = re.replace(member.as_str(), format!("${{a}}{}/${{b}}", dna_name));
             return Ok(Some(PathBuf::from(new_path.to_string())));
         }
@@ -171,12 +166,12 @@ fn try_to_guess_coordinator_zomes_location(
 
     let re = Regex::new(r"\A(?P<a>([^/*]*/)*)\*/(?P<b>([^/*]*coordinator[^/*]*/))\*\z").unwrap();
     for member in members.clone() {
-        if re.is_match(member.as_str()) { // if there is a [something with "coordinator"]/* pattern
+        if re.is_match(member.as_str()) {
+            // if there is a [something with "coordinator"]/* pattern
             let new_path = re.replace(member.as_str(), format!("${{a}}{}/${{b}}", dna_name));
             return Ok(Some(PathBuf::from(new_path.to_string())));
         }
     }
-
 
     if members.len() == 1 {
         let re = Regex::new(r"\A(?P<a>([^/*]*/)*)\*/(?P<b>([^/*]*/)*)\*\z").unwrap();
@@ -193,7 +188,6 @@ fn try_to_guess_coordinator_zomes_location(
             return Ok(Some(PathBuf::from(new_path.to_string())));
         }
     }
-
 
     let maybe_packages_paths = get_workspace_packages_locations(&app_file_tree)?;
 
@@ -216,20 +210,14 @@ fn try_to_guess_coordinator_zomes_location(
     }
 }
 
-
 pub fn scaffold_integrity_zome_with_path(
     app_file_tree: FileTree,
-    app_manifest: &AppManifest,
     dna_manifest_path: &PathBuf,
     zome_name: &String,
     path: &PathBuf,
 ) -> ScaffoldResult<FileTree> {
-    let app_file_tree = add_integrity_zome_to_manifest(
-        app_file_tree,
-        &app_manifest.app_name().to_string(),
-        &dna_manifest_path,
-        zome_name,
-    )?;
+    let app_file_tree =
+        add_integrity_zome_to_manifest(app_file_tree, &dna_manifest_path, zome_name)?;
 
     let app_file_tree =
         add_workspace_external_dependency(app_file_tree, &"hdi".to_string(), &hdi_version())?;
@@ -259,7 +247,6 @@ pub fn scaffold_integrity_zome_with_path(
 
 pub fn scaffold_integrity_zome(
     app_file_tree: FileTree,
-    app_manifest: &AppManifest,
     dna_manifest_path: &PathBuf,
     zome_name: &String,
     path: &Option<PathBuf>,
@@ -286,13 +273,13 @@ pub fn scaffold_integrity_zome(
                     } else {
                         choose_directory_path(
                             &String::from("Where should the integrity zome be scaffolded instead?"),
-                            &app_file_tree
+                            &app_file_tree,
                         )?
                     }
                 }
                 None => choose_directory_path(
                     &String::from("Where should the integrity zome be scaffolded?"),
-                    &app_file_tree
+                    &app_file_tree,
                 )?,
             }
         }
@@ -300,7 +287,6 @@ pub fn scaffold_integrity_zome(
 
     scaffold_integrity_zome_with_path(
         app_file_tree,
-        app_manifest,
         dna_manifest_path,
         zome_name,
         &path_to_scaffold_in,
@@ -309,7 +295,6 @@ pub fn scaffold_integrity_zome(
 
 pub fn scaffold_coordinator_zome_in_path(
     app_file_tree: FileTree,
-    app_manifest: &AppManifest,
     dna_manifest_path: &PathBuf,
     zome_name: &String,
     dependencies: &Option<Vec<String>>,
@@ -317,7 +302,6 @@ pub fn scaffold_coordinator_zome_in_path(
 ) -> ScaffoldResult<FileTree> {
     let app_file_tree = add_coordinator_zome_to_manifest(
         app_file_tree,
-        &app_manifest.app_name().to_string(),
         &dna_manifest_path,
         zome_name,
         dependencies,
@@ -351,7 +335,6 @@ pub fn scaffold_coordinator_zome_in_path(
 
 pub fn scaffold_coordinator_zome(
     app_file_tree: FileTree,
-    app_manifest: &AppManifest,
     dna_manifest_path: &PathBuf,
     zome_name: &String,
     dependencies: &Option<Vec<String>>,
@@ -388,7 +371,6 @@ pub fn scaffold_coordinator_zome(
 
     scaffold_coordinator_zome_in_path(
         app_file_tree,
-        app_manifest,
         dna_manifest_path,
         zome_name,
         dependencies,

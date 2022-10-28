@@ -1,12 +1,10 @@
 use std::collections::BTreeMap;
 
 use dialoguer::{theme::ColorfulTheme, Confirm, Input, Select};
-use quote::quote;
 
 use crate::{
-    definitions::{EntryDefinition, FieldDefinition, FieldType},
+    definitions::{FieldDefinition, FieldType},
     error::{ScaffoldError, ScaffoldResult},
-    generators::entry_def::integrity::render_entry_definition_struct,
 };
 
 fn list_names() -> Vec<String> {
