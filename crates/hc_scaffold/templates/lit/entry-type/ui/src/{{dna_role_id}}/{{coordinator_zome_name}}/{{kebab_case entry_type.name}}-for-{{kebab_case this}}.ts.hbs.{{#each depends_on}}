@@ -1,8 +1,0 @@
-import { LitElement, html } from 'lit';
-import { state, customElement } from 'lit/decorators.js';
-import { InstalledCell, Record, AppWebsocket, InstalledAppInfo } from '@holochain/client';
-import { deserializeHash } from '@holochain-open-dev/utils';
-import { contextProvided } from '@lit-labs/context';
-import { appWebsocketContext, appInfoContext } from '../../contexts';
-import './{{kebab_case entry_type.name}}-detail';
-{{@index}}

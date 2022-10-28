@@ -6,8 +6,8 @@ import { contextProvided } from '@lit-labs/context';
 import { appWebsocketContext, appInfoContext } from '../../contexts';
 import './{{kebab_case entry_type.name}}-detail';
 
-@customElement('{{kebab_case entry_type.name}}-for-{{kebab_case (lookup @index depends_on)}}')
-export class {{pascal_case entry_type.name}}For{{pascal_case (lookup @index depends_on)}} extends LitElement {
+@customElement('{{kebab_case entry_type.name}}-for-{{kebab_case (lookup depends_on index)}}')
+export class {{pascal_case entry_type.name}}For{{pascal_case (lookup depends_on index)}} extends LitElement {
 
   @property()
   actionHash: string; // This must be a base 64 serialized string to be compatible with the automatic Lit updates 
@@ -43,7 +43,7 @@ export class {{pascal_case entry_type.name}}For{{pascal_case (lookup @index depe
     return html`
       <div style="display: flex; flex-direction: column">
         ${this._allRecords.map(r => 
-          html`<{{kebab_case entry_type.name}} .actionHash=${r.signed_action.hashed.hash}></{{kebab_case entry_type.name}}>`
+          html`<{{kebab_case entry_type.name}}-detail .actionHash=${r.signed_action.hashed.hash}></{{kebab_case entry_type.name}}-detail>`
         )}
       </div>
     `;

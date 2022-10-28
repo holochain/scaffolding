@@ -4,20 +4,21 @@ import { InstalledCell, Record, AppWebsocket, InstalledAppInfo } from '@holochai
 import { deserializeHash } from '@holochain-open-dev/utils';
 import { contextProvided } from '@lit-labs/context';
 import { appWebsocketContext, appInfoContext } from '../../contexts';
+import '@material/mwc-circular-progress';
 {{#each entry_types}}
 import './{{kebab_case this}}-detail';
-{{/}}
+{{/each}}
 
 @customElement('{{kebab_case index_name}}')
 export class {{pascal_case index_name}} extends LitElement {
+  {{#if (eq index_type.type "ByAuthor")}}
 
-  {{#if (eq index_type "ByAuthor")}}
   @property()
   author: string; // This must be a base 64 serialized string to be compatible with the automatic Lit updates 
   {{/if}}
 
   @state()
-  _allRecords: Array<Record> | undefined;
+  _records: Array<Record> | undefined;
 
   @contextProvided({ context: appWebsocketContext })
   appWebsocket!: AppWebsocket;
@@ -28,26 +29,26 @@ export class {{pascal_case index_name}} extends LitElement {
   async firstUpdated() {
     const cellData = this.appInfo.cell_data.find((c: InstalledCell) => c.role_id === '{{dna_role_id}}')!;
 
-    const records: Array<Record> = await this.appWebsocket.callZome({
+    this._records = await this.appWebsocket.callZome({
       cap_secret: null,
       cell_id: cellData.cell_id,
       zome_name: '{{coordinator_zome_name}}',
-      fn_name: '{{snake_case entry_type.name}}',
-      payload: {{#if (eq index_type "ByAuthor")}}deserializeHash(this.author){{else}}null{{/if}},
+      fn_name: 'get_{{snake_case index_name}}',
+      payload: {{#if (eq index_type.type "ByAuthor")}}deserializeHash(this.author){{else}}null{{/if}},
       provenance: cellData.cell_id[1]
     });
   }
 
   render() {
-    if (!this._allRecords) {
+    if (!this._records) {
       return html`<div style="display: flex; flex: 1; align-items: center; justify-content: center">
         <mwc-circular-progress indeterminate></mwc-circular-progress>
       </div>`;
     }
     return html`
       <div style="display: flex; flex-direction: column">
-        ${this._allRecords.map(r => 
-          html`<{{kebab_case (lookup entry_types 0)}} .actionHash=${r.signed_action.hashed.hash}></{{kebab_case (lookup entry_types 0)}}>`
+        ${this._records.map(r => 
+          html`<{{kebab_case (lookup entry_types 0)}}-detail .actionHash=${r.signed_action.hashed.hash} style="margin-bottom: 16px;"></{{kebab_case (lookup entry_types 0)}}-detail>`
         )}
       </div>
     `;

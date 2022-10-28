@@ -76,35 +76,43 @@ pub fn render_template_file_tree<'a, T: Serialize>(
     let mut transformed_templates: BTreeMap<PathBuf, String> = BTreeMap::new();
 
     for (path, contents) in flattened_templates {
-        if let Some(e) = path.extension() {
-            let re = Regex::new(r"\A(?P<a>(.)*).hbs.\{\{#each (?P<b>(.)*)\}\}\z").unwrap();
+        let path = PathBuf::from(path.to_str().unwrap().replace('\\', "/"));
 
-            if re.is_match(path.to_str().unwrap()) {
-                let new_path =
-                    re.replace(path.to_str().unwrap(), "{{#each ${b} }}${a}.hbs{{/each}}");
-                let all_paths = h.render_template(new_path.to_string().as_str(), data)?;
+        let re = Regex::new(
+            r"(?P<c>(.)*)/\{\{#each (?P<b>([^\{\}])*)\}\}(?P<a>(.)*).hbs\{\{/each\}\}\z",
+        )
+        .unwrap();
 
-                let files_to_create: Vec<String> = all_paths
-                    .split(".hbs")
-                    .map(|s| s.to_string())
-                    .filter(|s| !s.is_empty())
-                    .collect();
+        if re.is_match(path.to_str().unwrap()) {
+            let path_prefix = re.replace(path.to_str().unwrap(), "${c}");
+            let path_prefix = h.render_template(path_prefix.to_string().as_str(), data)?;
 
-                println!("asdf{:?} {:?}", all_paths, new_path);
+            let new_path_suffix =
+                re.replace(path.to_str().unwrap(), "{{#each ${b} }}${a}.hbs{{/each}}");
 
-                for (i, f) in files_to_create.into_iter().enumerate() {
-                    let new_data = serde_json::to_string(data)?;
-                    let mut value: serde_json::Value = serde_json::from_str(new_data.as_str())?;
+            let all_paths = h.render_template(new_path_suffix.to_string().as_str(), data)?;
 
-                    value
-                        .as_object_mut()
-                        .unwrap()
-                        .insert(String::from("@index"), json!(i));
+            let files_to_create: Vec<String> = all_paths
+                .split(".hbs")
+                .map(|s| s.to_string())
+                .filter(|s| !s.is_empty())
+                .collect();
 
-                    let new_contents = h.render_template(contents.as_str(), &value)?;
-                    transformed_templates.insert(PathBuf::from(f), new_contents);
-                }
-            } else if e == "hbs" {
+            for (i, f) in files_to_create.into_iter().enumerate() {
+                let new_data = serde_json::to_string(data)?;
+                let mut value: serde_json::Value = serde_json::from_str(new_data.as_str())?;
+
+                value
+                    .as_object_mut()
+                    .unwrap()
+                    .insert(String::from("index"), json!(i));
+
+                let new_contents = h.render_template(contents.as_str(), &value)?;
+                transformed_templates
+                    .insert(PathBuf::from(path_prefix.clone()).join(f), new_contents);
+            }
+        } else if let Some(e) = path.extension() {
+            if e == "hbs" {
                 let new_path = h.render_template(path.as_os_str().to_str().unwrap(), data)?;
                 let new_contents = h.render_template(contents.as_str(), data)?;
 
