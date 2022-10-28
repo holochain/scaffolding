@@ -13,7 +13,7 @@ export class {{pascal_case index_name}} extends LitElement {
   {{#if (eq index_type.type "ByAuthor")}}
 
   @property()
-  author: AgentPubKey;
+  author!: AgentPubKey;
   {{/if}}
 
   @state()

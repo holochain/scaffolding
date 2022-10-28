@@ -1,6 +1,6 @@
 import { LitElement, html } from 'lit';
 import { state, customElement, property } from 'lit/decorators.js';
-import { InstalledCell, Record, AppWebsocket, InstalledAppInfo } from '@holochain/client';
+import { InstalledCell, Record, AppWebsocket, ActionHash, InstalledAppInfo } from '@holochain/client';
 import { deserializeHash } from '@holochain-open-dev/utils';
 import { contextProvided } from '@lit-labs/context';
 import { appWebsocketContext, appInfoContext } from '../../contexts';
@@ -10,7 +10,7 @@ import './{{kebab_case entry_type.name}}-detail';
 export class {{pascal_case entry_type.name}}For{{pascal_case (lookup depends_on index)}} extends LitElement {
 
   @property()
-  actionHash: string; // This must be a base 64 serialized string to be compatible with the automatic Lit updates 
+  actionHash!: ActionHash;
 
   @state()
   _records: Array<Record> | undefined;
@@ -35,14 +35,14 @@ export class {{pascal_case entry_type.name}}For{{pascal_case (lookup depends_on 
   }
 
   render() {
-    if (!this._allRecords) {
+    if (!this._records) {
       return html`<div style="display: flex; flex: 1; align-items: center; justify-content: center">
         <mwc-circular-progress indeterminate></mwc-circular-progress>
       </div>`;
     }
     return html`
       <div style="display: flex; flex-direction: column">
-        ${this._allRecords.map(r => 
+        ${this._records.map(r => 
           html`<{{kebab_case entry_type.name}}-detail .actionHash=${r.signed_action.hashed.hash}></{{kebab_case entry_type.name}}-detail>`
         )}
       </div>
