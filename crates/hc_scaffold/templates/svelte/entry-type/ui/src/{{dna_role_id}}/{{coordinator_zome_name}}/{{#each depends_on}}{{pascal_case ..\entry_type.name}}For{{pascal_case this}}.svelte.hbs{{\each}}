@@ -5,7 +5,7 @@ import { decode } from '@msgpack/msgpack';
 import { InstalledCell, Record, ActionHash, AppWebsocket, InstalledAppInfo } from '@holochain/client';
 import { appInfoContext, appWebsocketContext } from '../../contexts';
 import { {{pascal_case entry_type.name}} } from './{{kebab_case entry_type.name}}';
-import './{{pascal_case entry_type.name}}Detail.svelte';
+import {{pascal_case entry_type.name}}Detail from './{{pascal_case entry_type.name}}Detail.svelte';
 
 export let actionHash: ActionHash;
 

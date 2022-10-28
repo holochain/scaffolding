@@ -2,11 +2,10 @@
 import { onMount, getContext } from 'svelte';
 import '@material/mwc-circular-progress';
 import { decode } from '@msgpack/msgpack';
-import { InstalledCell, Record, ActionHash, AppWebsocket, InstalledAppInfo } from '@holochain/client';
+import { InstalledCell, Record, AgentPubKey, ActionHash, AppWebsocket, InstalledAppInfo } from '@holochain/client';
 import { appInfoContext, appWebsocketContext } from '../../contexts';
-import { {{pascal_case entry_type.name}} } from './{{kebab_case entry_type.name}}';
 {{#each entry_types}}
-import './{{pascal_case this}}Detail.svelte';
+import {{pascal_case this}}Detail from './{{pascal_case this}}Detail.svelte';
 {{/each}}
 
 {{#if (eq index_type.type "ByAuthor")}}

@@ -1,5 +1,5 @@
 {
-  "name": "my-app",
+  "name": "ui",
   "version": "0.0.0",
   "scripts": {
     "start": "VITE_HC_PORT=$HC_PORT vite",
@@ -8,9 +8,13 @@
     "package": "npm run build && cd dist && bestzip ../dist.zip *"
   },
   "dependencies": {
-    "@holochain/client": "^0.8.0",
-    "@material/mwc-button": "^0.25.3",
+    "@holochain/client": "{{holochain_client_version}}",
     "@material/mwc-circular-progress": "^0.25.3",
+    "@material/mwc-button": "^0.25.3",
+    "@material/mwc-textfield": "^0.25.3",
+    "@material/mwc-textarea": "^0.25.3",
+    "@material/mwc-checkbox": "^0.25.3",
+    "@material/mwc-slider": "^0.25.3",
     "@msgpack/msgpack": "^2.7.2",
     "@types/ws": "^8.5.1",
     "vue": "^3.2.25"

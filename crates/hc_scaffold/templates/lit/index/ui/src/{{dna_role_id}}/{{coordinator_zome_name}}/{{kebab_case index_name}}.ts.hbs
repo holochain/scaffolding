@@ -1,7 +1,6 @@
 import { LitElement, html } from 'lit';
 import { state, customElement } from 'lit/decorators.js';
-import { InstalledCell, Record, AppWebsocket, InstalledAppInfo } from '@holochain/client';
-import { deserializeHash } from '@holochain-open-dev/utils';
+import { InstalledCell, AgentPubKey, Record, AppWebsocket, InstalledAppInfo } from '@holochain/client';
 import { contextProvided } from '@lit-labs/context';
 import { appWebsocketContext, appInfoContext } from '../../contexts';
 import '@material/mwc-circular-progress';
@@ -14,7 +13,7 @@ export class {{pascal_case index_name}} extends LitElement {
   {{#if (eq index_type.type "ByAuthor")}}
 
   @property()
-  author: string; // This must be a base 64 serialized string to be compatible with the automatic Lit updates 
+  author: AgentPubKey; // This must be a base 64 serialized string to be compatible with the automatic Lit updates 
   {{/if}}
 
   @state()
@@ -34,7 +33,7 @@ export class {{pascal_case index_name}} extends LitElement {
       cell_id: cellData.cell_id,
       zome_name: '{{coordinator_zome_name}}',
       fn_name: 'get_{{snake_case index_name}}',
-      payload: {{#if (eq index_type.type "ByAuthor")}}deserializeHash(this.author){{else}}null{{/if}},
+      payload: {{#if (eq index_type.type "ByAuthor")}}this.author{{else}}null{{/if}},
       provenance: cellData.cell_id[1]
     });
   }

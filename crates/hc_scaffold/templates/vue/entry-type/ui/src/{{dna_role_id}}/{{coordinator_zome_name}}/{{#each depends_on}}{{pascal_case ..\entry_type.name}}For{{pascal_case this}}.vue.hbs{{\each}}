@@ -19,7 +19,7 @@ import { decode } from '@msgpack/msgpack';
 import { InstalledCell, AppWebsocket, InstalledAppInfo, Record } from '@holochain/client';
 import { {{pascal_case entry_type.name}} } from './{{kebab_case entry_type.name}}';
 import '@material/mwc-circular-progress';
-import { {{pascal_case entry_type.name}}Detail } from './{{pascal_case entry_type.name}}Detail.vue';
+import {{pascal_case entry_type.name}}Detail from './{{pascal_case entry_type.name}}Detail.vue';
 
 export default defineComponent({
   components: {

@@ -17,15 +17,15 @@
 import { defineComponent, inject, ComputedRef } from 'vue';
 import { decode } from '@msgpack/msgpack';
 import { InstalledCell, AppWebsocket, InstalledAppInfo, Record } from '@holochain/client';
-import { {{pascal_case entry_type.name}} } from './{{kebab_case entry_type.name}}';
+import { {{pascal_case (lookup entry_types 0)}} } from './{{kebab_case (lookup entry_types 0)}}';
 import '@material/mwc-circular-progress';
 {{#each entry_types}}
-import { {{pascal_case this}}Detail } from './{{pascal_case entry_type.name}}Detail.vue';
+import {{pascal_case this}}Detail from './{{pascal_case this}}Detail.vue';
 {{/each}}
 
 export default defineComponent({
   components: {
-    {{pascal_case entry_type.name}}Detail
+    {{pascal_case (lookup entry_types 0)}}Detail
   },
   props: { {{#if (eq index_type.type "ByAuthor")}}
     author: {
