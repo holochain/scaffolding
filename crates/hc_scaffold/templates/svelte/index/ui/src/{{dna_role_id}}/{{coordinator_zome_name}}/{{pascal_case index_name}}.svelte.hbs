@@ -1,0 +1,47 @@
+<script lang="ts">
+import { onMount, getContext } from 'svelte';
+import '@material/mwc-circular-progress';
+import { decode } from '@msgpack/msgpack';
+import { InstalledCell, Record, ActionHash, AppWebsocket, InstalledAppInfo } from '@holochain/client';
+import { appInfoContext, appWebsocketContext } from '../../contexts';
+import { {{pascal_case entry_type.name}} } from './{{kebab_case entry_type.name}}';
+{{#each entry_types}}
+import './{{pascal_case this}}Detail.svelte';
+{{/each}}
+
+{{#if (eq index_type.type "ByAuthor")}}
+export let author: AgentPubKey;
+{{/if}}
+
+let appInfo = getContext(appInfoContext).getAppInfo();
+let appWebsocket = getContext(appWebsocketContext).getAppWebsocket();
+
+let records: Array<Record> | undefined;
+$: records;
+
+onMount(async () => {
+  const cellData = appInfo.cell_data.find((c: InstalledCell) => c.role_id === '{{dna_role_id}}')!;
+
+  records = await appWebsocket.callZome({
+    cap_secret: null,
+    cell_id: cellData.cell_id,
+    zome_name: '{{coordinator_zome_name}}',
+    fn_name: 'get_{{snake_case index_name}}',
+    payload: {{#if (eq index_type.type "ByAuthor")}}author{{else}}null{{/if}},
+    provenance: cellData.cell_id[1]
+  });
+});
+
+</script>
+
+{#if records }
+  <div style="display: flex; flex-direction: column">
+    {#each records as record}
+      <{{pascal_case (lookup entry_types 0)}}Detail actionHash={record.signed_action.hashed.hash} style="margin-bottom: 8px;"></{{pascal_case (lookup entry_types 0)}}Detail>
+    {/each}
+  </div>
+{:else}
+  <div style="display: flex; flex: 1; align-items: center; justify-content: center">
+    <mwc-circular-progress indeterminate></mwc-circular-progress>
+  </div>
+{/if}

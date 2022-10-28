@@ -1,0 +1,62 @@
+<template>
+  <div v-if="records" style="display: flex; flex-direction: column">
+    <{{pascal_case (lookup entry_types 0)}}Detail 
+      v-for="record in records" 
+      :action-hash="record.signed_action.hashed.hash" 
+      style="margin-bottom: 8px">
+    </{{pascal_case (lookup entry_types 0)}}Detail>
+  </div>
+
+  <div v-else style="display: flex; flex: 1; align-items: center; justify-content: center">
+    <mwc-circular-progress indeterminate></mwc-circular-progress>
+  </div>
+
+</template>
+
+<script lang="ts">
+import { defineComponent, inject, ComputedRef } from 'vue';
+import { decode } from '@msgpack/msgpack';
+import { InstalledCell, AppWebsocket, InstalledAppInfo, Record } from '@holochain/client';
+import { {{pascal_case entry_type.name}} } from './{{kebab_case entry_type.name}}';
+import '@material/mwc-circular-progress';
+{{#each entry_types}}
+import { {{pascal_case this}}Detail } from './{{pascal_case entry_type.name}}Detail.vue';
+{{/each}}
+
+export default defineComponent({
+  components: {
+    {{pascal_case entry_type.name}}Detail
+  },
+  props: { {{#if (eq index_type.type "ByAuthor")}}
+    author: {
+      type: Object,
+      required: true
+    } {{/if}}
+  },
+  data(): { records: Array<Record> | undefined } {
+    return {
+      records: undefined
+    }
+  },
+  async mounted() {
+    const cellData = this.appInfo.cell_data.find((c: InstalledCell) => c.role_id === '{{dna_role_id}}')!;
+
+    this.records = await this.appWebsocket.callZome({
+      cap_secret: null,
+      cell_id: cellData.cell_id,
+      zome_name: '{{coordinator_zome_name}}',
+      fn_name: 'get_{{snake_case index_name}}',
+      payload: {{#if (eq index_type.type "ByAuthor")}}this.author{{else}}null{{/if}},
+      provenance: cellData.cell_id[1]
+    });
+  },
+  setup() {
+    const appWebsocket = (inject('appWebsocket') as ComputedRef<AppWebsocket>).value;
+    const appInfo = (inject('appInfo') as ComputedRef<InstalledAppInfo>).value;
+    return {
+      appInfo,
+      appWebsocket,
+    };
+  },
+})
+</script>

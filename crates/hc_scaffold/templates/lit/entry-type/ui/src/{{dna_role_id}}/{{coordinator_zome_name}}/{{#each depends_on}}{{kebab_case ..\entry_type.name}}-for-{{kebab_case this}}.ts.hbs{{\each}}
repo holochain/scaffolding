@@ -13,7 +13,7 @@ export class {{pascal_case entry_type.name}}For{{pascal_case (lookup depends_on 
   actionHash: string; // This must be a base 64 serialized string to be compatible with the automatic Lit updates 
 
   @state()
-  _allRecords: Array<Record> | undefined;
+  _records: Array<Record> | undefined;
 
   @contextProvided({ context: appWebsocketContext })
   appWebsocket!: AppWebsocket;
@@ -28,8 +28,8 @@ export class {{pascal_case entry_type.name}}For{{pascal_case (lookup depends_on 
       cap_secret: null,
       cell_id: cellData.cell_id,
       zome_name: '{{coordinator_zome_name}}',
-      fn_name: '{{snake_case entry_type.name}}',
-      payload: {{#if (eq index_type "ByAuthor")}}deserializeHash(this.author){{else}}null{{/if}},
+      fn_name: 'get_{{snake_case entry_type.name}}_for_{{snake_case (lookup depends_on index)}}',
+      payload: this.actionHash,
       provenance: cellData.cell_id[1]
     });
   }

@@ -1,0 +1,43 @@
+<script lang="ts">
+import { onMount, getContext } from 'svelte';
+import '@material/mwc-circular-progress';
+import { decode } from '@msgpack/msgpack';
+import { InstalledCell, Record, ActionHash, AppWebsocket, InstalledAppInfo } from '@holochain/client';
+import { appInfoContext, appWebsocketContext } from '../../contexts';
+import { {{pascal_case entry_type.name}} } from './{{kebab_case entry_type.name}}';
+import './{{pascal_case entry_type.name}}Detail.svelte';
+
+export let actionHash: ActionHash;
+
+let appInfo = getContext(appInfoContext).getAppInfo();
+let appWebsocket = getContext(appWebsocketContext).getAppWebsocket();
+
+let records: Array<Record> | undefined;
+$: records;
+
+onMount(async () => {
+  const cellData = appInfo.cell_data.find((c: InstalledCell) => c.role_id === '{{dna_role_id}}')!;
+
+  records = await appWebsocket.callZome({
+    cap_secret: null,
+    cell_id: cellData.cell_id,
+    zome_name: '{{coordinator_zome_name}}',
+    fn_name: 'get_{{snake_case entry_type.name}}_for_{{snake_case (lookup depends_on index)}}',
+    payload: actionHash,
+    provenance: cellData.cell_id[1]
+  });
+});
+
+</script>
+
+{#if records }
+  <div style="display: flex; flex-direction: column">
+    {#each records as record}
+      <{{pascal_case entry_type.name}}Detail actionHash={record.signed_action.hashed.hash} style="margin-bottom: 8px;"></{{pascal_case entry_type.name}}Detail>
+    {/each}
+  </div>
+{:else}
+  <div style="display: flex; flex: 1; align-items: center; justify-content: center">
+    <mwc-circular-progress indeterminate></mwc-circular-progress>
+  </div>
+{/if}
