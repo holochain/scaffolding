@@ -1,7 +1,5 @@
 use std::collections::BTreeMap;
-use std::ffi::{OsStr, OsString};
-use std::fmt::Display;
-use std::path::Iter;
+use std::ffi::OsString;
 use std::{fs, io, path::PathBuf};
 
 use build_fs_tree::FileSystemTree;

@@ -25,7 +25,7 @@ impl Widget {
             DateAndTime { .. } => quote!(u32),
             Date { .. } => quote!(u32),
             Time { .. } => quote!(u32),
-            Slider { min, max, .. } => quote!(u32),
+            Slider { .. } => quote!(u32),
             RadioButton { label, .. } => quote!(#label),
             Checkbox { .. } => quote!(bool),
             Switch { .. } => quote!(bool),

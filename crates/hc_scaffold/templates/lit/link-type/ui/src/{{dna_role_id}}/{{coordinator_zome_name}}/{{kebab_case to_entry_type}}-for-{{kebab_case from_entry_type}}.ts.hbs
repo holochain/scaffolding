@@ -1,16 +1,16 @@
 import { LitElement, html } from 'lit';
-import { state, customElement, property } from 'lit/decorators.js';
-import { InstalledCell, Record, AppWebsocket, InstalledAppInfo } from '@holochain/client';
-import { deserializeHash } from '@holochain-open-dev/utils';
+import { state, property, customElement } from 'lit/decorators.js';
+import { InstalledCell, AgentPubKey, Record, AppWebsocket, InstalledAppInfo } from '@holochain/client';
 import { contextProvided } from '@lit-labs/context';
 import { appWebsocketContext, appInfoContext } from '../../contexts';
-import './{{kebab_case entry_type.name}}-detail';
+import '@material/mwc-circular-progress';
+import './{{kebab_case to_entry_type}}-detail';
 
-@customElement('{{kebab_case entry_type.name}}-for-{{kebab_case (lookup depends_on index)}}')
-export class {{pascal_case entry_type.name}}For{{pascal_case (lookup depends_on index)}} extends LitElement {
+@customElement('{{kebab_case to_entry_type}}-for-{{kebab_case from_entry_type}}')
+export class {{pascal_case to_entry_type}}For{{pascal_case from_entry_type}} extends LitElement {
 
   @property()
-  actionHash: string; // This must be a base 64 serialized string to be compatible with the automatic Lit updates 
+  actionHash: ActionHash; 
 
   @state()
   _records: Array<Record> | undefined;
@@ -24,26 +24,26 @@ export class {{pascal_case entry_type.name}}For{{pascal_case (lookup depends_on 
   async firstUpdated() {
     const cellData = this.appInfo.cell_data.find((c: InstalledCell) => c.role_id === '{{dna_role_id}}')!;
 
-    const records: Array<Record> = await this.appWebsocket.callZome({
+    this._records = await this.appWebsocket.callZome({
       cap_secret: null,
       cell_id: cellData.cell_id,
       zome_name: '{{coordinator_zome_name}}',
-      fn_name: 'get_{{snake_case entry_type.name}}_for_{{snake_case (lookup depends_on index)}}',
+      fn_name: 'get_{{snake_case to_entry_type}}_for_{{snake_case from_entry_type}}',
       payload: this.actionHash,
       provenance: cellData.cell_id[1]
     });
   }
 
   render() {
-    if (!this._allRecords) {
+    if (!this._records) {
       return html`<div style="display: flex; flex: 1; align-items: center; justify-content: center">
         <mwc-circular-progress indeterminate></mwc-circular-progress>
       </div>`;
     }
     return html`
       <div style="display: flex; flex-direction: column">
-        ${this._allRecords.map(r => 
-          html`<{{kebab_case entry_type.name}}-detail .actionHash=${r.signed_action.hashed.hash}></{{kebab_case entry_type.name}}-detail>`
+        ${this._records.map(r => 
+          html`<{{kebab_case to_entry_type}}-detail .actionHash=${r.signed_action.hashed.hash} style="margin-bottom: 16px;"></{{kebab_case to_entry_type}}-detail>`
         )}
       </div>
     `;

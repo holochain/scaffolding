@@ -1,5 +1,5 @@
 import { LitElement, html } from 'lit';
-import { state, customElement } from 'lit/decorators.js';
+import { state, customElement, property } from 'lit/decorators.js';
 import { InstalledCell, AgentPubKey, Record, AppWebsocket, InstalledAppInfo } from '@holochain/client';
 import { contextProvided } from '@lit-labs/context';
 import { appWebsocketContext, appInfoContext } from '../../contexts';
@@ -13,7 +13,7 @@ export class {{pascal_case index_name}} extends LitElement {
   {{#if (eq index_type.type "ByAuthor")}}
 
   @property()
-  author: AgentPubKey; // This must be a base 64 serialized string to be compatible with the automatic Lit updates 
+  author: AgentPubKey;
   {{/if}}
 
   @state()

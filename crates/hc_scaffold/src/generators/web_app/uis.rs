@@ -187,6 +187,48 @@ pub fn scaffold_entry_type_templates(
 }
 
 #[derive(Serialize)]
+pub struct ScaffoldLinkTypeData {
+    dna_role_id: String,
+    coordinator_zome_name: String,
+    from_entry_type: String,
+    to_entry_type: String,
+}
+pub fn scaffold_link_type_templates(
+    mut app_file_tree: FileTree,
+    dna_role_id: &String,
+    coordinator_zome_name: &String,
+    from_entry_type: &String,
+    to_entry_type: &String,
+) -> ScaffoldResult<FileTree> {
+    let framework = guess_or_choose_framework(&app_file_tree)?;
+
+    let data = ScaffoldLinkTypeData {
+        dna_role_id: dna_role_id.clone(),
+        coordinator_zome_name: coordinator_zome_name.clone(),
+        from_entry_type: from_entry_type.clone(),
+        to_entry_type: to_entry_type.clone(),
+    };
+
+    let templates = get_templates(&framework)?;
+
+    let h = build_handlebars(&templates)?;
+
+    let field_types_path = PathBuf::from("link-type");
+    let v: Vec<OsString> = field_types_path.iter().map(|s| s.to_os_string()).collect();
+
+    if let Some(web_app_template) = templates.path(&mut v.iter()) {
+        app_file_tree = render_template_file_tree_and_merge_with_existing(
+            app_file_tree,
+            &h,
+            web_app_template,
+            &data,
+        )?;
+    }
+
+    Ok(app_file_tree)
+}
+
+#[derive(Serialize)]
 pub struct ScaffoldIndexData {
     dna_role_id: String,
     coordinator_zome_name: String,

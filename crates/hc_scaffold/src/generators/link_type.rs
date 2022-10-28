@@ -13,6 +13,7 @@ use self::{
 
 use super::{
     entry_def::{integrity::get_all_entry_types, utils::get_or_choose_entry_type},
+    web_app::uis::scaffold_link_type_templates,
     zome::utils::get_coordinator_zomes_for_integrity,
 };
 
@@ -100,6 +101,14 @@ pub fn scaffold_link_type(
         &to_entry_type,
         link_from_entry_hash,
         link_to_entry_hash,
+    )?;
+
+    let app_file_tree = scaffold_link_type_templates(
+        app_file_tree,
+        &dna_manifest.name(),
+        &coordinator_zome.name.0.to_string(),
+        &from_entry_type,
+        &to_entry_type,
     )?;
 
     Ok((app_file_tree, link_type_name))
