@@ -1,5 +1,5 @@
 <div style="display: flex; flex-direction: row">
   <span style="margin-right: 4px">{{label}}</span>
 
-  <mwc-slider on:input="{e => this._{{camel_case field_name}} = e.detail.value}"></mwc-slider>
+  <mwc-slider on:input="{e => {{camel_case field_name}} = e.detail.value}"></mwc-slider>
 </div>
