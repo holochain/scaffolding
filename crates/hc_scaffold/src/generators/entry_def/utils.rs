@@ -4,13 +4,16 @@ use holochain_types::prelude::DnaManifest;
 use crate::error::{ScaffoldError, ScaffoldResult};
 
 pub fn choose_entry_type(all_entries: &Vec<String>, prompt: &String) -> ScaffoldResult<String> {
+    let mut all_options = all_entries.clone();
+    all_options.push("AgentPubKey".into());
+
     let selection = Select::with_theme(&ColorfulTheme::default())
         .with_prompt(prompt.clone())
         .default(0)
-        .items(&all_entries[..])
+        .items(&all_options[..])
         .interact()?;
 
-    Ok(all_entries[selection].clone())
+    Ok(all_options[selection].clone())
 }
 
 pub fn choose_multiple_entry_types(
@@ -41,13 +44,9 @@ pub fn get_or_choose_entry_type(
     all_entries: &Vec<String>,
     prompt: &String,
 ) -> ScaffoldResult<String> {
-    match (all_entries.len(), entry_type) {
-        (0, None) => Err(ScaffoldError::NoEntryTypesDefFoundForIntegrityZome(
-            dna_manifest.name(),
-            zome_name.clone(),
-        )),
-        (_, None) => choose_entry_type(all_entries, prompt),
-        (_, Some(name)) => all_entries
+    match entry_type {
+        None => choose_entry_type(all_entries, prompt),
+        Some(name) => all_entries
             .into_iter()
             .find(|et| et.eq(&name))
             .cloned()
