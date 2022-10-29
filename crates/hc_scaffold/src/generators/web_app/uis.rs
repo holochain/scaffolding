@@ -10,7 +10,7 @@ use crate::{
     file_tree::{dir_to_file_tree, FileTree},
     generators::index::IndexType,
     templates::{
-        register_all_partials_in_dir, register_case_helpers, register_concat_helper,
+        register_all_partials_in_dir, register_helpers,
         render_template_file_tree_and_merge_with_existing,
     },
     versions::holochain_client_version,
@@ -77,8 +77,7 @@ fn get_templates(framework: &UiFramework) -> ScaffoldResult<FileTree> {
 pub fn build_handlebars<'a>(templates_dir: &FileTree) -> ScaffoldResult<Handlebars<'a>> {
     let h = Handlebars::new();
 
-    let h = register_concat_helper(h);
-    let mut h = register_case_helpers(h);
+    let mut h = register_helpers(h);
 
     let field_types_path = PathBuf::from("field-types");
     let v: Vec<OsString> = field_types_path.iter().map(|s| s.to_os_string()).collect();

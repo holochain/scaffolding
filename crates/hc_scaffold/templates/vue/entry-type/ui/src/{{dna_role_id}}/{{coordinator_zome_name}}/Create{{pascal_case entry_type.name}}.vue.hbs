@@ -4,7 +4,9 @@
     <span style="font-size: 18px">Create {{pascal_case entry_type.name}}</span>
   
     {{#each entry_type.fields}}
-      {{> (concat field_type.type "/ui/create/render") entry_type=../entry_type field_name=@key field_type=this }}
+      {{#if (not (contains depends_on this)) }}
+        {{> (concat field_type.type "/ui/create/render") entry_type=../entry_type field_name=@key field_type=this }}
+      {{/if}}
     {{/each}}
   
     <mwc-button 
@@ -25,9 +27,21 @@ import '@material/mwc-button';
 
 export default defineComponent({
   data(): Partial<{{pascal_case entry_type.name}}> {
-    return { {{#each entry_type.fields}}
-      {{camel_case @key}}: undefined,
-  {{/each}} }
+    return { 
+      {{#each entry_type.fields}}
+        {{#if (not (contains depend_on this))}}
+          {{camel_case @key}}: undefined,
+        {{/if}}
+      {{/each}}
+    }
+  },
+  props: {
+  {{#each depends_on}}
+    {{camel_case this}}Hash: {
+      type: Object,
+      required: true
+    }
+  {{/each}}
   },
   methods: {
     is{{pascal_case entry_type.name}}Valid() {

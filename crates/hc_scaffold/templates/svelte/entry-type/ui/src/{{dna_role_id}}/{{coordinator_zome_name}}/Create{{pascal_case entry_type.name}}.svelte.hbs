@@ -13,17 +13,26 @@ let appWebsocket = getContext(appWebsocketContext).getAppWebsocket();
 
 const dispatch = createEventDispatcher();
 
+{{#each depends_on}}
+export let {{camel_case this}}Hash: ActionHash;
+{{/each}}
+
 {{#each entry_type.fields}}
+  {{#if (not (contains depends_on this)) }}
 let {{camel_case @key}}: {{> (concat field_type.type "/ui/type")}} | undefined;
+  {{/if}}
 {{/each}}
 
 $: {{#each entry_type.fields}}{{camel_case @key}}{{#unless @last}}, {{/unless}}{{/each}};
 
 async function create{{pascal_case entry_type.name}}() {
   const cellData = appInfo.cell_data.find((c: InstalledCell) => c.role_id === '{{dna_role_id}}')!;
-  const {{camel_case entry_type.name}}: {{pascal_case entry_type.name}} = { {{#each entry_type.fields}}
+  
+  const {{camel_case entry_type.name}}: {{pascal_case entry_type.name}} = { 
+  {{#each entry_type.fields}}
     {{snake_case @key}}: {{camel_case @key}}!,
- {{/each}} };
+  {{/each}}
+  };
   
   const record: Record = await appWebsocket.callZome({
     cap_secret: null,
@@ -40,7 +49,9 @@ async function create{{pascal_case entry_type.name}}() {
   <span style="font-size: 18px">Create {{pascal_case entry_type.name}}</span>
   
   {{#each entry_type.fields}}
-    {{> (concat field_type.type "/ui/create/render") entry_type=../entry_type field_name=@key field_type=this }}
+    {{#if (not (contains depends_on this)) }}
+      {{> (concat field_type.type "/ui/create/render") entry_type=../entry_type field_name=@key field_type=this }}
+    {{/if}}
   {{/each}}
 
   <mwc-button 

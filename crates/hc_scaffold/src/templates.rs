@@ -2,16 +2,31 @@ use build_fs_tree::serde::Serialize;
 use convert_case::{Case, Casing};
 use handlebars::{handlebars_helper, Handlebars};
 use regex::Regex;
-use serde_json::json;
+use serde_json::{json, Value};
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 
 use crate::error::ScaffoldResult;
 use crate::file_tree::{find_files, flatten_file_tree, unflatten_file_tree, FileTree};
 
+pub fn register_helpers<'a>(h: Handlebars<'a>) -> Handlebars<'a> {
+    let h = register_concat_helper(h);
+    let h = register_contains_helper(h);
+    let h = register_case_helpers(h);
+
+    h
+}
+
 pub fn register_concat_helper<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
     handlebars_helper!(concat: |s1: String, s2: String| format!("{}{}", s1, s2));
     h.register_helper("concat", Box::new(concat));
+
+    h
+}
+
+pub fn register_contains_helper<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
+    handlebars_helper!(contains: |list: Vec<Value>, value: Value| list.contains(&value));
+    h.register_helper("contains", Box::new(contains));
 
     h
 }

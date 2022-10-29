@@ -1,5 +1,5 @@
 import { LitElement, html } from 'lit';
-import { state, customElement } from 'lit/decorators.js';
+import { state, customElement, property } from 'lit/decorators.js';
 import { InstalledCell, ActionHash, Record, AppWebsocket, InstalledAppInfo } from '@holochain/client';
 import { contextProvided } from '@lit-labs/context';
 import { appWebsocketContext, appInfoContext } from '../../contexts';
@@ -11,14 +11,23 @@ import '@material/mwc-button';
 
 @customElement('create-{{kebab_case entry_type.name}}')
 export class Create{{pascal_case entry_type.name}} extends LitElement {
+  {{#each depends_on}}
+  @property()
+  {{camel_case this}}Hash!: ActionHash;
+  {{/each}}
 
   {{#each entry_type.fields}}
+  {{#if (not (contains depend_on this))}}
   @state()
   _{{camel_case @key}}: {{> (concat field_type.type "/ui/type") }} | undefined;
-
+  {{/if}}
   {{/each}}
   is{{pascal_case entry_type.name}}Valid() {
-    return {{#each entry_type.fields}}this._{{camel_case @key}}{{#unless @last}} && {{/unless}}{{/each}};
+    return {{#each entry_type.fields}}
+    {{#if (not (contains depend_on this)) }}
+    	this._{{camel_case @key}}{{#unless @last}} && {{/unless}}
+    {{/if}}
+    {{/each}};
   }
 
   @contextProvided({ context: appWebsocketContext })
@@ -30,9 +39,15 @@ export class Create{{pascal_case entry_type.name}} extends LitElement {
   async create{{pascal_case entry_type.name}}() {
     const cellData = this.appInfo.cell_data.find((c: InstalledCell) => c.role_id === '{{dna_role_id}}')!;
 
-    const {{camel_case entry_type.name}}: {{pascal_case entry_type.name}} = { {{#each entry_type.fields}}
-      {{snake_case @key}}: this._{{camel_case @key}}!,
-{{/each}}
+    const {{camel_case entry_type.name}}: {{pascal_case entry_type.name}} = { 
+    {{#each entry_type.fields}}
+      {{#if (not (contains depends_on this))}}
+        {{snake_case @key}}: this._{{camel_case @key}}!,
+      {{/if}}
+    {{/each}}
+    {{#each depends_on}}
+      {{snake_case this}}: this.{{camel_case this}}!,
+    {{/each}}
     };
 
     const record: Record = await this.appWebsocket.callZome({
