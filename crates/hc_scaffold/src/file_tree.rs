@@ -26,28 +26,92 @@ pub fn load_directory_into_memory(path: &PathBuf) -> ScaffoldResult<FileTree> {
             create_dir_all(&mut file_tree, &dir_entry)?;
         } else {
             if let Ok(contents) = fs::read_to_string(&path.join(&dir_entry)) {
-                let mut folder_path = dir_entry.clone();
-                folder_path.pop();
-
-                let v: Vec<OsString> = folder_path
-                    .clone()
-                    .iter()
-                    .map(|s| s.to_os_string())
-                    .collect();
-                file_tree
-                    .path_mut(&mut v.iter())
-                    .ok_or(ScaffoldError::PathNotFound(folder_path.clone()))?
-                    .dir_content_mut()
-                    .ok_or(ScaffoldError::PathNotFound(folder_path.clone()))?
-                    .insert(
-                        dir_entry.file_name().unwrap().to_os_string(),
-                        file!(contents),
-                    );
+                insert_file(&mut file_tree, &dir_entry, &contents)?;
             }
         }
     }
 
     Ok(file_tree)
+}
+
+pub fn dir_content(
+    file_tree: &FileTree,
+    folder_path: &PathBuf,
+) -> ScaffoldResult<BTreeMap<OsString, FileTree>> {
+    let v: Vec<OsString> = folder_path
+        .clone()
+        .iter()
+        .map(|s| s.to_os_string())
+        .collect();
+    file_tree
+        .path(&mut v.iter())
+        .ok_or(ScaffoldError::PathNotFound(folder_path.clone()))?
+        .dir_content()
+        .ok_or(ScaffoldError::PathNotFound(folder_path.clone()))
+        .cloned()
+}
+
+pub fn dir_exists(app_file_tree: &FileTree, dir_path: &PathBuf) -> bool {
+    dir_content(app_file_tree, dir_path).is_ok()
+}
+
+pub fn file_content(file_tree: &FileTree, file_path: &PathBuf) -> ScaffoldResult<String> {
+    let v: Vec<OsString> = file_path.clone().iter().map(|s| s.to_os_string()).collect();
+    file_tree
+        .path(&mut v.iter())
+        .ok_or(ScaffoldError::PathNotFound(file_path.clone()))?
+        .file_content()
+        .ok_or(ScaffoldError::PathNotFound(file_path.clone()))
+        .cloned()
+}
+
+pub fn map_file<F: Fn(String) -> String>(
+    file_tree: &mut FileTree,
+    file_path: &PathBuf,
+    map_fn: F,
+) -> ScaffoldResult<()> {
+    let contents = file_content(&file_tree, file_path)?;
+
+    let new_contents = map_fn(contents);
+
+    insert_file(file_tree, file_path, &new_contents)
+}
+
+pub fn insert_file(
+    file_tree: &mut FileTree,
+    file_path: &PathBuf,
+    content: &String,
+) -> ScaffoldResult<()> {
+    let mut folder_path = file_path.clone();
+    folder_path.pop();
+
+    insert_file_tree_in_dir(
+        file_tree,
+        &folder_path,
+        (
+            file_path.file_name().unwrap().to_os_string(),
+            file!(content),
+        ),
+    )
+}
+
+pub fn insert_file_tree_in_dir(
+    file_tree: &mut FileTree,
+    folder_path: &PathBuf,
+    file_tree_to_insert: (OsString, FileTree),
+) -> ScaffoldResult<()> {
+    let v: Vec<OsString> = folder_path
+        .clone()
+        .iter()
+        .map(|s| s.to_os_string())
+        .collect();
+    file_tree
+        .path_mut(&mut v.iter())
+        .ok_or(ScaffoldError::PathNotFound(folder_path.clone()))?
+        .dir_content_mut()
+        .ok_or(ScaffoldError::PathNotFound(folder_path.clone()))?
+        .insert(file_tree_to_insert.0, file_tree_to_insert.1);
+    Ok(())
 }
 
 pub fn find_files_by_name(file_tree: &FileTree, file_name: &PathBuf) -> BTreeMap<PathBuf, String> {
@@ -182,7 +246,8 @@ pub fn map_all_files<F: Fn(PathBuf, String) -> ScaffoldResult<String> + Clone>(
     file_tree: &mut FileTree,
     map_fn: F,
 ) -> ScaffoldResult<()> {
-    map_all_files_rec(file_tree, PathBuf::new(), map_fn)
+    map_all_files_rec(&mut file_tree, PathBuf::new(), map_fn)?;
+    Ok(file_tree)
 }
 
 fn map_all_files_rec<F: Fn(PathBuf, String) -> ScaffoldResult<String> + Clone>(

@@ -8,7 +8,7 @@ use std::{ffi::OsString, path::PathBuf};
 
 use crate::{
     definitions::EntryDefinition,
-    file_tree::{find_map_rust_files, map_rust_files, FileTree},
+    file_tree::{find_map_rust_files, map_file, map_rust_files, FileTree},
 };
 use crate::{
     error::{ScaffoldError, ScaffoldResult},
@@ -104,23 +104,16 @@ pub fn add_entry_def_to_integrity_zome(
     // 2. Add this file as a module in the entry point for the crate
 
     let lib_rs_path = crate_src_path.join("lib.rs");
-    let v: Vec<OsString> = lib_rs_path.iter().map(|s| s.to_os_string()).collect();
-    app_file_tree
-        .path_mut(&mut v.iter())
-        .ok_or(ScaffoldError::PathNotFound(lib_rs_path.clone()))?
-        .file_content_mut()
-        .ok_or(ScaffoldError::PathNotFound(lib_rs_path.clone()))?
-        .insert_str(
-            0,
-            format!(
-                r#"pub mod {};
+
+    map_file(&mut app_file_tree, &lib_rs_path, |s| {
+        format!(
+            r#"pub mod {};
 pub use {}::*;
 
-"#,
-                snake_entry_def_name, snake_entry_def_name,
-            )
-            .as_str(),
-        );
+{}"#,
+            snake_entry_def_name, snake_entry_def_name, s
+        )
+    })?;
 
     let entry_types = get_all_entry_types(&app_file_tree, dna_manifest, integrity_zome_name)?;
 

@@ -1,6 +1,6 @@
-use std::{ffi::OsString, path::PathBuf, process::Stdio, str::from_utf8};
+use std::{path::PathBuf, process::Stdio, str::from_utf8};
 
-use crate::file_tree::FileTree;
+use crate::file_tree::{file_content, insert_file, FileTree};
 use cargo_metadata::{Metadata, MetadataCommand};
 
 use crate::error::{ScaffoldError, ScaffoldResult};
@@ -98,12 +98,7 @@ fn add_workspace_dependency(
 
     let cargo_toml_str = toml::to_string(&workspace_cargo_toml)?;
 
-    let v: Vec<OsString> = path.iter().map(|a| a.to_os_string()).collect();
-    *app_file_tree
-        .path_mut(&mut v.iter())
-        .ok_or(ScaffoldError::PathNotFound(path.clone()))?
-        .file_content_mut()
-        .unwrap() = cargo_toml_str;
+    insert_file(&mut app_file_tree, &path, &cargo_toml_str)?;
 
     Ok(app_file_tree)
 }
@@ -204,14 +199,7 @@ pub fn get_workspace_members(app_file_tree: &FileTree) -> ScaffoldResult<Vec<Str
 pub fn get_workspace_cargo_toml(app_file_tree: &FileTree) -> ScaffoldResult<toml::Value> {
     let path = workspace_cargo_toml_path(app_file_tree);
 
-    let v: Vec<OsString> = path.iter().map(|a| a.to_os_string()).collect();
-    let cargo_toml_str = app_file_tree
-        .path(&mut v.iter())
-        .ok_or(ScaffoldError::PathNotFound(path.clone()))?
-        .file_content()
-        .ok_or(ScaffoldError::PathNotFound(path.clone()))?
-        .clone();
-
+    let cargo_toml_str = file_content(app_file_tree, &path)?;
     let v = toml::from_str(cargo_toml_str.as_str())?;
 
     Ok(v)

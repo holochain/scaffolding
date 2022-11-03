@@ -1,10 +1,9 @@
 use std::{collections::BTreeMap, ffi::OsString, path::PathBuf};
 
 use crate::{
-    cli::Crud,
     definitions::EntryDefinition,
-    error::{ScaffoldError, ScaffoldResult},
-    file_tree::{create_dir_all, FileTree},
+    error::ScaffoldResult,
+    file_tree::{create_dir_all, insert_file_tree_in_dir, FileTree},
 };
 
 pub mod entry_crud_tests;
@@ -16,7 +15,9 @@ pub mod utils;
 use build_fs_tree::file;
 use convert_case::{Case, Casing};
 use entry_crud_tests::entry_crud_tests;
-use holochain_types::prelude::{AppManifest, ZomeManifest};
+use holochain_types::prelude::ZomeManifest;
+
+use super::{app::utils::read_app_manifest, entry_def::crud::Crud};
 
 fn find_or_choose_tryorama_package_path(_app_file_tree: &FileTree) -> ScaffoldResult<PathBuf> {
     // TODO: Actually implement this
@@ -25,8 +26,7 @@ fn find_or_choose_tryorama_package_path(_app_file_tree: &FileTree) -> ScaffoldRe
 
 pub fn add_tryorama_tests_for_entry_def(
     mut app_file_tree: FileTree,
-    app_manifest: &(PathBuf, AppManifest),
-    dna_role_id: &String,
+    dna_manifest_path: &PathBuf,
     coordinator_zome: &String,
     entry_def: &EntryDefinition,
     crud: &Crud,
@@ -34,10 +34,12 @@ pub fn add_tryorama_tests_for_entry_def(
 ) -> ScaffoldResult<FileTree> {
     let tryorama_path = find_or_choose_tryorama_package_path(&app_file_tree)?;
 
-    let mut happ_bundle_path_from_root = app_manifest.0.clone();
+    let app_manifest = read_app_manifest(&app_file_tree, app_manifest_path)?;
+
+    let mut happ_bundle_path_from_root = app_manifest_path.clone();
     happ_bundle_path_from_root.pop();
     happ_bundle_path_from_root =
-        happ_bundle_path_from_root.join(format!("{}.happ", app_manifest.1.app_name()));
+        happ_bundle_path_from_root.join(format!("{}.happ", app_manifest.app_name()));
 
     let mut happ_bundle_from_tryorama_path = PathBuf::new();
 
@@ -65,16 +67,15 @@ pub fn add_tryorama_tests_for_entry_def(
     let kebab_entry_def_name = entry_def.name.clone().to_case(Case::Kebab);
 
     create_dir_all(&mut app_file_tree, &test_path)?;
-    let v: Vec<OsString> = test_path.iter().map(|s| s.to_os_string()).collect();
-    app_file_tree
-        .path_mut(&mut v.iter())
-        .ok_or(ScaffoldError::PathNotFound(test_path.clone()))?
-        .dir_content_mut()
-        .ok_or(ScaffoldError::PathNotFound(test_path.clone()))?
-        .insert(
+
+    insert_file_tree_in_dir(
+        &mut app_file_tree,
+        &test_path,
+        (
             OsString::from(format!("{}.test.ts", kebab_entry_def_name.clone())),
             file!(tests_file),
-        );
+        ),
+    )?;
 
     Ok(app_file_tree)
 }

@@ -69,14 +69,17 @@ pub enum ScaffoldError {
     #[error("DNA \"{0}\" was not found in this app")]
     DnaNotFound(String),
 
-    #[error("No DNAs were found in app \"{0}\"")]
-    NoDnasFound(String),
+    #[error("No apps were found that have the DNA \"{0}\"")]
+    NoAppsFoundForDna(String),
+
+    #[error("No DNAs were found")]
+    NoDnasFound,
 
     #[error("Malformed file {0}: ")]
     MalformedFile(PathBuf, String),
 
-    #[error("DNA \"{0}\" already exists in app \"{1}\"")]
-    DnaAlreadyExists(String, String),
+    #[error("DNA \"{0}\" already exists")]
+    DnaAlreadyExists(String),
 
     #[error("Zome \"{0}\" already exists in dna \"{1}\"")]
     ZomeAlreadyExists(String, String),

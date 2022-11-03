@@ -1,10 +1,11 @@
+use std::collections::BTreeMap;
 use std::{ffi::OsString, path::PathBuf, vec};
 
 use dialoguer::{theme::ColorfulTheme, Input, Select};
 use inflector::Inflector;
 
 use crate::error::{ScaffoldError, ScaffoldResult};
-use crate::file_tree::FileTree;
+use crate::file_tree::{dir_content, FileTree};
 
 pub fn choose_directory_path(prompt: &String, app_file_tree: &FileTree) -> ScaffoldResult<PathBuf> {
     let mut chosen_directory: Option<PathBuf> = None;
@@ -12,9 +13,7 @@ pub fn choose_directory_path(prompt: &String, app_file_tree: &FileTree) -> Scaff
     let mut current_path = PathBuf::new();
 
     while let None = chosen_directory {
-        let v: Vec<OsString> = current_path.iter().map(|s| s.to_os_string()).collect();
-        let mut folders =
-            get_folders_names(app_file_tree.path(&mut v.iter()).expect("Can't find path"));
+        let mut folders = get_folders_names(&dir_content(&app_file_tree, &current_path)?);
 
         folders = folders
             .clone()
@@ -57,15 +56,12 @@ pub fn choose_directory_path(prompt: &String, app_file_tree: &FileTree) -> Scaff
     Ok(d)
 }
 
-fn get_folders_names(file_tree: &FileTree) -> Vec<String> {
-    match file_tree {
-        FileTree::Directory(c) => c
-            .into_iter()
-            .filter(|d| d.1.dir_content().is_some())
-            .map(|(n, _)| n.to_str().unwrap().to_string())
-            .collect(),
-        FileTree::File(_) => vec![],
-    }
+fn get_folders_names(folder: &BTreeMap<OsString, FileTree>) -> Vec<String> {
+    folder
+        .into_iter()
+        .filter(|d| d.1.dir_content().is_some())
+        .map(|(n, _)| n.to_str().unwrap().to_string())
+        .collect()
 }
 
 /// "yes" or "no" input dialog, with the option to specify a recommended answer (yes = true, no = false)

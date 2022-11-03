@@ -7,7 +7,7 @@ use holochain_types::prelude::{DnaManifest, ZomeManifest};
 
 use crate::{
     error::{ScaffoldError, ScaffoldResult},
-    file_tree::{map_rust_files, FileTree},
+    file_tree::{map_file, map_rust_files, FileTree},
     generators::zome::{
         coordinator::find_extern_function_or_choose,
         utils::{get_coordinator_zomes_for_integrity, zome_manifest_path},
@@ -286,21 +286,15 @@ pub fn add_index_to_coordinators(
     // 2. Add this file as a module in the entry point for the crate
 
     let lib_rs_path = crate_src_path.join("lib.rs");
-    let v: Vec<OsString> = lib_rs_path.iter().map(|s| s.to_os_string()).collect();
-    app_file_tree
-        .path_mut(&mut v.iter())
-        .ok_or(ScaffoldError::PathNotFound(lib_rs_path.clone()))?
-        .file_content_mut()
-        .ok_or(ScaffoldError::PathNotFound(lib_rs_path.clone()))?
-        .insert_str(
-            0,
-            format!(
-                r#"pub mod {};
- "#,
-                snake_link_type_name,
-            )
-            .as_str(),
-        );
+
+    map_file(&mut app_file_tree, &lib_rs_path, |s| {
+        format!(
+            r#"pub mod {};
+
+{}"#,
+            snake_link_type_name, s
+        )
+    })?;
 
     for entry_type in entry_types {
         app_file_tree = add_create_link_in_create_function(
