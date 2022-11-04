@@ -157,6 +157,6 @@ pub fn template_path() -> PathBuf {
 pub fn get_templates_for_app(file_tree: &FileTree) -> ScaffoldResult<FileTree> {
     match dir_content(file_tree, &template_path()) {
         Ok(t) => Ok(FileTree::Directory(t)),
-        Err(_) => ScaffoldError::TemplateNotFound,
+        Err(_) => Err(ScaffoldError::TemplateNotFound),
     }
 }

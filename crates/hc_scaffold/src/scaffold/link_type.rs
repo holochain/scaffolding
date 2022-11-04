@@ -14,7 +14,7 @@ use self::{
 use super::{
     entry_def::{integrity::get_all_entry_types, utils::get_or_choose_entry_type},
     web_app::uis::scaffold_link_type_templates,
-    zome::utils::get_coordinator_zomes_for_integrity,
+    zome::{utils::get_coordinator_zomes_for_integrity, ZomeFileTree},
 };
 
 pub mod coordinator;
@@ -29,16 +29,14 @@ pub fn link_type_name(from_entry_type: &String, to_entry_type: &String) -> Strin
 }
 
 pub fn scaffold_link_type(
-    app_file_tree: FileTree,
-    dna_manifest: &DnaManifest,
-    integrity_zome_name: &String,
+    zome_file_tree: ZomeFileTree,
+    template_file_tree: &FileTree,
     from_entry_type: &Option<String>,
     to_entry_type: &Option<String>,
     link_from_entry_hash: bool,
     link_to_entry_hash: bool,
 ) -> ScaffoldResult<(FileTree, String)> {
-    let all_entries = get_all_entry_types(&app_file_tree, dna_manifest, integrity_zome_name)?
-        .unwrap_or_else(|| vec![]);
+    let all_entries = get_all_entry_types(&zome_file_tree)?.unwrap_or_else(|| vec![]);
 
     let from_entry_type = get_or_choose_entry_type(
         dna_manifest,

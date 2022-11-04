@@ -120,6 +120,7 @@ pub fn parse_depends_on_itself(depends_on_itself: &str) -> Result<DependsOnItsel
 
 pub fn scaffold_entry_type(
     zome_file_tree: ZomeFileTree,
+    template_file_tree: &FileTree,
     singular_name: &String,
     plural_name: &String,
     maybe_crud: &Option<Crud>,
@@ -176,7 +177,10 @@ pub fn scaffold_entry_type(
 
             depends_fields
         }
-        None => choose_fields(depends_fields)?,
+        None => choose_fields(
+            path(templates_file_tree, &PathBuf::from("field-types")),
+            depends_fields,
+        )?,
     };
 
     let entry_def = EntryDefinition {

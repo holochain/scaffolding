@@ -75,6 +75,9 @@ pub enum ScaffoldError {
     #[error("No \".template\" folder found for this project. \n\nInitialize a built-in template with \"hc-scaffold template init\", \n\nor pull an existing one from your favourite git repository with \"hc-scaffold template pull <GIT_REPO_URL>\"")]
     TemplateNotFound,
 
+    #[error("No \"{0}\" folder found in the given repository")]
+    TemplateNotFoundInRepo(PathBuf),
+
     #[error("No DNAs were found")]
     NoDnasFound,
 

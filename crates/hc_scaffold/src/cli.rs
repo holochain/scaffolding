@@ -11,7 +11,7 @@ use crate::scaffold::entry_type::{
 use crate::scaffold::index::{scaffold_index, IndexType};
 use crate::scaffold::link_type::scaffold_link_type;
 use crate::scaffold::web_app::scaffold_web_app;
-use crate::scaffold::web_app::uis::{template_for_ui_framework, UiFramework};
+use crate::scaffold::web_app::uis::{choose_ui_framework, template_for_ui_framework, UiFramework};
 use crate::scaffold::zome::utils::select_integrity_zomes;
 use crate::scaffold::zome::{
     integrity_zome_name, scaffold_coordinator_zome, scaffold_integrity_zome, ZomeFileTree,
@@ -172,14 +172,14 @@ impl HcScaffold {
                 template,
             } => {
                 let template = match template {
-                    Some(t) => Ok(t.clone()),
+                    Some(t) => Ok(t),
                     None => {
                         let ui_framework = choose_ui_framework()?;
                         Ok(HcScaffoldTemplate::Init { ui_framework })
                     }
                 }?;
 
-                let template_file_tree = template.get_template_file_tree();
+                let template_file_tree = template.get_template_file_tree()?;
 
                 let prompt = String::from("App name (no whitespaces):");
                 let name: String = match name {
@@ -196,7 +196,7 @@ impl HcScaffold {
                 };
 
                 let app_file_tree =
-                    scaffold_web_app(name.clone(), description, !setup_nix, &template_file_tree)?;
+                    scaffold_web_app(name.clone(), description, !setup_nix, template_file_tree)?;
 
                 let file_tree = MergeableFileSystemTree::<OsString, String>::from(app_file_tree);
 
@@ -310,6 +310,7 @@ Add new zomes to your DNA with:
                 let current_dir = std::env::current_dir()?;
 
                 let file_tree = load_directory_into_memory(&current_dir)?;
+                let template_file_tree = get_templates_for_app(&file_tree)?;
 
                 let mut dna_file_tree = DnaFileTree::get_or_choose(file_tree, &dna)?;
 
@@ -383,6 +384,10 @@ Add new entry definitions to your zome with:
                 depends_on_itself,
                 fields,
             } => {
+                let current_dir = std::env::current_dir()?;
+                let file_tree = load_directory_into_memory(&current_dir)?;
+                let template_file_tree = get_templates_for_app(&file_tree)?;
+
                 let singular_name: String = match singular_name {
                     Some(n) => check_snake_case(n, "entry type singular name")?,
                     None => input_snake_case(&String::from("Singular name (snake_case):"))?,
@@ -392,16 +397,13 @@ Add new entry definitions to your zome with:
                     None => input_snake_case(&String::from("Plural name (snake_case):"))?,
                 };
 
-                let current_dir = std::env::current_dir()?;
-
-                let app_file_tree = load_directory_into_memory(&current_dir)?;
-
-                let dna_file_tree = DnaFileTree::get_or_choose(app_file_tree, &dna)?;
+                let dna_file_tree = DnaFileTree::get_or_choose(file_tree, &dna)?;
 
                 let zome_file_tree = ZomeFileTree::get_or_choose_integrity(dna_file_tree, &zome)?;
 
                 let app_file_tree = scaffold_entry_type(
                     zome_file_tree,
+                    &template_file_tree,
                     &singular_name,
                     &plural_name,
                     &crud,
@@ -422,7 +424,7 @@ Add new indexes for that entry type with:
 
   hc-scaffold index
 "#,
-                    name
+                    plural_name
                 );
             }
             HcScaffold::LinkType {
@@ -434,19 +436,16 @@ Add new indexes for that entry type with:
                 link_to_entry_hash,
             } => {
                 let current_dir = std::env::current_dir()?;
+                let file_tree = load_directory_into_memory(&current_dir)?;
+                let template_file_tree = get_templates_for_app(&file_tree)?;
 
-                let app_file_tree = load_directory_into_memory(&current_dir)?;
+                let dna_file_tree = DnaFileTree::get_or_choose(file_tree, &dna)?;
 
-                let app_manifest = get_or_choose_app_manifest(&app_file_tree, &app)?;
-                let (_dna_manifest_path, dna_manifest) =
-                    get_or_choose_dna_manifest_path(&app_file_tree, &app_manifest, dna)?;
-
-                let integrity_zome_name = get_or_choose_integrity_zome(&dna_manifest, &zome)?;
+                let zome_file_tree = ZomeFileTree::get_or_choose_integrity(dna_file_tree, &zome)?;
 
                 let (app_file_tree, link_type_name) = scaffold_link_type(
-                    app_file_tree,
-                    &dna_manifest,
-                    &integrity_zome_name,
+                    &zome_file_tree,
+                    &template_file_tree,
                     &from_entry_type,
                     &to_entry_type,
                     link_from_entry_hash,
