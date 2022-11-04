@@ -1,13 +1,13 @@
-use holochain_types::prelude::DnaManifest;
+use holochain_types::prelude::{DnaManifest, DnaManifestCurrentBuilder, ZomeManifest};
 
-use crate::file_tree::insert_file;
+use crate::{error::ScaffoldResult, file_tree::insert_file};
 
-use super::manifest::check_zome_doesnt_exist;
+use super::{manifest::check_zome_doesnt_exist, zome_wasm_location, DnaFileTree};
 
-pub fn add_integrity_zome_to_manifest(
-    dna_file_tree: DnaFileTree,
+pub fn new_integrity_zome_manifest(
+    dna_file_tree: &DnaFileTree,
     name: &String,
-) -> ScaffoldResult<DnaFileTree> {
+) -> ScaffoldResult<ZomeManifest> {
     let location = zome_wasm_location(&dna_file_tree, &name);
     let zome_manifest = ZomeManifest {
         name: name.clone().into(),
@@ -16,6 +16,13 @@ pub fn add_integrity_zome_to_manifest(
         dependencies: None,
     };
 
+    Ok(zome_manifest)
+}
+
+pub fn add_integrity_zome_to_manifest(
+    dna_file_tree: DnaFileTree,
+    zome_manifest: ZomeManifest,
+) -> ScaffoldResult<DnaFileTree> {
     check_zome_doesnt_exist(&dna_file_tree.dna_manifest, &zome_manifest)?;
 
     let (mut integrity_manifest, mut coordinator_manifest) =

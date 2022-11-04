@@ -6,8 +6,10 @@ use serde_json::{json, Value};
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 
-use crate::error::ScaffoldResult;
-use crate::file_tree::{find_files, flatten_file_tree, unflatten_file_tree, FileTree};
+use crate::error::{ScaffoldError, ScaffoldResult};
+use crate::file_tree::{dir_content, find_files, flatten_file_tree, unflatten_file_tree, FileTree};
+
+pub mod pull;
 
 pub fn register_helpers<'a>(h: Handlebars<'a>) -> Handlebars<'a> {
     let h = register_concat_helper(h);
@@ -146,4 +148,15 @@ pub fn render_template_file_tree_and_merge_with_existing<'a, T: Serialize>(
     flattened_app_file_tree.extend(flattened_templates);
 
     unflatten_file_tree(&flattened_app_file_tree)
+}
+
+pub fn template_path() -> PathBuf {
+    PathBuf::from(".template")
+}
+
+pub fn get_templates_for_app(file_tree: &FileTree) -> ScaffoldResult<FileTree> {
+    match dir_content(file_tree, &template_path()) {
+        Ok(t) => Ok(FileTree::Directory(t)),
+        Err(_) => ScaffoldError::TemplateNotFound,
+    }
 }

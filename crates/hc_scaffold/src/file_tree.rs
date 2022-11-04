@@ -34,6 +34,23 @@ pub fn load_directory_into_memory(path: &PathBuf) -> ScaffoldResult<FileTree> {
     Ok(file_tree)
 }
 
+pub fn path_mut<'a>(
+    file_tree: &'a mut FileTree,
+    path: &PathBuf,
+) -> ScaffoldResult<&'a mut FileTree> {
+    let v: Vec<OsString> = path.clone().iter().map(|s| s.to_os_string()).collect();
+    file_tree
+        .path_mut(&mut v.iter())
+        .ok_or(ScaffoldError::PathNotFound(path.clone()))
+}
+
+pub fn path<'a>(file_tree: &'a FileTree, path: &PathBuf) -> ScaffoldResult<&'a FileTree> {
+    let v: Vec<OsString> = path.clone().iter().map(|s| s.to_os_string()).collect();
+    file_tree
+        .path(&mut v.iter())
+        .ok_or(ScaffoldError::PathNotFound(path.clone()))
+}
+
 pub fn dir_content(
     file_tree: &FileTree,
     folder_path: &PathBuf,

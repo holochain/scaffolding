@@ -24,32 +24,32 @@ impl AppFileTree {
     pub fn file_tree(self) -> FileTree {
         self.file_tree
     }
-}
 
-pub fn get_or_choose(
-    file_tree: FileTree,
-    app_name: &Option<String>,
-) -> ScaffoldResult<AppFileTree> {
-    let app_manifests = find_app_manifests(&file_tree)?;
+    pub fn get_or_choose(
+        file_tree: FileTree,
+        app_name: &Option<String>,
+    ) -> ScaffoldResult<AppFileTree> {
+        let app_manifests = find_app_manifests(&file_tree)?;
 
-    let (app_manifest_path, app_manifest) = match (app_manifests.len(), app_name) {
-        (0, _) => Err(ScaffoldError::AppManifestNotFound),
-        (1, None) => app_manifests
-            .into_iter()
-            .last()
-            .ok_or(ScaffoldError::AppManifestNotFound),
-        (_, None) => choose_app(app_manifests),
-        (_, Some(name)) => app_manifests
-            .into_iter()
-            .find(|(_, m)| m.app_name().to_string().eq(name))
-            .ok_or_else(|| ScaffoldError::AppManifestNotFound),
-    }?;
+        let (app_manifest_path, app_manifest) = match (app_manifests.len(), app_name) {
+            (0, _) => Err(ScaffoldError::AppManifestNotFound),
+            (1, None) => app_manifests
+                .into_iter()
+                .last()
+                .ok_or(ScaffoldError::AppManifestNotFound),
+            (_, None) => choose_app(app_manifests),
+            (_, Some(name)) => app_manifests
+                .into_iter()
+                .find(|(_, m)| m.app_name().to_string().eq(name))
+                .ok_or_else(|| ScaffoldError::AppManifestNotFound),
+        }?;
 
-    Ok(AppFileTree {
-        file_tree,
-        app_manifest_path,
-        app_manifest,
-    })
+        Ok(AppFileTree {
+            file_tree,
+            app_manifest_path,
+            app_manifest,
+        })
+    }
 }
 
 fn choose_app(

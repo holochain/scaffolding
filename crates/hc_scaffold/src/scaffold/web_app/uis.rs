@@ -63,7 +63,7 @@ pub struct ScaffoldWebAppData {
     holochain_client_version: String,
 }
 
-fn get_templates(framework: &UiFramework) -> ScaffoldResult<FileTree> {
+pub fn template_for_ui_framework(framework: &UiFramework) -> ScaffoldResult<FileTree> {
     let dir = match framework {
         UiFramework::Lit => &LIT_TEMPLATES,
         UiFramework::Vanilla => &VANILLA_TEMPLATES,
@@ -92,7 +92,7 @@ pub fn build_handlebars<'a>(templates_dir: &FileTree) -> ScaffoldResult<Handleba
 
 pub fn scaffold_web_app_ui(
     mut app_file_tree: FileTree,
-    framework: &UiFramework,
+    templates_file_tree: &FileTree,
     app_name: &String,
 ) -> ScaffoldResult<FileTree> {
     let data = ScaffoldWebAppData {
@@ -100,9 +100,7 @@ pub fn scaffold_web_app_ui(
         holochain_client_version: holochain_client_version(),
     };
 
-    let templates = get_templates(framework)?;
-
-    let h = build_handlebars(&templates)?;
+    let h = build_handlebars(templates_file_tree)?;
 
     let field_types_path = PathBuf::from("web-app");
     let v: Vec<OsString> = field_types_path.iter().map(|s| s.to_os_string()).collect();
@@ -166,7 +164,7 @@ pub fn scaffold_entry_type_templates(
         depends_on: depends_on.clone(),
     };
 
-    let templates = get_templates(&framework)?;
+    let templates = template_for_ui_framework(&framework)?;
 
     let h = build_handlebars(&templates)?;
 
@@ -208,7 +206,7 @@ pub fn scaffold_link_type_templates(
         to_entry_type: to_entry_type.clone(),
     };
 
-    let templates = get_templates(&framework)?;
+    let templates = template_for_ui_framework(&framework)?;
 
     let h = build_handlebars(&templates)?;
 
@@ -253,7 +251,7 @@ pub fn scaffold_index_templates(
         index_type: index_type.clone(),
     };
 
-    let templates = get_templates(&framework)?;
+    let templates = template_for_ui_framework(&framework)?;
 
     let h = build_handlebars(&templates)?;
 

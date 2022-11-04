@@ -2,15 +2,18 @@ use holochain_types::prelude::{
     DnaManifest, DnaManifestCurrentBuilder, ZomeDependency, ZomeManifest,
 };
 
-use crate::error::{ScaffoldError, ScaffoldResult};
+use crate::{
+    error::{ScaffoldError, ScaffoldResult},
+    file_tree::insert_file,
+};
 
-use super::{manifest::check_zome_doesnt_exist, DnaFileTree};
+use super::{manifest::check_zome_doesnt_exist, zome_wasm_location, DnaFileTree};
 
-pub fn add_coordinator_zome_to_manifest(
-    dna_file_tree: DnaFileTree,
+pub fn new_coordinator_zome_manifest(
+    dna_file_tree: &DnaFileTree,
     name: &String,
     maybe_dependencies: &Option<Vec<String>>,
-) -> ScaffoldResult<(DnaFileTree, ZomeManifest)> {
+) -> ScaffoldResult<ZomeManifest> {
     let location = zome_wasm_location(&dna_file_tree, &name);
     let zome_manifest = ZomeManifest {
         name: name.clone().into(),
@@ -22,22 +25,30 @@ pub fn add_coordinator_zome_to_manifest(
                 .collect()
         }),
     };
+
+    Ok(zome_manifest)
+}
+
+pub fn add_coordinator_zome_to_manifest(
+    dna_file_tree: DnaFileTree,
+    zome_manifest: ZomeManifest,
+) -> ScaffoldResult<DnaFileTree> {
     check_zome_doesnt_exist(&dna_file_tree.dna_manifest, &zome_manifest)?;
 
     let (mut integrity_manifest, mut coordinator_manifest) =
         match dna_file_tree.dna_manifest.clone() {
             DnaManifest::V1(m) => (m.integrity, m.coordinator),
         };
-    if let Some(dependencies) = maybe_dependencies {
+    if let Some(dependencies) = zome_manifest.dependencies {
         for d in dependencies {
             if !integrity_manifest
                 .zomes
                 .iter()
-                .any(|z| z.name.0.to_string().eq(d))
+                .any(|z| z.name.0.to_string().eq(&d.name.0.to_string()))
             {
                 return Err(ScaffoldError::IntegrityZomeNotFound(
-                    d.clone(),
-                    self.dna_manifest.name(),
+                    d.name.0.to_string(),
+                    dna_file_tree.dna_manifest.name(),
                 ));
             }
         }
@@ -58,5 +69,5 @@ pub fn add_coordinator_zome_to_manifest(
         &serde_yaml::to_string(&new_manifest)?,
     )?;
 
-    Ok((dna_file_tree, zome_manifest))
+    Ok(dna_file_tree)
 }

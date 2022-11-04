@@ -17,3 +17,11 @@ pub fn hdk_version() -> String {
 pub fn holochain_nix_version() -> String {
     String::from("main")
 }
+
+pub fn tsify_version() -> String {
+    String::from("0.4")
+}
+
+pub fn wasm_bindgen_version() -> String {
+    String::from("=0.2.79")
+}

@@ -1,13 +1,11 @@
-use dialoguer::{theme::ColorfulTheme, Confirm};
+use dialoguer::{theme::ColorfulTheme, Confirm, Select};
 use mr_bundle::Location;
 use regex::Regex;
 use std::{ffi::OsString, path::PathBuf};
 
 use crate::{
-    file_tree::{
-        dna_file_tree::DnaFileTree, insert_file_tree_in_dir, zome_file_tree::ZomeFileTree, FileTree,
-    },
-    versions::{hdi_version, hdk_version},
+    file_tree::{dir_exists, insert_file_tree_in_dir, FileTree},
+    versions::{hdi_version, tsify_version, wasm_bindgen_version},
 };
 use build_fs_tree::{dir, file};
 use holochain_types::prelude::{DnaManifest, ZomeManifest};
@@ -21,13 +19,16 @@ pub mod coordinator;
 pub mod integrity;
 pub mod utils;
 
-use integrity::add_integrity_zome_to_manifest;
-
-use self::utils::zome_wasm_location;
-
-use super::app::cargo::{
-    add_workspace_external_dependency, add_workspace_path_dependency, get_workspace_members,
-    get_workspace_packages_locations, workspace_package_path,
+use super::{
+    app::cargo::{
+        add_workspace_external_dependency, add_workspace_path_dependency, get_workspace_members,
+        get_workspace_packages_locations, workspace_package_path,
+    },
+    dna::{
+        coordinator::new_coordinator_zome_manifest,
+        integrity::{add_integrity_zome_to_manifest, new_integrity_zome_manifest},
+        DnaFileTree,
+    },
 };
 
 pub struct ZomeFileTree {
@@ -36,37 +37,67 @@ pub struct ZomeFileTree {
     pub zome_crate_path: PathBuf,
 }
 
-pub fn get_or_choose_integrity(
-    dna_file_tree: DnaFileTree,
-    integrity_zome_name: &Option<String>,
-) -> ScaffoldResult<ZomeFileTree> {
-    let integrity_zomes = match dna_file_tree.dna_manifest {
-        DnaManifest::V1(v1) => v1.integrity.zomes.clone(),
-    };
+impl ZomeFileTree {
+    pub fn get_or_choose_integrity(
+        dna_file_tree: DnaFileTree,
+        integrity_zome_name: &Option<String>,
+    ) -> ScaffoldResult<ZomeFileTree> {
+        let integrity_zomes = match dna_file_tree.dna_manifest {
+            DnaManifest::V1(v1) => v1.integrity.zomes.clone(),
+        };
 
-    let zome_manifest = match (integrity_zomes.len(), integrity_zome_name) {
-        (0, None) => Err(ScaffoldError::NoIntegrityZomesFound(
-            dna_file_tree.dna_manifest.name(),
-        )),
-        (1, None) => {
-            integrity_zomes
-                .into_iter()
-                .last()
-                .ok_or(ScaffoldError::NoIntegrityZomesFound(
-                    dna_file_tree.dna_manifest.name(),
-                ))
-        }
-        (_, None) => choose_integrity_zome(&dna_file_tree.dna_manifest.name(), &integrity_zomes),
-        (_, Some(name)) => integrity_zomes
-            .into_iter()
-            .find(|zome| zome.name.0.to_string().eq(name))
-            .ok_or(ScaffoldError::IntegrityZomeNotFound(
-                name.clone(),
+        let zome_manifest = match (integrity_zomes.len(), integrity_zome_name) {
+            (0, None) => Err(ScaffoldError::NoIntegrityZomesFound(
                 dna_file_tree.dna_manifest.name(),
             )),
-    }?;
+            (1, None) => {
+                integrity_zomes
+                    .into_iter()
+                    .last()
+                    .ok_or(ScaffoldError::NoIntegrityZomesFound(
+                        dna_file_tree.dna_manifest.name(),
+                    ))
+            }
+            (_, None) => {
+                choose_integrity_zome(&dna_file_tree.dna_manifest.name(), &integrity_zomes)
+            }
+            (_, Some(name)) => integrity_zomes
+                .into_iter()
+                .find(|zome| zome.name.0.to_string().eq(name))
+                .ok_or(ScaffoldError::IntegrityZomeNotFound(
+                    name.clone(),
+                    dna_file_tree.dna_manifest.name(),
+                )),
+        }?;
 
-    let zome_crate_path = match zome_manifest.location.clone() {
+        ZomeFileTree::from_zome_manifest(dna_file_tree, zome_manifest)
+    }
+
+    pub fn from_zome_manifest(
+        dna_file_tree: DnaFileTree,
+        zome_manifest: ZomeManifest,
+    ) -> ScaffoldResult<ZomeFileTree> {
+        let zome_crate_path = zome_crate_path(&dna_file_tree, &zome_manifest)?;
+
+        let lib_rs_path = zome_crate_path.join("src").join("lib.rs");
+
+        if !dir_exists(&dna_file_tree.file_tree_ref(), &lib_rs_path) {
+            return Err(ScaffoldError::PathNotFound(lib_rs_path.clone()));
+        }
+
+        Ok(ZomeFileTree {
+            dna_file_tree,
+            zome_manifest,
+            zome_crate_path,
+        })
+    }
+}
+
+fn zome_crate_path(
+    dna_file_tree: &DnaFileTree,
+    zome_manifest: &ZomeManifest,
+) -> ScaffoldResult<PathBuf> {
+    match zome_manifest.location.clone() {
         Location::Bundled(bundled_path) => {
             let file_name_os_str = bundled_path.file_name().unwrap();
             let file_name = file_name_os_str
@@ -88,13 +119,7 @@ pub fn get_or_choose_integrity(
             zome_manifest.name.0.to_string(),
             dna_file_tree.dna_manifest.name(),
         )),
-    }?;
-
-    Ok(ZomeFileTree {
-        dna_file_tree,
-        zome_manifest,
-        zome_crate_path,
-    })
+    }
 }
 
 pub fn integrity_zome_name(coordinator_zome_name: &String) -> String {
@@ -292,6 +317,24 @@ fn try_to_guess_coordinator_zomes_location(
     }
 }
 
+pub fn add_common_zome_dependencies_to_workspace_cargo(
+    file_tree: FileTree,
+) -> ScaffoldResult<FileTree> {
+    let file_tree =
+        add_workspace_external_dependency(file_tree, &"hdi".to_string(), &hdi_version())?;
+    let file_tree =
+        add_workspace_external_dependency(file_tree, &"serde".to_string(), &"1".to_string())?;
+    let file_tree =
+        add_workspace_external_dependency(file_tree, &"tsify".to_string(), &tsify_version())?;
+    let file_tree = add_workspace_external_dependency(
+        file_tree,
+        &"wasm-bindgen".to_string(),
+        &wasm_bindgen_version(),
+    )?;
+
+    Ok(file_tree)
+}
+
 pub fn scaffold_integrity_zome_with_path(
     dna_file_tree: DnaFileTree,
     zome_name: &String,
@@ -299,22 +342,8 @@ pub fn scaffold_integrity_zome_with_path(
 ) -> ScaffoldResult<ZomeFileTree> {
     let dna_manifest_path = dna_file_tree.dna_manifest_path.clone();
 
-    let zome_wasm_location = zome_wasm_location(&dna_file_tree.dna_manifest_path, &zome_name);
-    let zome_manifest = ZomeManifest {
-        dependencies: None,
-        hash: None,
-        name: zome_name.clone().into(),
-        location: zome_wasm_location,
-    };
-    let dna_file_tree = add_integrity_zome_to_manifest(dna_file_tree, &zome_manifest)?;
+    let file_tree = add_common_zome_dependencies_to_workspace_cargo(dna_file_tree)?;
 
-    let file_tree = add_workspace_external_dependency(
-        dna_file_tree.file_tree(),
-        &"hdi".to_string(),
-        &hdi_version(),
-    )?;
-    let file_tree =
-        add_workspace_external_dependency(file_tree, &"serde".to_string(), &"1".to_string())?;
     let mut file_tree = add_workspace_path_dependency(file_tree, zome_name, &path.join(zome_name))?;
 
     // Add zome to workspace Cargo.toml
@@ -326,9 +355,13 @@ pub fn scaffold_integrity_zome_with_path(
         }
     };
 
-    let file_tree = insert_file_tree_in_dir(file_tree, path, (OsString::from(zome_name), zome))?;
+    insert_file_tree_in_dir(&mut file_tree, path, (OsString::from(zome_name), zome))?;
 
     let dna_file_tree = DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
+
+    let zome_manifest = new_integrity_zome_manifest(&dna_file_tree, &zome_name)?;
+
+    let dna_file_tree = add_integrity_zome_to_manifest(dna_file_tree, zome_manifest.clone())?;
 
     Ok(ZomeFileTree {
         dna_file_tree,
@@ -380,13 +413,8 @@ pub fn scaffold_coordinator_zome_in_path(
 
     // Add zome to workspace Cargo.toml
 
-    let file_tree = add_workspace_external_dependency(
-        dna_file_tree.file_tree(),
-        &"hdk".to_string(),
-        &hdk_version(),
-    )?;
-    let file_tree =
-        add_workspace_external_dependency(file_tree, &"serde".to_string(), &"1".to_string())?;
+    let file_tree = add_common_zome_dependencies_to_workspace_cargo(dna_file_tree)?;
+
     let mut file_tree = add_workspace_path_dependency(file_tree, zome_name, &path.join(zome_name))?;
 
     let zome: FileTree = dir! {
@@ -396,9 +424,10 @@ pub fn scaffold_coordinator_zome_in_path(
         }
     };
 
-    let file_tree = insert_file_tree_in_dir(file_tree, path, (OsString::from(zome_name), zome))?;
+    insert_file_tree_in_dir(&mut file_tree, path, (OsString::from(zome_name), zome))?;
 
     let dna_file_tree = DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
+    let zome_manifest = new_coordinator_zome_manifest(&dna_file_tree, zome_name, dependencies)?;
 
     Ok(ZomeFileTree {
         dna_file_tree,
@@ -409,7 +438,6 @@ pub fn scaffold_coordinator_zome_in_path(
 
 pub fn scaffold_coordinator_zome(
     dna_file_tree: DnaFileTree,
-    dna_manifest_path: &PathBuf,
     zome_name: &String,
     dependencies: &Option<Vec<String>>,
     path: &Option<PathBuf>,

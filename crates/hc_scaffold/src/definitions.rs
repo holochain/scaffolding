@@ -7,13 +7,12 @@ use std::collections::BTreeMap;
 #[derive(Deserialize, Debug, Clone, Serialize)]
 #[serde(tag = "type")]
 pub enum FieldType {
-    TextField,
-    TextArea,
-    DateAndTime,
-    Date,
-    Slider { min: i32, max: i32 },
-    Checkbox,
-    Switch,
+    Bool,
+    String,
+    U32,
+    I32,
+    F32,
+    Timestamp,
     AgentPubKey,
     ActionHash,
     EntryHash,
@@ -23,13 +22,12 @@ impl ToString for FieldType {
     fn to_string(&self) -> String {
         use FieldType::*;
         match self {
-            TextField => "TextField",
-            TextArea => "TextArea",
-            DateAndTime => "DateAndTime",
-            Date => "Date",
-            Slider { .. } => "Slider",
-            Checkbox => "Checkbox",
-            Switch => "Switch",
+            Bool => "bool",
+            String => "String",
+            U32 => "u32",
+            I32 => "i32",
+            F32 => "f32",
+            Timestamp => "Timestamp",
             ActionHash => "ActionHash",
             EntryHash => "EntryHash",
             AgentPubKey => "AgentPubKey",
@@ -39,16 +37,29 @@ impl ToString for FieldType {
 }
 
 impl FieldType {
+    pub fn list() -> Vec<FieldType> {
+        vec![
+            FieldType::String,
+            FieldType::Bool,
+            FieldType::U32,
+            FieldType::I32,
+            FieldType::F32,
+            FieldType::Timestamp,
+            FieldType::ActionHash,
+            FieldType::EntryHash,
+            FieldType::AgentPubKey,
+        ]
+    }
+
     pub fn rust_type(&self) -> TokenStream {
         use FieldType::*;
         match self {
-            TextField => quote!(String),
-            TextArea => quote!(String),
-            DateAndTime => quote!(u32),
-            Date => quote!(u32),
-            Slider { .. } => quote!(u32),
-            Checkbox => quote!(bool),
-            Switch => quote!(bool),
+            Bool => quote!(bool),
+            String => quote!(String),
+            U32 => quote!(u32),
+            I32 => quote!(i32),
+            F32 => quote!(f32),
+            Timestamp => quote!(Timestamp),
             ActionHash => quote!(ActionHash),
             EntryHash => quote!(EntryHash),
             AgentPubKey => quote!(AgentPubKey),
@@ -79,15 +90,21 @@ impl FieldType {
     }
 
     pub fn js_sample_value(&self) -> String {
-        use FieldType::*;
         match self {
-            TextArea => String::from("'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed nec eros quis enim hendrerit aliquet.'"),
-            TextField => String::from("'Lorem ipsum'"),
-            Checkbox  | Switch { .. } => String::from("true"),
-            Date  | DateAndTime => String::from("1665499212508"),
-            Slider { min, max } => {
+           FieldType::String => String::from("'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed nec eros quis enim hendrerit aliquet.'"),
+            FieldType::Bool => String::from("true"),
+            FieldType::Timestamp => String::from("1665499212508"),
+            FieldType::U32 => {
                 let mut rng = rand::thread_rng();
-                format!("{}", rng.gen_range(min.clone()..max.clone()))
+                format!("{}", rng.gen_range(0..100))
+            },
+            FieldType::I32 => {
+                let mut rng = rand::thread_rng();
+                format!("{}", rng.gen_range(-100..100))
+            },
+            FieldType::F32 => {
+                let mut rng = rand::thread_rng();
+                format!("{}", rng.gen_range(-100.0..100.0))
             },
             ActionHash => format!(
                     "Buffer.from(new Uint8Array([{}]))",
@@ -118,30 +135,18 @@ impl FieldType {
             )
         }
     }
+}
 
-    pub fn ts_type(&self) -> String {
-        use FieldType::*;
-        match self {
-            TextArea => String::from("string"),
-            TextField => String::from("string"),
-            Checkbox | Switch => String::from("boolean"),
-            Slider { .. } | Date | DateAndTime => String::from("number"),
-            // get::RadioButton { options, .. } => options
-            //     .iter()
-            //     .map(|s| format!("'{}'", s))
-            //     .collect::<Vec<String>>()
-            //     .join(" | "),
-            ActionHash => String::from("ActionHash"),
-            EntryHash => String::from("EntryHash"),
-            AgentPubKey => String::from("AgentPubKey"),
-        }
-    }
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct FieldWidget {
+    pub widget_name: String,
+    pub properties: BTreeMap<String, String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct FieldDefinition {
     pub field_type: FieldType,
-    pub label: String,
+    pub widget: Option<FieldWidget>,
     pub vector: bool,
 }
 
@@ -177,7 +182,7 @@ impl FieldDefinition {
 #[derive(Serialize, Clone)]
 pub struct EntryDefinition {
     pub name: String,
-    pub fields: BTreeMap<String, FieldDefinition>,
+    pub fields: Vec<(String, FieldDefinition)>,
 }
 
 impl EntryDefinition {

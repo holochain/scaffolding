@@ -1,15 +1,3 @@
-use std::{ffi::OsString, path::PathBuf};
-
-use crate::{
-    file_tree::{dna_file_tree::DnaFileTree, insert_file, FileTree},
-    scaffold::dna::manifest::check_zome_doesnt_exist,
-};
-use holochain_types::prelude::{DnaManifest, DnaManifestCurrentBuilder, ZomeManifest};
-
-use crate::error::{ScaffoldError, ScaffoldResult};
-
-use super::utils::zome_wasm_location;
-
 pub fn initial_cargo_toml(zome_name: &String) -> String {
     format!(
         r#"[package]
@@ -23,7 +11,10 @@ name = "{}"
 
 [dependencies]
 hdi = {{ workspace = true }}
+
 serde = {{ workspace = true }}
+tsify = {{ workspace = true }}
+wasm-bindgen = {{ workspace = true }}
 "#,
         zome_name, zome_name,
     )

@@ -2,6 +2,7 @@ use build_fs_tree::{dir, file};
 use std::{ffi::OsString, path::PathBuf};
 
 use crate::error::ScaffoldResult;
+use crate::templates::template_path;
 use crate::{error::ScaffoldError, file_tree::FileTree};
 
 use self::uis::{choose_ui_framework, scaffold_web_app_ui, UiFramework};
@@ -25,7 +26,7 @@ fn web_app_skeleton(
     app_name: String,
     description: Option<String>,
     skip_nix: bool,
-    ui_framework: &UiFramework,
+    template_file_tree: FileTree,
 ) -> ScaffoldResult<FileTree> {
     let mut app_file_tree = dir! {
       ".gitignore" => file!(gitignore())
@@ -40,7 +41,7 @@ fn web_app_skeleton(
         "src" => dir! {}
       }
       "Cargo.toml" => file!(workspace_cargo_toml())
-      "dnas" => dir! {}
+      "dnas" => dir! {},
     };
 
     if !skip_nix {
@@ -49,6 +50,10 @@ fn web_app_skeleton(
             .ok_or(ScaffoldError::PathNotFound(PathBuf::new()))?
             .insert(OsString::from("default.nix"), default_nix());
     }
+    app_file_tree
+        .dir_content_mut()
+        .ok_or(ScaffoldError::PathNotFound(PathBuf::new()))?
+        .insert(OsString::from(template_path()), template_file_tree.clone());
 
     let mut app_file_tree = scaffold_web_app_ui(app_file_tree, ui_framework, &app_name)?;
 
@@ -64,14 +69,9 @@ pub fn scaffold_web_app(
     app_name: String,
     description: Option<String>,
     skip_nix: bool,
-    ui_framework: &Option<UiFramework>,
+    template_file_tree: FileTree,
 ) -> ScaffoldResult<FileTree> {
-    let ui = match ui_framework {
-        Some(ui) => ui.clone(),
-        None => choose_ui_framework()?,
-    };
-
     Ok(dir! {
-      app_name.clone() => web_app_skeleton(app_name, description, skip_nix, &ui)?
+      app_name.clone() => web_app_skeleton(app_name, description, skip_nix, template_file_tree)?
     })
 }

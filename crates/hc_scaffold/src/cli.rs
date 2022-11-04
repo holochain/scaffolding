@@ -1,26 +1,22 @@
 use crate::definitions::FieldType;
 use crate::error::ScaffoldError;
-use crate::file_tree::app_file_tree::AppFileTree;
-use crate::file_tree::dna_file_tree::DnaFileTree;
-use crate::file_tree::load_directory_into_memory;
+use crate::file_tree::{dir_content, load_directory_into_memory};
 use crate::scaffold::app::cargo::exec_metadata;
-use crate::scaffold::app::utils::{
-    get_or_choose_app_manifest_path, get_or_choose_app_manifest_path_for_dna_manifest,
+use crate::scaffold::app::AppFileTree;
+use crate::scaffold::dna::{scaffold_dna, DnaFileTree};
+use crate::scaffold::entry_type::crud::{parse_crud, Crud};
+use crate::scaffold::entry_type::{
+    parse_depends_on_itself, scaffold_entry_type, DependsOnItself, SelfDependencyType,
 };
-use crate::scaffold::dna::utils::read_dna_manifest;
-use crate::scaffold::entry_def::crud::{parse_crud, Crud};
 use crate::scaffold::index::{scaffold_index, IndexType};
 use crate::scaffold::link_type::scaffold_link_type;
 use crate::scaffold::web_app::scaffold_web_app;
-use crate::scaffold::web_app::uis::UiFramework;
-use crate::scaffold::{
-    dna::{scaffold_dna, utils::get_or_choose_dna_manifest_path},
-    entry_def::scaffold_entry_def,
-    zome::{
-        integrity_zome_name, scaffold_coordinator_zome, scaffold_integrity_zome,
-        scaffold_zome_pair, utils::get_or_choose_integrity_zome, utils::select_integrity_zomes,
-    },
+use crate::scaffold::web_app::uis::{template_for_ui_framework, UiFramework};
+use crate::scaffold::zome::utils::select_integrity_zomes;
+use crate::scaffold::zome::{
+    integrity_zome_name, scaffold_coordinator_zome, scaffold_integrity_zome, ZomeFileTree,
 };
+use crate::templates::get_templates_for_app;
 use crate::utils::{
     check_no_whitespace, check_snake_case, input_no_whitespace, input_snake_case, input_yes_or_no,
 };
@@ -48,10 +44,12 @@ pub enum HcScaffold {
         /// Whether to setup the holonix development environment for this web-app
         setup_nix: Option<bool>,
 
-        #[structopt(long)]
-        /// The UI framework to use as the template for this web-app
-        ui: Option<UiFramework>,
+        #[structopt(subcommand)]
+        /// The template to use for this web-app
+        template: Option<HcScaffoldTemplate>,
     },
+    /// Set up the template used in this project
+    Template(HcScaffoldTemplate),
     /// Scaffold a DNA into an existing app
     Dna {
         #[structopt(long)]
@@ -88,8 +86,11 @@ pub enum HcScaffold {
         /// Name of the integrity zome in which you want to scaffold the entry definition
         zome: Option<String>,
 
-        /// Name of the entry type being scaffolded
-        name: Option<String>,
+        /// Singular name of the entry type being scaffolded
+        singular_name: Option<String>,
+
+        /// Plural name of the entry type being scaffolded
+        plural_name: Option<String>,
 
         #[structopt(long, parse(try_from_str = parse_crud))]
         /// Whether to create a read zome call function for this entry type
@@ -98,6 +99,10 @@ pub enum HcScaffold {
         #[structopt(long, value_delimiter = ",")]
         /// The entry types that the new entry type depends on
         depends_on: Option<Vec<String>>,
+
+        #[structopt(long, parse(try_from_str = parse_depends_on_itself))]
+        /// The fields that the entry type struct should contain
+        depends_on_itself: Option<DependsOnItself>,
 
         #[structopt(long, value_delimiter = ",", parse(try_from_str = parse_fields))]
         /// The fields that the entry type struct should contain
@@ -164,8 +169,18 @@ impl HcScaffold {
                 name,
                 description,
                 setup_nix,
-                ui,
+                template,
             } => {
+                let template = match template {
+                    Some(t) => Ok(t.clone()),
+                    None => {
+                        let ui_framework = choose_ui_framework()?;
+                        Ok(HcScaffoldTemplate::Init { ui_framework })
+                    }
+                }?;
+
+                let template_file_tree = template.get_template_file_tree();
+
                 let prompt = String::from("App name (no whitespaces):");
                 let name: String = match name {
                     Some(n) => check_no_whitespace(n, "app name")?,
@@ -180,7 +195,8 @@ impl HcScaffold {
                     }
                 };
 
-                let app_file_tree = scaffold_web_app(name.clone(), description, !setup_nix, &ui)?;
+                let app_file_tree =
+                    scaffold_web_app(name.clone(), description, !setup_nix, &template_file_tree)?;
 
                 let file_tree = MergeableFileSystemTree::<OsString, String>::from(app_file_tree);
 
@@ -217,6 +233,7 @@ Then, add new DNAs to your app with:
                     name, name, maybe_nix
                 );
             }
+            HcScaffold::Template(template) => template.run(),
             HcScaffold::Dna { app, name } => {
                 let prompt = String::from("DNA name (snake_case):");
                 let name: String = match name {
@@ -227,12 +244,14 @@ Then, add new DNAs to your app with:
                 let current_dir = std::env::current_dir()?;
 
                 let file_tree = load_directory_into_memory(&current_dir)?;
+                let template_file_tree = get_templates_for_app(&file_tree)?;
 
                 let app_file_tree = AppFileTree::get_or_choose(file_tree, &app)?;
 
                 let file_tree = scaffold_dna(app_file_tree, &name)?;
 
-                let file_tree = MergeableFileSystemTree::<OsString, String>::from(file_tree);
+                let file_tree =
+                    MergeableFileSystemTree::<OsString, String>::from(file_tree.file_tree());
 
                 file_tree.build(&".".into())?;
 
@@ -299,33 +318,32 @@ Add new zomes to your DNA with:
                         true => integrity_zome_name(&name),
                         false => name,
                     };
-                    dna_file_tree =
+                    let zome_file_tree =
                         scaffold_integrity_zome(dna_file_tree, &integrity_zome_name, &integrity)?;
+                    dna_file_tree = zome_file_tree.dna_file_tree;
                 }
 
                 if scaffold_coordinator {
                     let dependencies = match scaffold_integrity {
                         true => Some(vec![integrity_zome_name(&name)]),
                         false => {
-                            let dna_manifest =
-                                read_dna_manifest(&app_file_tree, &dna_manifest_path)?;
-
-                            Some(select_integrity_zomes(&dna_manifest, Some(&String::from(
+                            Some(select_integrity_zomes(&dna_file_tree.dna_manifest, Some(&String::from(
                         "Select integrity zome(s) this coordinator zome depends on (SPACE to select/unselect, ENTER to continue):"
                         )))?
                     )
                         }
                     };
-                    app_file_tree = scaffold_coordinator_zome(
-                        app_file_tree,
-                        &dna_manifest_path,
+                    let zome_file_tree = scaffold_coordinator_zome(
+                        dna_file_tree,
                         &name,
                         &dependencies,
                         &coordinator,
                     )?;
+                    dna_file_tree = zome_file_tree.dna_file_tree;
                 }
 
-                let file_tree = MergeableFileSystemTree::<OsString, String>::from(app_file_tree);
+                let file_tree =
+                    MergeableFileSystemTree::<OsString, String>::from(dna_file_tree.file_tree());
 
                 let f = file_tree.clone();
 
@@ -358,37 +376,37 @@ Add new entry definitions to your zome with:
             HcScaffold::EntryType {
                 dna,
                 zome,
-                name,
+                singular_name,
+                plural_name,
                 crud,
                 depends_on,
+                depends_on_itself,
                 fields,
             } => {
-                let prompt = String::from("Entry definition name (snake_case):");
-                let name: String = match name {
-                    Some(n) => check_snake_case(n, "entry definition name")?,
-                    None => input_snake_case(&prompt)?,
+                let singular_name: String = match singular_name {
+                    Some(n) => check_snake_case(n, "entry type singular name")?,
+                    None => input_snake_case(&String::from("Singular name (snake_case):"))?,
+                };
+                let plural_name: String = match plural_name {
+                    Some(n) => check_snake_case(n, "entry type plural name")?,
+                    None => input_snake_case(&String::from("Plural name (snake_case):"))?,
                 };
 
                 let current_dir = std::env::current_dir()?;
 
                 let app_file_tree = load_directory_into_memory(&current_dir)?;
 
-                let dna_manifest_path = get_or_choose_dna_manifest_path(&app_file_tree, dna)?;
+                let dna_file_tree = DnaFileTree::get_or_choose(app_file_tree, &dna)?;
 
-                let dna_manifest = read_dna_manifest(&app_file_tree, &dna_manifest_path)?;
-                let integrity_zome_name = get_or_choose_integrity_zome(&dna_manifest, &zome)?;
+                let zome_file_tree = ZomeFileTree::get_or_choose_integrity(dna_file_tree, &zome)?;
 
-                let fields: Option<BTreeMap<String, FieldType>> =
-                    fields.map(|f| f.into_iter().collect());
-
-                let app_file_tree = scaffold_entry_def(
-                    app_file_tree,
-                    &app_manifest_path,
-                    &dna_manifest_path,
-                    &integrity_zome_name,
-                    &name,
+                let app_file_tree = scaffold_entry_type(
+                    zome_file_tree,
+                    &singular_name,
+                    &plural_name,
                     &crud,
                     &depends_on,
+                    &depends_on_itself,
                     &fields,
                 )?;
 
@@ -408,7 +426,6 @@ Add new indexes for that entry type with:
                 );
             }
             HcScaffold::LinkType {
-                app,
                 dna,
                 zome,
                 from_entry_type,
@@ -495,5 +512,64 @@ Index "{}" scaffolded!
         }
 
         Ok(())
+    }
+}
+
+#[derive(Debug, StructOpt)]
+#[structopt(setting = structopt::clap::AppSettings::InferSubcommands)]
+pub enum HcScaffoldTemplate {
+    Pull {
+        /// The git repository URL from which to download the template
+        git_url: String,
+
+        #[structopt(long)]
+        /// The directory where the template is located in the git repository (default: ".template")
+        subdirectory_path: Option<PathBuf>,
+    },
+    Init {
+        /// The UI framework to use as the template for this web-app
+        ui_framework: UiFramework,
+    },
+}
+impl HcScaffoldTemplate {
+    pub fn run(self) -> anyhow::Result<()> {
+        let template_file_tree = self.get_template_file_tree()?;
+        let template_file_tree = dir! {
+            template_path() => template_file_tree
+        };
+
+        let file_tree = MergeableFileSystemTree::<OsString, String>::from(template_file_tree);
+
+        file_tree.build(&".".into())?;
+
+        match self {
+            HcScaffoldTemplate::Pull {
+                git_url,
+                subdirectory_path,
+            } => {
+                println!(
+                    r#"Template pulled to \".template\" folder
+"#
+                );
+            }
+            HcScaffoldTemplate::Init { ui_framework } => {
+                println!(
+                    r#"Template initialized to \".template\" folder
+"#
+                );
+            }
+        }
+        Ok(())
+    }
+
+    pub fn get_template_file_tree(&self) -> ScaffoldResult<FileTree> {
+        match self {
+            HcScaffoldTemplate::Pull {
+                git_url,
+                subdirectory_path,
+            } => pull_template(git_url, subdirectory_path),
+
+            HcScaffoldTemplate::Init { ui_framework } => template_for_ui_framework(&ui_framework),
+        }
     }
 }

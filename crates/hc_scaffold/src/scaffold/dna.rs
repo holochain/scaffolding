@@ -30,43 +30,52 @@ pub struct DnaFileTree {
     pub dna_manifest: DnaManifest,
 }
 
-pub fn get_or_choose(
-    file_tree: FileTree,
-    dna_name: &Option<String>,
-) -> ScaffoldResult<DnaFileTree> {
-    let dna_manifests = find_dna_manifests(&file_tree)?;
+impl DnaFileTree {
+    pub fn get_or_choose(
+        file_tree: FileTree,
+        dna_name: &Option<String>,
+    ) -> ScaffoldResult<DnaFileTree> {
+        let dna_manifests = find_dna_manifests(&file_tree)?;
 
-    let (dna_manifest_path, dna_manifest) = match (dna_manifests.len(), dna_name) {
-        (0, None) => Err(ScaffoldError::NoDnasFound),
-        (1, None) => dna_manifests
-            .into_iter()
-            .last()
-            .ok_or(ScaffoldError::NoDnasFound),
-        (_, None) => choose_dna(dna_manifests.into_iter().collect()),
-        (_, Some(name)) => dna_manifests
-            .into_iter()
-            .find(|(_, m)| m.name().to_string().eq(name))
-            .ok_or(ScaffoldError::DnaNotFound(name.clone())),
-    }?;
+        let (dna_manifest_path, dna_manifest) = match (dna_manifests.len(), dna_name) {
+            (0, None) => Err(ScaffoldError::NoDnasFound),
+            (1, None) => dna_manifests
+                .into_iter()
+                .last()
+                .ok_or(ScaffoldError::NoDnasFound),
+            (_, None) => choose_dna(dna_manifests.into_iter().collect()),
+            (_, Some(name)) => dna_manifests
+                .into_iter()
+                .find(|(_, m)| m.name().to_string().eq(name))
+                .ok_or(ScaffoldError::DnaNotFound(name.clone())),
+        }?;
 
-    Ok(DnaFileTree {
-        file_tree,
-        dna_manifest_path,
-        dna_manifest,
-    })
-}
+        Ok(DnaFileTree {
+            file_tree,
+            dna_manifest_path,
+            dna_manifest,
+        })
+    }
 
-pub fn from_dna_manifest_path(
-    file_tree: FileTree,
-    dna_manifest_path: &PathBuf,
-) -> ScaffoldResult<DnaFileTree> {
-    let dna_manifest = read_dna_manifest(&file_tree, dna_manifest_path)?;
+    pub fn from_dna_manifest_path(
+        file_tree: FileTree,
+        dna_manifest_path: &PathBuf,
+    ) -> ScaffoldResult<DnaFileTree> {
+        let dna_manifest = read_dna_manifest(&file_tree, dna_manifest_path)?;
 
-    Ok(DnaFileTree {
-        file_tree,
-        dna_manifest_path: dna_manifest_path.clone(),
-        dna_manifest,
-    })
+        Ok(DnaFileTree {
+            file_tree,
+            dna_manifest_path: dna_manifest_path.clone(),
+            dna_manifest,
+        })
+    }
+
+    pub fn file_tree(self) -> FileTree {
+        self.file_tree
+    }
+    pub fn file_tree_ref<'a>(&'a self) -> &'a FileTree {
+        &self.file_tree
+    }
 }
 
 fn default_dnas_dir_path() -> PathBuf {

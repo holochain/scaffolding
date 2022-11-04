@@ -1,20 +1,17 @@
 use std::{collections::BTreeMap, ffi::OsString, path::PathBuf};
 
-use crate::{
-    file_tree::{
-        dna_file_tree::DnaFileTree, find_map_rust_files, insert_file, zome_file_tree::ZomeFileTree,
-        FileTree,
-    },
-    generators::dna::utils::read_dna_manifest,
-};
 use dialoguer::{theme::ColorfulTheme, Select};
 use holochain_types::prelude::{
     DnaManifest, DnaManifestCurrentBuilder, ZomeDependency, ZomeManifest, ZomeName,
 };
 
-use crate::error::{ScaffoldError, ScaffoldResult};
+use crate::{
+    error::{ScaffoldError, ScaffoldResult},
+    file_tree::{find_map_rust_files, path},
+    scaffold::dna::DnaFileTree,
+};
 
-use super::utils::zome_wasm_location;
+use super::ZomeFileTree;
 
 pub fn initial_cargo_toml(zome_name: &String, dependencies: &Option<Vec<String>>) -> String {
     let deps = match dependencies {
@@ -38,7 +35,10 @@ name = "{}"
 
 [dependencies]
 hdk = {{ workspace = true }}
+
 serde = {{ workspace = true }}
+tsify = {{ workspace = true }}
+wasm-bindgen = {{ workspace = true }}
 
 {} 
 "#,
@@ -86,8 +86,7 @@ fn choose_extern_function(
 }
 
 pub fn find_extern_function_or_choose(
-    app_file_tree: &FileTree,
-    dna_manifest: &DnaManifest,
+    dna_file_tree: &DnaFileTree,
     coordinator_zomes: &Vec<ZomeManifest>,
     fn_name_to_find: &String,
     prompt: &String,
@@ -95,8 +94,10 @@ pub fn find_extern_function_or_choose(
     let mut functions_by_zome: BTreeMap<String, Vec<String>> = BTreeMap::new();
 
     for coordinator_zome in coordinator_zomes {
-        let all_extern_functions =
-            find_all_extern_functions(&app_file_tree, dna_manifest, coordinator_zome)?;
+        let zome_file_tree =
+            ZomeFileTree::from_zome_manifest(dna_file_tree.clone(), coordinator_zome)?;
+
+        let all_extern_functions = find_all_extern_functions(&zome_file_tree)?;
 
         if all_extern_functions.contains(&fn_name_to_find) {
             return Ok((coordinator_zome.clone(), fn_name_to_find.clone()));
@@ -115,32 +116,18 @@ pub fn find_extern_function_or_choose(
         Some(z) => Ok((z.clone(), fn_name)),
         None => Err(ScaffoldError::CoordinatorZomeNotFound(
             zome_name.clone(),
-            dna_manifest.name(),
+            dna_file_tree.dna_manifest.name(),
         )),
     }
 }
 
-pub fn find_all_extern_functions(
-    app_file_tree: &FileTree,
-    dna_manifest: &DnaManifest,
-    coordinator_zome: &ZomeManifest,
-) -> ScaffoldResult<Vec<String>> {
-    let mut manifest_path = zome_manifest_path(&app_file_tree, &coordinator_zome)?.ok_or(
-        ScaffoldError::CoordinatorZomeNotFound(
-            coordinator_zome.name.0.to_string(),
-            dna_manifest.name(),
-        ),
-    )?;
-
-    manifest_path.pop();
-
-    let crate_src_path = manifest_path.join("src");
-    let crate_src_path_iter: Vec<OsString> =
-        crate_src_path.iter().map(|s| s.to_os_string()).collect();
+pub fn find_all_extern_functions(zome_file_tree: &ZomeFileTree) -> ScaffoldResult<Vec<String>> {
+    let crate_src_path = zome_file_tree.zome_crate_path.join("src");
     let hdk_extern_instances = find_map_rust_files(
-        app_file_tree
-            .path(&mut crate_src_path_iter.iter())
-            .ok_or(ScaffoldError::PathNotFound(crate_src_path.clone()))?,
+        path(
+            zome_file_tree.dna_file_tree.file_tree_ref(),
+            &crate_src_path,
+        )?,
         &|_file_path, rust_file| {
             rust_file.items.iter().find_map(|i| {
                 if let syn::Item::Fn(item_fn) = i.clone() {
