@@ -2,20 +2,20 @@ use std::str::FromStr;
 
 use convert_case::{Case, Casing};
 use dialoguer::{theme::ColorfulTheme, Select};
-use holochain_types::prelude::DnaManifest;
 use serde::Serialize;
 
 use crate::{
     error::{ScaffoldError, ScaffoldResult},
     file_tree::FileTree,
+    templates::index::scaffold_index_templates,
 };
 
 use self::coordinator::add_index_to_coordinators;
 
 use super::{
-    entry_def::{integrity::get_all_entry_types, utils::choose_multiple_entry_types},
-    link_type::integrity::add_link_type_to_integrity_zome,
-    web_app::uis::scaffold_index_templates,
+    entry_type::{integrity::get_all_entry_types, utils::choose_multiple_entry_types},
+    link_type::{choose_use_entry_hash, integrity::add_link_type_to_integrity_zome},
+    zome::ZomeFileTree,
 };
 
 pub mod coordinator;
@@ -59,19 +59,19 @@ pub fn choose_index_type() -> ScaffoldResult<IndexType> {
 }
 
 pub fn scaffold_index(
-    app_file_tree: FileTree,
-    dna_manifest: &DnaManifest,
-    integrity_zome_name: &String,
+    mut integrity_zome_file_tree: ZomeFileTree,
+    template_file_tree: &FileTree,
     index_name: &String,
     maybe_index_type: &Option<IndexType>,
     maybe_entry_types: &Option<Vec<String>>,
-    link_to_entry_hash: bool,
+    link_to_entry_hash: &Option<bool>,
 ) -> ScaffoldResult<FileTree> {
-    let all_entries = get_all_entry_types(&app_file_tree, dna_manifest, integrity_zome_name)?
-        .ok_or(ScaffoldError::NoEntryTypesDefFoundForIntegrityZome(
-            integrity_zome_name.clone(),
-            dna_manifest.name(),
-        ))?;
+    let all_entries = get_all_entry_types(&integrity_zome_file_tree)?.ok_or(
+        ScaffoldError::NoEntryTypesDefFoundForIntegrityZome(
+            integrity_zome_file_tree.dna_file_tree.dna_manifest.name(),
+            integrity_zome_file_tree.zome_manifest.name.0.to_string(),
+        ),
+    )?;
 
     let index_type = match maybe_index_type {
         Some(t) => Ok(t.clone()),
@@ -82,8 +82,8 @@ pub fn scaffold_index(
         Some(et) => match et.iter().find(|t| !all_entries.contains(t)) {
             Some(t) => Err(ScaffoldError::EntryTypeNotFound(
                 t.clone(),
-                dna_manifest.name(),
-                integrity_zome_name.clone(),
+                integrity_zome_file_tree.dna_file_tree.dna_manifest.name(),
+                integrity_zome_file_tree.zome_manifest.name.0.to_string(),
             )),
             None => Ok(et.clone()),
         },
@@ -94,19 +94,18 @@ pub fn scaffold_index(
         ),
     }?;
 
+    let link_to_entry_hash: bool = match link_to_entry_hash {
+        Some(l) => l.clone(),
+        None => choose_use_entry_hash(&String::from("Link to the entry hash or the action hash?"))?,
+    };
+
     let link_type_name = index_name.to_case(Case::Pascal);
 
-    let app_file_tree = add_link_type_to_integrity_zome(
-        app_file_tree,
-        dna_manifest,
-        integrity_zome_name,
-        &link_type_name,
-    )?;
+    let zome_file_tree =
+        add_link_type_to_integrity_zome(integrity_zome_file_tree, &link_type_name)?;
 
-    let (app_file_tree, coordinator_zome) = add_index_to_coordinators(
-        app_file_tree,
-        dna_manifest,
-        integrity_zome_name,
+    let (dna_file_tree, coordinator_zome) = add_index_to_coordinators(
+        zome_file_tree,
         index_name,
         &link_type_name,
         &index_type,
@@ -114,9 +113,12 @@ pub fn scaffold_index(
         link_to_entry_hash,
     )?;
 
+    let dna_name = dna_file_tree.dna_manifest.name();
+
     let app_file_tree = scaffold_index_templates(
-        app_file_tree,
-        &dna_manifest.name(),
+        dna_file_tree.file_tree(),
+        &template_file_tree,
+        &dna_name,
         &coordinator_zome.name.0.to_string(),
         &index_type,
         index_name,

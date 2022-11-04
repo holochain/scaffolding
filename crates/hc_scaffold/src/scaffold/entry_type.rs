@@ -2,8 +2,11 @@ use std::{collections::BTreeMap, path::PathBuf};
 
 use crate::{
     definitions::{EntryDefinition, FieldDefinition, FieldType},
-    file_tree::FileTree,
+    file_tree::{path, FileTree},
+    templates::entry_type::scaffold_entry_type_templates,
 };
+
+use build_fs_tree::dir;
 use convert_case::{Case, Casing};
 use dialoguer::{theme::ColorfulTheme, Confirm, MultiSelect, Select};
 use holochain_types::prelude::{AppManifest, DnaManifest, ZomeManifest};
@@ -23,7 +26,6 @@ use super::{
     app::utils::read_app_manifest,
     link_type::{integrity::add_link_type_to_integrity_zome, link_type_name},
     tryorama::add_tryorama_tests_for_entry_def,
-    web_app::uis::scaffold_entry_type_templates,
     zome::{
         coordinator::find_extern_function_or_choose, utils::get_coordinator_zomes_for_integrity,
         ZomeFileTree,
@@ -90,17 +92,17 @@ pub fn choose_depends_on_itself() -> ScaffoldResult<DependsOnItself> {
 
     match selection {
         0 => Ok(DependsOnItself::Yes(SelfDependencyType::Option)),
-        1 => Ok(DependsOnItself::Yes(SelfDependencyType::Vector)),
+        _ => Ok(DependsOnItself::Yes(SelfDependencyType::Vector)),
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub enum DependsOnItself {
     No,
     Yes(SelfDependencyType),
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub enum SelfDependencyType {
     Vector,
     Option,
@@ -147,10 +149,19 @@ pub fn scaffold_entry_type(
         ));
     }
 
-    if let DependsOnItself::Yes(dependency_type) = depends_on_itself {
+    if let DependsOnItself::Yes(dependency_type) = depends_on_itself.clone() {
         if let SelfDependencyType::Vector = dependency_type {
+            let field_name = format!("previous_{}_hashes", plural_name.to_case(Case::Snake));
+            depends_fields.push((
+                field_name,
+                FieldDefinition {
+                    widget: None,
+                    vector: true,
+                    field_type: FieldType::ActionHash,
+                },
+            ));
         } else {
-            let field_name = format!("previous_{}_hash", entry_def_name.to_case(Case::Snake));
+            let field_name = format!("previous_{}_hash", singular_name.to_case(Case::Snake));
             depends_fields.push((
                 field_name,
                 FieldDefinition {
@@ -178,39 +189,37 @@ pub fn scaffold_entry_type(
             depends_fields
         }
         None => choose_fields(
-            path(templates_file_tree, &PathBuf::from("field-types")),
+            path(template_file_tree, &PathBuf::from("field-types")).unwrap_or(&dir! {}),
             depends_fields,
         )?,
     };
 
     let entry_def = EntryDefinition {
-        name: entry_def_name.clone(),
+        singular_name: singular_name.clone(),
+        plural_name: plural_name.clone(),
         fields,
     };
 
-    let mut app_file_tree = add_entry_type_to_integrity_zome(
-        app_file_tree,
-        &dna_manifest,
-        integrity_zome_name,
-        &entry_def,
-    )?;
+    let integrity_zome_name = zome_file_tree.zome_manifest.name.0.to_string();
+
+    let mut zome_file_tree = add_entry_type_to_integrity_zome(zome_file_tree, &entry_def)?;
 
     for d in depends_on.iter() {
-        app_file_tree = add_link_type_to_integrity_zome(
-            app_file_tree,
-            &dna_manifest,
-            integrity_zome_name,
-            &link_type_name(&d, &entry_def_name),
+        zome_file_tree = add_link_type_to_integrity_zome(
+            zome_file_tree,
+            &link_type_name(&d, &plural_name.to_case(Case::Pascal)),
         )?;
     }
 
-    let coordinator_zomes_for_integrity =
-        get_coordinator_zomes_for_integrity(&dna_manifest, integrity_zome_name);
+    let coordinator_zomes_for_integrity = get_coordinator_zomes_for_integrity(
+        &zome_file_tree.dna_file_tree.dna_manifest,
+        &zome_file_tree.zome_manifest.name.0.to_string(),
+    );
 
     let coordinator_zome = match coordinator_zomes_for_integrity.len() {
         0 => Err(ScaffoldError::NoCoordinatorZomesFoundForIntegrityZome(
-            dna_manifest.name(),
-            integrity_zome_name.clone(),
+            zome_file_tree.dna_file_tree.dna_manifest.name(),
+            zome_file_tree.zome_manifest.name.0.to_string(),
         )),
         1 => Ok(coordinator_zomes_for_integrity[0].clone()),
         _ => {
@@ -232,12 +241,15 @@ pub fn scaffold_entry_type(
         Some(c) => c.clone(),
         None => choose_crud(),
     };
-    let app_file_tree = add_crud_functions_to_coordinator(
-        app_file_tree,
-        &dna_manifest,
-        integrity_zome_name,
-        &coordinator_zome,
-        entry_def_name,
+
+    let zome_file_tree =
+        ZomeFileTree::from_zome_manifest(zome_file_tree.dna_file_tree, coordinator_zome.clone())?;
+
+    let zome_file_tree = add_crud_functions_to_coordinator(
+        zome_file_tree,
+        &integrity_zome_name,
+        &singular_name,
+        &plural_name,
         &crud,
         &depends_on,
     )?;
@@ -246,8 +258,7 @@ pub fn scaffold_entry_type(
 
     for d in depends_on.clone() {
         let (zome, fn_name) = find_extern_function_or_choose(
-            &app_file_tree,
-            &dna_manifest,
+            &zome_file_tree.dna_file_tree,
             &coordinator_zomes_for_integrity,
             &format!("create_{}", d.to_case(Case::Snake)),
             &format!("In which function is a {} created", d.to_case(Case::Pascal)),
@@ -256,11 +267,10 @@ pub fn scaffold_entry_type(
         create_fns_for_depends_on.insert(d.clone(), (zome, fn_name));
     }
 
+    let dna_manifest = zome_file_tree.dna_file_tree.dna_manifest.clone();
+
     let app_file_tree = add_tryorama_tests_for_entry_def(
-        app_file_tree,
-        app_manifest_path,
-        &dna_manifest.name(),
-        &coordinator_zome.name.0.to_string(),
+        zome_file_tree,
         &entry_def,
         &crud,
         &create_fns_for_depends_on,
@@ -268,10 +278,12 @@ pub fn scaffold_entry_type(
 
     let app_file_tree = scaffold_entry_type_templates(
         app_file_tree,
+        template_file_tree,
         &dna_manifest.name(),
         &coordinator_zome.name.0.to_string(),
         &entry_def,
         &depends_on,
+        &depends_on_itself,
     )?;
 
     Ok(app_file_tree)

@@ -94,8 +94,12 @@ pub fn find_extern_function_or_choose(
     let mut functions_by_zome: BTreeMap<String, Vec<String>> = BTreeMap::new();
 
     for coordinator_zome in coordinator_zomes {
+        let dna_file_tree = DnaFileTree::from_dna_manifest_path(
+            dna_file_tree.file_tree_ref().clone(),
+            &dna_file_tree.dna_manifest_path,
+        )?;
         let zome_file_tree =
-            ZomeFileTree::from_zome_manifest(dna_file_tree.clone(), coordinator_zome)?;
+            ZomeFileTree::from_zome_manifest(dna_file_tree, coordinator_zome.clone())?;
 
         let all_extern_functions = find_all_extern_functions(&zome_file_tree)?;
 

@@ -17,7 +17,7 @@ use convert_case::{Case, Casing};
 use entry_crud_tests::entry_crud_tests;
 use holochain_types::prelude::ZomeManifest;
 
-use super::{app::utils::read_app_manifest, entry_def::crud::Crud};
+use super::{dna::DnaFileTree, entry_type::crud::Crud, zome::ZomeFileTree};
 
 fn find_or_choose_tryorama_package_path(_app_file_tree: &FileTree) -> ScaffoldResult<PathBuf> {
     // TODO: Actually implement this
@@ -25,51 +25,56 @@ fn find_or_choose_tryorama_package_path(_app_file_tree: &FileTree) -> ScaffoldRe
 }
 
 pub fn add_tryorama_tests_for_entry_def(
-    mut app_file_tree: FileTree,
-    dna_manifest_path: &PathBuf,
-    coordinator_zome: &String,
+    mut coordinator_zome_file_tree: ZomeFileTree,
     entry_def: &EntryDefinition,
     crud: &Crud,
     create_fns_for_depends_on: &BTreeMap<String, (ZomeManifest, String)>,
 ) -> ScaffoldResult<FileTree> {
-    let tryorama_path = find_or_choose_tryorama_package_path(&app_file_tree)?;
+    let tryorama_path = find_or_choose_tryorama_package_path(
+        coordinator_zome_file_tree.dna_file_tree.file_tree_ref(),
+    )?;
 
-    let app_manifest = read_app_manifest(&app_file_tree, app_manifest_path)?;
+    let dna_name = coordinator_zome_file_tree.dna_file_tree.dna_manifest.name();
+    let coordinator_zome_name = coordinator_zome_file_tree.zome_manifest.name.0.to_string();
 
-    let mut happ_bundle_path_from_root = app_manifest_path.clone();
-    happ_bundle_path_from_root.pop();
-    happ_bundle_path_from_root =
-        happ_bundle_path_from_root.join(format!("{}.happ", app_manifest.app_name()));
+    let mut dna_bundle_path_from_root = coordinator_zome_file_tree
+        .dna_file_tree
+        .dna_manifest_path
+        .clone();
+    dna_bundle_path_from_root.pop();
+    dna_bundle_path_from_root = dna_bundle_path_from_root.join(format!("{}.dna", dna_name));
 
-    let mut happ_bundle_from_tryorama_path = PathBuf::new();
+    let mut dna_bundle_from_tryorama_path = PathBuf::new();
 
     for _c in tryorama_path.components() {
-        happ_bundle_from_tryorama_path.push("..");
+        dna_bundle_from_tryorama_path.push("..");
     }
-    for c in happ_bundle_path_from_root.components() {
-        happ_bundle_from_tryorama_path.push(c);
+    for c in dna_bundle_path_from_root.components() {
+        dna_bundle_from_tryorama_path.push(c);
     }
 
     let tests_file = entry_crud_tests(
         entry_def,
-        &happ_bundle_from_tryorama_path,
-        dna_role_id,
-        coordinator_zome,
+        &dna_bundle_from_tryorama_path,
+        &dna_name,
+        &coordinator_zome_name,
         crud,
         &create_fns_for_depends_on,
     );
 
     let test_path = tryorama_path
         .join("src")
-        .join(dna_role_id)
-        .join(coordinator_zome);
+        .join(dna_name)
+        .join(coordinator_zome_name);
 
-    let kebab_entry_def_name = entry_def.name.clone().to_case(Case::Kebab);
+    let kebab_entry_def_name = entry_def.singular_name.clone().to_case(Case::Kebab);
 
-    create_dir_all(&mut app_file_tree, &test_path)?;
+    let mut file_tree = coordinator_zome_file_tree.dna_file_tree.file_tree();
+
+    create_dir_all(&mut file_tree, &test_path)?;
 
     insert_file_tree_in_dir(
-        &mut app_file_tree,
+        &mut file_tree,
         &test_path,
         (
             OsString::from(format!("{}.test.ts", kebab_entry_def_name.clone())),
@@ -77,5 +82,5 @@ pub fn add_tryorama_tests_for_entry_def(
         ),
     )?;
 
-    Ok(app_file_tree)
+    Ok(file_tree)
 }

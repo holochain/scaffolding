@@ -1,20 +1,19 @@
-use std::path::PathBuf;
+use std::{collections::BTreeMap, path::PathBuf};
 
 use crate::{
     file_tree::{
-        app_file_tree::AppFileTree,
-        dir_exists,
-        dna_file_tree::{find_dna_manifests, read_dna_manifest},
-        insert_file, insert_file_tree_in_dir, FileTree,
+        dir_exists, file_content, find_files_by_name, insert_file, insert_file_tree_in_dir,
+        FileTree,
     },
     utils::choose_directory_path,
 };
 use build_fs_tree::{dir, file};
+use dialoguer::{theme::ColorfulTheme, Select};
 use holochain_types::prelude::{
     AppManifest, AppManifestCurrentBuilder, AppRoleDnaManifest, AppRoleManifest, CellProvisioning,
-    DnaManifest, DnaModifiersOpt,
+    DnaManifest, DnaModifiersOpt, ValidatedDnaManifest,
 };
-use mr_bundle::Location;
+use mr_bundle::{Location, Manifest};
 
 pub mod coordinator;
 pub mod integrity;
@@ -23,6 +22,8 @@ pub mod manifest;
 use crate::error::{ScaffoldError, ScaffoldResult};
 
 use manifest::empty_dna_manifest;
+
+use super::app::AppFileTree;
 
 pub struct DnaFileTree {
     file_tree: FileTree,
@@ -175,23 +176,25 @@ pub fn scaffold_dna(
 
     let dnas_path = get_or_choose_dnas_dir_path(app_file_tree.file_tree_ref())?;
 
-    let mut dna_bundle_path = PathBuf::new();
+    let mut dna_workdir_path = PathBuf::new();
 
-    let app_workdir_path = app_file_tree.app_manifest_path().parent();
+    let app_workdir_path = app_file_tree.app_manifest_path.parent();
 
     if let Some(path) = app_workdir_path {
         for _path_segment in path.components() {
-            dna_bundle_path = dna_bundle_path.join("..");
+            dna_workdir_path = dna_workdir_path.join("..");
         }
     }
 
-    dna_bundle_path = dna_bundle_path
-        .join(dnas_path)
+    dna_workdir_path = dna_workdir_path
+        .join(&dnas_path)
         .join(dna_name.clone())
-        .join("workdir")
-        .join(format!("{}.dna", dna_name));
+        .join("workdir");
 
-    let mut roles = app_file_tree.app_manifest().app_roles();
+    let dna_bundle_path = dna_workdir_path.join(format!("{}.dna", dna_name));
+    let dna_manifest_path = dna_workdir_path.join("dna.yaml");
+
+    let mut roles = app_file_tree.app_manifest.app_roles();
 
     if let Some(_) = roles.iter().find(|r| r.id.eq(dna_name)) {
         return Err(ScaffoldError::DnaAlreadyExists(dna_name.clone()));
@@ -213,23 +216,30 @@ pub fn scaffold_dna(
     });
 
     let new_manifest: AppManifest = AppManifestCurrentBuilder::default()
-        .name(app_file_tree.app_manifest().app_name().to_string().clone())
+        .name(app_file_tree.app_manifest.app_name().to_string().clone())
         .description(None)
         .roles(roles)
         .build()
         .unwrap()
         .into();
 
+    let app_manifest_path = app_file_tree.app_manifest_path.clone();
+
+    let mut file_tree = app_file_tree.file_tree();
+
     insert_file(
-        app_file_tree.file_tree,
-        &app_file_tree.app_manifest_path,
+        &mut file_tree,
+        &app_manifest_path,
         &serde_yaml::to_string(&new_manifest)?,
     )?;
 
     insert_file_tree_in_dir(
-        app_file_tree.file_tree(),
+        &mut file_tree,
         &dnas_path,
         (dna_name.into(), new_dna_file_tree),
     )?;
-    Ok(file_tree)
+
+    let dna_file_tree = DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
+
+    Ok(dna_file_tree)
 }

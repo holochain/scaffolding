@@ -25,7 +25,7 @@ pub fn pull_template(
     }
 
     if !path.as_path().exists() {
-        return Err(ScaffoldError::TemplateNotFoundInRepo(path.clone))?;
+        return Err(ScaffoldError::TemplateNotFoundInRepo(path.clone()))?;
     }
 
     load_directory_into_memory(&path)

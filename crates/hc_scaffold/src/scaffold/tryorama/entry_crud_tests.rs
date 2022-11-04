@@ -2,13 +2,13 @@ use std::{collections::BTreeMap, path::PathBuf};
 
 use holochain_types::prelude::ZomeManifest;
 
-use crate::{cli::Crud, definitions::EntryDefinition};
+use crate::{definitions::EntryDefinition, scaffold::entry_type::crud::Crud};
 
 use super::utils::common_tests_setup;
 
 pub fn entry_crud_tests(
     entry_definition: &EntryDefinition,
-    happ_bundle_location_from_tests_root: &PathBuf,
+    dna_bundle_location_from_tests_root: &PathBuf,
     dna_role_id: &String,
     coordinator_zome: &String,
     crud: &Crud,
@@ -19,7 +19,7 @@ pub fn entry_crud_tests(
 import test from 'node:test';
 import assert from 'node:assert';
 
-import {{ runScenario, pause }} from '@holochain/tryorama';
+import {{ runScenario, pause, DnaSource }} from '@holochain/tryorama';
 import {{ ActionHash, Record }} from '@holochain/client';
 import {{ decode }} from '@msgpack/msgpack';
 
@@ -27,7 +27,7 @@ import {{ decode }} from '@msgpack/msgpack';
 "#,
         create_entry_test(
             entry_definition,
-            happ_bundle_location_from_tests_root,
+            dna_bundle_location_from_tests_root,
             dna_role_id,
             coordinator_zome,
             create_fns_of_entry_type_this_entry_type_depends_on
@@ -38,7 +38,7 @@ import {{ decode }} from '@msgpack/msgpack';
         initial_test_file.push_str(
             read_entry_test(
                 entry_definition,
-                happ_bundle_location_from_tests_root,
+                dna_bundle_location_from_tests_root,
                 dna_role_id,
                 coordinator_zome,
             )
@@ -50,7 +50,7 @@ import {{ decode }} from '@msgpack/msgpack';
         initial_test_file.push_str(
             update_entry_test(
                 entry_definition,
-                happ_bundle_location_from_tests_root,
+                dna_bundle_location_from_tests_root,
                 dna_role_id,
                 coordinator_zome,
                 crud.read,
@@ -63,7 +63,7 @@ import {{ decode }} from '@msgpack/msgpack';
         initial_test_file.push_str(
             delete_entry_test(
                 entry_definition,
-                happ_bundle_location_from_tests_root,
+                dna_bundle_location_from_tests_root,
                 dna_role_id,
                 coordinator_zome,
                 crud.read,
@@ -113,10 +113,10 @@ fn alice_create_entry(
             create_fns_of_entry_type_this_entry_type_depends_on
         ),
         entry_definition.js_sample_object(),
-        entry_definition.name,
+        entry_definition.singular_name,
         dna_role_id,
         coordinator_zome,
-        entry_definition.name
+        entry_definition.singular_name
     )
 }
 
@@ -136,7 +136,7 @@ test('create {}', async t => {{
 {}
   }});
 }});"#,
-        entry_definition.name,
+        entry_definition.singular_name,
         common_tests_setup(happ_bundle_location_from_tests_root, dna_role_id),
         alice_create_entry(
             entry_definition,
@@ -181,17 +181,17 @@ test('create and read {}', async t => {{
     assert.deepEqual(createInput, decode((createReadOutput.entry as any).Present.entry) as any);
   }});
 }});"#,
-        entry_definition.name,
+        entry_definition.singular_name,
         common_tests_setup(happ_bundle_location_from_tests_root, dna_role_id),
         entry_definition.js_sample_object(),
-        entry_definition.name,
+        entry_definition.singular_name,
         dna_role_id,
         coordinator_zome,
-        entry_definition.name,
-        entry_definition.name,
+        entry_definition.singular_name,
+        entry_definition.singular_name,
         dna_role_id,
         coordinator_zome,
-        entry_definition.name
+        entry_definition.singular_name
     )
 }
 
@@ -217,7 +217,10 @@ pub fn update_entry_test(
     }});
     assert.deepEqual(contentUpdate, decode((readUpdatedOutput.entry as any).Present.entry) as any);
 "#,
-            entry_definition.name, dna_role_id, coordinator_zome, entry_definition.name
+            entry_definition.singular_name,
+            dna_role_id,
+            coordinator_zome,
+            entry_definition.singular_name
         ),
     };
 
@@ -255,19 +258,19 @@ test('create and update {}', async t => {{
 {}
   }});
 }});"#,
-        entry_definition.name,
+        entry_definition.singular_name,
         common_tests_setup(happ_bundle_location_from_tests_root, dna_role_id),
         entry_definition.js_sample_object(),
-        entry_definition.name,
+        entry_definition.singular_name,
         dna_role_id,
         coordinator_zome,
-        entry_definition.name,
-        entry_definition.name,
+        entry_definition.singular_name,
+        entry_definition.singular_name,
         entry_definition.js_sample_object(),
-        entry_definition.name,
+        entry_definition.singular_name,
         dna_role_id,
         coordinator_zome,
-        entry_definition.name,
+        entry_definition.singular_name,
         maybe_read
     )
 }
@@ -294,7 +297,10 @@ pub fn delete_entry_test(
     }});
     assert.equal(readDeletedOutput, undefined);
 "#,
-            entry_definition.name, dna_role_id, coordinator_zome, entry_definition.name
+            entry_definition.singular_name,
+            dna_role_id,
+            coordinator_zome,
+            entry_definition.singular_name
         ),
     };
     format!(
@@ -324,17 +330,17 @@ test('create and delete {}', async t => {{
 {}
   }});
 }});"#,
-        entry_definition.name,
+        entry_definition.singular_name,
         common_tests_setup(happ_bundle_location_from_tests_root, dna_role_id),
         entry_definition.js_sample_object(),
-        entry_definition.name,
+        entry_definition.singular_name,
         dna_role_id,
         coordinator_zome,
-        entry_definition.name,
-        entry_definition.name,
+        entry_definition.singular_name,
+        entry_definition.singular_name,
         dna_role_id,
         coordinator_zome,
-        entry_definition.name,
+        entry_definition.singular_name,
         maybe_read
     )
 }

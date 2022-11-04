@@ -29,7 +29,7 @@ pub fn choose_widget(
                 .items(&widgets_that_can_render_this_type[..])
                 .interact()?;
 
-            let widget_name = widgets_that_can_render_this_type[selection];
+            let widget_name = widgets_that_can_render_this_type[selection].clone();
             let properties: BTreeMap<String, String> = BTreeMap::new();
             // TODO: ask for the properties
             Ok(Some(FieldWidget {
@@ -67,9 +67,9 @@ pub fn choose_field(field_types_templates: &FileTree) -> ScaffoldResult<(String,
             .items(&field_type_names[..])
             .interact()?;
 
-        (true, field_types[selection])
+        (true, field_types[selection].clone())
     } else {
-        (false, field_types[selection])
+        (false, field_types[selection].clone())
     };
 
     let visible = Confirm::with_theme(&ColorfulTheme::default())

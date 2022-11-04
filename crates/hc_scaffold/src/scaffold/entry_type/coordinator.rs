@@ -1,15 +1,12 @@
-use std::ffi::OsString;
-
-use build_fs_tree::file;
 use convert_case::{Case, Casing};
-use holochain_types::prelude::{DnaManifest, ZomeManifest};
 
 use crate::{
-    cli::Crud,
-    error::{ScaffoldError, ScaffoldResult},
-    file_tree::{map_file, FileTree},
-    generators::{link_type::link_type_name, zome::utils::zome_manifest_path},
+    error::ScaffoldResult,
+    file_tree::{insert_file, map_file},
+    scaffold::{dna::DnaFileTree, link_type::link_type_name, zome::ZomeFileTree},
 };
+
+use super::crud::Crud;
 
 pub fn read_handler(entry_def_name: &String) -> String {
     format!(
@@ -104,7 +101,7 @@ pub fn delete_{}(action_hash: ActionHash) -> ExternResult<ActionHash> {{
     )
 }
 
-fn depends_on_handler(entry_type: &String, depends_on: &String) -> String {
+fn depends_on_handler(plural_name: &String, depends_on: &String) -> String {
     format!(
         r#"
 #[hdk_extern]
@@ -122,17 +119,18 @@ pub fn get_{}_for_{}({}_hash: ActionHash) -> ExternResult<Vec<Record>> {{
 
     Ok(record)
 }}"#,
-        entry_type.to_case(Case::Snake),
+        plural_name.to_case(Case::Snake),
         depends_on.to_case(Case::Snake),
         depends_on.to_case(Case::Snake),
         depends_on.to_case(Case::Snake),
-        link_type_name(depends_on, entry_type),
+        link_type_name(depends_on, &plural_name.to_case(Case::Pascal)),
     )
 }
 
 fn initial_crud_handlers(
     integrity_zome_name: &String,
-    entry_def_name: &String,
+    singular_name: &String,
+    plural_name: &String,
     crud: &Crud,
     depends_on: &Vec<String>,
 ) -> String {
@@ -143,77 +141,69 @@ use {}::*;
 {}
 "#,
         integrity_zome_name,
-        create_handler(entry_def_name, depends_on)
+        create_handler(singular_name, depends_on)
     );
 
     if crud.read {
-        initial.push_str(read_handler(entry_def_name).as_str());
+        initial.push_str(read_handler(singular_name).as_str());
     }
     if crud.update {
-        initial.push_str(update_handler(entry_def_name).as_str());
+        initial.push_str(update_handler(singular_name).as_str());
     }
     if crud.delete {
-        initial.push_str(delete_handler(entry_def_name).as_str());
+        initial.push_str(delete_handler(singular_name).as_str());
     }
 
     for d in depends_on {
-        initial.push_str(depends_on_handler(entry_def_name, d).as_str());
+        initial.push_str(depends_on_handler(plural_name, d).as_str());
     }
 
     initial
 }
 
 pub fn add_crud_functions_to_coordinator(
-    mut app_file_tree: FileTree,
-    dna_manifest: &DnaManifest,
+    mut zome_file_tree: ZomeFileTree,
     integrity_zome_name: &String,
-    coordinator_zome: &ZomeManifest,
-    entry_def_name: &String,
+    singular_name: &String,
+    plural_name: &String,
     crud: &Crud,
     depends_on: &Vec<String>,
-) -> ScaffoldResult<FileTree> {
+) -> ScaffoldResult<ZomeFileTree> {
+    let dna_manifest_path = zome_file_tree.dna_file_tree.dna_manifest_path.clone();
+    let zome_manifest = zome_file_tree.zome_manifest.clone();
+
     // 1. Create an ENTRY_DEF_NAME.rs in "src/", with the appropriate crud functions
-    let mut manifest_path = zome_manifest_path(&app_file_tree, &coordinator_zome)?.ok_or(
-        ScaffoldError::CoordinatorZomeNotFound(
-            coordinator_zome.name.0.to_string(),
-            dna_manifest.name(),
+    let crate_src_path = zome_file_tree.zome_crate_path.join("src");
+
+    let mut file_tree = zome_file_tree.dna_file_tree.file_tree();
+    insert_file(
+        &mut file_tree,
+        &crate_src_path.join(format!("{}.rs", singular_name.to_case(Case::Snake))),
+        &initial_crud_handlers(
+            integrity_zome_name,
+            singular_name,
+            plural_name,
+            crud,
+            depends_on,
         ),
     )?;
-
-    manifest_path.pop();
-
-    let snake_entry_def_name = entry_def_name.to_case(Case::Snake);
-
-    let crate_src_path = manifest_path.join("src");
-    let crate_src_path_iter: Vec<OsString> =
-        crate_src_path.iter().map(|s| s.to_os_string()).collect();
-    app_file_tree
-        .path_mut(&mut crate_src_path_iter.iter())
-        .ok_or(ScaffoldError::PathNotFound(crate_src_path.clone()))?
-        .dir_content_mut()
-        .ok_or(ScaffoldError::PathNotFound(crate_src_path.clone()))?
-        .insert(
-            OsString::from(format!("{}.rs", snake_entry_def_name.clone())),
-            file!(initial_crud_handlers(
-                integrity_zome_name,
-                entry_def_name,
-                crud,
-                depends_on
-            )),
-        );
 
     // 2. Add this file as a module in the entry point for the crate
 
     let lib_rs_path = crate_src_path.join("lib.rs");
 
-    map_file(&mut app_file_tree, &lib_rs_path, |s| {
+    map_file(&mut file_tree, &lib_rs_path, |s| {
         format!(
             r#"pub mod {};
 
 {}"#,
-            snake_entry_def_name, s
+            singular_name.to_case(Case::Snake),
+            s
         )
     })?;
 
-    Ok(app_file_tree)
+    let dna_file_tree = DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
+    let zome_file_tree = ZomeFileTree::from_zome_manifest(dna_file_tree, zome_manifest)?;
+
+    Ok(zome_file_tree)
 }

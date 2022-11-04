@@ -1,14 +1,15 @@
 use crate::{
-    file_tree::{file_content, find_files_by_name, FileTree},
-    generators::dna::utils::read_dna_manifest,
+    file_tree::{file_content, FileTree},
+    scaffold::dna::read_dna_manifest,
 };
-use dialoguer::{theme::ColorfulTheme, Select};
 use holochain_types::prelude::AppManifest;
-use mr_bundle::{Location, Manifest};
+use mr_bundle::Location;
 use path_clean::PathClean;
 use std::{collections::BTreeMap, path::PathBuf};
 
 use crate::error::{ScaffoldError, ScaffoldResult};
+
+use super::{choose_app, find_app_manifests};
 
 pub fn read_app_manifest(
     app_file_tree: &FileTree,
@@ -30,6 +31,7 @@ pub fn get_or_choose_app_manifest_path_for_dna_manifest(
     let app_manifests = find_app_manifests(&app_file_tree)?;
 
     let apps_for_dna: BTreeMap<PathBuf, AppManifest> = app_manifests
+        .clone()
         .into_iter()
         .filter(|(app_manifest_path, manifest)| {
             match bundled_dnas_paths(&app_file_tree, &app_manifest_path) {
@@ -50,6 +52,7 @@ pub fn get_or_choose_app_manifest_path_for_dna_manifest(
 
     Ok(path)
 }
+
 pub fn bundled_dnas_paths(
     app_file_tree: &FileTree,
     app_manifest_path: &PathBuf,

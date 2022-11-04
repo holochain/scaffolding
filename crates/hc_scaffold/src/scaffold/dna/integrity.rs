@@ -25,10 +25,9 @@ pub fn add_integrity_zome_to_manifest(
 ) -> ScaffoldResult<DnaFileTree> {
     check_zome_doesnt_exist(&dna_file_tree.dna_manifest, &zome_manifest)?;
 
-    let (mut integrity_manifest, mut coordinator_manifest) =
-        match dna_file_tree.dna_manifest.clone() {
-            DnaManifest::V1(m) => (m.integrity, m.coordinator),
-        };
+    let (mut integrity_manifest, coordinator_manifest) = match dna_file_tree.dna_manifest.clone() {
+        DnaManifest::V1(m) => (m.integrity, m.coordinator),
+    };
     integrity_manifest.zomes.push(zome_manifest);
 
     let new_manifest: DnaManifest = DnaManifestCurrentBuilder::default()
@@ -39,11 +38,16 @@ pub fn add_integrity_zome_to_manifest(
         .unwrap()
         .into();
 
+    let dna_manifest_path = dna_file_tree.dna_manifest_path.clone();
+    let mut file_tree = dna_file_tree.file_tree();
+
     insert_file(
-        &mut dna_file_tree.file_tree,
-        &dna_file_tree.dna_manifest_path,
+        &mut file_tree,
+        &dna_manifest_path,
         &serde_yaml::to_string(&new_manifest)?,
     )?;
+
+    let dna_file_tree = DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
 
     Ok(dna_file_tree)
 }

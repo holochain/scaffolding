@@ -2,6 +2,7 @@ use std::{collections::BTreeMap, path::PathBuf};
 
 use dialoguer::{theme::ColorfulTheme, Select};
 use holochain_types::prelude::AppManifest;
+use mr_bundle::Manifest;
 
 use crate::{
     error::{ScaffoldError, ScaffoldResult},
@@ -23,6 +24,9 @@ pub struct AppFileTree {
 impl AppFileTree {
     pub fn file_tree(self) -> FileTree {
         self.file_tree
+    }
+    pub fn file_tree_ref<'a>(&'a self) -> &'a FileTree {
+        &self.file_tree
     }
 
     pub fn get_or_choose(

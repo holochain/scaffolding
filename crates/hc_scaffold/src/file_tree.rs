@@ -36,11 +36,10 @@ pub fn load_directory_into_memory(path: &PathBuf) -> ScaffoldResult<FileTree> {
 
 pub fn path_mut<'a>(
     file_tree: &'a mut FileTree,
-    path: &PathBuf,
+    path: &'a PathBuf,
 ) -> ScaffoldResult<&'a mut FileTree> {
-    let v: Vec<OsString> = path.clone().iter().map(|s| s.to_os_string()).collect();
     file_tree
-        .path_mut(&mut v.iter())
+        .path_mut(&mut path.iter().map(|s| &s.to_os_string()))
         .ok_or(ScaffoldError::PathNotFound(path.clone()))
 }
 
@@ -264,7 +263,7 @@ pub fn map_all_files<F: Fn(PathBuf, String) -> ScaffoldResult<String> + Clone>(
     map_fn: F,
 ) -> ScaffoldResult<()> {
     map_all_files_rec(&mut file_tree, PathBuf::new(), map_fn)?;
-    Ok(file_tree)
+    Ok(())
 }
 
 fn map_all_files_rec<F: Fn(PathBuf, String) -> ScaffoldResult<String> + Clone>(

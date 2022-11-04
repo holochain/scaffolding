@@ -19,7 +19,7 @@ pub fn new_coordinator_zome_manifest(
         name: name.clone().into(),
         hash: None,
         location,
-        dependencies: maybe_dependencies.map(|dz| {
+        dependencies: maybe_dependencies.clone().map(|dz| {
             dz.into_iter()
                 .map(|d| ZomeDependency { name: d.into() })
                 .collect()
@@ -30,16 +30,15 @@ pub fn new_coordinator_zome_manifest(
 }
 
 pub fn add_coordinator_zome_to_manifest(
-    dna_file_tree: DnaFileTree,
+    mut dna_file_tree: DnaFileTree,
     zome_manifest: ZomeManifest,
 ) -> ScaffoldResult<DnaFileTree> {
     check_zome_doesnt_exist(&dna_file_tree.dna_manifest, &zome_manifest)?;
 
-    let (mut integrity_manifest, mut coordinator_manifest) =
-        match dna_file_tree.dna_manifest.clone() {
-            DnaManifest::V1(m) => (m.integrity, m.coordinator),
-        };
-    if let Some(dependencies) = zome_manifest.dependencies {
+    let (integrity_manifest, mut coordinator_manifest) = match dna_file_tree.dna_manifest.clone() {
+        DnaManifest::V1(m) => (m.integrity, m.coordinator),
+    };
+    if let Some(dependencies) = zome_manifest.dependencies.clone() {
         for d in dependencies {
             if !integrity_manifest
                 .zomes

@@ -1,13 +1,11 @@
 use crate::definitions::FieldType;
-use crate::error::ScaffoldError;
-use crate::file_tree::{dir_content, load_directory_into_memory};
+use crate::error::ScaffoldResult;
+use crate::file_tree::{load_directory_into_memory, FileTree};
 use crate::scaffold::app::cargo::exec_metadata;
 use crate::scaffold::app::AppFileTree;
 use crate::scaffold::dna::{scaffold_dna, DnaFileTree};
 use crate::scaffold::entry_type::crud::{parse_crud, Crud};
-use crate::scaffold::entry_type::{
-    parse_depends_on_itself, scaffold_entry_type, DependsOnItself, SelfDependencyType,
-};
+use crate::scaffold::entry_type::{parse_depends_on_itself, scaffold_entry_type, DependsOnItself};
 use crate::scaffold::index::{scaffold_index, IndexType};
 use crate::scaffold::link_type::scaffold_link_type;
 use crate::scaffold::web_app::scaffold_web_app;
@@ -16,14 +14,14 @@ use crate::scaffold::zome::utils::select_integrity_zomes;
 use crate::scaffold::zome::{
     integrity_zome_name, scaffold_coordinator_zome, scaffold_integrity_zome, ZomeFileTree,
 };
-use crate::templates::get_templates_for_app;
+use crate::templates::pull::pull_template;
+use crate::templates::{get_templates_for_app, template_path};
 use crate::utils::{
     check_no_whitespace, check_snake_case, input_no_whitespace, input_snake_case, input_yes_or_no,
 };
 
-use build_fs_tree::{Build, MergeableFileSystemTree};
+use build_fs_tree::{dir, Build, MergeableFileSystemTree};
 use dialoguer::{theme::ColorfulTheme, Select};
-use std::collections::BTreeMap;
 use std::process::Stdio;
 use std::{ffi::OsString, path::PathBuf, process::Command};
 use structopt::StructOpt;
@@ -126,11 +124,11 @@ pub enum HcScaffold {
 
         #[structopt(long)]
         /// Use the entry hash as the base for the links, instead of the action hash
-        link_from_entry_hash: bool,
+        link_from_entry_hash: Option<bool>,
 
         #[structopt(long)]
         /// Use the entry hash as the target for the links, instead of the action hash
-        link_to_entry_hash: bool,
+        link_to_entry_hash: Option<bool>,
     },
     /// Scaffold an indexing link-type and appropriate zome functions to index entries into an existing zome
     Index {
@@ -154,7 +152,7 @@ pub enum HcScaffold {
 
         #[structopt(long)]
         /// Use the entry hash as the target for the links, instead of the action hash
-        link_to_entry_hash: bool,
+        link_to_entry_hash: Option<bool>,
     },
 }
 
@@ -172,12 +170,12 @@ impl HcScaffold {
                 template,
             } => {
                 let template = match template {
-                    Some(t) => Ok(t),
+                    Some(t) => t,
                     None => {
                         let ui_framework = choose_ui_framework()?;
-                        Ok(HcScaffoldTemplate::Init { ui_framework })
+                        HcScaffoldTemplate::Init { ui_framework }
                     }
-                }?;
+                };
 
                 let template_file_tree = template.get_template_file_tree()?;
 
@@ -233,7 +231,7 @@ Then, add new DNAs to your app with:
                     name, name, maybe_nix
                 );
             }
-            HcScaffold::Template(template) => template.run(),
+            HcScaffold::Template(template) => template.run()?,
             HcScaffold::Dna { app, name } => {
                 let prompt = String::from("DNA name (snake_case):");
                 let name: String = match name {
@@ -272,30 +270,35 @@ Add new zomes to your DNA with:
                 integrity,
                 coordinator,
             } => {
+                let current_dir = std::env::current_dir()?;
+                let file_tree = load_directory_into_memory(&current_dir)?;
+                let template_file_tree = get_templates_for_app(&file_tree)?;
+
                 if let Some(n) = name.clone() {
                     check_snake_case(n, "zome name")?;
                 }
 
-                let (scaffold_integrity, scaffold_coordinator) = match (integrity, coordinator) {
-                    (None, None) => {
-                        let option = Select::with_theme(&ColorfulTheme::default())
-                            .with_prompt("What do you want to scaffold?")
-                            .default(0)
-                            .items(&[
-                                "Integrity/coordinator zome-pair (recommended)",
-                                "Only an integrity zome",
-                                "Only a coordinator zome",
-                            ])
-                            .interact()?;
+                let (scaffold_integrity, scaffold_coordinator) =
+                    match (integrity.clone(), coordinator.clone()) {
+                        (None, None) => {
+                            let option = Select::with_theme(&ColorfulTheme::default())
+                                .with_prompt("What do you want to scaffold?")
+                                .default(0)
+                                .items(&[
+                                    "Integrity/coordinator zome-pair (recommended)",
+                                    "Only an integrity zome",
+                                    "Only a coordinator zome",
+                                ])
+                                .interact()?;
 
-                        match option {
-                            0 => (true, true),
-                            1 => (true, false),
-                            2 => (false, true),
+                            match option {
+                                0 => (true, true),
+                                1 => (true, false),
+                                _ => (false, true),
+                            }
                         }
-                    }
-                    _ => (integrity.is_some(), coordinator.is_some()),
-                };
+                        _ => (integrity.is_some(), coordinator.is_some()),
+                    };
 
                 let name_prompt = match (scaffold_integrity, scaffold_coordinator) {
                     (true, true) => String::from("Enter coordinator zome name (snake_case):\n (The integrity zome will automatically be named '{name of coordinator zome}_integrity')\n"),
@@ -307,17 +310,12 @@ Add new zomes to your DNA with:
                     None => input_snake_case(&name_prompt)?,
                 };
 
-                let current_dir = std::env::current_dir()?;
-
-                let file_tree = load_directory_into_memory(&current_dir)?;
-                let template_file_tree = get_templates_for_app(&file_tree)?;
-
                 let mut dna_file_tree = DnaFileTree::get_or_choose(file_tree, &dna)?;
 
                 if scaffold_integrity {
                     let integrity_zome_name = match scaffold_coordinator {
                         true => integrity_zome_name(&name),
-                        false => name,
+                        false => name.clone(),
                     };
                     let zome_file_tree =
                         scaffold_integrity_zome(dna_file_tree, &integrity_zome_name, &integrity)?;
@@ -342,6 +340,8 @@ Add new zomes to your DNA with:
                     )?;
                     dna_file_tree = zome_file_tree.dna_file_tree;
                 }
+
+                // TODO: implement scaffold_zome_template
 
                 let file_tree =
                     MergeableFileSystemTree::<OsString, String>::from(dna_file_tree.file_tree());
@@ -444,12 +444,12 @@ Add new indexes for that entry type with:
                 let zome_file_tree = ZomeFileTree::get_or_choose_integrity(dna_file_tree, &zome)?;
 
                 let (app_file_tree, link_type_name) = scaffold_link_type(
-                    &zome_file_tree,
+                    zome_file_tree,
                     &template_file_tree,
                     &from_entry_type,
                     &to_entry_type,
-                    link_from_entry_hash,
-                    link_to_entry_hash,
+                    &link_from_entry_hash,
+                    &link_to_entry_hash,
                 )?;
 
                 let file_tree = MergeableFileSystemTree::<OsString, String>::from(app_file_tree);
@@ -464,7 +464,6 @@ Link type "{}" scaffolded!
                 );
             }
             HcScaffold::Index {
-                app,
                 dna,
                 zome,
                 index_name,
@@ -472,29 +471,27 @@ Link type "{}" scaffolded!
                 entry_types,
                 link_to_entry_hash,
             } => {
+                let current_dir = std::env::current_dir()?;
+                let file_tree = load_directory_into_memory(&current_dir)?;
+                let template_file_tree = get_templates_for_app(&file_tree)?;
+
+                let dna_file_tree = DnaFileTree::get_or_choose(file_tree, &dna)?;
+
+                let zome_file_tree = ZomeFileTree::get_or_choose_integrity(dna_file_tree, &zome)?;
+
                 let prompt = String::from("Index name (snake_case, eg. \"all_posts\"):");
                 let name: String = match index_name {
                     Some(n) => check_snake_case(n, "index name")?,
                     None => input_snake_case(&prompt)?,
                 };
 
-                let current_dir = std::env::current_dir()?;
-                let app_file_tree = load_directory_into_memory(&current_dir)?;
-
-                let app_manifest = get_or_choose_app_manifest(&app_file_tree, &app)?;
-                let (_dna_manifest_path, dna_manifest) =
-                    get_or_choose_dna_manifest_path(&app_file_tree, &app_manifest, dna)?;
-
-                let integrity_zome_name = get_or_choose_integrity_zome(&dna_manifest, &zome)?;
-
                 let app_file_tree = scaffold_index(
-                    app_file_tree,
-                    &dna_manifest,
-                    &integrity_zome_name,
+                    zome_file_tree,
+                    &template_file_tree,
                     &name,
                     &index_type,
                     &entry_types,
-                    link_to_entry_hash,
+                    &link_to_entry_hash,
                 )?;
 
                 let file_tree = MergeableFileSystemTree::<OsString, String>::from(app_file_tree);

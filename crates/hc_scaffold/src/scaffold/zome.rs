@@ -25,7 +25,7 @@ use super::{
         get_workspace_packages_locations, workspace_package_path,
     },
     dna::{
-        coordinator::new_coordinator_zome_manifest,
+        coordinator::{add_coordinator_zome_to_manifest, new_coordinator_zome_manifest},
         integrity::{add_integrity_zome_to_manifest, new_integrity_zome_manifest},
         DnaFileTree,
     },
@@ -42,7 +42,7 @@ impl ZomeFileTree {
         dna_file_tree: DnaFileTree,
         integrity_zome_name: &Option<String>,
     ) -> ScaffoldResult<ZomeFileTree> {
-        let integrity_zomes = match dna_file_tree.dna_manifest {
+        let integrity_zomes = match dna_file_tree.dna_manifest.clone() {
             DnaManifest::V1(v1) => v1.integrity.zomes.clone(),
         };
 
@@ -342,7 +342,7 @@ pub fn scaffold_integrity_zome_with_path(
 ) -> ScaffoldResult<ZomeFileTree> {
     let dna_manifest_path = dna_file_tree.dna_manifest_path.clone();
 
-    let file_tree = add_common_zome_dependencies_to_workspace_cargo(dna_file_tree)?;
+    let file_tree = add_common_zome_dependencies_to_workspace_cargo(dna_file_tree.file_tree())?;
 
     let mut file_tree = add_workspace_path_dependency(file_tree, zome_name, &path.join(zome_name))?;
 
@@ -366,7 +366,7 @@ pub fn scaffold_integrity_zome_with_path(
     Ok(ZomeFileTree {
         dna_file_tree,
         zome_manifest,
-        zome_crate_path: path,
+        zome_crate_path: path.clone(),
     })
 }
 
@@ -408,12 +408,16 @@ pub fn scaffold_coordinator_zome_in_path(
     path: &PathBuf,
 ) -> ScaffoldResult<ZomeFileTree> {
     let dna_manifest_path = dna_file_tree.dna_manifest_path.clone();
-    let (dna_file_tree, zome_manifest) =
-        dna_file_tree.add_coordinator_zome_to_manifest(zome_name, dependencies)?;
+
+    let coordinator_zome_manifest =
+        new_coordinator_zome_manifest(&dna_file_tree, zome_name, dependencies)?;
+
+    let dna_file_tree =
+        add_coordinator_zome_to_manifest(dna_file_tree, coordinator_zome_manifest.clone())?;
 
     // Add zome to workspace Cargo.toml
 
-    let file_tree = add_common_zome_dependencies_to_workspace_cargo(dna_file_tree)?;
+    let file_tree = add_common_zome_dependencies_to_workspace_cargo(dna_file_tree.file_tree())?;
 
     let mut file_tree = add_workspace_path_dependency(file_tree, zome_name, &path.join(zome_name))?;
 
@@ -427,11 +431,10 @@ pub fn scaffold_coordinator_zome_in_path(
     insert_file_tree_in_dir(&mut file_tree, path, (OsString::from(zome_name), zome))?;
 
     let dna_file_tree = DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
-    let zome_manifest = new_coordinator_zome_manifest(&dna_file_tree, zome_name, dependencies)?;
 
     Ok(ZomeFileTree {
         dna_file_tree,
-        zome_manifest,
+        zome_manifest: coordinator_zome_manifest,
         zome_crate_path: path.clone(),
     })
 }

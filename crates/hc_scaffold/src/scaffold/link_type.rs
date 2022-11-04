@@ -5,6 +5,8 @@ use holochain_types::prelude::DnaManifest;
 use crate::{
     error::{ScaffoldError, ScaffoldResult},
     file_tree::FileTree,
+    templates::link_type::scaffold_link_type_templates,
+    utils::input_snake_case,
 };
 
 use self::{
@@ -12,8 +14,10 @@ use self::{
 };
 
 use super::{
-    entry_def::{integrity::get_all_entry_types, utils::get_or_choose_entry_type},
-    web_app::uis::scaffold_link_type_templates,
+    entry_type::{
+        integrity::get_all_entry_types,
+        utils::{get_or_choose_entry_type, get_or_choose_optional_entry_type},
+    },
     zome::{utils::get_coordinator_zomes_for_integrity, ZomeFileTree},
 };
 
@@ -28,48 +32,81 @@ pub fn link_type_name(from_entry_type: &String, to_entry_type: &String) -> Strin
     )
 }
 
+pub fn choose_use_entry_hash(prompt: &String) -> ScaffoldResult<bool> {
+    let selection = Select::with_theme(&ColorfulTheme::default())
+        .with_prompt(prompt)
+        .default(0)
+        .item("ActionHash (recommended)")
+        .item("EntryHash")
+        .interact()?;
+
+    match selection {
+        0 => Ok(false),
+        _ => Ok(true),
+    }
+}
+
 pub fn scaffold_link_type(
     zome_file_tree: ZomeFileTree,
     template_file_tree: &FileTree,
     from_entry_type: &Option<String>,
     to_entry_type: &Option<String>,
-    link_from_entry_hash: bool,
-    link_to_entry_hash: bool,
+    link_from_entry_hash: &Option<bool>,
+    link_to_entry_hash: &Option<bool>,
 ) -> ScaffoldResult<(FileTree, String)> {
-    let all_entries = get_all_entry_types(&zome_file_tree)?.unwrap_or_else(|| vec![]);
-
     let from_entry_type = get_or_choose_entry_type(
-        dna_manifest,
-        integrity_zome_name,
+        &zome_file_tree,
         from_entry_type,
-        &all_entries,
         &String::from("Link from which entry type?"),
     )?;
 
-    let to_entry_type = get_or_choose_entry_type(
-        dna_manifest,
-        integrity_zome_name,
+    let link_from_entry_hash: bool = match link_from_entry_hash {
+        Some(l) => l.clone(),
+        None => match from_entry_type.as_str() {
+            "AgentPubKey" => false,
+            _ => choose_use_entry_hash(&String::from(
+                "Link from the entry hash or the action hash?",
+            ))?,
+        },
+    };
+
+    let to_entry_type = get_or_choose_optional_entry_type(
+        &zome_file_tree,
         to_entry_type,
-        &all_entries,
         &String::from("Link to which entry type?"),
     )?;
 
-    let link_type_name = link_type_name(&from_entry_type, &to_entry_type);
+    let link_to_entry_hash: bool = match to_entry_type.clone() {
+        None => false,
+        Some(to_entry_type) => match link_to_entry_hash {
+            Some(l) => l.clone(),
+            None => match to_entry_type.as_str() {
+                "AgentPubKey" => false,
+                _ => choose_use_entry_hash(&String::from(
+                    "Link to the entry hash or the action hash?",
+                ))?,
+            },
+        },
+    };
 
-    let app_file_tree = add_link_type_to_integrity_zome(
-        app_file_tree,
-        dna_manifest,
-        integrity_zome_name,
-        &link_type_name,
-    )?;
+    let link_type_name = match to_entry_type.clone() {
+        Some(to_entry_type) => link_type_name(&from_entry_type, &to_entry_type),
+        None => input_snake_case(&String::from("Enter link type name:"))?.to_case(Case::Pascal),
+    };
 
-    let coordinator_zomes_for_integrity =
-        get_coordinator_zomes_for_integrity(dna_manifest, integrity_zome_name);
+    let zome_file_tree = add_link_type_to_integrity_zome(zome_file_tree, &link_type_name)?;
+
+    let integrity_zome_name = zome_file_tree.zome_manifest.name.0.to_string();
+
+    let coordinator_zomes_for_integrity = get_coordinator_zomes_for_integrity(
+        &zome_file_tree.dna_file_tree.dna_manifest,
+        &zome_file_tree.zome_manifest.name.0.to_string(),
+    );
 
     let coordinator_zome = match coordinator_zomes_for_integrity.len() {
         0 => Err(ScaffoldError::NoCoordinatorZomesFoundForIntegrityZome(
-            dna_manifest.name(),
-            integrity_zome_name.clone(),
+            zome_file_tree.dna_file_tree.dna_manifest.name(),
+            zome_file_tree.zome_manifest.name.0.to_string(),
         )),
         1 => Ok(coordinator_zomes_for_integrity[0].clone()),
         _ => {
@@ -89,11 +126,11 @@ pub fn scaffold_link_type(
         }
     }?;
 
+    let dna_manifest = zome_file_tree.dna_file_tree.dna_manifest.clone();
+
     let app_file_tree = add_link_type_functions_to_coordinator(
-        app_file_tree,
-        dna_manifest,
-        integrity_zome_name,
-        &coordinator_zome,
+        zome_file_tree,
+        &integrity_zome_name,
         &link_type_name,
         &from_entry_type,
         &to_entry_type,
@@ -101,13 +138,14 @@ pub fn scaffold_link_type(
         link_to_entry_hash,
     )?;
 
-    let app_file_tree = scaffold_link_type_templates(
-        app_file_tree,
+    let file_tree = scaffold_link_type_templates(
+        app_file_tree.dna_file_tree.file_tree(),
+        &template_file_tree,
         &dna_manifest.name(),
         &coordinator_zome.name.0.to_string(),
         &from_entry_type,
         &to_entry_type,
     )?;
 
-    Ok((app_file_tree, link_type_name))
+    Ok((file_tree, link_type_name))
 }

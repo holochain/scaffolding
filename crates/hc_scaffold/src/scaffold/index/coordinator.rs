@@ -7,10 +7,13 @@ use holochain_types::prelude::{DnaManifest, ZomeManifest};
 
 use crate::{
     error::{ScaffoldError, ScaffoldResult},
-    file_tree::{map_file, map_rust_files, FileTree},
-    generators::zome::{
-        coordinator::find_extern_function_or_choose,
-        utils::{get_coordinator_zomes_for_integrity, zome_manifest_path},
+    file_tree::{insert_file, map_file, map_rust_files, path_mut, FileTree},
+    scaffold::{
+        dna::DnaFileTree,
+        zome::{
+            coordinator::find_extern_function_or_choose,
+            utils::get_coordinator_zomes_for_integrity, ZomeFileTree,
+        },
     },
 };
 
@@ -92,18 +95,18 @@ pub fn get_{}(author: AgentPubKey) -> ExternResult<Vec<Record>> {{
 }
 
 fn add_create_link_in_create_function(
-    mut app_file_tree: FileTree,
-    dna_manifest: &DnaManifest,
+    mut dna_file_tree: DnaFileTree,
     coordinator_zomes_for_integrity: &Vec<ZomeManifest>,
     index_name: &String,
     link_type_name: &String,
     index_type: &IndexType,
     entry_type: &String,
     link_to_entry_hash: bool,
-) -> ScaffoldResult<FileTree> {
+) -> ScaffoldResult<DnaFileTree> {
+    let dna_manifest_path = dna_file_tree.dna_manifest_path.clone();
+
     let (chosen_coordinator_zome, fn_name) = find_extern_function_or_choose(
-        &app_file_tree,
-        dna_manifest,
+        &dna_file_tree,
         coordinator_zomes_for_integrity,
         &format!("create_{}", entry_type.to_case(Case::Snake)),
         &format!(
@@ -112,12 +115,7 @@ fn add_create_link_in_create_function(
         ),
     )?;
 
-    let mut manifest_path = zome_manifest_path(&app_file_tree, &chosen_coordinator_zome)?.ok_or(
-        ScaffoldError::CoordinatorZomeNotFound(
-            chosen_coordinator_zome.name.0.to_string(),
-            dna_manifest.name(),
-        ),
-    )?;
+    let zome_file_tree = ZomeFileTree::from_zome_manifest(dna_file_tree, chosen_coordinator_zome)?;
 
     let snake_case_entry_type = entry_type.to_case(Case::Snake);
 
@@ -158,16 +156,12 @@ fn add_create_link_in_create_function(
         .map(|s| syn::parse_str::<syn::Stmt>(s.as_str()))
         .collect::<Result<Vec<syn::Stmt>, syn::Error>>()?;
 
-    manifest_path.pop();
+    let crate_src_path = zome_file_tree.zome_crate_path.join("src");
 
-    let crate_src_path = manifest_path.join("src");
-    let crate_src_path_iter: Vec<OsString> =
-        crate_src_path.iter().map(|s| s.to_os_string()).collect();
+    let mut file_tree = zome_file_tree.dna_file_tree.file_tree();
 
     map_rust_files(
-        app_file_tree
-            .path_mut(&mut crate_src_path_iter.iter())
-            .ok_or(ScaffoldError::PathNotFound(crate_src_path.clone()))?,
+        path_mut(&mut file_tree, &crate_src_path)?,
         |_file_path, mut file| {
             file.items = file
                 .items
@@ -204,26 +198,34 @@ fn add_create_link_in_create_function(
         _ => e,
     })?;
 
-    Ok(app_file_tree)
+    let dna_file_tree = DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
+
+    Ok(dna_file_tree)
 }
 
 pub fn add_index_to_coordinators(
-    mut app_file_tree: FileTree,
-    dna_manifest: &DnaManifest,
-    integrity_zome_name: &String,
+    mut integrity_zome_file_tree: ZomeFileTree,
     index_name: &String,
     link_type_name: &String,
     index_type: &IndexType,
     entry_types: &Vec<String>,
     link_to_entry_hash: bool,
-) -> ScaffoldResult<(FileTree, ZomeManifest)> {
-    let coordinator_zomes_for_integrity =
-        get_coordinator_zomes_for_integrity(dna_manifest, integrity_zome_name);
+) -> ScaffoldResult<(DnaFileTree, ZomeManifest)> {
+    let integrity_zome_name = integrity_zome_file_tree.zome_manifest.name.0.to_string();
+    let dna_manifest_path = integrity_zome_file_tree
+        .dna_file_tree
+        .dna_manifest_path
+        .clone();
+
+    let coordinator_zomes_for_integrity = get_coordinator_zomes_for_integrity(
+        &integrity_zome_file_tree.dna_file_tree.dna_manifest,
+        &integrity_zome_name,
+    );
 
     let coordinator_zome = match coordinator_zomes_for_integrity.len() {
         0 => Err(ScaffoldError::NoCoordinatorZomesFoundForIntegrityZome(
-            dna_manifest.name(),
-            integrity_zome_name.clone(),
+            integrity_zome_file_tree.dna_file_tree.dna_manifest.name(),
+            integrity_zome_file_tree.zome_manifest.name.0.to_string(),
         )),
         1 => Ok(coordinator_zomes_for_integrity[0].clone()),
         _ => {
@@ -244,50 +246,40 @@ pub fn add_index_to_coordinators(
     }?;
 
     // 1. Create an INDEX_NAME.rs in "src/", with the appropriate zome functions
-    let mut manifest_path = zome_manifest_path(&app_file_tree, &coordinator_zome)?.ok_or(
-        ScaffoldError::CoordinatorZomeNotFound(
-            coordinator_zome.name.0.to_string(),
-            dna_manifest.name(),
-        ),
-    )?;
 
-    manifest_path.pop();
+    let zome_file_tree = ZomeFileTree::from_zome_manifest(
+        integrity_zome_file_tree.dna_file_tree,
+        coordinator_zome.clone(),
+    )?;
 
     let snake_link_type_name = index_name.to_case(Case::Snake);
 
     let getter = match index_type {
         IndexType::Global => global_index_getter(
-            integrity_zome_name,
+            &integrity_zome_name,
             index_name,
             link_type_name,
             link_to_entry_hash,
         ),
         IndexType::ByAuthor => by_author_index_getter(
-            integrity_zome_name,
+            &integrity_zome_name,
             index_name,
             link_type_name,
             link_to_entry_hash,
         ),
     };
 
-    let crate_src_path = manifest_path.join("src");
-    let crate_src_path_iter: Vec<OsString> =
-        crate_src_path.iter().map(|s| s.to_os_string()).collect();
-    app_file_tree
-        .path_mut(&mut crate_src_path_iter.iter())
-        .ok_or(ScaffoldError::PathNotFound(crate_src_path.clone()))?
-        .dir_content_mut()
-        .ok_or(ScaffoldError::PathNotFound(crate_src_path.clone()))?
-        .insert(
-            OsString::from(format!("{}.rs", snake_link_type_name.clone())),
-            file!(getter),
-        );
+    let mut file_tree = zome_file_tree.dna_file_tree.file_tree();
+
+    let crate_src_path = zome_file_tree.zome_crate_path.join("src");
+    let index_path = crate_src_path.join(format!("{}.rs", snake_link_type_name.clone()));
+    insert_file(&mut file_tree, &index_path, &getter)?;
 
     // 2. Add this file as a module in the entry point for the crate
 
     let lib_rs_path = crate_src_path.join("lib.rs");
 
-    map_file(&mut app_file_tree, &lib_rs_path, |s| {
+    map_file(&mut file_tree, &lib_rs_path, |s| {
         format!(
             r#"pub mod {};
 
@@ -296,10 +288,11 @@ pub fn add_index_to_coordinators(
         )
     })?;
 
+    let mut dna_file_tree = DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
+
     for entry_type in entry_types {
-        app_file_tree = add_create_link_in_create_function(
-            app_file_tree,
-            dna_manifest,
+        dna_file_tree = add_create_link_in_create_function(
+            dna_file_tree,
             &coordinator_zomes_for_integrity,
             index_name,
             link_type_name,
@@ -309,5 +302,5 @@ pub fn add_index_to_coordinators(
         )?;
     }
 
-    Ok((app_file_tree, coordinator_zome))
+    Ok((dna_file_tree, coordinator_zome))
 }

@@ -8,6 +8,7 @@ use std::{ffi::OsString, path::PathBuf};
 
 use crate::error::{ScaffoldError, ScaffoldResult};
 use crate::file_tree::{insert_file, path_mut};
+use crate::scaffold::dna::DnaFileTree;
 use crate::{
     definitions::EntryDefinition,
     file_tree::{find_map_rust_files, map_file, map_rust_files, FileTree},
@@ -15,7 +16,7 @@ use crate::{
 };
 
 pub fn render_entry_definition_struct(entry_def: &EntryDefinition) -> ScaffoldResult<TokenStream> {
-    let name: syn::Expr = syn::parse_str(entry_def.name.to_case(Case::Pascal).as_str())?;
+    let name: syn::Expr = syn::parse_str(entry_def.singular_name.to_case(Case::Pascal).as_str())?;
 
     let fields: Vec<TokenStream> = entry_def
         .fields
@@ -39,8 +40,8 @@ pub fn render_entry_definition_file(entry_def: &EntryDefinition) -> ScaffoldResu
 
     let type_definitions: Vec<TokenStream> = entry_def
         .fields
-        .values()
-        .filter_map(|field_def| field_def.field_type.rust_type_definition())
+        .iter()
+        .filter_map(|(field_name, field_def)| field_def.field_type.rust_type_definition())
         .collect();
 
     let token_stream = quote! {
@@ -60,10 +61,14 @@ pub fn render_entry_definition_file(entry_def: &EntryDefinition) -> ScaffoldResu
 }
 
 pub fn add_entry_type_to_integrity_zome(
-    mut zome_file_tree: ZomeFileTree,
+    zome_file_tree: ZomeFileTree,
     entry_def: &EntryDefinition,
-) -> ScaffoldResult<FileTree> {
-    let snake_entry_def_name = entry_def.name.to_case(Case::Snake);
+) -> ScaffoldResult<ZomeFileTree> {
+    let dna_manifest_path = zome_file_tree.dna_file_tree.dna_manifest_path.clone();
+    let dna_manifest = zome_file_tree.dna_file_tree.dna_manifest.clone();
+    let zome_manifest = zome_file_tree.zome_manifest.clone();
+
+    let snake_entry_def_name = entry_def.singular_name.to_case(Case::Snake);
     let entry_def_file = render_entry_definition_file(entry_def)?;
 
     let entry_types = get_all_entry_types(&zome_file_tree)?;
@@ -73,7 +78,7 @@ pub fn add_entry_type_to_integrity_zome(
 
     let entry_def_path = crate_src_path.join(format!("{}.rs", snake_entry_def_name));
 
-    let file_tree = zome_file_tree.dna_file_tree.file_tree();
+    let mut file_tree = zome_file_tree.dna_file_tree.file_tree();
 
     insert_file(&mut file_tree, &entry_def_path, &unparse(&entry_def_file))?;
 
@@ -91,13 +96,13 @@ pub use {}::*;
         )
     })?;
 
-    let pascal_entry_def_name = entry_def.name.to_case(Case::Pascal);
+    let pascal_entry_def_name = entry_def.singular_name.to_case(Case::Pascal);
 
     // 3. Find the #[hdk_entry_defs] macro
     // 3.1 Import the new struct
     // 3.2 Add a variant for the new entry def with the struct as its payload
     map_rust_files(
-        path_mut(&mut file_tree, &crate_src_path),
+        path_mut(&mut file_tree, &crate_src_path)?,
         |file_path, mut file| {
             let mut found = false;
 
@@ -127,7 +132,7 @@ pub use {}::*;
                                     return Err(ScaffoldError::EntryTypeAlreadyExists(
                                         pascal_entry_def_name.clone(),
                                         dna_manifest.name(),
-                                        integrity_zome_name.clone(),
+                                        zome_file_tree.zome_manifest.name.0.to_string(),
                                     ));
                                 }
 
@@ -162,7 +167,10 @@ pub use {}::*;
         _ => e,
     })?;
 
-    Ok(app_file_tree)
+    let dna_file_tree = DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
+    let zome_file_tree = ZomeFileTree::from_zome_manifest(dna_file_tree, zome_manifest)?;
+
+    Ok(zome_file_tree)
 }
 
 pub fn get_all_entry_types(zome_file_tree: &ZomeFileTree) -> ScaffoldResult<Option<Vec<String>>> {

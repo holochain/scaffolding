@@ -4,12 +4,37 @@ use handlebars::{handlebars_helper, Handlebars};
 use regex::Regex;
 use serde_json::{json, Value};
 use std::collections::BTreeMap;
+use std::ffi::OsString;
 use std::path::PathBuf;
 
 use crate::error::{ScaffoldError, ScaffoldResult};
 use crate::file_tree::{dir_content, find_files, flatten_file_tree, unflatten_file_tree, FileTree};
 
 pub mod pull;
+
+// pub mod dna;
+pub mod entry_type;
+pub mod index;
+pub mod link_type;
+pub mod web_app;
+// pub mod zome;
+// pub mod zome_function;
+
+pub fn build_handlebars<'a>(templates_dir: &FileTree) -> ScaffoldResult<Handlebars<'a>> {
+    let h = Handlebars::new();
+
+    let mut h = register_helpers(h);
+
+    let field_types_path = PathBuf::from("field-types");
+    let v: Vec<OsString> = field_types_path.iter().map(|s| s.to_os_string()).collect();
+
+    if let Some(field_types_templates) = templates_dir.path(&mut v.iter()) {
+        h = register_all_partials_in_dir(h, field_types_templates)?;
+    }
+    h.register_escape_fn(handlebars::no_escape);
+
+    Ok(h)
+}
 
 pub fn register_helpers<'a>(h: Handlebars<'a>) -> Handlebars<'a> {
     let h = register_concat_helper(h);

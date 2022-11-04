@@ -29,10 +29,10 @@ pub fn check_zome_doesnt_exist(
     dna_manifest: &DnaManifest,
     zome_manifest: &ZomeManifest,
 ) -> ScaffoldResult<()> {
-    let integrity_manifest = match dna_file_tree.dna_manifest.clone() {
+    let integrity_manifest = match dna_manifest.clone() {
         DnaManifest::V1(m) => m.integrity,
     };
-    let mut coordinator_manifest = match dna_file_tree.dna_manifest.clone() {
+    let mut coordinator_manifest = match dna_manifest.clone() {
         DnaManifest::V1(m) => m.coordinator,
     };
 
@@ -43,7 +43,7 @@ pub fn check_zome_doesnt_exist(
     {
         return Err(ScaffoldError::ZomeAlreadyExists(
             zome_manifest.name.0.to_string(),
-            dna_file_tree.dna_manifest.name(),
+            dna_manifest.name(),
         ));
     }
     Ok(())

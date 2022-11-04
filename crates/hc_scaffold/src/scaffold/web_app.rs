@@ -3,9 +3,10 @@ use std::{ffi::OsString, path::PathBuf};
 
 use crate::error::ScaffoldResult;
 use crate::templates::template_path;
+use crate::templates::web_app::scaffold_web_app_template;
 use crate::{error::ScaffoldError, file_tree::FileTree};
 
-use self::uis::{choose_ui_framework, scaffold_web_app_ui, UiFramework};
+use self::uis::{choose_ui_framework, UiFramework};
 
 use super::{
     app::{
@@ -55,7 +56,8 @@ fn web_app_skeleton(
         .ok_or(ScaffoldError::PathNotFound(PathBuf::new()))?
         .insert(OsString::from(template_path()), template_file_tree.clone());
 
-    let mut app_file_tree = scaffold_web_app_ui(app_file_tree, ui_framework, &app_name)?;
+    let mut app_file_tree =
+        scaffold_web_app_template(app_file_tree, &template_file_tree, &app_name)?;
 
     app_file_tree
         .dir_content_mut()

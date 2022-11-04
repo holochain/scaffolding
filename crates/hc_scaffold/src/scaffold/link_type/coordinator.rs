@@ -6,18 +6,23 @@ use holochain_types::prelude::{DnaManifest, ZomeManifest};
 
 use crate::{
     error::{ScaffoldError, ScaffoldResult},
-    file_tree::{map_file, FileTree},
-    generators::zome::utils::zome_manifest_path,
+    file_tree::{insert_file, map_file, FileTree},
+    scaffold::{dna::DnaFileTree, zome::ZomeFileTree},
 };
 
 fn initial_link_type_handlers(
     integrity_zome_name: &String,
     link_type_name: &String,
     from_entry_type: &String,
-    to_entry_type: &String,
+    to_entry_type: &Option<String>,
     link_from_entry_hash: bool,
     link_to_entry_hash: bool,
 ) -> String {
+    let to_entry_type = match to_entry_type {
+        Some(t) => t,
+        None => link_type_name,
+    };
+
     let from_hash_type = match link_from_entry_hash {
         true => String::from("EntryHash"),
         false => String::from("ActionHash"),
@@ -88,53 +93,49 @@ pub fn get_{}_for_{}({}_hash: {}) -> ExternResult<Vec<Record>> {{
 }
 
 pub fn add_link_type_functions_to_coordinator(
-    mut app_file_tree: FileTree,
-    dna_manifest: &DnaManifest,
+    mut coordinator_zome_file_tree: ZomeFileTree,
     integrity_zome_name: &String,
-    coordinator_zome: &ZomeManifest,
     link_type_name: &String,
     from_entry_type: &String,
-    to_entry_type: &String,
+    to_entry_type: &Option<String>,
     link_from_entry_hash: bool,
     link_to_entry_hash: bool,
-) -> ScaffoldResult<FileTree> {
-    // 1. Create an LINK_TYPE_NAME.rs in "src/", with the appropriate zome functions
-    let mut manifest_path = zome_manifest_path(&app_file_tree, &coordinator_zome)?.ok_or(
-        ScaffoldError::CoordinatorZomeNotFound(
-            coordinator_zome.name.0.to_string(),
-            dna_manifest.name(),
-        ),
-    )?;
-
-    manifest_path.pop();
+) -> ScaffoldResult<ZomeFileTree> {
+    let dna_manifest_path = coordinator_zome_file_tree
+        .dna_file_tree
+        .dna_manifest_path
+        .clone();
+    let zome_manifest = coordinator_zome_file_tree.zome_manifest.clone();
 
     let snake_link_type_name = link_type_name.to_case(Case::Snake);
 
-    let crate_src_path = manifest_path.join("src");
-    let crate_src_path_iter: Vec<OsString> =
-        crate_src_path.iter().map(|s| s.to_os_string()).collect();
-    app_file_tree
-        .path_mut(&mut crate_src_path_iter.iter())
-        .ok_or(ScaffoldError::PathNotFound(crate_src_path.clone()))?
-        .dir_content_mut()
-        .ok_or(ScaffoldError::PathNotFound(crate_src_path.clone()))?
-        .insert(
-            OsString::from(format!("{}.rs", snake_link_type_name.clone())),
-            file!(initial_link_type_handlers(
-                integrity_zome_name,
-                link_type_name,
-                from_entry_type,
-                to_entry_type,
-                link_from_entry_hash,
-                link_to_entry_hash
-            )),
-        );
+    let new_file_path = coordinator_zome_file_tree
+        .zome_crate_path
+        .join("src")
+        .join(format!("{}.rs", snake_link_type_name.clone()));
+    let lib_rs_path = coordinator_zome_file_tree
+        .zome_crate_path
+        .join("src")
+        .join("lib.rs");
+
+    let mut file_tree = coordinator_zome_file_tree.dna_file_tree.file_tree();
+
+    insert_file(
+        &mut file_tree,
+        &new_file_path,
+        &initial_link_type_handlers(
+            integrity_zome_name,
+            link_type_name,
+            from_entry_type,
+            to_entry_type,
+            link_from_entry_hash,
+            link_to_entry_hash,
+        ),
+    )?;
 
     // 2. Add this file as a module in the entry point for the crate
 
-    let lib_rs_path = crate_src_path.join("lib.rs");
-
-    map_file(&mut app_file_tree, &lib_rs_path, |file| {
+    map_file(&mut file_tree, &lib_rs_path, |file| {
         format!(
             r#"pub mod {};
 
@@ -143,5 +144,8 @@ pub fn add_link_type_functions_to_coordinator(
         )
     })?;
 
-    Ok(app_file_tree)
+    let dna_file_tree = DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
+    let zome_file_tree = ZomeFileTree::from_zome_manifest(dna_file_tree, zome_manifest)?;
+
+    Ok(zome_file_tree)
 }

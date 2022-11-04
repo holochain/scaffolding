@@ -181,7 +181,8 @@ impl FieldDefinition {
 
 #[derive(Serialize, Clone)]
 pub struct EntryDefinition {
-    pub name: String,
+    pub singular_name: String,
+    pub plural_name: String,
     pub fields: Vec<(String, FieldDefinition)>,
 }
 

@@ -1,0 +1,52 @@
+use std::{ffi::OsString, path::PathBuf};
+
+use serde::Serialize;
+
+use crate::{
+    definitions::EntryDefinition, error::ScaffoldResult, file_tree::FileTree,
+    scaffold::entry_type::DependsOnItself,
+};
+
+use super::{build_handlebars, render_template_file_tree_and_merge_with_existing};
+
+#[derive(Serialize)]
+pub struct ScaffoldEntryTypeData {
+    dna_role_id: String,
+    coordinator_zome_name: String,
+    entry_type: EntryDefinition,
+    depends_on: Vec<String>,
+    depends_on_itself: DependsOnItself,
+}
+pub fn scaffold_entry_type_templates(
+    mut app_file_tree: FileTree,
+    template_file_tree: &FileTree,
+    dna_role_id: &String,
+    coordinator_zome_name: &String,
+    entry_def: &EntryDefinition,
+    depends_on: &Vec<String>,
+    depends_on_itself: &DependsOnItself,
+) -> ScaffoldResult<FileTree> {
+    let data = ScaffoldEntryTypeData {
+        dna_role_id: dna_role_id.clone(),
+        coordinator_zome_name: coordinator_zome_name.clone(),
+        entry_type: entry_def.clone(),
+        depends_on: depends_on.clone(),
+        depends_on_itself: depends_on_itself.clone(),
+    };
+
+    let h = build_handlebars(&template_file_tree)?;
+
+    let field_types_path = PathBuf::from("entry-type");
+    let v: Vec<OsString> = field_types_path.iter().map(|s| s.to_os_string()).collect();
+
+    if let Some(web_app_template) = template_file_tree.path(&mut v.iter()) {
+        app_file_tree = render_template_file_tree_and_merge_with_existing(
+            app_file_tree,
+            &h,
+            web_app_template,
+            &data,
+        )?;
+    }
+
+    Ok(app_file_tree)
+}
