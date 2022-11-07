@@ -28,7 +28,7 @@ export class {{pascal_case entry_type.singular_name}}Detail extends LitElement {
     const record: Record | undefined = await this.appWebsocket.callZome({
       cap_secret: null,
       cell_id: cellData.cell_id,
-      zome_name: '{{coordinator_zome_name}}',
+      zome_name: '{{coordinator_zome_manifest.name}}',
       fn_name: 'get_{{snake_case entry_type.singular_name}}',
       payload: this.actionHash,
       provenance: cellData.cell_id[1]

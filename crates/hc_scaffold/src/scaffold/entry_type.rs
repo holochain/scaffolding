@@ -287,7 +287,7 @@ pub fn scaffold_entry_type(
         app_file_tree,
         template_file_tree,
         &dna_manifest.name(),
-        &coordinator_zome.name.0.to_string(),
+        &coordinator_zome,
         &entry_def,
         &depends_on,
         &depends_on_itself,

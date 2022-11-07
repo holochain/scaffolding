@@ -31,7 +31,7 @@ export class {{pascal_case index_name}} extends LitElement {
     this._records = await this.appWebsocket.callZome({
       cap_secret: null,
       cell_id: cellData.cell_id,
-      zome_name: '{{coordinator_zome_name}}',
+      zome_name: '{{coordinator_zome_manifest.name}}',
       fn_name: 'get_{{snake_case index_name}}',
       payload: {{#if (eq index_type.type "ByAuthor")}}this.author{{else}}null{{/if}},
       provenance: cellData.cell_id[1]

@@ -13,8 +13,6 @@ name = "{}"
 hdi = {{ workspace = true }}
 
 serde = {{ workspace = true }}
-tsify = {{ workspace = true }}
-wasm-bindgen = {{ workspace = true }}
 "#,
         zome_name, zome_name,
     )

@@ -20,7 +20,7 @@ onMount(async () => {
   records = await appWebsocket.callZome({
     cap_secret: null,
     cell_id: cellData.cell_id,
-    zome_name: '{{coordinator_zome_name}}',
+    zome_name: '{{coordinator_zome_manifest.name}}',
     fn_name: 'get_{{snake_case to_entry_type}}_for_{{snake_case from_entry_type}}',
     payload: actionHash,
     provenance: cellData.cell_id[1]

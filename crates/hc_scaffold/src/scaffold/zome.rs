@@ -9,7 +9,7 @@ use crate::{
         coordinator::scaffold_coordinator_zome_templates,
         integrity::scaffold_integrity_zome_templates,
     },
-    versions::{hdi_version, hdk_version, tsify_version, wasm_bindgen_version},
+    versions::{hdi_version, hdk_version},
 };
 use build_fs_tree::{dir, file};
 use holochain_types::prelude::{DnaManifest, ZomeManifest};
@@ -335,13 +335,6 @@ pub fn add_common_zome_dependencies_to_workspace_cargo(
         add_workspace_external_dependency(file_tree, &"hdk".to_string(), &hdk_version())?;
     let file_tree =
         add_workspace_external_dependency(file_tree, &"serde".to_string(), &"1".to_string())?;
-    let file_tree =
-        add_workspace_external_dependency(file_tree, &"tsify".to_string(), &tsify_version())?;
-    let file_tree = add_workspace_external_dependency(
-        file_tree,
-        &"wasm-bindgen".to_string(),
-        &wasm_bindgen_version(),
-    )?;
 
     Ok(file_tree)
 }

@@ -4,43 +4,37 @@ import '@material/mwc-circular-progress';
 import { decode } from '@msgpack/msgpack';
 import { InstalledCell, Record, ActionHash, AppWebsocket, InstalledAppInfo } from '@holochain/client';
 import { appInfoContext, appWebsocketContext } from '../../contexts';
-import { {{pascal_case entry_type.singular_name}} } from './types';
-{{#each entry_type.fields}}
-{{> (concat field_type.type "/detail/imports") }}
-{{/each}}
+import { {{pascal_case entry_type.singular_name}} } from '../../../types/{{coordinator_zome_manifest.name}}';
+import {{pascal_case entry_type.singular_name}}Detail from './{{pascal_case entry_type.singular_name}}Detail.svelte';
 
 export let actionHash: ActionHash;
 
 let appInfo = getContext(appInfoContext).getAppInfo();
 let appWebsocket = getContext(appWebsocketContext).getAppWebsocket();
 
-let {{camel_case entry_type.singular_name}}: {{pascal_case entry_type.singular_name}} | undefined;
-$: {{camel_case entry_type.singular_name}};
+let records: Array<Record> | undefined;
+$: records;
 
 onMount(async () => {
   const cellData = appInfo.cell_data.find((c: InstalledCell) => c.role_id === '{{dna_role_id}}')!;
 
-  const record: Record | undefined = await appWebsocket.callZome({
+  records = await appWebsocket.callZome({
     cap_secret: null,
     cell_id: cellData.cell_id,
-    zome_name: '{{coordinator_zome_name}}',
-    fn_name: 'get_{{snake_case entry_type.singular_name}}',
+    zome_name: '{{coordinator_zome_manifest.name}}',
+    fn_name: 'get_{{snake_case entry_type.plural_name}}_for_{{snake_case (lookup depends_on index)}}',
     payload: actionHash,
     provenance: cellData.cell_id[1]
   });
-  if (record) {
-    {{camel_case entry_type.singular_name}} = decode((record.entry as any).Present.entry) as {{pascal_case entry_type.singular_name}};
-  }
 });
 
 </script>
 
-{#if {{camel_case entry_type.singular_name}} }
+{#if records }
   <div style="display: flex; flex-direction: column">
-    <span style="font-size: 18px">{{pascal_case entry_type.singular_name}}</span>
-	{{#each entry_type.fields}}
-	  {{> (concat field_type.type "/detail/render") entry_type=../entry_type field_name=@key field_type=this }}
-	{{/each}}
+    {#each records as record}
+      <{{pascal_case entry_type.singular_name}}Detail actionHash={record.signed_action.hashed.hash} style="margin-bottom: 8px;"></{{pascal_case entry_type.singular_name}}Detail>
+    {/each}
   </div>
 {:else}
   <div style="display: flex; flex: 1; align-items: center; justify-content: center">

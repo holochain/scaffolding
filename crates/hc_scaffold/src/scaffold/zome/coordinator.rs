@@ -37,8 +37,6 @@ name = "{}"
 hdk = {{ workspace = true }}
 
 serde = {{ workspace = true }}
-tsify = {{ workspace = true }}
-wasm-bindgen = {{ workspace = true }}
 
 {} 
 "#,

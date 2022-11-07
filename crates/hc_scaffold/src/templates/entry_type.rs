@@ -1,5 +1,6 @@
 use std::{ffi::OsString, path::PathBuf};
 
+use holochain_types::prelude::ZomeManifest;
 use serde::Serialize;
 
 use crate::{
@@ -12,7 +13,7 @@ use super::{build_handlebars, render_template_file_tree_and_merge_with_existing}
 #[derive(Serialize)]
 pub struct ScaffoldEntryTypeData {
     dna_role_id: String,
-    coordinator_zome_name: String,
+    coordinator_zome_manifest: ZomeManifest,
     entry_type: EntryDefinition,
     depends_on: Vec<String>,
     depends_on_itself: DependsOnItself,
@@ -21,14 +22,14 @@ pub fn scaffold_entry_type_templates(
     mut app_file_tree: FileTree,
     template_file_tree: &FileTree,
     dna_role_id: &String,
-    coordinator_zome_name: &String,
+    coordinator_zome: &ZomeManifest,
     entry_def: &EntryDefinition,
     depends_on: &Vec<String>,
     depends_on_itself: &DependsOnItself,
 ) -> ScaffoldResult<FileTree> {
     let data = ScaffoldEntryTypeData {
         dna_role_id: dna_role_id.clone(),
-        coordinator_zome_name: coordinator_zome_name.clone(),
+        coordinator_zome_manifest: coordinator_zome.clone(),
         entry_type: entry_def.clone(),
         depends_on: depends_on.clone(),
         depends_on_itself: depends_on_itself.clone(),

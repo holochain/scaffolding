@@ -26,7 +26,7 @@ export class {{pascal_case entry_type.plural_name}}For{{pascal_case (lookup depe
     const records: Array<Record> = await this.appWebsocket.callZome({
       cap_secret: null,
       cell_id: cellData.cell_id,
-      zome_name: '{{coordinator_zome_name}}',
+      zome_name: '{{coordinator_zome_manifest.name}}',
       fn_name: 'get_{{snake_case entry_type.plural_name}}_for_{{snake_case (lookup depends_on index)}}',
       payload: this.actionHash,
       provenance: cellData.cell_id[1]

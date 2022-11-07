@@ -37,7 +37,7 @@ async function create{{pascal_case entry_type.singular_name}}() {
   const record: Record = await appWebsocket.callZome({
     cap_secret: null,
     cell_id: cellData.cell_id,
-    zome_name: '{{coordinator_zome_name}}',
+    zome_name: '{{coordinator_zome_manifest.name}}',
     fn_name: 'create_{{snake_case entry_type.singular_name}}',
     payload: {{camel_case entry_type.singular_name}},
     provenance: cellData.cell_id[1]

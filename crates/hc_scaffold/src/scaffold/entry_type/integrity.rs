@@ -46,12 +46,11 @@ pub fn render_entry_definition_file(entry_def: &EntryDefinition) -> ScaffoldResu
 
     let token_stream = quote! {
       use hdi::prelude::*;
-      use tsify::Tsify;
 
       #(#type_definitions)*
 
       #[hdk_entry_helper]
-      #[derive(Clone, Tsify)]
+      #[derive(Clone)]
       #entry_def_token_stream
     };
 
