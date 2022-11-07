@@ -193,8 +193,11 @@ pub fn scaffold_entry_type(
                 .iter()
                 .map(|s| s.to_os_string())
                 .collect();
-            let field_types_file_tree = template_file_tree.path(&mut v.iter()).unwrap_or(&dir! {});
-            choose_fields(&field_types_file_tree, depends_fields)?
+            let empty_dir = dir! {};
+            choose_fields(
+                template_file_tree.path(&mut v.iter()).unwrap_or(&empty_dir),
+                depends_fields,
+            )?
         }
     };
 

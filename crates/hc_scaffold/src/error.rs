@@ -21,9 +21,6 @@ pub enum ScaffoldError {
     CargoMetadataError(#[from] cargo_metadata::Error),
 
     /*
-    /// DnaError
-    #[error("DNA error: {0}")]
-    DnaError(#[from] holochain_types::dna::DnaError),
 
     /// SerializedBytesError
     #[error("Internal serialization error: {0}")]
@@ -57,6 +54,9 @@ pub enum ScaffoldError {
     #[error("Path was not found: {0}")]
     PathNotFound(PathBuf),
 
+    #[error("Folder already exists: {0}")]
+    FolderAlreadyExists(PathBuf),
+
     #[error("Invalid path {0}: {1}")]
     InvalidPath(PathBuf, String),
 
@@ -72,11 +72,11 @@ pub enum ScaffoldError {
     #[error("No apps were found that have the DNA \"{0}\"")]
     NoAppsFoundForDna(String),
 
-    #[error("No \".template\" folder found for this project. \n\nInitialize a built-in template with \"hc-scaffold template init\", \n\nor pull an existing one from your favourite git repository with \"hc-scaffold template pull <GIT_REPO_URL>\"")]
-    TemplateNotFound,
+    #[error("Template \"{0}\" not found, should be in a folder named \"{0}\" inside the \".templates\" folder")]
+    TemplateNotFound(String),
 
-    #[error("No \"{0}\" folder found in the given repository")]
-    TemplateNotFoundInRepo(PathBuf),
+    #[error("No \".templates\" folder found for this project. \n\nInitialize a built-in template with \"hc-scaffold template init\", \n\nor pull an existing one from your favourite git repository with \"hc-scaffold template get <GIT_REPO_URL>\"")]
+    NoTemplatesFound,
 
     #[error("No DNAs were found")]
     NoDnasFound,

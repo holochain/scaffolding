@@ -246,7 +246,7 @@ pub fn map_all_files<F: Fn(PathBuf, String) -> ScaffoldResult<String> + Clone>(
     file_tree: &mut FileTree,
     map_fn: F,
 ) -> ScaffoldResult<()> {
-    map_all_files_rec(&mut file_tree, PathBuf::new(), map_fn)?;
+    map_all_files_rec(file_tree, PathBuf::new(), map_fn)?;
     Ok(())
 }
 

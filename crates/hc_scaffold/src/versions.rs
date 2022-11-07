@@ -11,11 +11,11 @@ pub fn hdi_version() -> String {
 }
 
 pub fn hdk_version() -> String {
-    String::from("0.0.157")
+    String::from("0.0.159")
 }
 
 pub fn holochain_nix_version() -> String {
-    String::from("main")
+    String::from("v0_0_171")
 }
 
 pub fn tsify_version() -> String {

@@ -1,5 +1,7 @@
 use build_fs_tree::serde::Serialize;
 use convert_case::{Case, Casing};
+use dialoguer::theme::ColorfulTheme;
+use dialoguer::Select;
 use handlebars::{handlebars_helper, Handlebars};
 use regex::Regex;
 use serde_json::{json, Value};
@@ -10,7 +12,7 @@ use std::path::PathBuf;
 use crate::error::{ScaffoldError, ScaffoldResult};
 use crate::file_tree::{dir_content, find_files, flatten_file_tree, unflatten_file_tree, FileTree};
 
-pub mod pull;
+pub mod get;
 
 // pub mod dna;
 pub mod entry_type;
@@ -175,13 +177,52 @@ pub fn render_template_file_tree_and_merge_with_existing<'a, T: Serialize>(
     unflatten_file_tree(&flattened_app_file_tree)
 }
 
-pub fn template_path() -> PathBuf {
-    PathBuf::from(".template")
+pub fn templates_path() -> PathBuf {
+    PathBuf::from(".templates")
 }
 
-pub fn get_templates_for_app(file_tree: &FileTree) -> ScaffoldResult<FileTree> {
-    match dir_content(file_tree, &template_path()) {
-        Ok(t) => Ok(FileTree::Directory(t)),
-        Err(_) => Err(ScaffoldError::TemplateNotFound),
-    }
+pub fn choose_or_get_template_file_tree(
+    file_tree: &FileTree,
+    template: &Option<String>,
+) -> ScaffoldResult<FileTree> {
+    let template_name = choose_or_get_template(file_tree, template)?;
+
+    Ok(FileTree::Directory(dir_content(
+        &file_tree,
+        &templates_path().join(template_name),
+    )?))
+}
+
+pub fn choose_or_get_template(
+    file_tree: &FileTree,
+    template: &Option<String>,
+) -> ScaffoldResult<String> {
+    let templates_path = PathBuf::new().join(templates_path());
+
+    let templates_dir_content = dir_content(file_tree, &templates_path)?;
+
+    let templates: Vec<String> = templates_dir_content
+        .into_keys()
+        .map(|k| k.to_str().unwrap().to_string())
+        .collect();
+
+    let chosen_template_name = match (template, templates.len()) {
+        (_, 0) => Err(ScaffoldError::NoTemplatesFound),
+        (None, 1) => Ok(templates[0].clone()),
+        (None, _) => {
+            let option = Select::with_theme(&ColorfulTheme::default())
+                .with_prompt("Which template should we use?")
+                .default(0)
+                .items(&templates[..])
+                .interact()?;
+
+            Ok(templates[option].clone())
+        }
+        (Some(t), _) => match templates.contains(&t) {
+            true => Ok(t.clone()),
+            false => Err(ScaffoldError::TemplateNotFound(t.clone())),
+        },
+    }?;
+
+    Ok(chosen_template_name)
 }
