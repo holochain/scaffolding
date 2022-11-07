@@ -7,7 +7,7 @@ use holochain_types::prelude::{
 
 use crate::{
     error::{ScaffoldError, ScaffoldResult},
-    file_tree::{find_map_rust_files, path},
+    file_tree::{dir_content, find_map_rust_files},
     scaffold::dna::DnaFileTree,
 };
 
@@ -127,11 +127,17 @@ pub fn find_extern_function_or_choose(
 
 pub fn find_all_extern_functions(zome_file_tree: &ZomeFileTree) -> ScaffoldResult<Vec<String>> {
     let crate_src_path = zome_file_tree.zome_crate_path.join("src");
+    let v: Vec<OsString> = crate_src_path
+        .clone()
+        .iter()
+        .map(|s| s.to_os_string())
+        .collect();
     let hdk_extern_instances = find_map_rust_files(
-        path(
-            zome_file_tree.dna_file_tree.file_tree_ref(),
-            &crate_src_path,
-        )?,
+        zome_file_tree
+            .dna_file_tree
+            .file_tree_ref()
+            .path(&mut v.iter())
+            .ok_or(ScaffoldError::PathNotFound(crate_src_path.clone()))?,
         &|_file_path, rust_file| {
             rust_file.items.iter().find_map(|i| {
                 if let syn::Item::Fn(item_fn) = i.clone() {

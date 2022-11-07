@@ -1,8 +1,8 @@
-use std::{collections::BTreeMap, path::PathBuf};
+use std::{collections::BTreeMap, ffi::OsString, path::PathBuf};
 
 use crate::{
     definitions::{EntryDefinition, FieldDefinition, FieldType},
-    file_tree::{path, FileTree},
+    file_tree::FileTree,
     templates::entry_type::scaffold_entry_type_templates,
 };
 
@@ -188,10 +188,14 @@ pub fn scaffold_entry_type(
 
             depends_fields
         }
-        None => choose_fields(
-            path(template_file_tree, &PathBuf::from("field-types")).unwrap_or(&dir! {}),
-            depends_fields,
-        )?,
+        None => {
+            let v: Vec<OsString> = PathBuf::from("field-types")
+                .iter()
+                .map(|s| s.to_os_string())
+                .collect();
+            let field_types_file_tree = template_file_tree.path(&mut v.iter()).unwrap_or(&dir! {});
+            choose_fields(&field_types_file_tree, depends_fields)?
+        }
     };
 
     let entry_def = EntryDefinition {

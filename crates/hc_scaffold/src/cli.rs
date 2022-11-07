@@ -14,7 +14,7 @@ use crate::scaffold::zome::utils::select_integrity_zomes;
 use crate::scaffold::zome::{
     integrity_zome_name, scaffold_coordinator_zome, scaffold_integrity_zome, ZomeFileTree,
 };
-use crate::templates::pull::pull_template;
+use crate::templates::pull::get_template;
 use crate::templates::{get_templates_for_app, template_path};
 use crate::utils::{
     check_no_whitespace, check_snake_case, input_no_whitespace, input_snake_case, input_yes_or_no,
@@ -23,6 +23,7 @@ use crate::utils::{
 use build_fs_tree::{dir, Build, MergeableFileSystemTree};
 use dialoguer::{theme::ColorfulTheme, Select};
 use std::process::Stdio;
+use std::str::FromStr;
 use std::{ffi::OsString, path::PathBuf, process::Command};
 use structopt::StructOpt;
 
@@ -42,9 +43,15 @@ pub enum HcScaffold {
         /// Whether to setup the holonix development environment for this web-app
         setup_nix: Option<bool>,
 
-        #[structopt(subcommand)]
-        /// The template to use for this web-app
-        template: Option<HcScaffoldTemplate>,
+        #[structopt(short = "u", long)]
+        /// The git repository URL from which to download the template
+        template_url: Option<String>,
+
+        #[structopt(short, long)]
+        /// The template to scaffold the web-app from
+        /// If "--template-url" is given, the template must be located at the ".template.<TEMPLATE NAME>" folder of the repository
+        /// If not, the template must be an option from the built-in templates: "vanilla", "vue", "lit", "svelte"
+        template: Option<String>,
     },
     /// Set up the template used in this project
     Template(HcScaffoldTemplate),
@@ -168,16 +175,19 @@ impl HcScaffold {
                 description,
                 setup_nix,
                 template,
+                template_url,
             } => {
-                let template = match template {
-                    Some(t) => t,
+                let template_file_tree = match template_url {
+                    Some(u) => get_template(&u, &template),
                     None => {
-                        let ui_framework = choose_ui_framework()?;
-                        HcScaffoldTemplate::Init { ui_framework }
-                    }
-                };
+                        let ui_framework = match template {
+                            Some(t) => UiFramework::from_str(t.as_str())?,
+                            None => choose_ui_framework()?,
+                        };
 
-                let template_file_tree = template.get_template_file_tree()?;
+                        template_for_ui_framework(&ui_framework)
+                    }
+                }?;
 
                 let prompt = String::from("App name (no whitespaces):");
                 let name: String = match name {
@@ -514,17 +524,16 @@ Index "{}" scaffolded!
 #[derive(Debug, StructOpt)]
 #[structopt(setting = structopt::clap::AppSettings::InferSubcommands)]
 pub enum HcScaffoldTemplate {
-    Pull {
+    Get {
         /// The git repository URL from which to download the template
-        git_url: String,
+        template_url: String,
 
-        #[structopt(long)]
-        /// The directory where the template is located in the git repository (default: ".template")
-        subdirectory_path: Option<PathBuf>,
+        /// The template name to use from the given repository (located at ".template.<TEMPLATE NAME>")
+        template: Option<String>,
     },
     Init {
         /// The UI framework to use as the template for this web-app
-        ui_framework: UiFramework,
+        template: UiFramework,
     },
 }
 impl HcScaffoldTemplate {
@@ -539,19 +548,21 @@ impl HcScaffoldTemplate {
         file_tree.build(&".".into())?;
 
         match self {
-            HcScaffoldTemplate::Pull {
-                git_url,
-                subdirectory_path,
+            HcScaffoldTemplate::Get {
+                template_url,
+                template,
             } => {
                 println!(
-                    r#"Template pulled to \".template\" folder
-"#
+                    r#"Template downloaded to folder {:?}
+"#,
+                    template_path()
                 );
             }
-            HcScaffoldTemplate::Init { ui_framework } => {
+            HcScaffoldTemplate::Init { template } => {
                 println!(
-                    r#"Template initialized to \".template\" folder
-"#
+                    r#"Template initialized to folder {:?}
+"#,
+                    template_path()
                 );
             }
         }
@@ -560,12 +571,12 @@ impl HcScaffoldTemplate {
 
     pub fn get_template_file_tree(&self) -> ScaffoldResult<FileTree> {
         match self {
-            HcScaffoldTemplate::Pull {
-                git_url,
-                subdirectory_path,
-            } => pull_template(git_url, subdirectory_path),
+            HcScaffoldTemplate::Get {
+                template_url,
+                template,
+            } => get_template(template_url, template),
 
-            HcScaffoldTemplate::Init { ui_framework } => template_for_ui_framework(&ui_framework),
+            HcScaffoldTemplate::Init { template } => template_for_ui_framework(&template),
         }
     }
 }

@@ -5,21 +5,27 @@ use holochain_types::prelude::DnaManifest;
 
 use crate::{
     error::{ScaffoldError, ScaffoldResult},
-    file_tree::{find_map_rust_files, map_rust_files, path, path_mut, FileTree},
+    file_tree::{find_map_rust_files, map_rust_files, FileTree},
     scaffold::{dna::DnaFileTree, zome::ZomeFileTree},
 };
 
 pub fn add_link_type_to_integrity_zome(
-    mut zome_file_tree: ZomeFileTree,
+    zome_file_tree: ZomeFileTree,
     link_type_name: &String,
 ) -> ScaffoldResult<ZomeFileTree> {
     let crate_src_path = zome_file_tree.zome_crate_path.join("src");
 
+    let v: Vec<OsString> = crate_src_path
+        .clone()
+        .iter()
+        .map(|s| s.to_os_string())
+        .collect();
     let hdk_link_types_instances = find_map_rust_files(
-        path(
-            zome_file_tree.dna_file_tree.file_tree_ref(),
-            &crate_src_path,
-        )?,
+        zome_file_tree
+            .dna_file_tree
+            .file_tree_ref()
+            .path(&mut v.iter())
+            .ok_or(ScaffoldError::PathNotFound(crate_src_path.clone()))?,
         &|_path, file| {
             file.items.clone().into_iter().find(|i| {
                 if let syn::Item::Enum(item_enum) = i.clone() {
@@ -44,9 +50,16 @@ pub fn add_link_type_to_integrity_zome(
 
     let mut file_tree = zome_file_tree.dna_file_tree.file_tree();
 
+    let v: Vec<OsString> = crate_src_path
+        .clone()
+        .iter()
+        .map(|s| s.to_os_string())
+        .collect();
     // Find the #[hdk_link_types] macro and add the new link type to it
     map_rust_files(
-        path_mut(&mut file_tree, &crate_src_path)?,
+        file_tree
+            .path_mut(&mut v.iter())
+            .ok_or(ScaffoldError::PathNotFound(crate_src_path.clone()))?,
         |file_path, mut file| {
             // If there are no link types in this zome, first add the empty enum
             if hdk_link_types_instances.len() == 0 && file_path == PathBuf::from("lib.rs") {

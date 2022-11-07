@@ -7,7 +7,7 @@ use holochain_types::prelude::{DnaManifest, ZomeManifest};
 
 use crate::{
     error::{ScaffoldError, ScaffoldResult},
-    file_tree::{insert_file, map_file, map_rust_files, path_mut, FileTree},
+    file_tree::{insert_file, map_file, map_rust_files, FileTree},
     scaffold::{
         dna::DnaFileTree,
         zome::{
@@ -160,8 +160,15 @@ fn add_create_link_in_create_function(
 
     let mut file_tree = zome_file_tree.dna_file_tree.file_tree();
 
+    let v: Vec<OsString> = crate_src_path
+        .clone()
+        .iter()
+        .map(|s| s.to_os_string())
+        .collect();
     map_rust_files(
-        path_mut(&mut file_tree, &crate_src_path)?,
+        file_tree
+            .path_mut(&mut v.iter())
+            .ok_or(ScaffoldError::PathNotFound(crate_src_path.clone()))?,
         |_file_path, mut file| {
             file.items = file
                 .items

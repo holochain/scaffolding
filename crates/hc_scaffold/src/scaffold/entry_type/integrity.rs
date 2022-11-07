@@ -7,7 +7,7 @@ use quote::quote;
 use std::{ffi::OsString, path::PathBuf};
 
 use crate::error::{ScaffoldError, ScaffoldResult};
-use crate::file_tree::{insert_file, path_mut};
+use crate::file_tree::insert_file;
 use crate::scaffold::dna::DnaFileTree;
 use crate::{
     definitions::EntryDefinition,
@@ -98,11 +98,18 @@ pub use {}::*;
 
     let pascal_entry_def_name = entry_def.singular_name.to_case(Case::Pascal);
 
+    let v: Vec<OsString> = crate_src_path
+        .clone()
+        .iter()
+        .map(|s| s.to_os_string())
+        .collect();
     // 3. Find the #[hdk_entry_defs] macro
     // 3.1 Import the new struct
     // 3.2 Add a variant for the new entry def with the struct as its payload
     map_rust_files(
-        path_mut(&mut file_tree, &crate_src_path)?,
+        file_tree
+            .path_mut(&mut v.iter())
+            .ok_or(ScaffoldError::PathNotFound(crate_src_path.clone()))?,
         |file_path, mut file| {
             let mut found = false;
 

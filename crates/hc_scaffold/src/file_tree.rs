@@ -3,7 +3,7 @@ use ignore::WalkBuilder;
 use include_dir::Dir;
 use prettyplease::unparse;
 use std::collections::BTreeMap;
-use std::ffi::OsString;
+use std::ffi::{OsStr, OsString};
 use std::{fs, path::PathBuf};
 
 use crate::error::{ScaffoldError, ScaffoldResult};
@@ -32,22 +32,6 @@ pub fn load_directory_into_memory(path: &PathBuf) -> ScaffoldResult<FileTree> {
     }
 
     Ok(file_tree)
-}
-
-pub fn path_mut<'a>(
-    file_tree: &'a mut FileTree,
-    path: &'a PathBuf,
-) -> ScaffoldResult<&'a mut FileTree> {
-    file_tree
-        .path_mut(&mut path.iter().map(|s| &s.to_os_string()))
-        .ok_or(ScaffoldError::PathNotFound(path.clone()))
-}
-
-pub fn path<'a>(file_tree: &'a FileTree, path: &PathBuf) -> ScaffoldResult<&'a FileTree> {
-    let v: Vec<OsString> = path.clone().iter().map(|s| s.to_os_string()).collect();
-    file_tree
-        .path(&mut v.iter())
-        .ok_or(ScaffoldError::PathNotFound(path.clone()))
 }
 
 pub fn dir_content(

@@ -9,19 +9,16 @@ use crate::{
 
 use super::template_path;
 
-pub fn pull_template(
-    git_url: &String,
-    subdirectory_path: &Option<PathBuf>,
-) -> ScaffoldResult<FileTree> {
+pub fn get_template(template_url: &String, template: &Option<String>) -> ScaffoldResult<FileTree> {
     let tempdir = TempDir::new().unwrap();
 
     let tempdir_path = tempdir.path().to_path_buf();
-    degit(git_url.as_str(), tempdir_path.to_str().unwrap());
+    degit(template_url.as_str(), tempdir_path.to_str().unwrap());
 
     let mut path = tempdir_path.join(template_path());
 
-    if let Some(p) = subdirectory_path {
-        path = path.join(p);
+    if let Some(t) = template {
+        path = path.join(format!(".template.{}", t));
     }
 
     if !path.as_path().exists() {
