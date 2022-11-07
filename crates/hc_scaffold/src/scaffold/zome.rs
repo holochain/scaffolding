@@ -4,8 +4,8 @@ use regex::Regex;
 use std::{ffi::OsString, path::PathBuf};
 
 use crate::{
-    file_tree::{dir_exists, insert_file_tree_in_dir, FileTree},
-    versions::{hdi_version, tsify_version, wasm_bindgen_version},
+    file_tree::{dir_exists, file_exists, insert_file_tree_in_dir, FileTree},
+    versions::{hdi_version, hdk_version, tsify_version, wasm_bindgen_version},
 };
 use build_fs_tree::{dir, file};
 use holochain_types::prelude::{DnaManifest, ZomeManifest};
@@ -81,7 +81,7 @@ impl ZomeFileTree {
 
         let lib_rs_path = zome_crate_path.join("src").join("lib.rs");
 
-        if !dir_exists(&dna_file_tree.file_tree_ref(), &lib_rs_path) {
+        if !file_exists(&dna_file_tree.file_tree_ref(), &lib_rs_path) {
             return Err(ScaffoldError::PathNotFound(lib_rs_path.clone()));
         }
 
@@ -108,12 +108,17 @@ fn zome_crate_path(
 
             let crate_name = file_name.split(".wasm").next().unwrap().to_string();
 
-            workspace_package_path(dna_file_tree.file_tree_ref(), &crate_name)?.ok_or(
-                ScaffoldError::IntegrityZomeNotFound(
-                    zome_manifest.name.0.to_string(),
-                    dna_file_tree.dna_manifest.name(),
-                ),
-            )
+            let mut manifest_path =
+                workspace_package_path(dna_file_tree.file_tree_ref(), &crate_name)?.ok_or(
+                    ScaffoldError::IntegrityZomeNotFound(
+                        zome_manifest.name.0.to_string(),
+                        dna_file_tree.dna_manifest.name(),
+                    ),
+                )?;
+
+            manifest_path.pop();
+
+            Ok(manifest_path)
         }
         _ => Err(ScaffoldError::IntegrityZomeNotFound(
             zome_manifest.name.0.to_string(),
@@ -322,6 +327,8 @@ pub fn add_common_zome_dependencies_to_workspace_cargo(
 ) -> ScaffoldResult<FileTree> {
     let file_tree =
         add_workspace_external_dependency(file_tree, &"hdi".to_string(), &hdi_version())?;
+    let file_tree =
+        add_workspace_external_dependency(file_tree, &"hdk".to_string(), &hdk_version())?;
     let file_tree =
         add_workspace_external_dependency(file_tree, &"serde".to_string(), &"1".to_string())?;
     let file_tree =

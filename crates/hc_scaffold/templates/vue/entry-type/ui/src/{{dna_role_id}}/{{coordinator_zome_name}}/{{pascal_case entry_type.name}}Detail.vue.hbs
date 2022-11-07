@@ -1,9 +1,9 @@
-<template>
+/<template>
   <div v-if="{{camel_case entry_type.name}}" style="display: flex; flex-direction: column">
     <span style="font-size: 18px">{{pascal_case entry_type.name}}</span>
 	
 	{{#each entry_type.fields}}
-	  {{> (concat field_type.type "/ui/detail/render") entry_type=../entry_type field_name=@key field_type=this}}
+	  {{> (concat field_type.type "/detail/render") entry_type=../entry_type field_name=@key field_type=this}}
 	{{/each}}
   </div>
 
@@ -20,7 +20,7 @@ import { InstalledCell, AppWebsocket, InstalledAppInfo, Record } from '@holochai
 import { {{pascal_case entry_type.name}} } from './{{kebab_case entry_type.name}}';
 import '@material/mwc-circular-progress';
 {{#each entry_type.fields}}
-{{> (concat field_type.type "/ui/detail/imports") }}
+{{> (concat field_type.type "/detail/imports") }}
 {{/each}}
 
 export default defineComponent({

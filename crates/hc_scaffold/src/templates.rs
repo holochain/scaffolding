@@ -199,7 +199,8 @@ pub fn choose_or_get_template(
 ) -> ScaffoldResult<String> {
     let templates_path = PathBuf::new().join(templates_path());
 
-    let templates_dir_content = dir_content(file_tree, &templates_path)?;
+    let templates_dir_content =
+        dir_content(file_tree, &templates_path).map_err(|_e| ScaffoldError::NoTemplatesFound)?;
 
     let templates: Vec<String> = templates_dir_content
         .into_keys()

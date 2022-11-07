@@ -160,10 +160,7 @@ pub fn get_or_choose_dnas_dir_path(app_file_tree: &FileTree) -> ScaffoldResult<P
     }
 }
 
-pub fn scaffold_dna(
-    mut app_file_tree: AppFileTree,
-    dna_name: &String,
-) -> ScaffoldResult<DnaFileTree> {
+pub fn scaffold_dna(app_file_tree: AppFileTree, dna_name: &String) -> ScaffoldResult<DnaFileTree> {
     let new_dna_file_tree: FileTree = dir! {
         "zomes" => dir! {
             "coordinator" => dir! {},
@@ -176,22 +173,24 @@ pub fn scaffold_dna(
 
     let dnas_path = get_or_choose_dnas_dir_path(app_file_tree.file_tree_ref())?;
 
-    let mut dna_workdir_path = PathBuf::new();
+    let dna_workdir_path = PathBuf::new()
+        .join(&dnas_path)
+        .join(dna_name.clone())
+        .join("workdir");
+    let mut dna_workdir_relative_to_app_manifest = PathBuf::new();
 
     let app_workdir_path = app_file_tree.app_manifest_path.parent();
 
     if let Some(path) = app_workdir_path {
         for _path_segment in path.components() {
-            dna_workdir_path = dna_workdir_path.join("..");
+            dna_workdir_relative_to_app_manifest = dna_workdir_relative_to_app_manifest.join("..");
         }
     }
 
-    dna_workdir_path = dna_workdir_path
-        .join(&dnas_path)
-        .join(dna_name.clone())
-        .join("workdir");
+    dna_workdir_relative_to_app_manifest =
+        dna_workdir_relative_to_app_manifest.join(&dna_workdir_path);
 
-    let dna_bundle_path = dna_workdir_path.join(format!("{}.dna", dna_name));
+    let dna_bundle_path = dna_workdir_relative_to_app_manifest.join(format!("{}.dna", dna_name));
     let dna_manifest_path = dna_workdir_path.join("dna.yaml");
 
     let mut roles = app_file_tree.app_manifest.app_roles();

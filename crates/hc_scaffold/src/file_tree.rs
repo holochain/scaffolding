@@ -55,6 +55,10 @@ pub fn dir_exists(app_file_tree: &FileTree, dir_path: &PathBuf) -> bool {
     dir_content(app_file_tree, dir_path).is_ok()
 }
 
+pub fn file_exists(app_file_tree: &FileTree, file_path: &PathBuf) -> bool {
+    file_content(app_file_tree, file_path).is_ok()
+}
+
 pub fn file_content(file_tree: &FileTree, file_path: &PathBuf) -> ScaffoldResult<String> {
     let v: Vec<OsString> = file_path.clone().iter().map(|s| s.to_os_string()).collect();
     file_tree

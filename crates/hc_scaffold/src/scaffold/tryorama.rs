@@ -25,7 +25,7 @@ fn find_or_choose_tryorama_package_path(_app_file_tree: &FileTree) -> ScaffoldRe
 }
 
 pub fn add_tryorama_tests_for_entry_def(
-    mut coordinator_zome_file_tree: ZomeFileTree,
+    coordinator_zome_file_tree: ZomeFileTree,
     entry_def: &EntryDefinition,
     crud: &Crud,
     create_fns_for_depends_on: &BTreeMap<String, (ZomeManifest, String)>,

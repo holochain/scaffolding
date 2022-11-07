@@ -5,7 +5,7 @@
   
     {{#each entry_type.fields}}
       {{#if (not (contains depends_on this)) }}
-        {{> (concat field_type.type "/ui/create/render") entry_type=../entry_type field_name=@key field_type=this }}
+        {{> (concat field_type.type "/create/render") entry_type=../entry_type field_name=@key field_type=this }}
       {{/if}}
     {{/each}}
   
@@ -22,7 +22,7 @@ import { InstalledCell, AppWebsocket, InstalledAppInfo, Record } from '@holochai
 import { {{pascal_case entry_type.name}} } from './{{kebab_case entry_type.name}}';
 import '@material/mwc-button';
 {{#each entry_type.fields}}
-{{> (concat field_type.type "/ui/create/imports") }}
+{{> (concat field_type.type "/create/imports") }}
 {{/each}}
 
 export default defineComponent({

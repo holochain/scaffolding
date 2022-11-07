@@ -6,8 +6,6 @@ use crate::templates::templates_path;
 use crate::templates::web_app::scaffold_web_app_template;
 use crate::{error::ScaffoldError, file_tree::FileTree};
 
-use self::uis::{choose_ui_framework, UiFramework};
-
 use super::{
     app::{
         cargo::workspace_cargo_toml,

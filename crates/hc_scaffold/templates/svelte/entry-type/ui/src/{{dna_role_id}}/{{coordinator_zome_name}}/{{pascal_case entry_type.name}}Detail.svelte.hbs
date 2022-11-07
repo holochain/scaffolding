@@ -6,7 +6,7 @@ import { InstalledCell, Record, ActionHash, AppWebsocket, InstalledAppInfo } fro
 import { appInfoContext, appWebsocketContext } from '../../contexts';
 import { {{pascal_case entry_type.name}} } from './{{kebab_case entry_type.name}}';
 {{#each entry_type.fields}}
-{{> (concat field_type.type "ui/detail/imports") }}
+{{> (concat field_type.type "/detail/imports") }}
 {{/each}}
 
 export let actionHash: ActionHash;
@@ -39,7 +39,7 @@ onMount(async () => {
   <div style="display: flex; flex-direction: column">
     <span style="font-size: 18px">{{pascal_case entry_type.name}}</span>
 	{{#each entry_type.fields}}
-	  {{> (concat field_type.type "ui/detail/render") entry_type=../entry_type field_name=@key field_type=this }}
+	  {{> (concat field_type.type "/detail/render") entry_type=../entry_type field_name=@key field_type=this }}
 	{{/each}}
   </div>
 {:else}

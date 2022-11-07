@@ -9,7 +9,14 @@ fn scaffold_full_web_app_and_test_it() {
 
     let mut cmd = Command::cargo_bin("hc-scaffold").unwrap();
     let cmd = cmd.current_dir(&tempdir_path);
-    let cmd = cmd.args(&["web-app", "forum", "--setup-nix", "true", "--ui", "lit"]);
+    let cmd = cmd.args(&[
+        "web-app",
+        "forum",
+        "--setup-nix",
+        "true",
+        "--template",
+        "lit",
+    ]);
     cmd.assert().success();
 
     let apptempdir = tempdir_path.join("forum");
@@ -21,12 +28,19 @@ fn scaffold_full_web_app_and_test_it() {
 
     let mut cmd = Command::cargo_bin("hc-scaffold").unwrap();
     let cmd = cmd.current_dir(&apptempdir);
-    let cmd = cmd.args(&["zome", "posts", "--path", "dnas/forum/zomes"]);
+    let cmd = cmd.args(&[
+        "zome",
+        "posts",
+        "--integrity",
+        "dnas/forum/zomes/integrity",
+        "--coordinator",
+        "dnas/forum/zomes/coordinator",
+    ]);
     cmd.assert().success();
 
     let mut cmd = Command::cargo_bin("hc-scaffold").unwrap();
     let cmd = cmd.current_dir(&apptempdir);
-    let cmd = cmd.args(&["entry-type", "post", "--crud", "crud", "--fields"]);
+    let cmd = cmd.args(&["entry-type", "post", "posts", "--crud", "crud", "--fields"]);
     cmd.assert().success();
 
     let mut cmd = Command::new("nix-shell");
