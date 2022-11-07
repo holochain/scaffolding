@@ -4,8 +4,8 @@ import '@material/mwc-circular-progress';
 import { decode } from '@msgpack/msgpack';
 import { InstalledCell, Record, ActionHash, AppWebsocket, InstalledAppInfo } from '@holochain/client';
 import { appInfoContext, appWebsocketContext } from '../../contexts';
-import { {{pascal_case entry_type.name}} } from './{{kebab_case entry_type.name}}';
-import {{pascal_case entry_type.name}}Detail from './{{pascal_case entry_type.name}}Detail.svelte';
+import { {{pascal_case entry_type.singular_name}} } from '../../../types/{{coordinator_zome_name}}';
+import {{pascal_case entry_type.singular_name}}Detail from './{{pascal_case entry_type.singular_name}}Detail.svelte';
 
 export let actionHash: ActionHash;
 
@@ -33,7 +33,7 @@ onMount(async () => {
 {#if records }
   <div style="display: flex; flex-direction: column">
     {#each records as record}
-      <{{pascal_case entry_type.name}}Detail actionHash={record.signed_action.hashed.hash} style="margin-bottom: 8px;"></{{pascal_case entry_type.name}}Detail>
+      <{{pascal_case entry_type.singular_name}}Detail actionHash={record.signed_action.hashed.hash} style="margin-bottom: 8px;"></{{pascal_case entry_type.singular_name}}Detail>
     {/each}
   </div>
 {:else}

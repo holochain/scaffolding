@@ -3,7 +3,7 @@ import { state, customElement, property } from 'lit/decorators.js';
 import { InstalledCell, Record, AppWebsocket, ActionHash, InstalledAppInfo } from '@holochain/client';
 import { contextProvided } from '@lit-labs/context';
 import { appWebsocketContext, appInfoContext } from '../../contexts';
-import './{{kebab_case entry_type.name}}-detail';
+import './{{kebab_case entry_type.singular_name}}-detail';
 
 @customElement('{{kebab_case entry_type.plural_name}}-for-{{kebab_case (lookup depends_on index)}}')
 export class {{pascal_case entry_type.plural_name}}For{{pascal_case (lookup depends_on index)}} extends LitElement {

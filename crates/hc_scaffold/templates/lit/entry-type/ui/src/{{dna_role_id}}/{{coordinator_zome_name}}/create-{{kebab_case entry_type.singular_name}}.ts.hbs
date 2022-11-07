@@ -3,14 +3,14 @@ import { state, customElement, property } from 'lit/decorators.js';
 import { InstalledCell, ActionHash, Record, AppWebsocket, InstalledAppInfo } from '@holochain/client';
 import { contextProvided } from '@lit-labs/context';
 import { appWebsocketContext, appInfoContext } from '../../contexts';
-import { {{pascal_case entry_type.name}} } from './{{kebab_case entry_type.name}}';
+import { {{pascal_case entry_type.singular_name}} } from '../../../types/{{coordinator_zome_name}}';
 import '@material/mwc-button';
 {{#each entry_type.fields}}
 {{> (concat field_type.type "/create/imports") }}
 {{/each}}
 
-@customElement('create-{{kebab_case entry_type.name}}')
-export class Create{{pascal_case entry_type.name}} extends LitElement {
+@customElement('create-{{kebab_case entry_type.singular_name}}')
+export class Create{{pascal_case entry_type.singular_name}} extends LitElement {
   {{#each depends_on}}
   @property()
   {{camel_case this}}Hash!: ActionHash;
@@ -22,7 +22,7 @@ export class Create{{pascal_case entry_type.name}} extends LitElement {
   _{{camel_case @key}}: {{> (concat field_type.type "/type") }} | undefined;
   {{/if}}
   {{/each}}
-  is{{pascal_case entry_type.name}}Valid() {
+  is{{pascal_case entry_type.singular_name}}Valid() {
     return {{#each entry_type.fields}} {{#if (not (contains depend_on @key)) }}	this._{{camel_case @key}}{{#unless @last}} && {{/unless}} {{/if}} {{/each}};
   }
 
@@ -32,10 +32,10 @@ export class Create{{pascal_case entry_type.name}} extends LitElement {
   @contextProvided({ context: appInfoContext })
   appInfo!: InstalledAppInfo;
 
-  async create{{pascal_case entry_type.name}}() {
+  async create{{pascal_case entry_type.singular_name}}() {
     const cellData = this.appInfo.cell_data.find((c: InstalledCell) => c.role_id === '{{dna_role_id}}')!;
 
-    const {{camel_case entry_type.name}}: {{pascal_case entry_type.name}} = { 
+    const {{camel_case entry_type.singular_name}}: {{pascal_case entry_type.singular_name}} = { 
     {{#each entry_type.fields}}
       {{#if (not (contains depends_on @key))}}
         {{snake_case @key}}: this._{{camel_case @key}}!,
@@ -50,12 +50,12 @@ export class Create{{pascal_case entry_type.name}} extends LitElement {
       cap_secret: null,
       cell_id: cellData.cell_id,
       zome_name: '{{coordinator_zome_name}}',
-      fn_name: 'create_{{snake_case entry_type.name}}',
-      payload: {{camel_case entry_type.name}},
+      fn_name: 'create_{{snake_case entry_type.singular_name}}',
+      payload: {{camel_case entry_type.singular_name}},
       provenance: cellData.cell_id[1]
     });
 
-    this.dispatchEvent(new CustomEvent('{{kebab_case entry_type.name}}-created', {
+    this.dispatchEvent(new CustomEvent('{{kebab_case entry_type.singular_name}}-created', {
       composed: true,
       bubbles: true,
       detail: {
@@ -67,16 +67,16 @@ export class Create{{pascal_case entry_type.name}} extends LitElement {
   render() {
     return html`
       <div style="display: flex; flex-direction: column">
-        <span style="font-size: 18px">Create {{pascal_case entry_type.name}}</span>
+        <span style="font-size: 18px">Create {{pascal_case entry_type.singular_name}}</span>
 
         {{#each entry_type.fields}}
           {{> (concat field_type.type "/create/render") entry_type=../entry_type field_name=@key field_type=this }}
         {{/each}}
 
         <mwc-button 
-          label="Create {{pascal_case entry_type.name}}"
-          .disabled=${!this.is{{pascal_case entry_type.name}}Valid()}
-          @click=${() => this.create{{pascal_case entry_type.name}}()}
+          label="Create {{pascal_case entry_type.singular_name}}"
+          .disabled=${!this.is{{pascal_case entry_type.singular_name}}Valid()}
+          @click=${() => this.create{{pascal_case entry_type.singular_name}}()}
         ></mwc-button>
     </div>`;
   }

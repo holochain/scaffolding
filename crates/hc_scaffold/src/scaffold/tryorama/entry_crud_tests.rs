@@ -19,8 +19,8 @@ pub fn entry_crud_tests(
 import test from 'node:test';
 import assert from 'node:assert';
 
-import {{ runScenario, pause, DnaSource }} from '@holochain/tryorama';
-import {{ ActionHash, Record }} from '@holochain/client';
+import {{ runScenario, pause }} from '@holochain/tryorama';
+import {{ ActionHash, Record, DnaSource }} from '@holochain/client';
 import {{ decode }} from '@msgpack/msgpack';
 
 {}

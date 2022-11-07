@@ -4,19 +4,19 @@ import { InstalledCell, AppWebsocket, Record, ActionHash, InstalledAppInfo } fro
 import { contextProvided } from '@lit-labs/context';
 import { decode } from '@msgpack/msgpack';
 import { appInfoContext, appWebsocketContext } from '../../contexts';
-import { {{pascal_case entry_type.name}} } from './{{kebab_case entry_type.name}}';
+import { {{pascal_case entry_type.singular_name}} } from '../../../types/{{coordinator_zome_name}}';
 import '@material/mwc-circular-progress';
 {{#each entry_type.fields}}
 {{> (concat field_type.type "/detail/imports") }}
 {{/each}}
 
-@customElement('{{kebab_case entry_type.name}}-detail')
-export class {{pascal_case entry_type.name}}Detail extends LitElement {
+@customElement('{{kebab_case entry_type.singular_name}}-detail')
+export class {{pascal_case entry_type.singular_name}}Detail extends LitElement {
   @property()
   actionHash!: ActionHash;
 
   @state()
-  _{{camel_case entry_type.name}}: {{pascal_case entry_type.name}} | undefined;
+  _{{camel_case entry_type.singular_name}}: {{pascal_case entry_type.singular_name}} | undefined;
 
   @contextProvided({ context: appWebsocketContext })
   appWebsocket!: AppWebsocket;
@@ -29,24 +29,24 @@ export class {{pascal_case entry_type.name}}Detail extends LitElement {
       cap_secret: null,
       cell_id: cellData.cell_id,
       zome_name: '{{coordinator_zome_name}}',
-      fn_name: 'get_{{snake_case entry_type.name}}',
+      fn_name: 'get_{{snake_case entry_type.singular_name}}',
       payload: this.actionHash,
       provenance: cellData.cell_id[1]
     });
     if (record) {
-      this._{{camel_case entry_type.name}} = decode((record.entry as any).Present.entry) as {{pascal_case entry_type.name}};
+      this._{{camel_case entry_type.singular_name}} = decode((record.entry as any).Present.entry) as {{pascal_case entry_type.singular_name}};
     }
   }
 
   render() {
-    if (!this._{{camel_case entry_type.name}}) {
+    if (!this._{{camel_case entry_type.singular_name}}) {
       return html`<div style="display: flex; flex: 1; align-items: center; justify-content: center">
         <mwc-circular-progress indeterminate></mwc-circular-progress>
       </div>`;
     }
     return html`
       <div style="display: flex; flex-direction: column">
-        <span style="font-size: 18px">{{pascal_case entry_type.name}}</span>
+        <span style="font-size: 18px">{{pascal_case entry_type.singular_name}}</span>
 		{{#each entry_type.fields}}
 		  {{> (concat field_type.type "/detail/render") entry_type=../entry_type field_name=@key}}
 		{{/each}}

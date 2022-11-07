@@ -2075,25 +2075,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "holochain_scaffolding_definitions"
-version = "0.1.0"
-dependencies = [
- "convert_case 0.1.0",
- "proc-macro2",
- "quote",
- "rand 0.8.5",
- "syn",
-]
-
-[[package]]
-name = "holochain_scaffolding_utils"
-version = "0.0.1"
-dependencies = [
- "build-fs-tree",
- "thiserror",
-]
-
-[[package]]
 name = "holochain_serialized_bytes"
 version = "0.0.51"
 source = "registry+https://github.com/rust-lang/crates.io-index"

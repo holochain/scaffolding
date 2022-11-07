@@ -2,7 +2,7 @@
 import { createEventDispatcher, getContext } from 'svelte';
 import { InstalledCell, AppWebsocket, InstalledAppInfo, Record, EntryHash, AgentPubKey, ActionHash } from '@holochain/client';
 import { appWebsocketContext, appInfoContext } from '../../contexts';
-import { {{pascal_case entry_type.name}} } from './{{kebab_case entry_type.name}}';
+import { {{pascal_case entry_type.singular_name}} } from '../../../types/{{coordinator_zome_name}}';
 import '@material/mwc-button';
 {{#each entry_type.fields}}
 {{> (concat field_type.type "/create/imports") }}
@@ -25,10 +25,10 @@ let {{camel_case @key}}: {{> (concat field_type.type "/type")}} | undefined;
 
 $: {{#each entry_type.fields}}{{camel_case @key}}{{#unless @last}}, {{/unless}}{{/each}};
 
-async function create{{pascal_case entry_type.name}}() {
+async function create{{pascal_case entry_type.singular_name}}() {
   const cellData = appInfo.cell_data.find((c: InstalledCell) => c.role_id === '{{dna_role_id}}')!;
   
-  const {{camel_case entry_type.name}}: {{pascal_case entry_type.name}} = { 
+  const {{camel_case entry_type.singular_name}}: {{pascal_case entry_type.singular_name}} = { 
   {{#each entry_type.fields}}
     {{snake_case @key}}: {{camel_case @key}}!,
   {{/each}}
@@ -38,15 +38,15 @@ async function create{{pascal_case entry_type.name}}() {
     cap_secret: null,
     cell_id: cellData.cell_id,
     zome_name: '{{coordinator_zome_name}}',
-    fn_name: 'create_{{snake_case entry_type.name}}',
-    payload: {{camel_case entry_type.name}},
+    fn_name: 'create_{{snake_case entry_type.singular_name}}',
+    payload: {{camel_case entry_type.singular_name}},
     provenance: cellData.cell_id[1]
   });
-  dispatch('{{kebab_case entry_type.name}}-created', { actionHash: record.signed_action.hashed.hash });
+  dispatch('{{kebab_case entry_type.singular_name}}-created', { actionHash: record.signed_action.hashed.hash });
 }
 </script>
 <div style="display: flex; flex-direction: column">
-  <span style="font-size: 18px">Create {{pascal_case entry_type.name}}</span>
+  <span style="font-size: 18px">Create {{pascal_case entry_type.singular_name}}</span>
   
   {{#each entry_type.fields}}
     {{#if (not (contains depends_on this)) }}
@@ -55,8 +55,8 @@ async function create{{pascal_case entry_type.name}}() {
   {{/each}}
 
   <mwc-button 
-    label="Create {{pascal_case entry_type.name}}"
+    label="Create {{pascal_case entry_type.singular_name}}"
     disabled={!( {{#each entry_type.fields}}{{camel_case @key}}{{#unless @last}} && {{/unless}}{{/each}} )}
-    on:click="{() => create{{pascal_case entry_type.name}}()}"
+    on:click="{() => create{{pascal_case entry_type.singular_name}}()}"
   ></mwc-button>
 </div>
