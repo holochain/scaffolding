@@ -17,7 +17,7 @@
 import { defineComponent, inject, ComputedRef } from 'vue';
 import { decode } from '@msgpack/msgpack';
 import { InstalledCell, AppWebsocket, InstalledAppInfo, Record } from '@holochain/client';
-import { {{pascal_case entry_type.singular_name}} } from '../../../types/{{coordinator_zome_name}}';
+import { {{pascal_case entry_type.singular_name}} } from './types';
 import '@material/mwc-circular-progress';
 {{#each entry_type.fields}}
 {{> (concat field_type.type "/detail/imports") }}

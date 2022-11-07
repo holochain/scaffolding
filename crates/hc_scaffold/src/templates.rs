@@ -14,12 +14,13 @@ use crate::file_tree::{dir_content, find_files, flatten_file_tree, unflatten_fil
 
 pub mod get;
 
+pub mod coordinator;
 pub mod dna;
 pub mod entry_type;
 pub mod index;
+pub mod integrity;
 pub mod link_type;
 pub mod web_app;
-// pub mod zome;
 // pub mod zome_function;
 
 pub fn build_handlebars<'a>(templates_dir: &FileTree) -> ScaffoldResult<Handlebars<'a>> {

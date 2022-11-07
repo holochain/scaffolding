@@ -9,7 +9,6 @@ use super::utils::common_tests_setup;
 pub fn entry_crud_tests(
     entry_definition: &EntryDefinition,
     dna_bundle_location_from_tests_root: &PathBuf,
-    dna_role_id: &String,
     coordinator_zome: &String,
     crud: &Crud,
     create_fns_of_entry_type_this_entry_type_depends_on: &BTreeMap<String, (ZomeManifest, String)>,
@@ -28,7 +27,6 @@ import {{ decode }} from '@msgpack/msgpack';
         create_entry_test(
             entry_definition,
             dna_bundle_location_from_tests_root,
-            dna_role_id,
             coordinator_zome,
             create_fns_of_entry_type_this_entry_type_depends_on
         )
@@ -39,7 +37,6 @@ import {{ decode }} from '@msgpack/msgpack';
             read_entry_test(
                 entry_definition,
                 dna_bundle_location_from_tests_root,
-                dna_role_id,
                 coordinator_zome,
             )
             .as_str(),
@@ -51,7 +48,6 @@ import {{ decode }} from '@msgpack/msgpack';
             update_entry_test(
                 entry_definition,
                 dna_bundle_location_from_tests_root,
-                dna_role_id,
                 coordinator_zome,
                 crud.read,
             )
@@ -64,7 +60,6 @@ import {{ decode }} from '@msgpack/msgpack';
             delete_entry_test(
                 entry_definition,
                 dna_bundle_location_from_tests_root,
-                dna_role_id,
                 coordinator_zome,
                 crud.read,
             )
@@ -76,7 +71,6 @@ import {{ decode }} from '@msgpack/msgpack';
 }
 
 fn create_depends_on_entries(
-    _dna_role_id: &String,
     create_fns_of_entry_type_this_entry_type_depends_on: &BTreeMap<String, (ZomeManifest, String)>,
 ) -> String {
     let mut initial_str = String::from("");
@@ -92,7 +86,6 @@ fn create_depends_on_entries(
 
 fn alice_create_entry(
     entry_definition: &EntryDefinition,
-    dna_role_id: &String,
     coordinator_zome: &String,
     create_fns_of_entry_type_this_entry_type_depends_on: &BTreeMap<String, (ZomeManifest, String)>,
 ) -> String {
@@ -101,20 +94,16 @@ fn alice_create_entry(
     const createInput = {};
 
     // Alice creates a {}
-    const record: Record = await alice_{}_cell.callZome({{
+    const record: Record = await alice.cells[0].callZome({{
       zome_name: "{}",
       fn_name: "create_{}",
       payload: createInput,
     }});
     assert.ok(record);
 "#,
-        create_depends_on_entries(
-            dna_role_id,
-            create_fns_of_entry_type_this_entry_type_depends_on
-        ),
+        create_depends_on_entries(create_fns_of_entry_type_this_entry_type_depends_on),
         entry_definition.js_sample_object(),
         entry_definition.singular_name,
-        dna_role_id,
         coordinator_zome,
         entry_definition.singular_name
     )
@@ -123,7 +112,6 @@ fn alice_create_entry(
 pub fn create_entry_test(
     entry_definition: &EntryDefinition,
     happ_bundle_location_from_tests_root: &PathBuf,
-    dna_role_id: &String,
     coordinator_zome: &String,
     create_fns_of_entry_type_this_entry_type_depends_on: &BTreeMap<String, (ZomeManifest, String)>,
 ) -> String {
@@ -137,10 +125,9 @@ test('create {}', async t => {{
   }});
 }});"#,
         entry_definition.singular_name,
-        common_tests_setup(happ_bundle_location_from_tests_root, dna_role_id),
+        common_tests_setup(happ_bundle_location_from_tests_root),
         alice_create_entry(
             entry_definition,
-            dna_role_id,
             coordinator_zome,
             create_fns_of_entry_type_this_entry_type_depends_on
         )
@@ -150,7 +137,6 @@ test('create {}', async t => {{
 pub fn read_entry_test(
     entry_definition: &EntryDefinition,
     happ_bundle_location_from_tests_root: &PathBuf,
-    dna_role_id: &String,
     coordinator_zome: &String,
 ) -> String {
     format!(
@@ -162,7 +148,7 @@ test('create and read {}', async t => {{
     const createInput: any = {};
 
     // Alice creates a {}
-    const record: Record = await alice_{}_cell.callZome({{
+    const record: Record = await alice.cells[0].callZome({{
       zome_name: "{}",
       fn_name: "create_{}",
       payload: createInput,
@@ -173,7 +159,7 @@ test('create and read {}', async t => {{
     await pause(300);
 
     // Bob gets the created {}
-    const createReadOutput: Record = await bob_{}_cell.callZome({{
+    const createReadOutput: Record = await bob.cells[0].callZome({{
       zome_name: "{}",
       fn_name: "get_{}",
       payload: record.signed_action.hashed.hash,
@@ -182,14 +168,12 @@ test('create and read {}', async t => {{
   }});
 }});"#,
         entry_definition.singular_name,
-        common_tests_setup(happ_bundle_location_from_tests_root, dna_role_id),
+        common_tests_setup(happ_bundle_location_from_tests_root),
         entry_definition.js_sample_object(),
         entry_definition.singular_name,
-        dna_role_id,
         coordinator_zome,
         entry_definition.singular_name,
         entry_definition.singular_name,
-        dna_role_id,
         coordinator_zome,
         entry_definition.singular_name
     )
@@ -198,7 +182,6 @@ test('create and read {}', async t => {{
 pub fn update_entry_test(
     entry_definition: &EntryDefinition,
     happ_bundle_location_from_tests_root: &PathBuf,
-    dna_role_id: &String,
     coordinator_zome: &String,
     read_after_update: bool,
 ) -> String {
@@ -210,17 +193,14 @@ pub fn update_entry_test(
     await pause(300);
         
     // Bob gets the updated {}
-    const readUpdatedOutput: Record = await bob_{}_cell.callZome({{
+    const readUpdatedOutput: Record = await bob.cells[0].callZome({{
       zome_name: "{}",
       fn_name: "get_{}",
       payload: updatedRecord.signed_action.hashed.hash,
     }});
     assert.deepEqual(contentUpdate, decode((readUpdatedOutput.entry as any).Present.entry) as any);
 "#,
-            entry_definition.singular_name,
-            dna_role_id,
-            coordinator_zome,
-            entry_definition.singular_name
+            entry_definition.singular_name, coordinator_zome, entry_definition.singular_name
         ),
     };
 
@@ -233,7 +213,7 @@ test('create and update {}', async t => {{
     const createInput = {};
 
     // Alice creates a {}
-    const record: Record = await alice_{}_cell.callZome({{
+    const record: Record = await alice.cells[0].callZome({{
       zome_name: "{}",
       fn_name: "create_{}",
       payload: createInput,
@@ -248,7 +228,7 @@ test('create and update {}', async t => {{
       updated_{}: contentUpdate,
     }};
 
-    const updatedRecord: Record = await alice_{}_cell.callZome({{
+    const updatedRecord: Record = await alice.cells[0].callZome({{
       zome_name: "{}",
       fn_name: "update_{}",
       payload: updateInput,
@@ -259,16 +239,14 @@ test('create and update {}', async t => {{
   }});
 }});"#,
         entry_definition.singular_name,
-        common_tests_setup(happ_bundle_location_from_tests_root, dna_role_id),
+        common_tests_setup(happ_bundle_location_from_tests_root),
         entry_definition.js_sample_object(),
         entry_definition.singular_name,
-        dna_role_id,
         coordinator_zome,
         entry_definition.singular_name,
         entry_definition.singular_name,
         entry_definition.js_sample_object(),
         entry_definition.singular_name,
-        dna_role_id,
         coordinator_zome,
         entry_definition.singular_name,
         maybe_read
@@ -278,7 +256,6 @@ test('create and update {}', async t => {{
 pub fn delete_entry_test(
     entry_definition: &EntryDefinition,
     happ_bundle_location_from_tests_root: &PathBuf,
-    dna_role_id: &String,
     coordinator_zome: &String,
     read_after_delete: bool,
 ) -> String {
@@ -290,17 +267,14 @@ pub fn delete_entry_test(
     await pause(300);
         
     // Bob tries to get the deleted {}
-    const readDeletedOutput = await bob_{}_cell.callZome({{
+    const readDeletedOutput = await bob.cells[0].callZome({{
       zome_name: "{}",
       fn_name: "get_{}",
       payload: record.signed_action.hashed.hash,
     }});
     assert.equal(readDeletedOutput, undefined);
 "#,
-            entry_definition.singular_name,
-            dna_role_id,
-            coordinator_zome,
-            entry_definition.singular_name
+            entry_definition.singular_name, coordinator_zome, entry_definition.singular_name
         ),
     };
     format!(
@@ -312,7 +286,7 @@ test('create and delete {}', async t => {{
     const createInput = {};
 
     // Alice creates a {}
-    const record: Record = await alice_{}_cell.callZome({{
+    const record: Record = await alice.cells[0].callZome({{
       zome_name: "{}",
       fn_name: "create_{}",
       payload: createInput,
@@ -320,7 +294,7 @@ test('create and delete {}', async t => {{
     assert.ok(record);
         
     // Alice deletes the {}
-    const deleteActionHash = await alice_{}_cell.callZome({{
+    const deleteActionHash = await alice.cells[0].callZome({{
       zome_name: "{}",
       fn_name: "delete_{}",
       payload: record.signed_action.hashed.hash,
@@ -331,14 +305,12 @@ test('create and delete {}', async t => {{
   }});
 }});"#,
         entry_definition.singular_name,
-        common_tests_setup(happ_bundle_location_from_tests_root, dna_role_id),
+        common_tests_setup(happ_bundle_location_from_tests_root),
         entry_definition.js_sample_object(),
         entry_definition.singular_name,
-        dna_role_id,
         coordinator_zome,
         entry_definition.singular_name,
         entry_definition.singular_name,
-        dna_role_id,
         coordinator_zome,
         entry_definition.singular_name,
         maybe_read

@@ -4,7 +4,7 @@ import { InstalledCell, AppWebsocket, Record, ActionHash, InstalledAppInfo } fro
 import { contextProvided } from '@lit-labs/context';
 import { decode } from '@msgpack/msgpack';
 import { appInfoContext, appWebsocketContext } from '../../contexts';
-import { {{pascal_case entry_type.singular_name}} } from '../../../types/{{coordinator_zome_name}}';
+import { {{pascal_case entry_type.singular_name}} } from './types';
 import '@material/mwc-circular-progress';
 {{#each entry_type.fields}}
 {{> (concat field_type.type "/detail/imports") }}

@@ -56,7 +56,6 @@ pub fn add_tryorama_tests_for_entry_def(
     let tests_file = entry_crud_tests(
         entry_def,
         &dna_bundle_from_tryorama_path,
-        &dna_name,
         &coordinator_zome_name,
         crud,
         &create_fns_for_depends_on,

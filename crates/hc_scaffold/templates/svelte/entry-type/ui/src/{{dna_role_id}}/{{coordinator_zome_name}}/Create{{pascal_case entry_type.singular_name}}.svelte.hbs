@@ -2,7 +2,7 @@
 import { createEventDispatcher, getContext } from 'svelte';
 import { InstalledCell, AppWebsocket, InstalledAppInfo, Record, EntryHash, AgentPubKey, ActionHash } from '@holochain/client';
 import { appWebsocketContext, appInfoContext } from '../../contexts';
-import { {{pascal_case entry_type.singular_name}} } from '../../../types/{{coordinator_zome_name}}';
+import { {{pascal_case entry_type.singular_name}} } from './types';
 import '@material/mwc-button';
 {{#each entry_type.fields}}
 {{> (concat field_type.type "/create/imports") }}

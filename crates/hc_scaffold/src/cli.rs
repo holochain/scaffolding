@@ -377,8 +377,12 @@ Add new zomes to your DNA with:
                         true => integrity_zome_name(&name),
                         false => name.clone(),
                     };
-                    let zome_file_tree =
-                        scaffold_integrity_zome(dna_file_tree, &integrity_zome_name, &integrity)?;
+                    let zome_file_tree = scaffold_integrity_zome(
+                        dna_file_tree,
+                        &template_file_tree,
+                        &integrity_zome_name,
+                        &integrity,
+                    )?;
                     dna_file_tree = zome_file_tree.dna_file_tree;
                 }
 
@@ -394,6 +398,7 @@ Add new zomes to your DNA with:
                     };
                     let zome_file_tree = scaffold_coordinator_zome(
                         dna_file_tree,
+                        &template_file_tree,
                         &name,
                         &dependencies,
                         &coordinator,

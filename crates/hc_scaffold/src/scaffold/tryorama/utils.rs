@@ -1,9 +1,6 @@
 use std::path::PathBuf;
 
-pub fn common_tests_setup(
-    dna_bundle_path_from_tests_root: &PathBuf,
-    dna_role_id: &String,
-) -> String {
+pub fn common_tests_setup(dna_bundle_path_from_tests_root: &PathBuf) -> String {
     format!(
         r#"
     // Construct proper paths for your app.
@@ -22,20 +19,7 @@ pub fn common_tests_setup(
     // conductor of the scenario.
     await scenario.shareAllAgents();
     
-    const alice_{}_cell = alice.cells.find(c => c.role_id === '{}');
-    if (!alice_{}_cell) throw new Error("No cell for role id {} was found");
-
-    const bob_{}_cell = bob.cells.find(c => c.role_id === '{}');
-    if (!bob_{}_cell) throw new Error("No cell for role id {} was found");
     "#,
         dna_bundle_path_from_tests_root,
-        dna_role_id,
-        dna_role_id,
-        dna_role_id,
-        dna_role_id,
-        dna_role_id,
-        dna_role_id,
-        dna_role_id,
-        dna_role_id,
     )
 }
