@@ -1,10 +1,10 @@
-/<template>
-  <div v-if="{{camel_case entry_type.name}}" style="display: flex; flex-direction: column">
-    <span style="font-size: 18px">{{pascal_case entry_type.name}}</span>
-	
-	{{#each entry_type.fields}}
-	  {{> (concat field_type.type "/detail/render") entry_type=../entry_type field_name=@key field_type=this}}
-	{{/each}}
+<template>
+  <div v-if="records" style="display: flex; flex-direction: column">
+    <{{pascal_case entry_type.name}}Detail 
+      v-for="record in records" 
+      :action-hash="record.signed_action.hashed.hash" 
+      style="margin-bottom: 8px">
+    </{{pascal_case entry_type.name}}Detail>
   </div>
 
   <div v-else style="display: flex; flex: 1; align-items: center; justify-content: center">
@@ -19,37 +19,34 @@ import { decode } from '@msgpack/msgpack';
 import { InstalledCell, AppWebsocket, InstalledAppInfo, Record } from '@holochain/client';
 import { {{pascal_case entry_type.name}} } from './{{kebab_case entry_type.name}}';
 import '@material/mwc-circular-progress';
-{{#each entry_type.fields}}
-{{> (concat field_type.type "/detail/imports") }}
-{{/each}}
+import {{pascal_case entry_type.name}}Detail from './{{pascal_case entry_type.name}}Detail.vue';
 
 export default defineComponent({
+  components: {
+    {{pascal_case entry_type.name}}Detail
+  },
   props: {
     actionHash: {
       type: Object,
       required: true
     }
   },
-  data(): { {{camel_case entry_type.name}}: {{pascal_case entry_type.name}} | undefined } {
+  data(): { records: Array<Record> | undefined } {
     return {
-      {{camel_case entry_type.name}}: undefined
+      records: undefined
     }
   },
   async mounted() {
     const cellData = this.appInfo.cell_data.find((c: InstalledCell) => c.role_id === '{{dna_role_id}}')!;
 
-    const record: Record | undefined = await this.appWebsocket.callZome({
+    this.records = await this.appWebsocket.callZome({
       cap_secret: null,
       cell_id: cellData.cell_id,
       zome_name: '{{coordinator_zome_name}}',
-      fn_name: 'get_{{snake_case entry_type.name}}',
+      fn_name: 'get_{{snake_case entry_type.plural_name}}_for_{{snake_case (lookup depends_on index)}}',
       payload: this.actionHash,
       provenance: cellData.cell_id[1]
     });
-    
-    if (record) {
-      this.{{camel_case entry_type.name}} = decode((record.entry as any).Present.entry) as {{pascal_case entry_type.name}};
-    }
   },
   setup() {
     const appWebsocket = (inject('appWebsocket') as ComputedRef<AppWebsocket>).value;

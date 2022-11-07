@@ -20,7 +20,8 @@ pub fn workspace_package_json(
     "start:happ": "concurrently \"RUST_LOG=warn echo \"pass\" | hc s --piped generate {}/{}.happ --run=$HC_PORT -a {} network mdns\" \"npm run playground\"",
     "package": "npm run build:happ && npm run package -w {} && hc web-app pack {} --recursive",
     "build:happ": "npm run build:zomes && hc app pack {} --recursive",
-    "build:zomes": "CARGO_TARGET_DIR=target cargo build --release --target wasm32-unknown-unknown",
+    "build:zomes": "CARGO_TARGET_DIR=target cargo build --release --target wasm32-unknown-unknown && npm run generate:types",
+    "generate:types":"rimraf ui/types && foreach -g \"./target/wasm32-unknown-unknown/release/*.wasm\" -i \"./target/wasm32-unknown-unknown/release/*_integrity.wasm\" -x \"wasm-bindgen #{{path}} --out-dir ui/types\" && rimraf ui/types/*.wasm ui/types/*_bg.wasm ui/types/*_bg.wasm.d.ts ui/types/*.js",
     "playground": "run-singleton \"holochain-playground\""
   }},
   "devDependencies": {{
@@ -28,6 +29,7 @@ pub fn workspace_package_json(
     "concurrently": "^6.2.1",
     "concurrently-repeat": "^0.0.1",
     "cross-env": "^7.0.3",
+    "foreach-cli": "^1.8.1",
     "new-port-cli": "^1.0.0",
     "rimraf": "^3.0.2",
     "run-singleton-cli": "^0.0.5"

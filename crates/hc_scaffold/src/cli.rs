@@ -21,8 +21,8 @@ use crate::utils::{
 };
 
 use build_fs_tree::{dir, Build, MergeableFileSystemTree};
+use dialoguer::Input;
 use dialoguer::{theme::ColorfulTheme, Select};
-use dialoguer::{Confirm, Input};
 use std::process::Stdio;
 use std::str::FromStr;
 use std::{ffi::OsString, path::PathBuf, process::Command};
@@ -203,6 +203,18 @@ impl HcScaffold {
                 template,
                 template_url,
             } => {
+                let prompt = String::from("App name (no whitespaces):");
+                let name: String = match name {
+                    Some(n) => check_no_whitespace(n, "app name")?,
+                    None => input_no_whitespace(&prompt)?,
+                };
+
+                let current_dir = std::env::current_dir()?;
+                let app_folder = current_dir.join(&name);
+                if app_folder.as_path().exists() {
+                    return Err(ScaffoldError::FolderAlreadyExists(app_folder.clone()))?;
+                }
+
                 let (template_name, template_file_tree) = match template_url {
                     Some(u) => get_template(&u, &template),
                     None => {
@@ -217,18 +229,6 @@ impl HcScaffold {
                         ))
                     }
                 }?;
-
-                let prompt = String::from("App name (no whitespaces):");
-                let name: String = match name {
-                    Some(n) => check_no_whitespace(n, "app name")?,
-                    None => input_no_whitespace(&prompt)?,
-                };
-
-                let current_dir = std::env::current_dir()?;
-                let app_folder = current_dir.join(&name);
-                if app_folder.as_path().exists() {
-                    return Err(ScaffoldError::FolderAlreadyExists(app_folder.clone()))?;
-                }
 
                 let setup_nix = match setup_nix {
                     Some(s) => s,
@@ -256,11 +256,16 @@ impl HcScaffold {
                     if cfg!(target_os = "windows") {
                         return Err(anyhow::anyhow!("Windows doesn't support nix"));
                     } else {
-                        Command::new("nix-shell")
+                        let output = Command::new("nix-shell")
                         .stdout(Stdio::inherit())
                         .current_dir(std::env::current_dir()?.join(&name))
                         .args(["-I", "nixpkgs=https://github.com/NixOS/nixpkgs/archive/nixos-21.11.tar.gz", "-p", "niv", "--run", "niv init && niv drop nixpkgs && niv drop niv && niv add -b main holochain/holonix"])
                         .output()?;
+
+                        if !output.status.success() {
+                            return Err(ScaffoldError::NixSetupError)?;
+                        }
+
                         maybe_nix = "\n  nix-shell";
                     };
                 }
@@ -300,7 +305,7 @@ Then, add new DNAs to your app with:
 
                 let app_file_tree = AppFileTree::get_or_choose(file_tree, &app)?;
 
-                let file_tree = scaffold_dna(app_file_tree, &name)?;
+                let file_tree = scaffold_dna(app_file_tree, &template_file_tree, &name)?;
 
                 let file_tree =
                     MergeableFileSystemTree::<OsString, String>::from(file_tree.file_tree());

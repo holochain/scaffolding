@@ -5,6 +5,7 @@ use crate::{
         dir_exists, file_content, find_files_by_name, insert_file, insert_file_tree_in_dir,
         FileTree,
     },
+    templates::dna::scaffold_dna_templates,
     utils::choose_directory_path,
 };
 use build_fs_tree::{dir, file};
@@ -160,7 +161,11 @@ pub fn get_or_choose_dnas_dir_path(app_file_tree: &FileTree) -> ScaffoldResult<P
     }
 }
 
-pub fn scaffold_dna(app_file_tree: AppFileTree, dna_name: &String) -> ScaffoldResult<DnaFileTree> {
+pub fn scaffold_dna(
+    app_file_tree: AppFileTree,
+    template_file_tree: &FileTree,
+    dna_name: &String,
+) -> ScaffoldResult<DnaFileTree> {
     let new_dna_file_tree: FileTree = dir! {
         "zomes" => dir! {
             "coordinator" => dir! {},
@@ -222,6 +227,8 @@ pub fn scaffold_dna(app_file_tree: AppFileTree, dna_name: &String) -> ScaffoldRe
         .unwrap()
         .into();
 
+    let app_name = app_file_tree.app_manifest.app_name().to_string();
+
     let app_manifest_path = app_file_tree.app_manifest_path.clone();
 
     let mut file_tree = app_file_tree.file_tree();
@@ -236,6 +243,13 @@ pub fn scaffold_dna(app_file_tree: AppFileTree, dna_name: &String) -> ScaffoldRe
         &mut file_tree,
         &dnas_path,
         (dna_name.into(), new_dna_file_tree),
+    )?;
+
+    let file_tree = scaffold_dna_templates(
+        file_tree,
+        template_file_tree,
+        &app_name.to_string(),
+        &dna_name,
     )?;
 
     let dna_file_tree = DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;

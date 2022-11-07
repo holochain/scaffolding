@@ -22,7 +22,7 @@ onMount(async () => {
     cap_secret: null,
     cell_id: cellData.cell_id,
     zome_name: '{{coordinator_zome_name}}',
-    fn_name: 'get_{{snake_case entry_type.name}}_for_{{snake_case (lookup depends_on index)}}',
+    fn_name: 'get_{{snake_case entry_type.plural_name}}_for_{{snake_case (lookup depends_on index)}}',
     payload: actionHash,
     provenance: cellData.cell_id[1]
   });

@@ -21,6 +21,7 @@ in nixpkgs.mkShell {{
   packages = with nixpkgs; [
     niv
     nodejs-18_x
+    wasm-bindgen-cli
     # any additional packages needed for this project, e. g. Nodejs
   ];
 }}"#,

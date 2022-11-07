@@ -60,6 +60,9 @@ pub enum ScaffoldError {
     #[error("Invalid path {0}: {1}")]
     InvalidPath(PathBuf, String),
 
+    #[error("Error setting up the nix environment")]
+    NixSetupError,
+
     #[error("No app manifest (happ.yaml) was found in this directory tree")]
     AppManifestNotFound,
 

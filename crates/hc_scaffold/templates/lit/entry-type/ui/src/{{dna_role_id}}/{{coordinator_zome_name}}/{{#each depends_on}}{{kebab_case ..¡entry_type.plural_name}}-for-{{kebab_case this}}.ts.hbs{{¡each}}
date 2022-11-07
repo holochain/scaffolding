@@ -5,8 +5,8 @@ import { contextProvided } from '@lit-labs/context';
 import { appWebsocketContext, appInfoContext } from '../../contexts';
 import './{{kebab_case entry_type.name}}-detail';
 
-@customElement('{{kebab_case entry_type.name}}-for-{{kebab_case (lookup depends_on index)}}')
-export class {{pascal_case entry_type.name}}For{{pascal_case (lookup depends_on index)}} extends LitElement {
+@customElement('{{kebab_case entry_type.plural_name}}-for-{{kebab_case (lookup depends_on index)}}')
+export class {{pascal_case entry_type.plural_name}}For{{pascal_case (lookup depends_on index)}} extends LitElement {
 
   @property()
   actionHash!: ActionHash;
@@ -27,7 +27,7 @@ export class {{pascal_case entry_type.name}}For{{pascal_case (lookup depends_on 
       cap_secret: null,
       cell_id: cellData.cell_id,
       zome_name: '{{coordinator_zome_name}}',
-      fn_name: 'get_{{snake_case entry_type.name}}_for_{{snake_case (lookup depends_on index)}}',
+      fn_name: 'get_{{snake_case entry_type.plural_name}}_for_{{snake_case (lookup depends_on index)}}',
       payload: this.actionHash,
       provenance: cellData.cell_id[1]
     });
@@ -42,7 +42,7 @@ export class {{pascal_case entry_type.name}}For{{pascal_case (lookup depends_on 
     return html`
       <div style="display: flex; flex-direction: column">
         ${this._records.map(r => 
-          html`<{{kebab_case entry_type.name}}-detail .actionHash=${r.signed_action.hashed.hash}></{{kebab_case entry_type.name}}-detail>`
+          html`<{{kebab_case entry_type.singular_name}}-detail .actionHash=${r.signed_action.hashed.hash}></{{kebab_case entry_type.singular_name}}-detail>`
         )}
       </div>
     `;

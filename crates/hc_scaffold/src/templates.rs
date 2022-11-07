@@ -14,7 +14,7 @@ use crate::file_tree::{dir_content, find_files, flatten_file_tree, unflatten_fil
 
 pub mod get;
 
-// pub mod dna;
+pub mod dna;
 pub mod entry_type;
 pub mod index;
 pub mod link_type;
