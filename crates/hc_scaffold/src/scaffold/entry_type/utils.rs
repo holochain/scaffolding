@@ -8,9 +8,15 @@ use crate::{
 
 use super::integrity::get_all_entry_types;
 
-pub fn choose_entry_type(all_entries: &Vec<String>, prompt: &String) -> ScaffoldResult<String> {
+pub fn choose_entry_type(
+    all_entries: &Vec<String>,
+    prompt: &String,
+    include_agent_pub_key: bool,
+) -> ScaffoldResult<String> {
     let mut all_options = all_entries.clone();
-    all_options.push("AgentPubKey".into());
+    if include_agent_pub_key {
+        all_options.push("AgentPubKey".into());
+    }
 
     let selection = Select::with_theme(&ColorfulTheme::default())
         .with_prompt(prompt.clone())
@@ -71,7 +77,7 @@ pub fn get_or_choose_entry_type(
     let all_entries = get_all_entry_types(&zome_file_tree)?.unwrap_or_else(|| vec![]);
 
     match entry_type {
-        None => choose_entry_type(&all_entries, prompt),
+        None => choose_entry_type(&all_entries, prompt, true),
         Some(name) => {
             all_entries
                 .into_iter()

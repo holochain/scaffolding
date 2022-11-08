@@ -6,7 +6,7 @@ use crate::{
     scaffold::{dna::DnaFileTree, link_type::link_type_name, zome::ZomeFileTree},
 };
 
-use super::crud::Crud;
+use super::{crud::Crud, DependsOnItself};
 
 pub fn read_handler(entry_def_name: &String) -> String {
     format!(
@@ -127,12 +127,42 @@ pub fn get_{}_for_{}({}_hash: ActionHash) -> ExternResult<Vec<Record>> {{
     )
 }
 
+fn depends_on_itself_handler(singular_name: &String, plural_name: &String) -> String {
+    format!(
+        r#"
+#[hdk_extern]
+pub fn get_{}_for_{}({}_hash: ActionHash) -> ExternResult<Vec<Record>> {{
+    let links = get_links({}_hash, LinkTypes::{}, None)?;
+    
+    let get_input: Vec<GetInput> = links
+        .into_iter()
+        .map(|link| GetInput::new(ActionHash::from(link.target).into(), GetOptions::default()))
+        .collect();
+
+    let maybe_records = HDK.with(|hdk| hdk.borrow().get(get_input))?;
+
+    let record: Vec<Record> = maybe_records.into_iter().filter_map(|r| r).collect();
+
+    Ok(record)
+}}"#,
+        plural_name.to_case(Case::Snake),
+        singular_name.to_case(Case::Snake),
+        singular_name.to_case(Case::Snake),
+        singular_name.to_case(Case::Snake),
+        link_type_name(
+            &singular_name.to_case(Case::Pascal),
+            &plural_name.to_case(Case::Pascal)
+        ),
+    )
+}
+
 fn initial_crud_handlers(
     integrity_zome_name: &String,
     singular_name: &String,
     plural_name: &String,
     crud: &Crud,
     depends_on: &Vec<String>,
+    depends_on_itself: &DependsOnItself,
 ) -> String {
     let mut initial = format!(
         r#"use hdk::prelude::*;
@@ -157,6 +187,9 @@ use {}::*;
     for d in depends_on {
         initial.push_str(depends_on_handler(plural_name, d).as_str());
     }
+    if let Some(cardinality) = depends_on_itself {
+        initial.push_str(depends_on_itself_handler(singular_name, plural_name).as_str());
+    }
 
     initial
 }
@@ -168,6 +201,7 @@ pub fn add_crud_functions_to_coordinator(
     plural_name: &String,
     crud: &Crud,
     depends_on: &Vec<String>,
+    depends_on_itself: &DependsOnItself,
 ) -> ScaffoldResult<ZomeFileTree> {
     let dna_manifest_path = zome_file_tree.dna_file_tree.dna_manifest_path.clone();
     let zome_manifest = zome_file_tree.zome_manifest.clone();
@@ -185,6 +219,7 @@ pub fn add_crud_functions_to_coordinator(
             plural_name,
             crud,
             depends_on,
+            depends_on_itself,
         ),
     )?;
 

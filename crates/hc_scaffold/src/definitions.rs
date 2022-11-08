@@ -143,18 +143,33 @@ impl FieldType {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+pub enum Cardinality {
+    #[serde(rename = "single")]
+    Single,
+    #[serde(rename = "vector")]
+    Vector,
+    #[serde(rename = "option")]
+    Option,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct FieldDefinition {
     pub field_name: String,
     pub field_type: FieldType,
     pub widget: Option<String>,
-    pub vector: bool,
+    pub cardinality: Cardinality,
 }
 
 impl FieldDefinition {
     pub fn rust_type(&self) -> TokenStream {
-        match self.vector {
-            false => self.field_type.rust_type(),
-            true => {
+        match self.cardinality {
+            Cardinality::Single => self.field_type.rust_type(),
+            Cardinality::Option => {
+                let rust_representation_type = self.field_type.rust_type();
+
+                quote! {Option<#rust_representation_type>}
+            }
+            Cardinality::Vector => {
                 let rust_representation_type = self.field_type.rust_type();
 
                 quote! {Vec<#rust_representation_type>}
@@ -163,8 +178,8 @@ impl FieldDefinition {
     }
 
     pub fn js_sample_value(&self) -> String {
-        if self.vector {
-            format!(
+        match self.cardinality {
+            Cardinality::Vector => format!(
                 "[{}]",
                 vec![
                     self.field_type.js_sample_value(),
@@ -172,9 +187,8 @@ impl FieldDefinition {
                     self.field_type.js_sample_value()
                 ]
                 .join(", ")
-            )
-        } else {
-            self.field_type.js_sample_value()
+            ),
+            Cardinality::Single | Cardinality::Option => self.field_type.js_sample_value(),
         }
     }
 }

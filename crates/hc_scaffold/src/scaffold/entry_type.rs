@@ -1,7 +1,7 @@
 use std::{collections::BTreeMap, ffi::OsString, path::PathBuf};
 
 use crate::{
-    definitions::{EntryDefinition, FieldDefinition, FieldType},
+    definitions::{Cardinality, EntryDefinition, FieldDefinition, FieldType},
     file_tree::FileTree,
     templates::entry_type::scaffold_entry_type_templates,
 };
@@ -19,7 +19,7 @@ use self::{
     crud::Crud,
     fields::choose_fields,
     integrity::{add_entry_type_to_integrity_zome, get_all_entry_types},
-    utils::choose_multiple_entry_types,
+    utils::{choose_entry_type, choose_multiple_entry_types},
 };
 
 use super::{
@@ -38,14 +38,53 @@ pub mod fields;
 pub mod integrity;
 pub mod utils;
 
+fn choose_cardinality() -> ScaffoldResult<Cardinality> {
+    let selection = Select::with_theme(&ColorfulTheme::default())
+        .with_prompt("Select the type of dependency to that entry type:")
+        .default(0)
+        .item("Single: an entry of the new entry type depends on *an* entry of the selected entry type")
+        .item("Option: an entry of the new entry type *may depend on an* entry of the selected entry type")
+        .item("Vector: an entry of the new entry type depends on a *list* of entries of the selected entry type")
+        .interact()?;
+
+    match selection {
+        0 => Ok(Cardinality::Single),
+        1 => Ok(Cardinality::Option),
+        _ => Ok(Cardinality::Vector),
+    }
+}
+
+fn choose_depends_on(entry_types: &Vec<String>) -> ScaffoldResult<BTreeMap<String, Cardinality>> {
+    let mut finished = false;
+
+    let mut depends_on: BTreeMap<String, Cardinality> = BTreeMap::new();
+
+    while !finished {
+        let entry_type = choose_entry_type(
+            &entry_types,
+            &String::from("Select an existing entry type that the new entry type depends on:"),
+            false,
+        )?;
+        let cardinality = choose_cardinality()?;
+
+        depends_on.insert(entry_type, cardinality);
+
+        finished = Confirm::with_theme(&ColorfulTheme::default())
+            .with_prompt("Does the new entry type depend on another existing entry type?")
+            .interact()?;
+    }
+
+    Ok(depends_on)
+}
+
 fn get_or_choose_depends_on(
     zome_file_tree: &ZomeFileTree,
     depends_on: &Option<Vec<String>>,
-) -> ScaffoldResult<Vec<String>> {
+) -> ScaffoldResult<BTreeMap<String, Cardinality>> {
     let entry_types = get_all_entry_types(zome_file_tree)?.unwrap_or_else(|| vec![]);
 
     if entry_types.len() == 0 {
-        return Ok(vec![]);
+        return Ok(BTreeMap::new());
     }
 
     match depends_on {
@@ -55,19 +94,19 @@ fn get_or_choose_depends_on(
                 zome_file_tree.dna_file_tree.dna_manifest.name(),
                 zome_file_tree.zome_manifest.name.0.to_string(),
             )),
-            None => Ok(et.clone()),
+            None => Ok(et
+                .clone()
+                .into_iter()
+                .map(|t| (t, Cardinality::Single))
+                .collect()),
         },
         None => {
             let depends = Confirm::with_theme(&ColorfulTheme::default())
                 .with_prompt("Does the new entry type depend on an existing one? (Eg. in a forum app, a comment depends on a post)")
                 .interact()?;
             match depends {
-                true => choose_multiple_entry_types(
-                    &entry_types,
-                    &String::from("Which existing entry types does the new entry type depend on?"),
-                    false,
-                ),
-                false => Ok(vec![]),
+                true => choose_depends_on(&entry_types),
+                false => Ok(BTreeMap::new()),
             }
         }
     }
@@ -83,7 +122,7 @@ pub fn choose_depends_on_itself() -> ScaffoldResult<DependsOnItself> {
 
     let selection = Select::with_theme(&ColorfulTheme::default())
         .with_prompt(
-            "Does an entry depend on an Option or a Vector of entries of its same entry type?",
+            "Does an entry of this type depend on an Option or a Vector of entries of this type?",
         )
         .default(0)
         .item("Option")
@@ -91,15 +130,15 @@ pub fn choose_depends_on_itself() -> ScaffoldResult<DependsOnItself> {
         .interact()?;
 
     match selection {
-        0 => Ok(DependsOnItself::Some(SelfDependencyType::Option)),
-        _ => Ok(DependsOnItself::Some(SelfDependencyType::Vector)),
+        0 => Ok(DependsOnItself::Some(SelfDependencyCardinality::Option)),
+        _ => Ok(DependsOnItself::Some(SelfDependencyCardinality::Vector)),
     }
 }
 
-pub type DependsOnItself = Option<SelfDependencyType>;
+pub type DependsOnItself = Option<SelfDependencyCardinality>;
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
-pub enum SelfDependencyType {
+pub enum SelfDependencyCardinality {
     Vector,
     Option,
 }
@@ -107,8 +146,8 @@ pub enum SelfDependencyType {
 pub fn parse_depends_on_itself(depends_on_itself: &str) -> Result<DependsOnItself, String> {
     match depends_on_itself {
         "false" => Ok(DependsOnItself::None),
-        "vector" => Ok(DependsOnItself::Some(SelfDependencyType::Vector)),
-        "option" => Ok(DependsOnItself::Some(SelfDependencyType::Option)),
+        "vector" => Ok(DependsOnItself::Some(SelfDependencyCardinality::Vector)),
+        "option" => Ok(DependsOnItself::Some(SelfDependencyCardinality::Option)),
         _ => Err(format!(
             "Invalid depends_on_itself value {}. Valid values: \"false\", \"vector\", \"option\" ",
             depends_on_itself
@@ -126,30 +165,31 @@ pub fn scaffold_entry_type(
     maybe_depends_on_itself: &Option<DependsOnItself>,
     maybe_fields: &Option<Vec<(String, FieldType)>>,
 ) -> ScaffoldResult<FileTree> {
-    let depends_on: Vec<String> = get_or_choose_depends_on(&zome_file_tree, maybe_depends_on)?;
+    let depends_on: BTreeMap<String, Cardinality> =
+        get_or_choose_depends_on(&zome_file_tree, maybe_depends_on)?;
     let depends_on_itself: DependsOnItself = match maybe_depends_on_itself {
         Some(d) => d.clone(),
         None => choose_depends_on_itself()?,
     };
 
     let mut depends_fields: Vec<FieldDefinition> = Vec::new();
-    for d in depends_on.clone() {
+    for (d, cardinality) in depends_on.clone() {
         let field_name = format!("{}_hash", d.to_case(Case::Snake));
         depends_fields.push(FieldDefinition {
             widget: None,
             field_name,
-            vector: false,
+            cardinality,
             field_type: FieldType::ActionHash,
         });
     }
 
     if let DependsOnItself::Some(dependency_type) = depends_on_itself.clone() {
-        if let SelfDependencyType::Vector = dependency_type {
+        if let SelfDependencyCardinality::Vector = dependency_type {
             let field_name = format!("previous_{}_hashes", plural_name.to_case(Case::Snake));
             depends_fields.push(FieldDefinition {
                 widget: None,
                 field_name,
-                vector: true,
+                cardinality: Cardinality::Vector,
                 field_type: FieldType::ActionHash,
             });
         } else {
@@ -157,11 +197,13 @@ pub fn scaffold_entry_type(
             depends_fields.push(FieldDefinition {
                 field_name,
                 widget: None,
-                vector: false,
+                cardinality: Cardinality::Option,
                 field_type: FieldType::ActionHash,
             });
         }
     }
+
+    let depends_on: Vec<String> = depends_on.clone().into_iter().map(|(d, _)| d).collect();
 
     let fields = match maybe_fields {
         Some(f) => {
@@ -169,7 +211,7 @@ pub fn scaffold_entry_type(
                 depends_fields.push(FieldDefinition {
                     field_name: field_name.clone(),
                     widget: None,
-                    vector: false,
+                    cardinality: Cardinality::Single,
                     field_type: field_type.clone(),
                 });
             }
@@ -201,10 +243,19 @@ pub fn scaffold_entry_type(
 
     let mut zome_file_tree = add_entry_type_to_integrity_zome(zome_file_tree, &entry_def)?;
 
-    for d in depends_on.iter() {
+    for d in depends_on.clone() {
         zome_file_tree = add_link_type_to_integrity_zome(
             zome_file_tree,
             &link_type_name(&d, &plural_name.to_case(Case::Pascal)),
+        )?;
+    }
+    if depends_on_itself.is_some() {
+        zome_file_tree = add_link_type_to_integrity_zome(
+            zome_file_tree,
+            &link_type_name(
+                &singular_name.to_case(Case::Pascal),
+                &plural_name.to_case(Case::Pascal),
+            ),
         )?;
     }
 
@@ -249,6 +300,7 @@ pub fn scaffold_entry_type(
         &plural_name,
         &crud,
         &depends_on,
+        &depends_on_itself,
     )?;
 
     let mut create_fns_for_depends_on: BTreeMap<String, (ZomeManifest, String)> = BTreeMap::new();

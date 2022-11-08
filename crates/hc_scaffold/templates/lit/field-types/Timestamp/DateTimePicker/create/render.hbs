@@ -1,0 +1,2 @@
+<vaadin-date-time-picker label="{{label}}" @change=${(e: CustomEvent) => { {{variable_to_change}} = new Date((e.target as any).value).valueOf() * 1000;} }></vaadin-date-time-picker>
+

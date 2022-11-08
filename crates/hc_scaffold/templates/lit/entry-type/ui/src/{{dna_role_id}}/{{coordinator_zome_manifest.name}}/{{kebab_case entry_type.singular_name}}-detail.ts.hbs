@@ -47,9 +47,14 @@ export class {{pascal_case entry_type.singular_name}}Detail extends LitElement {
     return html`
       <div style="display: flex; flex-direction: column">
         <span style="font-size: 18px">{{pascal_case entry_type.singular_name}}</span>
-		{{#each entry_type.fields}}
-		  {{> (concat field_type "/" widget "/detail/render") entry_type=../entry_type field_name=field_name}}
-		{{/each}}
+	
+	{{#each entry_type.fields}}
+	<div style="display: flex; flex-direction: row">
+	  <span><strong>{{title_case field_name}}</strong></span>
+  	  <span style="white-space: pre-line">{{> (concat field_type "/" widget "/detail/render") variable_to_read=(concat "this._" (camel_case ../entry_type.singular_name) "." (snake_case field_name) ) }}</span>
+	</div>
+	{{/each}}
+	
       </div>
     `;
   }

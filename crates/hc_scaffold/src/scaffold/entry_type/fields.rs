@@ -3,14 +3,13 @@ use std::{collections::BTreeMap, path::PathBuf};
 use dialoguer::{theme::ColorfulTheme, Confirm, Input, Select};
 
 use crate::{
-    definitions::{FieldDefinition, FieldType},
+    definitions::{Cardinality, FieldDefinition, FieldType},
     error::{ScaffoldError, ScaffoldResult},
     file_tree::{dir_content, FileTree},
 };
 
 pub fn choose_widget(
     field_type: &FieldType,
-    vector: bool,
     field_types_templates: &FileTree,
 ) -> ScaffoldResult<Option<String>> {
     let path = PathBuf::new().join(field_type.to_string());
@@ -66,28 +65,37 @@ pub fn choose_field(field_types_templates: &FileTree) -> ScaffoldResult<FieldDef
         .with_prompt("Choose field type:")
         .default(0)
         .items(&field_type_names[..])
+        .item("Option of...")
         .item("Vector of...")
         .interact()?;
 
     // If user selected vector
-    let (vector, field_type) = if selection == field_type_names.len() {
+    let (cardinality, field_type) = if selection == field_type_names.len() {
+        let selection = Select::with_theme(&ColorfulTheme::default())
+            .with_prompt("Option of which field type?")
+            .default(0)
+            .items(&field_type_names[..])
+            .interact()?;
+
+        (Cardinality::Option, field_types[selection].clone())
+    } else if selection == field_type_names.len() + 1 {
         let selection = Select::with_theme(&ColorfulTheme::default())
             .with_prompt("Vector of which field type?")
             .default(0)
             .items(&field_type_names[..])
             .interact()?;
 
-        (true, field_types[selection].clone())
+        (Cardinality::Vector, field_types[selection].clone())
     } else {
-        (false, field_types[selection].clone())
+        (Cardinality::Single, field_types[selection].clone())
     };
 
-    let widget = choose_widget(&field_type, vector, field_types_templates)?;
+    let widget = choose_widget(&field_type, field_types_templates)?;
 
     Ok(FieldDefinition {
         widget,
         field_name,
-        vector,
+        cardinality,
         field_type,
     })
 }
