@@ -120,7 +120,7 @@ pub fn register_all_partials_in_dir<'a>(
     for (path, content) in partials {
         h.register_partial(
             path.with_extension("").as_os_str().to_str().unwrap(),
-            content,
+            content.trim(),
         )?;
     }
 
