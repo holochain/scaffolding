@@ -7,13 +7,13 @@ import { appInfoContext, appWebsocketContext } from '../../contexts';
 import { {{pascal_case entry_type.singular_name}} } from './types';
 import '@material/mwc-circular-progress';
 {{#each entry_type.fields}}
-{{> (concat field_type.type "/detail/imports") }}
+{{> (concat field_type "/" widget "/detail/imports") }}
 {{/each}}
 
 @customElement('{{kebab_case entry_type.singular_name}}-detail')
 export class {{pascal_case entry_type.singular_name}}Detail extends LitElement {
   @property()
-  actionHash!: ActionHash;
+  {{camel_case entry_type.singular_name}}Hash!: ActionHash;
 
   @state()
   _{{camel_case entry_type.singular_name}}: {{pascal_case entry_type.singular_name}} | undefined;
@@ -30,7 +30,7 @@ export class {{pascal_case entry_type.singular_name}}Detail extends LitElement {
       cell_id: cellData.cell_id,
       zome_name: '{{coordinator_zome_manifest.name}}',
       fn_name: 'get_{{snake_case entry_type.singular_name}}',
-      payload: this.actionHash,
+      payload: this.{{camel_case entry_type.singular_name}}Hash,
       provenance: cellData.cell_id[1]
     });
     if (record) {
@@ -48,7 +48,7 @@ export class {{pascal_case entry_type.singular_name}}Detail extends LitElement {
       <div style="display: flex; flex-direction: column">
         <span style="font-size: 18px">{{pascal_case entry_type.singular_name}}</span>
 		{{#each entry_type.fields}}
-		  {{> (concat field_type.type "/detail/render") entry_type=../entry_type field_name=@key}}
+		  {{> (concat field_type "/" widget "/detail/render") entry_type=../entry_type field_name=field_name}}
 		{{/each}}
       </div>
     `;

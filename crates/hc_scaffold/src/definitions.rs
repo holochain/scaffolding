@@ -4,13 +4,18 @@ use rand::Rng;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
+use crate::scaffold::entry_type::DependsOnItself;
+
 #[derive(Deserialize, Debug, Clone, Serialize)]
-#[serde(tag = "type")]
 pub enum FieldType {
+    #[serde(rename = "bool")]
     Bool,
     String,
+    #[serde(rename = "u32")]
     U32,
+    #[serde(rename = "i32")]
     I32,
+    #[serde(rename = "f32")]
     F32,
     Timestamp,
     AgentPubKey,
@@ -106,7 +111,7 @@ impl FieldType {
                 let mut rng = rand::thread_rng();
                 format!("{}", rng.gen_range(-100.0..100.0))
             },
-            ActionHash => format!(
+            FieldType::ActionHash => format!(
                     "Buffer.from(new Uint8Array([{}]))",
                     vec![0x84, 0x29, 0x24]
                         .into_iter()
@@ -115,7 +120,7 @@ impl FieldType {
                         .collect::<Vec<String>>()
                         .join(", ")
                 ),
-            EntryHash => format!(
+            FieldType::EntryHash => format!(
                     "Buffer.from(new Uint8Array([{}]))",
                     vec![0x84, 0x21, 0x24]
                         .into_iter()
@@ -124,7 +129,7 @@ impl FieldType {
                         .collect::<Vec<String>>()
                         .join(", ")
                 ),
-            AgentPubKey => format!(
+            FieldType::AgentPubKey => format!(
                     "Buffer.from(new Uint8Array([{}]))",
                     vec![0x84, 0x20, 0x24]
                         .into_iter()
@@ -138,15 +143,10 @@ impl FieldType {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct FieldWidget {
-    pub widget_name: String,
-    pub properties: BTreeMap<String, String>,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct FieldDefinition {
+    pub field_name: String,
     pub field_type: FieldType,
-    pub widget: Option<FieldWidget>,
+    pub widget: Option<String>,
     pub vector: bool,
 }
 
@@ -183,7 +183,9 @@ impl FieldDefinition {
 pub struct EntryDefinition {
     pub singular_name: String,
     pub plural_name: String,
-    pub fields: Vec<(String, FieldDefinition)>,
+    pub fields: Vec<FieldDefinition>,
+    pub depends_on: Vec<String>,
+    pub depends_on_itself: DependsOnItself,
 }
 
 impl EntryDefinition {
@@ -191,8 +193,12 @@ impl EntryDefinition {
         let fields_samples: Vec<String> = self
             .fields
             .iter()
-            .map(|(field_name, field_def)| {
-                format!("{}: {}", field_name, field_def.field_type.js_sample_value())
+            .map(|field_def| {
+                format!(
+                    "{}: {}",
+                    field_def.field_name,
+                    field_def.field_type.js_sample_value()
+                )
             })
             .collect();
         format!(

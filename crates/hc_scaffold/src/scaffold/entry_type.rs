@@ -75,10 +75,10 @@ fn get_or_choose_depends_on(
 
 pub fn choose_depends_on_itself() -> ScaffoldResult<DependsOnItself> {
     let depends = Confirm::with_theme(&ColorfulTheme::default())
-                .with_prompt("Does a new entry of this type depend on a existing entries of its same type? (Eg. in git, a commit depends on a list of previous_commits)")
+                .with_prompt("Does a new entry of this type depend on previously existing entries of its same type? (Eg. in git, a commit depends on a list of previous_commits)")
                 .interact()?;
     if !depends {
-        return Ok(DependsOnItself::No);
+        return Ok(DependsOnItself::None);
     }
 
     let selection = Select::with_theme(&ColorfulTheme::default())
@@ -91,16 +91,12 @@ pub fn choose_depends_on_itself() -> ScaffoldResult<DependsOnItself> {
         .interact()?;
 
     match selection {
-        0 => Ok(DependsOnItself::Yes(SelfDependencyType::Option)),
-        _ => Ok(DependsOnItself::Yes(SelfDependencyType::Vector)),
+        0 => Ok(DependsOnItself::Some(SelfDependencyType::Option)),
+        _ => Ok(DependsOnItself::Some(SelfDependencyType::Vector)),
     }
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug)]
-pub enum DependsOnItself {
-    No,
-    Yes(SelfDependencyType),
-}
+pub type DependsOnItself = Option<SelfDependencyType>;
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub enum SelfDependencyType {
@@ -110,9 +106,9 @@ pub enum SelfDependencyType {
 
 pub fn parse_depends_on_itself(depends_on_itself: &str) -> Result<DependsOnItself, String> {
     match depends_on_itself {
-        "false" => Ok(DependsOnItself::No),
-        "vector" => Ok(DependsOnItself::Yes(SelfDependencyType::Vector)),
-        "option" => Ok(DependsOnItself::Yes(SelfDependencyType::Option)),
+        "false" => Ok(DependsOnItself::None),
+        "vector" => Ok(DependsOnItself::Some(SelfDependencyType::Vector)),
+        "option" => Ok(DependsOnItself::Some(SelfDependencyType::Option)),
         _ => Err(format!(
             "Invalid depends_on_itself value {}. Valid values: \"false\", \"vector\", \"option\" ",
             depends_on_itself
@@ -136,54 +132,46 @@ pub fn scaffold_entry_type(
         None => choose_depends_on_itself()?,
     };
 
-    let mut depends_fields: Vec<(String, FieldDefinition)> = Vec::new();
+    let mut depends_fields: Vec<FieldDefinition> = Vec::new();
     for d in depends_on.clone() {
         let field_name = format!("{}_hash", d.to_case(Case::Snake));
-        depends_fields.push((
+        depends_fields.push(FieldDefinition {
+            widget: None,
             field_name,
-            FieldDefinition {
+            vector: false,
+            field_type: FieldType::ActionHash,
+        });
+    }
+
+    if let DependsOnItself::Some(dependency_type) = depends_on_itself.clone() {
+        if let SelfDependencyType::Vector = dependency_type {
+            let field_name = format!("previous_{}_hashes", plural_name.to_case(Case::Snake));
+            depends_fields.push(FieldDefinition {
+                widget: None,
+                field_name,
+                vector: true,
+                field_type: FieldType::ActionHash,
+            });
+        } else {
+            let field_name = format!("previous_{}_hash", singular_name.to_case(Case::Snake));
+            depends_fields.push(FieldDefinition {
+                field_name,
                 widget: None,
                 vector: false,
                 field_type: FieldType::ActionHash,
-            },
-        ));
-    }
-
-    if let DependsOnItself::Yes(dependency_type) = depends_on_itself.clone() {
-        if let SelfDependencyType::Vector = dependency_type {
-            let field_name = format!("previous_{}_hashes", plural_name.to_case(Case::Snake));
-            depends_fields.push((
-                field_name,
-                FieldDefinition {
-                    widget: None,
-                    vector: true,
-                    field_type: FieldType::ActionHash,
-                },
-            ));
-        } else {
-            let field_name = format!("previous_{}_hash", singular_name.to_case(Case::Snake));
-            depends_fields.push((
-                field_name,
-                FieldDefinition {
-                    widget: None,
-                    vector: false,
-                    field_type: FieldType::ActionHash,
-                },
-            ));
+            });
         }
     }
 
     let fields = match maybe_fields {
         Some(f) => {
             for (field_name, field_type) in f {
-                depends_fields.push((
-                    field_name.clone(),
-                    FieldDefinition {
-                        widget: None,
-                        vector: false,
-                        field_type: field_type.clone(),
-                    },
-                ));
+                depends_fields.push(FieldDefinition {
+                    field_name: field_name.clone(),
+                    widget: None,
+                    vector: false,
+                    field_type: field_type.clone(),
+                });
             }
 
             depends_fields
@@ -205,6 +193,8 @@ pub fn scaffold_entry_type(
         singular_name: singular_name.clone(),
         plural_name: plural_name.clone(),
         fields,
+        depends_on: depends_on.clone(),
+        depends_on_itself: depends_on_itself.clone(),
     };
 
     let integrity_zome_name = zome_file_tree.zome_manifest.name.0.to_string();

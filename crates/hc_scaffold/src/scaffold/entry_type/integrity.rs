@@ -21,9 +21,10 @@ pub fn render_entry_definition_struct(entry_def: &EntryDefinition) -> ScaffoldRe
     let fields: Vec<TokenStream> = entry_def
         .fields
         .iter()
-        .map(|(key, value)| {
-            let name: syn::Expr = syn::parse_str(key.to_case(Case::Snake).as_str())?;
-            let rust_type = value.rust_type();
+        .map(|field_def| {
+            let name: syn::Expr =
+                syn::parse_str(field_def.field_name.to_case(Case::Snake).as_str())?;
+            let rust_type = field_def.field_type.rust_type();
             Ok(quote! {  #name: #rust_type })
         })
         .collect::<ScaffoldResult<Vec<TokenStream>>>()?;
@@ -41,7 +42,7 @@ pub fn render_entry_definition_file(entry_def: &EntryDefinition) -> ScaffoldResu
     let type_definitions: Vec<TokenStream> = entry_def
         .fields
         .iter()
-        .filter_map(|(field_name, field_def)| field_def.field_type.rust_type_definition())
+        .filter_map(|field_def| field_def.field_type.rust_type_definition())
         .collect();
 
     let token_stream = quote! {

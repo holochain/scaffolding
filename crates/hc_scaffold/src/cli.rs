@@ -638,8 +638,9 @@ impl HcScaffoldTemplate {
             None => {
                 let selection = Select::with_theme(&ColorfulTheme::default())
                     .with_prompt("Do you want to create a new template in this repository?")
-                    .item("Create a new template")
+                    .default(0)
                     .item("Merge with an existing template")
+                    .item("Create a new template")
                     .interact()?;
                 match selection {
                     0 => {

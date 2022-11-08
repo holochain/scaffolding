@@ -3,7 +3,7 @@ use std::{collections::BTreeMap, path::PathBuf};
 use dialoguer::{theme::ColorfulTheme, Confirm, Input, Select};
 
 use crate::{
-    definitions::{FieldDefinition, FieldType, FieldWidget},
+    definitions::{FieldDefinition, FieldType},
     error::{ScaffoldError, ScaffoldResult},
     file_tree::{dir_content, FileTree},
 };
@@ -12,16 +12,30 @@ pub fn choose_widget(
     field_type: &FieldType,
     vector: bool,
     field_types_templates: &FileTree,
-) -> ScaffoldResult<Option<FieldWidget>> {
+) -> ScaffoldResult<Option<String>> {
     let path = PathBuf::new().join(field_type.to_string());
 
     match dir_content(field_types_templates, &path) {
         Err(_) => Ok(None),
         Ok(folders) => {
             let widgets_that_can_render_this_type: Vec<String> = folders
-                .keys()
+                .into_iter()
+                .filter(|(_key, value)| value.dir_content().is_some())
+                .map(|(key, _value)| key)
                 .map(|s| s.to_str().unwrap().to_string())
                 .collect();
+
+            if widgets_that_can_render_this_type.len() == 0 {
+                return Ok(None);
+            }
+
+            let visible = Confirm::with_theme(&ColorfulTheme::default())
+                .with_prompt("Should this field be visible in the UI?")
+                .interact()?;
+
+            if !visible {
+                return Ok(None);
+            }
 
             let selection = Select::with_theme(&ColorfulTheme::default())
                 .with_prompt("Choose widget to render this field:")
@@ -30,17 +44,13 @@ pub fn choose_widget(
                 .interact()?;
 
             let widget_name = widgets_that_can_render_this_type[selection].clone();
-            let properties: BTreeMap<String, String> = BTreeMap::new();
-            // TODO: ask for the properties
-            Ok(Some(FieldWidget {
-                widget_name,
-                properties,
-            }))
+
+            Ok(Some(widget_name))
         }
     }
 }
 
-pub fn choose_field(field_types_templates: &FileTree) -> ScaffoldResult<(String, FieldDefinition)> {
+pub fn choose_field(field_types_templates: &FileTree) -> ScaffoldResult<FieldDefinition> {
     let field_name: String = Input::with_theme(&ColorfulTheme::default())
         .with_prompt("Field name:")
         .interact_text()?;
@@ -72,36 +82,27 @@ pub fn choose_field(field_types_templates: &FileTree) -> ScaffoldResult<(String,
         (false, field_types[selection].clone())
     };
 
-    let visible = Confirm::with_theme(&ColorfulTheme::default())
-        .with_prompt("Should this field be visible in the UI?")
-        .interact()?;
+    let widget = choose_widget(&field_type, vector, field_types_templates)?;
 
-    let widget = match visible {
-        false => None,
-        true => choose_widget(&field_type, vector, field_types_templates)?,
-    };
-
-    Ok((
+    Ok(FieldDefinition {
+        widget,
         field_name,
-        FieldDefinition {
-            widget,
-            vector,
-            field_type,
-        },
-    ))
+        vector,
+        field_type,
+    })
 }
 
 pub fn choose_fields(
     field_types_templates: &FileTree,
-    mut initial_fields: Vec<(String, FieldDefinition)>,
-) -> ScaffoldResult<Vec<(String, FieldDefinition)>> {
+    mut initial_fields: Vec<FieldDefinition>,
+) -> ScaffoldResult<Vec<FieldDefinition>> {
     let mut finished = false;
     if initial_fields.len() > 0 {
         println!(
             "\nThe entry already contains these fields: {}\n",
             initial_fields
                 .iter()
-                .map(|f| f.0.clone())
+                .map(|f| f.field_name.clone())
                 .collect::<Vec<String>>()
                 .join(", ")
         );
@@ -114,10 +115,10 @@ pub fn choose_fields(
     }
 
     while !finished {
-        let (field_name, field_def) = choose_field(field_types_templates)?;
+        let field_def = choose_field(field_types_templates)?;
         println!("");
 
-        initial_fields.push((field_name, field_def));
+        initial_fields.push(field_def);
         finished = !Confirm::with_theme(&ColorfulTheme::default())
             .with_prompt("Add another field to the entry?")
             .report(false)
@@ -128,7 +129,7 @@ pub fn choose_fields(
         "Chosen fields: {}",
         initial_fields
             .iter()
-            .map(|f| f.0.clone())
+            .map(|f| f.field_name.clone())
             .collect::<Vec<String>>()
             .join(", ")
     );

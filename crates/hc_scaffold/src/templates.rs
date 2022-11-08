@@ -2,7 +2,10 @@ use build_fs_tree::serde::Serialize;
 use convert_case::{Case, Casing};
 use dialoguer::theme::ColorfulTheme;
 use dialoguer::Select;
-use handlebars::{handlebars_helper, Handlebars};
+use handlebars::{
+    handlebars_helper, Context, Handlebars, Helper, HelperResult, Output, RenderContext,
+    RenderError,
+};
 use regex::Regex;
 use serde_json::{json, Value};
 use std::collections::BTreeMap;
@@ -10,7 +13,9 @@ use std::ffi::OsString;
 use std::path::PathBuf;
 
 use crate::error::{ScaffoldError, ScaffoldResult};
-use crate::file_tree::{dir_content, find_files, flatten_file_tree, unflatten_file_tree, FileTree};
+use crate::file_tree::{
+    dir_content, file_content, find_files, flatten_file_tree, unflatten_file_tree, FileTree,
+};
 
 pub mod get;
 
@@ -48,8 +53,27 @@ pub fn register_helpers<'a>(h: Handlebars<'a>) -> Handlebars<'a> {
 }
 
 pub fn register_concat_helper<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
-    handlebars_helper!(concat: |s1: String, s2: String| format!("{}{}", s1, s2));
-    h.register_helper("concat", Box::new(concat));
+    h.register_helper(
+        "concat",
+        Box::new(
+            |h: &Helper,
+             r: &Handlebars,
+             _: &Context,
+             rc: &mut RenderContext,
+             out: &mut dyn Output|
+             -> HelperResult {
+                let result = h
+                    .params()
+                    .into_iter()
+                    .map(|p| p.render())
+                    .collect::<Vec<String>>()
+                    .join("");
+
+                out.write(result.as_ref())?;
+                Ok(())
+            },
+        ),
+    );
 
     h
 }
@@ -103,7 +127,31 @@ pub fn register_all_partials_in_dir<'a>(
     Ok(h)
 }
 
+pub fn render_template_file<'a>(
+    h: &Handlebars<'a>,
+    existing_app_file_tree: &FileTree,
+    target_path: &PathBuf,
+    template_str: &String,
+    value: &serde_json::Value,
+) -> ScaffoldResult<String> {
+    let mut value = value.clone();
+
+    if let Ok(previous_content) = file_content(existing_app_file_tree, &target_path) {
+        value
+            .as_object_mut()
+            .unwrap()
+            .insert("previous_file_content".into(), previous_content.into());
+    }
+
+    let mut h = h.clone();
+    h.register_template_string(target_path.to_str().unwrap(), template_str)?;
+    let new_contents = h.render(target_path.to_str().unwrap(), &value)?;
+
+    Ok(new_contents)
+}
+
 pub fn render_template_file_tree<'a, T: Serialize>(
+    existing_app_file_tree: &FileTree,
     h: &Handlebars<'a>,
     templates_file_tree: &FileTree,
     data: &T,
@@ -111,6 +159,9 @@ pub fn render_template_file_tree<'a, T: Serialize>(
     let flattened_templates = flatten_file_tree(templates_file_tree);
 
     let mut transformed_templates: BTreeMap<PathBuf, String> = BTreeMap::new();
+
+    let new_data = serde_json::to_string(data)?;
+    let mut value: serde_json::Value = serde_json::from_str(new_data.as_str())?;
 
     for (path, contents) in flattened_templates {
         let path = PathBuf::from(path.to_str().unwrap().replace('¡', "/"));
@@ -136,25 +187,36 @@ pub fn render_template_file_tree<'a, T: Serialize>(
                 .collect();
 
             for (i, f) in files_to_create.into_iter().enumerate() {
-                let new_data = serde_json::to_string(data)?;
-                let mut value: serde_json::Value = serde_json::from_str(new_data.as_str())?;
-
                 value
                     .as_object_mut()
                     .unwrap()
                     .insert(String::from("index"), json!(i));
 
-                let new_contents = h.render_template(contents.as_str(), &value)?;
-                transformed_templates
-                    .insert(PathBuf::from(path_prefix.clone()).join(f), new_contents);
+                let target_path = PathBuf::from(path_prefix.clone()).join(f);
+
+                let new_contents = render_template_file(
+                    &h,
+                    existing_app_file_tree,
+                    &target_path,
+                    &contents,
+                    &value,
+                )?;
+                transformed_templates.insert(target_path, new_contents);
             }
         } else if let Some(e) = path.extension() {
             if e == "hbs" {
                 let new_path = h.render_template(path.as_os_str().to_str().unwrap(), data)?;
-                let new_contents = h.render_template(contents.as_str(), data)?;
+                let target_path = PathBuf::from(new_path).with_extension("");
 
-                transformed_templates
-                    .insert(PathBuf::from(new_path).with_extension(""), new_contents);
+                let new_contents = render_template_file(
+                    &h,
+                    existing_app_file_tree,
+                    &target_path,
+                    &contents,
+                    &value,
+                )?;
+
+                transformed_templates.insert(target_path, new_contents);
             }
         }
     }
@@ -168,7 +230,8 @@ pub fn render_template_file_tree_and_merge_with_existing<'a, T: Serialize>(
     template_file_tree: &FileTree,
     data: &T,
 ) -> ScaffoldResult<FileTree> {
-    let rendered_templates = render_template_file_tree(h, template_file_tree, data)?;
+    let rendered_templates =
+        render_template_file_tree(&app_file_tree, h, template_file_tree, data)?;
 
     let mut flattened_app_file_tree = flatten_file_tree(&app_file_tree);
     let flattened_templates = flatten_file_tree(&rendered_templates);
