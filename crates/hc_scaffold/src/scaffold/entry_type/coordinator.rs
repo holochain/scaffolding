@@ -7,7 +7,10 @@ use crate::{
     scaffold::{dna::DnaFileTree, link_type::link_type_name, zome::ZomeFileTree},
 };
 
-use super::{crud::Crud, DependsOnItself, SelfDependencyCardinality};
+use super::{
+    crud::Crud, depends_on_field_name, depends_on_itself_field_name, DependsOnItself,
+    SelfDependencyCardinality,
+};
 
 pub fn read_handler(entry_def_name: &String) -> String {
     format!(
@@ -20,45 +23,64 @@ pub fn get_{}(action_hash: ActionHash) -> ExternResult<Option<Record>> {{
     )
 }
 
+pub fn create_link_for_cardinality(
+    entry_def: &EntryDefinition,
+    field_name: &String,
+    link_type_name: &String,
+    cardinality: &Cardinality,
+) -> String {
+    match cardinality {
+        Cardinality::Single => format!(
+            r#"  create_link({}.{}.clone(), {}_hash.clone(), LinkTypes::{}, ())?;"#,
+            entry_def.singular_name.to_case(Case::Snake),
+            field_name,
+            entry_def.singular_name.to_case(Case::Snake),
+            link_type_name
+        ),
+        Cardinality::Option => format!(
+            r#"  if let Some(action_hash) = {}.{}.clone() {{
+    create_link(action_hash, {}_hash.clone(), LinkTypes::{}, ())?;
+  }}"#,
+            entry_def.singular_name.to_case(Case::Snake),
+            field_name,
+            entry_def.singular_name.to_case(Case::Snake),
+            link_type_name
+        ),
+        Cardinality::Vector => format!(
+            r#"  for action_hash in {}.{}.clone() {{
+    create_link(action_hash, {}_hash.clone(), LinkTypes::{}, ())?;
+  }}"#,
+            entry_def.singular_name.to_case(Case::Snake),
+            field_name,
+            entry_def.singular_name.to_case(Case::Snake),
+            link_type_name
+        ),
+    }
+}
+
 pub fn create_handler(entry_def: &EntryDefinition) -> String {
     let snake_entry_type = entry_def.singular_name.to_case(Case::Snake);
 
     let mut create_links_str = entry_def
         .depends_on
         .iter()
-        .map(|s| {
-            format!(
-                r#"  create_link({}.{}_hash.clone(), {}_hash.clone(), LinkTypes::{}, ())?;"#,
-                snake_entry_type,
-                s.to_case(Case::Snake),
-                snake_entry_type,
-                link_type_name(s, &entry_def.plural_name)
+        .map(|d| {
+            create_link_for_cardinality(
+                entry_def,
+                &depends_on_field_name(d),
+                &link_type_name(&d.entry_type, &entry_def.plural_name),
+                &d.cardinality,
             )
         })
         .collect::<Vec<String>>();
 
     if let Some(c) = &entry_def.depends_on_itself {
-        if let SelfDependencyCardinality::Option = c {
-            create_links_str.push(format!(
-                r#"  if let Some(action_hash) = {}.previous_{}_hash.clone() {{
-    create_link(action_hash, {}_hash.clone(), LinkTypes::{}, ())?;
-  }}"#,
-                snake_entry_type,
-                snake_entry_type,
-                snake_entry_type,
-                link_type_name(&entry_def.singular_name, &entry_def.plural_name)
-            ));
-        } else {
-            create_links_str.push(format!(
-                r#"  for action_hash in {}.previous_{}_hashes.clone() {{
-    create_link(action_hash, {}_hash.clone(), LinktTypes::{}, ())?;
-  }}"#,
-                snake_entry_type,
-                entry_def.plural_name.to_case(Case::Snake),
-                snake_entry_type,
-                link_type_name(&entry_def.singular_name, &entry_def.plural_name)
-            ));
-        }
+        create_links_str.push(create_link_for_cardinality(
+            entry_def,
+            &depends_on_itself_field_name(&entry_def.singular_name, &entry_def.plural_name, c),
+            &link_type_name(&entry_def.singular_name, &entry_def.plural_name),
+            &c.clone().into(),
+        ));
     }
 
     let create_links_str = create_links_str.join("\n\n");
@@ -209,7 +231,7 @@ use {}::*;
     }
 
     for d in &entry_def.depends_on {
-        initial.push_str(depends_on_handler(&entry_def.plural_name, &d).as_str());
+        initial.push_str(depends_on_handler(&entry_def.plural_name, &d.entry_type).as_str());
     }
     if let Some(_cardinality) = &entry_def.depends_on_itself {
         initial.push_str(

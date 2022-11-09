@@ -1,7 +1,7 @@
 use std::{collections::BTreeMap, ffi::OsString, path::PathBuf};
 
 use crate::{
-    definitions::{Cardinality, EntryDefinition, FieldDefinition, FieldType},
+    definitions::{Cardinality, DependsOn, EntryDefinition, FieldDefinition, FieldType},
     file_tree::FileTree,
     templates::entry_type::scaffold_entry_type_templates,
 };
@@ -63,10 +63,10 @@ fn choose_cardinality(dependant_entry_type: &String) -> ScaffoldResult<Cardinali
     }
 }
 
-fn choose_depends_on(entry_types: &Vec<String>) -> ScaffoldResult<BTreeMap<String, Cardinality>> {
+fn choose_depends_on(entry_types: &Vec<String>) -> ScaffoldResult<Vec<DependsOn>> {
     let mut finished = false;
 
-    let mut depends_on: BTreeMap<String, Cardinality> = BTreeMap::new();
+    let mut depends_on: Vec<DependsOn> = Vec::new();
 
     while !finished {
         let entry_type = choose_entry_type(
@@ -76,7 +76,10 @@ fn choose_depends_on(entry_types: &Vec<String>) -> ScaffoldResult<BTreeMap<Strin
         )?;
         let cardinality = choose_cardinality(&entry_type)?;
 
-        depends_on.insert(entry_type, cardinality);
+        depends_on.push(DependsOn {
+            entry_type,
+            cardinality,
+        });
 
         println!("");
 
@@ -93,11 +96,11 @@ fn choose_depends_on(entry_types: &Vec<String>) -> ScaffoldResult<BTreeMap<Strin
 fn get_or_choose_depends_on(
     zome_file_tree: &ZomeFileTree,
     depends_on: &Option<Vec<String>>,
-) -> ScaffoldResult<BTreeMap<String, Cardinality>> {
+) -> ScaffoldResult<Vec<DependsOn>> {
     let entry_types = get_all_entry_types(zome_file_tree)?.unwrap_or_else(|| vec![]);
 
     if entry_types.len() == 0 {
-        return Ok(BTreeMap::new());
+        return Ok(Vec::new());
     }
 
     match depends_on {
@@ -110,7 +113,10 @@ fn get_or_choose_depends_on(
             None => Ok(et
                 .clone()
                 .into_iter()
-                .map(|t| (t, Cardinality::Single))
+                .map(|t| DependsOn {
+                    entry_type: t,
+                    cardinality: Cardinality::Single,
+                })
                 .collect()),
         },
         None => {
@@ -120,7 +126,7 @@ fn get_or_choose_depends_on(
                 .interact()?;
             match depends {
                 true => choose_depends_on(&entry_types),
-                false => Ok(BTreeMap::new()),
+                false => Ok(Vec::new()),
             }
         }
     }
@@ -163,6 +169,15 @@ pub enum SelfDependencyCardinality {
     Option,
 }
 
+impl Into<Cardinality> for SelfDependencyCardinality {
+    fn into(self) -> Cardinality {
+        match self {
+            SelfDependencyCardinality::Vector => Cardinality::Vector,
+            SelfDependencyCardinality::Option => Cardinality::Option,
+        }
+    }
+}
+
 pub fn parse_depends_on_itself(depends_on_itself: &str) -> Result<DependsOnItself, String> {
     match depends_on_itself {
         "false" => Ok(DependsOnItself::None),
@@ -172,6 +187,24 @@ pub fn parse_depends_on_itself(depends_on_itself: &str) -> Result<DependsOnItsel
             "Invalid depends_on_itself value {}. Valid values: \"false\", \"vector\", \"option\" ",
             depends_on_itself
         )),
+    }
+}
+
+pub fn depends_on_field_name(depends_on: &DependsOn) -> String {
+    match depends_on.cardinality {
+        Cardinality::Vector => format!("{}_hashes", depends_on.entry_type.to_case(Case::Snake)),
+        _ => format!("{}_hash", depends_on.entry_type.to_case(Case::Snake)),
+    }
+}
+
+pub fn depends_on_itself_field_name(
+    singular_name: &String,
+    plural_name: &String,
+    cardinality: &SelfDependencyCardinality,
+) -> String {
+    match cardinality.clone().into() {
+        Cardinality::Vector => format!("previous_{}_hashes", plural_name.to_case(Case::Snake)),
+        _ => format!("{}_hash", singular_name.to_case(Case::Snake)),
     }
 }
 
@@ -185,45 +218,30 @@ pub fn scaffold_entry_type(
     maybe_depends_on_itself: &Option<DependsOnItself>,
     maybe_fields: &Option<Vec<(String, FieldType)>>,
 ) -> ScaffoldResult<FileTree> {
-    let depends_on: BTreeMap<String, Cardinality> =
-        get_or_choose_depends_on(&zome_file_tree, maybe_depends_on)?;
+    let depends_on = get_or_choose_depends_on(&zome_file_tree, maybe_depends_on)?;
     let depends_on_itself: DependsOnItself = match maybe_depends_on_itself {
         Some(d) => d.clone(),
         None => choose_depends_on_itself(singular_name, plural_name)?,
     };
 
     let mut depends_fields: Vec<FieldDefinition> = Vec::new();
-    for (d, cardinality) in depends_on.clone() {
-        let field_name = format!("{}_hash", d.to_case(Case::Snake));
+    for d in depends_on.clone() {
         depends_fields.push(FieldDefinition {
             widget: None,
-            field_name,
-            cardinality,
+            field_name: depends_on_field_name(&d),
+            cardinality: d.cardinality,
             field_type: FieldType::ActionHash,
         });
     }
 
-    if let DependsOnItself::Some(dependency_type) = depends_on_itself.clone() {
-        if let SelfDependencyCardinality::Vector = dependency_type {
-            let field_name = format!("previous_{}_hashes", plural_name.to_case(Case::Snake));
-            depends_fields.push(FieldDefinition {
-                widget: None,
-                field_name,
-                cardinality: Cardinality::Vector,
-                field_type: FieldType::ActionHash,
-            });
-        } else {
-            let field_name = format!("previous_{}_hash", singular_name.to_case(Case::Snake));
-            depends_fields.push(FieldDefinition {
-                field_name,
-                widget: None,
-                cardinality: Cardinality::Option,
-                field_type: FieldType::ActionHash,
-            });
-        }
+    if let DependsOnItself::Some(cardinality) = depends_on_itself.clone() {
+        depends_fields.push(FieldDefinition {
+            widget: None,
+            field_name: depends_on_itself_field_name(&singular_name, &plural_name, &cardinality),
+            cardinality: cardinality.into(),
+            field_type: FieldType::ActionHash,
+        });
     }
-
-    let depends_on: Vec<String> = depends_on.clone().into_iter().map(|(d, _)| d).collect();
 
     let fields = match maybe_fields {
         Some(f) => {
@@ -266,7 +284,7 @@ pub fn scaffold_entry_type(
     for d in depends_on.clone() {
         zome_file_tree = add_link_type_to_integrity_zome(
             zome_file_tree,
-            &link_type_name(&d, &plural_name.to_case(Case::Pascal)),
+            &link_type_name(&d.entry_type, &plural_name.to_case(Case::Pascal)),
         )?;
     }
     if depends_on_itself.is_some() {
@@ -322,11 +340,14 @@ pub fn scaffold_entry_type(
         let (zome, fn_name) = find_extern_function_or_choose(
             &zome_file_tree.dna_file_tree,
             &coordinator_zomes_for_integrity,
-            &format!("create_{}", d.to_case(Case::Snake)),
-            &format!("In which function is a {} created", d.to_case(Case::Pascal)),
+            &format!("create_{}", d.entry_type.to_case(Case::Snake)),
+            &format!(
+                "In which function is a {} created",
+                d.entry_type.to_case(Case::Pascal)
+            ),
         )?;
 
-        create_fns_for_depends_on.insert(d.clone(), (zome, fn_name));
+        create_fns_for_depends_on.insert(d.entry_type.clone(), (zome, fn_name));
     }
 
     let dna_manifest = zome_file_tree.dna_file_tree.dna_manifest.clone();

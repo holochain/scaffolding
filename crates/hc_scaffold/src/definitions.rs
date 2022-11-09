@@ -194,11 +194,17 @@ impl FieldDefinition {
 }
 
 #[derive(Serialize, Clone)]
+pub struct DependsOn {
+    pub entry_type: String,
+    pub cardinality: Cardinality,
+}
+
+#[derive(Serialize, Clone)]
 pub struct EntryDefinition {
     pub singular_name: String,
     pub plural_name: String,
     pub fields: Vec<FieldDefinition>,
-    pub depends_on: Vec<String>,
+    pub depends_on: Vec<DependsOn>,
     pub depends_on_itself: DependsOnItself,
 }
 

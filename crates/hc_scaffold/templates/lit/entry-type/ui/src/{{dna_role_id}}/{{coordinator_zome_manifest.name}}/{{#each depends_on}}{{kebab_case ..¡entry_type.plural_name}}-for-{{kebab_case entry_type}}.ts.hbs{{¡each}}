@@ -5,11 +5,11 @@ import { contextProvided } from '@lit-labs/context';
 import { appWebsocketContext, appInfoContext } from '../../contexts';
 import './{{kebab_case entry_type.singular_name}}-detail';
 
-@customElement('{{kebab_case entry_type.plural_name}}-for-{{kebab_case (lookup depends_on index)}}')
-export class {{pascal_case entry_type.plural_name}}For{{pascal_case (lookup depends_on index)}} extends LitElement {
+@customElement('{{kebab_case entry_type.plural_name}}-for-{{kebab_case (lookup (lookup depends_on index) "entry_type") }}')
+export class {{pascal_case entry_type.plural_name}}For{{pascal_case (lookup (lookup depends_on index) "entry_type") }} extends LitElement {
 
   @property()
-  {{camel_case (lookup depends_on index)}}Hash!: ActionHash;
+  {{camel_case (lookup (lookup depends_on index) "entry_type")}}Hash!: ActionHash;
 
   @state()
   _records: Array<Record> | undefined;
@@ -27,8 +27,8 @@ export class {{pascal_case entry_type.plural_name}}For{{pascal_case (lookup depe
       cap_secret: null,
       cell_id: cellData.cell_id,
       zome_name: '{{coordinator_zome_manifest.name}}',
-      fn_name: 'get_{{snake_case entry_type.plural_name}}_for_{{snake_case (lookup depends_on index)}}',
-      payload: this.{{camel_case (lookup depends_on index)}}Hash,
+      fn_name: 'get_{{snake_case entry_type.plural_name}}_for_{{snake_case (lookup (lookup depends_on index) "entry_type")}}',
+      payload: this.{{camel_case (lookup (lookup depends_on index) "entry_type")}}Hash,
       provenance: cellData.cell_id[1]
     });
   }
