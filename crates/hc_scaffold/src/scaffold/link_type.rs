@@ -142,7 +142,7 @@ pub fn scaffold_link_type(
         app_file_tree.dna_file_tree.file_tree(),
         &template_file_tree,
         &dna_manifest.name(),
-        &coordinator_zome.name.0.to_string(),
+        &coordinator_zome,
         &from_entry_type,
         &to_entry_type,
     )?;

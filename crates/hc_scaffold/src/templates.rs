@@ -215,10 +215,8 @@ pub fn render_template_file_tree<'a, T: Serialize>(
 
             let new_template = h.render_template(new_path_suffix.to_string().as_str(), data)?;
 
-            let create_file = new_template.contains(".hbs");
-
-            if create_file {
-                let target_path = PathBuf::from(path_prefix.clone()).join(new_template);
+            if let Some(file_name) = new_template.strip_suffix(".hbs") {
+                let target_path = PathBuf::from(path_prefix.clone()).join(file_name);
 
                 let new_contents = render_template_file(
                     &h,

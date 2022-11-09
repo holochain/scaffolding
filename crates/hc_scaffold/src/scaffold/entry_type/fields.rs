@@ -134,7 +134,8 @@ pub fn choose_fields(
     }
 
     println!(
-        "Chosen fields: {}",
+        "Chosen fields: {}
+",
         initial_fields
             .iter()
             .map(|f| f.field_name.clone())

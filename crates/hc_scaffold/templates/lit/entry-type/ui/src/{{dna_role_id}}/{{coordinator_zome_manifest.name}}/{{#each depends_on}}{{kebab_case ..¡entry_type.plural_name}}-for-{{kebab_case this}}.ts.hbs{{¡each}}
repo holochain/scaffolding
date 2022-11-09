@@ -42,7 +42,7 @@ export class {{pascal_case entry_type.plural_name}}For{{pascal_case (lookup depe
     return html`
       <div style="display: flex; flex-direction: column">
         ${this._records.map(r => 
-          html`<{{kebab_case entry_type.singular_name}}-detail .actionHash=${r.signed_action.hashed.hash}></{{kebab_case entry_type.singular_name}}-detail>`
+          html`<{{kebab_case entry_type.singular_name}}-detail .{{camel_case entry_type.singular_name}}Hash=${r.signed_action.hashed.hash}></{{kebab_case entry_type.singular_name}}-detail>`
         )}
       </div>
     `;

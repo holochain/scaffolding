@@ -119,7 +119,7 @@ pub fn scaffold_index(
         dna_file_tree.file_tree(),
         &template_file_tree,
         &dna_name,
-        &coordinator_zome.name.0.to_string(),
+        &coordinator_zome,
         &index_type,
         index_name,
         &entry_types,

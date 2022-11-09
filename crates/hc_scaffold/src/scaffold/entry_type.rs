@@ -38,13 +38,22 @@ pub mod fields;
 pub mod integrity;
 pub mod utils;
 
-fn choose_cardinality() -> ScaffoldResult<Cardinality> {
+fn choose_cardinality(dependant_entry_type: &String) -> ScaffoldResult<Cardinality> {
     let selection = Select::with_theme(&ColorfulTheme::default())
         .with_prompt("Select the type of dependency to that entry type:")
         .default(0)
-        .item("Single: an entry of the new entry type depends on *an* entry of the selected entry type")
-        .item("Option: an entry of the new entry type *may depend on an* entry of the selected entry type")
-        .item("Vector: an entry of the new entry type depends on a *list* of entries of the selected entry type")
+        .item(format!(
+            "Single ({}_hash: ActionHash)",
+            dependant_entry_type.to_case(Case::Snake)
+        ))
+        .item(format!(
+            "Optional ({}_hash: Option<ActionHash>)",
+            dependant_entry_type.to_case(Case::Snake)
+        ))
+        .item(format!(
+            "Vector ({}_hashes: Vec<ActionHash>)",
+            dependant_entry_type.to_case(Case::Snake)
+        ))
         .interact()?;
 
     match selection {
@@ -65,14 +74,18 @@ fn choose_depends_on(entry_types: &Vec<String>) -> ScaffoldResult<BTreeMap<Strin
             &String::from("Select an existing entry type that the new entry type depends on:"),
             false,
         )?;
-        let cardinality = choose_cardinality()?;
+        let cardinality = choose_cardinality(&entry_type)?;
 
         depends_on.insert(entry_type, cardinality);
 
-        finished = Confirm::with_theme(&ColorfulTheme::default())
+        println!("");
+
+        finished = !Confirm::with_theme(&ColorfulTheme::default())
             .with_prompt("Does the new entry type depend on another existing entry type?")
             .interact()?;
     }
+
+    println!("");
 
     Ok(depends_on)
 }
@@ -101,6 +114,7 @@ fn get_or_choose_depends_on(
                 .collect()),
         },
         None => {
+            println!("");
             let depends = Confirm::with_theme(&ColorfulTheme::default())
                 .with_prompt("Does the new entry type depend on an existing one? (Eg. in a forum app, a comment depends on a post)")
                 .interact()?;
@@ -112,7 +126,10 @@ fn get_or_choose_depends_on(
     }
 }
 
-pub fn choose_depends_on_itself() -> ScaffoldResult<DependsOnItself> {
+pub fn choose_depends_on_itself(
+    singular_name: &String,
+    plural_name: &String,
+) -> ScaffoldResult<DependsOnItself> {
     let depends = Confirm::with_theme(&ColorfulTheme::default())
                 .with_prompt("Does a new entry of this type depend on previously existing entries of its same type? (Eg. in git, a commit depends on a list of previous_commits)")
                 .interact()?;
@@ -125,8 +142,11 @@ pub fn choose_depends_on_itself() -> ScaffoldResult<DependsOnItself> {
             "Does an entry of this type depend on an Option or a Vector of entries of this type?",
         )
         .default(0)
-        .item("Option")
-        .item("Vector")
+        .item(format!(
+            "Option ({}_hash: Option<ActionHash>)",
+            singular_name
+        ))
+        .item(format!("Vector ({}_hashes: Vec<ActionHash>)", plural_name))
         .interact()?;
 
     match selection {
@@ -169,7 +189,7 @@ pub fn scaffold_entry_type(
         get_or_choose_depends_on(&zome_file_tree, maybe_depends_on)?;
     let depends_on_itself: DependsOnItself = match maybe_depends_on_itself {
         Some(d) => d.clone(),
-        None => choose_depends_on_itself()?,
+        None => choose_depends_on_itself(singular_name, plural_name)?,
     };
 
     let mut depends_fields: Vec<FieldDefinition> = Vec::new();
@@ -293,15 +313,8 @@ pub fn scaffold_entry_type(
     let zome_file_tree =
         ZomeFileTree::from_zome_manifest(zome_file_tree.dna_file_tree, coordinator_zome.clone())?;
 
-    let zome_file_tree = add_crud_functions_to_coordinator(
-        zome_file_tree,
-        &integrity_zome_name,
-        &singular_name,
-        &plural_name,
-        &crud,
-        &depends_on,
-        &depends_on_itself,
-    )?;
+    let zome_file_tree =
+        add_crud_functions_to_coordinator(zome_file_tree, &integrity_zome_name, &entry_def, &crud)?;
 
     let mut create_fns_for_depends_on: BTreeMap<String, (ZomeManifest, String)> = BTreeMap::new();
 

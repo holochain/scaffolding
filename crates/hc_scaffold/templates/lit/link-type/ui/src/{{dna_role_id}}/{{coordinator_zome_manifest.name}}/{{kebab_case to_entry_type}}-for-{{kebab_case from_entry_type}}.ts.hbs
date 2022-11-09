@@ -10,7 +10,7 @@ import './{{kebab_case to_entry_type}}-detail';
 export class {{pascal_case to_entry_type}}For{{pascal_case from_entry_type}} extends LitElement {
 
   @property()
-  actionHash!: ActionHash; 
+  {{camel_case from_entry_type}}Hash!: ActionHash; 
 
   @state()
   _records: Array<Record> | undefined;
@@ -43,7 +43,7 @@ export class {{pascal_case to_entry_type}}For{{pascal_case from_entry_type}} ext
     return html`
       <div style="display: flex; flex-direction: column">
         ${this._records.map(r => 
-          html`<{{kebab_case to_entry_type}}-detail .actionHash=${r.signed_action.hashed.hash} style="margin-bottom: 16px;"></{{kebab_case to_entry_type}}-detail>`
+          html`<{{kebab_case to_entry_type}}-detail .{{camel_case to_entry_type}}Hash=${r.signed_action.hashed.hash} style="margin-bottom: 16px;"></{{kebab_case to_entry_type}}-detail>`
         )}
       </div>
     `;

@@ -47,7 +47,7 @@ export class {{pascal_case index_name}} extends LitElement {
     return html`
       <div style="display: flex; flex-direction: column">
         ${this._records.map(r => 
-          html`<{{kebab_case (lookup entry_types 0)}}-detail .actionHash=${r.signed_action.hashed.hash} style="margin-bottom: 16px;"></{{kebab_case (lookup entry_types 0)}}-detail>`
+          html`<{{kebab_case (lookup entry_types 0)}}-detail .{{camel_case (lookup entry_types 0)}}Hash=${r.signed_action.hashed.hash} style="margin-bottom: 16px;"></{{kebab_case (lookup entry_types 0)}}-detail>`
         )}
       </div>
     `;

@@ -1,5 +1,6 @@
 use std::{ffi::OsString, path::PathBuf};
 
+use holochain_types::prelude::ZomeManifest;
 use serde::Serialize;
 
 use crate::{error::ScaffoldResult, file_tree::FileTree, scaffold::index::IndexType};
@@ -9,7 +10,7 @@ use super::{build_handlebars, render_template_file_tree_and_merge_with_existing}
 #[derive(Serialize)]
 pub struct ScaffoldIndexData {
     dna_role_id: String,
-    coordinator_zome_name: String,
+    coordinator_zome_manifest: ZomeManifest,
     index_type: IndexType,
     index_name: String,
     entry_types: Vec<String>,
@@ -18,7 +19,7 @@ pub fn scaffold_index_templates(
     mut app_file_tree: FileTree,
     template_file_tree: &FileTree,
     dna_role_id: &String,
-    coordinator_zome_name: &String,
+    coordinator_zome_manifest: &ZomeManifest,
     index_type: &IndexType,
     index_name: &String,
     entry_types: &Vec<String>,
@@ -26,7 +27,7 @@ pub fn scaffold_index_templates(
     let data = ScaffoldIndexData {
         entry_types: entry_types.clone(),
         dna_role_id: dna_role_id.clone(),
-        coordinator_zome_name: coordinator_zome_name.clone(),
+        coordinator_zome_manifest: coordinator_zome_manifest.clone(),
         index_name: index_name.clone(),
         index_type: index_type.clone(),
     };

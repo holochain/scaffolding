@@ -1,12 +1,13 @@
 use convert_case::{Case, Casing};
 
 use crate::{
+    definitions::{Cardinality, EntryDefinition},
     error::ScaffoldResult,
     file_tree::{insert_file, map_file},
     scaffold::{dna::DnaFileTree, link_type::link_type_name, zome::ZomeFileTree},
 };
 
-use super::{crud::Crud, DependsOnItself};
+use super::{crud::Crud, DependsOnItself, SelfDependencyCardinality};
 
 pub fn read_handler(entry_def_name: &String) -> String {
     format!(
@@ -19,10 +20,11 @@ pub fn get_{}(action_hash: ActionHash) -> ExternResult<Option<Record>> {{
     )
 }
 
-pub fn create_handler(entry_def_name: &String, depends_on: &Vec<String>) -> String {
-    let snake_entry_type = entry_def_name.to_case(Case::Snake);
+pub fn create_handler(entry_def: &EntryDefinition) -> String {
+    let snake_entry_type = entry_def.singular_name.to_case(Case::Snake);
 
-    let create_links_str = depends_on
+    let mut create_links_str = entry_def
+        .depends_on
         .iter()
         .map(|s| {
             format!(
@@ -30,11 +32,36 @@ pub fn create_handler(entry_def_name: &String, depends_on: &Vec<String>) -> Stri
                 snake_entry_type,
                 s.to_case(Case::Snake),
                 snake_entry_type,
-                link_type_name(s, entry_def_name)
+                link_type_name(s, &entry_def.plural_name)
             )
         })
-        .collect::<Vec<String>>()
-        .join("\n");
+        .collect::<Vec<String>>();
+
+    if let Some(c) = &entry_def.depends_on_itself {
+        if let SelfDependencyCardinality::Option = c {
+            create_links_str.push(format!(
+                r#"  if let Some(action_hash) = {}.previous_{}_hash.clone() {{
+    create_link(action_hash, {}_hash.clone(), LinkTypes::{}, ())?;
+  }}"#,
+                snake_entry_type,
+                snake_entry_type,
+                snake_entry_type,
+                link_type_name(&entry_def.singular_name, &entry_def.plural_name)
+            ));
+        } else {
+            create_links_str.push(format!(
+                r#"  for action_hash in {}.previous_{}_hashes.clone() {{
+    create_link(action_hash, {}_hash.clone(), LinktTypes::{}, ())?;
+  }}"#,
+                snake_entry_type,
+                entry_def.plural_name.to_case(Case::Snake),
+                snake_entry_type,
+                link_type_name(&entry_def.singular_name, &entry_def.plural_name)
+            ));
+        }
+    }
+
+    let create_links_str = create_links_str.join("\n\n");
 
     format!(
         r#"#[hdk_extern]
@@ -48,15 +75,15 @@ pub fn create_{}({}: {}) -> ExternResult<Record> {{
   Ok(record)
 }}
 "#,
-        entry_def_name.to_case(Case::Snake),
-        entry_def_name.to_case(Case::Snake),
-        entry_def_name.to_case(Case::Pascal),
-        entry_def_name.to_case(Case::Snake),
-        entry_def_name.to_case(Case::Pascal),
-        entry_def_name.to_case(Case::Snake),
+        entry_def.singular_name.to_case(Case::Snake),
+        entry_def.singular_name.to_case(Case::Snake),
+        entry_def.singular_name.to_case(Case::Pascal),
+        entry_def.singular_name.to_case(Case::Snake),
+        entry_def.singular_name.to_case(Case::Pascal),
+        entry_def.singular_name.to_case(Case::Snake),
         create_links_str,
-        entry_def_name.to_case(Case::Snake),
-        entry_def_name.to_case(Case::Pascal)
+        entry_def.singular_name.to_case(Case::Snake),
+        entry_def.singular_name.to_case(Case::Pascal)
     )
 }
 
@@ -158,11 +185,8 @@ pub fn get_{}_for_{}({}_hash: ActionHash) -> ExternResult<Vec<Record>> {{
 
 fn initial_crud_handlers(
     integrity_zome_name: &String,
-    singular_name: &String,
-    plural_name: &String,
+    entry_def: &EntryDefinition,
     crud: &Crud,
-    depends_on: &Vec<String>,
-    depends_on_itself: &DependsOnItself,
 ) -> String {
     let mut initial = format!(
         r#"use hdk::prelude::*;
@@ -171,37 +195,36 @@ use {}::*;
 {}
 "#,
         integrity_zome_name,
-        create_handler(singular_name, depends_on)
+        create_handler(entry_def)
     );
 
     if crud.read {
-        initial.push_str(read_handler(singular_name).as_str());
+        initial.push_str(read_handler(&entry_def.singular_name).as_str());
     }
     if crud.update {
-        initial.push_str(update_handler(singular_name).as_str());
+        initial.push_str(update_handler(&entry_def.singular_name).as_str());
     }
     if crud.delete {
-        initial.push_str(delete_handler(singular_name).as_str());
+        initial.push_str(delete_handler(&entry_def.singular_name).as_str());
     }
 
-    for d in depends_on {
-        initial.push_str(depends_on_handler(plural_name, d).as_str());
+    for d in &entry_def.depends_on {
+        initial.push_str(depends_on_handler(&entry_def.plural_name, &d).as_str());
     }
-    if let Some(cardinality) = depends_on_itself {
-        initial.push_str(depends_on_itself_handler(singular_name, plural_name).as_str());
+    if let Some(_cardinality) = &entry_def.depends_on_itself {
+        initial.push_str(
+            depends_on_itself_handler(&entry_def.singular_name, &entry_def.plural_name).as_str(),
+        );
     }
 
     initial
 }
 
 pub fn add_crud_functions_to_coordinator(
-    mut zome_file_tree: ZomeFileTree,
+    zome_file_tree: ZomeFileTree,
     integrity_zome_name: &String,
-    singular_name: &String,
-    plural_name: &String,
+    entry_def: &EntryDefinition,
     crud: &Crud,
-    depends_on: &Vec<String>,
-    depends_on_itself: &DependsOnItself,
 ) -> ScaffoldResult<ZomeFileTree> {
     let dna_manifest_path = zome_file_tree.dna_file_tree.dna_manifest_path.clone();
     let zome_manifest = zome_file_tree.zome_manifest.clone();
@@ -212,15 +235,11 @@ pub fn add_crud_functions_to_coordinator(
     let mut file_tree = zome_file_tree.dna_file_tree.file_tree();
     insert_file(
         &mut file_tree,
-        &crate_src_path.join(format!("{}.rs", singular_name.to_case(Case::Snake))),
-        &initial_crud_handlers(
-            integrity_zome_name,
-            singular_name,
-            plural_name,
-            crud,
-            depends_on,
-            depends_on_itself,
-        ),
+        &crate_src_path.join(format!(
+            "{}.rs",
+            entry_def.singular_name.to_case(Case::Snake)
+        )),
+        &initial_crud_handlers(integrity_zome_name, &entry_def, crud),
     )?;
 
     // 2. Add this file as a module in the entry point for the crate
@@ -232,7 +251,7 @@ pub fn add_crud_functions_to_coordinator(
             r#"pub mod {};
 
 {}"#,
-            singular_name.to_case(Case::Snake),
+            entry_def.singular_name.to_case(Case::Snake),
             s
         )
     })?;

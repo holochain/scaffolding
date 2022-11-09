@@ -24,7 +24,7 @@ pub fn render_entry_definition_struct(entry_def: &EntryDefinition) -> ScaffoldRe
         .map(|field_def| {
             let name: syn::Expr =
                 syn::parse_str(field_def.field_name.to_case(Case::Snake).as_str())?;
-            let rust_type = field_def.field_type.rust_type();
+            let rust_type = field_def.rust_type();
             Ok(quote! {  #name: #rust_type })
         })
         .collect::<ScaffoldResult<Vec<TokenStream>>>()?;
