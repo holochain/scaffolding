@@ -215,20 +215,24 @@ impl HcScaffold {
                     return Err(ScaffoldError::FolderAlreadyExists(app_folder.clone()))?;
                 }
 
-                let (template_name, template_file_tree) = match template_url {
-                    Some(u) => get_template(&u, &template),
+                let (template_name, template_file_tree, scaffold_template) = match template_url {
+                    Some(u) => {
+                        let (name, file_tree) = get_template(&u, &template)?;
+                        (name, file_tree, true)
+                    }
                     None => {
                         let ui_framework = match template {
                             Some(t) => UiFramework::from_str(t.as_str())?,
                             None => choose_ui_framework()?,
                         };
 
-                        Ok((
+                        (
                             format!("{:?}", ui_framework),
                             template_for_ui_framework(&ui_framework)?,
-                        ))
+                            false,
+                        )
                     }
-                }?;
+                };
 
                 let setup_nix = match setup_nix {
                     Some(s) => s,
@@ -244,6 +248,7 @@ impl HcScaffold {
                     !setup_nix,
                     template_file_tree,
                     template_name,
+                    scaffold_template,
                 )?;
 
                 let file_tree = MergeableFileSystemTree::<OsString, String>::from(app_file_tree);
@@ -596,7 +601,7 @@ pub enum HcScaffoldTemplate {
     },
     Init {
         /// The UI framework to use as the template for this web-app
-        template: UiFramework,
+        template: Option<UiFramework>,
 
         #[structopt(long)]
         /// The folder to download the template to, will end up at ".templates/<TO TEMPLATE>"
@@ -604,16 +609,23 @@ pub enum HcScaffoldTemplate {
     },
 }
 
-fn choose_existing_template(file_tree: &FileTree) -> ScaffoldResult<String> {
+fn existing_templates_names(file_tree: &FileTree) -> ScaffoldResult<Vec<String>> {
     let templates_path = PathBuf::new().join(templates_path());
 
-    let templates_dir_content = dir_content(file_tree, &templates_path)?;
+    match dir_content(file_tree, &templates_path) {
+        Ok(templates_dir_content) => {
+            let templates: Vec<String> = templates_dir_content
+                .into_keys()
+                .map(|k| k.to_str().unwrap().to_string())
+                .collect();
+            Ok(templates)
+        }
+        _ => Ok(vec![]),
+    }
+}
 
-    let templates: Vec<String> = templates_dir_content
-        .into_keys()
-        .map(|k| k.to_str().unwrap().to_string())
-        .collect();
-
+fn choose_existing_template(file_tree: &FileTree) -> ScaffoldResult<String> {
+    let templates = existing_templates_names(file_tree)?;
     match templates.len() {
         0 => Err(ScaffoldError::NoTemplatesFound),
         1 => Ok(templates[0].clone()),
@@ -636,27 +648,37 @@ impl HcScaffoldTemplate {
         let target_template = match self.target_template() {
             Some(t) => t,
             None => {
-                let selection = Select::with_theme(&ColorfulTheme::default())
-                    .with_prompt("Do you want to create a new template in this repository?")
-                    .default(0)
-                    .item("Merge with an existing template")
-                    .item("Create a new template")
-                    .interact()?;
-                match selection {
-                    0 => {
-                        let template_name = Input::with_theme(&ColorfulTheme::default())
-                            .with_prompt("Enter new template name:")
-                            .with_initial_text(template_name)
-                            .interact()?;
-                        template_name
-                    }
-                    _ => {
-                        let current_dir = std::env::current_dir()?;
+                let current_dir = std::env::current_dir()?;
 
-                        let file_tree = load_directory_into_memory(&current_dir)?;
-                        let existing_template = choose_existing_template(&file_tree)?;
-                        existing_template
+                let file_tree = load_directory_into_memory(&current_dir)?;
+
+                let mut create = true;
+                // If existing templates
+                if existing_templates_names(&file_tree)?.len() != 0 {
+                    // Merge or create?
+
+                    let selection = Select::with_theme(&ColorfulTheme::default())
+                        .with_prompt("Do you want to create a new template in this repository?")
+                        .default(0)
+                        .item("Merge with an existing template")
+                        .item("Create a new template")
+                        .interact()?;
+
+                    if selection == 0 {
+                        create = false;
                     }
+                }
+
+                if create {
+                    // Enter template name
+                    let template_name = Input::with_theme(&ColorfulTheme::default())
+                        .with_prompt("Enter new template name:")
+                        .with_initial_text(template_name)
+                        .interact()?;
+                    template_name
+                } else {
+                    let existing_template = choose_existing_template(&file_tree)?;
+                    existing_template
                 }
             }
         };
@@ -716,10 +738,16 @@ impl HcScaffoldTemplate {
                 ..
             } => get_template(template_url, template),
 
-            HcScaffoldTemplate::Init { template, .. } => Ok((
-                format!("{:?}", template),
-                template_for_ui_framework(&template)?,
-            )),
+            HcScaffoldTemplate::Init { template, .. } => {
+                let ui_framework = match template {
+                    Some(t) => t.clone(),
+                    None => choose_ui_framework()?,
+                };
+                Ok((
+                    format!("{}", ui_framework.to_string()),
+                    template_for_ui_framework(&ui_framework)?,
+                ))
+            }
         }
     }
 }

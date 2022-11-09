@@ -365,6 +365,7 @@ pub fn scaffold_entry_type(
         &dna_manifest.name(),
         &coordinator_zome,
         &entry_def,
+        &crud,
         &depends_on,
         &depends_on_itself,
     )?;

@@ -7,7 +7,7 @@ use crate::{
     definitions::{Cardinality, DependsOn, EntryDefinition},
     error::ScaffoldResult,
     file_tree::FileTree,
-    scaffold::entry_type::DependsOnItself,
+    scaffold::entry_type::{crud::Crud, DependsOnItself},
 };
 
 use super::{build_handlebars, render_template_file_tree_and_merge_with_existing};
@@ -17,6 +17,7 @@ pub struct ScaffoldEntryTypeData {
     dna_role_id: String,
     coordinator_zome_manifest: ZomeManifest,
     entry_type: EntryDefinition,
+    crud: Crud,
     depends_on: Vec<DependsOn>,
     depends_on_itself: DependsOnItself,
 }
@@ -26,6 +27,7 @@ pub fn scaffold_entry_type_templates(
     dna_role_id: &String,
     coordinator_zome: &ZomeManifest,
     entry_def: &EntryDefinition,
+    crud: &Crud,
     depends_on: &Vec<DependsOn>,
     depends_on_itself: &DependsOnItself,
 ) -> ScaffoldResult<FileTree> {
@@ -33,6 +35,7 @@ pub fn scaffold_entry_type_templates(
         dna_role_id: dna_role_id.clone(),
         coordinator_zome_manifest: coordinator_zome.clone(),
         entry_type: entry_def.clone(),
+        crud: crud.clone(),
         depends_on: depends_on.clone(),
         depends_on_itself: depends_on_itself.clone(),
     };

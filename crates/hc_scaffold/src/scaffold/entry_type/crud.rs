@@ -1,4 +1,6 @@
-#[derive(Debug, Clone)]
+use serde::Serialize;
+
+#[derive(Debug, Serialize, Clone)]
 pub struct Crud {
     // We don't include create because create must always exist
     pub read: bool,

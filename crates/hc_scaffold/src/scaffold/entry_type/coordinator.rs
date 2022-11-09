@@ -59,8 +59,6 @@ pub fn create_link_for_cardinality(
 }
 
 pub fn create_handler(entry_def: &EntryDefinition) -> String {
-    let snake_entry_type = entry_def.singular_name.to_case(Case::Snake);
-
     let mut create_links_str = entry_def
         .depends_on
         .iter()

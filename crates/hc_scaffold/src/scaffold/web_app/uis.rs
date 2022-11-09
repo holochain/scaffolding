@@ -28,6 +28,18 @@ pub enum UiFramework {
     Vue,
 }
 
+impl ToString for UiFramework {
+    fn to_string(&self) -> String {
+        match self {
+            UiFramework::Vanilla => "vanilla",
+            UiFramework::Lit => "lit",
+            UiFramework::Svelte => "svelte",
+            UiFramework::Vue => "vue",
+        }
+        .into()
+    }
+}
+
 impl FromStr for UiFramework {
     type Err = ScaffoldError;
 
@@ -43,6 +55,30 @@ impl FromStr for UiFramework {
             )),
         }
     }
+}
+
+pub fn guess_or_choose_framework(app_file_tree: &FileTree) -> ScaffoldResult<UiFramework> {
+    let ui_package_json_path = PathBuf::from("ui/package.json");
+    let v: Vec<OsString> = ui_package_json_path
+        .iter()
+        .map(|s| s.to_os_string())
+        .collect();
+    let ui_package_json = app_file_tree
+        .path(&mut v.iter())
+        .ok_or(ScaffoldError::PathNotFound(ui_package_json_path.clone()))?
+        .file_content()
+        .ok_or(ScaffoldError::PathNotFound(ui_package_json_path.clone()))?
+        .clone();
+
+    if ui_package_json.contains("lit") {
+        return Ok(UiFramework::Lit);
+    } else if ui_package_json.contains("svelte") {
+        return Ok(UiFramework::Svelte);
+    } else if ui_package_json.contains("vue") {
+        return Ok(UiFramework::Vue);
+    }
+
+    choose_ui_framework()
 }
 
 pub fn choose_ui_framework() -> ScaffoldResult<UiFramework> {

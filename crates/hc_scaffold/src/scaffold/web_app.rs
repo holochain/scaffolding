@@ -27,6 +27,7 @@ fn web_app_skeleton(
     skip_nix: bool,
     template_file_tree: FileTree,
     template_name: String,
+    scaffold_template: bool,
 ) -> ScaffoldResult<FileTree> {
     let mut app_file_tree = dir! {
       ".gitignore" => file!(gitignore())
@@ -50,13 +51,15 @@ fn web_app_skeleton(
             .ok_or(ScaffoldError::PathNotFound(PathBuf::new()))?
             .insert(OsString::from("default.nix"), default_nix());
     }
-    app_file_tree
-        .dir_content_mut()
-        .ok_or(ScaffoldError::PathNotFound(PathBuf::new()))?
-        .insert(
-            OsString::from(templates_path().join(template_name)),
-            template_file_tree.clone(),
-        );
+    if scaffold_template {
+        app_file_tree
+            .dir_content_mut()
+            .ok_or(ScaffoldError::PathNotFound(PathBuf::new()))?
+            .insert(
+                OsString::from(templates_path().join(template_name)),
+                template_file_tree.clone(),
+            );
+    }
 
     let mut app_file_tree =
         scaffold_web_app_template(app_file_tree, &template_file_tree, &app_name)?;
@@ -75,8 +78,9 @@ pub fn scaffold_web_app(
     skip_nix: bool,
     template_file_tree: FileTree,
     template_name: String,
+    scaffold_template: bool,
 ) -> ScaffoldResult<FileTree> {
     Ok(dir! {
-      app_name.clone() => web_app_skeleton(app_name, description, skip_nix, template_file_tree, template_name)?
+      app_name.clone() => web_app_skeleton(app_name, description, skip_nix, template_file_tree, template_name, scaffold_template)?
     })
 }

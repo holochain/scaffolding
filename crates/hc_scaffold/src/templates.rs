@@ -14,7 +14,11 @@ use std::path::PathBuf;
 
 use crate::error::{ScaffoldError, ScaffoldResult};
 use crate::file_tree::{
-    dir_content, file_content, find_files, flatten_file_tree, unflatten_file_tree, FileTree,
+    dir_content, dir_exists, file_content, find_files, flatten_file_tree, unflatten_file_tree,
+    FileTree,
+};
+use crate::scaffold::web_app::uis::{
+    choose_ui_framework, guess_or_choose_framework, template_for_ui_framework, UiFramework,
 };
 
 pub mod get;
@@ -273,12 +277,18 @@ pub fn choose_or_get_template_file_tree(
     file_tree: &FileTree,
     template: &Option<String>,
 ) -> ScaffoldResult<FileTree> {
-    let template_name = choose_or_get_template(file_tree, template)?;
+    if dir_exists(file_tree, &templates_path()) {
+        let template_name = choose_or_get_template(file_tree, template)?;
 
-    Ok(FileTree::Directory(dir_content(
-        &file_tree,
-        &templates_path().join(template_name),
-    )?))
+        Ok(FileTree::Directory(dir_content(
+            &file_tree,
+            &templates_path().join(template_name),
+        )?))
+    } else {
+        let ui_framework = guess_or_choose_framework(file_tree)?;
+
+        template_for_ui_framework(&ui_framework)
+    }
 }
 
 pub fn choose_or_get_template(
