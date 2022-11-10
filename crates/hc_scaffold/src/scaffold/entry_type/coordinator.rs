@@ -7,19 +7,89 @@ use crate::{
     scaffold::{dna::DnaFileTree, link_type::link_type_name, zome::ZomeFileTree},
 };
 
-use super::{
-    crud::Crud, depends_on_field_name, depends_on_itself_field_name, DependsOnItself,
-    SelfDependencyCardinality,
-};
+use super::{crud::Crud, depends_on_field_name, depends_on_itself_field_name};
 
-pub fn read_handler(entry_def_name: &String) -> String {
+pub fn no_update_read_handler(entry_def_name: &String) -> String {
     format!(
         r#"#[hdk_extern]
-pub fn get_{}(action_hash: ActionHash) -> ExternResult<Option<Record>> {{
-  get(action_hash, GetOptions::default())
+pub fn get_{}({}_hash: ActionHash) -> ExternResult<Option<Record>> {{
+  get({}_hash, GetOptions::default())
+}}"#,
+        entry_def_name.to_case(Case::Snake),
+        entry_def_name.to_case(Case::Snake),
+        entry_def_name.to_case(Case::Snake)
+    )
+}
+
+pub fn read_handler_without_linking_to_updates(entry_def_name: &String) -> String {
+    format!(
+        r#"#[hdk_extern]
+pub fn get_{}(original_{}_hash: ActionHash) -> ExternResult<Option<Record>> {{
+  get_latest_{}({}_hash)
+}}
+
+fn get_latest_{}({}_hash: ActionHash) -> ExternResult<Option<Record>> {{
+  let details = get_details({}_hash, GetOptions::default())?
+      .ok_or(wasm_error!(WasmErrorInner::Guest("{} not found".into())))?;
+
+  let record_details = match details {{
+    Details::Entry(_) => Err(wasm_error!(WasmErrorInner::Guest(
+      "Malformed details".into()
+    ))),
+    Details::Record(record_details) => Ok(record_details)
+  }};
+
+  // If there is some delete action, it means that the whole entry is deleted
+  if record_details.deletes.len() > 0 {{
+    return Ok(None);
+  }}
+    
+  match record_details.updates.last() {{
+      Some(update) => get_latest_{}(update.action_address().clone()),
+      None => Ok(record_details.record),
+    }},
+  }}
 }}
 "#,
+        entry_def_name.to_case(Case::Snake),
+        entry_def_name.to_case(Case::Snake),
+        entry_def_name.to_case(Case::Snake),
+        entry_def_name.to_case(Case::Snake),
+        entry_def_name.to_case(Case::Snake),
+        entry_def_name.to_case(Case::Snake),
+        entry_def_name.to_case(Case::Snake),
+        entry_def_name.to_case(Case::Pascal),
         entry_def_name.to_case(Case::Snake)
+    )
+}
+
+pub fn updates_link_name(entry_def_name: &String) -> String {
+    format!("{}Updates", entry_def_name.to_case(Case::Pascal))
+}
+
+pub fn read_handler_with_linking_to_updates(entry_def_name: &String) -> String {
+    format!(
+        r#"#[hdk_extern]
+pub fn get_{}(original_{}_hash: ActionHash) -> ExternResult<Option<Record>> {{
+  let links = get_links(original_{}_hash, LinkTypes::{}, None)?;
+
+  let latest_link = links.into_iter().max_by(|link_a, link_b| link_b.timestamp.cmp(&link_a.timestamp));
+  
+  let latest_{}_hash = match latest_link {{
+    Some(link) => ActionHash::from(link.target.clone()),
+    None => original_{}_hash.clone()   
+  }};
+ 
+  get(latest_{}_hash, GetOptions::default())
+}}
+"#,
+        entry_def_name.to_case(Case::Snake),
+        entry_def_name.to_case(Case::Snake),
+        entry_def_name.to_case(Case::Snake),
+        updates_link_name(entry_def_name),
+        entry_def_name.to_case(Case::Snake),
+        entry_def_name.to_case(Case::Snake),
+        entry_def_name.to_case(Case::Snake),
     )
 }
 
@@ -107,17 +177,24 @@ pub fn create_{}({}: {}) -> ExternResult<Record> {{
     )
 }
 
-pub fn update_handler(entry_def_name: &String) -> String {
+pub fn update_handler(entry_def_name: &String, link_from_original_to_each_update: bool) -> String {
+    match link_from_original_to_each_update {
+        true => update_handler_linking_on_each_update(entry_def_name),
+        false => update_handler_without_linking_on_each_update(entry_def_name),
+    }
+}
+
+pub fn update_handler_without_linking_on_each_update(entry_def_name: &String) -> String {
     format!(
         r#"#[derive(Serialize, Deserialize, Debug)]
 pub struct Update{}Input {{
-  original_action_hash: ActionHash,
-  updated_{}: {}
+  pub previous_{}_hash: ActionHash,
+  pub updated_{}: {}
 }}
 
 #[hdk_extern]
 pub fn update_{}(input: Update{}Input) -> ExternResult<Record> {{
-  let updated_{}_hash = update_entry(input.original_action_hash, &input.updated_{})?;
+  let updated_{}_hash = update_entry(input.previous_{}_hash, &input.updated_{})?;
 
   let record = get(updated_{}_hash.clone(), GetOptions::default())?
         .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("Could not find the newly updated {}"))))?;
@@ -127,11 +204,52 @@ pub fn update_{}(input: Update{}Input) -> ExternResult<Record> {{
 "#,
         entry_def_name.to_case(Case::Pascal),
         entry_def_name.to_case(Case::Snake),
+        entry_def_name.to_case(Case::Snake),
+        entry_def_name.to_case(Case::Pascal),
+        entry_def_name.to_case(Case::Snake),
+        entry_def_name.to_case(Case::Pascal),
+        entry_def_name.to_case(Case::Snake),
+        entry_def_name.to_case(Case::Snake),
+        entry_def_name.to_case(Case::Snake),
+        entry_def_name.to_case(Case::Snake),
+        entry_def_name.to_case(Case::Pascal)
+    )
+}
+
+pub fn update_handler_linking_on_each_update(entry_def_name: &String) -> String {
+    format!(
+        r#"#[derive(Serialize, Deserialize, Debug)]
+pub struct Update{}Input {{
+  pub original_{}_hash: ActionHash,
+  pub previous_{}_hash: ActionHash,
+  pub updated_{}: {}
+}}
+
+#[hdk_extern]
+pub fn update_{}(input: Update{}Input) -> ExternResult<Record> {{
+  let updated_{}_hash = update_entry(input.previous_{}_hash, &input.updated_{})?;
+        
+  create_link(input.original_{}_hash.clone(), input.previous_{}_hash, LinkTypes::{}, ())?;
+
+  let record = get(updated_{}_hash.clone(), GetOptions::default())?
+        .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("Could not find the newly updated {}"))))?;
+    
+  Ok(record)
+}}
+"#,
+        entry_def_name.to_case(Case::Pascal),
+        entry_def_name.to_case(Case::Snake),
+        entry_def_name.to_case(Case::Snake),
+        entry_def_name.to_case(Case::Snake),
         entry_def_name.to_case(Case::Pascal),
         entry_def_name.to_case(Case::Snake),
         entry_def_name.to_case(Case::Pascal),
         entry_def_name.to_case(Case::Snake),
         entry_def_name.to_case(Case::Snake),
+        entry_def_name.to_case(Case::Snake),
+        entry_def_name.to_case(Case::Snake),
+        entry_def_name.to_case(Case::Snake),
+        updates_link_name(entry_def_name),
         entry_def_name.to_case(Case::Snake),
         entry_def_name.to_case(Case::Pascal)
     )
@@ -140,10 +258,12 @@ pub fn update_{}(input: Update{}Input) -> ExternResult<Record> {{
 pub fn delete_handler(entry_def_name: &String) -> String {
     format!(
         r#"#[hdk_extern]
-pub fn delete_{}(action_hash: ActionHash) -> ExternResult<ActionHash> {{
-  delete_entry(action_hash)
+pub fn delete_{}(original_{}_hash: ActionHash) -> ExternResult<ActionHash> {{
+  delete_entry(original_{}_hash)
 }}
 "#,
+        entry_def_name.to_case(Case::Snake),
+        entry_def_name.to_case(Case::Snake),
         entry_def_name.to_case(Case::Snake)
     )
 }
@@ -207,6 +327,7 @@ fn initial_crud_handlers(
     integrity_zome_name: &String,
     entry_def: &EntryDefinition,
     crud: &Crud,
+    link_from_original_to_each_update: bool,
 ) -> String {
     let mut initial = format!(
         r#"use hdk::prelude::*;
@@ -219,10 +340,24 @@ use {}::*;
     );
 
     if crud.read {
-        initial.push_str(read_handler(&entry_def.singular_name).as_str());
+        if !crud.update {
+            initial.push_str(no_update_read_handler(&entry_def.singular_name).as_str());
+        } else {
+            if link_from_original_to_each_update {
+                initial.push_str(
+                    read_handler_with_linking_to_updates(&entry_def.singular_name).as_str(),
+                );
+            } else {
+                initial.push_str(
+                    read_handler_without_linking_to_updates(&entry_def.singular_name).as_str(),
+                );
+            }
+        }
     }
     if crud.update {
-        initial.push_str(update_handler(&entry_def.singular_name).as_str());
+        initial.push_str(
+            update_handler(&entry_def.singular_name, link_from_original_to_each_update).as_str(),
+        );
     }
     if crud.delete {
         initial.push_str(delete_handler(&entry_def.singular_name).as_str());
@@ -245,6 +380,7 @@ pub fn add_crud_functions_to_coordinator(
     integrity_zome_name: &String,
     entry_def: &EntryDefinition,
     crud: &Crud,
+    link_from_original_to_each_update: bool,
 ) -> ScaffoldResult<ZomeFileTree> {
     let dna_manifest_path = zome_file_tree.dna_file_tree.dna_manifest_path.clone();
     let zome_manifest = zome_file_tree.zome_manifest.clone();
@@ -259,7 +395,12 @@ pub fn add_crud_functions_to_coordinator(
             "{}.rs",
             entry_def.singular_name.to_case(Case::Snake)
         )),
-        &initial_crud_handlers(integrity_zome_name, &entry_def, crud),
+        &initial_crud_handlers(
+            integrity_zome_name,
+            &entry_def,
+            crud,
+            link_from_original_to_each_update,
+        ),
     )?;
 
     // 2. Add this file as a module in the entry point for the crate

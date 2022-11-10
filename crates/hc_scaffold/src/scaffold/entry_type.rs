@@ -15,7 +15,7 @@ use serde::{Deserialize, Serialize};
 use crate::error::{ScaffoldError, ScaffoldResult};
 
 use self::{
-    coordinator::add_crud_functions_to_coordinator,
+    coordinator::{add_crud_functions_to_coordinator, updates_link_name},
     crud::Crud,
     fields::choose_fields,
     integrity::{add_entry_type_to_integrity_zome, get_all_entry_types},
@@ -214,6 +214,7 @@ pub fn scaffold_entry_type(
     singular_name: &String,
     plural_name: &String,
     maybe_crud: &Option<Crud>,
+    maybe_link_from_original_to_each_update: &Option<bool>,
     maybe_depends_on: &Option<Vec<String>>,
     maybe_depends_on_itself: &Option<DependsOnItself>,
     maybe_fields: &Option<Vec<(String, FieldType)>>,
@@ -328,11 +329,40 @@ pub fn scaffold_entry_type(
         None => choose_crud(),
     };
 
+    let link_from_original_to_each_update = match crud.update {
+        true => match maybe_link_from_original_to_each_update {
+            Some(l) => l.clone(),
+            None => {
+                let selection = Select::with_theme(&ColorfulTheme::default())
+                .with_prompt("Should a link from the original entry be created when this entry is updated?")
+                .default(0)
+                .item("Yes (more storage cost but better read performance, recommended)")
+                .item("No (less storage cost but worse read performance)")
+                .interact()?;
+
+                selection == 0
+            }
+        },
+        false => false,
+    };
+
+    if link_from_original_to_each_update {
+        zome_file_tree = add_link_type_to_integrity_zome(
+            zome_file_tree,
+            &updates_link_name(&entry_def.singular_name),
+        )?;
+    }
+
     let zome_file_tree =
         ZomeFileTree::from_zome_manifest(zome_file_tree.dna_file_tree, coordinator_zome.clone())?;
 
-    let zome_file_tree =
-        add_crud_functions_to_coordinator(zome_file_tree, &integrity_zome_name, &entry_def, &crud)?;
+    let zome_file_tree = add_crud_functions_to_coordinator(
+        zome_file_tree,
+        &integrity_zome_name,
+        &entry_def,
+        &crud,
+        link_from_original_to_each_update,
+    )?;
 
     let mut create_fns_for_depends_on: BTreeMap<String, (ZomeManifest, String)> = BTreeMap::new();
 
@@ -356,6 +386,7 @@ pub fn scaffold_entry_type(
         zome_file_tree,
         &entry_def,
         &crud,
+        link_from_original_to_each_update,
         &create_fns_for_depends_on,
     )?;
 

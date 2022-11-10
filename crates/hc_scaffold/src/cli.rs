@@ -112,6 +112,11 @@ pub enum HcScaffold {
         /// Whether to create a read zome call function for this entry type
         crud: Option<Crud>,
 
+        #[structopt(long)]
+        /// Whether to create a link from the original entry to each update action
+        /// Only applies if update is selected in the "crud" argument
+        link_from_original_to_each_update: Option<bool>,
+
         #[structopt(long, value_delimiter = ",")]
         /// The entry types that the new entry type depends on
         depends_on: Option<Vec<String>>,
@@ -450,6 +455,7 @@ Add new entry definitions to your zome with:
                 singular_name,
                 plural_name,
                 crud,
+                link_from_original_to_each_update,
                 depends_on,
                 depends_on_itself,
                 fields,
@@ -478,6 +484,7 @@ Add new entry definitions to your zome with:
                     &singular_name,
                     &plural_name,
                     &crud,
+                    &link_from_original_to_each_update,
                     &depends_on,
                     &depends_on_itself,
                     &fields,

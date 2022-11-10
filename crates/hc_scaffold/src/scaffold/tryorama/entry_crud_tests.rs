@@ -1,5 +1,6 @@
 use std::{collections::BTreeMap, path::PathBuf};
 
+use convert_case::{Case, Casing};
 use holochain_types::prelude::ZomeManifest;
 
 use crate::{definitions::EntryDefinition, scaffold::entry_type::crud::Crud};
@@ -11,6 +12,7 @@ pub fn entry_crud_tests(
     dna_bundle_location_from_tests_root: &PathBuf,
     coordinator_zome: &String,
     crud: &Crud,
+    link_original_to_each_update: bool,
     create_fns_of_entry_type_this_entry_type_depends_on: &BTreeMap<String, (ZomeManifest, String)>,
 ) -> String {
     let mut initial_test_file = format!(
@@ -50,6 +52,7 @@ import {{ decode }} from '@msgpack/msgpack';
                 dna_bundle_location_from_tests_root,
                 coordinator_zome,
                 crud.read,
+                link_original_to_each_update,
             )
             .as_str(),
         )
@@ -183,6 +186,7 @@ pub fn update_entry_test(
     entry_definition: &EntryDefinition,
     happ_bundle_location_from_tests_root: &PathBuf,
     coordinator_zome: &String,
+    link_original_to_each_update: bool,
     read_after_update: bool,
 ) -> String {
     let maybe_read = match read_after_update {
@@ -200,8 +204,19 @@ pub fn update_entry_test(
     }});
     assert.deepEqual(contentUpdate, decode((readUpdatedOutput.entry as any).Present.entry) as any);
 "#,
-            entry_definition.singular_name, coordinator_zome, entry_definition.singular_name
+            entry_definition.singular_name.to_case(Case::Snake),
+            coordinator_zome,
+            entry_definition.singular_name.to_case(Case::Snake)
         ),
+    };
+
+    let original_action_hash_field = match link_original_to_each_update {
+        true => format!(
+            r#"
+      original_{}_hash: originalActionHash,"#,
+            entry_definition.singular_name.to_case(Case::Snake)
+        ),
+        false => String::from(""),
     };
 
     format!(
@@ -219,12 +234,29 @@ test('create and update {}', async t => {{
       payload: createInput,
     }});
     assert.ok(record);
+        
+    const originalActionHash = record.signed_action.hashed.hash;
  
     // Alice updates the {}
-    const contentUpdate: any = {};
+    let contentUpdate: any = {};
+    const updateInput = {{ {}
+      previous_{}_hash: originalActionHash,
+      updated_{}: contentUpdate,
+    }};
 
-    const updateInput = {{
-      original_action_hash: record.signed_action.hashed.hash,
+    const updatedRecord: Record = await alice.cells[0].callZome({{
+      zome_name: "{}",
+      fn_name: "update_{}",
+      payload: updateInput,
+    }});
+    assert.ok(updatedRecord);
+
+{}
+
+    // Alice updates the {} again
+    contentUpdate = {};
+    const updateInput = {{ {}
+      previous_{}_hash: updatedRecord.signed_action.hashed.hash,
       updated_{}: contentUpdate,
     }};
 
@@ -238,17 +270,27 @@ test('create and update {}', async t => {{
 {}
   }});
 }});"#,
-        entry_definition.singular_name,
+        entry_definition.singular_name.to_case(Case::Snake),
         common_tests_setup(happ_bundle_location_from_tests_root),
         entry_definition.js_sample_object(),
-        entry_definition.singular_name,
+        entry_definition.singular_name.to_case(Case::Snake),
         coordinator_zome,
-        entry_definition.singular_name,
-        entry_definition.singular_name,
+        entry_definition.singular_name.to_case(Case::Snake),
+        entry_definition.singular_name.to_case(Case::Snake),
         entry_definition.js_sample_object(),
-        entry_definition.singular_name,
+        original_action_hash_field,
+        entry_definition.singular_name.to_case(Case::Snake),
+        entry_definition.singular_name.to_case(Case::Snake),
         coordinator_zome,
-        entry_definition.singular_name,
+        entry_definition.singular_name.to_case(Case::Snake),
+        maybe_read,
+        entry_definition.singular_name.to_case(Case::Snake),
+        entry_definition.js_sample_object(),
+        original_action_hash_field,
+        entry_definition.singular_name.to_case(Case::Snake),
+        entry_definition.singular_name.to_case(Case::Snake),
+        coordinator_zome,
+        entry_definition.singular_name.to_case(Case::Snake),
         maybe_read
     )
 }

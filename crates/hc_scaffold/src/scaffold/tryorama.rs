@@ -28,6 +28,7 @@ pub fn add_tryorama_tests_for_entry_def(
     coordinator_zome_file_tree: ZomeFileTree,
     entry_def: &EntryDefinition,
     crud: &Crud,
+    link_original_to_each_update: bool,
     create_fns_for_depends_on: &BTreeMap<String, (ZomeManifest, String)>,
 ) -> ScaffoldResult<FileTree> {
     let tryorama_path = find_or_choose_tryorama_package_path(
@@ -58,6 +59,7 @@ pub fn add_tryorama_tests_for_entry_def(
         &dna_bundle_from_tryorama_path,
         &coordinator_zome_name,
         crud,
+        link_original_to_each_update,
         &create_fns_for_depends_on,
     );
 
