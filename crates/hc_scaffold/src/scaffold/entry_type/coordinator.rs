@@ -37,7 +37,7 @@ fn get_latest_{}({}_hash: ActionHash) -> ExternResult<Option<Record>> {{
       "Malformed details".into()
     ))),
     Details::Record(record_details) => Ok(record_details)
-  }};
+  }}?;
 
   // If there is some delete action, it means that the whole entry is deleted
   if record_details.deletes.len() > 0 {{
@@ -45,9 +45,8 @@ fn get_latest_{}({}_hash: ActionHash) -> ExternResult<Option<Record>> {{
   }}
     
   match record_details.updates.last() {{
-      Some(update) => get_latest_{}(update.action_address().clone()),
-      None => Ok(record_details.record),
-    }},
+    Some(update) => get_latest_{}(update.action_address().clone()),
+    None => Ok(record_details.record),
   }}
 }}
 "#,
