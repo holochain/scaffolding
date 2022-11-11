@@ -2,6 +2,8 @@ import { LitElement, html } from 'lit';
 import { state, customElement, property } from 'lit/decorators.js';
 import { InstalledCell, Record, AppWebsocket, ActionHash, InstalledAppInfo } from '@holochain/client';
 import { contextProvided } from '@lit-labs/context';
+import { Task } from '@lit-labs/task';
+
 import { appWebsocketContext, appInfoContext } from '../../contexts';
 import './{{kebab_case entry_type.singular_name}}-detail';
 
@@ -11,8 +13,14 @@ export class {{pascal_case entry_type.plural_name}}For{{pascal_case (lookup (loo
   @property()
   {{camel_case (lookup (lookup depends_on index) "entry_type")}}Hash!: ActionHash;
 
-  @state()
-  _records: Array<Record> | undefined;
+  _fetch{{pascal_case entry_type.plural_name}}: Task<[ActionHash], Array<ActionHash>> = new Task(this, ([{{camel_case (lookup (lookup depends_on index) "entry_type")}}Hash]) => this.appWebsocket.callZome({
+      cap_secret: null,
+      cell_id: this.cellData.cell_id,
+      zome_name: '{{coordinator_zome_manifest.name}}',
+      fn_name: 'get_{{snake_case entry_type.plural_name}}_for_{{snake_case (lookup (lookup depends_on index) "entry_type")}}',
+      payload: {{camel_case (lookup (lookup depends_on index) "entry_type")}}Hash,
+      provenance: this.cellData.cell_id[1]
+  }), [this.{{camel_case (lookup (lookup depends_on index) "entry_type")}}Hash]);
 
   @contextProvided({ context: appWebsocketContext })
   appWebsocket!: AppWebsocket;
@@ -20,31 +28,29 @@ export class {{pascal_case entry_type.plural_name}}For{{pascal_case (lookup (loo
   @contextProvided({ context: appInfoContext })
   appInfo!: InstalledAppInfo;
 
-  async firstUpdated() {
-    const cellData = this.appInfo.cell_data.find((c: InstalledCell) => c.role_id === '{{dna_role_id}}')!;
-
-    this.records = await this.appWebsocket.callZome({
-      cap_secret: null,
-      cell_id: cellData.cell_id,
-      zome_name: '{{coordinator_zome_manifest.name}}',
-      fn_name: 'get_{{snake_case entry_type.plural_name}}_for_{{snake_case (lookup (lookup depends_on index) "entry_type")}}',
-      payload: this.{{camel_case (lookup (lookup depends_on index) "entry_type")}}Hash,
-      provenance: cellData.cell_id[1]
-    });
+  get cellData() {
+    return this.appInfo.cell_data.find((c: InstalledCell) => c.role_id === '{{dna_role_id}}')!;
   }
 
-  render() {
-    if (!this._records) {
-      return html`<div style="display: flex; flex: 1; align-items: center; justify-content: center">
-        <mwc-circular-progress indeterminate></mwc-circular-progress>
-      </div>`;
-    }
+  renderList(actionHashes: Array<ActionHash>) {
+    if (actionHashes.length === 0) return html`<span>No {{lower_case entry_type.plural_name}} found for this {{lower_case (lookup (lookup depends_on index) "entry_type")}}.</span>`;
+    
     return html`
       <div style="display: flex; flex-direction: column">
-        ${this._records.map(r => 
-          html`<{{kebab_case entry_type.singular_name}}-detail .{{camel_case entry_type.singular_name}}Hash=${r.signed_action.hashed.hash}></{{kebab_case entry_type.singular_name}}-detail>`
+        ${actionHashes.map(actionHash => 
+          html`<{{kebab_case entry_type.singular_name}}-detail .{{camel_case entry_type.singular_name}}Hash=${actionHash}></{{kebab_case entry_type.singular_name}}-detail>`
         )}
       </div>
     `;
+  }
+
+  render() {
+    return this._fetch{{pascal_case entry_type.plural_name}}.render({
+      pending: () => html`<div style="display: flex; flex: 1; align-items: center; justify-content: center">
+        <mwc-circular-progress indeterminate></mwc-circular-progress>
+      </div>`,
+      complete: (actionHashes) => this.renderList(actionHashes),
+      error: (e) => html`<span>Error fetching the {{lower_case entry_type.plural_names}}: ${e.message}.</span>`
+    });
   }
 }

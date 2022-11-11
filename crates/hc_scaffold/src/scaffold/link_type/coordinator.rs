@@ -53,7 +53,7 @@ pub fn add_{}_for_{}(input: Create{}For{}Input) -> ExternResult<()> {{
 }}
 
 #[hdk_extern]
-pub fn get_{}_for_{}({}_hash: {}) -> ExternResult<Vec<Record>> {{
+pub fn get_{}_for_{}({}_hash: {}) -> ExternResult<Vec<ActionHash>> {{
     let links = get_links({}_hash, LinkTypes::{}, None)?;
     
     let get_input: Vec<GetInput> = links
@@ -61,11 +61,16 @@ pub fn get_{}_for_{}({}_hash: {}) -> ExternResult<Vec<Record>> {{
         .map(|link| GetInput::new({}::from(link.target).into(), GetOptions::default()))
         .collect();
 
-    let maybe_records = HDK.with(|hdk| hdk.borrow().get(get_input))?;
+    // Get the records to filter out the deleted ones
+    let records = HDK.with(|hdk| hdk.borrow().get(get_input))?;
 
-    let record: Vec<Record> = maybe_records.into_iter().filter_map(|r| r).collect();
+    let action_hashes: Vec<ActionHash> = records
+        .into_iter()
+        .filter_map(|r| r)
+        .map(|r| r.action_address().clone())
+        .collect();
 
-    Ok(record)
+    Ok(action_hashes)
 }}
 "#,
         integrity_zome_name,

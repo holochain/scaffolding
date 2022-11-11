@@ -271,7 +271,7 @@ fn depends_on_handler(plural_name: &String, depends_on: &String) -> String {
     format!(
         r#"
 #[hdk_extern]
-pub fn get_{}_for_{}({}_hash: ActionHash) -> ExternResult<Vec<Record>> {{
+pub fn get_{}_for_{}({}_hash: ActionHash) -> ExternResult<Vec<ActionHash>> {{
     let links = get_links({}_hash, LinkTypes::{}, None)?;
     
     let get_input: Vec<GetInput> = links
@@ -279,11 +279,16 @@ pub fn get_{}_for_{}({}_hash: ActionHash) -> ExternResult<Vec<Record>> {{
         .map(|link| GetInput::new(ActionHash::from(link.target).into(), GetOptions::default()))
         .collect();
 
-    let maybe_records = HDK.with(|hdk| hdk.borrow().get(get_input))?;
+    // Get the records to filter out the deleted ones
+    let records = HDK.with(|hdk| hdk.borrow().get(get_input))?;
 
-    let record: Vec<Record> = maybe_records.into_iter().filter_map(|r| r).collect();
+    let action_hashes: Vec<ActionHash> = records
+        .into_iter()
+        .filter_map(|r| r)
+        .map(|r| r.action_address().clone())
+        .collect();
 
-    Ok(record)
+    Ok(action_hashes)
 }}"#,
         plural_name.to_case(Case::Snake),
         depends_on.to_case(Case::Snake),
@@ -297,7 +302,7 @@ fn depends_on_itself_handler(singular_name: &String, plural_name: &String) -> St
     format!(
         r#"
 #[hdk_extern]
-pub fn get_{}_for_{}({}_hash: ActionHash) -> ExternResult<Vec<Record>> {{
+pub fn get_{}_for_{}({}_hash: ActionHash) -> ExternResult<Vec<ActionHash>> {{
     let links = get_links({}_hash, LinkTypes::{}, None)?;
     
     let get_input: Vec<GetInput> = links
@@ -305,11 +310,16 @@ pub fn get_{}_for_{}({}_hash: ActionHash) -> ExternResult<Vec<Record>> {{
         .map(|link| GetInput::new(ActionHash::from(link.target).into(), GetOptions::default()))
         .collect();
 
-    let maybe_records = HDK.with(|hdk| hdk.borrow().get(get_input))?;
+    // Get the records to filter out the deleted ones
+    let records = HDK.with(|hdk| hdk.borrow().get(get_input))?;
 
-    let record: Vec<Record> = maybe_records.into_iter().filter_map(|r| r).collect();
+    let action_hashes: Vec<ActionHash> = records
+        .into_iter()
+        .filter_map(|r| r)
+        .map(|r| r.action_address().clone())
+        .collect();
 
-    Ok(record)
+    Ok(action_hashes)
 }}"#,
         plural_name.to_case(Case::Snake),
         singular_name.to_case(Case::Snake),

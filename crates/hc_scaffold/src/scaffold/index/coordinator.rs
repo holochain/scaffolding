@@ -36,7 +36,7 @@ fn global_index_getter(
 use {}::*;
 
 #[hdk_extern]
-pub fn get_{}(_: ()) -> ExternResult<Vec<Record>> {{
+pub fn get_{}(_: ()) -> ExternResult<Vec<ActionHash>> {{
     let path = Path::from("{}");
         
     let links = get_links(path.path_entry_hash()?, LinkTypes::{}, None)?;
@@ -46,11 +46,16 @@ pub fn get_{}(_: ()) -> ExternResult<Vec<Record>> {{
         .map(|link| GetInput::new({}::from(link.target).into(), GetOptions::default()))
         .collect();
 
-    let maybe_records = HDK.with(|hdk| hdk.borrow().get(get_input))?;
+    // Get the records to filter out the deleted ones
+    let records = HDK.with(|hdk| hdk.borrow().get(get_input))?;
 
-    let record: Vec<Record> = maybe_records.into_iter().filter_map(|r| r).collect();
+    let action_hashes: Vec<ActionHash> = records
+        .into_iter()
+        .filter_map(|r| r)
+        .map(|r| r.action_address().clone())
+        .collect();
 
-    Ok(record)
+    Ok(action_hashes)
 }}
 "#,
         integrity_zome_name, snake_index_name, snake_index_name, link_type_name, to_hash_type,
@@ -75,7 +80,7 @@ fn by_author_index_getter(
 use {}::*;
 
 #[hdk_extern]
-pub fn get_{}(author: AgentPubKey) -> ExternResult<Vec<Record>> {{
+pub fn get_{}(author: AgentPubKey) -> ExternResult<Vec<ActionHash>> {{
     let links = get_links(author, LinkTypes::{}, None)?;
     
     let get_input: Vec<GetInput> = links
@@ -83,11 +88,16 @@ pub fn get_{}(author: AgentPubKey) -> ExternResult<Vec<Record>> {{
         .map(|link| GetInput::new({}::from(link.target).into(), GetOptions::default()))
         .collect();
 
-    let maybe_records = HDK.with(|hdk| hdk.borrow().get(get_input))?;
+    // Get the records to filter out the deleted ones
+    let records = HDK.with(|hdk| hdk.borrow().get(get_input))?;
 
-    let record: Vec<Record> = maybe_records.into_iter().filter_map(|r| r).collect();
+    let action_hashes: Vec<ActionHash> = records
+        .into_iter()
+        .filter_map(|r| r)
+        .map(|r| r.action_address().clone())
+        .collect();
 
-    Ok(record)
+    Ok(action_hashes)
 }}
 "#,
         integrity_zome_name, snake_index_name, link_type_name, to_hash_type,
@@ -95,7 +105,7 @@ pub fn get_{}(author: AgentPubKey) -> ExternResult<Vec<Record>> {{
 }
 
 fn add_create_link_in_create_function(
-    mut dna_file_tree: DnaFileTree,
+    dna_file_tree: DnaFileTree,
     coordinator_zomes_for_integrity: &Vec<ZomeManifest>,
     index_name: &String,
     link_type_name: &String,
@@ -211,7 +221,7 @@ fn add_create_link_in_create_function(
 }
 
 pub fn add_index_to_coordinators(
-    mut integrity_zome_file_tree: ZomeFileTree,
+    integrity_zome_file_tree: ZomeFileTree,
     index_name: &String,
     link_type_name: &String,
     index_type: &IndexType,

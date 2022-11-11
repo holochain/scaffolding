@@ -59,7 +59,7 @@ pub fn choose_index_type() -> ScaffoldResult<IndexType> {
 }
 
 pub fn scaffold_index(
-    mut integrity_zome_file_tree: ZomeFileTree,
+    integrity_zome_file_tree: ZomeFileTree,
     template_file_tree: &FileTree,
     index_name: &String,
     maybe_index_type: &Option<IndexType>,

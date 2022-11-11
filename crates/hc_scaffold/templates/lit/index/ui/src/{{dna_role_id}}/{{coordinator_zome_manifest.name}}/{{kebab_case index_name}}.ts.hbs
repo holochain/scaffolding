@@ -12,44 +12,50 @@ import './{{kebab_case this}}-detail';
 export class {{pascal_case index_name}} extends LitElement {
   {{#if (eq index_type.type "ByAuthor")}}
 
-  @property()
+  @property({
+    hasChanged: (newVal: ActionHash, oldVal: ActionHash) => newVal.toString() !== oldVal.toString()
+  })
   author!: AgentPubKey;
   {{/if}}
-
-  @state()
-  _records: Array<Record> | undefined;
+  
+  _fetch{{pascal_case entry_type.plural_name}}: Task<[ActionHash], Array<ActionHash>> = new Task(this, ([{{camel_case entry_type.singular_name}}Hash]) => this.appWebsocket.callZome({
+      cap_secret: null,
+      cell_id: this.cellData.cell_id,
+      zome_name: '{{coordinator_zome_manifest.name}}',
+      fn_name: 'get_{{snake_case index_name}}',
+      payload: {{#if (eq index_type.type "ByAuthor")}}this.author{{else}}null{{/if}},
+      provenance: this.cellData.cell_id[1]
+  }), [{{#if (eq index_type.type "ByAuthor")}}this.author{{/if}}]);
 
   @contextProvided({ context: appWebsocketContext })
   appWebsocket!: AppWebsocket;
 
   @contextProvided({ context: appInfoContext })
   appInfo!: InstalledAppInfo;
-
-  async firstUpdated() {
-    const cellData = this.appInfo.cell_data.find((c: InstalledCell) => c.role_id === '{{dna_role_id}}')!;
-
-    this._records = await this.appWebsocket.callZome({
-      cap_secret: null,
-      cell_id: cellData.cell_id,
-      zome_name: '{{coordinator_zome_manifest.name}}',
-      fn_name: 'get_{{snake_case index_name}}',
-      payload: {{#if (eq index_type.type "ByAuthor")}}this.author{{else}}null{{/if}},
-      provenance: cellData.cell_id[1]
-    });
+  
+  get cellData() {
+    return this.appInfo.cell_data.find((c: InstalledCell) => c.role_id === '{{dna_role_id}}')!;
   }
 
-  render() {
-    if (!this._records) {
-      return html`<div style="display: flex; flex: 1; align-items: center; justify-content: center">
-        <mwc-circular-progress indeterminate></mwc-circular-progress>
-      </div>`;
-    }
+  renderList(actionHashes: Array<ActionHash>) {
+    if (actionHashes.length === 0) return html`<span>No {{lower_case (lookup entry_types 0)}} found.</span>`;
+    
     return html`
       <div style="display: flex; flex-direction: column">
-        ${this._records.map(r => 
-          html`<{{kebab_case (lookup entry_types 0)}}-detail .{{camel_case (lookup entry_types 0)}}Hash=${r.signed_action.hashed.hash} style="margin-bottom: 16px;"></{{kebab_case (lookup entry_types 0)}}-detail>`
+        ${actionHashes.map(actionHash => 
+          html`<{{kebab_case (lookup entry_types 0)}}-detail .{{camel_case (lookup entry_types 0)}}Hash=${actionHash} style="margin-bottom: 16px;"></{{kebab_case (lookup entry_types 0)}}-detail>`
         )}
       </div>
     `;
+  }
+
+  render() {
+    return this._fetch{{pascal_case entry_type.plural_name}}.render({
+      pending: () => html`<div style="display: flex; flex: 1; align-items: center; justify-content: center">
+        <mwc-circular-progress indeterminate></mwc-circular-progress>
+      </div>`,
+      complete: (actionHashes) => this.renderList(actionHashes),
+      error: (e) => html`<span>Error fetching the {{lower_case (lookup entry_types 0)}}: ${e.message}.</span>`
+    });
   }
 }
