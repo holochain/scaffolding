@@ -14,4 +14,5 @@ hc-scaffold entry-type post posts --crud crud --link-from-original-to-each-updat
 hc-scaffold entry-type comment comments --crud crud --link-from-original-to-each-update false --depends-on --depends-on-itself false --fields
 hc-scaffold entry-type like likes --crud crd --depends-on --depends-on-itself false --fields
 npm t
+npm run package
 "

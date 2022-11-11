@@ -34,16 +34,14 @@ import {{ decode }} from '@msgpack/msgpack';
         )
     );
 
-    if crud.read {
-        initial_test_file.push_str(
-            read_entry_test(
-                entry_definition,
-                dna_bundle_location_from_tests_root,
-                coordinator_zome,
-            )
-            .as_str(),
+    initial_test_file.push_str(
+        read_entry_test(
+            entry_definition,
+            dna_bundle_location_from_tests_root,
+            coordinator_zome,
         )
-    }
+        .as_str(),
+    );
 
     if crud.update {
         initial_test_file.push_str(
@@ -51,11 +49,10 @@ import {{ decode }} from '@msgpack/msgpack';
                 entry_definition,
                 dna_bundle_location_from_tests_root,
                 coordinator_zome,
-                crud.read,
                 link_original_to_each_update,
             )
             .as_str(),
-        )
+        );
     }
 
     if crud.delete {
@@ -64,10 +61,9 @@ import {{ decode }} from '@msgpack/msgpack';
                 entry_definition,
                 dna_bundle_location_from_tests_root,
                 coordinator_zome,
-                crud.read,
             )
             .as_str(),
-        )
+        );
     }
 
     initial_test_file
@@ -187,12 +183,9 @@ pub fn update_entry_test(
     happ_bundle_location_from_tests_root: &PathBuf,
     coordinator_zome: &String,
     link_original_to_each_update: bool,
-    read_after_update: bool,
 ) -> String {
-    let maybe_read = match read_after_update {
-        false => String::from(""),
-        true => format!(
-            r#"
+    let read_after_update = format!(
+        r#"
     // Wait for the updated entry to be propagated to the other node.
     await pause(300);
         
@@ -204,11 +197,10 @@ pub fn update_entry_test(
     }});
     assert.deepEqual(contentUpdate, decode((readUpdatedOutput.entry as any).Present.entry) as any);
 "#,
-            entry_definition.singular_name.to_case(Case::Snake),
-            coordinator_zome,
-            entry_definition.singular_name.to_case(Case::Snake)
-        ),
-    };
+        entry_definition.singular_name.to_case(Case::Snake),
+        coordinator_zome,
+        entry_definition.singular_name.to_case(Case::Snake)
+    );
 
     let original_action_hash_field = match link_original_to_each_update {
         true => format!(
@@ -283,7 +275,7 @@ test('create and update {}', async t => {{
         entry_definition.singular_name.to_case(Case::Snake),
         coordinator_zome,
         entry_definition.singular_name.to_case(Case::Snake),
-        maybe_read,
+        read_after_update,
         entry_definition.singular_name.to_case(Case::Snake),
         entry_definition.js_sample_object(),
         original_action_hash_field,
@@ -291,7 +283,7 @@ test('create and update {}', async t => {{
         entry_definition.singular_name.to_case(Case::Snake),
         coordinator_zome,
         entry_definition.singular_name.to_case(Case::Snake),
-        maybe_read
+        read_after_update
     )
 }
 
@@ -299,12 +291,9 @@ pub fn delete_entry_test(
     entry_definition: &EntryDefinition,
     happ_bundle_location_from_tests_root: &PathBuf,
     coordinator_zome: &String,
-    read_after_delete: bool,
 ) -> String {
-    let maybe_read = match read_after_delete {
-        false => String::from(""),
-        true => format!(
-            r#"
+    let read_after_update = format!(
+        r#"
     // Wait for the entry deletion to be propagated to the other node.
     await pause(300);
         
@@ -316,9 +305,8 @@ pub fn delete_entry_test(
     }});
     assert.equal(readDeletedOutput, undefined);
 "#,
-            entry_definition.singular_name, coordinator_zome, entry_definition.singular_name
-        ),
-    };
+        entry_definition.singular_name, coordinator_zome, entry_definition.singular_name
+    );
     format!(
         r#"
 test('create and delete {}', async t => {{
@@ -355,6 +343,6 @@ test('create and delete {}', async t => {{
         entry_definition.singular_name,
         coordinator_zome,
         entry_definition.singular_name,
-        maybe_read
+        read_after_update
     )
 }

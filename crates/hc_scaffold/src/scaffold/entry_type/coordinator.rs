@@ -25,7 +25,7 @@ pub fn read_handler_without_linking_to_updates(entry_def_name: &String) -> Strin
     format!(
         r#"#[hdk_extern]
 pub fn get_{}(original_{}_hash: ActionHash) -> ExternResult<Option<Record>> {{
-  get_latest_{}({}_hash)
+  get_latest_{}(original_{}_hash)
 }}
 
 fn get_latest_{}({}_hash: ActionHash) -> ExternResult<Option<Record>> {{
@@ -46,7 +46,7 @@ fn get_latest_{}({}_hash: ActionHash) -> ExternResult<Option<Record>> {{
     
   match record_details.updates.last() {{
     Some(update) => get_latest_{}(update.action_address().clone()),
-    None => Ok(record_details.record),
+    None => Ok(Some(record_details.record)),
   }}
 }}
 "#,
@@ -338,19 +338,16 @@ use {}::*;
         create_handler(entry_def)
     );
 
-    if crud.read {
-        if !crud.update {
-            initial.push_str(no_update_read_handler(&entry_def.singular_name).as_str());
+    if !crud.update {
+        initial.push_str(no_update_read_handler(&entry_def.singular_name).as_str());
+    } else {
+        if link_from_original_to_each_update {
+            initial
+                .push_str(read_handler_with_linking_to_updates(&entry_def.singular_name).as_str());
         } else {
-            if link_from_original_to_each_update {
-                initial.push_str(
-                    read_handler_with_linking_to_updates(&entry_def.singular_name).as_str(),
-                );
-            } else {
-                initial.push_str(
-                    read_handler_without_linking_to_updates(&entry_def.singular_name).as_str(),
-                );
-            }
+            initial.push_str(
+                read_handler_without_linking_to_updates(&entry_def.singular_name).as_str(),
+            );
         }
     }
     if crud.update {

@@ -1,6 +1,6 @@
 <template>
   <div v-if="{{camel_case entry_type.singular_name}}" style="display: flex; flex-direction: column">
-    <span style="font-size: 18px">{{pascal_case entry_type.singular_name}}</span>
+    <span style="font-size: 18px">{{title_case entry_type.singular_name}}</span>
 	
 	{{#each entry_type.fields}}
 	  {{> (concat field_type.type "/detail/render") entry_type=../entry_type field_name=@key field_type=this}}

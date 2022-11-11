@@ -2,8 +2,7 @@ use serde::Serialize;
 
 #[derive(Debug, Serialize, Clone)]
 pub struct Crud {
-    // We don't include create because create must always exist
-    pub read: bool,
+    // We don't include create and read because they must always exist
     pub update: bool,
     pub delete: bool,
 }
@@ -12,9 +11,11 @@ pub fn parse_crud(crud_str: &str) -> Result<Crud, String> {
     if !crud_str.contains('c') {
         return Err(String::from("create ('c') must be present"));
     }
+    if !crud_str.contains('r') {
+        return Err(String::from("read ('r') must be present"));
+    }
 
     let mut crud = Crud {
-        read: false,
         update: false,
         delete: false,
     };
@@ -22,9 +23,6 @@ pub fn parse_crud(crud_str: &str) -> Result<Crud, String> {
     for c in crud_str.chars() {
         match c {
             'c' => {}
-            'r' => {
-                crud.read = true;
-            }
             'u' => {
                 crud.update = true;
             }

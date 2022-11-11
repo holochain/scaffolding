@@ -2,13 +2,14 @@ import { LitElement, html } from 'lit';
 import { state, customElement, property } from 'lit/decorators.js';
 import { InstalledCell, ActionHash, Record, AppWebsocket, InstalledAppInfo } from '@holochain/client';
 import { contextProvided } from '@lit-labs/context';
-import { appWebsocketContext, appInfoContext } from '../../contexts';
-import { {{pascal_case entry_type.singular_name}} } from './types';
 import '@material/mwc-button';
+import { Snackbar } from '@material/mwc-snackbar';
 {{#each entry_type.fields}}
 {{> (concat field_type "/" widget "/create/imports") }}
 {{/each}}
 
+import { appWebsocketContext, appInfoContext } from '../../contexts';
+import { {{pascal_case entry_type.singular_name}} } from './types';
 
 @customElement('create-{{kebab_case entry_type.singular_name}}')
 export class Create{{pascal_case entry_type.singular_name}} extends LitElement {
@@ -64,41 +65,51 @@ export class Create{{pascal_case entry_type.singular_name}} extends LitElement {
     {{/each}}
     };
 
-    const record: Record = await this.appWebsocket.callZome({
-      cap_secret: null,
-      cell_id: cellData.cell_id,
-      zome_name: '{{coordinator_zome_manifest.name}}',
-      fn_name: 'create_{{snake_case entry_type.singular_name}}',
-      payload: {{camel_case entry_type.singular_name}},
-      provenance: cellData.cell_id[1]
-    });
+    try {
+      const record: Record = await this.appWebsocket.callZome({
+        cap_secret: null,
+        cell_id: cellData.cell_id,
+        zome_name: '{{coordinator_zome_manifest.name}}',
+        fn_name: 'create_{{snake_case entry_type.singular_name}}',
+        payload: {{camel_case entry_type.singular_name}},
+        provenance: cellData.cell_id[1]
+      });
 
-    this.dispatchEvent(new CustomEvent('{{kebab_case entry_type.singular_name}}-created', {
-      composed: true,
-      bubbles: true,
-      detail: {
-        actionHash: record.signed_action.hashed.hash
-      }
-    }));
+      this.dispatchEvent(new CustomEvent('{{kebab_case entry_type.singular_name}}-created', {
+        composed: true,
+        bubbles: true,
+        detail: {
+          {{camel_case entry_type.singular_name}}Hash: record.signed_action.hashed.hash
+        }
+      }));
+    } catch (e) {
+      const errorSnackbar = this.shadowRoot?.getElementById('create-error') as Snackbar;
+      errorSnackbar.labelText = `Error creating the {{lower_case entry_type.singular_name}}: ${e.message}`;
+      errorSnackbar.show();
+    }
   }
 
   render() {
     return html`
+      <mwc-snackbar id="create-error">
+      </mwc-snackbar>
+
       <div style="display: flex; flex-direction: column">
-        <span style="font-size: 18px">Create {{pascal_case entry_type.singular_name}}</span>
+        <span style="font-size: 18px">Create {{title_case entry_type.singular_name}}</span>
 
         {{#each entry_type.fields}}
           {{#if widget}}
             {{#if (not (eq cardinality "vector") )}}
-        {{> (concat field_type "/" widget "/create/render") label=(title_case field_name) variable_to_change=(concat "this._" (camel_case field_name) ) }}
+        {{> (concat field_type "/" widget "/edit/render") label=(title_case field_name) variable_to_change=(concat "this._" (camel_case field_name) ) }}
             {{else}}
-        {{> Vec/create/render field_name=field_name field_type=field_type widget=widget }}
+        {{> Vec/edit/render field_name=field_name field_type=field_type widget=widget }}
             {{/if}}
           {{/if}}
 
         {{/each}}
 
         <mwc-button 
+          raised
           label="Create {{pascal_case entry_type.singular_name}}"
           .disabled=${!this.is{{pascal_case entry_type.singular_name}}Valid()}
           @click=${() => this.create{{pascal_case entry_type.singular_name}}()}

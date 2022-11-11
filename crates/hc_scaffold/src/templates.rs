@@ -93,6 +93,9 @@ pub fn register_case_helpers<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
     handlebars_helper!(title_case: |s: String| s.to_case(Case::Title));
     h.register_helper("title_case", Box::new(title_case));
 
+    handlebars_helper!(lower_case: |s: String| s.to_case(Case::Lower));
+    h.register_helper("lower_case", Box::new(lower_case));
+
     handlebars_helper!(snake_case: |s: String| s.to_case(Case::Snake));
     h.register_helper("snake_case", Box::new(snake_case));
 

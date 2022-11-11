@@ -1,7 +1,7 @@
 <template>
   <div style="display: flex; flex-direction: column">
 
-    <span style="font-size: 18px">Create {{pascal_case entry_type.singular_name}}</span>
+    <span style="font-size: 18px">Create {{title_case entry_type.singular_name}}</span>
   
     {{#each entry_type.fields}}
       {{#if (not (contains depends_on this)) }}
@@ -10,7 +10,7 @@
     {{/each}}
   
     <mwc-button 
-      label="Create {{pascal_case entry_type.singular_name}}"
+      label="Create {{title_case entry_type.singular_name}}"
       :disabled="!is{{pascal_case entry_type.singular_name}}Valid()"
       @click="create{{pascal_case entry_type.singular_name}}()"
     ></mwc-button>

@@ -397,6 +397,7 @@ pub fn scaffold_entry_type(
         &coordinator_zome,
         &entry_def,
         &crud,
+        link_from_original_to_each_update,
         &depends_on,
         &depends_on_itself,
     )?;
@@ -407,7 +408,6 @@ pub fn scaffold_entry_type(
 fn choose_crud() -> Crud {
     let selections = MultiSelect::with_theme(&ColorfulTheme::default())
         .with_prompt("Which CRUD functions should be scaffolded (SPACE to select/unselect, ENTER to continue)?")
-        .item_checked("Read", true)
         .item_checked("Update", true)
         .item_checked("Delete", true)
         .interact()
@@ -415,18 +415,15 @@ fn choose_crud() -> Crud {
 
     let mut crud = Crud {
         delete: false,
-        read: false,
+
         update: false,
     };
 
     for selection in selections {
         if selection == 0 {
-            crud.read = true;
-        }
-        if selection == 1 {
             crud.update = true;
         }
-        if selection == 2 {
+        if selection == 1 {
             crud.delete = true;
         }
     }

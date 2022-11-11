@@ -18,6 +18,7 @@ pub struct ScaffoldEntryTypeData {
     coordinator_zome_manifest: ZomeManifest,
     entry_type: EntryDefinition,
     crud: Crud,
+    link_from_original_to_each_update: bool,
     depends_on: Vec<DependsOn>,
     depends_on_itself: DependsOnItself,
 }
@@ -28,6 +29,7 @@ pub fn scaffold_entry_type_templates(
     coordinator_zome: &ZomeManifest,
     entry_def: &EntryDefinition,
     crud: &Crud,
+    link_from_original_to_each_update: bool,
     depends_on: &Vec<DependsOn>,
     depends_on_itself: &DependsOnItself,
 ) -> ScaffoldResult<FileTree> {
@@ -36,6 +38,7 @@ pub fn scaffold_entry_type_templates(
         coordinator_zome_manifest: coordinator_zome.clone(),
         entry_type: entry_def.clone(),
         crud: crud.clone(),
+        link_from_original_to_each_update: link_from_original_to_each_update.clone(),
         depends_on: depends_on.clone(),
         depends_on_itself: depends_on_itself.clone(),
     };
