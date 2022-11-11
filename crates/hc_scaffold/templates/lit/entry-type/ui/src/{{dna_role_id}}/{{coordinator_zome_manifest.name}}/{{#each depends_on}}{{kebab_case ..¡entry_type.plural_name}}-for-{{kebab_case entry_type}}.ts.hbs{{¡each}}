@@ -1,6 +1,6 @@
 import { LitElement, html } from 'lit';
 import { state, customElement, property } from 'lit/decorators.js';
-import { InstalledCell, Record, AppWebsocket, ActionHash, InstalledAppInfo } from '@holochain/client';
+import { InstalledCell, Record, AppWebsocket, ActionHash, InstalledAppInfo, AgentPubKey } from '@holochain/client';
 import { contextProvided } from '@lit-labs/context';
 import { Task } from '@lit-labs/task';
 
@@ -9,16 +9,25 @@ import './{{kebab_case entry_type.singular_name}}-detail';
 
 @customElement('{{kebab_case entry_type.plural_name}}-for-{{kebab_case (lookup (lookup depends_on index) "entry_type") }}')
 export class {{pascal_case entry_type.plural_name}}For{{pascal_case (lookup (lookup depends_on index) "entry_type") }} extends LitElement {
-
-  @property()
+  
+  {{#if (eq (lookup (lookup depends_on index) "entry_type") "Agent")}}
+  @property({
+    hasChanged: (newVal: ActionHash, oldVal: ActionHash) => newVal.toString() !== oldVal.toString()
+  })
+  agentPubKey!: AgentPubKey;
+  {{else}}
+  @property({
+    hasChanged: (newVal: ActionHash, oldVal: ActionHash) => newVal.toString() !== oldVal.toString()
+  })
   {{camel_case (lookup (lookup depends_on index) "entry_type")}}Hash!: ActionHash;
+  {{/if}}
 
   _fetch{{pascal_case entry_type.plural_name}}: Task<[ActionHash], Array<ActionHash>> = new Task(this, ([{{camel_case (lookup (lookup depends_on index) "entry_type")}}Hash]) => this.appWebsocket.callZome({
       cap_secret: null,
       cell_id: this.cellData.cell_id,
       zome_name: '{{coordinator_zome_manifest.name}}',
       fn_name: 'get_{{snake_case entry_type.plural_name}}_for_{{snake_case (lookup (lookup depends_on index) "entry_type")}}',
-      payload: {{camel_case (lookup (lookup depends_on index) "entry_type")}}Hash,
+      payload: {{#if (eq (lookup (lookup depends_on index) "entry_type") "Agent")}}this.agentPubKey{{else}}{{camel_case (lookup (lookup depends_on index) "entry_type")}}Hash{{/if}},
       provenance: this.cellData.cell_id[1]
   }), [this.{{camel_case (lookup (lookup depends_on index) "entry_type")}}Hash]);
 
@@ -50,7 +59,7 @@ export class {{pascal_case entry_type.plural_name}}For{{pascal_case (lookup (loo
         <mwc-circular-progress indeterminate></mwc-circular-progress>
       </div>`,
       complete: (actionHashes) => this.renderList(actionHashes),
-      error: (e) => html`<span>Error fetching the {{lower_case entry_type.plural_names}}: ${e.message}.</span>`
+      error: (e) => html`<span>Error fetching {{lower_case entry_type.plural_name}}: ${e.message}.</span>`
     });
   }
 }

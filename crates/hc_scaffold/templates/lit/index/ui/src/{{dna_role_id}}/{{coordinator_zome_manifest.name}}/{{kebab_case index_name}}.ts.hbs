@@ -18,12 +18,12 @@ export class {{pascal_case index_name}} extends LitElement {
   author!: AgentPubKey;
   {{/if}}
   
-  _fetch{{pascal_case entry_type.plural_name}}: Task<[ActionHash], Array<ActionHash>> = new Task(this, ([{{camel_case entry_type.singular_name}}Hash]) => this.appWebsocket.callZome({
+  _fetch{{pascal_case (lookup entry_types 0)}}: Task<[ActionHash], Array<ActionHash>> = new Task(this, ([{{#if (eq index_type.type "ByAuthor")}}author{{/if}}]) => this.appWebsocket.callZome({
       cap_secret: null,
       cell_id: this.cellData.cell_id,
       zome_name: '{{coordinator_zome_manifest.name}}',
       fn_name: 'get_{{snake_case index_name}}',
-      payload: {{#if (eq index_type.type "ByAuthor")}}this.author{{else}}null{{/if}},
+      payload: {{#if (eq index_type.type "ByAuthor")}}author{{else}}null{{/if}},
       provenance: this.cellData.cell_id[1]
   }), [{{#if (eq index_type.type "ByAuthor")}}this.author{{/if}}]);
 

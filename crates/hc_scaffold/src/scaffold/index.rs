@@ -79,7 +79,11 @@ pub fn scaffold_index(
     }?;
 
     let entry_types = match maybe_entry_types {
-        Some(et) => match et.iter().find(|t| !all_entries.contains(t)) {
+        Some(et) => match et
+            .iter()
+            .map(|t| t.to_case(Case::Pascal))
+            .find(|t| !all_entries.contains(t))
+        {
             Some(t) => Err(ScaffoldError::EntryTypeNotFound(
                 t.clone(),
                 integrity_zome_file_tree.dna_file_tree.dna_manifest.name(),

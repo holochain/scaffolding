@@ -22,7 +22,7 @@ pub fn parse_crud(crud_str: &str) -> Result<Crud, String> {
 
     for c in crud_str.chars() {
         match c {
-            'c' => {}
+            'c' | 'r' => {}
             'u' => {
                 crud.update = true;
             }

@@ -194,9 +194,32 @@ impl FieldDefinition {
 }
 
 #[derive(Serialize, Clone)]
-pub struct DependsOn {
-    pub entry_type: String,
-    pub cardinality: Cardinality,
+#[serde(tag = "type")]
+pub enum DependsOn {
+    EntryType {
+        entry_type: String,
+        cardinality: Cardinality,
+    },
+    AgentPubKey {
+        field_name: String,
+        cardinality: Cardinality,
+    },
+}
+
+impl DependsOn {
+    pub fn cardinality(&self) -> Cardinality {
+        match self {
+            DependsOn::EntryType { cardinality, .. } => cardinality.clone(),
+            DependsOn::AgentPubKey { cardinality, .. } => cardinality.clone(),
+        }
+    }
+
+    pub fn entry_type(&self) -> String {
+        match self {
+            Self::EntryType { entry_type, .. } => entry_type.clone(),
+            Self::AgentPubKey { .. } => String::from("Agent"),
+        }
+    }
 }
 
 #[derive(Serialize, Clone)]

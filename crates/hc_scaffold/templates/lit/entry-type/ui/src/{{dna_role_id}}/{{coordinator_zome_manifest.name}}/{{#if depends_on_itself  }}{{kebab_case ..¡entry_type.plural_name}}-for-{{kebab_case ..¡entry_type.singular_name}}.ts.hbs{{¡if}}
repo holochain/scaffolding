@@ -8,7 +8,9 @@ import './{{kebab_case entry_type.singular_name}}-detail';
 @customElement('{{kebab_case entry_type.plural_name}}-for-{{kebab_case entry_type.singular_name}}')
 export class {{pascal_case entry_type.plural_name}}For{{pascal_case entry_type.singular_name}} extends LitElement {
 
-  @property()
+  @property({
+    hasChanged: (newVal: ActionHash, oldVal: ActionHash) => newVal.toString() !== oldVal.toString()
+  })
   {{camel_case entry_type.singular_name}}Hash!: ActionHash;
 
   _fetch{{pascal_case entry_type.plural_name}}: Task<[ActionHash], Array<ActionHash>> = new Task(this, ([{{camel_case entry_type.singular_name}}Hash]) => this.appWebsocket.callZome({

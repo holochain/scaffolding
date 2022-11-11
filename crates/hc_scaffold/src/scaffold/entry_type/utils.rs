@@ -1,3 +1,4 @@
+use convert_case::{Case, Casing};
 use dialoguer::{theme::ColorfulTheme, MultiSelect, Select};
 use holochain_types::prelude::DnaManifest;
 
@@ -78,16 +79,14 @@ pub fn get_or_choose_entry_type(
 
     match entry_type {
         None => choose_entry_type(&all_entries, prompt, true),
-        Some(name) => {
-            all_entries
-                .into_iter()
-                .find(|et| et.eq(name))
-                .ok_or(ScaffoldError::EntryTypeNotFound(
-                    name.clone(),
-                    zome_file_tree.dna_file_tree.dna_manifest.name(),
-                    zome_file_tree.zome_manifest.name.0.to_string(),
-                ))
-        }
+        Some(name) => all_entries
+            .into_iter()
+            .find(|et| et.eq(&name.to_case(Case::Pascal)))
+            .ok_or(ScaffoldError::EntryTypeNotFound(
+                name.clone(),
+                zome_file_tree.dna_file_tree.dna_manifest.name(),
+                zome_file_tree.zome_manifest.name.0.to_string(),
+            )),
     }
 }
 
@@ -100,12 +99,15 @@ pub fn get_or_choose_optional_entry_type(
 
     match entry_type {
         None => choose_optional_entry_type(&all_entries, prompt),
-        Some(name) => Ok(Some(all_entries.into_iter().find(|et| et.eq(name)).ok_or(
-            ScaffoldError::EntryTypeNotFound(
-                name.clone(),
-                zome_file_tree.dna_file_tree.dna_manifest.name(),
-                zome_file_tree.zome_manifest.name.0.to_string(),
-            ),
-        )?)),
+        Some(name) => Ok(Some(
+            all_entries
+                .into_iter()
+                .find(|et| et.eq(&name.to_case(Case::Pascal)))
+                .ok_or(ScaffoldError::EntryTypeNotFound(
+                    name.clone(),
+                    zome_file_tree.dna_file_tree.dna_manifest.name(),
+                    zome_file_tree.zome_manifest.name.0.to_string(),
+                ))?,
+        )),
     }
 }

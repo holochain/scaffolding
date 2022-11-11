@@ -502,7 +502,7 @@ Add new indexes for that entry type with:
 
   hc-scaffold index
 "#,
-                    plural_name
+                    singular_name
                 );
             }
             HcScaffold::LinkType {

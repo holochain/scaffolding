@@ -1,7 +1,7 @@
 use convert_case::{Case, Casing};
 
 use crate::{
-    definitions::{Cardinality, EntryDefinition},
+    definitions::{Cardinality, DependsOn, EntryDefinition},
     error::ScaffoldResult,
     file_tree::{insert_file, map_file},
     scaffold::{dna::DnaFileTree, link_type::link_type_name, zome::ZomeFileTree},
@@ -70,7 +70,7 @@ pub fn read_handler_with_linking_to_updates(entry_def_name: &String) -> String {
     format!(
         r#"#[hdk_extern]
 pub fn get_{}(original_{}_hash: ActionHash) -> ExternResult<Option<Record>> {{
-  let links = get_links(original_{}_hash, LinkTypes::{}, None)?;
+  let links = get_links(original_{}_hash.clone(), LinkTypes::{}, None)?;
 
   let latest_link = links.into_iter().max_by(|link_a, link_b| link_b.timestamp.cmp(&link_a.timestamp));
   
@@ -107,8 +107,8 @@ pub fn create_link_for_cardinality(
             link_type_name
         ),
         Cardinality::Option => format!(
-            r#"  if let Some(action_hash) = {}.{}.clone() {{
-    create_link(action_hash, {}_hash.clone(), LinkTypes::{}, ())?;
+            r#"  if let Some(base) = {}.{}.clone() {{
+    create_link(base, {}_hash.clone(), LinkTypes::{}, ())?;
   }}"#,
             entry_def.singular_name.to_case(Case::Snake),
             field_name,
@@ -116,8 +116,8 @@ pub fn create_link_for_cardinality(
             link_type_name
         ),
         Cardinality::Vector => format!(
-            r#"  for action_hash in {}.{}.clone() {{
-    create_link(action_hash, {}_hash.clone(), LinkTypes::{}, ())?;
+            r#"  for base in {}.{}.clone() {{
+    create_link(base, {}_hash.clone(), LinkTypes::{}, ())?;
   }}"#,
             entry_def.singular_name.to_case(Case::Snake),
             field_name,
@@ -135,8 +135,8 @@ pub fn create_handler(entry_def: &EntryDefinition) -> String {
             create_link_for_cardinality(
                 entry_def,
                 &depends_on_field_name(d),
-                &link_type_name(&d.entry_type, &entry_def.plural_name),
-                &d.cardinality,
+                &link_type_name(&d.entry_type(), &entry_def.plural_name),
+                &d.cardinality(),
             )
         })
         .collect::<Vec<String>>();
@@ -226,9 +226,9 @@ pub struct Update{}Input {{
 
 #[hdk_extern]
 pub fn update_{}(input: Update{}Input) -> ExternResult<Record> {{
-  let updated_{}_hash = update_entry(input.previous_{}_hash, &input.updated_{})?;
+  let updated_{}_hash = update_entry(input.previous_{}_hash.clone(), &input.updated_{})?;
         
-  create_link(input.original_{}_hash.clone(), input.previous_{}_hash, LinkTypes::{}, ())?;
+  create_link(input.original_{}_hash.clone(), updated_{}_hash, LinkTypes::{}, ())?;
 
   let record = get(updated_{}_hash.clone(), GetOptions::default())?
         .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("Could not find the newly updated {}"))))?;
@@ -267,12 +267,21 @@ pub fn delete_{}(original_{}_hash: ActionHash) -> ExternResult<ActionHash> {{
     )
 }
 
-fn depends_on_handler(plural_name: &String, depends_on: &String) -> String {
+fn depends_on_handler(plural_name: &String, depends_on: &DependsOn) -> String {
+    let arg_name: String = match depends_on {
+        DependsOn::AgentPubKey { .. } => String::from("agent"),
+        DependsOn::EntryType { entry_type, .. } => format!("{}_hash", entry_type),
+    };
+    let arg_type: String = match depends_on {
+        DependsOn::AgentPubKey { .. } => String::from("AgentPubKey"),
+        DependsOn::EntryType { .. } => String::from("ActionHash"),
+    };
+
     format!(
         r#"
 #[hdk_extern]
-pub fn get_{}_for_{}({}_hash: ActionHash) -> ExternResult<Vec<ActionHash>> {{
-    let links = get_links({}_hash, LinkTypes::{}, None)?;
+pub fn get_{}_for_{}({}: {}) -> ExternResult<Vec<ActionHash>> {{
+    let links = get_links({}, LinkTypes::{}, None)?;
     
     let get_input: Vec<GetInput> = links
         .into_iter()
@@ -291,10 +300,11 @@ pub fn get_{}_for_{}({}_hash: ActionHash) -> ExternResult<Vec<ActionHash>> {{
     Ok(action_hashes)
 }}"#,
         plural_name.to_case(Case::Snake),
-        depends_on.to_case(Case::Snake),
-        depends_on.to_case(Case::Snake),
-        depends_on.to_case(Case::Snake),
-        link_type_name(depends_on, &plural_name.to_case(Case::Pascal)),
+        depends_on.entry_type().to_case(Case::Snake),
+        arg_name,
+        arg_type,
+        arg_name,
+        link_type_name(&depends_on.entry_type(), &plural_name.to_case(Case::Pascal)),
     )
 }
 
@@ -370,7 +380,7 @@ use {}::*;
     }
 
     for d in &entry_def.depends_on {
-        initial.push_str(depends_on_handler(&entry_def.plural_name, &d.entry_type).as_str());
+        initial.push_str(depends_on_handler(&entry_def.plural_name, &d).as_str());
     }
     if let Some(_cardinality) = &entry_def.depends_on_itself {
         initial.push_str(
