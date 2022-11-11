@@ -1,3 +1,4 @@
+use convert_case::{Case, Casing};
 use proc_macro2::TokenStream;
 use quote::quote;
 use rand::Rng;
@@ -193,33 +194,34 @@ impl FieldDefinition {
     }
 }
 
-#[derive(Serialize, Clone)]
+#[derive(Serialize, Clone, Debug)]
 #[serde(tag = "type")]
-pub enum DependsOn {
-    EntryType {
-        entry_type: String,
-        cardinality: Cardinality,
-    },
-    AgentPubKey {
-        field_name: String,
-        cardinality: Cardinality,
-    },
+pub enum EntryType {
+    Agent,
+    App(String),
 }
 
-impl DependsOn {
-    pub fn cardinality(&self) -> Cardinality {
-        match self {
-            DependsOn::EntryType { cardinality, .. } => cardinality.clone(),
-            DependsOn::AgentPubKey { cardinality, .. } => cardinality.clone(),
-        }
+pub fn parse_entry_type(s: &str) -> EntryType {
+    match s.to_string().to_case(Case::Snake).as_str() {
+        "agent" => EntryType::Agent,
+        _ => EntryType::App(s.to_string().to_case(Case::Pascal)),
     }
+}
 
-    pub fn entry_type(&self) -> String {
+impl ToString for EntryType {
+    fn to_string(&self) -> String {
         match self {
-            Self::EntryType { entry_type, .. } => entry_type.clone(),
-            Self::AgentPubKey { .. } => String::from("Agent"),
+            EntryType::Agent => String::from("Agent"),
+            EntryType::App(s) => s.clone(),
         }
     }
+}
+
+#[derive(Serialize, Clone, Debug)]
+pub struct DependsOn {
+    pub entry_type: EntryType,
+    pub cardinality: Cardinality,
+    pub field_name: String,
 }
 
 #[derive(Serialize, Clone)]

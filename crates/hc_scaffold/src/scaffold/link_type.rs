@@ -3,6 +3,7 @@ use dialoguer::{theme::ColorfulTheme, Select};
 use holochain_types::prelude::DnaManifest;
 
 use crate::{
+    definitions::EntryType,
     error::{ScaffoldError, ScaffoldResult},
     file_tree::FileTree,
     templates::link_type::scaffold_link_type_templates,
@@ -24,11 +25,11 @@ use super::{
 pub mod coordinator;
 pub mod integrity;
 
-pub fn link_type_name(from_entry_type: &String, to_entry_type: &String) -> String {
+pub fn link_type_name(from_entry_type: &EntryType, to_entry_type: &EntryType) -> String {
     format!(
         "{}To{}",
-        from_entry_type.to_case(Case::Pascal),
-        to_entry_type.to_case(Case::Pascal)
+        from_entry_type.to_string().to_case(Case::Pascal),
+        to_entry_type.to_string().to_case(Case::Pascal)
     )
 }
 
@@ -49,8 +50,8 @@ pub fn choose_use_entry_hash(prompt: &String) -> ScaffoldResult<bool> {
 pub fn scaffold_link_type(
     zome_file_tree: ZomeFileTree,
     template_file_tree: &FileTree,
-    from_entry_type: &Option<String>,
-    to_entry_type: &Option<String>,
+    from_entry_type: &Option<EntryType>,
+    to_entry_type: &Option<EntryType>,
     link_from_entry_hash: &Option<bool>,
     link_to_entry_hash: &Option<bool>,
 ) -> ScaffoldResult<(FileTree, String)> {
@@ -62,8 +63,8 @@ pub fn scaffold_link_type(
 
     let link_from_entry_hash: bool = match link_from_entry_hash {
         Some(l) => l.clone(),
-        None => match from_entry_type.as_str() {
-            "AgentPubKey" => false,
+        None => match from_entry_type {
+            EntryType::Agent => false,
             _ => choose_use_entry_hash(&String::from(
                 "Link from the entry hash or the action hash?",
             ))?,
@@ -80,8 +81,8 @@ pub fn scaffold_link_type(
         None => false,
         Some(to_entry_type) => match link_to_entry_hash {
             Some(l) => l.clone(),
-            None => match to_entry_type.as_str() {
-                "AgentPubKey" => false,
+            None => match to_entry_type {
+                EntryType::Agent => false,
                 _ => choose_use_entry_hash(&String::from(
                     "Link to the entry hash or the action hash?",
                 ))?,

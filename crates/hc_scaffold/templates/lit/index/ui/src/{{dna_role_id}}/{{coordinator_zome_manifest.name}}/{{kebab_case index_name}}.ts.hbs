@@ -50,7 +50,7 @@ export class {{pascal_case index_name}} extends LitElement {
   }
 
   render() {
-    return this._fetch{{pascal_case entry_type.plural_name}}.render({
+    return this._fetch{{pascal_case (lookup entry_types 0)}}.render({
       pending: () => html`<div style="display: flex; flex: 1; align-items: center; justify-content: center">
         <mwc-circular-progress indeterminate></mwc-circular-progress>
       </div>`,

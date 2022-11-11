@@ -3,6 +3,7 @@ use dialoguer::{theme::ColorfulTheme, MultiSelect, Select};
 use holochain_types::prelude::DnaManifest;
 
 use crate::{
+    definitions::EntryType,
     error::{ScaffoldError, ScaffoldResult},
     scaffold::zome::ZomeFileTree,
 };
@@ -13,27 +14,32 @@ pub fn choose_entry_type(
     all_entries: &Vec<String>,
     prompt: &String,
     include_agent_pub_key: bool,
-) -> ScaffoldResult<String> {
+) -> ScaffoldResult<EntryType> {
     let mut all_options = all_entries.clone();
-    if include_agent_pub_key {
-        all_options.push("AgentPubKey".into());
-    }
 
-    let selection = Select::with_theme(&ColorfulTheme::default())
+    let mut select = Select::with_theme(&ColorfulTheme::default())
         .with_prompt(prompt.clone())
         .default(0)
-        .items(&all_options[..])
-        .interact()?;
+        .items(&all_options[..]);
 
-    Ok(all_options[selection].clone())
+    if include_agent_pub_key {
+        select.item("Agent");
+    }
+
+    let selection = select.interact()?;
+
+    match selection == all_options.len() {
+        true => Ok(EntryType::Agent),
+        false => Ok(EntryType::App(all_options[selection].clone())),
+    }
 }
 
 pub fn choose_optional_entry_type(
     all_entries: &Vec<String>,
     prompt: &String,
-) -> ScaffoldResult<Option<String>> {
+) -> ScaffoldResult<Option<EntryType>> {
     let mut all_options = all_entries.clone();
-    all_options.push("AgentPubKey".into());
+    all_options.push("Agent".into());
 
     let selection = Select::with_theme(&ColorfulTheme::default())
         .with_prompt(prompt.clone())
@@ -44,9 +50,11 @@ pub fn choose_optional_entry_type(
 
     if selection == all_options.len() {
         return Ok(None);
+    } else if selection == all_options.len() - 1 {
+        return Ok(Some(EntryType::Agent));
     }
 
-    Ok(Some(all_options[selection].clone()))
+    Ok(Some(EntryType::App(all_options[selection].clone())))
 }
 
 pub fn choose_multiple_entry_types(
@@ -72,42 +80,54 @@ pub fn choose_multiple_entry_types(
 
 pub fn get_or_choose_entry_type(
     zome_file_tree: &ZomeFileTree,
-    entry_type: &Option<String>,
+    entry_type: &Option<EntryType>,
     prompt: &String,
-) -> ScaffoldResult<String> {
+) -> ScaffoldResult<EntryType> {
     let all_entries = get_all_entry_types(&zome_file_tree)?.unwrap_or_else(|| vec![]);
 
     match entry_type {
         None => choose_entry_type(&all_entries, prompt, true),
-        Some(name) => all_entries
-            .into_iter()
-            .find(|et| et.eq(&name.to_case(Case::Pascal)))
-            .ok_or(ScaffoldError::EntryTypeNotFound(
-                name.clone(),
-                zome_file_tree.dna_file_tree.dna_manifest.name(),
-                zome_file_tree.zome_manifest.name.0.to_string(),
-            )),
+        Some(entry_type) => {
+            if let EntryType::Agent = entry_type {
+                return Ok(EntryType::Agent);
+            }
+            let entry_type_name = all_entries
+                .into_iter()
+                .find(|et| et.eq(&entry_type.to_string()))
+                .ok_or(ScaffoldError::EntryTypeNotFound(
+                    entry_type.to_string().clone(),
+                    zome_file_tree.dna_file_tree.dna_manifest.name(),
+                    zome_file_tree.zome_manifest.name.0.to_string(),
+                ))?;
+
+            Ok(EntryType::App(entry_type_name))
+        }
     }
 }
 
 pub fn get_or_choose_optional_entry_type(
     zome_file_tree: &ZomeFileTree,
-    entry_type: &Option<String>,
+    entry_type: &Option<EntryType>,
     prompt: &String,
-) -> ScaffoldResult<Option<String>> {
+) -> ScaffoldResult<Option<EntryType>> {
     let all_entries = get_all_entry_types(&zome_file_tree)?.unwrap_or_else(|| vec![]);
 
     match entry_type {
         None => choose_optional_entry_type(&all_entries, prompt),
-        Some(name) => Ok(Some(
-            all_entries
+        Some(entry_type) => {
+            if let EntryType::Agent = entry_type {
+                return Ok(Some(EntryType::Agent));
+            }
+            let entry_type_name = all_entries
                 .into_iter()
-                .find(|et| et.eq(&name.to_case(Case::Pascal)))
+                .find(|et| et.eq(&entry_type.to_string()))
                 .ok_or(ScaffoldError::EntryTypeNotFound(
-                    name.clone(),
+                    entry_type.to_string().clone(),
                     zome_file_tree.dna_file_tree.dna_manifest.name(),
                     zome_file_tree.zome_manifest.name.0.to_string(),
-                ))?,
-        )),
+                ))?;
+
+            Ok(Some(EntryType::App(entry_type_name)))
+        }
     }
 }

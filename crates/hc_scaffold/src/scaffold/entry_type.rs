@@ -1,10 +1,10 @@
 use std::{collections::BTreeMap, ffi::OsString, path::PathBuf};
 
 use crate::{
-    definitions::{Cardinality, DependsOn, EntryDefinition, FieldDefinition, FieldType},
+    definitions::{Cardinality, DependsOn, EntryDefinition, EntryType, FieldDefinition, FieldType},
     file_tree::FileTree,
     templates::entry_type::scaffold_entry_type_templates,
-    utils::input_snake_case,
+    utils::{input_snake_case, input_snake_case_with_initial_text},
 };
 
 use build_fs_tree::dir;
@@ -39,26 +39,18 @@ pub mod fields;
 pub mod integrity;
 pub mod utils;
 
-fn choose_cardinality(
-    hash_type: &String,
-    single_or_option_field_name: &String,
-    vector_field_name: &String,
-) -> ScaffoldResult<Cardinality> {
+fn choose_cardinality(entry_type: &EntryType) -> ScaffoldResult<Cardinality> {
+    let hash_type = match entry_type {
+        EntryType::Agent => String::from("AgentPubKey"),
+        _ => String::from("ActionHash"),
+    };
+
     let selection = Select::with_theme(&ColorfulTheme::default())
         .with_prompt("Select the type of dependency to that entry type:")
         .default(0)
-        .item(format!(
-            "Single ({}: {})",
-            single_or_option_field_name, hash_type
-        ))
-        .item(format!(
-            "Optional ({}: Option<{}>)",
-            single_or_option_field_name, hash_type
-        ))
-        .item(format!(
-            "Vector ({}: Vec<{}>)",
-            vector_field_name, hash_type
-        ))
+        .item(format!("Single ({})", hash_type))
+        .item(format!("Optional (Option<{}>)", hash_type))
+        .item(format!("Vector (Vec<{}>)", hash_type))
         .interact()?;
 
     match selection {
@@ -79,41 +71,27 @@ fn choose_depends_on(entry_types: &Vec<String>) -> ScaffoldResult<Vec<DependsOn>
             &String::from("Select an existing entry type that the new entry type depends on:"),
             true,
         )?;
+        let cardinality = choose_cardinality(&entry_type)?;
 
-        let d = match entry_type.as_str() {
-            "AgentPubKey" => {
-                let field_name = input_snake_case(&String::from("Input field name:"))?;
-                let cardinality =
-                    choose_cardinality(&String::from("AgentPubKey"), &field_name, &field_name)?;
-
-                DependsOn::AgentPubKey {
-                    field_name: field_name.clone(),
-                    cardinality,
-                }
-            }
-            _ => {
-                let single_or_option_field_name = depends_on_field_name(&DependsOn::EntryType {
-                    entry_type: entry_type.clone(),
-                    cardinality: Cardinality::Single,
-                });
-                let vector_field_name = depends_on_field_name(&DependsOn::EntryType {
-                    entry_type: entry_type.clone(),
-                    cardinality: Cardinality::Vector,
-                });
-                let cardinality = choose_cardinality(
-                    &entry_type,
-                    &single_or_option_field_name,
-                    &vector_field_name,
-                )?;
-
-                DependsOn::EntryType {
-                    entry_type: entry_type.clone(),
-                    cardinality,
-                }
+        let field_name = match entry_type {
+            EntryType::Agent => input_snake_case(&String::from("Input field name:"))?,
+            EntryType::App(et) => {
+                let initial_text = match cardinality {
+                    Cardinality::Vector => format!("{}_hashes", et),
+                    _ => format!("{}_hash", et),
+                };
+                input_snake_case_with_initial_text(
+                    &String::from("Input field name:"),
+                    &initial_text,
+                )?
             }
         };
 
-        depends_on.push(d);
+        depends_on.push(DependsOn {
+            entry_type,
+            cardinality,
+            field_name,
+        });
 
         println!("");
 
@@ -129,15 +107,18 @@ fn choose_depends_on(entry_types: &Vec<String>) -> ScaffoldResult<Vec<DependsOn>
 
 fn get_or_choose_depends_on(
     zome_file_tree: &ZomeFileTree,
-    depends_on: &Option<Vec<String>>,
+    depends_on: &Option<Vec<EntryType>>,
 ) -> ScaffoldResult<Vec<DependsOn>> {
     let entry_types = get_all_entry_types(zome_file_tree)?.unwrap_or_else(|| vec![]);
 
     match depends_on {
         Some(et) => match et
             .iter()
-            .map(|t| t.to_case(Case::Pascal))
-            .find(|t| !entry_types.contains(t) && t.to_case(Case::Pascal) != "Agent")
+            .filter_map(|t| match t {
+                EntryType::Agent => None,
+                EntryType::App(et) => Some(et),
+            })
+            .find(|t| !entry_types.contains(t))
         {
             Some(t) => Err(ScaffoldError::EntryTypeNotFound(
                 t.clone(),
@@ -147,13 +128,15 @@ fn get_or_choose_depends_on(
             None => Ok(et
                 .clone()
                 .into_iter()
-                .map(|t| match t.as_str() {
-                    "agent" => DependsOn::AgentPubKey {
+                .map(|t| match t {
+                    EntryType::Agent => DependsOn {
+                        entry_type: EntryType::Agent,
                         field_name: "agent".into(),
                         cardinality: Cardinality::Single,
                     },
-                    _ => DependsOn::EntryType {
-                        entry_type: t,
+                    EntryType::App(t) => DependsOn {
+                        field_name: format!("{}_hash", t),
+                        entry_type: EntryType::App(t),
                         cardinality: Cardinality::Single,
                     },
                 })
@@ -243,19 +226,6 @@ pub fn parse_depends_on_itself(depends_on_itself: &str) -> Result<DependsOnItsel
     }
 }
 
-pub fn depends_on_field_name(depends_on: &DependsOn) -> String {
-    match depends_on {
-        DependsOn::EntryType {
-            cardinality: Cardinality::Vector,
-            entry_type,
-        } => format!("{}_hashes", entry_type.to_case(Case::Snake)),
-        DependsOn::EntryType { entry_type, .. } => {
-            format!("{}_hash", entry_type.to_case(Case::Snake))
-        }
-        DependsOn::AgentPubKey { field_name, .. } => field_name.clone(),
-    }
-}
-
 pub fn depends_on_itself_field_name(
     singular_name: &String,
     plural_name: &String,
@@ -268,22 +238,14 @@ pub fn depends_on_itself_field_name(
 }
 
 pub fn depends_on_field_definition(depends_on: &DependsOn) -> FieldDefinition {
-    match depends_on {
-        DependsOn::EntryType { cardinality, .. } => FieldDefinition {
-            field_name: depends_on_field_name(&depends_on),
-            field_type: FieldType::ActionHash,
-            widget: None,
-            cardinality: cardinality.clone(),
+    FieldDefinition {
+        field_name: depends_on.field_name.clone(),
+        field_type: match depends_on.entry_type {
+            EntryType::Agent => FieldType::AgentPubKey,
+            _ => FieldType::ActionHash,
         },
-        DependsOn::AgentPubKey {
-            field_name,
-            cardinality,
-        } => FieldDefinition {
-            field_name: field_name.clone(),
-            field_type: FieldType::AgentPubKey,
-            widget: None,
-            cardinality: cardinality.clone(),
-        },
+        widget: None,
+        cardinality: depends_on.cardinality.clone(),
     }
 }
 
@@ -294,7 +256,7 @@ pub fn scaffold_entry_type(
     plural_name: &String,
     maybe_crud: &Option<Crud>,
     maybe_link_from_original_to_each_update: &Option<bool>,
-    maybe_depends_on: &Option<Vec<String>>,
+    maybe_depends_on: &Option<Vec<EntryType>>,
     maybe_depends_on_itself: &Option<DependsOnItself>,
     maybe_fields: &Option<Vec<(String, FieldType)>>,
 ) -> ScaffoldResult<FileTree> {
@@ -359,15 +321,18 @@ pub fn scaffold_entry_type(
     for d in depends_on.clone() {
         zome_file_tree = add_link_type_to_integrity_zome(
             zome_file_tree,
-            &link_type_name(&d.entry_type(), &plural_name.to_case(Case::Pascal)),
+            &link_type_name(
+                &d.entry_type,
+                &EntryType::App(plural_name.to_case(Case::Pascal)),
+            ),
         )?;
     }
     if depends_on_itself.is_some() {
         zome_file_tree = add_link_type_to_integrity_zome(
             zome_file_tree,
             &link_type_name(
-                &singular_name.to_case(Case::Pascal),
-                &plural_name.to_case(Case::Pascal),
+                &EntryType::App(singular_name.to_case(Case::Pascal)),
+                &EntryType::App(plural_name.to_case(Case::Pascal)),
             ),
         )?;
     }
@@ -441,7 +406,7 @@ pub fn scaffold_entry_type(
     let mut create_fns_for_depends_on: BTreeMap<String, (ZomeManifest, String)> = BTreeMap::new();
 
     for d in depends_on.clone() {
-        if let DependsOn::EntryType { entry_type, .. } = d {
+        if let EntryType::App(entry_type) = d.entry_type {
             let (zome, fn_name) = find_extern_function_or_choose(
                 &zome_file_tree.dna_file_tree,
                 &coordinator_zomes_for_integrity,

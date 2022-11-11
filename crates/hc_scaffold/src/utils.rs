@@ -102,6 +102,23 @@ pub fn input_snake_case(prompt: &String) -> ScaffoldResult<String> {
 
     Ok(input)
 }
+pub fn input_snake_case_with_initial_text(
+    prompt: &String,
+    initial_text: &String,
+) -> ScaffoldResult<String> {
+    let input: String = Input::with_theme(&ColorfulTheme::default())
+        .with_prompt(prompt)
+        .with_initial_text(initial_text)
+        .validate_with(|input: &String| -> Result<(), &str> {
+            match input.is_snake_case() {
+                false => Err("Input must be snake_case."),
+                true => Ok(()),
+            }
+        })
+        .interact_text()?;
+
+    Ok(input)
+}
 
 pub fn input_no_whitespace(prompt: &String) -> ScaffoldResult<String> {
     let input = Input::with_theme(&ColorfulTheme::default())

@@ -1,4 +1,4 @@
-use crate::definitions::FieldType;
+use crate::definitions::{parse_entry_type, EntryType, FieldType};
 use crate::error::{ScaffoldError, ScaffoldResult};
 use crate::file_tree::{dir_content, load_directory_into_memory, FileTree};
 use crate::scaffold::app::cargo::exec_metadata;
@@ -117,9 +117,9 @@ pub enum HcScaffold {
         /// Only applies if update is selected in the "crud" argument
         link_from_original_to_each_update: Option<bool>,
 
-        #[structopt(long, value_delimiter = ",")]
+        #[structopt(long, value_delimiter = ",", parse(from_str = parse_entry_type))]
         /// The entry types that the new entry type depends on
-        depends_on: Option<Vec<String>>,
+        depends_on: Option<Vec<EntryType>>,
 
         #[structopt(long, parse(try_from_str = parse_depends_on_itself))]
         /// The fields that the entry type struct should contain
@@ -144,11 +144,13 @@ pub enum HcScaffold {
         /// Name of the integrity zome in which you want to scaffold the link type
         zome: Option<String>,
 
+        #[structopt(parse(from_str = parse_entry_type))]
         /// Entry type used as the base for the links
-        from_entry_type: Option<String>,
+        from_entry_type: Option<EntryType>,
 
+        #[structopt(parse(from_str = parse_entry_type))]
         /// Entry type used as the target for the links
-        to_entry_type: Option<String>,
+        to_entry_type: Option<EntryType>,
 
         #[structopt(long)]
         /// Use the entry hash as the base for the links, instead of the action hash

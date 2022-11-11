@@ -24,6 +24,7 @@ hc-scaffold index by-author posts_by_author_entry_hash --entry-types post --link
 hc-scaffold link-type post like --link-from-entry-hash false --link-to-entry-hash false
 hc-scaffold link-type comment like --link-from-entry-hash false --link-to-entry-hash true
 hc-scaffold link-type certificate like --link-from-entry-hash true --link-to-entry-hash false
+hc-scaffold link-type agent post --link-from-entry-hash true --link-to-entry-hash false
 
 npm t
 npm run package

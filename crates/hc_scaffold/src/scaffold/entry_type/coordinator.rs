@@ -1,13 +1,13 @@
 use convert_case::{Case, Casing};
 
 use crate::{
-    definitions::{Cardinality, DependsOn, EntryDefinition},
+    definitions::{Cardinality, DependsOn, EntryDefinition, EntryType},
     error::ScaffoldResult,
     file_tree::{insert_file, map_file},
     scaffold::{dna::DnaFileTree, link_type::link_type_name, zome::ZomeFileTree},
 };
 
-use super::{crud::Crud, depends_on_field_name, depends_on_itself_field_name};
+use super::{crud::Crud, depends_on_itself_field_name};
 
 pub fn no_update_read_handler(entry_def_name: &String) -> String {
     format!(
@@ -134,9 +134,12 @@ pub fn create_handler(entry_def: &EntryDefinition) -> String {
         .map(|d| {
             create_link_for_cardinality(
                 entry_def,
-                &depends_on_field_name(d),
-                &link_type_name(&d.entry_type(), &entry_def.plural_name),
-                &d.cardinality(),
+                &d.field_name,
+                &link_type_name(
+                    &d.entry_type,
+                    &EntryType::App(entry_def.plural_name.clone()),
+                ),
+                &d.cardinality,
             )
         })
         .collect::<Vec<String>>();
@@ -145,7 +148,10 @@ pub fn create_handler(entry_def: &EntryDefinition) -> String {
         create_links_str.push(create_link_for_cardinality(
             entry_def,
             &depends_on_itself_field_name(&entry_def.singular_name, &entry_def.plural_name, c),
-            &link_type_name(&entry_def.singular_name, &entry_def.plural_name),
+            &link_type_name(
+                &EntryType::App(entry_def.singular_name),
+                &EntryType::App(entry_def.plural_name),
+            ),
             &c.clone().into(),
         ));
     }
@@ -268,13 +274,13 @@ pub fn delete_{}(original_{}_hash: ActionHash) -> ExternResult<ActionHash> {{
 }
 
 fn depends_on_handler(plural_name: &String, depends_on: &DependsOn) -> String {
-    let arg_name: String = match depends_on {
-        DependsOn::AgentPubKey { .. } => String::from("agent"),
-        DependsOn::EntryType { entry_type, .. } => format!("{}_hash", entry_type),
+    let arg_name: String = match depends_on.entry_type {
+        EntryType::Agent => String::from("agent"),
+        EntryType::App(entry_type) => format!("{}_hash", entry_type),
     };
-    let arg_type: String = match depends_on {
-        DependsOn::AgentPubKey { .. } => String::from("AgentPubKey"),
-        DependsOn::EntryType { .. } => String::from("ActionHash"),
+    let arg_type: String = match depends_on.entry_type {
+        EntryType::Agent => String::from("AgentPubKey"),
+        _ => String::from("ActionHash"),
     };
 
     format!(
@@ -300,11 +306,14 @@ pub fn get_{}_for_{}({}: {}) -> ExternResult<Vec<ActionHash>> {{
     Ok(action_hashes)
 }}"#,
         plural_name.to_case(Case::Snake),
-        depends_on.entry_type().to_case(Case::Snake),
+        depends_on.entry_type.to_string().to_case(Case::Snake),
         arg_name,
         arg_type,
         arg_name,
-        link_type_name(&depends_on.entry_type(), &plural_name.to_case(Case::Pascal)),
+        link_type_name(
+            &depends_on.entry_type,
+            &EntryType::App(plural_name.to_case(Case::Pascal))
+        ),
     )
 }
 
@@ -336,8 +345,8 @@ pub fn get_{}_for_{}({}_hash: ActionHash) -> ExternResult<Vec<ActionHash>> {{
         singular_name.to_case(Case::Snake),
         singular_name.to_case(Case::Snake),
         link_type_name(
-            &singular_name.to_case(Case::Pascal),
-            &plural_name.to_case(Case::Pascal)
+            &EntryType::App(singular_name.to_case(Case::Pascal)),
+            &EntryType::App(plural_name.to_case(Case::Pascal))
         ),
     )
 }
