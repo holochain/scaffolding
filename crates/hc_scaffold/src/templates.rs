@@ -187,7 +187,7 @@ pub fn render_template_file_tree<'a, T: Serialize>(
         )
         .unwrap();
         let if_regex =
-            Regex::new(r"(?P<c>(.)*)/\{\{#if (?P<b>([^\{\}])*)\}\}(?P<a>(.)*)\{\{/if\}\}.hbz\z")
+            Regex::new(r"(?P<c>(.)*)/\{\{#if (?P<b>([^\{\}])*)\}\}(?P<a>(.)*)\{\{/if\}\}.hbs\z")
                 .unwrap();
 
         if re.is_match(path.to_str().unwrap()) {

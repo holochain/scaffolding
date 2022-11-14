@@ -6,8 +6,8 @@ import { appWebsocketContext, appInfoContext } from '../../contexts';
 import '@material/mwc-circular-progress';
 import './{{kebab_case to_referenceable.name}}-detail';
 
-@customElement('{{kebab_case to_referenceable.name}}-for-{{kebab_case from_referenceable.name}}')
-export class {{pascal_case to_referenceable.name}}For{{pascal_case from_referenceable.name}} extends LitElement {
+@customElement('{{kebab_case (plural to_referenceable.name)}}-for-{{kebab_case from_referenceable.name}}')
+export class {{pascal_case (plural to_referenceable.name)}}For{{pascal_case from_referenceable.name}} extends LitElement {
 
   @property({
     hasChanged: (newVal: {{from_referenceable.hash_type}}, oldVal: {{from_referenceable.hash_type}}) => newVal.toString() !== oldVal.toString()
@@ -46,7 +46,7 @@ export class {{pascal_case to_referenceable.name}}For{{pascal_case from_referenc
   }
 
   render() {
-    return this._fetch{{pascal_case (plural entry_type.name)}}.render({
+    return this._fetch{{pascal_case (plural to_referenceable.name)}}.render({
       pending: () => html`<div style="display: flex; flex: 1; align-items: center; justify-content: center">
         <mwc-circular-progress indeterminate></mwc-circular-progress>
       </div>`,

@@ -21,10 +21,10 @@ hc-scaffold index by-author posts_by_author post
 hc-scaffold index global all_posts_entry_hash post:EntryHash
 hc-scaffold index by-author posts_by_author_entry_hash post:EntryHash
 
-hc-scaffold link-type post like
-hc-scaffold link-type comment like:EntryHash
-hc-scaffold link-type certificate:EntryHash like
-hc-scaffold link-type agent:Creator post:EntryHash
+hc-scaffold link-type post like --bidireccional false
+hc-scaffold link-type comment like:EntryHash --bidireccional true
+hc-scaffold link-type certificate:EntryHash like --bidireccional false
+hc-scaffold link-type agent:Creator post:EntryHash --bidireccional true
 
 npm t
 npm run package

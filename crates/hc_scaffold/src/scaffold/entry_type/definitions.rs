@@ -212,8 +212,8 @@ impl EntryTypeReference {
     }
     pub fn field_name(&self, cardinality: &Cardinality) -> String {
         match cardinality {
-            Cardinality::Vector => format!("{}_hashes", self.entry_type),
-            _ => format!("{}_hash", self.entry_type),
+            Cardinality::Vector => format!("{}_hashes", self.entry_type.to_case(Case::Snake)),
+            _ => format!("{}_hash", self.entry_type.to_case(Case::Snake)),
         }
     }
     pub fn to_string(&self, c: &Cardinality) -> String {
@@ -225,9 +225,9 @@ impl EntryTypeReference {
 }
 
 pub fn parse_entry_type_reference(s: &str) -> ScaffoldResult<EntryTypeReference> {
-    check_snake_case(s.into(), "entry reference type")?;
-
     let sp: Vec<&str> = s.split(":").collect();
+    check_snake_case(sp[0].to_string(), "entry type reference")?;
+
     let reference_entry_hash = match sp.len() {
         0 | 1 => false,
         _ => match sp[1] {
@@ -240,7 +240,7 @@ pub fn parse_entry_type_reference(s: &str) -> ScaffoldResult<EntryTypeReference>
     };
 
     Ok(EntryTypeReference {
-        entry_type: sp[0].to_string(),
+        entry_type: sp[0].to_string().to_case(Case::Pascal),
         reference_entry_hash,
     })
 }
@@ -264,9 +264,9 @@ impl Serialize for Referenceable {
 }
 
 pub fn parse_referenceable(s: &str) -> ScaffoldResult<Referenceable> {
-    check_snake_case(s.into(), "reference type")?;
-
     let sp: Vec<&str> = s.split(":").collect();
+
+    check_snake_case(sp[0].to_string(), "referenceable")?;
 
     Ok(match sp[0] {
         "agent" => match sp.len() {

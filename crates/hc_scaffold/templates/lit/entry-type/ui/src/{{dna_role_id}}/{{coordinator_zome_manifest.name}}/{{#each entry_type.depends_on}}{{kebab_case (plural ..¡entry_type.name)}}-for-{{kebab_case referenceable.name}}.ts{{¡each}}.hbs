@@ -8,7 +8,7 @@ import { appWebsocketContext, appInfoContext } from '../../contexts';
 import './{{kebab_case ../entry_type.name}}-detail';
 
 @customElement('{{kebab_case (plural ../entry_type.name)}}-for-{{kebab_case referenceable.name}}')
-export class {{pascal_cas (plural ../entry_type.name)}}For{{pascal_case referenceable.name }} extends LitElement {
+export class {{pascal_case (plural ../entry_type.name)}}For{{pascal_case referenceable.name }} extends LitElement {
 
   @property({
     hasChanged: (newVal: {{referenceable.hash_type}}, oldVal: {{referenceable.hash_type}}) => newVal.toString() !== oldVal.toString()

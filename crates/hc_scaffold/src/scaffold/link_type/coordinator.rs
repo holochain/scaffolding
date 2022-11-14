@@ -115,7 +115,7 @@ pub struct Add{singular_pascal_to_entry_type}For{singular_pascal_from_entry_type
 #[hdk_extern]
 pub fn add_{singular_snake_to_entry_type}_for_{singular_snake_from_entry_type}(input: Add{singular_pascal_to_entry_type}For{singular_pascal_from_entry_type}Input) -> ExternResult<()> {{
     create_link(input.{from_arg_name}.clone(), input.{to_arg_name}.clone(), LinkTypes::{normal_link_type_name}, ())?;
-{bidireccional_create}
+    {bidireccional_create}
 
     Ok(())    
 }}"#
@@ -258,18 +258,16 @@ fn remove_link_handlers(
     let singular_pascal_from_entry_type = from_referenceable
         .to_string(&Cardinality::Single)
         .to_case(Case::Pascal);
-    let plural_snake_to_entry_type = to_referenceable
-        .to_string(&Cardinality::Vector)
-        .to_case(Case::Snake);
     let singular_snake_to_entry_type = to_referenceable
         .to_string(&Cardinality::Single)
         .to_case(Case::Snake);
     let bidireccional_remove = match bidireccional {
         true => format!(
-            r#"let links = get_links({to_arg_name}, LinkTypes::{inverse_link_type_name}, None)?;
+            r#"
+    let links = get_links({to_arg_name}, LinkTypes::{inverse_link_type_name}, None)?;
 
     for link in links {{
-        if {from_hash_type}::from(link.target.clone()).eq(&input.{from_arg_name}) {{
+        if {from_hash_type}::from(EntryHash::from(link.target.clone())).eq(&input.{from_arg_name}) {{
             delete_link(link.create_link_hash)?;
         }}
     }}"#
@@ -284,14 +282,16 @@ pub struct Remove{singular_pascal_to_entry_type}For{singular_pascal_from_entry_t
 }}
 #[hdk_extern]
 pub fn remove_{singular_snake_to_entry_type}_for_{singular_snake_from_entry_type}(input: Remove{singular_pascal_to_entry_type}For{singular_pascal_from_entry_type}Input ) -> ExternResult<()> {{
-    let links = get_links({from_arg_name}, LinkTypes::{pascal_link_type_name}, None)?;
+    let links = get_links(input.{from_arg_name}, LinkTypes::{pascal_link_type_name}, None)?;
     
     for link in links {{
-        if {to_hash_type}::from(link.target.clone()).eq(&input.{to_arg_name}) {{
+        if {to_hash_type}::from(EntryHash::from(link.target.clone())).eq(&input.{to_arg_name}) {{
             delete_link(link.create_link_hash)?;
         }}
     }}
-        
+    {bidireccional_remove}
+
+    Ok(())        
 }}"#
     )
 }

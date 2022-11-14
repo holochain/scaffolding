@@ -18,7 +18,7 @@ export class {{pascal_case index_name}} extends LitElement {
   author!: AgentPubKey;
   {{/if}}
   
-  _fetch{{pascal_case (lookup entry_types 0)}}: Task<[AgentPubKey], Array<{{referenceable.hash_type}}>> = new Task(this, ([{{#if (eq index_type.type "ByAuthor")}}author{{/if}}]) => this.appWebsocket.callZome({
+  _fetch{{pascal_case (plural referenceable.name)}}: Task<[AgentPubKey], Array<{{referenceable.hash_type}}>> = new Task(this, ([{{#if (eq index_type.type "ByAuthor")}}author{{/if}}]) => this.appWebsocket.callZome({
       cap_secret: null,
       cell_id: this.cellData.cell_id,
       zome_name: '{{coordinator_zome_manifest.name}}',
@@ -50,7 +50,7 @@ export class {{pascal_case index_name}} extends LitElement {
   }
 
   render() {
-    return this._fetch{{pascal_case (lookup entry_types 0)}}.render({
+    return this._fetch{{pascal_case (plural referenceable.name)}}.render({
       pending: () => html`<div style="display: flex; flex: 1; align-items: center; justify-content: center">
         <mwc-circular-progress indeterminate></mwc-circular-progress>
       </div>`,

@@ -87,7 +87,7 @@ pub fn scaffold_index(
         .map(|e| e.entry_type)
         .collect();
     let entry_type = match maybe_entry_type {
-        Some(et) => match !all_entries_names.contains(&et.entry_type) {
+        Some(et) => match all_entries_names.contains(&et.entry_type) {
             true => Ok(et.clone()),
             false => Err(ScaffoldError::EntryTypeNotFound(
                 et.entry_type.clone(),

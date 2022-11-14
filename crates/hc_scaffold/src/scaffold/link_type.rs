@@ -65,7 +65,7 @@ pub fn scaffold_link_type(
         &String::from("Link to which entry type?"),
     )?;
 
-    let link_type_name = match to_referenceable.clone() {
+    let link_type = match to_referenceable.clone() {
         Some(to_referenceable) => link_type_name(&from_referenceable, &to_referenceable),
         None => input_snake_case(&String::from("Enter link type name:"))?.to_case(Case::Pascal),
     };
@@ -77,7 +77,16 @@ pub fn scaffold_link_type(
             .interact()?,
     };
 
-    let zome_file_tree = add_link_type_to_integrity_zome(zome_file_tree, &link_type_name)?;
+    let mut zome_file_tree = add_link_type_to_integrity_zome(zome_file_tree, &link_type)?;
+
+    if bidireccional {
+        if let Some(to) = &to_referenceable {
+            zome_file_tree = add_link_type_to_integrity_zome(
+                zome_file_tree,
+                &link_type_name(&to, &from_referenceable),
+            )?;
+        }
+    }
 
     let integrity_zome_name = zome_file_tree.zome_manifest.name.0.to_string();
 
@@ -111,10 +120,13 @@ pub fn scaffold_link_type(
 
     let dna_manifest = zome_file_tree.dna_file_tree.dna_manifest.clone();
 
+    let zome_file_tree =
+        ZomeFileTree::from_zome_manifest(zome_file_tree.dna_file_tree, coordinator_zome.clone())?;
+
     let app_file_tree = add_link_type_functions_to_coordinator(
         zome_file_tree,
         &integrity_zome_name,
-        &link_type_name,
+        &link_type,
         &from_referenceable,
         &to_referenceable,
         bidireccional,
@@ -130,5 +142,5 @@ pub fn scaffold_link_type(
         bidireccional,
     )?;
 
-    Ok((file_tree, link_type_name))
+    Ok((file_tree, link_type))
 }
