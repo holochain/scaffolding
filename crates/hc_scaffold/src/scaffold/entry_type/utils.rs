@@ -3,68 +3,133 @@ use dialoguer::{theme::ColorfulTheme, MultiSelect, Select};
 use holochain_types::prelude::DnaManifest;
 
 use crate::{
-    definitions::EntryType,
     error::{ScaffoldError, ScaffoldResult},
     scaffold::zome::ZomeFileTree,
+    utils::input_snake_case,
 };
 
-use super::integrity::get_all_entry_types;
+use super::{
+    definitions::{EntryTypeReference, Referenceable},
+    integrity::get_all_entry_types,
+};
 
-pub fn choose_entry_type(
-    all_entries: &Vec<String>,
+pub fn choose_reference_entry_hash(recommended: bool) -> ScaffoldResult<bool> {
+    let mut select = Select::with_theme(&ColorfulTheme::default())
+        .with_prompt(String::from(
+            "Reference this entry type by its entry hash or its action hash?",
+        ))
+        .default(0);
+
+    match recommended {
+        true => {
+            let selection = select
+                .item("EntryHash (recommended)")
+                .item("ActionHash")
+                .interact()?;
+
+            match selection {
+                0 => Ok(true),
+                _ => Ok(false),
+            }
+        }
+        false => {
+            let selection = select
+                .item("ActionHash (recommended)")
+                .item("EntryHash")
+                .interact()?;
+
+            match selection {
+                0 => Ok(false),
+                _ => Ok(true),
+            }
+        }
+    }
+}
+
+pub fn choose_fixed() -> ScaffoldResult<bool> {
+    let mut select = Select::with_theme(&ColorfulTheme::default())
+        .with_prompt(String::from("Is this entry type fixed?"))
+        .default(0);
+
+    let selection = select
+        .item("Not fixed: can be updated and deleted, referred to by ActionHash (recommended)")
+        .item("Fixed: can't be deleted or updated, referred to by EntryHash")
+        .interact()?;
+
+    match selection {
+        0 => Ok(false),
+        _ => Ok(true),
+    }
+}
+
+fn inner_choose_referenceable(
+    all_entries: &Vec<EntryTypeReference>,
     prompt: &String,
-    include_agent_pub_key: bool,
-) -> ScaffoldResult<EntryType> {
-    let mut all_options = all_entries.clone();
+    optional: bool,
+) -> ScaffoldResult<Option<Referenceable>> {
+    let mut all_options: Vec<String> = all_entries
+        .clone()
+        .into_iter()
+        .map(|r| r.entry_type)
+        .collect();
 
     let mut select = Select::with_theme(&ColorfulTheme::default())
         .with_prompt(prompt.clone())
         .default(0)
-        .items(&all_options[..]);
+        .items(&all_options[..])
+        .item("Agent");
 
-    if include_agent_pub_key {
-        select.item("Agent");
+    if optional {
+        select.item("[None]");
     }
 
     let selection = select.interact()?;
 
-    match selection == all_options.len() {
-        true => Ok(EntryType::Agent),
-        false => Ok(EntryType::App(all_options[selection].clone())),
+    if selection == all_options.len() {
+        let role = input_snake_case(&String::from("Which role does this agent play in the relationship ? (eg. \"creator\", \"\", \"invitee\")"))?;
+        return Ok(Some(Referenceable::Agent { role }));
+    } else if selection == all_options.len() + 1 {
+        return Ok(None);
+    } else {
+        Ok(Some(Referenceable::EntryType(EntryTypeReference {
+            entry_type: all_options[selection].clone(),
+            reference_entry_hash: choose_reference_entry_hash(
+                all_entries[selection].reference_entry_hash,
+            )?,
+        })))
     }
 }
 
-pub fn choose_optional_entry_type(
-    all_entries: &Vec<String>,
+pub fn choose_referenceable(
+    all_entries: &Vec<EntryTypeReference>,
     prompt: &String,
-) -> ScaffoldResult<Option<EntryType>> {
-    let mut all_options = all_entries.clone();
-    all_options.push("Agent".into());
+) -> ScaffoldResult<Referenceable> {
+    let maybe_reference_type = inner_choose_referenceable(all_entries, prompt, false)?;
 
-    let selection = Select::with_theme(&ColorfulTheme::default())
-        .with_prompt(prompt.clone())
-        .default(0)
-        .items(&all_options[..])
-        .item("[None]")
-        .interact()?;
+    Ok(maybe_reference_type.expect("reference type should not be None"))
+}
 
-    if selection == all_options.len() {
-        return Ok(None);
-    } else if selection == all_options.len() - 1 {
-        return Ok(Some(EntryType::Agent));
-    }
-
-    Ok(Some(EntryType::App(all_options[selection].clone())))
+pub fn choose_optional_referenceable(
+    all_entries: &Vec<EntryTypeReference>,
+    prompt: &String,
+) -> ScaffoldResult<Option<Referenceable>> {
+    inner_choose_referenceable(all_entries, prompt, true)
 }
 
 pub fn choose_multiple_entry_types(
-    all_entries: &Vec<String>,
+    all_entries: &Vec<EntryTypeReference>,
     prompt: &String,
     allow_empty_selection: bool,
-) -> ScaffoldResult<Vec<String>> {
+) -> ScaffoldResult<Vec<EntryTypeReference>> {
+    let mut all_options: Vec<String> = all_entries
+        .clone()
+        .into_iter()
+        .map(|r| r.entry_type)
+        .collect();
+
     let selection = MultiSelect::with_theme(&ColorfulTheme::default())
         .with_prompt(prompt.clone())
-        .items(&all_entries[..])
+        .items(&all_options[..])
         .interact()?;
 
     let chosen_entry_types = match (selection.len(), allow_empty_selection) {
@@ -78,56 +143,56 @@ pub fn choose_multiple_entry_types(
     Ok(chosen_entry_types)
 }
 
-pub fn get_or_choose_entry_type(
+pub fn get_or_choose_referenceable(
     zome_file_tree: &ZomeFileTree,
-    entry_type: &Option<EntryType>,
+    entry_type: &Option<Referenceable>,
     prompt: &String,
-) -> ScaffoldResult<EntryType> {
+) -> ScaffoldResult<Referenceable> {
     let all_entries = get_all_entry_types(&zome_file_tree)?.unwrap_or_else(|| vec![]);
 
-    match entry_type {
-        None => choose_entry_type(&all_entries, prompt, true),
-        Some(entry_type) => {
-            if let EntryType::Agent = entry_type {
-                return Ok(EntryType::Agent);
-            }
+    match &entry_type {
+        None => choose_referenceable(&all_entries, prompt),
+        Some(Referenceable::Agent { role }) => Ok(Referenceable::Agent { role: role.clone() }),
+        Some(Referenceable::EntryType(app_entry_reference)) => {
+            let all_entries: Vec<String> = all_entries.into_iter().map(|e| e.entry_type).collect();
+
             let entry_type_name = all_entries
                 .into_iter()
-                .find(|et| et.eq(&entry_type.to_string()))
+                .find(|et| et.eq(&app_entry_reference.entry_type.to_string()))
                 .ok_or(ScaffoldError::EntryTypeNotFound(
-                    entry_type.to_string().clone(),
+                    app_entry_reference.entry_type.to_string().clone(),
                     zome_file_tree.dna_file_tree.dna_manifest.name(),
                     zome_file_tree.zome_manifest.name.0.to_string(),
                 ))?;
 
-            Ok(EntryType::App(entry_type_name))
+            Ok(Referenceable::EntryType(app_entry_reference.clone()))
         }
     }
 }
 
-pub fn get_or_choose_optional_entry_type(
+pub fn get_or_choose_optional_reference_type(
     zome_file_tree: &ZomeFileTree,
-    entry_type: &Option<EntryType>,
+    entry_type: &Option<Referenceable>,
     prompt: &String,
-) -> ScaffoldResult<Option<EntryType>> {
+) -> ScaffoldResult<Option<Referenceable>> {
     let all_entries = get_all_entry_types(&zome_file_tree)?.unwrap_or_else(|| vec![]);
 
     match entry_type {
-        None => choose_optional_entry_type(&all_entries, prompt),
-        Some(entry_type) => {
-            if let EntryType::Agent = entry_type {
-                return Ok(Some(EntryType::Agent));
-            }
+        None => choose_optional_referenceable(&all_entries, prompt),
+        Some(Referenceable::Agent { role }) => Ok(entry_type.clone()),
+        Some(Referenceable::EntryType(app_entry_reference)) => {
+            let all_entries: Vec<String> = all_entries.into_iter().map(|e| e.entry_type).collect();
+
             let entry_type_name = all_entries
                 .into_iter()
-                .find(|et| et.eq(&entry_type.to_string()))
+                .find(|et| et.eq(&app_entry_reference.entry_type.to_string()))
                 .ok_or(ScaffoldError::EntryTypeNotFound(
-                    entry_type.to_string().clone(),
+                    app_entry_reference.entry_type.to_string().clone(),
                     zome_file_tree.dna_file_tree.dna_manifest.name(),
                     zome_file_tree.zome_manifest.name.0.to_string(),
                 ))?;
 
-            Ok(Some(EntryType::App(entry_type_name)))
+            Ok(entry_type.clone())
         }
     }
 }

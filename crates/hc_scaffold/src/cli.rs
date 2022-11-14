@@ -1,10 +1,12 @@
-use crate::definitions::{parse_entry_type, EntryType, FieldType};
 use crate::error::{ScaffoldError, ScaffoldResult};
 use crate::file_tree::{dir_content, load_directory_into_memory, FileTree};
 use crate::scaffold::app::cargo::exec_metadata;
 use crate::scaffold::app::AppFileTree;
 use crate::scaffold::dna::{scaffold_dna, DnaFileTree};
 use crate::scaffold::entry_type::crud::{parse_crud, Crud};
+use crate::scaffold::entry_type::definitions::{
+    parse_entry_type_reference, parse_referenceable, EntryTypeReference, FieldType, Referenceable,
+};
 use crate::scaffold::entry_type::{parse_depends_on_itself, scaffold_entry_type, DependsOnItself};
 use crate::scaffold::index::{scaffold_index, IndexType};
 use crate::scaffold::link_type::scaffold_link_type;
@@ -102,14 +104,17 @@ pub enum HcScaffold {
         /// Name of the integrity zome in which you want to scaffold the entry definition
         zome: Option<String>,
 
-        /// Singular name of the entry type being scaffolded
-        singular_name: Option<String>,
+        /// Name of the entry type being scaffolded
+        name: Option<String>,
 
-        /// Plural name of the entry type being scaffolded
-        plural_name: Option<String>,
+        #[structopt(long)]
+        /// Whether this entry should be "fixed" or not
+        /// Fixed entries cannot be updated or deleted, and they are referenced to by with its "EntryHash"
+        fixed: Option<bool>,
 
         #[structopt(long, parse(try_from_str = parse_crud))]
-        /// Whether to create a read zome call function for this entry type
+        /// The Create, "Read", "Update", and "Delete" zome call functions that should be scaffolded for this entry type
+        /// If "--reference-entry-hash" is "true", only "Create" and "Read" will be scaffolded
         crud: Option<Crud>,
 
         #[structopt(long)]
@@ -117,9 +122,9 @@ pub enum HcScaffold {
         /// Only applies if update is selected in the "crud" argument
         link_from_original_to_each_update: Option<bool>,
 
-        #[structopt(long, value_delimiter = ",", parse(from_str = parse_entry_type))]
-        /// The entry types that the new entry type depends on
-        depends_on: Option<Vec<EntryType>>,
+        #[structopt(long, value_delimiter = ",", parse(try_from_str = parse_referenceable))]
+        /// The entry types (or agent roles) that the new entry type depends on
+        depends_on: Option<Vec<Referenceable>>,
 
         #[structopt(long, parse(try_from_str = parse_depends_on_itself))]
         /// The fields that the entry type struct should contain
@@ -144,21 +149,13 @@ pub enum HcScaffold {
         /// Name of the integrity zome in which you want to scaffold the link type
         zome: Option<String>,
 
-        #[structopt(parse(from_str = parse_entry_type))]
-        /// Entry type used as the base for the links
-        from_entry_type: Option<EntryType>,
+        #[structopt(parse(try_from_str = parse_referenceable))]
+        /// Entry type (or agent role) used as the base for the links
+        from_referenceable: Option<Referenceable>,
 
-        #[structopt(parse(from_str = parse_entry_type))]
-        /// Entry type used as the target for the links
-        to_entry_type: Option<EntryType>,
-
-        #[structopt(long)]
-        /// Use the entry hash as the base for the links, instead of the action hash
-        link_from_entry_hash: Option<bool>,
-
-        #[structopt(long)]
-        /// Use the entry hash as the target for the links, instead of the action hash
-        link_to_entry_hash: Option<bool>,
+        #[structopt(parse(try_from_str = parse_referenceable))]
+        /// Entry type (or agent role) used as the target for the links
+        to_referenceable: Option<Referenceable>,
 
         #[structopt(short, long)]
         /// The template to scaffold the dna from
@@ -181,13 +178,9 @@ pub enum HcScaffold {
         /// Index name, just to differentiate it from other indexes
         index_name: Option<String>,
 
-        #[structopt(long, value_delimiter = ",")]
+        #[structopt(long, value_delimiter = ",", parse(try_from_str = parse_entry_type_reference))]
         /// Entry types that are going to be indexed by this index
-        entry_types: Option<Vec<String>>,
-
-        #[structopt(long)]
-        /// Use the entry hash as the target for the links, instead of the action hash
-        link_to_entry_hash: Option<bool>,
+        entry_types: Option<Vec<EntryTypeReference>>,
 
         #[structopt(short, long)]
         /// The template to scaffold the dna from
@@ -454,9 +447,9 @@ Add new entry definitions to your zome with:
             HcScaffold::EntryType {
                 dna,
                 zome,
-                singular_name,
-                plural_name,
+                name,
                 crud,
+                fixed: reference_entry_hash,
                 link_from_original_to_each_update,
                 depends_on,
                 depends_on_itself,
@@ -467,13 +460,9 @@ Add new entry definitions to your zome with:
                 let file_tree = load_directory_into_memory(&current_dir)?;
                 let template_file_tree = choose_or_get_template_file_tree(&file_tree, &template)?;
 
-                let singular_name: String = match singular_name {
-                    Some(n) => check_snake_case(n, "entry type singular name")?,
-                    None => input_snake_case(&String::from("Singular name (snake_case):"))?,
-                };
-                let plural_name: String = match plural_name {
-                    Some(n) => check_snake_case(n, "entry type plural name")?,
-                    None => input_snake_case(&String::from("Plural name (snake_case):"))?,
+                let name: String = match name {
+                    Some(n) => check_snake_case(n, "entry type name")?,
+                    None => input_snake_case(&String::from("Entry type name (snake_case):"))?,
                 };
 
                 let dna_file_tree = DnaFileTree::get_or_choose(file_tree, &dna)?;
@@ -483,9 +472,9 @@ Add new entry definitions to your zome with:
                 let app_file_tree = scaffold_entry_type(
                     zome_file_tree,
                     &template_file_tree,
-                    &singular_name,
-                    &plural_name,
+                    &name,
                     &crud,
+                    &reference_entry_hash,
                     &link_from_original_to_each_update,
                     &depends_on,
                     &depends_on_itself,
@@ -504,16 +493,14 @@ Add new indexes for that entry type with:
 
   hc-scaffold index
 "#,
-                    singular_name
+                    name
                 );
             }
             HcScaffold::LinkType {
                 dna,
                 zome,
-                from_entry_type,
-                to_entry_type,
-                link_from_entry_hash,
-                link_to_entry_hash,
+                from_referenceable,
+                to_referenceable,
                 template,
             } => {
                 let current_dir = std::env::current_dir()?;
@@ -527,10 +514,8 @@ Add new indexes for that entry type with:
                 let (app_file_tree, link_type_name) = scaffold_link_type(
                     zome_file_tree,
                     &template_file_tree,
-                    &from_entry_type,
-                    &to_entry_type,
-                    &link_from_entry_hash,
-                    &link_to_entry_hash,
+                    &from_referenceable,
+                    &to_referenceable,
                 )?;
 
                 let file_tree = MergeableFileSystemTree::<OsString, String>::from(app_file_tree);
@@ -550,7 +535,6 @@ Link type "{}" scaffolded!
                 index_name,
                 index_type,
                 entry_types,
-                link_to_entry_hash,
                 template,
             } => {
                 let current_dir = std::env::current_dir()?;
@@ -573,7 +557,6 @@ Link type "{}" scaffolded!
                     &name,
                     &index_type,
                     &entry_types,
-                    &link_to_entry_hash,
                 )?;
 
                 let file_tree = MergeableFileSystemTree::<OsString, String>::from(app_file_tree);

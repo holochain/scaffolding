@@ -5,51 +5,55 @@ use convert_case::{Case, Casing};
 use holochain_types::prelude::{DnaManifest, ZomeManifest};
 
 use crate::{
-    definitions::EntryType,
     error::{ScaffoldError, ScaffoldResult},
     file_tree::{insert_file, map_file, FileTree},
-    scaffold::{dna::DnaFileTree, zome::ZomeFileTree},
+    scaffold::{
+        dna::DnaFileTree,
+        entry_type::definitions::{Cardinality, Referenceable},
+        zome::ZomeFileTree,
+    },
 };
 
 fn metadata_handlers(
     integrity_zome_name: &String,
     link_type_name: &String,
-    from_entry_type: &EntryType,
-    link_from_entry_hash: bool,
+    from_referenceable: &Referenceable,
 ) -> String {
-    let from_arg = match from_entry_type {
-        EntryType::Agent => String::from("agent"),
-        EntryType::App(et) => format!("{}_hash", et.to_case(Case::Snake)),
-    };
-    let from_arg_type = match from_entry_type {
-        EntryType::Agent => String::from("AgentPubKey"),
-        EntryType::App(et) => match link_from_entry_hash {
-            true => String::from("EntryHash"),
-            false => String::from("ActionHash"),
-        },
-    };
+    let snake_from_arg = from_referenceable
+        .field_name(&Cardinality::Single)
+        .to_case(Case::Snake);
+    let from_arg_type = from_referenceable.hash_type().to_string();
+
+    let snake_from = from_referenceable
+        .to_string(&Cardinality::Single)
+        .to_case(Case::Snake);
+    let pascal_from = from_referenceable
+        .to_string(&Cardinality::Single)
+        .to_case(Case::Pascal);
+    let snake_link_type_name = link_type_name.to_case(Case::Snake);
+    let pascal_link_type_name = link_type_name.to_case(Case::Pascal);
 
     format!(
         r#"use hdk::prelude::*;
-use {}::*;
+use {integrity_zome_name}::*;
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct Add{}For{}Input {{
-    {}: {},
-    {}: String,
+pub struct Add{pascal_link_type_name}For{pascal_from}Input {{
+    {snake_from_arg}: {from_arg_type},
+    {snake_link_type_name}: String,
 }}
 #[hdk_extern]
-pub fn add_{}_for_{}(input: Add{}For{}Input) -> ExternResult<()> {{
-    create_link(input.{}.clone(), input.{}, LinkTypes::{}, input.{})?;
+pub fn add_{snake_link_type_name}_for_{snake_from}(input: Add{pascal_link_type_name}For{pascal_from}Input) -> ExternResult<()> {{
+    create_link(input.{snake_from_arg}.clone(), input.{snake_from_arg}, LinkTypes::{pascal_link_type_name}, input.{snake_link_type_name})?;
 
     Ok(())    
 }}
 
 #[hdk_extern]
-pub fn get_{}_for_{}({}: {}) -> ExternResult<Vec<String>> {{
-    let links = get_links({}, LinkTypes::{}, None)?;
+pub fn get_{snake_link_type_name}_for_{snake_from}({snake_from_arg}: {from_arg_type}) -> ExternResult<Vec<String>> {{
+    let links = get_links({snake_from_arg}, LinkTypes::{pascal_link_type_name}, None)?;
     
-    let {}: Vec<String> = links
+    let {snake_link_type_name}: Vec<String> = links
         .into_iter()
         .map(|link| 
           String::from_utf8(link.target.into_inner())
@@ -57,30 +61,8 @@ pub fn get_{}_for_{}({}: {}) -> ExternResult<Vec<String>> {{
         )
         .collect::<ExternResult<Vec<String>>>()?;
 
-    Ok({})
-}}"#,
-        integrity_zome_name,
-        link_type_name.to_case(Case::Pascal),
-        from_entry_type.to_string().to_case(Case::Pascal),
-        from_arg,
-        from_arg_type,
-        link_type_name.to_case(Case::Snake),
-        link_type_name.to_case(Case::Snake),
-        from_entry_type.to_string().to_case(Case::Snake),
-        link_type_name.to_case(Case::Pascal),
-        from_entry_type.to_string().to_case(Case::Pascal),
-        from_arg,
-        from_arg,
-        link_type_name.to_case(Case::Pascal),
-        link_type_name.to_case(Case::Snake),
-        link_type_name.to_case(Case::Snake),
-        from_entry_type.to_string().to_case(Case::Snake),
-        from_arg,
-        from_arg_type,
-        from_arg,
-        link_type_name.to_case(Case::Pascal),
-        link_type_name.to_case(Case::Snake),
-        link_type_name.to_case(Case::Snake),
+    Ok({snake_link_type_name})
+}}"#
     )
 }
 
@@ -88,7 +70,7 @@ pub fn get_{}_for_{}({}: {}) -> ExternResult<Vec<String>> {{
 fn to_agent_handlers(
     integrity_zome_name: &String,
     link_type_name: &String,
-    from_entry_type: &EntryType,
+    from_entry_type: &Referenceable,
     link_from_entry_hash: bool,
 ) -> String {
     let pascal_link_type_name = link_type_name.to_case(Case::Pascal);
@@ -97,12 +79,12 @@ fn to_agent_handlers(
     let snake_from_entry_type = from_entry_type.to_string().to_case(Case::Snake);
 
     let from_arg = match from_entry_type {
-        EntryType::Agent => String::from("agent"),
-        EntryType::App(et) => format!("{}_hash", et.to_case(Case::Snake)),
+        Referenceable::Agent => String::from("agent"),
+        Referenceable::EntryType(et) => format!("{}_hash", et.to_case(Case::Snake)),
     };
     let from_arg_type = match from_entry_type {
-        EntryType::Agent => String::from("AgentPubKey"),
-        EntryType::App(et) => match link_from_entry_hash {
+        Referenceable::Agent => String::from("AgentPubKey"),
+        Referenceable::EntryType(et) => match link_from_entry_hash {
             true => String::from("EntryHash"),
             false => String::from("ActionHash"),
         },
@@ -142,19 +124,19 @@ pub fn get_{snake_link_type_name}_for_{snake_from_entry_type}({from_arg}: {from_
 fn to_entry_link_type_handlers(
     integrity_zome_name: &String,
     link_type_name: &String,
-    from_entry_type: &EntryType,
+    from_entry_type: &Referenceable,
     to_entry_type: &String,
     link_from_entry_hash: bool,
     link_to_entry_hash: bool,
 ) -> String {
     let from_hash_type = match (from_entry_type, link_from_entry_hash) {
-        (EntryType::Agent, _) => String::from("AgentPubKey"),
+        (Referenceable::Agent, _) => String::from("AgentPubKey"),
         (_, true) => String::from("EntryHash"),
         (_, false) => String::from("ActionHash"),
     };
     let from_arg_name = match from_entry_type {
-        EntryType::Agent => String::from("from_agent"),
-        EntryType::App(et) => format!("{}_hash", et),
+        Referenceable::Agent => String::from("from_agent"),
+        Referenceable::EntryType(et) => format!("{}_hash", et),
     };
     let to_hash_type = match link_to_entry_hash {
         true => String::from("EntryHash"),
@@ -210,31 +192,19 @@ pub fn get_{snake_to_entry_type}_for_{snake_from_entry_type}({from_arg_name}: {f
 fn initial_link_type_handlers(
     integrity_zome_name: &String,
     link_type_name: &String,
-    from_entry_type: &EntryType,
-    to_entry_type: &Option<EntryType>,
-    link_from_entry_hash: bool,
-    link_to_entry_hash: bool,
+    from_referenceable: &Referenceable,
+    to_referenceable: &Option<Referenceable>,
 ) -> String {
-    match to_entry_type {
-        None => metadata_handlers(
+    match to_referenceable {
+        None => metadata_handlers(integrity_zome_name, link_type_name, from_referenceable),
+        Some(Referenceable::Agent) => {
+            to_agent_handlers(integrity_zome_name, link_type_name, from_referenceable)
+        }
+        Some(Referenceable::EntryType(entry_type)) => to_entry_link_type_handlers(
             integrity_zome_name,
             link_type_name,
-            from_entry_type,
-            link_from_entry_hash,
-        ),
-        Some(EntryType::Agent) => to_agent_handlers(
-            integrity_zome_name,
-            link_type_name,
-            from_entry_type,
-            link_from_entry_hash,
-        ),
-        Some(EntryType::App(entry_type)) => to_entry_link_type_handlers(
-            integrity_zome_name,
-            link_type_name,
-            from_entry_type,
+            from_referenceable,
             entry_type,
-            link_from_entry_hash,
-            link_to_entry_hash,
         ),
     }
 }
@@ -243,10 +213,8 @@ pub fn add_link_type_functions_to_coordinator(
     mut coordinator_zome_file_tree: ZomeFileTree,
     integrity_zome_name: &String,
     link_type_name: &String,
-    from_entry_type: &EntryType,
-    to_entry_type: &Option<EntryType>,
-    link_from_entry_hash: bool,
-    link_to_entry_hash: bool,
+    from_referenceable: &Referenceable,
+    to_referenceable: &Option<Referenceable>,
 ) -> ScaffoldResult<ZomeFileTree> {
     let dna_manifest_path = coordinator_zome_file_tree
         .dna_file_tree
@@ -273,10 +241,8 @@ pub fn add_link_type_functions_to_coordinator(
         &initial_link_type_handlers(
             integrity_zome_name,
             link_type_name,
-            from_entry_type,
-            to_entry_type,
-            link_from_entry_hash,
-            link_to_entry_hash,
+            from_referenceable,
+            to_referenceable,
         ),
     )?;
 

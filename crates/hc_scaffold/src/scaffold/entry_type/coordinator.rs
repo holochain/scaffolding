@@ -1,27 +1,32 @@
 use convert_case::{Case, Casing};
 
 use crate::{
-    definitions::{Cardinality, DependsOn, EntryDefinition, EntryType},
     error::ScaffoldResult,
     file_tree::{insert_file, map_file},
     scaffold::{dna::DnaFileTree, link_type::link_type_name, zome::ZomeFileTree},
 };
 
-use super::{crud::Crud, depends_on_itself_field_name};
+use super::{
+    crud::Crud,
+    definitions::{Cardinality, DependsOn, EntryDefinition, EntryTypeReference, Referenceable},
+    depends_on_itself_field_name,
+};
 
-pub fn no_update_read_handler(entry_def_name: &String) -> String {
+pub fn no_update_read_handler(entry_def: &EntryDefinition) -> String {
+    let hash_type = entry_def.referenceable().hash_type().to_string();
+    let snake_entry_def = entry_def.name.to_case(Case::Snake);
+
     format!(
         r#"#[hdk_extern]
-pub fn get_{}({}_hash: ActionHash) -> ExternResult<Option<Record>> {{
-  get({}_hash, GetOptions::default())
+pub fn get_{snake_entry_def}({snake_entry_def}_hash: {hash_type}) -> ExternResult<Option<Record>> {{
+  get({snake_entry_def}_hash, GetOptions::default())
 }}"#,
-        entry_def_name.to_case(Case::Snake),
-        entry_def_name.to_case(Case::Snake),
-        entry_def_name.to_case(Case::Snake)
     )
 }
 
-pub fn read_handler_without_linking_to_updates(entry_def_name: &String) -> String {
+pub fn read_handler_without_linking_to_updates(entry_def: &EntryDefinition) -> String {
+    let entry_def_name = entry_def.name.clone();
+
     format!(
         r#"#[hdk_extern]
 pub fn get_{}(original_{}_hash: ActionHash) -> ExternResult<Option<Record>> {{
@@ -98,60 +103,63 @@ pub fn create_link_for_cardinality(
     link_type_name: &String,
     cardinality: &Cardinality,
 ) -> String {
+    let link_target = match entry_def.fixed {
+        true => format!("{}_entry_hash", entry_def.name.to_case(Case::Snake)),
+        false => format!("{}_hash", entry_def.name.to_case(Case::Snake)),
+    };
+
     match cardinality {
         Cardinality::Single => format!(
-            r#"  create_link({}.{}.clone(), {}_hash.clone(), LinkTypes::{}, ())?;"#,
-            entry_def.singular_name.to_case(Case::Snake),
+            r#"  create_link({}.{}.clone(), {}.clone(), LinkTypes::{}, ())?;"#,
+            entry_def.name.to_case(Case::Snake),
             field_name,
-            entry_def.singular_name.to_case(Case::Snake),
+            link_target,
             link_type_name
         ),
         Cardinality::Option => format!(
             r#"  if let Some(base) = {}.{}.clone() {{
-    create_link(base, {}_hash.clone(), LinkTypes::{}, ())?;
+    create_link(base, {}.clone(), LinkTypes::{}, ())?;
   }}"#,
-            entry_def.singular_name.to_case(Case::Snake),
+            entry_def.name.to_case(Case::Snake),
             field_name,
-            entry_def.singular_name.to_case(Case::Snake),
+            link_target,
             link_type_name
         ),
         Cardinality::Vector => format!(
             r#"  for base in {}.{}.clone() {{
-    create_link(base, {}_hash.clone(), LinkTypes::{}, ())?;
+    create_link(base, {}.clone(), LinkTypes::{}, ())?;
   }}"#,
-            entry_def.singular_name.to_case(Case::Snake),
+            entry_def.name.to_case(Case::Snake),
             field_name,
-            entry_def.singular_name.to_case(Case::Snake),
+            link_target,
             link_type_name
         ),
     }
 }
 
 pub fn create_handler(entry_def: &EntryDefinition) -> String {
-    let mut create_links_str = entry_def
-        .depends_on
-        .iter()
-        .map(|d| {
-            create_link_for_cardinality(
-                entry_def,
-                &d.field_name,
-                &link_type_name(
-                    &d.entry_type,
-                    &EntryType::App(entry_def.plural_name.clone()),
-                ),
-                &d.cardinality,
-            )
-        })
-        .collect::<Vec<String>>();
+    let mut create_links_str: Vec<String> = match entry_def.fixed {
+        true => vec![format!(
+            r#"let {}_entry_hash = hash_entry(&{})?;"#,
+            entry_def.name.to_case(Case::Snake),
+            entry_def.name.to_case(Case::Snake)
+        )],
+        false => vec![],
+    };
 
+    for d in entry_def.depends_on {
+        create_links_str.push(create_link_for_cardinality(
+            entry_def,
+            &d.field_name,
+            &link_type_name(&d.referenceable, &entry_def.referenceable()),
+            &d.cardinality,
+        ));
+    }
     if let Some(c) = &entry_def.depends_on_itself {
         create_links_str.push(create_link_for_cardinality(
             entry_def,
-            &depends_on_itself_field_name(&entry_def.singular_name, &entry_def.plural_name, c),
-            &link_type_name(
-                &EntryType::App(entry_def.singular_name),
-                &EntryType::App(entry_def.plural_name),
-            ),
+            &depends_on_itself_field_name(&entry_def.name, c),
+            &link_type_name(&entry_def.referenceable(), &entry_def.referenceable()),
             &c.clone().into(),
         ));
     }
@@ -170,15 +178,15 @@ pub fn create_{}({}: {}) -> ExternResult<Record> {{
   Ok(record)
 }}
 "#,
-        entry_def.singular_name.to_case(Case::Snake),
-        entry_def.singular_name.to_case(Case::Snake),
-        entry_def.singular_name.to_case(Case::Pascal),
-        entry_def.singular_name.to_case(Case::Snake),
-        entry_def.singular_name.to_case(Case::Pascal),
-        entry_def.singular_name.to_case(Case::Snake),
+        entry_def.name.to_case(Case::Snake),
+        entry_def.name.to_case(Case::Snake),
+        entry_def.name.to_case(Case::Pascal),
+        entry_def.name.to_case(Case::Snake),
+        entry_def.name.to_case(Case::Pascal),
+        entry_def.name.to_case(Case::Snake),
         create_links_str,
-        entry_def.singular_name.to_case(Case::Snake),
-        entry_def.singular_name.to_case(Case::Pascal)
+        entry_def.name.to_case(Case::Snake),
+        entry_def.name.to_case(Case::Pascal)
     )
 }
 
@@ -273,82 +281,55 @@ pub fn delete_{}(original_{}_hash: ActionHash) -> ExternResult<ActionHash> {{
     )
 }
 
-fn depends_on_handler(plural_name: &String, depends_on: &DependsOn) -> String {
-    let arg_name: String = match depends_on.entry_type {
-        EntryType::Agent => String::from("agent"),
-        EntryType::App(entry_type) => format!("{}_hash", entry_type),
+fn depends_on_handler(entry_def: &EntryDefinition, referenceable: &Referenceable) -> String {
+    let depends_on_snake = referenceable
+        .to_string(&Cardinality::Single)
+        .to_case(Case::Snake);
+    let arg_name = referenceable.field_name(&Cardinality::Single);
+    let arg_type: String = referenceable.hash_type().to_string();
+
+    let link_type_name = link_type_name(referenceable, &entry_def.referenceable());
+
+    let output_type = match entry_def.fixed {
+        true => String::from("EntryHash"),
+        false => String::from("ActionHash"),
     };
-    let arg_type: String = match depends_on.entry_type {
-        EntryType::Agent => String::from("AgentPubKey"),
-        _ => String::from("ActionHash"),
+
+    let plural_snake_entry_name =
+        pluralizer::pluralize(entry_def.name.as_str(), 2, false).to_case(Case::Snake);
+
+    let map_line = match entry_def.fixed {
+        true => String::from(".filter_map(|r| r.action().entry_hash().cloned())"),
+        false => String::from(".map(|r| r.action_address().clone())"),
     };
 
     format!(
         r#"
 #[hdk_extern]
-pub fn get_{}_for_{}({}: {}) -> ExternResult<Vec<ActionHash>> {{
-    let links = get_links({}, LinkTypes::{}, None)?;
+pub fn get_{plural_snake_entry_name}_for_{depends_on_snake}({arg_name}: {arg_type}) -> ExternResult<Vec<{output_type}>> {{
+    let links = get_links({arg_name}, LinkTypes::{link_type_name}, None)?;
     
     let get_input: Vec<GetInput> = links
         .into_iter()
-        .map(|link| GetInput::new(ActionHash::from(link.target).into(), GetOptions::default()))
+        .map(|link| GetInput::new({output_type}::from(link.target).into(), GetOptions::default()))
         .collect();
 
     // Get the records to filter out the deleted ones
     let records = HDK.with(|hdk| hdk.borrow().get(get_input))?;
 
-    let action_hashes: Vec<ActionHash> = records
+    let hashes: Vec<{output_type}> = records
         .into_iter()
         .filter_map(|r| r)
-        .map(|r| r.action_address().clone())
+        {map_line}
         .collect();
 
-    Ok(action_hashes)
+    Ok(hashes)
 }}"#,
-        plural_name.to_case(Case::Snake),
-        depends_on.entry_type.to_string().to_case(Case::Snake),
-        arg_name,
-        arg_type,
-        arg_name,
-        link_type_name(
-            &depends_on.entry_type,
-            &EntryType::App(plural_name.to_case(Case::Pascal))
-        ),
     )
 }
 
-fn depends_on_itself_handler(singular_name: &String, plural_name: &String) -> String {
-    format!(
-        r#"
-#[hdk_extern]
-pub fn get_{}_for_{}({}_hash: ActionHash) -> ExternResult<Vec<ActionHash>> {{
-    let links = get_links({}_hash, LinkTypes::{}, None)?;
-    
-    let get_input: Vec<GetInput> = links
-        .into_iter()
-        .map(|link| GetInput::new(ActionHash::from(link.target).into(), GetOptions::default()))
-        .collect();
-
-    // Get the records to filter out the deleted ones
-    let records = HDK.with(|hdk| hdk.borrow().get(get_input))?;
-
-    let action_hashes: Vec<ActionHash> = records
-        .into_iter()
-        .filter_map(|r| r)
-        .map(|r| r.action_address().clone())
-        .collect();
-
-    Ok(action_hashes)
-}}"#,
-        plural_name.to_case(Case::Snake),
-        singular_name.to_case(Case::Snake),
-        singular_name.to_case(Case::Snake),
-        singular_name.to_case(Case::Snake),
-        link_type_name(
-            &EntryType::App(singular_name.to_case(Case::Pascal)),
-            &EntryType::App(plural_name.to_case(Case::Pascal))
-        ),
-    )
+fn depends_on_itself_handler(entry_def: &EntryDefinition) -> String {
+    depends_on_handler(entry_def, &entry_def.referenceable())
 }
 
 fn initial_crud_handlers(
@@ -368,33 +349,27 @@ use {}::*;
     );
 
     if !crud.update {
-        initial.push_str(no_update_read_handler(&entry_def.singular_name).as_str());
+        initial.push_str(no_update_read_handler(entry_def).as_str());
     } else {
         if link_from_original_to_each_update {
-            initial
-                .push_str(read_handler_with_linking_to_updates(&entry_def.singular_name).as_str());
+            initial.push_str(read_handler_with_linking_to_updates(&entry_def.name).as_str());
         } else {
-            initial.push_str(
-                read_handler_without_linking_to_updates(&entry_def.singular_name).as_str(),
-            );
+            initial.push_str(read_handler_without_linking_to_updates(&entry_def).as_str());
         }
     }
     if crud.update {
-        initial.push_str(
-            update_handler(&entry_def.singular_name, link_from_original_to_each_update).as_str(),
-        );
+        initial
+            .push_str(update_handler(&entry_def.name, link_from_original_to_each_update).as_str());
     }
     if crud.delete {
-        initial.push_str(delete_handler(&entry_def.singular_name).as_str());
+        initial.push_str(delete_handler(&entry_def.name).as_str());
     }
 
     for d in &entry_def.depends_on {
-        initial.push_str(depends_on_handler(&entry_def.plural_name, &d).as_str());
+        initial.push_str(depends_on_handler(&entry_def, &d.referenceable).as_str());
     }
     if let Some(_cardinality) = &entry_def.depends_on_itself {
-        initial.push_str(
-            depends_on_itself_handler(&entry_def.singular_name, &entry_def.plural_name).as_str(),
-        );
+        initial.push_str(depends_on_itself_handler(&entry_def).as_str());
     }
 
     initial
@@ -416,10 +391,7 @@ pub fn add_crud_functions_to_coordinator(
     let mut file_tree = zome_file_tree.dna_file_tree.file_tree();
     insert_file(
         &mut file_tree,
-        &crate_src_path.join(format!(
-            "{}.rs",
-            entry_def.singular_name.to_case(Case::Snake)
-        )),
+        &crate_src_path.join(format!("{}.rs", entry_def.name.to_case(Case::Snake))),
         &initial_crud_handlers(
             integrity_zome_name,
             &entry_def,
@@ -437,7 +409,7 @@ pub fn add_crud_functions_to_coordinator(
             r#"pub mod {};
 
 {}"#,
-            entry_def.singular_name.to_case(Case::Snake),
+            entry_def.name.to_case(Case::Snake),
             s
         )
     })?;

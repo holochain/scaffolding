@@ -4,10 +4,13 @@ use holochain_types::prelude::ZomeManifest;
 use serde::Serialize;
 
 use crate::{
-    definitions::{Cardinality, DependsOn, EntryDefinition, FieldType},
     error::ScaffoldResult,
     file_tree::FileTree,
-    scaffold::entry_type::{crud::Crud, DependsOnItself},
+    scaffold::entry_type::{
+        crud::Crud,
+        definitions::{Cardinality, DependsOn, EntryDefinition},
+        DependsOnItself,
+    },
 };
 
 use super::{build_handlebars, render_template_file_tree_and_merge_with_existing};
@@ -24,8 +27,6 @@ pub struct ScaffoldEntryTypeData {
     entry_type: EntryDefinition,
     crud: Crud,
     link_from_original_to_each_update: bool,
-    depends_on: Vec<SimpleDependsOn>,
-    depends_on_itself: DependsOnItself,
 }
 pub fn scaffold_entry_type_templates(
     mut app_file_tree: FileTree,

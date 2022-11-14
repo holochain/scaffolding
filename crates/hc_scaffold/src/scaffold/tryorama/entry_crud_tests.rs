@@ -3,7 +3,7 @@ use std::{collections::BTreeMap, path::PathBuf};
 use convert_case::{Case, Casing};
 use holochain_types::prelude::ZomeManifest;
 
-use crate::{definitions::EntryDefinition, scaffold::entry_type::crud::Crud};
+use crate::scaffold::entry_type::{crud::Crud, definitions::EntryDefinition};
 
 use super::utils::common_tests_setup;
 
@@ -102,9 +102,9 @@ fn alice_create_entry(
 "#,
         create_depends_on_entries(create_fns_of_entry_type_this_entry_type_depends_on),
         entry_definition.js_sample_object(),
-        entry_definition.singular_name,
+        entry_definition.name,
         coordinator_zome,
-        entry_definition.singular_name
+        entry_definition.name
     )
 }
 
@@ -123,7 +123,7 @@ test('create {}', async t => {{
 {}
   }});
 }});"#,
-        entry_definition.singular_name,
+        entry_definition.name,
         common_tests_setup(happ_bundle_location_from_tests_root),
         alice_create_entry(
             entry_definition,
@@ -166,15 +166,15 @@ test('create and read {}', async t => {{
     assert.deepEqual(createInput, decode((createReadOutput.entry as any).Present.entry) as any);
   }});
 }});"#,
-        entry_definition.singular_name,
+        entry_definition.name,
         common_tests_setup(happ_bundle_location_from_tests_root),
         entry_definition.js_sample_object(),
-        entry_definition.singular_name,
+        entry_definition.name,
         coordinator_zome,
-        entry_definition.singular_name,
-        entry_definition.singular_name,
+        entry_definition.name,
+        entry_definition.name,
         coordinator_zome,
-        entry_definition.singular_name
+        entry_definition.name
     )
 }
 
@@ -197,16 +197,16 @@ pub fn update_entry_test(
     }});
     assert.deepEqual(contentUpdate, decode((readUpdatedOutput.entry as any).Present.entry) as any);
 "#,
-        entry_definition.singular_name.to_case(Case::Snake),
+        entry_definition.name.to_case(Case::Snake),
         coordinator_zome,
-        entry_definition.singular_name.to_case(Case::Snake)
+        entry_definition.name.to_case(Case::Snake)
     );
 
     let original_action_hash_field = match link_original_to_each_update {
         true => format!(
             r#"
       original_{}_hash: originalActionHash,"#,
-            entry_definition.singular_name.to_case(Case::Snake)
+            entry_definition.name.to_case(Case::Snake)
         ),
         false => String::from(""),
     };
@@ -262,27 +262,27 @@ test('create and update {}', async t => {{
 {}
   }});
 }});"#,
-        entry_definition.singular_name.to_case(Case::Snake),
+        entry_definition.name.to_case(Case::Snake),
         common_tests_setup(happ_bundle_location_from_tests_root),
         entry_definition.js_sample_object(),
-        entry_definition.singular_name.to_case(Case::Snake),
+        entry_definition.name.to_case(Case::Snake),
         coordinator_zome,
-        entry_definition.singular_name.to_case(Case::Snake),
-        entry_definition.singular_name.to_case(Case::Snake),
+        entry_definition.name.to_case(Case::Snake),
+        entry_definition.name.to_case(Case::Snake),
         entry_definition.js_sample_object(),
         original_action_hash_field,
-        entry_definition.singular_name.to_case(Case::Snake),
-        entry_definition.singular_name.to_case(Case::Snake),
+        entry_definition.name.to_case(Case::Snake),
+        entry_definition.name.to_case(Case::Snake),
         coordinator_zome,
-        entry_definition.singular_name.to_case(Case::Snake),
+        entry_definition.name.to_case(Case::Snake),
         read_after_update,
-        entry_definition.singular_name.to_case(Case::Snake),
+        entry_definition.name.to_case(Case::Snake),
         entry_definition.js_sample_object(),
         original_action_hash_field,
-        entry_definition.singular_name.to_case(Case::Snake),
-        entry_definition.singular_name.to_case(Case::Snake),
+        entry_definition.name.to_case(Case::Snake),
+        entry_definition.name.to_case(Case::Snake),
         coordinator_zome,
-        entry_definition.singular_name.to_case(Case::Snake),
+        entry_definition.name.to_case(Case::Snake),
         read_after_update
     )
 }
@@ -305,7 +305,7 @@ pub fn delete_entry_test(
     }});
     assert.equal(readDeletedOutput, undefined);
 "#,
-        entry_definition.singular_name, coordinator_zome, entry_definition.singular_name
+        entry_definition.name, coordinator_zome, entry_definition.name
     );
     format!(
         r#"
@@ -334,15 +334,15 @@ test('create and delete {}', async t => {{
 {}
   }});
 }});"#,
-        entry_definition.singular_name,
+        entry_definition.name,
         common_tests_setup(happ_bundle_location_from_tests_root),
         entry_definition.js_sample_object(),
-        entry_definition.singular_name,
+        entry_definition.name,
         coordinator_zome,
-        entry_definition.singular_name,
-        entry_definition.singular_name,
+        entry_definition.name,
+        entry_definition.name,
         coordinator_zome,
-        entry_definition.singular_name,
+        entry_definition.name,
         read_after_update
     )
 }

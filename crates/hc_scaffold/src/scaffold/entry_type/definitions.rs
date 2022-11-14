@@ -5,7 +5,11 @@ use rand::Rng;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
-use crate::scaffold::entry_type::DependsOnItself;
+use crate::{
+    error::{ScaffoldError, ScaffoldResult},
+    scaffold::entry_type::DependsOnItself,
+    utils::check_snake_case,
+};
 
 #[derive(Deserialize, Debug, Clone, Serialize)]
 pub enum FieldType {
@@ -194,43 +198,113 @@ impl FieldDefinition {
     }
 }
 
-#[derive(Serialize, Clone, Debug)]
-#[serde(tag = "type")]
-pub enum EntryType {
-    Agent,
-    App(String),
+#[derive(Serialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub struct EntryTypeReference {
+    pub entry_type: String,
+    pub reference_entry_hash: bool,
 }
-
-pub fn parse_entry_type(s: &str) -> EntryType {
-    match s.to_string().to_case(Case::Snake).as_str() {
-        "agent" => EntryType::Agent,
-        _ => EntryType::App(s.to_string().to_case(Case::Pascal)),
+impl EntryTypeReference {
+    pub fn hash_type(&self) -> FieldType {
+        match self.reference_entry_hash {
+            true => FieldType::EntryHash,
+            false => FieldType::ActionHash,
+        }
     }
 }
 
-impl ToString for EntryType {
-    fn to_string(&self) -> String {
+pub fn parse_entry_type_reference(s: &str) -> ScaffoldResult<EntryTypeReference> {
+    check_snake_case(s.into(), "app reference type")?;
+
+    let sp: Vec<&str> = s.split(":").collect();
+    let reference_entry_hash = match sp.len() {
+        0 | 1 => false,
+        _ => match sp[1] {
+            "EntryHash" => true,
+            "ActionHash" => false,
+            _ => Err(ScaffoldError::InvalidArguments(String::from(
+                "second argument for reference type must be \"entry_hash\" or \"action_hash\"",
+            )))?,
+        },
+    };
+
+    Ok(EntryTypeReference {
+        entry_type: sp[0].to_string(),
+        reference_entry_hash,
+    })
+}
+
+#[derive(Serialize, Clone, Debug)]
+#[serde(tag = "type")]
+pub enum Referenceable {
+    Agent { role: String },
+    EntryType(EntryTypeReference),
+}
+
+pub fn parse_referenceable(s: &str) -> ScaffoldResult<Referenceable> {
+    check_snake_case(s.into(), "reference type")?;
+
+    let sp: Vec<&str> = s.split(":").collect();
+
+    Ok(match sp[0] {
+        "agent" => match sp.len() {
+            0 | 1 => Referenceable::Agent {
+                role: String::from("agent"),
+            },
+            _ => Referenceable::Agent {
+                role: sp[1].to_string(),
+            },
+        },
+        _ => Referenceable::EntryType(parse_entry_type_reference(s)?),
+    })
+}
+
+impl Referenceable {
+    pub fn hash_type(&self) -> FieldType {
         match self {
-            EntryType::Agent => String::from("Agent"),
-            EntryType::App(s) => s.clone(),
+            Referenceable::Agent { .. } => FieldType::AgentPubKey,
+            Referenceable::EntryType(r) => r.hash_type(),
+        }
+    }
+
+    pub fn field_name(&self, c: &Cardinality) -> String {
+        let s = self.to_string(c).to_case(Case::Snake);
+
+        match self {
+            Referenceable::Agent { .. } => s,
+            _ => match c {
+                Cardinality::Vector => format!("{}_hashes", s),
+                _ => format!("{}_hash", s),
+            },
+        }
+    }
+
+    pub fn to_string(&self, c: &Cardinality) -> String {
+        let singular = match self {
+            Referenceable::Agent { role } => role.clone(),
+            Referenceable::EntryType(r) => r.entry_type.clone(),
+        };
+
+        match c {
+            Cardinality::Vector => pluralizer::pluralize(singular.as_str(), 2, false),
+            _ => pluralizer::pluralize(singular.as_str(), 1, false),
         }
     }
 }
 
 #[derive(Serialize, Clone, Debug)]
 pub struct DependsOn {
-    pub entry_type: EntryType,
+    pub referenceable: Referenceable,
     pub cardinality: Cardinality,
     pub field_name: String,
 }
 
 #[derive(Serialize, Clone)]
 pub struct EntryDefinition {
-    pub singular_name: String,
-    pub plural_name: String,
+    pub name: String,
     pub fields: Vec<FieldDefinition>,
     pub depends_on: Vec<DependsOn>,
     pub depends_on_itself: DependsOnItself,
+    pub fixed: bool,
 }
 
 impl EntryDefinition {
@@ -252,6 +326,13 @@ impl EntryDefinition {
 }}"#,
             fields_samples.join(",\n  ")
         )
+    }
+
+    pub fn referenceable(&self) -> Referenceable {
+        Referenceable::EntryType(EntryTypeReference {
+            entry_type: self.name,
+            reference_entry_hash: self.fixed,
+        })
     }
 }
 

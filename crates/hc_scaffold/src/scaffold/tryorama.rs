@@ -1,7 +1,6 @@
 use std::{collections::BTreeMap, ffi::OsString, path::PathBuf};
 
 use crate::{
-    definitions::EntryDefinition,
     error::ScaffoldResult,
     file_tree::{create_dir_all, insert_file_tree_in_dir, FileTree},
 };
@@ -17,7 +16,11 @@ use convert_case::{Case, Casing};
 use entry_crud_tests::entry_crud_tests;
 use holochain_types::prelude::ZomeManifest;
 
-use super::{dna::DnaFileTree, entry_type::crud::Crud, zome::ZomeFileTree};
+use super::{
+    dna::DnaFileTree,
+    entry_type::{crud::Crud, definitions::EntryDefinition},
+    zome::ZomeFileTree,
+};
 
 fn find_or_choose_tryorama_package_path(_app_file_tree: &FileTree) -> ScaffoldResult<PathBuf> {
     // TODO: Actually implement this
@@ -68,7 +71,7 @@ pub fn add_tryorama_tests_for_entry_def(
         .join(dna_name)
         .join(coordinator_zome_name);
 
-    let kebab_entry_def_name = entry_def.singular_name.clone().to_case(Case::Kebab);
+    let kebab_entry_def_name = entry_def.name.clone().to_case(Case::Kebab);
 
     let mut file_tree = coordinator_zome_file_tree.dna_file_tree.file_tree();
 

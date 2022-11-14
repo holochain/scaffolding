@@ -3,7 +3,6 @@ use dialoguer::{theme::ColorfulTheme, Select};
 use holochain_types::prelude::DnaManifest;
 
 use crate::{
-    definitions::EntryType,
     error::{ScaffoldError, ScaffoldResult},
     file_tree::FileTree,
     templates::link_type::scaffold_link_type_templates,
@@ -16,8 +15,9 @@ use self::{
 
 use super::{
     entry_type::{
+        definitions::{Cardinality, Referenceable},
         integrity::get_all_entry_types,
-        utils::{get_or_choose_entry_type, get_or_choose_optional_entry_type},
+        utils::{get_or_choose_optional_reference_type, get_or_choose_referenceable},
     },
     zome::{utils::get_coordinator_zomes_for_integrity, ZomeFileTree},
 };
@@ -25,73 +25,47 @@ use super::{
 pub mod coordinator;
 pub mod integrity;
 
-pub fn link_type_name(from_entry_type: &EntryType, to_entry_type: &EntryType) -> String {
+pub fn link_type_name(
+    from_referenceable: &Referenceable,
+    to_referenceable: &Referenceable,
+) -> String {
     format!(
         "{}To{}",
-        from_entry_type.to_string().to_case(Case::Pascal),
-        to_entry_type.to_string().to_case(Case::Pascal)
+        pluralizer::pluralize(
+            from_referenceable.to_string(&Cardinality::Single).as_str(),
+            1,
+            false
+        )
+        .to_case(Case::Pascal),
+        pluralizer::pluralize(
+            to_referenceable.to_string(&Cardinality::Vector).as_str(),
+            2,
+            false
+        )
+        .to_case(Case::Pascal),
     )
-}
-
-pub fn choose_use_entry_hash(prompt: &String) -> ScaffoldResult<bool> {
-    let selection = Select::with_theme(&ColorfulTheme::default())
-        .with_prompt(prompt)
-        .default(0)
-        .item("ActionHash (recommended)")
-        .item("EntryHash")
-        .interact()?;
-
-    match selection {
-        0 => Ok(false),
-        _ => Ok(true),
-    }
 }
 
 pub fn scaffold_link_type(
     zome_file_tree: ZomeFileTree,
     template_file_tree: &FileTree,
-    from_entry_type: &Option<EntryType>,
-    to_entry_type: &Option<EntryType>,
-    link_from_entry_hash: &Option<bool>,
-    link_to_entry_hash: &Option<bool>,
+    from_referenceable: &Option<Referenceable>,
+    to_referenceable: &Option<Referenceable>,
 ) -> ScaffoldResult<(FileTree, String)> {
-    let from_entry_type = get_or_choose_entry_type(
+    let from_referenceable = get_or_choose_referenceable(
         &zome_file_tree,
-        from_entry_type,
+        from_referenceable,
         &String::from("Link from which entry type?"),
     )?;
 
-    let link_from_entry_hash: bool = match link_from_entry_hash {
-        Some(l) => l.clone(),
-        None => match from_entry_type {
-            EntryType::Agent => false,
-            _ => choose_use_entry_hash(&String::from(
-                "Link from the entry hash or the action hash?",
-            ))?,
-        },
-    };
-
-    let to_entry_type = get_or_choose_optional_entry_type(
+    let to_referenceable = get_or_choose_optional_reference_type(
         &zome_file_tree,
-        to_entry_type,
+        to_referenceable,
         &String::from("Link to which entry type?"),
     )?;
 
-    let link_to_entry_hash: bool = match to_entry_type.clone() {
-        None => false,
-        Some(to_entry_type) => match link_to_entry_hash {
-            Some(l) => l.clone(),
-            None => match to_entry_type {
-                EntryType::Agent => false,
-                _ => choose_use_entry_hash(&String::from(
-                    "Link to the entry hash or the action hash?",
-                ))?,
-            },
-        },
-    };
-
-    let link_type_name = match to_entry_type.clone() {
-        Some(to_entry_type) => link_type_name(&from_entry_type, &to_entry_type),
+    let link_type_name = match to_referenceable.clone() {
+        Some(to_entry_type) => link_type_name(&from_referenceable, &to_entry_type),
         None => input_snake_case(&String::from("Enter link type name:"))?.to_case(Case::Pascal),
     };
 
@@ -133,10 +107,8 @@ pub fn scaffold_link_type(
         zome_file_tree,
         &integrity_zome_name,
         &link_type_name,
-        &from_entry_type,
-        &to_entry_type,
-        link_from_entry_hash,
-        link_to_entry_hash,
+        &from_referenceable,
+        &to_referenceable,
     )?;
 
     let file_tree = scaffold_link_type_templates(
@@ -144,8 +116,8 @@ pub fn scaffold_link_type(
         &template_file_tree,
         &dna_manifest.name(),
         &coordinator_zome,
-        &from_entry_type,
-        &to_entry_type,
+        &from_referenceable,
+        &to_referenceable,
     )?;
 
     Ok((file_tree, link_type_name))

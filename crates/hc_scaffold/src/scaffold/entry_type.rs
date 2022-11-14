@@ -1,7 +1,6 @@
 use std::{collections::BTreeMap, ffi::OsString, path::PathBuf};
 
 use crate::{
-    definitions::{Cardinality, DependsOn, EntryDefinition, EntryType, FieldDefinition, FieldType},
     file_tree::FileTree,
     templates::entry_type::scaffold_entry_type_templates,
     utils::{input_snake_case, input_snake_case_with_initial_text},
@@ -18,9 +17,16 @@ use crate::error::{ScaffoldError, ScaffoldResult};
 use self::{
     coordinator::{add_crud_functions_to_coordinator, updates_link_name},
     crud::Crud,
+    definitions::{
+        Cardinality, DependsOn, EntryDefinition, EntryTypeReference, FieldDefinition, FieldType,
+        Referenceable,
+    },
     fields::choose_fields,
     integrity::{add_entry_type_to_integrity_zome, get_all_entry_types},
-    utils::{choose_entry_type, choose_multiple_entry_types},
+    utils::{
+        choose_fixed, choose_multiple_entry_types, choose_reference_entry_hash,
+        choose_referenceable,
+    },
 };
 
 use super::{
@@ -35,15 +41,13 @@ use super::{
 
 pub mod coordinator;
 pub mod crud;
+pub mod definitions;
 pub mod fields;
 pub mod integrity;
 pub mod utils;
 
-fn choose_cardinality(entry_type: &EntryType) -> ScaffoldResult<Cardinality> {
-    let hash_type = match entry_type {
-        EntryType::Agent => String::from("AgentPubKey"),
-        _ => String::from("ActionHash"),
-    };
+fn choose_cardinality(referenceable: &Referenceable) -> ScaffoldResult<Cardinality> {
+    let hash_type = referenceable.hash_type().to_string();
 
     let selection = Select::with_theme(&ColorfulTheme::default())
         .with_prompt("Select the type of dependency to that entry type:")
@@ -60,35 +64,22 @@ fn choose_cardinality(entry_type: &EntryType) -> ScaffoldResult<Cardinality> {
     }
 }
 
-fn choose_depends_on(entry_types: &Vec<String>) -> ScaffoldResult<Vec<DependsOn>> {
+fn choose_depends_on(entry_types: &Vec<EntryTypeReference>) -> ScaffoldResult<Vec<DependsOn>> {
     let mut finished = false;
 
     let mut depends_on: Vec<DependsOn> = Vec::new();
 
     while !finished {
-        let entry_type = choose_entry_type(
+        let referenceable = choose_referenceable(
             &entry_types,
             &String::from("Select an existing entry type that the new entry type depends on:"),
-            true,
         )?;
-        let cardinality = choose_cardinality(&entry_type)?;
+        let cardinality = choose_cardinality(&referenceable)?;
 
-        let field_name = match entry_type {
-            EntryType::Agent => input_snake_case(&String::from("Input field name:"))?,
-            EntryType::App(et) => {
-                let initial_text = match cardinality {
-                    Cardinality::Vector => format!("{}_hashes", et),
-                    _ => format!("{}_hash", et),
-                };
-                input_snake_case_with_initial_text(
-                    &String::from("Input field name:"),
-                    &initial_text,
-                )?
-            }
-        };
+        let field_name = referenceable.field_name(&cardinality);
 
         depends_on.push(DependsOn {
-            entry_type,
+            referenceable,
             cardinality,
             field_name,
         });
@@ -107,38 +98,39 @@ fn choose_depends_on(entry_types: &Vec<String>) -> ScaffoldResult<Vec<DependsOn>
 
 fn get_or_choose_depends_on(
     zome_file_tree: &ZomeFileTree,
-    depends_on: &Option<Vec<EntryType>>,
+    depends_on: &Option<Vec<Referenceable>>,
 ) -> ScaffoldResult<Vec<DependsOn>> {
     let entry_types = get_all_entry_types(zome_file_tree)?.unwrap_or_else(|| vec![]);
+
+    let entry_types_names: Vec<String> = entry_types
+        .into_iter()
+        .map(|et| et.entry_type.clone())
+        .collect();
 
     match depends_on {
         Some(et) => match et
             .iter()
             .filter_map(|t| match t {
-                EntryType::Agent => None,
-                EntryType::App(et) => Some(et),
+                Referenceable::Agent { .. } => None,
+                Referenceable::EntryType(et) => Some(et),
             })
-            .find(|t| !entry_types.contains(t))
+            .find(|t| !entry_types_names.contains(&t.entry_type))
         {
             Some(t) => Err(ScaffoldError::EntryTypeNotFound(
-                t.clone(),
+                t.entry_type.clone(),
                 zome_file_tree.dna_file_tree.dna_manifest.name(),
                 zome_file_tree.zome_manifest.name.0.to_string(),
             )),
             None => Ok(et
                 .clone()
                 .into_iter()
-                .map(|t| match t {
-                    EntryType::Agent => DependsOn {
-                        entry_type: EntryType::Agent,
-                        field_name: "agent".into(),
-                        cardinality: Cardinality::Single,
-                    },
-                    EntryType::App(t) => DependsOn {
-                        field_name: format!("{}_hash", t),
-                        entry_type: EntryType::App(t),
-                        cardinality: Cardinality::Single,
-                    },
+                .map(|referenceable| {
+                    let cardinality = Cardinality::Single;
+                    DependsOn {
+                        referenceable: referenceable.clone(),
+                        field_name: referenceable.field_name(&cardinality),
+                        cardinality,
+                    }
                 })
                 .collect()),
         },
@@ -166,10 +158,7 @@ For example, in a forum app, the "comment" entry type depends on the "post" entr
     }
 }
 
-pub fn choose_depends_on_itself(
-    singular_name: &String,
-    plural_name: &String,
-) -> ScaffoldResult<DependsOnItself> {
+pub fn choose_depends_on_itself(name: &String) -> ScaffoldResult<DependsOnItself> {
     let depends = Confirm::with_theme(&ColorfulTheme::default())
         .with_prompt(
             "Does a new entry of this type depend on previously existing entries of its same type?",
@@ -184,11 +173,11 @@ pub fn choose_depends_on_itself(
             "Does an entry of this type depend on an Option or a Vector of entries of this type?",
         )
         .default(0)
+        .item(format!("Option ({}_hash: Option<ActionHash>)", name))
         .item(format!(
-            "Option ({}_hash: Option<ActionHash>)",
-            singular_name
+            "Vector ({}_hashes: Vec<ActionHash>)",
+            pluralizer::pluralize(name, 2, false).to_case(Case::Snake)
         ))
-        .item(format!("Vector ({}_hashes: Vec<ActionHash>)", plural_name))
         .interact()?;
 
     match selection {
@@ -227,23 +216,22 @@ pub fn parse_depends_on_itself(depends_on_itself: &str) -> Result<DependsOnItsel
 }
 
 pub fn depends_on_itself_field_name(
-    singular_name: &String,
-    plural_name: &String,
+    name: &String,
     cardinality: &SelfDependencyCardinality,
 ) -> String {
     match cardinality.clone().into() {
-        Cardinality::Vector => format!("previous_{}_hashes", plural_name.to_case(Case::Snake)),
-        _ => format!("{}_hash", singular_name.to_case(Case::Snake)),
+        Cardinality::Vector => format!(
+            "previous_{}_hashes",
+            pluralizer::pluralize(name, 2, false).to_case(Case::Snake)
+        ),
+        _ => format!("{}_hash", name.to_case(Case::Snake)),
     }
 }
 
 pub fn depends_on_field_definition(depends_on: &DependsOn) -> FieldDefinition {
     FieldDefinition {
         field_name: depends_on.field_name.clone(),
-        field_type: match depends_on.entry_type {
-            EntryType::Agent => FieldType::AgentPubKey,
-            _ => FieldType::ActionHash,
-        },
+        field_type: depends_on.referenceable.hash_type(),
         widget: None,
         cardinality: depends_on.cardinality.clone(),
     }
@@ -252,18 +240,18 @@ pub fn depends_on_field_definition(depends_on: &DependsOn) -> FieldDefinition {
 pub fn scaffold_entry_type(
     zome_file_tree: ZomeFileTree,
     template_file_tree: &FileTree,
-    singular_name: &String,
-    plural_name: &String,
+    name: &String,
     maybe_crud: &Option<Crud>,
+    maybe_fixed: &Option<bool>,
     maybe_link_from_original_to_each_update: &Option<bool>,
-    maybe_depends_on: &Option<Vec<EntryType>>,
+    maybe_depends_on: &Option<Vec<Referenceable>>,
     maybe_depends_on_itself: &Option<DependsOnItself>,
     maybe_fields: &Option<Vec<(String, FieldType)>>,
 ) -> ScaffoldResult<FileTree> {
     let depends_on = get_or_choose_depends_on(&zome_file_tree, maybe_depends_on)?;
     let depends_on_itself: DependsOnItself = match maybe_depends_on_itself {
         Some(d) => d.clone(),
-        None => choose_depends_on_itself(singular_name, plural_name)?,
+        None => choose_depends_on_itself(name)?,
     };
 
     let mut depends_fields: Vec<FieldDefinition> = Vec::new();
@@ -274,7 +262,7 @@ pub fn scaffold_entry_type(
     if let DependsOnItself::Some(cardinality) = depends_on_itself.clone() {
         depends_fields.push(FieldDefinition {
             widget: None,
-            field_name: depends_on_itself_field_name(&singular_name, &plural_name, &cardinality),
+            field_name: depends_on_itself_field_name(&name, &cardinality),
             cardinality: cardinality.into(),
             field_type: FieldType::ActionHash,
         });
@@ -306,12 +294,51 @@ pub fn scaffold_entry_type(
         }
     };
 
+    let fixed = match maybe_fixed {
+        Some(r) => r.clone(),
+        None => choose_fixed()?,
+    };
+
+    let (crud, link_from_original_to_each_update) = match fixed {
+        true => (
+            Crud {
+                update: false,
+                delete: false,
+            },
+            false,
+        ),
+        false => {
+            let crud = match maybe_crud {
+                Some(c) => c.clone(),
+                None => choose_crud(),
+            };
+
+            let link_from_original_to_each_update = match crud.update {
+                true => match maybe_link_from_original_to_each_update {
+                    Some(l) => l.clone(),
+                    None => {
+                        let selection = Select::with_theme(&ColorfulTheme::default())
+                .with_prompt("Should a link from the original entry be created when this entry is updated?")
+                .default(0)
+                .item("Yes (more storage cost but better read performance, recommended)")
+                .item("No (less storage cost but worse read performance)")
+                .interact()?;
+
+                        selection == 0
+                    }
+                },
+                false => false,
+            };
+            (crud, link_from_original_to_each_update)
+        }
+    };
+
     let entry_def = EntryDefinition {
-        singular_name: singular_name.clone(),
-        plural_name: plural_name.clone(),
+        name: name.clone(),
         fields,
         depends_on: depends_on.clone(),
         depends_on_itself: depends_on_itself.clone(),
+        fixed,
     };
 
     let integrity_zome_name = zome_file_tree.zome_manifest.name.0.to_string();
@@ -321,19 +348,13 @@ pub fn scaffold_entry_type(
     for d in depends_on.clone() {
         zome_file_tree = add_link_type_to_integrity_zome(
             zome_file_tree,
-            &link_type_name(
-                &d.entry_type,
-                &EntryType::App(plural_name.to_case(Case::Pascal)),
-            ),
+            &link_type_name(&d.referenceable, &entry_def.referenceable()),
         )?;
     }
     if depends_on_itself.is_some() {
         zome_file_tree = add_link_type_to_integrity_zome(
             zome_file_tree,
-            &link_type_name(
-                &EntryType::App(singular_name.to_case(Case::Pascal)),
-                &EntryType::App(plural_name.to_case(Case::Pascal)),
-            ),
+            &link_type_name(&entry_def.referenceable(), &entry_def.referenceable()),
         )?;
     }
 
@@ -363,33 +384,9 @@ pub fn scaffold_entry_type(
         }
     }?;
 
-    let crud = match maybe_crud {
-        Some(c) => c.clone(),
-        None => choose_crud(),
-    };
-
-    let link_from_original_to_each_update = match crud.update {
-        true => match maybe_link_from_original_to_each_update {
-            Some(l) => l.clone(),
-            None => {
-                let selection = Select::with_theme(&ColorfulTheme::default())
-                .with_prompt("Should a link from the original entry be created when this entry is updated?")
-                .default(0)
-                .item("Yes (more storage cost but better read performance, recommended)")
-                .item("No (less storage cost but worse read performance)")
-                .interact()?;
-
-                selection == 0
-            }
-        },
-        false => false,
-    };
-
     if link_from_original_to_each_update {
-        zome_file_tree = add_link_type_to_integrity_zome(
-            zome_file_tree,
-            &updates_link_name(&entry_def.singular_name),
-        )?;
+        zome_file_tree =
+            add_link_type_to_integrity_zome(zome_file_tree, &updates_link_name(&entry_def.name))?;
     }
 
     let zome_file_tree =
@@ -406,18 +403,24 @@ pub fn scaffold_entry_type(
     let mut create_fns_for_depends_on: BTreeMap<String, (ZomeManifest, String)> = BTreeMap::new();
 
     for d in depends_on.clone() {
-        if let EntryType::App(entry_type) = d.entry_type {
+        if let Referenceable::EntryType(entry_type_reference) = d.referenceable {
             let (zome, fn_name) = find_extern_function_or_choose(
                 &zome_file_tree.dna_file_tree,
                 &coordinator_zomes_for_integrity,
-                &format!("create_{}", entry_type.to_case(Case::Snake)),
                 &format!(
-                    "In which function is a {} created",
-                    entry_type.to_case(Case::Pascal)
+                    "create_{}",
+                    entry_type_reference.entry_type.to_case(Case::Snake)
+                ),
+                &format!(
+                    "In which function is a {} created?",
+                    entry_type_reference.entry_type.to_case(Case::Pascal)
                 ),
             )?;
 
-            create_fns_for_depends_on.insert(entry_type.clone(), (zome, fn_name));
+            create_fns_for_depends_on.insert(
+                entry_type_reference.entry_type.clone(),
+                (zome, fn_name.sig.ident.to_string()),
+            );
         }
     }
 

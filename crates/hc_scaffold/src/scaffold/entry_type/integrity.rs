@@ -9,14 +9,17 @@ use std::{ffi::OsString, path::PathBuf};
 use crate::error::{ScaffoldError, ScaffoldResult};
 use crate::file_tree::insert_file;
 use crate::scaffold::dna::DnaFileTree;
+use crate::scaffold::zome::coordinator::find_extern_function_in_zomes;
+use crate::scaffold::zome::utils::get_coordinator_zomes_for_integrity;
 use crate::{
-    definitions::EntryDefinition,
     file_tree::{find_map_rust_files, map_file, map_rust_files, FileTree},
     scaffold::zome::ZomeFileTree,
 };
 
+use super::definitions::{EntryDefinition, EntryTypeReference};
+
 pub fn render_entry_definition_struct(entry_def: &EntryDefinition) -> ScaffoldResult<TokenStream> {
-    let name: syn::Expr = syn::parse_str(entry_def.singular_name.to_case(Case::Pascal).as_str())?;
+    let name: syn::Expr = syn::parse_str(entry_def.name.to_case(Case::Pascal).as_str())?;
 
     let fields: Vec<TokenStream> = entry_def
         .fields
@@ -68,7 +71,7 @@ pub fn add_entry_type_to_integrity_zome(
     let dna_manifest = zome_file_tree.dna_file_tree.dna_manifest.clone();
     let zome_manifest = zome_file_tree.zome_manifest.clone();
 
-    let snake_entry_def_name = entry_def.singular_name.to_case(Case::Snake);
+    let snake_entry_def_name = entry_def.name.to_case(Case::Snake);
     let entry_def_file = render_entry_definition_file(entry_def)?;
 
     let entry_types = get_all_entry_types(&zome_file_tree)?;
@@ -96,7 +99,7 @@ pub use {}::*;
         )
     })?;
 
-    let pascal_entry_def_name = entry_def.singular_name.to_case(Case::Pascal);
+    let pascal_entry_def_name = entry_def.name.to_case(Case::Pascal);
 
     let v: Vec<OsString> = crate_src_path
         .clone()
@@ -180,7 +183,9 @@ pub use {}::*;
     Ok(zome_file_tree)
 }
 
-pub fn get_all_entry_types(zome_file_tree: &ZomeFileTree) -> ScaffoldResult<Option<Vec<String>>> {
+pub fn get_all_entry_types(
+    zome_file_tree: &ZomeFileTree,
+) -> ScaffoldResult<Option<Vec<EntryTypeReference>>> {
     let crate_src_path = zome_file_tree.zome_crate_path.join("src");
     let crate_src_path_iter: Vec<OsString> =
         crate_src_path.iter().map(|s| s.to_os_string()).collect();
@@ -219,7 +224,41 @@ pub fn get_all_entry_types(zome_file_tree: &ZomeFileTree) -> ScaffoldResult<Opti
                 .map(|v| v.ident.to_string())
                 .collect();
 
-            Ok(Some(variants))
+            let coordinators_for_zome = get_coordinator_zomes_for_integrity(
+                &zome_file_tree.dna_file_tree.dna_manifest,
+                &zome_file_tree.zome_manifest.name.0.to_string(),
+            );
+
+            let mut entry_types: Vec<EntryTypeReference> = Vec::new();
+
+            let entry_hash_type: syn::Type = syn::parse_str("EntryHash")?;
+
+            for v in variants {
+                let referenced_by_entry_hash = match find_extern_function_in_zomes(
+                    &zome_file_tree.dna_file_tree,
+                    &coordinators_for_zome,
+                    &format!("read_{}", v),
+                )? {
+                    Some((_z, item_fn)) => {
+                        match item_fn
+                            .sig
+                            .inputs
+                            .first()
+                            .expect("Extern function must have one argument")
+                        {
+                            syn::FnArg::Typed(typed) => (*typed.ty).eq(&entry_hash_type),
+                            _ => false,
+                        }
+                    }
+                    None => false,
+                };
+                entry_types.push(EntryTypeReference {
+                    entry_type: v,
+                    reference_entry_hash: referenced_by_entry_hash,
+                });
+            }
+
+            Ok(Some(entry_types))
         }
         _ => Err(ScaffoldError::MultipleEntryTypesDefsFoundForIntegrityZome(
             zome_file_tree.dna_file_tree.dna_manifest.name(),

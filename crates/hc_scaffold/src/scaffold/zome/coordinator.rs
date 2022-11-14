@@ -4,6 +4,7 @@ use dialoguer::{theme::ColorfulTheme, Select};
 use holochain_types::prelude::{
     DnaManifest, DnaManifestCurrentBuilder, ZomeDependency, ZomeManifest, ZomeName,
 };
+use syn::ItemFn;
 
 use crate::{
     error::{ScaffoldError, ScaffoldResult},
@@ -57,14 +58,14 @@ pub fn init(_: ()) -> ExternResult<InitCallbackResult> {{
 }
 
 fn choose_extern_function(
-    functions_by_zome: &BTreeMap<String, Vec<String>>,
+    functions_by_zome: &BTreeMap<String, Vec<ItemFn>>,
     prompt: &String,
 ) -> ScaffoldResult<(String, String)> {
     let all_functions: Vec<(String, String)> = functions_by_zome
         .iter()
         .map(|(z, fns)| {
             fns.iter()
-                .map(|f| (z.clone(), f.clone()))
+                .map(|f| (z.clone(), f.sig.ident.to_string()))
                 .collect::<Vec<(String, String)>>()
         })
         .flatten()
@@ -88,8 +89,8 @@ pub fn find_extern_function_or_choose(
     coordinator_zomes: &Vec<ZomeManifest>,
     fn_name_to_find: &String,
     prompt: &String,
-) -> ScaffoldResult<(ZomeManifest, String)> {
-    let mut functions_by_zome: BTreeMap<String, Vec<String>> = BTreeMap::new();
+) -> ScaffoldResult<(ZomeManifest, ItemFn)> {
+    let mut functions_by_zome: BTreeMap<String, Vec<ItemFn>> = BTreeMap::new();
 
     for coordinator_zome in coordinator_zomes {
         let dna_file_tree = DnaFileTree::from_dna_manifest_path(
@@ -98,11 +99,13 @@ pub fn find_extern_function_or_choose(
         )?;
         let zome_file_tree =
             ZomeFileTree::from_zome_manifest(dna_file_tree, coordinator_zome.clone())?;
-
         let all_extern_functions = find_all_extern_functions(&zome_file_tree)?;
 
-        if all_extern_functions.contains(&fn_name_to_find) {
-            return Ok((coordinator_zome.clone(), fn_name_to_find.clone()));
+        if let Some(item_fn) = all_extern_functions
+            .iter()
+            .find(|item_fn| item_fn.sig.ident.to_string().eq(&fn_name_to_find))
+        {
+            return Ok((coordinator_zome.clone(), item_fn.clone()));
         }
 
         functions_by_zome.insert(coordinator_zome.name.to_string(), all_extern_functions);
@@ -123,7 +126,42 @@ pub fn find_extern_function_or_choose(
     }
 }
 
-pub fn find_all_extern_functions(zome_file_tree: &ZomeFileTree) -> ScaffoldResult<Vec<String>> {
+pub fn find_extern_function_in_zome(
+    zome_file_tree: &ZomeFileTree,
+    fn_name: &String,
+) -> ScaffoldResult<Option<ItemFn>> {
+    let all_extern_functions = find_all_extern_functions(&zome_file_tree)?;
+    Ok(all_extern_functions
+        .into_iter()
+        .find(|f| f.sig.ident.eq(fn_name)))
+}
+
+pub fn find_extern_function_in_zomes(
+    dna_file_tree: &DnaFileTree,
+    zomes: &Vec<ZomeManifest>,
+    fn_name_to_find: &String,
+) -> ScaffoldResult<Option<(ZomeManifest, ItemFn)>> {
+    for coordinator_zome in zomes {
+        let dna_file_tree = DnaFileTree::from_dna_manifest_path(
+            dna_file_tree.file_tree_ref().clone(),
+            &dna_file_tree.dna_manifest_path,
+        )?;
+        let zome_file_tree =
+            ZomeFileTree::from_zome_manifest(dna_file_tree, coordinator_zome.clone())?;
+        let all_extern_functions = find_all_extern_functions(&zome_file_tree)?;
+
+        if let Some(item_fn) = all_extern_functions
+            .iter()
+            .find(|item_fn| item_fn.sig.ident.to_string().eq(&fn_name_to_find))
+        {
+            return Ok(Some((coordinator_zome.clone(), item_fn.clone())));
+        }
+    }
+
+    Ok(None)
+}
+
+pub fn find_all_extern_functions(zome_file_tree: &ZomeFileTree) -> ScaffoldResult<Vec<ItemFn>> {
     let crate_src_path = zome_file_tree.zome_crate_path.join("src");
     let v: Vec<OsString> = crate_src_path
         .clone()

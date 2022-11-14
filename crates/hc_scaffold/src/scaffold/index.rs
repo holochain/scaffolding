@@ -13,7 +13,10 @@ use crate::{
 use self::coordinator::add_index_to_coordinators;
 
 use super::{
-    entry_type::{integrity::get_all_entry_types, utils::choose_multiple_entry_types},
+    entry_type::{
+        definitions::EntryTypeReference, integrity::get_all_entry_types,
+        utils::choose_multiple_entry_types,
+    },
     link_type::{choose_use_entry_hash, integrity::add_link_type_to_integrity_zome},
     zome::ZomeFileTree,
 };
@@ -63,8 +66,7 @@ pub fn scaffold_index(
     template_file_tree: &FileTree,
     index_name: &String,
     maybe_index_type: &Option<IndexType>,
-    maybe_entry_types: &Option<Vec<String>>,
-    link_to_entry_hash: &Option<bool>,
+    maybe_entry_types: &Option<Vec<EntryTypeReference>>,
 ) -> ScaffoldResult<FileTree> {
     let all_entries = get_all_entry_types(&integrity_zome_file_tree)?.ok_or(
         ScaffoldError::NoEntryTypesDefFoundForIntegrityZome(
