@@ -5,7 +5,6 @@ use include_dir::{include_dir, Dir};
 use std::{ffi::OsString, path::PathBuf, str::FromStr};
 
 use crate::{
-    definitions::EntryDefinition,
     error::{ScaffoldError, ScaffoldResult},
     file_tree::{dir_to_file_tree, FileTree},
     templates::{

@@ -60,19 +60,20 @@ pub fn init(_: ()) -> ExternResult<InitCallbackResult> {{
 fn choose_extern_function(
     functions_by_zome: &BTreeMap<String, Vec<ItemFn>>,
     prompt: &String,
-) -> ScaffoldResult<(String, String)> {
-    let all_functions: Vec<(String, String)> = functions_by_zome
+) -> ScaffoldResult<(String, ItemFn)> {
+    let all_functions: Vec<(String, ItemFn)> = functions_by_zome
         .iter()
         .map(|(z, fns)| {
             fns.iter()
-                .map(|f| (z.clone(), f.sig.ident.to_string()))
-                .collect::<Vec<(String, String)>>()
+                .map(|f| (z.clone(), f.clone()))
+                .collect::<Vec<(String, ItemFn)>>()
         })
         .flatten()
         .collect();
+
     let all_fns_str: Vec<String> = all_functions
         .iter()
-        .map(|(z, f)| format!(r#""{}", in zome "{}""#, f, z))
+        .map(|(z, f)| format!(r#""{}", in zome "{}""#, f.sig.ident.to_string(), z))
         .collect();
 
     let selection = Select::with_theme(&ColorfulTheme::default())
@@ -103,7 +104,7 @@ pub fn find_extern_function_or_choose(
 
         if let Some(item_fn) = all_extern_functions
             .iter()
-            .find(|item_fn| item_fn.sig.ident.to_string().eq(&fn_name_to_find))
+            .find(|item_fn| item_fn.sig.ident.to_string().eq(fn_name_to_find))
         {
             return Ok((coordinator_zome.clone(), item_fn.clone()));
         }
@@ -152,7 +153,7 @@ pub fn find_extern_function_in_zomes(
 
         if let Some(item_fn) = all_extern_functions
             .iter()
-            .find(|item_fn| item_fn.sig.ident.to_string().eq(&fn_name_to_find))
+            .find(|item_fn| item_fn.sig.ident.to_string().eq(fn_name_to_find))
         {
             return Ok(Some((coordinator_zome.clone(), item_fn.clone())));
         }
@@ -182,7 +183,7 @@ pub fn find_all_extern_functions(zome_file_tree: &ZomeFileTree) -> ScaffoldResul
                         .iter()
                         .any(|a| a.path.segments.iter().any(|s| s.ident.eq("hdk_extern")))
                     {
-                        return Some(item_fn.sig.ident.to_string());
+                        return Some(item_fn);
                     }
                 }
 

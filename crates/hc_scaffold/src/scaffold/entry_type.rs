@@ -23,10 +23,7 @@ use self::{
     },
     fields::choose_fields,
     integrity::{add_entry_type_to_integrity_zome, get_all_entry_types},
-    utils::{
-        choose_fixed, choose_multiple_entry_types, choose_reference_entry_hash,
-        choose_referenceable,
-    },
+    utils::{choose_fixed, choose_reference_entry_hash, choose_referenceable},
 };
 
 use super::{
@@ -103,6 +100,7 @@ fn get_or_choose_depends_on(
     let entry_types = get_all_entry_types(zome_file_tree)?.unwrap_or_else(|| vec![]);
 
     let entry_types_names: Vec<String> = entry_types
+        .clone()
         .into_iter()
         .map(|et| et.entry_type.clone())
         .collect();
@@ -442,8 +440,6 @@ pub fn scaffold_entry_type(
         &entry_def,
         &crud,
         link_from_original_to_each_update,
-        &depends_on,
-        &depends_on_itself,
     )?;
 
     Ok(app_file_tree)

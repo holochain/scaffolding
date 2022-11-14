@@ -13,16 +13,12 @@ use super::{
     integrity::get_all_entry_types,
 };
 
-pub fn choose_reference_entry_hash(recommended: bool) -> ScaffoldResult<bool> {
-    let mut select = Select::with_theme(&ColorfulTheme::default())
-        .with_prompt(String::from(
-            "Reference this entry type by its entry hash or its action hash?",
-        ))
-        .default(0);
-
+pub fn choose_reference_entry_hash(prompt: &String, recommended: bool) -> ScaffoldResult<bool> {
     match recommended {
         true => {
-            let selection = select
+            let selection = Select::with_theme(&ColorfulTheme::default())
+                .with_prompt(prompt)
+                .default(0)
                 .item("EntryHash (recommended)")
                 .item("ActionHash")
                 .interact()?;
@@ -33,7 +29,9 @@ pub fn choose_reference_entry_hash(recommended: bool) -> ScaffoldResult<bool> {
             }
         }
         false => {
-            let selection = select
+            let selection = Select::with_theme(&ColorfulTheme::default())
+                .with_prompt(prompt)
+                .default(0)
                 .item("ActionHash (recommended)")
                 .item("EntryHash")
                 .interact()?;
@@ -47,11 +45,9 @@ pub fn choose_reference_entry_hash(recommended: bool) -> ScaffoldResult<bool> {
 }
 
 pub fn choose_fixed() -> ScaffoldResult<bool> {
-    let mut select = Select::with_theme(&ColorfulTheme::default())
+    let selection = Select::with_theme(&ColorfulTheme::default())
         .with_prompt(String::from("Is this entry type fixed?"))
-        .default(0);
-
-    let selection = select
+        .default(0)
         .item("Not fixed: can be updated and deleted, referred to by ActionHash (recommended)")
         .item("Fixed: can't be deleted or updated, referred to by EntryHash")
         .interact()?;
@@ -73,27 +69,28 @@ fn inner_choose_referenceable(
         .map(|r| r.entry_type)
         .collect();
 
-    let mut select = Select::with_theme(&ColorfulTheme::default())
+    all_options.push("Agent".to_string());
+
+    if optional {
+        all_options.push("[None]".to_string());
+    }
+
+    let selection = Select::with_theme(&ColorfulTheme::default())
         .with_prompt(prompt.clone())
         .default(0)
         .items(&all_options[..])
-        .item("Agent");
+        .interact()?;
 
-    if optional {
-        select.item("[None]");
-    }
-
-    let selection = select.interact()?;
-
-    if selection == all_options.len() {
+    if selection == all_options.len() - 1 {
         let role = input_snake_case(&String::from("Which role does this agent play in the relationship ? (eg. \"creator\", \"\", \"invitee\")"))?;
         return Ok(Some(Referenceable::Agent { role }));
-    } else if selection == all_options.len() + 1 {
+    } else if selection == all_options.len() {
         return Ok(None);
     } else {
         Ok(Some(Referenceable::EntryType(EntryTypeReference {
             entry_type: all_options[selection].clone(),
             reference_entry_hash: choose_reference_entry_hash(
+                &String::from("Reference this entry type with its entry hash or its action hash?"),
                 all_entries[selection].reference_entry_hash,
             )?,
         })))
@@ -116,31 +113,22 @@ pub fn choose_optional_referenceable(
     inner_choose_referenceable(all_entries, prompt, true)
 }
 
-pub fn choose_multiple_entry_types(
+pub fn choose_entry_type_reference(
     all_entries: &Vec<EntryTypeReference>,
     prompt: &String,
-    allow_empty_selection: bool,
-) -> ScaffoldResult<Vec<EntryTypeReference>> {
-    let mut all_options: Vec<String> = all_entries
+) -> ScaffoldResult<EntryTypeReference> {
+    let all_options: Vec<String> = all_entries
         .clone()
         .into_iter()
         .map(|r| r.entry_type)
         .collect();
 
-    let selection = MultiSelect::with_theme(&ColorfulTheme::default())
+    let selection = Select::with_theme(&ColorfulTheme::default())
         .with_prompt(prompt.clone())
         .items(&all_options[..])
         .interact()?;
 
-    let chosen_entry_types = match (selection.len(), allow_empty_selection) {
-        (0, false) => choose_multiple_entry_types(all_entries, &String::from("X You must choose at least one entry type to index. Press SPACE to select/unselect an entry type:"), false)?,
-        _ => selection
-                .into_iter()
-                .map(|i| all_entries[i].clone())
-                .collect()
-    };
-
-    Ok(chosen_entry_types)
+    Ok(all_entries[selection].clone())
 }
 
 pub fn get_or_choose_referenceable(

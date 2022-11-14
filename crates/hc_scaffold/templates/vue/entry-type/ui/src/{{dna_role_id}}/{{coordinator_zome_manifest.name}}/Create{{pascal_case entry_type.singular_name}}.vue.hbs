@@ -1,7 +1,7 @@
 <template>
   <div style="display: flex; flex-direction: column">
 
-    <span style="font-size: 18px">Create {{title_case entry_type.singular_name}}</span>
+    <span style="font-size: 18px">Create {{title_case entry_type.name}}</span>
   
     {{#each entry_type.fields}}
       {{#if (not (contains depends_on this)) }}
@@ -10,23 +10,23 @@
     {{/each}}
   
     <mwc-button 
-      label="Create {{title_case entry_type.singular_name}}"
-      :disabled="!is{{pascal_case entry_type.singular_name}}Valid()"
-      @click="create{{pascal_case entry_type.singular_name}}()"
+      label="Create {{title_case entry_type.name}}"
+      :disabled="!is{{pascal_case entry_type.name}}Valid()"
+      @click="create{{pascal_case entry_type.name}}()"
     ></mwc-button>
   </div>
 </template>
 <script lang="ts">
 import { defineComponent, inject, ComputedRef } from 'vue';
 import { InstalledCell, AppWebsocket, InstalledAppInfo, Record } from '@holochain/client';
-import { {{pascal_case entry_type.singular_name}} } from './types';
+import { {{pascal_case entry_type.name}} } from './types';
 import '@material/mwc-button';
 {{#each entry_type.fields}}
 {{> (concat field_type.type "/create/imports") }}
 {{/each}}
 
 export default defineComponent({
-  data(): Partial<{{pascal_case entry_type.singular_name}}> {
+  data(): Partial<{{pascal_case entry_type.name}}> {
     return { 
       {{#each entry_type.fields}}
         {{#if (not (contains depend_on this))}}
@@ -44,14 +44,14 @@ export default defineComponent({
   {{/each}}
   },
   methods: {
-    is{{pascal_case entry_type.singular_name}}Valid() {
+    is{{pascal_case entry_type.name}}Valid() {
       return {{#each entry_type.fields}}
         this.{{camel_case @key}} {{#unless @last}} && {{/unless}}
 {{/each}}  
     },
-    async create{{pascal_case entry_type.singular_name}}() {
+    async create{{pascal_case entry_type.name}}() {
       const cellData = this.appInfo.cell_data.find((c: InstalledCell) => c.role_id === '{{dna_role_id}}')!;
-      const {{camel_case entry_type.singular_name}}: {{pascal_case entry_type.singular_name}} = { {{#each entry_type.fields}}
+      const {{camel_case entry_type.name}}: {{pascal_case entry_type.name}} = { {{#each entry_type.fields}}
         {{snake_case @key}}: this.{{camel_case @key}}!,
   {{/each}}
       };
@@ -59,14 +59,14 @@ export default defineComponent({
         cap_secret: null,
         cell_id: cellData.cell_id,
         zome_name: '{{coordinator_zome_manifest.name}}',
-        fn_name: 'create_{{snake_case entry_type.singular_name}}',
-        payload: {{camel_case entry_type.singular_name}},
+        fn_name: 'create_{{snake_case entry_type.name}}',
+        payload: {{camel_case entry_type.name}},
         provenance: cellData.cell_id[1]
       });
-      this.$emit('{{kebab_case entry_type.singular_name}}-created', record.signed_action.hashed.hash);
+      this.$emit('{{kebab_case entry_type.name}}-created', record.signed_action.hashed.hash);
     },
   },
-  emits: ['{{kebab_case entry_type.singular_name}}-created'],
+  emits: ['{{kebab_case entry_type.name}}-created'],
   setup() {
     const appWebsocket = (inject('appWebsocket') as ComputedRef<AppWebsocket>).value;
     const appInfo = (inject('appInfo') as ComputedRef<InstalledAppInfo>).value;

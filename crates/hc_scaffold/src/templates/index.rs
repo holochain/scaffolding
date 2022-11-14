@@ -3,7 +3,14 @@ use std::{ffi::OsString, path::PathBuf};
 use holochain_types::prelude::ZomeManifest;
 use serde::Serialize;
 
-use crate::{error::ScaffoldResult, file_tree::FileTree, scaffold::index::IndexType};
+use crate::{
+    error::ScaffoldResult,
+    file_tree::FileTree,
+    scaffold::{
+        entry_type::definitions::{EntryTypeReference, Referenceable},
+        index::IndexType,
+    },
+};
 
 use super::{build_handlebars, render_template_file_tree_and_merge_with_existing};
 
@@ -13,7 +20,7 @@ pub struct ScaffoldIndexData {
     coordinator_zome_manifest: ZomeManifest,
     index_type: IndexType,
     index_name: String,
-    entry_types: Vec<String>,
+    referenceable: Referenceable,
 }
 pub fn scaffold_index_templates(
     mut app_file_tree: FileTree,
@@ -22,14 +29,14 @@ pub fn scaffold_index_templates(
     coordinator_zome_manifest: &ZomeManifest,
     index_type: &IndexType,
     index_name: &String,
-    entry_types: &Vec<String>,
+    entry_type_reference: &EntryTypeReference,
 ) -> ScaffoldResult<FileTree> {
     let data = ScaffoldIndexData {
-        entry_types: entry_types.clone(),
         dna_role_id: dna_role_id.clone(),
         coordinator_zome_manifest: coordinator_zome_manifest.clone(),
         index_name: index_name.clone(),
         index_type: index_type.clone(),
+        referenceable: Referenceable::EntryType(entry_type_reference.clone()),
     };
 
     let h = build_handlebars(&template_file_tree)?;

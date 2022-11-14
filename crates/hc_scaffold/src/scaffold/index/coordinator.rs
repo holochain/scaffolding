@@ -10,6 +10,7 @@ use crate::{
     file_tree::{insert_file, map_file, map_rust_files, FileTree},
     scaffold::{
         dna::DnaFileTree,
+        entry_type::definitions::EntryTypeReference,
         zome::{
             coordinator::find_extern_function_or_choose,
             utils::get_coordinator_zomes_for_integrity, ZomeFileTree,
@@ -23,42 +24,42 @@ fn global_index_getter(
     integrity_zome_name: &String,
     index_name: &String,
     link_type_name: &String,
-    link_to_entry_hash: bool,
+    entry_type_reference: &EntryTypeReference,
 ) -> String {
-    let to_hash_type = match link_to_entry_hash {
-        true => String::from("EntryHash"),
-        false => String::from("ActionHash"),
-    };
+    let to_hash_type = entry_type_reference.hash_type().to_string();
     let snake_index_name = index_name.to_case(Case::Snake);
+    let map_line = match entry_type_reference.reference_entry_hash {
+        true => String::from(".filter_map(|r| r.action().entry_hash().cloned())"),
+        false => String::from(".map(|r| r.action_address().clone())"),
+    };
 
     format!(
         r#"use hdk::prelude::*;
-use {}::*;
+use {integrity_zome_name}::*;
 
 #[hdk_extern]
-pub fn get_{}(_: ()) -> ExternResult<Vec<ActionHash>> {{
-    let path = Path::from("{}");
-        
-    let links = get_links(path.path_entry_hash()?, LinkTypes::{}, None)?;
+pub fn get_{snake_index_name}(_: ()) -> ExternResult<Vec<{to_hash_type}>> {{
+    let path = Path::from("{snake_index_name}");
+
+    let links = get_links(path.path_entry_hash()?, LinkTypes::{link_type_name}, None)?;
     
     let get_input: Vec<GetInput> = links
         .into_iter()
-        .map(|link| GetInput::new({}::from(link.target).into(), GetOptions::default()))
+        .map(|link| GetInput::new({to_hash_type}::from(link.target).into(), GetOptions::default()))
         .collect();
 
     // Get the records to filter out the deleted ones
     let records = HDK.with(|hdk| hdk.borrow().get(get_input))?;
 
-    let action_hashes: Vec<ActionHash> = records
+    let hashes: Vec<{to_hash_type}> = records
         .into_iter()
         .filter_map(|r| r)
-        .map(|r| r.action_address().clone())
+        {map_line}
         .collect();
 
-    Ok(action_hashes)
+    Ok(hashes)
 }}
 "#,
-        integrity_zome_name, snake_index_name, snake_index_name, link_type_name, to_hash_type,
     )
 }
 
@@ -66,41 +67,40 @@ fn by_author_index_getter(
     integrity_zome_name: &String,
     index_name: &String,
     link_type_name: &String,
-    link_to_entry_hash: bool,
+    entry_type_reference: &EntryTypeReference,
 ) -> String {
-    let to_hash_type = match link_to_entry_hash {
-        true => String::from("EntryHash"),
-        false => String::from("ActionHash"),
-    };
-
+    let to_hash_type = entry_type_reference.hash_type().to_string();
     let snake_index_name = index_name.to_case(Case::Snake);
+    let map_line = match entry_type_reference.reference_entry_hash {
+        true => String::from(".filter_map(|r| r.action().entry_hash().cloned())"),
+        false => String::from(".map(|r| r.action_address().clone())"),
+    };
 
     format!(
         r#"use hdk::prelude::*;
-use {}::*;
+use {integrity_zome_name}::*;
 
 #[hdk_extern]
-pub fn get_{}(author: AgentPubKey) -> ExternResult<Vec<ActionHash>> {{
-    let links = get_links(author, LinkTypes::{}, None)?;
+pub fn get_{index_name}(author: AgentPubKey) -> ExternResult<Vec<{to_hash_type}>> {{
+    let links = get_links(author, LinkTypes::{link_type_name}, None)?;
     
     let get_input: Vec<GetInput> = links
         .into_iter()
-        .map(|link| GetInput::new({}::from(link.target).into(), GetOptions::default()))
+        .map(|link| GetInput::new({to_hash_type}::from(link.target).into(), GetOptions::default()))
         .collect();
 
     // Get the records to filter out the deleted ones
     let records = HDK.with(|hdk| hdk.borrow().get(get_input))?;
 
-    let action_hashes: Vec<ActionHash> = records
+    let hashes: Vec<{to_hash_type}> = records
         .into_iter()
         .filter_map(|r| r)
-        .map(|r| r.action_address().clone())
+        {map_line}
         .collect();
 
-    Ok(action_hashes)
+    Ok(hashes)
 }}
 "#,
-        integrity_zome_name, snake_index_name, link_type_name, to_hash_type,
     )
 }
 
@@ -110,26 +110,28 @@ fn add_create_link_in_create_function(
     index_name: &String,
     link_type_name: &String,
     index_type: &IndexType,
-    entry_type: &String,
-    link_to_entry_hash: bool,
+    entry_type_reference: &EntryTypeReference,
 ) -> ScaffoldResult<DnaFileTree> {
     let dna_manifest_path = dna_file_tree.dna_manifest_path.clone();
 
     let (chosen_coordinator_zome, fn_name) = find_extern_function_or_choose(
         &dna_file_tree,
         coordinator_zomes_for_integrity,
-        &format!("create_{}", entry_type.to_case(Case::Snake)),
+        &format!(
+            "create_{}",
+            entry_type_reference.entry_type.to_case(Case::Snake)
+        ),
         &format!(
             "At the end of which function should the {} entries be indexed?",
-            entry_type
+            entry_type_reference.entry_type.to_case(Case::Pascal)
         ),
     )?;
 
     let zome_file_tree = ZomeFileTree::from_zome_manifest(dna_file_tree, chosen_coordinator_zome)?;
 
-    let snake_case_entry_type = entry_type.to_case(Case::Snake);
+    let snake_case_entry_type = entry_type_reference.entry_type.to_case(Case::Snake);
 
-    let mut create_link_stmts = match link_to_entry_hash {
+    let mut create_link_stmts = match entry_type_reference.reference_entry_hash {
         true => vec![format!(
             "let {}_entry_hash = hash_entry(&{})?;",
             snake_case_entry_type, snake_case_entry_type
@@ -137,7 +139,7 @@ fn add_create_link_in_create_function(
         false => vec![],
     };
 
-    let link_to_variable = match link_to_entry_hash {
+    let link_to_variable = match entry_type_reference.reference_entry_hash {
         true => format!("{}_entry_hash", snake_case_entry_type),
         false => format!("{}_hash", snake_case_entry_type),
     };
@@ -189,7 +191,7 @@ fn add_create_link_in_create_function(
                             .attrs
                             .iter()
                             .any(|a| a.path.segments.iter().any(|s| s.ident.eq("hdk_extern")))
-                            && item_fn.sig.ident.eq(fn_name.as_str())
+                            && item_fn.sig.ident.eq(&fn_name.sig.ident)
                         {
                             for new_stmt in stmts.clone() {
                                 item_fn
@@ -225,8 +227,7 @@ pub fn add_index_to_coordinators(
     index_name: &String,
     link_type_name: &String,
     index_type: &IndexType,
-    entry_types: &Vec<String>,
-    link_to_entry_hash: bool,
+    entry_type: &EntryTypeReference,
 ) -> ScaffoldResult<(DnaFileTree, ZomeManifest)> {
     let integrity_zome_name = integrity_zome_file_tree.zome_manifest.name.0.to_string();
     let dna_manifest_path = integrity_zome_file_tree
@@ -272,18 +273,12 @@ pub fn add_index_to_coordinators(
     let snake_link_type_name = index_name.to_case(Case::Snake);
 
     let getter = match index_type {
-        IndexType::Global => global_index_getter(
-            &integrity_zome_name,
-            index_name,
-            link_type_name,
-            link_to_entry_hash,
-        ),
-        IndexType::ByAuthor => by_author_index_getter(
-            &integrity_zome_name,
-            index_name,
-            link_type_name,
-            link_to_entry_hash,
-        ),
+        IndexType::Global => {
+            global_index_getter(&integrity_zome_name, index_name, link_type_name, entry_type)
+        }
+        IndexType::ByAuthor => {
+            by_author_index_getter(&integrity_zome_name, index_name, link_type_name, entry_type)
+        }
     };
 
     let mut file_tree = zome_file_tree.dna_file_tree.file_tree();
@@ -307,17 +302,14 @@ pub fn add_index_to_coordinators(
 
     let mut dna_file_tree = DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
 
-    for entry_type in entry_types {
-        dna_file_tree = add_create_link_in_create_function(
-            dna_file_tree,
-            &coordinator_zomes_for_integrity,
-            index_name,
-            link_type_name,
-            index_type,
-            entry_type,
-            link_to_entry_hash,
-        )?;
-    }
+    dna_file_tree = add_create_link_in_create_function(
+        dna_file_tree,
+        &coordinator_zomes_for_integrity,
+        index_name,
+        link_type_name,
+        index_type,
+        entry_type,
+    )?;
 
     Ok((dna_file_tree, coordinator_zome))
 }

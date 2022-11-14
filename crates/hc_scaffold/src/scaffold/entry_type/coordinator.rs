@@ -3,7 +3,11 @@ use convert_case::{Case, Casing};
 use crate::{
     error::ScaffoldResult,
     file_tree::{insert_file, map_file},
-    scaffold::{dna::DnaFileTree, link_type::link_type_name, zome::ZomeFileTree},
+    scaffold::{
+        dna::DnaFileTree,
+        link_type::{coordinator::get_links_handler, link_type_name},
+        zome::ZomeFileTree,
+    },
 };
 
 use super::{
@@ -147,7 +151,7 @@ pub fn create_handler(entry_def: &EntryDefinition) -> String {
         false => vec![],
     };
 
-    for d in entry_def.depends_on {
+    for d in &entry_def.depends_on {
         create_links_str.push(create_link_for_cardinality(
             entry_def,
             &d.field_name,
@@ -281,55 +285,12 @@ pub fn delete_{}(original_{}_hash: ActionHash) -> ExternResult<ActionHash> {{
     )
 }
 
-fn depends_on_handler(entry_def: &EntryDefinition, referenceable: &Referenceable) -> String {
-    let depends_on_snake = referenceable
-        .to_string(&Cardinality::Single)
-        .to_case(Case::Snake);
-    let arg_name = referenceable.field_name(&Cardinality::Single);
-    let arg_type: String = referenceable.hash_type().to_string();
-
-    let link_type_name = link_type_name(referenceable, &entry_def.referenceable());
-
-    let output_type = match entry_def.fixed {
-        true => String::from("EntryHash"),
-        false => String::from("ActionHash"),
-    };
-
-    let plural_snake_entry_name =
-        pluralizer::pluralize(entry_def.name.as_str(), 2, false).to_case(Case::Snake);
-
-    let map_line = match entry_def.fixed {
-        true => String::from(".filter_map(|r| r.action().entry_hash().cloned())"),
-        false => String::from(".map(|r| r.action_address().clone())"),
-    };
-
-    format!(
-        r#"
-#[hdk_extern]
-pub fn get_{plural_snake_entry_name}_for_{depends_on_snake}({arg_name}: {arg_type}) -> ExternResult<Vec<{output_type}>> {{
-    let links = get_links({arg_name}, LinkTypes::{link_type_name}, None)?;
-    
-    let get_input: Vec<GetInput> = links
-        .into_iter()
-        .map(|link| GetInput::new({output_type}::from(link.target).into(), GetOptions::default()))
-        .collect();
-
-    // Get the records to filter out the deleted ones
-    let records = HDK.with(|hdk| hdk.borrow().get(get_input))?;
-
-    let hashes: Vec<{output_type}> = records
-        .into_iter()
-        .filter_map(|r| r)
-        {map_line}
-        .collect();
-
-    Ok(hashes)
-}}"#,
-    )
+fn depends_on_handler(entry_def: &EntryDefinition, depends_on: &DependsOn) -> String {
+    get_links_handler(&depends_on.referenceable, &entry_def.referenceable())
 }
 
 fn depends_on_itself_handler(entry_def: &EntryDefinition) -> String {
-    depends_on_handler(entry_def, &entry_def.referenceable())
+    get_links_handler(&entry_def.referenceable(), &entry_def.referenceable())
 }
 
 fn initial_crud_handlers(
@@ -366,7 +327,7 @@ use {}::*;
     }
 
     for d in &entry_def.depends_on {
-        initial.push_str(depends_on_handler(&entry_def, &d.referenceable).as_str());
+        initial.push_str(depends_on_handler(&entry_def, &d).as_str());
     }
     if let Some(_cardinality) = &entry_def.depends_on_itself {
         initial.push_str(depends_on_itself_handler(&entry_def).as_str());

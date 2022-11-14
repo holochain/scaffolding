@@ -14,10 +14,11 @@ use self::coordinator::add_index_to_coordinators;
 
 use super::{
     entry_type::{
-        definitions::EntryTypeReference, integrity::get_all_entry_types,
-        utils::choose_multiple_entry_types,
+        definitions::EntryTypeReference,
+        integrity::get_all_entry_types,
+        utils::{choose_entry_type_reference, choose_reference_entry_hash},
     },
-    link_type::{choose_use_entry_hash, integrity::add_link_type_to_integrity_zome},
+    link_type::integrity::add_link_type_to_integrity_zome,
     zome::ZomeFileTree,
 };
 
@@ -66,7 +67,7 @@ pub fn scaffold_index(
     template_file_tree: &FileTree,
     index_name: &String,
     maybe_index_type: &Option<IndexType>,
-    maybe_entry_types: &Option<Vec<EntryTypeReference>>,
+    maybe_entry_type: &Option<EntryTypeReference>,
 ) -> ScaffoldResult<FileTree> {
     let all_entries = get_all_entry_types(&integrity_zome_file_tree)?.ok_or(
         ScaffoldError::NoEntryTypesDefFoundForIntegrityZome(
@@ -80,30 +81,25 @@ pub fn scaffold_index(
         None => choose_index_type(),
     }?;
 
-    let entry_types = match maybe_entry_types {
-        Some(et) => match et
-            .iter()
-            .map(|t| t.to_case(Case::Pascal))
-            .find(|t| !all_entries.contains(t))
-        {
-            Some(t) => Err(ScaffoldError::EntryTypeNotFound(
-                t.clone(),
+    let all_entries_names: Vec<String> = all_entries
+        .clone()
+        .into_iter()
+        .map(|e| e.entry_type)
+        .collect();
+    let entry_type = match maybe_entry_type {
+        Some(et) => match !all_entries_names.contains(&et.entry_type) {
+            true => Ok(et.clone()),
+            false => Err(ScaffoldError::EntryTypeNotFound(
+                et.entry_type.clone(),
                 integrity_zome_file_tree.dna_file_tree.dna_manifest.name(),
                 integrity_zome_file_tree.zome_manifest.name.0.to_string(),
             )),
-            None => Ok(et.clone()),
         },
-        None => choose_multiple_entry_types(
+        None => choose_entry_type_reference(
             &all_entries,
-            &"Which entry types should be indexed?".to_string(),
-            false,
+            &"Which entry type should be indexed?".to_string(),
         ),
     }?;
-
-    let link_to_entry_hash: bool = match link_to_entry_hash {
-        Some(l) => l.clone(),
-        None => choose_use_entry_hash(&String::from("Link to the entry hash or the action hash?"))?,
-    };
 
     let link_type_name = index_name.to_case(Case::Pascal);
 
@@ -115,8 +111,7 @@ pub fn scaffold_index(
         index_name,
         &link_type_name,
         &index_type,
-        &entry_types,
-        link_to_entry_hash,
+        &entry_type,
     )?;
 
     let dna_name = dna_file_tree.dna_manifest.name();
@@ -128,7 +123,7 @@ pub fn scaffold_index(
         &coordinator_zome,
         &index_type,
         index_name,
-        &entry_types,
+        &entry_type,
     )?;
 
     Ok(app_file_tree)

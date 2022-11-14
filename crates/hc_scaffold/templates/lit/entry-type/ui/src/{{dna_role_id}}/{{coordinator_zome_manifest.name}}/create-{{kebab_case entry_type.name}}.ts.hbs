@@ -9,15 +9,21 @@ import { Snackbar } from '@material/mwc-snackbar';
 {{/each}}
 
 import { appWebsocketContext, appInfoContext } from '../../contexts';
-import { {{pascal_case entry_type.singular_name}} } from './types';
+import { {{pascal_case entry_type.name}} } from './types';
 
-@customElement('create-{{kebab_case entry_type.singular_name}}')
-export class Create{{pascal_case entry_type.singular_name}} extends LitElement {
+@customElement('create-{{kebab_case entry_type.name}}')
+export class Create{{pascal_case entry_type.name}} extends LitElement {
   {{#each entry_type.fields}}
     {{#if (not widget) }}
+      {{#if (not (eq cardinality "vector" ) )}}
   @property()
   {{camel_case field_name}}!: {{> (concat field_type "/type") }};
 
+      {{else}}
+  @property()
+  {{camel_case field_name}}!: Array<{{> (concat field_type "/type") }}>;
+
+      {{/if}}
     {{/if}}
   {{/each}}
 
@@ -35,7 +41,7 @@ export class Create{{pascal_case entry_type.singular_name}} extends LitElement {
     {{/if}}
   {{/each}}
 
-  is{{pascal_case entry_type.singular_name}}Valid() {
+  is{{pascal_case entry_type.name}}Valid() {
     return true{{#each entry_type.fields}}{{#if widget}}{{#if (eq cardinality "single")}} && this._{{camel_case field_name}}{{/if}}{{#if (eq cardinality "vector")}} && this._{{camel_case field_name}}.all(e => e !== undefined){{/if}}{{/if}}{{/each}};
   }
 
@@ -45,10 +51,10 @@ export class Create{{pascal_case entry_type.singular_name}} extends LitElement {
   @contextProvided({ context: appInfoContext })
   appInfo!: InstalledAppInfo;
 
-  async create{{pascal_case entry_type.singular_name}}() {
+  async create{{pascal_case entry_type.name}}() {
     const cellData = this.appInfo.cell_data.find((c: InstalledCell) => c.role_id === '{{dna_role_id}}')!;
 
-    const {{camel_case entry_type.singular_name}}: {{pascal_case entry_type.singular_name}} = { 
+    const {{camel_case entry_type.name}}: {{pascal_case entry_type.name}} = { 
     {{#each entry_type.fields}}
       {{#if widget}}
         {{#if (eq cardinality "single") }}
@@ -70,21 +76,21 @@ export class Create{{pascal_case entry_type.singular_name}} extends LitElement {
         cap_secret: null,
         cell_id: cellData.cell_id,
         zome_name: '{{coordinator_zome_manifest.name}}',
-        fn_name: 'create_{{snake_case entry_type.singular_name}}',
-        payload: {{camel_case entry_type.singular_name}},
+        fn_name: 'create_{{snake_case entry_type.name}}',
+        payload: {{camel_case entry_type.name}},
         provenance: cellData.cell_id[1]
       });
 
-      this.dispatchEvent(new CustomEvent('{{kebab_case entry_type.singular_name}}-created', {
+      this.dispatchEvent(new CustomEvent('{{kebab_case entry_type.name}}-created', {
         composed: true,
         bubbles: true,
         detail: {
-          {{camel_case entry_type.singular_name}}Hash: record.signed_action.hashed.hash
+          {{camel_case entry_type.name}}Hash: record.signed_action.hashed.hash
         }
       }));
     } catch (e) {
       const errorSnackbar = this.shadowRoot?.getElementById('create-error') as Snackbar;
-      errorSnackbar.labelText = `Error creating the {{lower_case entry_type.singular_name}}: ${e.message}`;
+      errorSnackbar.labelText = `Error creating the {{lower_case entry_type.name}}: ${e.message}`;
       errorSnackbar.show();
     }
   }
@@ -95,7 +101,7 @@ export class Create{{pascal_case entry_type.singular_name}} extends LitElement {
       </mwc-snackbar>
 
       <div style="display: flex; flex-direction: column">
-        <span style="font-size: 18px">Create {{title_case entry_type.singular_name}}</span>
+        <span style="font-size: 18px">Create {{title_case entry_type.name}}</span>
 
         {{#each entry_type.fields}}
           {{#if widget}}
@@ -110,9 +116,9 @@ export class Create{{pascal_case entry_type.singular_name}} extends LitElement {
 
         <mwc-button 
           raised
-          label="Create {{pascal_case entry_type.singular_name}}"
-          .disabled=${!this.is{{pascal_case entry_type.singular_name}}Valid()}
-          @click=${() => this.create{{pascal_case entry_type.singular_name}}()}
+          label="Create {{pascal_case entry_type.name}}"
+          .disabled=${!this.is{{pascal_case entry_type.name}}Valid()}
+          @click=${() => this.create{{pascal_case entry_type.name}}()}
         ></mwc-button>
     </div>`;
   }

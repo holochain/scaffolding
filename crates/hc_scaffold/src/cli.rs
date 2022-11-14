@@ -157,6 +157,10 @@ pub enum HcScaffold {
         /// Entry type (or agent role) used as the target for the links
         to_referenceable: Option<Referenceable>,
 
+        #[structopt(long)]
+        /// Whether to create the inverse link, from the "--to-referenceable" entry type to the "--fromreferenceable" entry type
+        bidireccional: Option<bool>,
+
         #[structopt(short, long)]
         /// The template to scaffold the dna from
         /// The template must be located at the ".templates/<TEMPLATE NAME>" folder of the repository
@@ -178,9 +182,9 @@ pub enum HcScaffold {
         /// Index name, just to differentiate it from other indexes
         index_name: Option<String>,
 
-        #[structopt(long, value_delimiter = ",", parse(try_from_str = parse_entry_type_reference))]
-        /// Entry types that are going to be indexed by this index
-        entry_types: Option<Vec<EntryTypeReference>>,
+        #[structopt(parse(try_from_str = parse_entry_type_reference))]
+        /// Entry type that is going to be indexed by this index
+        entry_type: Option<EntryTypeReference>,
 
         #[structopt(short, long)]
         /// The template to scaffold the dna from
@@ -501,6 +505,7 @@ Add new indexes for that entry type with:
                 zome,
                 from_referenceable,
                 to_referenceable,
+                bidireccional,
                 template,
             } => {
                 let current_dir = std::env::current_dir()?;
@@ -516,6 +521,7 @@ Add new indexes for that entry type with:
                     &template_file_tree,
                     &from_referenceable,
                     &to_referenceable,
+                    &bidireccional,
                 )?;
 
                 let file_tree = MergeableFileSystemTree::<OsString, String>::from(app_file_tree);
@@ -534,7 +540,7 @@ Link type "{}" scaffolded!
                 zome,
                 index_name,
                 index_type,
-                entry_types,
+                entry_type,
                 template,
             } => {
                 let current_dir = std::env::current_dir()?;
@@ -556,7 +562,7 @@ Link type "{}" scaffolded!
                     &template_file_tree,
                     &name,
                     &index_type,
-                    &entry_types,
+                    &entry_type,
                 )?;
 
                 let file_tree = MergeableFileSystemTree::<OsString, String>::from(app_file_tree);

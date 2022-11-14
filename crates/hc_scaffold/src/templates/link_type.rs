@@ -15,6 +15,7 @@ pub struct ScaffoldLinkTypeData {
     coordinator_zome_manifest: ZomeManifest,
     from_referenceable: Referenceable,
     to_referenceable: Option<Referenceable>,
+    bidireccional: bool,
 }
 pub fn scaffold_link_type_templates(
     mut app_file_tree: FileTree,
@@ -23,12 +24,14 @@ pub fn scaffold_link_type_templates(
     coordinator_zome_manifest: &ZomeManifest,
     from_referenceable: &Referenceable,
     to_referenceable: &Option<Referenceable>,
+    bidireccional: bool,
 ) -> ScaffoldResult<FileTree> {
     let data = ScaffoldLinkTypeData {
         dna_role_id: dna_role_id.clone(),
         coordinator_zome_manifest: coordinator_zome_manifest.clone(),
         from_referenceable: from_referenceable.clone(),
         to_referenceable: to_referenceable.clone(),
+        bidireccional,
     };
 
     let h = build_handlebars(&template_file_tree)?;

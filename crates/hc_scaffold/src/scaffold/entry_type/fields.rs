@@ -3,10 +3,11 @@ use std::{collections::BTreeMap, path::PathBuf};
 use dialoguer::{theme::ColorfulTheme, Confirm, Input, Select};
 
 use crate::{
-    definitions::{Cardinality, FieldDefinition, FieldType},
     error::{ScaffoldError, ScaffoldResult},
     file_tree::{dir_content, FileTree},
 };
+
+use super::definitions::{Cardinality, FieldDefinition, FieldType};
 
 pub fn choose_widget(
     field_type: &FieldType,

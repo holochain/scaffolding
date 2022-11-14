@@ -2,7 +2,7 @@ use convert_case::{Case, Casing};
 use proc_macro2::TokenStream;
 use quote::quote;
 use rand::Rng;
-use serde::{Deserialize, Serialize};
+use serde::{ser::SerializeStruct, Deserialize, Serialize, Serializer};
 use std::collections::BTreeMap;
 
 use crate::{
@@ -210,10 +210,22 @@ impl EntryTypeReference {
             false => FieldType::ActionHash,
         }
     }
+    pub fn field_name(&self, cardinality: &Cardinality) -> String {
+        match cardinality {
+            Cardinality::Vector => format!("{}_hashes", self.entry_type),
+            _ => format!("{}_hash", self.entry_type),
+        }
+    }
+    pub fn to_string(&self, c: &Cardinality) -> String {
+        match c {
+            Cardinality::Vector => pluralizer::pluralize(self.entry_type.as_str(), 2, false),
+            _ => pluralizer::pluralize(self.entry_type.as_str(), 1, false),
+        }
+    }
 }
 
 pub fn parse_entry_type_reference(s: &str) -> ScaffoldResult<EntryTypeReference> {
-    check_snake_case(s.into(), "app reference type")?;
+    check_snake_case(s.into(), "entry reference type")?;
 
     let sp: Vec<&str> = s.split(":").collect();
     let reference_entry_hash = match sp.len() {
@@ -222,7 +234,7 @@ pub fn parse_entry_type_reference(s: &str) -> ScaffoldResult<EntryTypeReference>
             "EntryHash" => true,
             "ActionHash" => false,
             _ => Err(ScaffoldError::InvalidArguments(String::from(
-                "second argument for reference type must be \"entry_hash\" or \"action_hash\"",
+                "second argument for reference type must be \"EntryHash\" or \"ActionHash\"",
             )))?,
         },
     };
@@ -233,11 +245,22 @@ pub fn parse_entry_type_reference(s: &str) -> ScaffoldResult<EntryTypeReference>
     })
 }
 
-#[derive(Serialize, Clone, Debug)]
-#[serde(tag = "type")]
+#[derive(Clone, Debug)]
 pub enum Referenceable {
     Agent { role: String },
     EntryType(EntryTypeReference),
+}
+impl Serialize for Referenceable {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("Referenceable", 3)?;
+        state.serialize_field("name", &self.to_string(&Cardinality::Single))?;
+        state.serialize_field("hash_type", &self.hash_type().to_string())?;
+        state.serialize_field("singular_arg", &self.field_name(&Cardinality::Single))?;
+        state.end()
+    }
 }
 
 pub fn parse_referenceable(s: &str) -> ScaffoldResult<Referenceable> {
@@ -271,10 +294,7 @@ impl Referenceable {
 
         match self {
             Referenceable::Agent { .. } => s,
-            _ => match c {
-                Cardinality::Vector => format!("{}_hashes", s),
-                _ => format!("{}_hash", s),
-            },
+            Referenceable::EntryType(e) => e.field_name(c),
         }
     }
 
@@ -330,7 +350,7 @@ impl EntryDefinition {
 
     pub fn referenceable(&self) -> Referenceable {
         Referenceable::EntryType(EntryTypeReference {
-            entry_type: self.name,
+            entry_type: self.name.clone(),
             reference_entry_hash: self.fixed,
         })
     }

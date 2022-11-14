@@ -9,10 +9,12 @@ use crate::{
     file_tree::{insert_file, map_file, FileTree},
     scaffold::{
         dna::DnaFileTree,
-        entry_type::definitions::{Cardinality, Referenceable},
+        entry_type::definitions::{Cardinality, EntryTypeReference, Referenceable},
         zome::ZomeFileTree,
     },
 };
+
+use super::link_type_name;
 
 fn metadata_handlers(
     integrity_zome_name: &String,
@@ -66,49 +68,100 @@ pub fn get_{snake_link_type_name}_for_{snake_from}({snake_from_arg}: {from_arg_t
     )
 }
 
-// Add invitee to event
-fn to_agent_handlers(
-    integrity_zome_name: &String,
-    link_type_name: &String,
-    from_entry_type: &Referenceable,
-    link_from_entry_hash: bool,
+pub fn add_link_handler(
+    from_referenceable: &Referenceable,
+    to_referenceable: &Referenceable,
+    bidireccional: bool,
 ) -> String {
-    let pascal_link_type_name = link_type_name.to_case(Case::Pascal);
-    let snake_link_type_name = link_type_name.to_case(Case::Snake);
-    let pascal_from_entry_type = from_entry_type.to_string().to_case(Case::Pascal);
-    let snake_from_entry_type = from_entry_type.to_string().to_case(Case::Snake);
+    let from_hash_type = from_referenceable.hash_type().to_string();
+    let from_arg_name = from_referenceable.field_name(&Cardinality::Single);
+    let to_hash_type = to_referenceable.hash_type().to_string();
+    let to_arg_name = to_referenceable.field_name(&Cardinality::Single);
 
-    let from_arg = match from_entry_type {
-        Referenceable::Agent => String::from("agent"),
-        Referenceable::EntryType(et) => format!("{}_hash", et.to_case(Case::Snake)),
-    };
-    let from_arg_type = match from_entry_type {
-        Referenceable::Agent => String::from("AgentPubKey"),
-        Referenceable::EntryType(et) => match link_from_entry_hash {
-            true => String::from("EntryHash"),
-            false => String::from("ActionHash"),
-        },
+    let normal_link_type_name = link_type_name(from_referenceable, to_referenceable);
+    let inverse_link_type_name = link_type_name(to_referenceable, from_referenceable);
+    let singular_snake_from_entry_type = from_referenceable
+        .to_string(&Cardinality::Single)
+        .to_case(Case::Snake);
+    let plural_snake_from_entry_type = from_referenceable
+        .to_string(&Cardinality::Vector)
+        .to_case(Case::Snake);
+    let singular_pascal_from_entry_type = from_referenceable
+        .to_string(&Cardinality::Single)
+        .to_case(Case::Pascal);
+    let plural_snake_to_entry_type = to_referenceable
+        .to_string(&Cardinality::Vector)
+        .to_case(Case::Snake);
+    let singular_snake_to_entry_type = to_referenceable
+        .to_string(&Cardinality::Single)
+        .to_case(Case::Snake);
+    let singular_pascal_to_entry_type = to_referenceable
+        .to_string(&Cardinality::Single)
+        .to_case(Case::Pascal);
+
+    let bidireccional_create = match bidireccional {
+        true => format!(
+            r#"create_link(input.{to_arg_name}, input.{from_arg_name}, LinkTypes::{inverse_link_type_name}, ())?;"#
+        ),
+        false => format!(""),
     };
 
     format!(
-        r#"use hdk::prelude::*;
-use {integrity_zome_name}::*;
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct Add{pascal_link_type_name}For{pascal_from_entry_type}Input {{
-    {from_arg}: {from_arg_type},
-    {snake_link_type_name}: AgentPubKey,
+        r#"#[derive(Serialize, Deserialize, Debug)]
+pub struct Add{singular_pascal_to_entry_type}For{singular_pascal_from_entry_type}Input {{
+    {from_arg_name}: {from_hash_type},
+    {to_arg_name}: {to_hash_type},
 }}
 #[hdk_extern]
-pub fn add_{snake_link_type_name}_for_{snake_from_entry_type}(input: Add{pascal_link_type_name}For{pascal_from_entry_type}Input) -> ExternResult<()> {{
-    create_link(input.{from_arg}.clone(), input.{snake_link_type_name}, LinkTypes::{pascal_link_type_name}, ())?;
+pub fn add_{singular_snake_to_entry_type}_for_{singular_snake_from_entry_type}(input: Add{singular_pascal_to_entry_type}For{singular_pascal_from_entry_type}Input) -> ExternResult<()> {{
+    create_link(input.{from_arg_name}.clone(), input.{to_arg_name}.clone(), LinkTypes::{normal_link_type_name}, ())?;
+{bidireccional_create}
 
     Ok(())    
-}}
-        
-#[hdk_extern]
-pub fn get_{snake_link_type_name}_for_{snake_from_entry_type}({from_arg}: {from_arg_type}) -> ExternResult<Vec<AgentPubKey>> {{
-    let links = get_links({from_arg}, LinkTypes::{pascal_link_type_name}, None)?;
+}}"#
+    )
+}
+
+pub fn get_links_handler(
+    from_referenceable: &Referenceable,
+    to_referenceable: &Referenceable,
+) -> String {
+    match to_referenceable {
+        Referenceable::Agent { role } => {
+            get_links_handler_to_agent(from_referenceable, to_referenceable)
+        }
+        Referenceable::EntryType(e) => get_links_handler_to_entry(from_referenceable, e),
+    }
+}
+
+fn get_links_handler_to_agent(
+    from_referenceable: &Referenceable,
+    to_referenceable: &Referenceable,
+) -> String {
+    let from_hash_type = from_referenceable.hash_type().to_string();
+    let from_arg_name = from_referenceable.field_name(&Cardinality::Single);
+
+    let pascal_link_type_name = link_type_name(from_referenceable, to_referenceable);
+    let singular_snake_from_entry_type = from_referenceable
+        .to_string(&Cardinality::Single)
+        .to_case(Case::Snake);
+    let plural_snake_from_entry_type = from_referenceable
+        .to_string(&Cardinality::Vector)
+        .to_case(Case::Snake);
+    let pascal_from_entry_type = from_referenceable
+        .to_string(&Cardinality::Single)
+        .to_case(Case::Pascal);
+    let plural_snake_to_entry_type = to_referenceable
+        .to_string(&Cardinality::Vector)
+        .to_case(Case::Snake);
+    let singular_snake_to_entry_type = to_referenceable
+        .to_string(&Cardinality::Single)
+        .to_case(Case::Snake);
+
+    format!(
+        r#"#[hdk_extern]
+pub fn get_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}({from_arg_name}: {from_hash_type}) -> ExternResult<Vec<AgentPubKey>> {{
+    let links = get_links({from_arg_name}, LinkTypes::{pascal_link_type_name}, None)?;
     
     let agents: Vec<AgentPubKey> = links
         .into_iter()
@@ -116,57 +169,49 @@ pub fn get_{snake_link_type_name}_for_{snake_from_entry_type}({from_arg}: {from_
         .collect();
 
     Ok(agents)
-}}"#
+}}"#,
     )
 }
 
-// Event to agent
-fn to_entry_link_type_handlers(
-    integrity_zome_name: &String,
-    link_type_name: &String,
-    from_entry_type: &Referenceable,
-    to_entry_type: &String,
-    link_from_entry_hash: bool,
-    link_to_entry_hash: bool,
+fn get_links_handler_to_entry(
+    from_referenceable: &Referenceable,
+    to_entry_type: &EntryTypeReference,
 ) -> String {
-    let from_hash_type = match (from_entry_type, link_from_entry_hash) {
-        (Referenceable::Agent, _) => String::from("AgentPubKey"),
-        (_, true) => String::from("EntryHash"),
-        (_, false) => String::from("ActionHash"),
-    };
-    let from_arg_name = match from_entry_type {
-        Referenceable::Agent => String::from("from_agent"),
-        Referenceable::EntryType(et) => format!("{}_hash", et),
-    };
-    let to_hash_type = match link_to_entry_hash {
-        true => String::from("EntryHash"),
-        false => String::from("ActionHash"),
-    };
-    let to_arg_name = format!("{}_hash", to_entry_type.to_case(Case::Snake));
-    let pascal_link_type_name = link_type_name.to_case(Case::Pascal);
-    let pascal_to_entry_type = to_entry_type.to_case(Case::Pascal);
-    let snake_from_entry_type = from_entry_type.to_string().to_case(Case::Snake);
-    let pascal_from_entry_type = from_entry_type.to_string().to_case(Case::Pascal);
-    let snake_to_entry_type = to_entry_type.to_case(Case::Snake);
+    let from_hash_type = from_referenceable.hash_type().to_string();
+    let from_arg_name = from_referenceable.field_name(&Cardinality::Single);
+    let to_hash_type = to_entry_type.hash_type().to_string();
+    let to_arg_name = to_entry_type.field_name(&Cardinality::Single);
 
+    let pascal_link_type_name = link_type_name(
+        from_referenceable,
+        &Referenceable::EntryType(to_entry_type.clone()),
+    );
+    let pascal_to_entry_type = to_entry_type
+        .to_string(&Cardinality::Single)
+        .to_case(Case::Pascal);
+    let singular_snake_from_entry_type = from_referenceable
+        .to_string(&Cardinality::Single)
+        .to_case(Case::Snake);
+    let plural_snake_from_entry_type = from_referenceable
+        .to_string(&Cardinality::Vector)
+        .to_case(Case::Snake);
+    let pascal_from_entry_type = from_referenceable
+        .to_string(&Cardinality::Single)
+        .to_case(Case::Pascal);
+    let plural_snake_to_entry_type = to_entry_type
+        .to_string(&Cardinality::Vector)
+        .to_case(Case::Snake);
+    let singular_snake_to_entry_type = to_entry_type
+        .to_string(&Cardinality::Single)
+        .to_case(Case::Snake);
+
+    let map_line = match to_entry_type.reference_entry_hash {
+        true => String::from(".filter_map(|r| r.action().entry_hash().cloned())"),
+        false => String::from(".map(|r| r.action_address().clone())"),
+    };
     format!(
-        r#"use hdk::prelude::*;
-use {integrity_zome_name}::*;
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct Add{pascal_to_entry_type}For{pascal_from_entry_type}Input {{
-    {from_arg_name}: {from_hash_type},
-    {to_arg_name}: {to_hash_type},
-}}
-#[hdk_extern]
-pub fn add_{snake_to_entry_type}_for_{snake_from_entry_type}(input: Add{pascal_to_entry_type}For{pascal_from_entry_type}Input) -> ExternResult<()> {{
-    create_link(input.{from_arg_name}, input.{to_arg_name}, LinkTypes::{pascal_link_type_name}, ())?;
-
-    Ok(())    
-}}
-
-#[hdk_extern]
-pub fn get_{snake_to_entry_type}_for_{snake_from_entry_type}({from_arg_name}: {from_hash_type}) -> ExternResult<Vec<ActionHash>> {{
+        r#"#[hdk_extern]
+pub fn get_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}({from_arg_name}: {from_hash_type}) -> ExternResult<Vec<{to_hash_type}>> {{
     let links = get_links({from_arg_name}, LinkTypes::{pascal_link_type_name}, None)?;
     
     let get_input: Vec<GetInput> = links
@@ -177,36 +222,111 @@ pub fn get_{snake_to_entry_type}_for_{snake_from_entry_type}({from_arg_name}: {f
     // Get the records to filter out the deleted ones
     let records = HDK.with(|hdk| hdk.borrow().get(get_input))?;
 
-    let action_hashes: Vec<ActionHash> = records
+    let hashes: Vec<{to_hash_type}> = records
         .into_iter()
         .filter_map(|r| r)
-        .map(|r| r.action_address().clone())
+        {map_line}
         .collect();
 
-    Ok(action_hashes)
-}}
-"#
+    Ok(hashes)
+}}"#,
     )
 }
 
-fn initial_link_type_handlers(
-    integrity_zome_name: &String,
-    link_type_name: &String,
+// Event to calendar
+fn remove_link_handlers(
     from_referenceable: &Referenceable,
-    to_referenceable: &Option<Referenceable>,
+    to_referenceable: &Referenceable,
+    bidireccional: bool,
 ) -> String {
-    match to_referenceable {
-        None => metadata_handlers(integrity_zome_name, link_type_name, from_referenceable),
-        Some(Referenceable::Agent) => {
-            to_agent_handlers(integrity_zome_name, link_type_name, from_referenceable)
-        }
-        Some(Referenceable::EntryType(entry_type)) => to_entry_link_type_handlers(
-            integrity_zome_name,
-            link_type_name,
-            from_referenceable,
-            entry_type,
+    let from_hash_type = from_referenceable.hash_type().to_string();
+    let from_arg_name = from_referenceable.field_name(&Cardinality::Single);
+    let to_hash_type = to_referenceable.hash_type().to_string();
+    let to_arg_name = to_referenceable.field_name(&Cardinality::Single);
+
+    let pascal_link_type_name = link_type_name(from_referenceable, to_referenceable);
+    let inverse_link_type_name = link_type_name(to_referenceable, from_referenceable);
+    let singular_pascal_to_entry_type = to_referenceable
+        .to_string(&Cardinality::Single)
+        .to_case(Case::Pascal);
+    let singular_snake_from_entry_type = from_referenceable
+        .to_string(&Cardinality::Single)
+        .to_case(Case::Snake);
+    let plural_snake_from_entry_type = from_referenceable
+        .to_string(&Cardinality::Vector)
+        .to_case(Case::Snake);
+    let singular_pascal_from_entry_type = from_referenceable
+        .to_string(&Cardinality::Single)
+        .to_case(Case::Pascal);
+    let plural_snake_to_entry_type = to_referenceable
+        .to_string(&Cardinality::Vector)
+        .to_case(Case::Snake);
+    let singular_snake_to_entry_type = to_referenceable
+        .to_string(&Cardinality::Single)
+        .to_case(Case::Snake);
+    let bidireccional_remove = match bidireccional {
+        true => format!(
+            r#"let links = get_links({to_arg_name}, LinkTypes::{inverse_link_type_name}, None)?;
+
+    for link in links {{
+        if {from_hash_type}::from(link.target.clone()).eq(&input.{from_arg_name}) {{
+            delete_link(link.create_link_hash)?;
+        }}
+    }}"#
         ),
-    }
+        false => format!(""),
+    };
+    format!(
+        r#"#[derive(Serialize, Deserialize, Debug)]
+pub struct Remove{singular_pascal_to_entry_type}For{singular_pascal_from_entry_type}Input {{
+    {from_arg_name}: {from_hash_type},
+    {to_arg_name}: {to_hash_type},
+}}
+#[hdk_extern]
+pub fn remove_{singular_snake_to_entry_type}_for_{singular_snake_from_entry_type}(input: Remove{singular_pascal_to_entry_type}For{singular_pascal_from_entry_type}Input ) -> ExternResult<()> {{
+    let links = get_links({from_arg_name}, LinkTypes::{pascal_link_type_name}, None)?;
+    
+    for link in links {{
+        if {to_hash_type}::from(link.target.clone()).eq(&input.{to_arg_name}) {{
+            delete_link(link.create_link_hash)?;
+        }}
+    }}
+        
+}}"#
+    )
+}
+
+fn normal_handlers(
+    integrity_zome_name: &String,
+    from_referenceable: &Referenceable,
+    to_referenceable: &Referenceable,
+    bidireccional: bool,
+) -> String {
+    let inverse_get = match bidireccional {
+        true => format!(
+            r#"
+
+{}"#,
+            get_links_handler(to_referenceable, from_referenceable)
+        ),
+        false => format!(""),
+    };
+
+    format!(
+        r#"use hdk::prelude::*;
+use {integrity_zome_name}::*;
+
+{}
+
+{}
+{}
+        
+{}"#,
+        add_link_handler(from_referenceable, to_referenceable, bidireccional),
+        get_links_handler(from_referenceable, to_referenceable),
+        inverse_get,
+        remove_link_handlers(from_referenceable, to_referenceable, bidireccional)
+    )
 }
 
 pub fn add_link_type_functions_to_coordinator(
@@ -215,6 +335,7 @@ pub fn add_link_type_functions_to_coordinator(
     link_type_name: &String,
     from_referenceable: &Referenceable,
     to_referenceable: &Option<Referenceable>,
+    bidireccional: bool,
 ) -> ScaffoldResult<ZomeFileTree> {
     let dna_manifest_path = coordinator_zome_file_tree
         .dna_file_tree
@@ -235,16 +356,12 @@ pub fn add_link_type_functions_to_coordinator(
 
     let mut file_tree = coordinator_zome_file_tree.dna_file_tree.file_tree();
 
-    insert_file(
-        &mut file_tree,
-        &new_file_path,
-        &initial_link_type_handlers(
-            integrity_zome_name,
-            link_type_name,
-            from_referenceable,
-            to_referenceable,
-        ),
-    )?;
+    let handlers = match to_referenceable {
+        None => metadata_handlers(integrity_zome_name, link_type_name, from_referenceable),
+        Some(r) => normal_handlers(integrity_zome_name, from_referenceable, r, bidireccional),
+    };
+
+    insert_file(&mut file_tree, &new_file_path, &handlers)?;
 
     // 2. Add this file as a module in the entry point for the crate
 

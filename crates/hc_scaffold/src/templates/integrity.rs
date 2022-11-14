@@ -3,10 +3,7 @@ use std::{ffi::OsString, path::PathBuf};
 use holochain_types::prelude::ZomeManifest;
 use serde::Serialize;
 
-use crate::{
-    definitions::EntryDefinition, error::ScaffoldResult, file_tree::FileTree,
-    scaffold::entry_type::DependsOnItself,
-};
+use crate::{error::ScaffoldResult, file_tree::FileTree, scaffold::entry_type::DependsOnItself};
 
 use super::{build_handlebars, render_template_file_tree_and_merge_with_existing};
 

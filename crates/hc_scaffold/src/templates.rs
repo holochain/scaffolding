@@ -52,6 +52,7 @@ pub fn register_helpers<'a>(h: Handlebars<'a>) -> Handlebars<'a> {
     let h = register_concat_helper(h);
     let h = register_contains_helper(h);
     let h = register_case_helpers(h);
+    let h = register_pluralize_helpers(h);
 
     h
 }
@@ -85,6 +86,14 @@ pub fn register_concat_helper<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
 pub fn register_contains_helper<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
     handlebars_helper!(contains: |list: Option<Vec<Value>>, value: Value| list.is_some() && list.unwrap().contains(&value));
     h.register_helper("contains", Box::new(contains));
+
+    h
+}
+pub fn register_pluralize_helpers<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
+    handlebars_helper!(singular: |s: String| pluralizer::pluralize(s.as_str(), 1, false));
+    h.register_helper("singular", Box::new(singular));
+    handlebars_helper!(plural: |s: String| pluralizer::pluralize(s.as_str(), 2, false));
+    h.register_helper("plural", Box::new(plural));
 
     h
 }
@@ -174,11 +183,11 @@ pub fn render_template_file_tree<'a, T: Serialize>(
         let path = PathBuf::from(path.to_str().unwrap().replace('¡', "/"));
 
         let re = Regex::new(
-            r"(?P<c>(.)*)/\{\{#each (?P<b>([^\{\}])*)\}\}(?P<a>(.)*).hbs\{\{/each\}\}\z",
+            r"(?P<c>(.)*)/\{\{#each (?P<b>([^\{\}])*)\}\}(?P<a>(.)*)\{\{/each\}\}.hbs\z",
         )
         .unwrap();
         let if_regex =
-            Regex::new(r"(?P<c>(.)*)/\{\{#if (?P<b>([^\{\}])*)\}\}(?P<a>(.)*).hbs\{\{/if\}\}\z")
+            Regex::new(r"(?P<c>(.)*)/\{\{#if (?P<b>([^\{\}])*)\}\}(?P<a>(.)*)\{\{/if\}\}.hbz\z")
                 .unwrap();
 
         if re.is_match(path.to_str().unwrap()) {
@@ -196,22 +205,32 @@ pub fn render_template_file_tree<'a, T: Serialize>(
                 .filter(|s| !s.is_empty())
                 .collect();
 
-            for (i, f) in files_to_create.into_iter().enumerate() {
-                value
-                    .as_object_mut()
-                    .unwrap()
-                    .insert(String::from("index"), json!(i));
+            let delimiter = "----END_OF_FILE_DELIMITER----";
 
+            let new_all_contents = re.replace(
+                path.to_str().unwrap(),
+                format!(
+                    "{{{{#each ${{b}} }}}}{}{}{{{{/each}}}}",
+                    contents, delimiter
+                ),
+            );
+            let new_contents = render_template_file(
+                &h,
+                existing_app_file_tree,
+                &path,
+                &new_all_contents.to_string(),
+                &value,
+            )?;
+            let new_contents_split: Vec<String> = new_contents
+                .split(delimiter)
+                .into_iter()
+                .map(|s| s.to_string())
+                .collect();
+
+            for (i, f) in files_to_create.into_iter().enumerate() {
                 let target_path = PathBuf::from(path_prefix.clone()).join(f);
 
-                let new_contents = render_template_file(
-                    &h,
-                    existing_app_file_tree,
-                    &target_path,
-                    &contents,
-                    &value,
-                )?;
-                transformed_templates.insert(target_path, new_contents);
+                transformed_templates.insert(target_path, new_contents_split[i].clone());
             }
         } else if if_regex.is_match(path.to_str().unwrap()) {
             let path_prefix = if_regex.replace(path.to_str().unwrap(), "${c}");

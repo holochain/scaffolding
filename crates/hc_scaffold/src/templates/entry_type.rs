@@ -16,11 +16,6 @@ use crate::{
 use super::{build_handlebars, render_template_file_tree_and_merge_with_existing};
 
 #[derive(Serialize)]
-pub struct SimpleDependsOn {
-    entry_type: String,
-    cardinality: Cardinality,
-}
-#[derive(Serialize)]
 pub struct ScaffoldEntryTypeData {
     dna_role_id: String,
     coordinator_zome_manifest: ZomeManifest,
@@ -33,27 +28,16 @@ pub fn scaffold_entry_type_templates(
     template_file_tree: &FileTree,
     dna_role_id: &String,
     coordinator_zome: &ZomeManifest,
-    entry_def: &EntryDefinition,
+    entry_type: &EntryDefinition,
     crud: &Crud,
     link_from_original_to_each_update: bool,
-    depends_on: &Vec<DependsOn>,
-    depends_on_itself: &DependsOnItself,
 ) -> ScaffoldResult<FileTree> {
     let data = ScaffoldEntryTypeData {
         dna_role_id: dna_role_id.clone(),
         coordinator_zome_manifest: coordinator_zome.clone(),
-        entry_type: entry_def.clone(),
+        entry_type: entry_type.clone(),
         crud: crud.clone(),
         link_from_original_to_each_update: link_from_original_to_each_update.clone(),
-        depends_on: depends_on
-            .clone()
-            .into_iter()
-            .map(|d| SimpleDependsOn {
-                entry_type: d.entry_type(),
-                cardinality: d.cardinality(),
-            })
-            .collect(),
-        depends_on_itself: depends_on_itself.clone(),
     };
 
     let h = build_handlebars(&template_file_tree)?;

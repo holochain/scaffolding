@@ -1,10 +1,10 @@
 <template>
   <div v-if="records" style="display: flex; flex-direction: column">
-    <{{pascal_case entry_type.singular_name}}Detail 
+    <{{pascal_case entry_type.name}}Detail 
       v-for="record in records" 
       :action-hash="record.signed_action.hashed.hash" 
       style="margin-bottom: 8px">
-    </{{pascal_case entry_type.singular_name}}Detail>
+    </{{pascal_case entry_type.name}}Detail>
   </div>
 
   <div v-else style="display: flex; flex: 1; align-items: center; justify-content: center">
@@ -17,13 +17,13 @@
 import { defineComponent, inject, ComputedRef } from 'vue';
 import { decode } from '@msgpack/msgpack';
 import { InstalledCell, AppWebsocket, InstalledAppInfo, Record } from '@holochain/client';
-import { {{pascal_case entry_type.singular_name}} } from '../../../types/{{coordinator_zome_manifest.name}}';
+import { {{pascal_case entry_type.name}} } from '../../../types/{{coordinator_zome_manifest.name}}';
 import '@material/mwc-circular-progress';
-import {{pascal_case entry_type.singular_name}}Detail from './{{pascal_case entry_type.singular_name}}Detail.vue';
+import {{pascal_case entry_type.name}}Detail from './{{pascal_case entry_type.name}}Detail.vue';
 
 export default defineComponent({
   components: {
-    {{pascal_case entry_type.singular_name}}Detail
+    {{pascal_case entry_type.name}}Detail
   },
   props: {
     actionHash: {
@@ -43,7 +43,7 @@ export default defineComponent({
       cap_secret: null,
       cell_id: cellData.cell_id,
       zome_name: '{{coordinator_zome_manifest.name}}',
-      fn_name: 'get_{{snake_case entry_type.plural_name}}_for_{{snake_case (lookup depends_on index)}}',
+      fn_name: 'get_{{snake_case (plural entry_type.name)}}_for_{{snake_case (lookup depends_on index)}}',
       payload: this.actionHash,
       provenance: cellData.cell_id[1]
     });

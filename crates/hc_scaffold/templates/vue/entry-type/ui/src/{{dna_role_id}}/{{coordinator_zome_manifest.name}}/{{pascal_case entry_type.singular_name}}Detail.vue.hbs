@@ -1,6 +1,6 @@
 <template>
-  <div v-if="{{camel_case entry_type.singular_name}}" style="display: flex; flex-direction: column">
-    <span style="font-size: 18px">{{title_case entry_type.singular_name}}</span>
+  <div v-if="{{camel_case entry_type.name}}" style="display: flex; flex-direction: column">
+    <span style="font-size: 18px">{{title_case entry_type.name}}</span>
 	
 	{{#each entry_type.fields}}
 	  {{> (concat field_type.type "/detail/render") entry_type=../entry_type field_name=@key field_type=this}}
@@ -17,7 +17,7 @@
 import { defineComponent, inject, ComputedRef } from 'vue';
 import { decode } from '@msgpack/msgpack';
 import { InstalledCell, AppWebsocket, InstalledAppInfo, Record } from '@holochain/client';
-import { {{pascal_case entry_type.singular_name}} } from './types';
+import { {{pascal_case entry_type.name}} } from './types';
 import '@material/mwc-circular-progress';
 {{#each entry_type.fields}}
 {{> (concat field_type.type "/detail/imports") }}
@@ -30,9 +30,9 @@ export default defineComponent({
       required: true
     }
   },
-  data(): { {{camel_case entry_type.singular_name}}: {{pascal_case entry_type.singular_name}} | undefined } {
+  data(): { {{camel_case entry_type.name}}: {{pascal_case entry_type.name}} | undefined } {
     return {
-      {{camel_case entry_type.singular_name}}: undefined
+      {{camel_case entry_type.name}}: undefined
     }
   },
   async mounted() {
@@ -42,13 +42,13 @@ export default defineComponent({
       cap_secret: null,
       cell_id: cellData.cell_id,
       zome_name: '{{coordinator_zome_manifest.name}}',
-      fn_name: 'get_{{snake_case entry_type.singular_name}}',
+      fn_name: 'get_{{snake_case entry_type.name}}',
       payload: this.actionHash,
       provenance: cellData.cell_id[1]
     });
     
     if (record) {
-      this.{{camel_case entry_type.singular_name}} = decode((record.entry as any).Present.entry) as {{pascal_case entry_type.singular_name}};
+      this.{{camel_case entry_type.name}} = decode((record.entry as any).Present.entry) as {{pascal_case entry_type.name}};
     }
   },
   setup() {

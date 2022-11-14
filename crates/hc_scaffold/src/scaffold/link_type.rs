@@ -1,5 +1,5 @@
 use convert_case::{Case, Casing};
-use dialoguer::{theme::ColorfulTheme, Select};
+use dialoguer::{theme::ColorfulTheme, Confirm, Select};
 use holochain_types::prelude::DnaManifest;
 
 use crate::{
@@ -51,6 +51,7 @@ pub fn scaffold_link_type(
     template_file_tree: &FileTree,
     from_referenceable: &Option<Referenceable>,
     to_referenceable: &Option<Referenceable>,
+    bidireccional: &Option<bool>,
 ) -> ScaffoldResult<(FileTree, String)> {
     let from_referenceable = get_or_choose_referenceable(
         &zome_file_tree,
@@ -65,8 +66,15 @@ pub fn scaffold_link_type(
     )?;
 
     let link_type_name = match to_referenceable.clone() {
-        Some(to_entry_type) => link_type_name(&from_referenceable, &to_entry_type),
+        Some(to_referenceable) => link_type_name(&from_referenceable, &to_referenceable),
         None => input_snake_case(&String::from("Enter link type name:"))?.to_case(Case::Pascal),
+    };
+
+    let bidireccional = match bidireccional {
+        Some(b) => b.clone(),
+        None => Confirm::with_theme(&ColorfulTheme::default())
+            .with_prompt("Should the link be bidireccional?")
+            .interact()?,
     };
 
     let zome_file_tree = add_link_type_to_integrity_zome(zome_file_tree, &link_type_name)?;
@@ -109,6 +117,7 @@ pub fn scaffold_link_type(
         &link_type_name,
         &from_referenceable,
         &to_referenceable,
+        bidireccional,
     )?;
 
     let file_tree = scaffold_link_type_templates(
@@ -118,6 +127,7 @@ pub fn scaffold_link_type(
         &coordinator_zome,
         &from_referenceable,
         &to_referenceable,
+        bidireccional,
     )?;
 
     Ok((file_tree, link_type_name))

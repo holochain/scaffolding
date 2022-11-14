@@ -13,12 +13,12 @@ export class {{pascal_case index_name}} extends LitElement {
   {{#if (eq index_type.type "ByAuthor")}}
 
   @property({
-    hasChanged: (newVal: ActionHash, oldVal: ActionHash) => newVal.toString() !== oldVal.toString()
+    hasChanged: (newVal: AgentPubKey, oldVal: AgentPubKey) => newVal.toString() !== oldVal.toString()
   })
   author!: AgentPubKey;
   {{/if}}
   
-  _fetch{{pascal_case (lookup entry_types 0)}}: Task<[ActionHash], Array<ActionHash>> = new Task(this, ([{{#if (eq index_type.type "ByAuthor")}}author{{/if}}]) => this.appWebsocket.callZome({
+  _fetch{{pascal_case (lookup entry_types 0)}}: Task<[AgentPubKey], Array<{{referenceable.hash_type}}>> = new Task(this, ([{{#if (eq index_type.type "ByAuthor")}}author{{/if}}]) => this.appWebsocket.callZome({
       cap_secret: null,
       cell_id: this.cellData.cell_id,
       zome_name: '{{coordinator_zome_manifest.name}}',
@@ -37,13 +37,13 @@ export class {{pascal_case index_name}} extends LitElement {
     return this.appInfo.cell_data.find((c: InstalledCell) => c.role_id === '{{dna_role_id}}')!;
   }
 
-  renderList(actionHashes: Array<ActionHash>) {
-    if (actionHashes.length === 0) return html`<span>No {{lower_case (lookup entry_types 0)}} found.</span>`;
+  renderList(hashes: Array<{{referenceable.hash_type}}>) {
+    if (hashes.length === 0) return html`<span>No {{lower_case (plural referenceable.name)}} found.</span>`;
     
     return html`
       <div style="display: flex; flex-direction: column">
-        ${actionHashes.map(actionHash => 
-          html`<{{kebab_case (lookup entry_types 0)}}-detail .{{camel_case (lookup entry_types 0)}}Hash=${actionHash} style="margin-bottom: 16px;"></{{kebab_case (lookup entry_types 0)}}-detail>`
+        ${hashes.map(hash => 
+          html`<{{kebab_case referenceable.name}}-detail .{{camel_case referenceable.name}}Hash=${hash} style="margin-bottom: 16px;"></{{kebab_case referenceable.name}}-detail>`
         )}
       </div>
     `;
@@ -54,8 +54,8 @@ export class {{pascal_case index_name}} extends LitElement {
       pending: () => html`<div style="display: flex; flex: 1; align-items: center; justify-content: center">
         <mwc-circular-progress indeterminate></mwc-circular-progress>
       </div>`,
-      complete: (actionHashes) => this.renderList(actionHashes),
-      error: (e) => html`<span>Error fetching the {{lower_case (lookup entry_types 0)}}: ${e.message}.</span>`
+      complete: (hashes) => this.renderList(hashes),
+      error: (e) => html`<span>Error fetching the {{lower_case (plural referenceable.name)}}: ${e.message}.</span>`
     });
   }
 }
