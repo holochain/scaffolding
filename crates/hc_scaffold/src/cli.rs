@@ -17,7 +17,7 @@ use crate::scaffold::zome::{
     integrity_zome_name, scaffold_coordinator_zome, scaffold_integrity_zome, ZomeFileTree,
 };
 use crate::templates::get::get_template;
-use crate::templates::{choose_or_get_template_file_tree, templates_path};
+use crate::templates::{choose_or_get_template, choose_or_get_template_file_tree, templates_path};
 use crate::utils::{
     check_no_whitespace, check_snake_case, input_no_whitespace, input_snake_case, input_yes_or_no,
 };
@@ -47,12 +47,16 @@ pub enum HcScaffold {
         setup_nix: Option<bool>,
 
         #[structopt(short = "u", long)]
-        /// The git repository URL from which to download the template
-        template_url: Option<String>,
+        /// The git repository URL from which to download the template, incompatible with --templates-path
+        templates_url: Option<String>,
+
+        #[structopt(short = "p", long)]
+        /// The local folder path in which to look for the given template, incompatible with --templates-url
+        templates_path: Option<PathBuf>,
 
         #[structopt(short, long)]
         /// The template to scaffold the web-app from
-        /// If "--template-url" is given, the template must be located at the ".templates/<TEMPLATE NAME>" folder of the repository
+        /// If "--templates-url" is given, the template must be located at the ".templates/<TEMPLATE NAME>" folder of the repository
         /// If not, the template must be an option from the built-in templates: "vanilla", "vue", "lit", "svelte"
         template: Option<String>,
     },
@@ -205,7 +209,8 @@ impl HcScaffold {
                 description,
                 setup_nix,
                 template,
-                template_url,
+                templates_url,
+                templates_path,
             } => {
                 let prompt = String::from("App name (no whitespaces):");
                 let name: String = match name {
@@ -219,24 +224,39 @@ impl HcScaffold {
                     return Err(ScaffoldError::FolderAlreadyExists(app_folder.clone()))?;
                 }
 
-                let (template_name, template_file_tree, scaffold_template) = match template_url {
-                    Some(u) => {
-                        let (name, file_tree) = get_template(&u, &template)?;
-                        (name, file_tree, true)
-                    }
-                    None => {
-                        let ui_framework = match template {
-                            Some(t) => UiFramework::from_str(t.as_str())?,
-                            None => choose_ui_framework()?,
-                        };
+                let (template_name, template_file_tree, scaffold_template) =
+                    match (templates_url, templates_path) {
+                        (Some(_), Some(_)) => Err(ScaffoldError::InvalidArguments(String::from(
+                            "cannot use --templates-path and --templates-url together",
+                        )))?,
+                        (Some(u), None) => {
+                            let (name, file_tree) = get_template(&u, &template)?;
+                            (name, file_tree, true)
+                        }
+                        (None, Some(p)) => {
+                            let templates_dir = current_dir.join(p);
+                            let templates_file_tree = load_directory_into_memory(&templates_dir)?;
+                            let name = choose_or_get_template(
+                                &dir! {".templates"=>templates_file_tree},
+                                &template,
+                            )?;
+                            let template_file_tree =
+                                load_directory_into_memory(&templates_dir.join(&name))?;
+                            (name, template_file_tree, true)
+                        }
+                        (None, None) => {
+                            let ui_framework = match template {
+                                Some(t) => UiFramework::from_str(t.as_str())?,
+                                None => choose_ui_framework()?,
+                            };
 
-                        (
-                            format!("{:?}", ui_framework),
-                            template_for_ui_framework(&ui_framework)?,
-                            false,
-                        )
-                    }
-                };
+                            (
+                                format!("{:?}", ui_framework),
+                                template_for_ui_framework(&ui_framework)?,
+                                false,
+                            )
+                        }
+                    };
 
                 if file_content(&template_file_tree, &PathBuf::from("web-app/README.md.hbs"))
                     .is_err()
