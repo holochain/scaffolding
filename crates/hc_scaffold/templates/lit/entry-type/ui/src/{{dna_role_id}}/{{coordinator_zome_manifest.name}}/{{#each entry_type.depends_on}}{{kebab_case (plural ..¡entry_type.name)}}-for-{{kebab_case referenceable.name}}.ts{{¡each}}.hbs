@@ -15,14 +15,14 @@ export class {{pascal_case (plural ../entry_type.name)}}For{{pascal_case referen
   })
   {{camel_case referenceable.singular_arg}}!: {{referenceable.hash_type}};
 
-  _fetch{{pascal_case (plural ../entry_type.name)}}: Task<[{{referenceable.hash_type}}], Array<{{#if ../entry_type.fixed}}EntryHash{{else}}ActionHash{{/if}}>> = new Task(this, ([{{camel_case referenceable.singular_arg}}]) => this.appWebsocket.callZome({
+  _fetch{{pascal_case (plural ../entry_type.name)}} = new Task(this, ([{{camel_case referenceable.singular_arg}}]) => this.appWebsocket.callZome({
       cap_secret: null,
       cell_id: this.cellData.cell_id,
       zome_name: '{{coordinator_zome_manifest.name}}',
       fn_name: 'get_{{snake_case (plural ../entry_type.name)}}_for_{{snake_case referenceable.name}}',
       payload: {{camel_case referenceable.singular_arg}},
       provenance: this.cellData.cell_id[1]
-  }), [this.{{camel_case referenceable.singular_arg}}]);
+  }) as Promise<Array<{{#if ../entry_type.fixed}}EntryHash{{else}}ActionHash{{/if}}>>, () => [this.{{camel_case referenceable.singular_arg}}]);
 
   @contextProvided({ context: appWebsocketContext })
   appWebsocket!: AppWebsocket;
@@ -52,7 +52,7 @@ export class {{pascal_case (plural ../entry_type.name)}}For{{pascal_case referen
         <mwc-circular-progress indeterminate></mwc-circular-progress>
       </div>`,
       complete: (hashes) => this.renderList(hashes),
-      error: (e) => html`<span>Error fetching {{lower_case (plural ../entry_type.name)}}: ${e.message}.</span>`
+      error: (e) => html`<span>Error fetching {{lower_case (plural ../entry_type.name)}}: ${e}.</span>`
     });
   }
 }

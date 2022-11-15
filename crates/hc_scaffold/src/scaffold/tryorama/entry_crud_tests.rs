@@ -21,7 +21,7 @@ import test from 'node:test';
 import assert from 'node:assert';
 
 import {{ runScenario, pause }} from '@holochain/tryorama';
-import {{ ActionHash, Record, DnaSource }} from '@holochain/client';
+import {{ NewEntryAction, ActionHash, Record, DnaSource }} from '@holochain/client';
 import {{ decode }} from '@msgpack/msgpack';
 
 {}
@@ -122,7 +122,8 @@ test('create {}', async t => {{
 
 {}
   }});
-}});"#,
+}});
+"#,
         entry_definition.name,
         common_tests_setup(happ_bundle_location_from_tests_root),
         alice_create_entry(
@@ -138,6 +139,11 @@ pub fn read_entry_test(
     happ_bundle_location_from_tests_root: &PathBuf,
     coordinator_zome: &String,
 ) -> String {
+    let hash_to_get_from = match entry_definition.fixed {
+        true => format!("(record.signed_action.hashed.content as NewEntryAction).entry_hash"),
+        false => format!("record.signed_action.hashed.hash"),
+    };
+
     format!(
         r#"
 test('create and read {}', async t => {{
@@ -161,11 +167,12 @@ test('create and read {}', async t => {{
     const createReadOutput: Record = await bob.cells[0].callZome({{
       zome_name: "{}",
       fn_name: "get_{}",
-      payload: record.signed_action.hashed.hash,
+      payload: {hash_to_get_from},
     }});
     assert.deepEqual(createInput, decode((createReadOutput.entry as any).Present.entry) as any);
   }});
-}});"#,
+}});
+"#,
         entry_definition.name,
         common_tests_setup(happ_bundle_location_from_tests_root),
         entry_definition.js_sample_object(),
@@ -184,23 +191,25 @@ pub fn update_entry_test(
     coordinator_zome: &String,
     link_original_to_each_update: bool,
 ) -> String {
-    let read_after_update = format!(
-        r#"
+    let read_after_update = |n: u32| {
+        format!(
+            r#"
     // Wait for the updated entry to be propagated to the other node.
     await pause(300);
         
     // Bob gets the updated {}
-    const readUpdatedOutput: Record = await bob.cells[0].callZome({{
+    const readUpdatedOutput{n}: Record = await bob.cells[0].callZome({{
       zome_name: "{}",
       fn_name: "get_{}",
       payload: updatedRecord.signed_action.hashed.hash,
     }});
-    assert.deepEqual(contentUpdate, decode((readUpdatedOutput.entry as any).Present.entry) as any);
+    assert.deepEqual(contentUpdate, decode((readUpdatedOutput{n}.entry as any).Present.entry) as any);
 "#,
-        entry_definition.name.to_case(Case::Snake),
-        coordinator_zome,
-        entry_definition.name.to_case(Case::Snake)
-    );
+            entry_definition.name.to_case(Case::Snake),
+            coordinator_zome,
+            entry_definition.name.to_case(Case::Snake)
+        )
+    };
 
     let original_action_hash_field = match link_original_to_each_update {
         true => format!(
@@ -231,12 +240,12 @@ test('create and update {}', async t => {{
  
     // Alice updates the {}
     let contentUpdate: any = {};
-    const updateInput = {{ {}
+    let updateInput = {{ {}
       previous_{}_hash: originalActionHash,
       updated_{}: contentUpdate,
     }};
 
-    const updatedRecord: Record = await alice.cells[0].callZome({{
+    let updatedRecord: Record = await alice.cells[0].callZome({{
       zome_name: "{}",
       fn_name: "update_{}",
       payload: updateInput,
@@ -247,12 +256,12 @@ test('create and update {}', async t => {{
 
     // Alice updates the {} again
     contentUpdate = {};
-    const updateInput = {{ {}
+    updateInput = {{ {}
       previous_{}_hash: updatedRecord.signed_action.hashed.hash,
       updated_{}: contentUpdate,
     }};
 
-    const updatedRecord: Record = await alice.cells[0].callZome({{
+    updatedRecord = await alice.cells[0].callZome({{
       zome_name: "{}",
       fn_name: "update_{}",
       payload: updateInput,
@@ -261,7 +270,8 @@ test('create and update {}', async t => {{
 
 {}
   }});
-}});"#,
+}});
+"#,
         entry_definition.name.to_case(Case::Snake),
         common_tests_setup(happ_bundle_location_from_tests_root),
         entry_definition.js_sample_object(),
@@ -275,7 +285,7 @@ test('create and update {}', async t => {{
         entry_definition.name.to_case(Case::Snake),
         coordinator_zome,
         entry_definition.name.to_case(Case::Snake),
-        read_after_update,
+        read_after_update(0),
         entry_definition.name.to_case(Case::Snake),
         entry_definition.js_sample_object(),
         original_action_hash_field,
@@ -283,7 +293,7 @@ test('create and update {}', async t => {{
         entry_definition.name.to_case(Case::Snake),
         coordinator_zome,
         entry_definition.name.to_case(Case::Snake),
-        read_after_update
+        read_after_update(1)
     )
 }
 
@@ -333,7 +343,8 @@ test('create and delete {}', async t => {{
 
 {}
   }});
-}});"#,
+}});
+"#,
         entry_definition.name,
         common_tests_setup(happ_bundle_location_from_tests_root),
         entry_definition.js_sample_object(),

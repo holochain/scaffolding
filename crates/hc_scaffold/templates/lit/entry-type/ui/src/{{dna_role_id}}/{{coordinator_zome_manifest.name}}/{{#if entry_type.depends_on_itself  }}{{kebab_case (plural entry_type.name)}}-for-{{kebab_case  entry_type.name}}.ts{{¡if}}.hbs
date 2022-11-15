@@ -2,6 +2,7 @@ import { LitElement, html } from 'lit';
 import { state, customElement, property } from 'lit/decorators.js';
 import { InstalledCell, Record, AppWebsocket, ActionHash, InstalledAppInfo } from '@holochain/client';
 import { contextProvided } from '@lit-labs/context';
+import { Task } from '@lit-labs/task';
 import { appWebsocketContext, appInfoContext } from '../../contexts';
 import './{{kebab_case entry_type.name}}-detail';
 
@@ -13,14 +14,14 @@ export class {{pascal_case (plural entry_type.name)}}For{{pascal_case entry_type
   })
   {{camel_case entry_type.name}}Hash!: {{#if entry_type.fixed}}EntryHash{{else}}ActionHash{{/if}};
 
-  _fetch{{pascal_case (plural entry_type.name)}}: Task<[{{#if entry_type.fixed}}EntryHash{{else}}ActionHash{{/if}}], Array<{{#if entry_type.fixed}}EntryHash{{else}}ActionHash{{/if}}>> = new Task(this, ([{{camel_case entry_type.name}}Hash]) => this.appWebsocket.callZome({
+  _fetch{{pascal_case (plural entry_type.name)}} = new Task(this, ([{{camel_case entry_type.name}}Hash]) => this.appWebsocket.callZome({
       cap_secret: null,
       cell_id: this.cellData.cell_id,
       zome_name: '{{coordinator_zome_manifest.name}}',
       fn_name: 'get_{{snake_case (plural entry_type.name)}}_for_{{snake_case entry_type.name}}',
       payload: {{camel_case entry_type.name}}Hash,
       provenance: this.cellData.cell_id[1]
-  }), [this.{{camel_case entry_type.name}}Hash]);
+  }) as Promise<Array<{{#if entry_type.fixed}}EntryHash{{else}}ActionHash{{/if}}>>, () => [this.{{camel_case entry_type.name}}Hash]);
 
   @contextProvided({ context: appWebsocketContext })
   appWebsocket!: AppWebsocket;
@@ -50,7 +51,7 @@ export class {{pascal_case (plural entry_type.name)}}For{{pascal_case entry_type
         <mwc-circular-progress indeterminate></mwc-circular-progress>
       </div>`,
       complete: (hashes) => this.renderList(hashes),
-      error: (e) => html`<span>Error fetching the {{lower_case (plural entry_type.names)}}: ${e.message}.</span>`
+      error: (e) => html`<span>Error fetching the {{lower_case (plural entry_type.names)}}: ${e}.</span>`
     });
   }
 

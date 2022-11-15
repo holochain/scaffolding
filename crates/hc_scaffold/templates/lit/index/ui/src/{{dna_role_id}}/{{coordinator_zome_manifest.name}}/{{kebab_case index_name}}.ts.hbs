@@ -1,7 +1,8 @@
 import { LitElement, html } from 'lit';
 import { state, customElement, property } from 'lit/decorators.js';
-import { InstalledCell, AgentPubKey, Record, AppWebsocket, InstalledAppInfo } from '@holochain/client';
+import { InstalledCell, AgentPubKey, EntryHash, ActionHash, Record, AppWebsocket, InstalledAppInfo } from '@holochain/client';
 import { contextProvided } from '@lit-labs/context';
+import { Task } from '@lit-labs/task';
 import { appWebsocketContext, appInfoContext } from '../../contexts';
 import '@material/mwc-circular-progress';
 {{#each entry_types}}
@@ -18,14 +19,14 @@ export class {{pascal_case index_name}} extends LitElement {
   author!: AgentPubKey;
   {{/if}}
   
-  _fetch{{pascal_case (plural referenceable.name)}}: Task<[AgentPubKey], Array<{{referenceable.hash_type}}>> = new Task(this, ([{{#if (eq index_type.type "ByAuthor")}}author{{/if}}]) => this.appWebsocket.callZome({
+  _fetch{{pascal_case (plural referenceable.name)}} = new Task(this, ([{{#if (eq index_type.type "ByAuthor")}}author{{/if}}]) => this.appWebsocket.callZome({
       cap_secret: null,
       cell_id: this.cellData.cell_id,
       zome_name: '{{coordinator_zome_manifest.name}}',
       fn_name: 'get_{{snake_case index_name}}',
       payload: {{#if (eq index_type.type "ByAuthor")}}author{{else}}null{{/if}},
       provenance: this.cellData.cell_id[1]
-  }), [{{#if (eq index_type.type "ByAuthor")}}this.author{{/if}}]);
+  }) as Promise<Array<{{referenceable.hash_type}}>>, () => [{{#if (eq index_type.type "ByAuthor")}}this.author{{/if}}]);
 
   @contextProvided({ context: appWebsocketContext })
   appWebsocket!: AppWebsocket;
@@ -55,7 +56,7 @@ export class {{pascal_case index_name}} extends LitElement {
         <mwc-circular-progress indeterminate></mwc-circular-progress>
       </div>`,
       complete: (hashes) => this.renderList(hashes),
-      error: (e) => html`<span>Error fetching the {{lower_case (plural referenceable.name)}}: ${e.message}.</span>`
+      error: (e) => html`<span>Error fetching the {{lower_case (plural referenceable.name)}}: ${e}.</span>`
     });
   }
 }

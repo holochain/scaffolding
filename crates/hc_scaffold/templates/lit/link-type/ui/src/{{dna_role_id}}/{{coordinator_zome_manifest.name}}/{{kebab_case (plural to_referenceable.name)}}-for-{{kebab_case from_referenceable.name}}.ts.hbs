@@ -1,7 +1,8 @@
 import { LitElement, html } from 'lit';
 import { state, property, customElement } from 'lit/decorators.js';
-import { InstalledCell, AgentPubKey, ActionHash, Record, AppWebsocket, InstalledAppInfo } from '@holochain/client';
+import { InstalledCell, AgentPubKey, EntryHash, ActionHash, Record, AppWebsocket, InstalledAppInfo } from '@holochain/client';
 import { contextProvided } from '@lit-labs/context';
+import { Task } from '@lit-labs/task';
 import { appWebsocketContext, appInfoContext } from '../../contexts';
 import '@material/mwc-circular-progress';
 import './{{kebab_case to_referenceable.name}}-detail';
@@ -14,14 +15,14 @@ export class {{pascal_case (plural to_referenceable.name)}}For{{pascal_case from
   })
   {{camel_case from_referenceable.singular_arg}}!: {{from_referenceable.hash_type}}; 
 
-  _fetch{{pascal_case to_referenceable.name}}: Task<[{{from_referenceable.hash_type}}], Array<{{to_referenceable.hash_type}}>> = new Task(this, ([{{camel_case from_referenceable.singular_arg}}]) => this.appWebsocket.callZome({
+  _fetch{{pascal_case (plural to_referenceable.name)}} = new Task(this, ([{{camel_case from_referenceable.singular_arg}}]) => this.appWebsocket.callZome({
       cap_secret: null,
       cell_id: this.cellData.cell_id,
       zome_name: '{{coordinator_zome_manifest.name}}',
       fn_name: 'get_{{snake_case (plural to_referenceable.name)}}_for_{{snake_case from_referenceable.name}}',
       payload: {{camel_case from_referenceable.singular_arg}},
       provenance: this.cellData.cell_id[1]
-  }), [this.{{camel_case from_referenceable.singular_arg}}]);
+  }) as Promise<Array<{{to_referenceable.hash_type}}>>, () => [this.{{camel_case from_referenceable.singular_arg}}]);
 
   @contextProvided({ context: appWebsocketContext })
   appWebsocket!: AppWebsocket;

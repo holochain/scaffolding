@@ -24,14 +24,14 @@ export class {{pascal_case entry_type.name}}Detail extends LitElement {
   })
   {{camel_case entry_type.name}}Hash!: {{#if entry_type.fixed}}EntryHash{{else}}ActionHash{{/if}};
 
-  _fetchRecord: Task<[{{#if entry_type.fixed}}EntryHash{{else}}ActionHash{{/if}}], Record | undefined> = new Task(this, ([{{camel_case entry_type.name}}Hash]) => this.appWebsocket.callZome({
+  _fetchRecord = new Task(this, ([{{camel_case entry_type.name}}Hash]) => this.appWebsocket.callZome({
       cap_secret: null,
       cell_id: this.cellData.cell_id,
       zome_name: '{{coordinator_zome_manifest.name}}',
       fn_name: 'get_{{snake_case entry_type.name}}',
       payload: {{camel_case entry_type.name}}Hash,
       provenance: this.cellData.cell_id[1]
-  }), [this.{{camel_case entry_type.name}}Hash]);
+  }) as Promise<Record | undefined>, () => [this.{{camel_case entry_type.name}}Hash]);
 
   {{#if crud.update}}
   @state()
@@ -87,7 +87,7 @@ export class {{pascal_case entry_type.name}}Detail extends LitElement {
           <span style="font-size: 18px; flex: 1;">{{title_case entry_type.name}}</span>
 
           {{#if crud.update}}
-          <mwc-icon-button style="margin-left: 8px" icon="edit" @click=${() => { this._editing = true }; }></mwc-icon-button>
+          <mwc-icon-button style="margin-left: 8px" icon="edit" @click=${() => { this._editing = true; } }></mwc-icon-button>
           {{/if}}
           {{#if crud.delete}}
           <mwc-icon-button style="margin-left: 8px" icon="delete" @click=${() => this.delete{{pascal_case entry_type.name}}()}></mwc-icon-button>
@@ -124,9 +124,9 @@ export class {{pascal_case entry_type.name}}Detail extends LitElement {
     	  .record=${maybeRecord}
     	  @{{kebab_case entry_type.name}}-updated=${async () => {
     	    this._editing = false;
-    	    await this._fetchRecord.run()
-    	  }; }
-    	  @edit-canceled=${() => { this._editing = false; }; }
+    	    await this._fetchRecord.run();
+    	  } }
+    	  @edit-canceled=${() => { this._editing = false; } }
     	  style="display: flex; flex: 1;"
     	></edit-{{kebab_case entry_type.name}}>`;
     }
@@ -141,7 +141,7 @@ export class {{pascal_case entry_type.name}}Detail extends LitElement {
         <mwc-circular-progress indeterminate></mwc-circular-progress>
       </div>`,
       complete: (maybeRecord) => this.render{{pascal_case entry_type.name}}(maybeRecord),
-      error: (e) => html`<span>Error fetching the {{lower_case entry_type.name}}: ${e.message}</span>`
+      error: (e) => html`<span>Error fetching the {{lower_case entry_type.name}}: ${e}</span>`
     });
   }
 }

@@ -2,9 +2,10 @@ use build_fs_tree::serde::Serialize;
 use convert_case::{Case, Casing};
 use dialoguer::theme::ColorfulTheme;
 use dialoguer::Select;
+use handlebars::template::TemplateElement;
 use handlebars::{
-    handlebars_helper, Context, Handlebars, Helper, HelperResult, Output, RenderContext,
-    RenderError,
+    handlebars_helper, Context, Handlebars, Helper, HelperDef, HelperResult, Output, RenderContext,
+    RenderError, Renderable,
 };
 use regex::Regex;
 use serde_json::{json, Value};
@@ -53,6 +54,7 @@ pub fn register_helpers<'a>(h: Handlebars<'a>) -> Handlebars<'a> {
     let h = register_contains_helper(h);
     let h = register_case_helpers(h);
     let h = register_pluralize_helpers(h);
+    let h = register_merge_scope(h);
 
     h
 }
@@ -79,6 +81,92 @@ pub fn register_concat_helper<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
             },
         ),
     );
+
+    h
+}
+
+#[derive(Clone, Copy)]
+pub struct MergeScope;
+
+impl HelperDef for MergeScope {
+    fn call<'reg: 'rc, 'rc>(
+        &self,
+        h: &Helper<'reg, 'rc>,
+        r: &'reg Handlebars<'reg>,
+        ctx: &'rc Context,
+        rc: &mut RenderContext<'reg, 'rc>,
+        out: &mut dyn Output,
+    ) -> HelperResult {
+        let t = h.template().ok_or(RenderError::new(
+            "merge_scope helper cannot have empty content",
+        ))?;
+
+        let s = h
+            .param(0)
+            .ok_or(RenderError::new("merge_scope helper needs two parameters"))?
+            .value()
+            .as_str()
+            .ok_or(RenderError::new(
+                "merge_scope first parameter must be a string",
+            ))?
+            .to_string();
+        let scope_opener = h
+            .param(1)
+            .ok_or(RenderError::new("merge_scope helper needs two parameters"))?
+            .value()
+            .as_str()
+            .ok_or(RenderError::new(
+                "merge_scope's second parameter must be a string",
+            ))?
+            .to_string();
+
+        let mut index = s.find(scope_opener.as_str()).ok_or(RenderError::new(
+            "Given scope opener not found in the given parameter",
+        ))?;
+
+        index += scope_opener.len();
+        let scope_opener_index = index.clone();
+        let mut scope_count = 1;
+
+        while scope_count > 0 {
+            index += 1;
+            match s.chars().nth(index) {
+                Some('{') => {
+                    scope_count += 1;
+                }
+                Some('}') => {
+                    scope_count -= 1;
+                }
+                None => {
+                    return Err(RenderError::new("Malformed scopes"));
+                }
+                _ => {}
+            }
+        }
+
+        // Here index is the position of the correct closing '}' for the scope
+
+        out.write(&s[0..=scope_opener_index])?;
+        let previous_scope_content = &s[scope_opener_index..index].to_string();
+
+        let mut data = ctx
+            .data()
+            .as_object()
+            .ok_or(RenderError::new("Context must be an object"))?
+            .clone();
+        data.insert(
+            String::from("previous_scope_content"),
+            Value::String(previous_scope_content.clone()),
+        );
+        rc.set_context(Context::wraps(data)?);
+        t.render(r, ctx, rc, out)?;
+
+        out.write(&s[index..])?;
+        Ok(())
+    }
+}
+pub fn register_merge_scope<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
+    h.register_helper("merge_scope", Box::new(MergeScope));
 
     h
 }

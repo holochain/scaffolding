@@ -17,9 +17,7 @@ pub fn common_tests_setup(dna_bundle_path_from_tests_root: &PathBuf) -> String {
 
     // Shortcut peer discovery through gossip and register all agents in every
     // conductor of the scenario.
-    await scenario.shareAllAgents();
-    
-    "#,
+    await scenario.shareAllAgents();"#,
         dna_bundle_path_from_tests_root,
     )
 }

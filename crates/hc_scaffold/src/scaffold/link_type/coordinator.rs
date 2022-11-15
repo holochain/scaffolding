@@ -165,7 +165,7 @@ pub fn get_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}({fr
     
     let agents: Vec<AgentPubKey> = links
         .into_iter()
-        .map(|link| AgentPubKey::from(link.target))
+        .map(|link| AgentPubKey::from(EntryHash::from(link.target)))
         .collect();
 
     Ok(agents)
@@ -233,6 +233,13 @@ pub fn get_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}({fr
     )
 }
 
+fn from_link_hash_type(hash_type: &String) -> String {
+    match hash_type.as_str() {
+        "AgentPubKey" => format!("AgentPubKey::from(EntryHash::from(link.target.clone()))"),
+        _ => format!("{}::from(link.target.clone())", hash_type),
+    }
+}
+
 // Event to calendar
 fn remove_link_handlers(
     from_referenceable: &Referenceable,
@@ -261,13 +268,17 @@ fn remove_link_handlers(
     let singular_snake_to_entry_type = to_referenceable
         .to_string(&Cardinality::Single)
         .to_case(Case::Snake);
+
+    let from_link = from_link_hash_type(&to_hash_type);
+    let from_inverse = from_link_hash_type(&from_hash_type);
+
     let bidireccional_remove = match bidireccional {
         true => format!(
             r#"
-    let links = get_links({to_arg_name}, LinkTypes::{inverse_link_type_name}, None)?;
+    let links = get_links(input.{to_arg_name}.clone(), LinkTypes::{inverse_link_type_name}, None)?;
 
     for link in links {{
-        if {from_hash_type}::from(EntryHash::from(link.target.clone())).eq(&input.{from_arg_name}) {{
+        if {from_inverse}.eq(&input.{from_arg_name}) {{
             delete_link(link.create_link_hash)?;
         }}
     }}"#
@@ -282,10 +293,10 @@ pub struct Remove{singular_pascal_to_entry_type}For{singular_pascal_from_entry_t
 }}
 #[hdk_extern]
 pub fn remove_{singular_snake_to_entry_type}_for_{singular_snake_from_entry_type}(input: Remove{singular_pascal_to_entry_type}For{singular_pascal_from_entry_type}Input ) -> ExternResult<()> {{
-    let links = get_links(input.{from_arg_name}, LinkTypes::{pascal_link_type_name}, None)?;
+    let links = get_links(input.{from_arg_name}.clone(), LinkTypes::{pascal_link_type_name}, None)?;
     
     for link in links {{
-        if {to_hash_type}::from(EntryHash::from(link.target.clone())).eq(&input.{to_arg_name}) {{
+        if {from_link}.eq(&input.{to_arg_name}) {{
             delete_link(link.create_link_hash)?;
         }}
     }}
