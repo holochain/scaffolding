@@ -1,4 +1,6 @@
 <template>
+  <mwc-snackbar id="create-error"></mwc-snackbar>
+
   <div style="display: flex; flex-direction: column">
 
     <span style="font-size: 18px">Create {{title_case entry_type.name}}</span>
@@ -21,49 +23,61 @@ import { defineComponent, inject, ComputedRef } from 'vue';
 import { InstalledCell, AppWebsocket, InstalledAppInfo, Record } from '@holochain/client';
 import { {{pascal_case entry_type.name}} } from './types';
 import '@material/mwc-button';
+import '@material/mwc-snackbar';
 {{#each entry_type.fields}}
-{{> (concat field_type.type "/create/imports") }}
+{{> (concat field_type.type "/edit/imports") }}
 {{/each}}
 
 export default defineComponent({
   data(): Partial<{{pascal_case entry_type.name}}> {
     return { 
       {{#each entry_type.fields}}
-        {{#if (not (contains depend_on this))}}
-          {{camel_case @key}}: undefined,
+        {{#if widget}}
+          {{#if (not (eq cardinality "vector" ) )}}
+      {{camel_case field_name}}: undefined,
+          {{else}}
+      {{camel_case field_name}}: [],
+          {{/if}}
         {{/if}}
       {{/each}}
     }
   },
   props: {
-  {{#each depends_on}}
-    {{camel_case this}}Hash: {
-      type: Object,
+    {{#each entry_type.fields}}
+      {{#if (not widget)}}
+    {{camel_case field_name}}: {
+      type: null,
       required: true
-    }
-  {{/each}}
+    },
+      {{/if}}
+    {{/each}}
   },
   methods: {
     is{{pascal_case entry_type.name}}Valid() {
-      return {{#each entry_type.fields}}
-        this.{{camel_case @key}} {{#unless @last}} && {{/unless}}
-{{/each}}  
+      return true{{#each entry_type.fields}}{{#if widget}} && {{#if (eq cardinality "single")}}this.{{camel_case field_name}}{{/if}}{{#if (eq cardinality "vector")}}this.{{camel_case field_name}}.all(e => e !== undefined){{/if}}{{/if}}{{/each}}
     },
     async create{{pascal_case entry_type.name}}() {
       const cellData = this.appInfo.cell_data.find((c: InstalledCell) => c.role_id === '{{dna_role_id}}')!;
       const {{camel_case entry_type.name}}: {{pascal_case entry_type.name}} = { {{#each entry_type.fields}}
-        {{snake_case @key}}: this.{{camel_case @key}}!,
+        {{snake_case field_name}}: this.{{camel_case field_name}}!,
   {{/each}}
       };
-      const record: Record = await this.appWebsocket.callZome({
-        cap_secret: null,
-        cell_id: cellData.cell_id,
-        zome_name: '{{coordinator_zome_manifest.name}}',
-        fn_name: 'create_{{snake_case entry_type.name}}',
-        payload: {{camel_case entry_type.name}},
-        provenance: cellData.cell_id[1]
-      });
-      this.$emit('{{kebab_case entry_type.name}}-created', record.signed_action.hashed.hash);
+
+      try {
+        const record: Record = await this.appWebsocket.callZome({
+          cap_secret: null,
+          cell_id: cellData.cell_id,
+          zome_name: '{{coordinator_zome_manifest.name}}',
+          fn_name: 'create_{{snake_case entry_type.name}}',
+          payload: {{camel_case entry_type.name}},
+          provenance: cellData.cell_id[1]
+        });
+        this.$emit('{{kebab_case entry_type.name}}-created', record.signed_action.hashed.hash);
+      } catch (e) {
+        const errorSnackbar = this.shadowRoot?.getElementById('create-error') as Snackbar;
+        errorSnackbar.labelText = `Error creating the {{lower_case entry_type.name}}: ${e.data.data}`;
+        errorSnackbar.show();
+      }
     },
   },
   emits: ['{{kebab_case entry_type.name}}-created'],

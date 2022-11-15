@@ -90,14 +90,14 @@ export class Create{{pascal_case entry_type.name}} extends LitElement {
       }));
     } catch (e) {
       const errorSnackbar = this.shadowRoot?.getElementById('create-error') as Snackbar;
-      errorSnackbar.labelText = `Error creating the {{lower_case entry_type.name}}: ${e}`;
+      errorSnackbar.labelText = `Error creating the {{lower_case entry_type.name}}: ${e.data.data}`;
       errorSnackbar.show();
     }
   }
 
   render() {
     return html`
-      <mwc-snackbar id="create-error">
+      <mwc-snackbar id="create-error" leading>
       </mwc-snackbar>
 
       <div style="display: flex; flex-direction: column">
