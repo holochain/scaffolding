@@ -88,7 +88,7 @@ export class Create{{pascal_case entry_type.name}} extends LitElement {
           {{camel_case entry_type.name}}Hash: record.signed_action.hashed.hash
         }
       }));
-    } catch (e) {
+    } catch (e: any) {
       const errorSnackbar = this.shadowRoot?.getElementById('create-error') as Snackbar;
       errorSnackbar.labelText = `Error creating the {{lower_case entry_type.name}}: ${e.data.data}`;
       errorSnackbar.show();

@@ -101,7 +101,7 @@ export class Edit{{pascal_case entry_type.name}} extends LitElement {
           updated{{pascal_case entry_type.name}}Hash: updateRecord.signed_action.hashed.hash
         }
       }));
-    } catch (e) {
+    } catch (e: any) {
       const errorSnackbar = this.shadowRoot?.getElementById('update-error') as Snackbar;
       errorSnackbar.labelText = `Error updating the {{lower_case entry_type.name}}: ${e.data.data}`;
       errorSnackbar.show();

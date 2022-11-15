@@ -66,7 +66,7 @@ export class {{pascal_case entry_type.name}}Detail extends LitElement {
         }
       }));
       this._fetchRecord.run();
-    } catch (e) {
+    } catch (e: any) {
       const errorSnackbar = this.shadowRoot?.getElementById('delete-error') as Snackbar;
       errorSnackbar.labelText = `Error deleting the {{lower_case entry_type.name}}: ${e.data.data}`;
       errorSnackbar.show();
