@@ -1,20 +1,13 @@
-{ sources ? import ./nix/sources.nix {} 
-, holonix ? import (sources.holonix) {}
-, pkgs ? holonix.pkgs
-, ...
-}:
-
 let
-  workspace = pkgs.yarn2nix-moretea.mkYarnWorkspace {
-    src = pkgs.nix-gitignore.gitignoreSource [] ./.;
-    name = "hc-scaffold";
-
-    buildPhase = ''
-      yarn --offline build
-    '';
-
-    nativeBuildInputs = [
-      pkgs.nodejs-16_x
-    ];
+  holonixPath = (import ./nix/sources.nix).holonix; # points to the current state of the Holochain repository
+  holonix = import (holonixPath) {
+     # holochainVersionId = "v0_0_124"; specifies the Holochain version
   };
-in workspace
+  nixpkgs = holonix.pkgs;
+in nixpkgs.mkShell {
+  inputsFrom = [ holonix.main ];
+  packages = with nixpkgs; [
+    niv
+    # any additional packages needed for this project, e. g. Nodejs
+  ];
+}

@@ -21,20 +21,16 @@ jobs:
         with:
           name: holochain-ci
 
-      - name: Build Nix package
-        run: |
-          nix build -f .
-
       - name: Install
         run: |
-          nix-shell shell.nix \
+          nix-shell . \
             --keep NIX_PATH \
             --pure \
-            --run "yarn install"
+            --run "cargo install --path crates/hc-scaffold"
 
       - name: Test
         run: |
-          nix-shell shell.nix \
+          nix-shell . \
             --keep NIX_PATH \
             --pure \
-            --run "yarn test"
+            --run "sh run_test.sh"
