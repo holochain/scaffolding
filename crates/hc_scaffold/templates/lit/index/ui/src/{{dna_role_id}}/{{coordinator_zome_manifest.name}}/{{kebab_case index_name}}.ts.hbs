@@ -56,7 +56,7 @@ export class {{pascal_case index_name}} extends LitElement {
         <mwc-circular-progress indeterminate></mwc-circular-progress>
       </div>`,
       complete: (hashes) => this.renderList(hashes),
-      error: (e) => html`<span>Error fetching the {{lower_case (plural referenceable.name)}}: ${e.data.data}.</span>`
+      error: (e: any) => html`<span>Error fetching the {{lower_case (plural referenceable.name)}}: ${e.data.data}.</span>`
     });
   }
 }

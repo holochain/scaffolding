@@ -708,7 +708,7 @@ impl HcScaffoldTemplate {
         };
 
         let template_file_tree = dir! {
-            templates_path().join(target_template) => template_file_tree
+            templates_path().join(&target_template) => template_file_tree
         };
 
         let file_tree = MergeableFileSystemTree::<OsString, String>::from(template_file_tree);
@@ -716,25 +716,18 @@ impl HcScaffoldTemplate {
         file_tree.build(&".".into())?;
 
         match self {
-            HcScaffoldTemplate::Get {
-                template_url,
-                from_template: template,
-                to_template: target_template,
-            } => {
+            HcScaffoldTemplate::Get { .. } => {
                 println!(
                     r#"Template downloaded to folder {:?}
 "#,
-                    templates_path()
+                    templates_path().join(target_template)
                 );
             }
-            HcScaffoldTemplate::Init {
-                template,
-                to_template: target_template,
-            } => {
+            HcScaffoldTemplate::Init { template, .. } => {
                 println!(
                     r#"Template initialized to folder {:?}
 "#,
-                    templates_path()
+                    templates_path().join(target_template)
                 );
             }
         }
