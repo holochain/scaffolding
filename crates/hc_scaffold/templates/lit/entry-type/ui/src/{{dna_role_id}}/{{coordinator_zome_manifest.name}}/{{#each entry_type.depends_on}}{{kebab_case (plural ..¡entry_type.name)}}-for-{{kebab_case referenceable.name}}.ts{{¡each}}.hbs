@@ -18,7 +18,7 @@ export class {{pascal_case (plural ../entry_type.name)}}For{{pascal_case referen
   _fetch{{pascal_case (plural ../entry_type.name)}} = new Task(this, ([{{camel_case referenceable.singular_arg}}]) => this.appWebsocket.callZome({
       cap_secret: null,
       cell_id: this.cellData.cell_id,
-      zome_name: '{{coordinator_zome_manifest.name}}',
+      zome_name: '{{../coordinator_zome_manifest.name}}',
       fn_name: 'get_{{snake_case (plural ../entry_type.name)}}_for_{{snake_case referenceable.name}}',
       payload: {{camel_case referenceable.singular_arg}},
       provenance: this.cellData.cell_id[1]
@@ -31,7 +31,7 @@ export class {{pascal_case (plural ../entry_type.name)}}For{{pascal_case referen
   appInfo!: InstalledAppInfo;
 
   get cellData() {
-    return this.appInfo.cell_data.find((c: InstalledCell) => c.role_id === '{{dna_role_id}}')!;
+    return this.appInfo.cell_data.find((c: InstalledCell) => c.role_id === '{{../dna_role_id}}')!;
   }
 
   renderList(hashes: Array<{{referenceable.hash_type}}>) {
@@ -39,7 +39,7 @@ export class {{pascal_case (plural ../entry_type.name)}}For{{pascal_case referen
     
     return html`
       <div style="display: flex; flex-direction: column">
-        ${hashes.map(hash => 
+        ${hashes.map(hash =>
           html`<{{kebab_case ../entry_type.name}}-detail .{{camel_case ../entry_type.name}}Hash=${hash}></{{kebab_case ../entry_type.name}}-detail>`
         )}
       </div>

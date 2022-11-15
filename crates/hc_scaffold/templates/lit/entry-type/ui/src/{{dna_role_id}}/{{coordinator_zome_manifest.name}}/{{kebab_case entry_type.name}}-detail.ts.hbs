@@ -1,6 +1,6 @@
 import { LitElement, html } from 'lit';
 import { state, customElement, property } from 'lit/decorators.js';
-import { InstalledCell, AppWebsocket, Record, ActionHash, InstalledAppInfo } from '@holochain/client';
+import { InstalledCell, AppWebsocket, EntryHash, Record, ActionHash, InstalledAppInfo } from '@holochain/client';
 import { contextProvided } from '@lit-labs/context';
 import { Task } from '@lit-labs/task';
 import { decode } from '@msgpack/msgpack';
@@ -68,7 +68,7 @@ export class {{pascal_case entry_type.name}}Detail extends LitElement {
       this._fetchRecord.run();
     } catch (e) {
       const errorSnackbar = this.shadowRoot?.getElementById('delete-error') as Snackbar;
-      errorSnackbar.labelText = `Error deleting the {{lower_case entry_type.name}}: ${e.message}`;
+      errorSnackbar.labelText = `Error deleting the {{lower_case entry_type.name}}: ${e}`;
       errorSnackbar.show();
     }
   }

@@ -332,13 +332,7 @@ impl EntryDefinition {
         let fields_samples: Vec<String> = self
             .fields
             .iter()
-            .map(|field_def| {
-                format!(
-                    "{}: {}",
-                    field_def.field_name,
-                    field_def.field_type.js_sample_value()
-                )
-            })
+            .map(|field_def| format!("{}: {}", field_def.field_name, field_def.js_sample_value()))
             .collect();
         format!(
             r#"{{

@@ -11,9 +11,9 @@ pub fn hdi_version() -> String {
 }
 
 pub fn hdk_version() -> String {
-    String::from("0.0.159")
+    String::from("0.0.160")
 }
 
 pub fn holochain_nix_version() -> String {
-    String::from("v0_0_171")
+    String::from("v0_0_172")
 }

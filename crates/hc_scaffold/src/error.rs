@@ -90,8 +90,11 @@ pub enum ScaffoldError {
     #[error("No DNAs were found")]
     NoDnasFound,
 
-    #[error("Malformed file {0}: ")]
+    #[error("Malformed file {0}: {1}")]
     MalformedFile(PathBuf, String),
+
+    #[error("Malformed template: {0}")]
+    MalformedTemplate(String),
 
     #[error("DNA \"{0}\" already exists")]
     DnaAlreadyExists(String),

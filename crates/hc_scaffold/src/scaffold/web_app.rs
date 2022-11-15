@@ -16,10 +16,7 @@ use super::{
     tryorama::{package_json::tryorama_package_json, tsconfig_json::tryorama_tsconfig},
 };
 
-mod package_json;
 pub mod uis;
-
-use package_json::workspace_package_json;
 
 fn web_app_skeleton(
     app_name: String,
@@ -35,7 +32,6 @@ fn web_app_skeleton(
         "happ.yaml" => file!(empty_happ_manifest(app_name.clone(), description)?)
         "web-happ.yaml" => file!(web_happ_manifest(app_name.clone(), format!("./{}.happ", app_name), String::from("../ui/dist.zip"))?)
       }
-      "package.json" => file!(workspace_package_json(&app_name, &String::from("ui"), &String::from("workdir"), &String::from("workdir")))
       "tests" => dir!{
         "package.json" => file!(tryorama_package_json())
         "tsconfig.json" => file!(tryorama_tsconfig())

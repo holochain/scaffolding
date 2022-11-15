@@ -116,7 +116,7 @@ pub fn create_entry_test(
 ) -> String {
     format!(
         r#"
-test('create {}', async t => {{
+test('create {}', {{ concurrency: 1 }}, async t => {{
   await runScenario(async scenario => {{
 {}
 
@@ -146,7 +146,7 @@ pub fn read_entry_test(
 
     format!(
         r#"
-test('create and read {}', async t => {{
+test('create and read {}', {{ concurrency: 1 }}, async t => {{
   await runScenario(async scenario => {{
 {}
 
@@ -222,7 +222,7 @@ pub fn update_entry_test(
 
     format!(
         r#"
-test('create and update {}', async t => {{
+test('create and update {}', {{ concurrency: 1 }}, async t => {{
   await runScenario(async scenario => {{
 {}
 
@@ -319,7 +319,7 @@ pub fn delete_entry_test(
     );
     format!(
         r#"
-test('create and delete {}', async t => {{
+test('create and delete {}', {{ concurrency: 1 }}, async t => {{
   await runScenario(async scenario => {{
 {}
 

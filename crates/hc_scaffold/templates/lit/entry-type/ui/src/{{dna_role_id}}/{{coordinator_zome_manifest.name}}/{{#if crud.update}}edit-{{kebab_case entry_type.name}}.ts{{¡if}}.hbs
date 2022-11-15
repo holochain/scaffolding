@@ -69,7 +69,7 @@ export class Edit{{pascal_case entry_type.name}} extends LitElement {
     {{/each}}
     {{#each entry_type.fields}}
       {{#if (not widget)}}
-      {{snake_case field_name}}: this.current{{camel_case ../entry_type.name}}.{{snake_case field_name}},
+      {{snake_case field_name}}: this.current{{pascal_case ../entry_type.name}}.{{snake_case field_name}},
       {{/if}}
     {{/each}}
     };
@@ -103,7 +103,7 @@ export class Edit{{pascal_case entry_type.name}} extends LitElement {
       }));
     } catch (e) {
       const errorSnackbar = this.shadowRoot?.getElementById('update-error') as Snackbar;
-      errorSnackbar.labelText = `Error updating the {{lower_case entry_type.name}}: ${e.message}`;
+      errorSnackbar.labelText = `Error updating the {{lower_case entry_type.name}}: ${e}`;
       errorSnackbar.show();
     }
   }
@@ -131,7 +131,7 @@ export class Edit{{pascal_case entry_type.name}} extends LitElement {
           <mwc-button
             outlined
             label="Cancel"
-            @click=${() => this.dispathEvent(new CustomEvent('edit-canceled', {
+            @click=${() => this.dispatchEvent(new CustomEvent('edit-canceled', {
               bubbles: true,
               composed: true
             }))}

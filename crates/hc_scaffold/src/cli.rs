@@ -1,5 +1,5 @@
 use crate::error::{ScaffoldError, ScaffoldResult};
-use crate::file_tree::{dir_content, load_directory_into_memory, FileTree};
+use crate::file_tree::{dir_content, file_content, load_directory_into_memory, FileTree};
 use crate::scaffold::app::cargo::exec_metadata;
 use crate::scaffold::app::AppFileTree;
 use crate::scaffold::dna::{scaffold_dna, DnaFileTree};
@@ -238,6 +238,15 @@ impl HcScaffold {
                     }
                 };
 
+                if file_content(&template_file_tree, &PathBuf::from("web-app/README.md.hbs"))
+                    .is_err()
+                {
+                    return Err(ScaffoldError::MalformedTemplate(
+                        "Template does not contain a README.md.hbs file in its \"web-app\" directory"
+                            .to_string(),
+                    ))?;
+                }
+
                 let setup_nix = match setup_nix {
                     Some(s) => s,
                     None => {
@@ -283,16 +292,13 @@ impl HcScaffold {
                     r#"
 Web hApp "{}" scaffolded!
 
-To set up your development environment, run:
-
-  cd {}{}
-  npm install
+Set up your development environment as described in {}/README.md.
 
 Then, add new DNAs to your app with:
 
   hc-scaffold dna
 "#,
-                    name, name, maybe_nix
+                    name, name
                 );
             }
             HcScaffold::Template(template) => template.run()?,

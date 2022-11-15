@@ -293,22 +293,15 @@ pub fn render_template_file_tree<'a, T: Serialize>(
                 .filter(|s| !s.is_empty())
                 .collect();
 
-            let delimiter = "----END_OF_FILE_DELIMITER----";
+            let delimiter = "\n----END_OF_FILE_DELIMITER----\n";
 
-            let new_all_contents = re.replace(
-                path.to_str().unwrap(),
-                format!(
-                    "{{{{#each ${{b}} }}}}{}{}{{{{/each}}}}",
-                    contents, delimiter
-                ),
+            let b = re.replace(path.to_str().unwrap(), "${b}");
+            let new_all_contents = format!(
+                "{{{{#each {} }}}}\n{}{}{{{{/each}}}}",
+                b, contents, delimiter
             );
-            let new_contents = render_template_file(
-                &h,
-                existing_app_file_tree,
-                &path,
-                &new_all_contents.to_string(),
-                &value,
-            )?;
+            let new_contents =
+                render_template_file(&h, existing_app_file_tree, &path, &new_all_contents, &value)?;
             let new_contents_split: Vec<String> = new_contents
                 .split(delimiter)
                 .into_iter()
