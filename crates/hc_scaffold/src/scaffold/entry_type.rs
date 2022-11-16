@@ -134,7 +134,8 @@ fn get_or_choose_depends_on(
         },
         None => {
             println!(
-                r#"In most holochain apps, there are dependency relationships between entry types. 
+                r#"
+In most holochain apps, there are dependency relationships between entry types. 
 
 An entry type "B" depends on an entry type "A" when:
 
@@ -142,7 +143,6 @@ An entry type "B" depends on an entry type "A" when:
     2. There is a link from those entries of type "A" to the entry of type "B" that references them.
                 
 For example, in a forum app, the "comment" entry type depends on the "post" entry type.
-
 "#
             );
             let depends = Confirm::with_theme(&ColorfulTheme::default())

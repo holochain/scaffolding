@@ -2,7 +2,7 @@
 
 export interface {{pascal_case entry_type.name}} { {{#each entry_type.fields}}
   {{#if (not (eq cardinality "vector" ) )}}
-  {{snake_case field_name}}: {{> (concat field_type "/type") }};
+  {{snake_case field_name}}: {{> (concat field_type "/type") }}{{#if (eq cardinality "option")}} | undefined{{/if}};
   {{else}}
   {{snake_case field_name}}: Array<{{> (concat field_type "/type") }}>;
   {{/if}}

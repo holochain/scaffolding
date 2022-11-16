@@ -3,9 +3,11 @@ import { state, customElement, property } from 'lit/decorators.js';
 import { InstalledCell, ActionHash, Record, AgentPubKey, EntryHash, AppWebsocket, InstalledAppInfo } from '@holochain/client';
 import { contextProvided } from '@lit-labs/context';
 import '@material/mwc-button';
+import '@material/mwc-snackbar';
 import { Snackbar } from '@material/mwc-snackbar';
 {{#each entry_type.fields}}
-{{> (concat field_type "/" widget "/create/imports") }}
+{{> (concat field_type "/" widget "/edit/imports") }}
+
 {{/each}}
 
 import { appWebsocketContext, appInfoContext } from '../../contexts';
@@ -116,7 +118,7 @@ export class Create{{pascal_case entry_type.name}} extends LitElement {
 
         <mwc-button 
           raised
-          label="Create {{pascal_case entry_type.name}}"
+          label="Create {{title_case entry_type.name}}"
           .disabled=${!this.is{{pascal_case entry_type.name}}Valid()}
           @click=${() => this.create{{pascal_case entry_type.name}}()}
         ></mwc-button>

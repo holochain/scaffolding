@@ -5,9 +5,8 @@ import { contextProvided } from '@lit-labs/context';
 import { Task } from '@lit-labs/task';
 import { appWebsocketContext, appInfoContext } from '../../contexts';
 import '@material/mwc-circular-progress';
-{{#each entry_types}}
-import './{{kebab_case this}}-detail';
-{{/each}}
+
+import './{{kebab_case referenceable.name}}-detail';
 
 @customElement('{{kebab_case index_name}}')
 export class {{pascal_case index_name}} extends LitElement {

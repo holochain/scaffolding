@@ -6,9 +6,11 @@ import { Task } from '@lit-labs/task';
 import { decode } from '@msgpack/msgpack';
 import '@material/mwc-circular-progress';
 import '@material/mwc-icon-button';
+import '@material/mwc-snackbar';
 import { Snackbar } from '@material/mwc-snackbar';
 {{#each entry_type.fields}}
 {{> (concat field_type "/" widget "/detail/imports") }}
+
 {{/each}}
 {{#if crud.update}}
 import './edit-{{kebab_case entry_type.name}}';
@@ -120,7 +122,7 @@ export class {{pascal_case entry_type.name}}Detail extends LitElement {
           {{#if link_from_original_to_each_update}}
     	  .original{{pascal_case entry_type.name}}Hash=${this.{{camel_case entry_type.name}}Hash}
     	  {{/if}}
-    	  .record=${maybeRecord}
+    	  .currentRecord=${maybeRecord}
     	  @{{kebab_case entry_type.name}}-updated=${async () => {
     	    this._editing = false;
     	    await this._fetchRecord.run();

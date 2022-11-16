@@ -4,9 +4,11 @@ import { InstalledCell, ActionHash, Record, AppWebsocket, InstalledAppInfo } fro
 import { contextProvided } from '@lit-labs/context';
 import { decode } from '@msgpack/msgpack';
 import '@material/mwc-button';
+import '@material/mwc-snackbar';
 import { Snackbar } from '@material/mwc-snackbar';
 {{#each entry_type.fields}}
-{{> (concat field_type "/" widget "/create/imports") }}
+{{> (concat field_type "/" widget "/edit/imports") }}
+
 {{/each}}
 
 import { appWebsocketContext, appInfoContext } from '../../contexts';
@@ -24,17 +26,17 @@ export class Edit{{pascal_case entry_type.name}} extends LitElement {
   {{/if}}
   
   @property()
-  record!: Record;
+  currentRecord!: Record;
  
   get current{{pascal_case entry_type.name}}() {
-    return decode((this.record.entry as any).Present.entry) as {{pascal_case entry_type.name}};
+    return decode((this.currentRecord.entry as any).Present.entry) as {{pascal_case entry_type.name}};
   }
  
   {{#each entry_type.fields}}
     {{#if widget }}
       {{#if (not (eq cardinality "vector" ) )}}
   @state()
-  _{{camel_case field_name}}: {{> (concat field_type "/type") }} | undefined = this.current{{pascal_case ../entry_type.name}}.{{snake_case field_name}};
+  _{{camel_case field_name}}: {{> (concat field_type "/type") }} = this.current{{pascal_case ../entry_type.name}}.{{snake_case field_name}};
 
       {{else}}
   @state()
@@ -84,7 +86,7 @@ export class Edit{{pascal_case entry_type.name}} extends LitElement {
           {{#if link_from_original_to_each_update}}
           original_{{snake_case entry_type.name}}_hash: this.original{{pascal_case entry_type.name}}Hash,
           {{/if}}
-          previous_{{snake_case entry_type.name}}_hash: this.record.signed_action.hashed.hash,
+          previous_{{snake_case entry_type.name}}_hash: this.currentRecord.signed_action.hashed.hash,
           updated_{{snake_case entry_type.name}}: {{camel_case entry_type.name}}
         },
         provenance: cellData.cell_id[1]
@@ -97,7 +99,7 @@ export class Edit{{pascal_case entry_type.name}} extends LitElement {
           {{#if link_from_original_to_each_update}}
           original{{pascal_case entry_type.name}}Hash: this.original{{pascal_case entry_type.name}}Hash,
           {{/if}}
-          previous{{pascal_case entry_type.name}}Hash: this.record.signed_action.hashed.hash,
+          previous{{pascal_case entry_type.name}}Hash: this.currentRecord.signed_action.hashed.hash,
           updated{{pascal_case entry_type.name}}Hash: updateRecord.signed_action.hashed.hash
         }
       }));

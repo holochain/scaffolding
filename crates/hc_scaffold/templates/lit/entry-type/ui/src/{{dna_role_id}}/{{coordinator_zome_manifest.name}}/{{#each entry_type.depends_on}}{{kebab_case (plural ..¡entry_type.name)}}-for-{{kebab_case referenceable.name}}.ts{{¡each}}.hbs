@@ -2,6 +2,7 @@ import { LitElement, html } from 'lit';
 import { state, customElement, property } from 'lit/decorators.js';
 import { InstalledCell, Record, AppWebsocket, EntryHash, ActionHash, InstalledAppInfo, AgentPubKey } from '@holochain/client';
 import { contextProvided } from '@lit-labs/context';
+import '@material/mwc-circular-progress';
 import { Task } from '@lit-labs/task';
 
 import { appWebsocketContext, appInfoContext } from '../../contexts';
@@ -34,7 +35,7 @@ export class {{pascal_case (plural ../entry_type.name)}}For{{pascal_case referen
     return this.appInfo.cell_data.find((c: InstalledCell) => c.role_id === '{{../dna_role_id}}')!;
   }
 
-  renderList(hashes: Array<{{referenceable.hash_type}}>) {
+  renderList(hashes: Array<{{#if ../entry_type.fixed}}EntryHash{{else}}ActionHash{{/if}}>) {
     if (hashes.length === 0) return html`<span>No {{lower_case (plural ../entry_type.name)}} found for this {{lower_case referenceable.name}}.</span>`;
     
     return html`
