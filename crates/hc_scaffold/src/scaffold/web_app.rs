@@ -2,8 +2,8 @@ use build_fs_tree::{dir, file};
 use std::{ffi::OsString, path::PathBuf};
 
 use crate::error::ScaffoldResult;
-use crate::templates::templates_path;
 use crate::templates::web_app::scaffold_web_app_template;
+use crate::templates::{templates_path, ScaffoldedTemplate};
 use crate::{error::ScaffoldError, file_tree::FileTree};
 
 use super::{
@@ -25,7 +25,7 @@ fn web_app_skeleton(
     template_file_tree: FileTree,
     template_name: String,
     scaffold_template: bool,
-) -> ScaffoldResult<FileTree> {
+) -> ScaffoldResult<ScaffoldedTemplate> {
     let mut app_file_tree = dir! {
       ".gitignore" => file!(gitignore())
       "workdir" => dir!{
@@ -57,15 +57,16 @@ fn web_app_skeleton(
             );
     }
 
-    let mut app_file_tree =
+    let mut scaffold_template_result =
         scaffold_web_app_template(app_file_tree, &template_file_tree, &app_name)?;
 
-    app_file_tree
+    scaffold_template_result
+        .file_tree
         .dir_content_mut()
         .unwrap()
         .insert(OsString::from("dnas"), dir! {});
 
-    Ok(app_file_tree)
+    Ok(scaffold_template_result)
 }
 
 pub fn scaffold_web_app(
@@ -75,8 +76,19 @@ pub fn scaffold_web_app(
     template_file_tree: FileTree,
     template_name: String,
     scaffold_template: bool,
-) -> ScaffoldResult<FileTree> {
-    Ok(dir! {
-      app_name.clone() => web_app_skeleton(app_name, description, skip_nix, template_file_tree, template_name, scaffold_template)?
+) -> ScaffoldResult<ScaffoldedTemplate> {
+    let scaffolded_template = web_app_skeleton(
+        app_name.clone(),
+        description,
+        skip_nix,
+        template_file_tree,
+        template_name,
+        scaffold_template,
+    )?;
+    Ok(ScaffoldedTemplate {
+        file_tree: dir! {
+          app_name.clone() => scaffolded_template.file_tree
+        },
+        next_instructions: scaffolded_template.next_instructions,
     })
 }

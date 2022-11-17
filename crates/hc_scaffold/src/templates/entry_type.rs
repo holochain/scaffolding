@@ -5,7 +5,7 @@ use serde::Serialize;
 
 use crate::{
     error::ScaffoldResult,
-    file_tree::FileTree,
+    file_tree::{file_content, FileTree},
     scaffold::entry_type::{
         crud::Crud,
         definitions::{Cardinality, DependsOn, EntryDefinition},
@@ -13,7 +13,9 @@ use crate::{
     },
 };
 
-use super::{build_handlebars, render_template_file_tree_and_merge_with_existing};
+use super::{
+    build_handlebars, render_template_file_tree_and_merge_with_existing, ScaffoldedTemplate,
+};
 
 #[derive(Serialize)]
 pub struct ScaffoldEntryTypeData {
@@ -31,7 +33,7 @@ pub fn scaffold_entry_type_templates(
     entry_type: &EntryDefinition,
     crud: &Crud,
     link_from_original_to_each_update: bool,
-) -> ScaffoldResult<FileTree> {
+) -> ScaffoldResult<ScaffoldedTemplate> {
     let data = ScaffoldEntryTypeData {
         dna_role_id: dna_role_id.clone(),
         coordinator_zome_manifest: coordinator_zome.clone(),
@@ -54,5 +56,16 @@ pub fn scaffold_entry_type_templates(
         )?;
     }
 
-    Ok(app_file_tree)
+    let next_instructions = match file_content(
+        &template_file_tree,
+        &PathBuf::from("entry-type.instructions.hbs"),
+    ) {
+        Ok(content) => Some(h.render_template(content.as_str(), &data)?),
+        Err(_) => None,
+    };
+
+    Ok(ScaffoldedTemplate {
+        file_tree: app_file_tree,
+        next_instructions,
+    })
 }

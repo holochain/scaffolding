@@ -2,9 +2,15 @@ use std::{ffi::OsString, path::PathBuf};
 
 use serde::Serialize;
 
-use crate::{error::ScaffoldResult, file_tree::FileTree, scaffold::entry_type::DependsOnItself};
+use crate::{
+    error::ScaffoldResult,
+    file_tree::{file_content, FileTree},
+    scaffold::entry_type::DependsOnItself,
+};
 
-use super::{build_handlebars, render_template_file_tree_and_merge_with_existing};
+use super::{
+    build_handlebars, render_template_file_tree_and_merge_with_existing, ScaffoldedTemplate,
+};
 
 #[derive(Serialize)]
 pub struct ScaffoldDnaData {
@@ -16,7 +22,7 @@ pub fn scaffold_dna_templates(
     template_file_tree: &FileTree,
     app_name: &String,
     dna_name: &String,
-) -> ScaffoldResult<FileTree> {
+) -> ScaffoldResult<ScaffoldedTemplate> {
     let data = ScaffoldDnaData {
         app_name: dna_name.clone(),
         dna_name: dna_name.clone(),
@@ -36,5 +42,14 @@ pub fn scaffold_dna_templates(
         )?;
     }
 
-    Ok(app_file_tree)
+    let next_instructions =
+        match file_content(&template_file_tree, &PathBuf::from("dna.instructions.hbs")) {
+            Ok(content) => Some(h.render_template(content.as_str(), &data)?),
+            Err(_) => None,
+        };
+
+    Ok(ScaffoldedTemplate {
+        file_tree: app_file_tree,
+        next_instructions,
+    })
 }

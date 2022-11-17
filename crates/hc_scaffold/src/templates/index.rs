@@ -5,14 +5,16 @@ use serde::Serialize;
 
 use crate::{
     error::ScaffoldResult,
-    file_tree::FileTree,
+    file_tree::{file_content, FileTree},
     scaffold::{
         entry_type::definitions::{EntryTypeReference, Referenceable},
         index::IndexType,
     },
 };
 
-use super::{build_handlebars, render_template_file_tree_and_merge_with_existing};
+use super::{
+    build_handlebars, render_template_file_tree_and_merge_with_existing, ScaffoldedTemplate,
+};
 
 #[derive(Serialize)]
 pub struct ScaffoldIndexData {
@@ -30,7 +32,7 @@ pub fn scaffold_index_templates(
     index_type: &IndexType,
     index_name: &String,
     entry_type_reference: &EntryTypeReference,
-) -> ScaffoldResult<FileTree> {
+) -> ScaffoldResult<ScaffoldedTemplate> {
     let data = ScaffoldIndexData {
         dna_role_id: dna_role_id.clone(),
         coordinator_zome_manifest: coordinator_zome_manifest.clone(),
@@ -53,5 +55,16 @@ pub fn scaffold_index_templates(
         )?;
     }
 
-    Ok(app_file_tree)
+    let next_instructions = match file_content(
+        &template_file_tree,
+        &PathBuf::from("index.instructions.hbs"),
+    ) {
+        Ok(content) => Some(h.render_template(content.as_str(), &data)?),
+        Err(_) => None,
+    };
+
+    Ok(ScaffoldedTemplate {
+        file_tree: app_file_tree,
+        next_instructions,
+    })
 }

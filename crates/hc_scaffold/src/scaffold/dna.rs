@@ -5,7 +5,7 @@ use crate::{
         dir_exists, file_content, find_files_by_name, insert_file, insert_file_tree_in_dir,
         FileTree,
     },
-    templates::dna::scaffold_dna_templates,
+    templates::{dna::scaffold_dna_templates, ScaffoldedTemplate},
     utils::choose_directory_path,
 };
 use build_fs_tree::{dir, file};
@@ -165,7 +165,7 @@ pub fn scaffold_dna(
     app_file_tree: AppFileTree,
     template_file_tree: &FileTree,
     dna_name: &String,
-) -> ScaffoldResult<DnaFileTree> {
+) -> ScaffoldResult<ScaffoldedTemplate> {
     let new_dna_file_tree: FileTree = dir! {
         "zomes" => dir! {
             "coordinator" => dir! {},
@@ -245,14 +245,10 @@ pub fn scaffold_dna(
         (dna_name.into(), new_dna_file_tree),
     )?;
 
-    let file_tree = scaffold_dna_templates(
+    scaffold_dna_templates(
         file_tree,
         template_file_tree,
         &app_name.to_string(),
         &dna_name,
-    )?;
-
-    let dna_file_tree = DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
-
-    Ok(dna_file_tree)
+    )
 }

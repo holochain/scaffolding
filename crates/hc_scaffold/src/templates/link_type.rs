@@ -4,10 +4,14 @@ use holochain_types::prelude::ZomeManifest;
 use serde::Serialize;
 
 use crate::{
-    error::ScaffoldResult, file_tree::FileTree, scaffold::entry_type::definitions::Referenceable,
+    error::ScaffoldResult,
+    file_tree::{file_content, FileTree},
+    scaffold::entry_type::definitions::Referenceable,
 };
 
-use super::{build_handlebars, render_template_file_tree_and_merge_with_existing};
+use super::{
+    build_handlebars, render_template_file_tree_and_merge_with_existing, ScaffoldedTemplate,
+};
 
 #[derive(Serialize)]
 pub struct ScaffoldLinkTypeData {
@@ -25,7 +29,7 @@ pub fn scaffold_link_type_templates(
     from_referenceable: &Referenceable,
     to_referenceable: &Option<Referenceable>,
     bidireccional: bool,
-) -> ScaffoldResult<FileTree> {
+) -> ScaffoldResult<ScaffoldedTemplate> {
     let data = ScaffoldLinkTypeData {
         dna_role_id: dna_role_id.clone(),
         coordinator_zome_manifest: coordinator_zome_manifest.clone(),
@@ -48,5 +52,16 @@ pub fn scaffold_link_type_templates(
         )?;
     }
 
-    Ok(app_file_tree)
+    let next_instructions = match file_content(
+        &template_file_tree,
+        &PathBuf::from("link-type.instructions.hbs"),
+    ) {
+        Ok(content) => Some(h.render_template(content.as_str(), &data)?),
+        Err(_) => None,
+    };
+
+    Ok(ScaffoldedTemplate {
+        file_tree: app_file_tree,
+        next_instructions,
+    })
 }

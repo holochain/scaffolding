@@ -31,7 +31,11 @@ pub mod index;
 pub mod integrity;
 pub mod link_type;
 pub mod web_app;
-// pub mod zome_function;
+
+pub struct ScaffoldedTemplate {
+    pub file_tree: FileTree,
+    pub next_instructions: Option<String>,
+}
 
 pub fn build_handlebars<'a>(templates_dir: &FileTree) -> ScaffoldResult<Handlebars<'a>> {
     let h = Handlebars::new();
@@ -156,7 +160,7 @@ impl HelperDef for MergeScope {
             .clone();
         data.insert(
             String::from("previous_scope_content"),
-            Value::String(previous_scope_content.clone()),
+            Value::String(previous_scope_content.clone().trim().to_string()),
         );
         rc.set_context(Context::wraps(data)?);
         t.render(r, ctx, rc, out)?;

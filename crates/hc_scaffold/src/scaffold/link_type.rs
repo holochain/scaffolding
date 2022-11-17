@@ -5,7 +5,7 @@ use holochain_types::prelude::DnaManifest;
 use crate::{
     error::{ScaffoldError, ScaffoldResult},
     file_tree::FileTree,
-    templates::link_type::scaffold_link_type_templates,
+    templates::{link_type::scaffold_link_type_templates, ScaffoldedTemplate},
     utils::input_snake_case,
 };
 
@@ -52,7 +52,7 @@ pub fn scaffold_link_type(
     from_referenceable: &Option<Referenceable>,
     to_referenceable: &Option<Referenceable>,
     bidireccional: &Option<bool>,
-) -> ScaffoldResult<(FileTree, String)> {
+) -> ScaffoldResult<ScaffoldedTemplate> {
     let from_referenceable = get_or_choose_referenceable(
         &zome_file_tree,
         from_referenceable,
@@ -132,7 +132,7 @@ pub fn scaffold_link_type(
         bidireccional,
     )?;
 
-    let file_tree = scaffold_link_type_templates(
+    scaffold_link_type_templates(
         app_file_tree.dna_file_tree.file_tree(),
         &template_file_tree,
         &dna_manifest.name(),
@@ -140,7 +140,5 @@ pub fn scaffold_link_type(
         &from_referenceable,
         &to_referenceable,
         bidireccional,
-    )?;
-
-    Ok((file_tree, link_type))
+    )
 }

@@ -17,7 +17,9 @@ use crate::scaffold::zome::{
     integrity_zome_name, scaffold_coordinator_zome, scaffold_integrity_zome, ZomeFileTree,
 };
 use crate::templates::get::get_template;
-use crate::templates::{choose_or_get_template, choose_or_get_template_file_tree, templates_path};
+use crate::templates::{
+    choose_or_get_template, choose_or_get_template_file_tree, templates_path, ScaffoldedTemplate,
+};
 use crate::utils::{
     check_no_whitespace, check_snake_case, input_no_whitespace, input_snake_case, input_yes_or_no,
 };
@@ -275,7 +277,10 @@ impl HcScaffold {
                     }
                 };
 
-                let app_file_tree = scaffold_web_app(
+                let ScaffoldedTemplate {
+                    file_tree,
+                    next_instructions,
+                } = scaffold_web_app(
                     name.clone(),
                     description,
                     !setup_nix,
@@ -284,7 +289,7 @@ impl HcScaffold {
                     scaffold_template,
                 )?;
 
-                let file_tree = MergeableFileSystemTree::<OsString, String>::from(app_file_tree);
+                let file_tree = MergeableFileSystemTree::<OsString, String>::from(file_tree);
 
                 file_tree.build(&".".into())?;
 
@@ -310,16 +315,23 @@ impl HcScaffold {
 
                 println!(
                     r#"
-Web hApp "{}" scaffolded!
+Web hApp "{}" scaffolded!"#,
+                    name
+                );
 
-Set up your development environment as described in {}/README.md.
+                if let Some(i) = next_instructions {
+                    println!("{}", i);
+                } else {
+                    println!(
+                        r#"Set up your development environment as described in {}/README.md.
 
 Then, add new DNAs to your app with:
 
   hc-scaffold dna
 "#,
-                    name, name
-                );
+                        name
+                    );
+                }
             }
             HcScaffold::Template(template) => template.run()?,
             HcScaffold::Dna {
@@ -340,23 +352,32 @@ Then, add new DNAs to your app with:
 
                 let app_file_tree = AppFileTree::get_or_choose(file_tree, &app)?;
 
-                let file_tree = scaffold_dna(app_file_tree, &template_file_tree, &name)?;
+                let ScaffoldedTemplate {
+                    file_tree,
+                    next_instructions,
+                } = scaffold_dna(app_file_tree, &template_file_tree, &name)?;
 
-                let file_tree =
-                    MergeableFileSystemTree::<OsString, String>::from(file_tree.file_tree());
+                let file_tree = MergeableFileSystemTree::<OsString, String>::from(file_tree);
 
                 file_tree.build(&".".into())?;
 
                 println!(
                     r#"
-DNA "{}" scaffolded!
+DNA "{}" scaffolded!"#,
+                    name
+                );
 
+                if let Some(i) = next_instructions {
+                    println!("{}", i);
+                } else {
+                    println!(
+                        r#"
 Add new zomes to your DNA with:
 
   hc-scaffold zome
 "#,
-                    name
-                );
+                    );
+                }
             }
             HcScaffold::Zome {
                 dna,
@@ -406,39 +427,59 @@ Add new zomes to your DNA with:
                 };
 
                 let mut dna_file_tree = DnaFileTree::get_or_choose(file_tree, &dna)?;
+                let dna_manifest_path = dna_file_tree.dna_manifest_path.clone();
+
+                let mut zome_next_instructions: (Option<String>, Option<String>) = (None, None);
 
                 if scaffold_integrity {
                     let integrity_zome_name = match scaffold_coordinator {
                         true => integrity_zome_name(&name),
                         false => name.clone(),
                     };
-                    let zome_file_tree = scaffold_integrity_zome(
+                    let ScaffoldedTemplate {
+                        file_tree,
+                        next_instructions,
+                    } = scaffold_integrity_zome(
                         dna_file_tree,
                         &template_file_tree,
                         &integrity_zome_name,
                         &integrity,
                     )?;
-                    dna_file_tree = zome_file_tree.dna_file_tree;
+
+                    zome_next_instructions.0 = next_instructions;
+
+                    println!(r#"Integrity zome "{}" scaffolded!"#, integrity_zome_name);
+
+                    dna_file_tree =
+                        DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
                 }
 
                 if scaffold_coordinator {
                     let dependencies = match scaffold_integrity {
                         true => Some(vec![integrity_zome_name(&name)]),
                         false => {
-                            Some(select_integrity_zomes(&dna_file_tree.dna_manifest, Some(&String::from(
-                        "Select integrity zome(s) this coordinator zome depends on (SPACE to select/unselect, ENTER to continue):"
-                        )))?
-                    )
+                            let integrity_zomes = select_integrity_zomes(&dna_file_tree.dna_manifest, Some(&String::from(
+                              "Select integrity zome(s) this coordinator zome depends on (SPACE to select/unselect, ENTER to continue):"
+                            )))?;
+                            Some(integrity_zomes)
                         }
                     };
-                    let zome_file_tree = scaffold_coordinator_zome(
+                    let ScaffoldedTemplate {
+                        file_tree,
+                        next_instructions,
+                    } = scaffold_coordinator_zome(
                         dna_file_tree,
                         &template_file_tree,
                         &name,
                         &dependencies,
                         &coordinator,
                     )?;
-                    dna_file_tree = zome_file_tree.dna_file_tree;
+                    zome_next_instructions.1 = next_instructions;
+
+                    println!(r#"Coordinator zome "{}" scaffolded!"#, name);
+
+                    dna_file_tree =
+                        DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
                 }
 
                 // TODO: implement scaffold_zome_template
@@ -453,26 +494,21 @@ Add new zomes to your DNA with:
                 // Execute cargo metadata to set up the cargo workspace in case this zome is the first crate
                 exec_metadata(&f)?;
 
-                let headline = match (scaffold_integrity, scaffold_coordinator) {
-                    (true, false) => format!(r#"Integrity zome "{}" scaffolded!"#, name),
-                    (false, true) => format!(r#"Coordinator zome "{}" scaffolded!"#, name),
-                    (_, _) => format!(
-                        r#"Integrity zome "{}" and coordinator zome "{}" scaffolded!"#,
-                        integrity_zome_name(&name),
-                        name
-                    ),
-                };
-
-                println!(
-                    r#"
-{}
-
+                match zome_next_instructions {
+                    (Some(ii), Some(ci)) => {
+                        println!("{}", ii);
+                        println!("{}", ci);
+                    }
+                    (None, Some(i)) => println!("{}", i),
+                    (Some(i), None) => println!("{}", i),
+                    _ => println!(
+                        r#"
 Add new entry definitions to your zome with:
 
   hc-scaffold entry-type
 "#,
-                    headline
-                );
+                    ),
+                }
             }
             HcScaffold::EntryType {
                 dna,
@@ -499,7 +535,10 @@ Add new entry definitions to your zome with:
 
                 let zome_file_tree = ZomeFileTree::get_or_choose_integrity(dna_file_tree, &zome)?;
 
-                let app_file_tree = scaffold_entry_type(
+                let ScaffoldedTemplate {
+                    file_tree,
+                    next_instructions,
+                } = scaffold_entry_type(
                     zome_file_tree,
                     &template_file_tree,
                     &name,
@@ -511,20 +550,27 @@ Add new entry definitions to your zome with:
                     &fields,
                 )?;
 
-                let file_tree = MergeableFileSystemTree::<OsString, String>::from(app_file_tree);
+                let file_tree = MergeableFileSystemTree::<OsString, String>::from(file_tree);
 
                 file_tree.build(&".".into())?;
 
                 println!(
                     r#"
-Entry type "{}" scaffolded!
+Entry type "{}" scaffolded!"#,
+                    name
+                );
 
+                if let Some(i) = next_instructions {
+                    println!("{}", i);
+                } else {
+                    println!(
+                        r#"
 Add new indexes for that entry type with:
 
   hc-scaffold index
 "#,
-                    name
-                );
+                    );
+                }
             }
             HcScaffold::LinkType {
                 dna,
@@ -542,7 +588,10 @@ Add new indexes for that entry type with:
 
                 let zome_file_tree = ZomeFileTree::get_or_choose_integrity(dna_file_tree, &zome)?;
 
-                let (app_file_tree, link_type_name) = scaffold_link_type(
+                let ScaffoldedTemplate {
+                    file_tree,
+                    next_instructions,
+                } = scaffold_link_type(
                     zome_file_tree,
                     &template_file_tree,
                     &from_referenceable,
@@ -550,16 +599,18 @@ Add new indexes for that entry type with:
                     &bidireccional,
                 )?;
 
-                let file_tree = MergeableFileSystemTree::<OsString, String>::from(app_file_tree);
+                let file_tree = MergeableFileSystemTree::<OsString, String>::from(file_tree);
 
                 file_tree.build(&".".into())?;
 
                 println!(
                     r#"
-Link type "{}" scaffolded!
+Link type scaffolded!
 "#,
-                    link_type_name
                 );
+                if let Some(i) = next_instructions {
+                    println!("{}", i);
+                }
             }
             HcScaffold::Index {
                 dna,
@@ -583,7 +634,10 @@ Link type "{}" scaffolded!
                     None => input_snake_case(&prompt)?,
                 };
 
-                let app_file_tree = scaffold_index(
+                let ScaffoldedTemplate {
+                    file_tree,
+                    next_instructions,
+                } = scaffold_index(
                     zome_file_tree,
                     &template_file_tree,
                     &name,
@@ -591,7 +645,7 @@ Link type "{}" scaffolded!
                     &entry_type,
                 )?;
 
-                let file_tree = MergeableFileSystemTree::<OsString, String>::from(app_file_tree);
+                let file_tree = MergeableFileSystemTree::<OsString, String>::from(file_tree);
 
                 file_tree.build(&".".into())?;
 
@@ -601,6 +655,10 @@ Index "{}" scaffolded!
 "#,
                     name
                 );
+
+                if let Some(i) = next_instructions {
+                    println!("{}", i);
+                }
             }
         }
 

@@ -2,7 +2,7 @@ use std::{collections::BTreeMap, ffi::OsString, path::PathBuf};
 
 use crate::{
     file_tree::FileTree,
-    templates::entry_type::scaffold_entry_type_templates,
+    templates::{entry_type::scaffold_entry_type_templates, ScaffoldedTemplate},
     utils::{input_snake_case, input_snake_case_with_initial_text},
 };
 
@@ -245,7 +245,7 @@ pub fn scaffold_entry_type(
     maybe_depends_on: &Option<Vec<Referenceable>>,
     maybe_depends_on_itself: &Option<DependsOnItself>,
     maybe_fields: &Option<Vec<(String, FieldType)>>,
-) -> ScaffoldResult<FileTree> {
+) -> ScaffoldResult<ScaffoldedTemplate> {
     let depends_on = get_or_choose_depends_on(&zome_file_tree, maybe_depends_on)?;
     let depends_on_itself: DependsOnItself = match maybe_depends_on_itself {
         Some(d) => d.clone(),
@@ -432,7 +432,7 @@ pub fn scaffold_entry_type(
         &create_fns_for_depends_on,
     )?;
 
-    let app_file_tree = scaffold_entry_type_templates(
+    scaffold_entry_type_templates(
         app_file_tree,
         template_file_tree,
         &dna_manifest.name(),
@@ -440,9 +440,7 @@ pub fn scaffold_entry_type(
         &entry_def,
         &crud,
         link_from_original_to_each_update,
-    )?;
-
-    Ok(app_file_tree)
+    )
 }
 
 fn choose_crud() -> Crud {

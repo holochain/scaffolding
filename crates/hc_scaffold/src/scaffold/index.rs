@@ -7,7 +7,7 @@ use serde::Serialize;
 use crate::{
     error::{ScaffoldError, ScaffoldResult},
     file_tree::FileTree,
-    templates::index::scaffold_index_templates,
+    templates::{index::scaffold_index_templates, ScaffoldedTemplate},
 };
 
 use self::coordinator::add_index_to_coordinators;
@@ -68,7 +68,7 @@ pub fn scaffold_index(
     index_name: &String,
     maybe_index_type: &Option<IndexType>,
     maybe_entry_type: &Option<EntryTypeReference>,
-) -> ScaffoldResult<FileTree> {
+) -> ScaffoldResult<ScaffoldedTemplate> {
     let all_entries = get_all_entry_types(&integrity_zome_file_tree)?.ok_or(
         ScaffoldError::NoEntryTypesDefFoundForIntegrityZome(
             integrity_zome_file_tree.dna_file_tree.dna_manifest.name(),
@@ -116,7 +116,7 @@ pub fn scaffold_index(
 
     let dna_name = dna_file_tree.dna_manifest.name();
 
-    let app_file_tree = scaffold_index_templates(
+    scaffold_index_templates(
         dna_file_tree.file_tree(),
         &template_file_tree,
         &dna_name,
@@ -124,7 +124,5 @@ pub fn scaffold_index(
         &index_type,
         index_name,
         &entry_type,
-    )?;
-
-    Ok(app_file_tree)
+    )
 }
