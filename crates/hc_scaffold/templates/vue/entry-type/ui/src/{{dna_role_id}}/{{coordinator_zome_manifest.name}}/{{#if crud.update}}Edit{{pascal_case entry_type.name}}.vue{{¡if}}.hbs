@@ -18,15 +18,15 @@
       <mwc-button
         outlined
         label="Cancel"
-        @click="$emit('edit-canceled'"
-        style="flex: 1;
+        @click="$emit('edit-canceled')"
+        style="flex: 1;"
       ></mwc-button>
       <mwc-button 
         raised
         label="Save"
-        :disabled="!this.is{{pascal_case entry_type.name}}Valid()"
-        @click="update{{pascal_case entry_type.name}}()"
-        style="flex: 1;
+        :disabled="!is{{pascal_case entry_type.name}}Valid"
+        @click="update{{pascal_case entry_type.name}}"
+        style="flex: 1;"
       ></mwc-button>
     </div>
   </div>
@@ -73,7 +73,7 @@ export default defineComponent({
     original{{pascal_case entry_type.name}}Hash: {
       type: null,
       required: true,
-    }
+    },
 {{/if}}
     currentRecord: {
       type: Object,
@@ -83,12 +83,12 @@ export default defineComponent({
   computed: {
     current{{pascal_case entry_type.name}}() {
       return decode((this.currentRecord.entry as any).Present.entry) as {{pascal_case entry_type.name}};
-    }
+    },
+    is{{pascal_case entry_type.name}}Valid() {
+      return true{{#each entry_type.fields}}{{#if widget}} && {{#if (eq cardinality "single")}}this.{{camel_case field_name}}{{/if}}{{#if (eq cardinality "vector")}}this.{{camel_case field_name}}.all(e => e !== undefined){{/if}}{{/if}}{{/each}};
+    },
   },
   methods: {
-    is{{pascal_case entry_type.name}}Valid() {
-      return true{{#each entry_type.fields}}{{#if widget}} && {{#if (eq cardinality "single")}}this.{{camel_case field_name}}{{/if}}{{#if (eq cardinality "vector")}}this.{{camel_case field_name}}.all(e => e !== undefined){{/if}}{{/if}}{{/each}}
-    },
     async update{{pascal_case entry_type.name}}() {
       const cellData = this.appInfo.cell_data.find((c: InstalledCell) => c.role_id === '{{dna_role_id}}')!;
 

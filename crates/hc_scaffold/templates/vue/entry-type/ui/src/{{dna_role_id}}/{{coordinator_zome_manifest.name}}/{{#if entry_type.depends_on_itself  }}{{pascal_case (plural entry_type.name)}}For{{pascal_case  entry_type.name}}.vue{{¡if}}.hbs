@@ -1,7 +1,7 @@
 <template>
   <div v-if="loading" style="display: flex; flex-direction: column">
     <span v-if="error">Error fetching the {{lower_case (plural entry_type.name)}}: {{{{raw}}}} {{error.data.data}}.{{{{/raw}}}}</span>
-    <div v-else-if="hashes.length > 0">
+    <div v-else-if="hashes && hashes.length > 0">
       <{{pascal_case entry_type.name}}Detail 
         v-for="hash in hashes" 
         :{{kebab_case entry_type.name}}-hash="hash" 

@@ -17,8 +17,8 @@
     <mwc-button 
       raised
       label="Create {{title_case entry_type.name}}"
-      :disabled="!is{{pascal_case entry_type.name}}Valid()"
-      @click="create{{pascal_case entry_type.name}}()"
+      :disabled="!is{{pascal_case entry_type.name}}Valid"
+      @click="create{{pascal_case entry_type.name}}"
     ></mwc-button>
   </div>
 </template>
@@ -69,10 +69,12 @@ export default defineComponent({
       {{/if}}
     {{/each}}
   },
-  methods: {
+  computed: {
     is{{pascal_case entry_type.name}}Valid() {
       return true{{#each entry_type.fields}}{{#if widget}} && {{#if (eq cardinality "single")}}this.{{camel_case field_name}}{{/if}}{{#if (eq cardinality "vector")}}this.{{camel_case field_name}}.all(e => e !== undefined){{/if}}{{/if}}{{/each}}
     },
+  },
+  methods: {
     async create{{pascal_case entry_type.name}}() {
       const cellData = this.appInfo.cell_data.find((c: InstalledCell) => c.role_id === '{{dna_role_id}}')!;
       const {{camel_case entry_type.name}}: {{pascal_case entry_type.name}} = { {{#each entry_type.fields}}

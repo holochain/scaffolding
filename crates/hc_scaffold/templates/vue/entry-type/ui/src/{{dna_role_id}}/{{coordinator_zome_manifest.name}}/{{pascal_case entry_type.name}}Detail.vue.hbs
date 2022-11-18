@@ -1,17 +1,19 @@
 <template>
   <div v-if="!loading">
+{{#if crud.update}}
     <div v-if="editing">
       <Edit{{pascal_case entry_type.name}}
 {{#if link_from_original_to_each_update}}
-    	:original-{{kebab_case entry_type.name}}-hash="{{camel_case entry_type.name}}Hash"
+        :original-{{kebab_case entry_type.name}}-hash="{{camel_case entry_type.name}}Hash"
 {{/if}}
-    	:current-record="record"
-    	@{{kebab_case entry_type.name}}-updated="editing = false; fetch{{pascal_case entry_type.name}}();"
-    	@edit-canceled="editing = false"
-    	style="display: flex; flex: 1;"
+        :current-record="record!"
+        @{{kebab_case entry_type.name}}-updated="editing = false; fetch{{pascal_case entry_type.name}}();"
+        @edit-canceled="editing = false"
+        style="display: flex; flex: 1;"
       ></Edit{{pascal_case entry_type.name}}>
     </div>
-    <div v-else-if="record" style="display: flex; flex-direction: column">
+{{/if}}
+    <div v-{{#if crud.update}}else-{{/if}}if="record" style="display: flex; flex-direction: column">
       <div style="display: flex; flex-direction: row">
         <span style="font-size: 18px; flex: 1;">{{title_case entry_type.name}}</span>
 
