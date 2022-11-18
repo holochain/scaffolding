@@ -4,7 +4,7 @@ use std::{ffi::OsString, path::PathBuf, str::FromStr};
 
 use crate::{
     error::{ScaffoldError, ScaffoldResult},
-    file_tree::{dir_to_file_tree, FileTree},
+    file_tree::{dir_exists, dir_to_file_tree, FileTree},
 };
 
 static LIT_TEMPLATES: Dir<'static> = include_dir!("$CARGO_MANIFEST_DIR/templates/lit");
@@ -68,6 +68,8 @@ pub fn guess_or_choose_framework(app_file_tree: &FileTree) -> ScaffoldResult<UiF
         return Ok(UiFramework::Svelte);
     } else if ui_package_json.contains("vue") {
         return Ok(UiFramework::Vue);
+    } else if !dir_exists(app_file_tree, &PathBuf::from("ui/src")) {
+        return Ok(UiFramework::Vanilla);
     }
 
     choose_ui_framework()
