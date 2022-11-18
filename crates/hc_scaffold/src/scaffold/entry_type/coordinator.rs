@@ -12,7 +12,7 @@ use crate::{
 
 use super::{
     crud::Crud,
-    definitions::{Cardinality, DependsOn, EntryDefinition, EntryTypeReference, Referenceable},
+    definitions::{Cardinality, DependsOn, EntryDefinition},
     depends_on_itself_field_name,
 };
 

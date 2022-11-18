@@ -1,9 +1,9 @@
-use std::{collections::BTreeMap, path::PathBuf};
+use std::path::PathBuf;
 
 use dialoguer::{theme::ColorfulTheme, Confirm, Input, Select};
 
 use crate::{
-    error::{ScaffoldError, ScaffoldResult},
+    error::ScaffoldResult,
     file_tree::{dir_content, FileTree},
 };
 

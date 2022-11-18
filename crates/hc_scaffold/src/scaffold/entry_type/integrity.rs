@@ -1,6 +1,4 @@
-use build_fs_tree::file;
 use convert_case::{Case, Casing};
-use holochain_types::prelude::DnaManifest;
 use prettyplease::unparse;
 use proc_macro2::TokenStream;
 use quote::quote;
@@ -12,7 +10,7 @@ use crate::scaffold::dna::DnaFileTree;
 use crate::scaffold::zome::coordinator::find_extern_function_in_zomes;
 use crate::scaffold::zome::utils::get_coordinator_zomes_for_integrity;
 use crate::{
-    file_tree::{find_map_rust_files, map_file, map_rust_files, FileTree},
+    file_tree::{find_map_rust_files, map_file, map_rust_files},
     scaffold::zome::ZomeFileTree,
 };
 

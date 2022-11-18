@@ -3,7 +3,7 @@ use ignore::WalkBuilder;
 use include_dir::Dir;
 use prettyplease::unparse;
 use std::collections::BTreeMap;
-use std::ffi::{OsStr, OsString};
+use std::ffi::OsString;
 use std::{fs, path::PathBuf};
 
 use crate::error::{ScaffoldError, ScaffoldResult};

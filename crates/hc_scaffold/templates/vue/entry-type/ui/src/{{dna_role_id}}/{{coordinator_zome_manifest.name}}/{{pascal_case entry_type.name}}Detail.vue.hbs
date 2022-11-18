@@ -1,0 +1,150 @@
+<template>
+  <div v-if="!loading">
+    <div v-if="editing">
+      <Edit{{pascal_case entry_type.name}}
+{{#if link_from_original_to_each_update}}
+    	:original-{{kebab_case entry_type.name}}-hash="{{camel_case entry_type.name}}Hash"
+{{/if}}
+    	:current-record="record"
+    	@{{kebab_case entry_type.name}}-updated="editing = false; fetch{{pascal_case entry_type.name}}();"
+    	@edit-canceled="editing = false"
+    	style="display: flex; flex: 1;"
+      ></Edit{{pascal_case entry_type.name}}>
+    </div>
+    <div v-else-if="record" style="display: flex; flex-direction: column">
+      <div style="display: flex; flex-direction: row">
+        <span style="font-size: 18px; flex: 1;">{{title_case entry_type.name}}</span>
+
+{{#if crud.update}}
+        <mwc-icon-button style="margin-left: 8px" icon="edit" @click="editing = true"></mwc-icon-button>
+{{/if}}
+{{#if crud.delete}}
+        <mwc-icon-button style="margin-left: 8px" icon="delete" @click="delete{{pascal_case entry_type.name}}()"></mwc-icon-button>
+{{/if}}
+      </div>
+
+{{#each entry_type.fields}}
+  {{#if widget}}	  
+    {{#if (not (eq cardinality "vector") )}}
+      <div style="display: flex; flex-direction: row">
+	<span><strong>{{title_case field_name}}</strong></span>
+ 	<span style="white-space: pre-line">{{> (concat field_type "/" widget "/detail/render") variable_to_read=(concat (camel_case ../entry_type.name) "." (snake_case field_name) ) }}</span>
+      </div>
+    {{else}}
+      {{> Vec/detail/render variable_to_read=(concat (camel_case ../entry_type.name) "." (snake_case field_name) ) field_name=field_name field_type=field_type widget=widget }}
+    {{/if}}
+
+  {{/if}}
+{{/each}}
+    </div>
+    
+    <span v-else>The requested {{lower_case entry_type.name}} was not found.</span>
+  </div>
+
+  <div v-else style="display: flex; flex: 1; align-items: center; justify-content: center">
+    <mwc-circular-progress indeterminate></mwc-circular-progress>
+  </div>
+
+{{#if crud.delete}}
+  <mwc-snackbar ref="delete-error" leading>
+  </mwc-snackbar>
+{{/if}}
+</template>
+
+<script lang="ts">
+import { defineComponent, inject, ComputedRef } from 'vue';
+import { decode } from '@msgpack/msgpack';
+import { InstalledCell, AppWebsocket, InstalledAppInfo, Record } from '@holochain/client';
+import { {{pascal_case entry_type.name}} } from './types';
+import '@material/mwc-circular-progress';
+import '@material/mwc-icon-button';
+import '@material/mwc-snackbar';
+import { Snackbar } from '@material/mwc-snackbar';
+{{#each entry_type.fields}}
+{{> (concat field_type.type "/detail/imports") }}
+
+{{/each}}
+{{#if crud.update}}
+import Edit{{pascal_case entry_type.name}} from './Edit{{pascal_case entry_type.name}}.vue';
+{{/if}}
+
+export default defineComponent({
+{{#if crud.update}}
+  components: {
+    Edit{{pascal_case entry_type.name}}
+  },
+{{/if}}
+  props: {
+    {{camel_case entry_type.name}}Hash: {
+      type: Object,
+      required: true
+    }
+  },
+  data(): { record: Record | undefined; loading: boolean; {{#if crud.update}}editing: boolean;{{/if}} } {
+    return {
+      record: undefined,
+      loading: true,
+{{#if crud.update}}
+      editing: false,
+{{/if}}
+    }
+  },
+  computed: {
+    cellData() {
+      return this.appInfo.cell_data.find((c: InstalledCell) => c.role_id === '{{dna_role_id}}')!;
+    },
+    {{camel_case entry_type.name}}() {
+      if (!this.record) return undefined;
+      return decode((this.record.entry as any).Present.entry) as {{pascal_case entry_type.name}};
+    }
+  },
+  async mounted() {
+    await this.fetch{{pascal_case entry_type.name}}();
+  },
+  methods: {
+    async fetch{{pascal_case entry_type.name}}() {
+      this.loading = true;
+      this.record = undefined;
+
+      this.record = await this.appWebsocket.callZome({
+        cap_secret: null,
+        cell_id: this.cellData.cell_id,
+        zome_name: '{{coordinator_zome_manifest.name}}',
+        fn_name: 'get_{{snake_case entry_type.name}}',
+        payload: this.{{camel_case entry_type.name}}Hash,
+        provenance: cellData.cell_id[1]
+      });
+
+      this.loading = false;
+    },
+{{#if crud.delete}}    
+    async delete{{pascal_case entry_type.name}}() {
+      try {
+        await this.appWebsocket.callZome({
+          cap_secret: null,
+          cell_id: this.cellData.cell_id,
+          zome_name: '{{coordinator_zome_manifest.name}}',
+          fn_name: 'delete_{{snake_case entry_type.name}}',
+          payload: this.{{camel_case entry_type.name}}Hash,
+          provenance: this.cellData.cell_id[1]
+        });
+        this.$emit('{{kebab_case entry_type.name}}-deleted', this.{{camel_case entry_type.name}}Hash);
+        this.fetch{{pascal_case entry_type.name}}();
+      } catch (e: any) {
+        const errorSnackbar = this.$refs['delete-error'] as Snackbar;
+        errorSnackbar.labelText = `Error deleting the {{lower_case entry_type.name}}: ${e.data.data}`;
+        errorSnackbar.show();
+      }
+    }
+{{/if}}
+  },
+  setup() {
+    const appWebsocket = (inject('appWebsocket') as ComputedRef<AppWebsocket>).value;
+    const appInfo = (inject('appInfo') as ComputedRef<InstalledAppInfo>).value;
+    return {
+      appInfo,
+      appWebsocket,
+    };
+  },
+})
+</script>

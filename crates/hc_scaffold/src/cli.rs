@@ -323,13 +323,16 @@ Web hApp "{}" scaffolded!"#,
                     println!("{}", i);
                 } else {
                     println!(
-                        r#"Set up your development environment as described in {}/README.md.
+                        r#"Set up your development environment with:
+
+    cd {}{}
+    npm install
 
 Then, add new DNAs to your app with:
 
   hc-scaffold dna
 "#,
-                        name
+                        name, maybe_nix
                     );
                 }
             }
@@ -781,7 +784,7 @@ impl HcScaffoldTemplate {
                     templates_path().join(target_template)
                 );
             }
-            HcScaffoldTemplate::Init { template, .. } => {
+            HcScaffoldTemplate::Init { .. } => {
                 println!(
                     r#"Template initialized to folder {:?}
 "#,

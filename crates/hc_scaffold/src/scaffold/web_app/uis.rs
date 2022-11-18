@@ -1,17 +1,10 @@
-use build_fs_tree::serde::Serialize;
 use dialoguer::{theme::ColorfulTheme, Select};
-use handlebars::Handlebars;
 use include_dir::{include_dir, Dir};
 use std::{ffi::OsString, path::PathBuf, str::FromStr};
 
 use crate::{
     error::{ScaffoldError, ScaffoldResult},
     file_tree::{dir_to_file_tree, FileTree},
-    templates::{
-        register_all_partials_in_dir, register_helpers,
-        render_template_file_tree_and_merge_with_existing,
-    },
-    versions::holochain_client_version,
 };
 
 static LIT_TEMPLATES: Dir<'static> = include_dir!("$CARGO_MANIFEST_DIR/templates/lit");

@@ -114,7 +114,7 @@ export class {{pascal_case entry_type.name}}Detail extends LitElement {
   }
   
   render{{pascal_case entry_type.name}}(maybeRecord: Record | undefined) {
-    if (!maybeRecord) return html`<span>The requested {{lower_case entry_type.name}} doesn't exist</span>`;
+    if (!maybeRecord) return html`<span>The requested {{lower_case entry_type.name}} was not found.</span>`;
     
     {{#if crud.update}}
     if (this._editing) {

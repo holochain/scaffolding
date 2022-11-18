@@ -4,7 +4,7 @@ use regex::Regex;
 use std::{ffi::OsString, path::PathBuf};
 
 use crate::{
-    file_tree::{dir_exists, file_exists, insert_file_tree_in_dir, FileTree},
+    file_tree::{file_exists, insert_file_tree_in_dir, FileTree},
     templates::{
         coordinator::scaffold_coordinator_zome_templates,
         integrity::scaffold_integrity_zome_templates, ScaffoldedTemplate,
@@ -427,7 +427,6 @@ pub fn scaffold_coordinator_zome_in_path(
     dependencies: &Option<Vec<String>>,
     path: &PathBuf,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
-    let dna_manifest_path = dna_file_tree.dna_manifest_path.clone();
     let dna_manifest = dna_file_tree.dna_manifest.clone();
 
     let coordinator_zome_manifest =

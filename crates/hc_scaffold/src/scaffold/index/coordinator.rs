@@ -1,13 +1,12 @@
 use std::ffi::OsString;
 
-use build_fs_tree::file;
 use convert_case::{Case, Casing};
 use dialoguer::{theme::ColorfulTheme, Select};
-use holochain_types::prelude::{DnaManifest, ZomeManifest};
+use holochain_types::prelude::ZomeManifest;
 
 use crate::{
     error::{ScaffoldError, ScaffoldResult},
-    file_tree::{insert_file, map_file, map_rust_files, FileTree},
+    file_tree::{insert_file, map_file, map_rust_files},
     scaffold::{
         dna::DnaFileTree,
         entry_type::definitions::EntryTypeReference,
@@ -70,7 +69,6 @@ fn by_author_index_getter(
     entry_type_reference: &EntryTypeReference,
 ) -> String {
     let to_hash_type = entry_type_reference.hash_type().to_string();
-    let snake_index_name = index_name.to_case(Case::Snake);
     let map_line = match entry_type_reference.reference_entry_hash {
         true => String::from(".filter_map(|r| r.action().entry_hash().cloned())"),
         false => String::from(".map(|r| r.action_address().clone())"),

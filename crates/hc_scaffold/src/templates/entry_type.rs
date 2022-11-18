@@ -1,4 +1,4 @@
-use std::{collections::BTreeMap, ffi::OsString, path::PathBuf};
+use std::{ffi::OsString, path::PathBuf};
 
 use holochain_types::prelude::ZomeManifest;
 use serde::Serialize;
@@ -6,11 +6,7 @@ use serde::Serialize;
 use crate::{
     error::ScaffoldResult,
     file_tree::{file_content, FileTree},
-    scaffold::entry_type::{
-        crud::Crud,
-        definitions::{Cardinality, DependsOn, EntryDefinition},
-        DependsOnItself,
-    },
+    scaffold::entry_type::{crud::Crud, definitions::EntryDefinition},
 };
 
 use super::{

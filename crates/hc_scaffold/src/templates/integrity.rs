@@ -6,7 +6,6 @@ use serde::Serialize;
 use crate::{
     error::ScaffoldResult,
     file_tree::{file_content, FileTree},
-    scaffold::entry_type::DependsOnItself,
 };
 
 use super::{

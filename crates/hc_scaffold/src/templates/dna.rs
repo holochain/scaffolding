@@ -5,7 +5,6 @@ use serde::Serialize;
 use crate::{
     error::ScaffoldResult,
     file_tree::{file_content, FileTree},
-    scaffold::entry_type::DependsOnItself,
 };
 
 use super::{
@@ -24,7 +23,7 @@ pub fn scaffold_dna_templates(
     dna_name: &String,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     let data = ScaffoldDnaData {
-        app_name: dna_name.clone(),
+        app_name: app_name.clone(),
         dna_name: dna_name.clone(),
     };
 

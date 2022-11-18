@@ -2,13 +2,12 @@ use build_fs_tree::serde::Serialize;
 use convert_case::{Case, Casing};
 use dialoguer::theme::ColorfulTheme;
 use dialoguer::Select;
-use handlebars::template::TemplateElement;
 use handlebars::{
     handlebars_helper, Context, Handlebars, Helper, HelperDef, HelperResult, Output, RenderContext,
     RenderError, Renderable,
 };
 use regex::Regex;
-use serde_json::{json, Value};
+use serde_json::Value;
 use std::collections::BTreeMap;
 use std::ffi::OsString;
 use std::path::PathBuf;
@@ -18,9 +17,7 @@ use crate::file_tree::{
     dir_content, dir_exists, file_content, find_files, flatten_file_tree, unflatten_file_tree,
     FileTree,
 };
-use crate::scaffold::web_app::uis::{
-    choose_ui_framework, guess_or_choose_framework, template_for_ui_framework, UiFramework,
-};
+use crate::scaffold::web_app::uis::{guess_or_choose_framework, template_for_ui_framework};
 
 pub mod get;
 
@@ -68,9 +65,9 @@ pub fn register_concat_helper<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
         "concat",
         Box::new(
             |h: &Helper,
-             r: &Handlebars,
+             _r: &Handlebars,
              _: &Context,
-             rc: &mut RenderContext,
+             _rc: &mut RenderContext,
              out: &mut dyn Output|
              -> HelperResult {
                 let result = h
@@ -269,7 +266,7 @@ pub fn render_template_file_tree<'a, T: Serialize>(
     let mut transformed_templates: BTreeMap<PathBuf, String> = BTreeMap::new();
 
     let new_data = serde_json::to_string(data)?;
-    let mut value: serde_json::Value = serde_json::from_str(new_data.as_str())?;
+    let value: serde_json::Value = serde_json::from_str(new_data.as_str())?;
 
     for (path, contents) in flattened_templates {
         let path = PathBuf::from(path.to_str().unwrap().replace('¡', "/"));

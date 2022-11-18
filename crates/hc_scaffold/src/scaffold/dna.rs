@@ -196,7 +196,6 @@ pub fn scaffold_dna(
         dna_workdir_relative_to_app_manifest.join(&dna_workdir_path);
 
     let dna_bundle_path = dna_workdir_relative_to_app_manifest.join(format!("{}.dna", dna_name));
-    let dna_manifest_path = dna_workdir_path.join("dna.yaml");
 
     let mut roles = app_file_tree.app_manifest.app_roles();
 

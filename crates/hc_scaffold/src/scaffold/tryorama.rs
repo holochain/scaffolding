@@ -17,7 +17,6 @@ use entry_crud_tests::entry_crud_tests;
 use holochain_types::prelude::ZomeManifest;
 
 use super::{
-    dna::DnaFileTree,
     entry_type::{crud::Crud, definitions::EntryDefinition},
     zome::ZomeFileTree,
 };

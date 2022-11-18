@@ -1,14 +1,9 @@
 use degit::{degit, validate_src};
-use dialoguer::{theme::ColorfulTheme, Select};
-use std::{
-    fs::{self, DirEntry},
-    path::{Path, PathBuf},
-};
 use temp_dir::TempDir;
 
 use crate::{
     error::{ScaffoldError, ScaffoldResult},
-    file_tree::{dir_content, dir_exists, load_directory_into_memory, FileTree},
+    file_tree::{dir_content, load_directory_into_memory, FileTree},
 };
 
 use super::{choose_or_get_template, templates_path};

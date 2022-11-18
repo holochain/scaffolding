@@ -14,9 +14,8 @@ use self::coordinator::add_index_to_coordinators;
 
 use super::{
     entry_type::{
-        definitions::EntryTypeReference,
-        integrity::get_all_entry_types,
-        utils::{choose_entry_type_reference, choose_reference_entry_hash},
+        definitions::EntryTypeReference, integrity::get_all_entry_types,
+        utils::choose_entry_type_reference,
     },
     link_type::integrity::add_link_type_to_integrity_zome,
     zome::ZomeFileTree,

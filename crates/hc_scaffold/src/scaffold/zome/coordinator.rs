@@ -1,14 +1,12 @@
-use std::{collections::BTreeMap, ffi::OsString, path::PathBuf};
+use std::{collections::BTreeMap, ffi::OsString};
 
 use dialoguer::{theme::ColorfulTheme, Select};
-use holochain_types::prelude::{
-    DnaManifest, DnaManifestCurrentBuilder, ZomeDependency, ZomeManifest, ZomeName,
-};
+use holochain_types::prelude::ZomeManifest;
 use syn::ItemFn;
 
 use crate::{
     error::{ScaffoldError, ScaffoldResult},
-    file_tree::{dir_content, find_map_rust_files},
+    file_tree::find_map_rust_files,
     scaffold::dna::DnaFileTree,
 };
 

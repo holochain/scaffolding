@@ -1,6 +1,5 @@
 use convert_case::{Case, Casing};
 use dialoguer::{theme::ColorfulTheme, Confirm, Select};
-use holochain_types::prelude::DnaManifest;
 
 use crate::{
     error::{ScaffoldError, ScaffoldResult},
@@ -16,7 +15,6 @@ use self::{
 use super::{
     entry_type::{
         definitions::{Cardinality, Referenceable},
-        integrity::get_all_entry_types,
         utils::{get_or_choose_optional_reference_type, get_or_choose_referenceable},
     },
     zome::{utils::get_coordinator_zomes_for_integrity, ZomeFileTree},

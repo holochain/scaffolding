@@ -1,12 +1,8 @@
-use std::ffi::OsString;
-
-use build_fs_tree::file;
 use convert_case::{Case, Casing};
-use holochain_types::prelude::{DnaManifest, ZomeManifest};
 
 use crate::{
-    error::{ScaffoldError, ScaffoldResult},
-    file_tree::{insert_file, map_file, FileTree},
+    error::ScaffoldResult,
+    file_tree::{insert_file, map_file},
     scaffold::{
         dna::DnaFileTree,
         entry_type::definitions::{Cardinality, EntryTypeReference, Referenceable},
@@ -83,15 +79,9 @@ pub fn add_link_handler(
     let singular_snake_from_entry_type = from_referenceable
         .to_string(&Cardinality::Single)
         .to_case(Case::Snake);
-    let plural_snake_from_entry_type = from_referenceable
-        .to_string(&Cardinality::Vector)
-        .to_case(Case::Snake);
     let singular_pascal_from_entry_type = from_referenceable
         .to_string(&Cardinality::Single)
         .to_case(Case::Pascal);
-    let plural_snake_to_entry_type = to_referenceable
-        .to_string(&Cardinality::Vector)
-        .to_case(Case::Snake);
     let singular_snake_to_entry_type = to_referenceable
         .to_string(&Cardinality::Single)
         .to_case(Case::Snake);
@@ -127,7 +117,7 @@ pub fn get_links_handler(
     to_referenceable: &Referenceable,
 ) -> String {
     match to_referenceable {
-        Referenceable::Agent { role } => {
+        Referenceable::Agent { .. } => {
             get_links_handler_to_agent(from_referenceable, to_referenceable)
         }
         Referenceable::EntryType(e) => get_links_handler_to_entry(from_referenceable, e),
@@ -145,17 +135,8 @@ fn get_links_handler_to_agent(
     let singular_snake_from_entry_type = from_referenceable
         .to_string(&Cardinality::Single)
         .to_case(Case::Snake);
-    let plural_snake_from_entry_type = from_referenceable
-        .to_string(&Cardinality::Vector)
-        .to_case(Case::Snake);
-    let pascal_from_entry_type = from_referenceable
-        .to_string(&Cardinality::Single)
-        .to_case(Case::Pascal);
     let plural_snake_to_entry_type = to_referenceable
         .to_string(&Cardinality::Vector)
-        .to_case(Case::Snake);
-    let singular_snake_to_entry_type = to_referenceable
-        .to_string(&Cardinality::Single)
         .to_case(Case::Snake);
 
     format!(
@@ -180,29 +161,16 @@ fn get_links_handler_to_entry(
     let from_hash_type = from_referenceable.hash_type().to_string();
     let from_arg_name = from_referenceable.field_name(&Cardinality::Single);
     let to_hash_type = to_entry_type.hash_type().to_string();
-    let to_arg_name = to_entry_type.field_name(&Cardinality::Single);
 
     let pascal_link_type_name = link_type_name(
         from_referenceable,
         &Referenceable::EntryType(to_entry_type.clone()),
     );
-    let pascal_to_entry_type = to_entry_type
-        .to_string(&Cardinality::Single)
-        .to_case(Case::Pascal);
     let singular_snake_from_entry_type = from_referenceable
         .to_string(&Cardinality::Single)
         .to_case(Case::Snake);
-    let plural_snake_from_entry_type = from_referenceable
-        .to_string(&Cardinality::Vector)
-        .to_case(Case::Snake);
-    let pascal_from_entry_type = from_referenceable
-        .to_string(&Cardinality::Single)
-        .to_case(Case::Pascal);
     let plural_snake_to_entry_type = to_entry_type
         .to_string(&Cardinality::Vector)
-        .to_case(Case::Snake);
-    let singular_snake_to_entry_type = to_entry_type
-        .to_string(&Cardinality::Single)
         .to_case(Case::Snake);
 
     let map_line = match to_entry_type.reference_entry_hash {
@@ -258,9 +226,6 @@ fn remove_link_handlers(
         .to_case(Case::Pascal);
     let singular_snake_from_entry_type = from_referenceable
         .to_string(&Cardinality::Single)
-        .to_case(Case::Snake);
-    let plural_snake_from_entry_type = from_referenceable
-        .to_string(&Cardinality::Vector)
         .to_case(Case::Snake);
     let singular_pascal_from_entry_type = from_referenceable
         .to_string(&Cardinality::Single)
@@ -341,7 +306,7 @@ use {integrity_zome_name}::*;
 }
 
 pub fn add_link_type_functions_to_coordinator(
-    mut coordinator_zome_file_tree: ZomeFileTree,
+    coordinator_zome_file_tree: ZomeFileTree,
     integrity_zome_name: &String,
     link_type_name: &String,
     from_referenceable: &Referenceable,

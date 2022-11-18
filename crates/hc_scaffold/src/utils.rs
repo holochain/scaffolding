@@ -1,5 +1,5 @@
 use std::collections::BTreeMap;
-use std::{ffi::OsString, path::PathBuf, vec};
+use std::{ffi::OsString, path::PathBuf};
 
 use dialoguer::{theme::ColorfulTheme, Input, Select};
 use inflector::Inflector;

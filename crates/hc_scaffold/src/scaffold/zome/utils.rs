@@ -1,14 +1,7 @@
-use std::path::PathBuf;
-
-use crate::file_tree::FileTree;
-use dialoguer::{theme::ColorfulTheme, MultiSelect, Select};
+use dialoguer::{theme::ColorfulTheme, MultiSelect};
 use holochain_types::prelude::{DnaManifest, ZomeManifest};
-use mr_bundle::Location;
 
-use crate::{
-    error::{ScaffoldError, ScaffoldResult},
-    scaffold::app::cargo::workspace_package_path,
-};
+use crate::error::ScaffoldResult;
 
 /// Prompts a MultiSelect dialog to select one or multiple integrity zomes
 ///

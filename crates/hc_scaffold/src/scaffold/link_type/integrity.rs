@@ -1,11 +1,10 @@
 use std::{ffi::OsString, path::PathBuf};
 
 use convert_case::{Case, Casing};
-use holochain_types::prelude::DnaManifest;
 
 use crate::{
     error::{ScaffoldError, ScaffoldResult},
-    file_tree::{find_map_rust_files, map_rust_files, FileTree},
+    file_tree::{find_map_rust_files, map_rust_files},
     scaffold::{dna::DnaFileTree, zome::ZomeFileTree},
 };
 

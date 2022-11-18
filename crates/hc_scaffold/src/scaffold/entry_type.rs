@@ -3,13 +3,12 @@ use std::{collections::BTreeMap, ffi::OsString, path::PathBuf};
 use crate::{
     file_tree::FileTree,
     templates::{entry_type::scaffold_entry_type_templates, ScaffoldedTemplate},
-    utils::{input_snake_case, input_snake_case_with_initial_text},
 };
 
 use build_fs_tree::dir;
 use convert_case::{Case, Casing};
 use dialoguer::{theme::ColorfulTheme, Confirm, MultiSelect, Select};
-use holochain_types::prelude::{AppManifest, DnaManifest, ZomeManifest};
+use holochain_types::prelude::ZomeManifest;
 use serde::{Deserialize, Serialize};
 
 use crate::error::{ScaffoldError, ScaffoldResult};
@@ -23,11 +22,10 @@ use self::{
     },
     fields::choose_fields,
     integrity::{add_entry_type_to_integrity_zome, get_all_entry_types},
-    utils::{choose_fixed, choose_reference_entry_hash, choose_referenceable},
+    utils::{choose_fixed, choose_referenceable},
 };
 
 use super::{
-    app::utils::read_app_manifest,
     link_type::{integrity::add_link_type_to_integrity_zome, link_type_name},
     tryorama::add_tryorama_tests_for_entry_def,
     zome::{

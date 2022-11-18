@@ -1,14 +1,14 @@
 <template>
   <div v-if="loading" style="display: flex; flex-direction: column">
-    <span v-if="error">Error fetching the {{lower_case (plural referenceable.name)}}: {{{{raw}}}} {{error.data.data}}.{{{{/raw}}}}</span>
+    <span v-if="error">Error fetching the {{lower_case (plural entry_type.name)}}: {{{{raw}}}} {{error.data.data}}.{{{{/raw}}}}</span>
     <div v-else-if="hashes.length > 0">
-      <{{pascal_case referenceable.name}}Detail 
+      <{{pascal_case entry_type.name}}Detail 
         v-for="hash in hashes" 
-        :{{kebab_case referenceable.name}}-hash="hash" 
+        :{{kebab_case entry_type.name}}-hash="hash" 
         style="margin-bottom: 8px">
-      </{{pascal_case referenceable.name}}Detail>
+      </{{pascal_case entry_type.name}}Detail>
     </div>
-    <span v-else>No {{lower_case (plural referenceable.name)}} found for.</span>
+    <span v-else>No {{lower_case (plural entry_type.name)}} found for this {{lower_case entry_type.name}}.</span>
   </div>
 
   <div v-else style="display: flex; flex: 1; align-items: center; justify-content: center">
@@ -16,25 +16,24 @@
   </div>
 
 </template>
-
 <script lang="ts">
 import { defineComponent, inject, ComputedRef } from 'vue';
 import { decode } from '@msgpack/msgpack';
 import { InstalledCell, AppWebsocket, InstalledAppInfo, Record } from '@holochain/client';
 import '@material/mwc-circular-progress';
-import {{pascal_case referenceable.name}}Detail from './{{pascal_case referenceable.name}}Detail.vue';
+import {{pascal_case entry_type.name}}Detail from './{{pascal_case entry_type.name}}Detail.vue';
 
 export default defineComponent({
   components: {
-    {{pascal_case referenceable.name}}Detail
+    {{pascal_case entry_type.name}}Detail
   },
-  props: { {{#if (eq index_type.type "ByAuthor")}}
-    author: {
+  props: {
+    {{camel_case entry_type.name}}Hash: {
       type: Object,
       required: true
-    } {{/if}}
+    }
   },
-  data(): { hashes: Array<{{referenceable.hash_type}}> | undefined; loading: boolean; error: any } {
+  data(): { hashes: Array<{{#if entry_type.fixed}}EntryHash{{else}}ActionHash{{/if}}> | undefined; loading: boolean; error: any } {
     return {
       hashes: undefined,
       loading: true,
@@ -49,8 +48,8 @@ export default defineComponent({
         cap_secret: null,
         cell_id: cellData.cell_id,
         zome_name: '{{coordinator_zome_manifest.name}}',
-        fn_name: 'get_{{snake_case index_name}}',
-        payload: {{#if (eq index_type.type "ByAuthor")}}author{{else}}null{{/if}},
+        fn_name: 'get_{{snake_case (plural entry_type.name)}}_for_{{snake_case entry_type.name}}',
+        payload: this.{{camel_case entry_type.name}}Hash,
         provenance: cellData.cell_id[1]
       });
     } catch (e) {

@@ -5,8 +5,6 @@ use holochain_types::prelude::{
 
 use crate::error::{ScaffoldError, ScaffoldResult};
 
-use super::DnaFileTree;
-
 pub fn empty_dna_manifest(dna_name: String) -> ScaffoldResult<String> {
     let manifest: DnaManifest = DnaManifestCurrentBuilder::default()
         .name(dna_name.clone())
@@ -32,13 +30,14 @@ pub fn check_zome_doesnt_exist(
     let integrity_manifest = match dna_manifest.clone() {
         DnaManifest::V1(m) => m.integrity,
     };
-    let mut coordinator_manifest = match dna_manifest.clone() {
+    let coordinator_manifest = match dna_manifest.clone() {
         DnaManifest::V1(m) => m.coordinator,
     };
 
     if let Some(_) = coordinator_manifest
         .zomes
         .iter()
+        .chain(integrity_manifest.zomes.iter())
         .find(|z| z.name.to_string().eq(&zome_manifest.name.0.to_string()))
     {
         return Err(ScaffoldError::ZomeAlreadyExists(

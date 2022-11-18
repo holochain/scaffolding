@@ -1,6 +1,4 @@
-use convert_case::{Case, Casing};
-use dialoguer::{theme::ColorfulTheme, MultiSelect, Select};
-use holochain_types::prelude::DnaManifest;
+use dialoguer::{theme::ColorfulTheme, Select};
 
 use crate::{
     error::{ScaffoldError, ScaffoldResult},
@@ -146,7 +144,7 @@ pub fn get_or_choose_referenceable(
         Some(Referenceable::EntryType(app_entry_reference)) => {
             let all_entries: Vec<String> = all_entries.into_iter().map(|e| e.entry_type).collect();
 
-            let entry_type_name = all_entries
+            all_entries
                 .into_iter()
                 .find(|et| et.eq(&app_entry_reference.entry_type.to_string()))
                 .ok_or(ScaffoldError::EntryTypeNotFound(
@@ -169,11 +167,11 @@ pub fn get_or_choose_optional_reference_type(
 
     match entry_type {
         None => choose_optional_referenceable(&all_entries, prompt),
-        Some(Referenceable::Agent { role }) => Ok(entry_type.clone()),
+        Some(Referenceable::Agent { .. }) => Ok(entry_type.clone()),
         Some(Referenceable::EntryType(app_entry_reference)) => {
             let all_entries: Vec<String> = all_entries.into_iter().map(|e| e.entry_type).collect();
 
-            let entry_type_name = all_entries
+            all_entries
                 .into_iter()
                 .find(|et| et.eq(&app_entry_reference.entry_type.to_string()))
                 .ok_or(ScaffoldError::EntryTypeNotFound(
