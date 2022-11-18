@@ -125,6 +125,7 @@ pub fn choose_entry_type_reference(
 
     let selection = Select::with_theme(&ColorfulTheme::default())
         .with_prompt(prompt.clone())
+        .default(0)
         .items(&all_options[..])
         .interact()?;
 

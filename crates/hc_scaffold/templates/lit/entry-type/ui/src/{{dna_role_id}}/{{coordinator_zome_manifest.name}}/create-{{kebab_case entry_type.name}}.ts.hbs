@@ -108,7 +108,7 @@ export class Create{{pascal_case entry_type.name}} extends LitElement {
         {{#each entry_type.fields}}
           {{#if widget}}
             {{#if (not (eq cardinality "vector") )}}
-        {{> (concat field_type "/" widget "/edit/render") label=(title_case field_name) variable_to_change=(concat "this._" (camel_case field_name) ) }}
+        {{> (concat field_type "/" widget "/edit/render") label=(title_case field_name) variable_to_change=(concat "this._" (camel_case field_name) ) required=(eq cardinality "single") }}
             {{else}}
         {{> Vec/edit/render field_name=field_name field_type=field_type widget=widget }}
             {{/if}}

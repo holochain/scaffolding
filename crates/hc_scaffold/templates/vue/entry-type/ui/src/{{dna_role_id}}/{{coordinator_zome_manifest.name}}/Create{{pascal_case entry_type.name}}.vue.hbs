@@ -7,7 +7,7 @@
 {{#each entry_type.fields}}
   {{#if widget}}
     {{#if (not (eq cardinality "vector") )}}
-    {{> (concat field_type "/" widget "/edit/render") label=(title_case field_name) variable_to_change=(concat "this." (camel_case field_name) ) }}
+    {{> (concat field_type "/" widget "/edit/render") label=(title_case field_name) variable_to_change=(concat "this." (camel_case field_name) ) required=(eq cardinality "single")}}
     {{else}}
     {{> Vec/edit/render field_name=field_name field_type=field_type widget=widget }}
     {{/if}}
@@ -24,7 +24,7 @@
 </template>
 <script lang="ts">
 import { defineComponent, inject, ComputedRef } from 'vue';
-import { InstalledCell, AppWebsocket, InstalledAppInfo, Record } from '@holochain/client';
+import { InstalledCell, AppWebsocket, InstalledAppInfo, Record, AgentPubKey, EntryHash, ActionHash } from '@holochain/client';
 import { {{pascal_case entry_type.name}} } from './types';
 import '@material/mwc-button';
 import '@material/mwc-icon-button';
@@ -90,7 +90,7 @@ export default defineComponent({
           provenance: cellData.cell_id[1]
         });
         this.$emit('{{kebab_case entry_type.name}}-created', record.signed_action.hashed.hash);
-      } catch (e) {
+      } catch (e: any) {
         const errorSnackbar = this.$refs['create-error'] as Snackbar;
         errorSnackbar.labelText = `Error creating the {{lower_case entry_type.name}}: ${e.data.data}`;
         errorSnackbar.show();

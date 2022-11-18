@@ -1,1 +1,1 @@
-<mwc-textfield outlined label="{{label}}" {{#if initial_value_variable}}.value=${ {{initial_value_variable}} }{{/if}} @input=${(e: CustomEvent) => { {{variable_to_change}} = (e.target as any).value; } }></mwc-textfield>
+<mwc-textfield outlined label="{{label}}" {{#if initial_value_variable}}.value=${ {{initial_value_variable}} }{{/if}} @input=${(e: CustomEvent) => { {{variable_to_change}} = (e.target as any).value; } } {{#if required}}required{{/if}}></mwc-textfield>
