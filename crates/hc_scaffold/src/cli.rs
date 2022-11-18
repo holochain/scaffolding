@@ -325,8 +325,8 @@ Web hApp "{}" scaffolded!"#,
                     println!(
                         r#"Set up your development environment with:
 
-    cd {}{}
-    npm install
+  cd {}{}
+  npm install
 
 Then, add new DNAs to your app with:
 
