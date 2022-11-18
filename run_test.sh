@@ -82,7 +82,7 @@ hc-scaffold link-type comment like:EntryHash --bidireccional true
 hc-scaffold link-type certificate:EntryHash like --bidireccional false
 hc-scaffold link-type agent:Creator post:EntryHash --bidireccional true
 
-nix-shell https://holochain.love --run "
+nix-shell . --run "
 set -e
 npm i
 npm t
