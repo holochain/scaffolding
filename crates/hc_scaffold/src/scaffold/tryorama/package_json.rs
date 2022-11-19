@@ -8,7 +8,7 @@ pub fn tryorama_package_json() -> String {
   "description": "",
   "main": "index.js",
   "scripts": {{
-    "test": "TEST_EXTENSIONS=.test.ts ts-node-test src"
+    "test": "foreach -g \"**/*.test.ts\" -X \"NODE_NO_WARNINGS=1 ts-node-test #{{path}}\" --no-C"
   }},
   "author": "",
   "license": "CAL-1.0",
@@ -16,6 +16,7 @@ pub fn tryorama_package_json() -> String {
     "@msgpack/msgpack": "^2.7.0",
     "@holochain/client": "{}",
     "@holochain/tryorama": "{}",
+    "foreach-cli": "^1.8.1",
     "ts-node-test": "^0.2.0"
   }},
   "type": "module"
