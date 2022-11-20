@@ -8,7 +8,7 @@ pub fn tryorama_package_json() -> String {
   "description": "",
   "main": "index.js",
   "scripts": {{
-    "test": "foreach -g \"**/*.test.ts\" -X \"NODE_NO_WARNINGS=1 ts-node-test #{{path}}\" --no-C"
+    "test": "foreach -g \"**/*.test.ts\" -x \"NODE_NO_WARNINGS=1 ts-node-test #{{path}}\" --no-C"
   }},
   "author": "",
   "license": "CAL-1.0",
