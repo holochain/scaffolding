@@ -79,12 +79,12 @@ fn inner_choose_referenceable(
         .items(&all_options[..])
         .interact()?;
 
-    if selection == all_options.len() - 2 {
+    if selection == all_entries.len() {
         let role = input_snake_case(&String::from(
             "Which role does this agent play in the relationship ? (eg. \"creator\", \"invitee\")",
         ))?;
         return Ok(Some(Referenceable::Agent { role }));
-    } else if selection == all_options.len() - 1 {
+    } else if selection == all_entries.len() + 1 {
         return Ok(None);
     } else {
         Ok(Some(Referenceable::EntryType(EntryTypeReference {
