@@ -30,10 +30,10 @@
     {{#if (not (eq cardinality "vector") )}}
       <div style="display: flex; flex-direction: row">
 	<span><strong>{{title_case field_name}}</strong></span>
- 	<span style="white-space: pre-line">{{> (concat field_type "/" widget "/detail/render") variable_to_read=(concat (camel_case ../entry_type.name) "." (snake_case field_name) ) }}</span>
+ 	<span style="white-space: pre-line">{{> (concat field_type "/" widget "/detail/render") variable_to_read=(concat (camel_case ../entry_type.name) "?." (snake_case field_name) ) }}</span>
       </div>
     {{else}}
-      {{> Vec/detail/render variable_to_read=(concat (camel_case ../entry_type.name) "." (snake_case field_name) ) field_name=field_name field_type=field_type widget=widget }}
+      {{> Vec/detail/render variable_to_read=(concat (camel_case ../entry_type.name) "?." (snake_case field_name) ) field_name=field_name field_type=field_type widget=widget }}
     {{/if}}
 
   {{/if}}

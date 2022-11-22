@@ -1,63 +1,63 @@
 #!/usr/bin/bash
 set -e
 
-# rm -rf /tmp/forum-vue
-# cd /tmp
+rm -rf /tmp/forum-vue
+cd /tmp
 
-# hc-scaffold web-app forum-vue --setup-nix false --template vue
-# cd forum-vue
-# hc-scaffold dna forum 
-# hc-scaffold zome posts --integrity dnas/forum/zomes/integrity/ --coordinator dnas/forum/zomes/coordinator/
-# hc-scaffold entry-type post --reference-entry-hash false --crud crud --link-from-original-to-each-update true --fields title:String:TextField,content:String:TextArea
-# hc-scaffold entry-type comment --reference-entry-hash false --crud crud --link-from-original-to-each-update false --fields post_hash:ActionHash::Post
-# hc-scaffold entry-type like --reference-entry-hash false --crud crd --fields like_hash:Option\<ActionHash\>::Like
-# hc-scaffold entry-type certificate --reference-entry-hash true --crud cr --fields post_hash:ActionHash::Post,agent:AgentPubKey::certified,certifications_hashes:Vec\<EntryHash\>::Certificate
+hc-scaffold web-app forum-vue --setup-nix false --template vue
+cd forum-vue
+hc-scaffold dna forum 
+hc-scaffold zome posts --integrity dnas/forum/zomes/integrity/ --coordinator dnas/forum/zomes/coordinator/
+hc-scaffold entry-type post --reference-entry-hash false --crud crud --link-from-original-to-each-update true --fields title:String:TextField,content:String:TextArea
+hc-scaffold entry-type comment --reference-entry-hash false --crud crud --link-from-original-to-each-update false --fields post_hash:ActionHash::Post
+hc-scaffold entry-type like --reference-entry-hash false --crud crd --fields like_hash:Option\<ActionHash\>::Like
+hc-scaffold entry-type certificate --reference-entry-hash true --crud cr --fields post_hash:ActionHash::Post,agent:AgentPubKey::certified,certifications_hashes:Vec\<EntryHash\>::Certificate
 
-# hc-scaffold index global all_posts post 
-# hc-scaffold index by-author posts_by_author post
-# hc-scaffold index global all_posts_entry_hash post:EntryHash
-# hc-scaffold index by-author posts_by_author_entry_hash post:EntryHash
+hc-scaffold index global all_posts post 
+hc-scaffold index by-author posts_by_author post
+hc-scaffold index global all_posts_entry_hash post:EntryHash
+hc-scaffold index by-author posts_by_author_entry_hash post:EntryHash
 
-# hc-scaffold link-type post like --bidireccional false
-# hc-scaffold link-type comment like:EntryHash --bidireccional true
-# hc-scaffold link-type certificate:EntryHash like --bidireccional false
-# hc-scaffold link-type agent:creator post:EntryHash --bidireccional true
+hc-scaffold link-type post like --bidireccional false
+hc-scaffold link-type comment like:EntryHash --bidireccional true
+hc-scaffold link-type certificate:EntryHash like --bidireccional false
+hc-scaffold link-type agent:creator post:EntryHash --bidireccional true
 
-# nix-shell https://holochain.love --run "
-# set -e
-# npm i
-# npm run build -w ui
-# "
+nix-shell https://holochain.love --run "
+set -e
+npm i
+npm run build -w ui
+"
 
-# rm -rf /tmp/forum-lit
-# cd /tmp
+rm -rf /tmp/forum-lit
+cd /tmp
 
-# hc-scaffold web-app forum-lit --setup-nix false --template lit
-# cd forum-lit
-# hc-scaffold dna forum 
-# hc-scaffold zome posts --integrity dnas/forum/zomes/integrity/ --coordinator dnas/forum/zomes/coordinator/
-# hc-scaffold entry-type post --reference-entry-hash false --crud crud --link-from-original-to-each-update true --fields title:String:TextField,content:String:TextArea
-# hc-scaffold entry-type comment --reference-entry-hash false --crud crud --link-from-original-to-each-update false --fields post_hash:ActionHash::Post
-# hc-scaffold entry-type like --reference-entry-hash false --crud crd --fields like_hash:Option\<ActionHash\>::Like
-# hc-scaffold entry-type certificate --reference-entry-hash true --crud cr --fields post_hash:ActionHash::Post,agent:AgentPubKey::certified,certifications_hashes:Vec\<EntryHash\>::Certificate
+hc-scaffold web-app forum-lit --setup-nix false --template lit
+cd forum-lit
+hc-scaffold dna forum 
+hc-scaffold zome posts --integrity dnas/forum/zomes/integrity/ --coordinator dnas/forum/zomes/coordinator/
+hc-scaffold entry-type post --reference-entry-hash false --crud crud --link-from-original-to-each-update true --fields title:String:TextField,content:String:TextArea
+hc-scaffold entry-type comment --reference-entry-hash false --crud crud --link-from-original-to-each-update false --fields post_hash:ActionHash::Post
+hc-scaffold entry-type like --reference-entry-hash false --crud crd --fields like_hash:Option\<ActionHash\>::Like
+hc-scaffold entry-type certificate --reference-entry-hash true --crud cr --fields post_hash:ActionHash::Post,agent:AgentPubKey::certified,certifications_hashes:Vec\<EntryHash\>::Certificate
 
-# hc-scaffold index global all_posts post 
-# hc-scaffold index by-author posts_by_author post
-# hc-scaffold index global all_posts_entry_hash post:EntryHash
-# hc-scaffold index by-author posts_by_author_entry_hash post:EntryHash
+hc-scaffold index global all_posts post 
+hc-scaffold index by-author posts_by_author post
+hc-scaffold index global all_posts_entry_hash post:EntryHash
+hc-scaffold index by-author posts_by_author_entry_hash post:EntryHash
 
-# hc-scaffold link-type post like --bidireccional false
-# hc-scaffold link-type comment like:EntryHash --bidireccional true
-# hc-scaffold link-type certificate:EntryHash like --bidireccional false
-# hc-scaffold link-type agent:creator post:EntryHash --bidireccional true
+hc-scaffold link-type post like --bidireccional false
+hc-scaffold link-type comment like:EntryHash --bidireccional true
+hc-scaffold link-type certificate:EntryHash like --bidireccional false
+hc-scaffold link-type agent:creator post:EntryHash --bidireccional true
 
-# nix-shell https://holochain.love --run "
-# set -e
-# npm i
-# npm run build -w ui
-# npm run format -w ui
-# npm run lint -w ui
-# "
+nix-shell https://holochain.love --run "
+set -e
+npm i
+npm run build -w ui
+npm run format -w ui
+npm run lint -w ui
+"
 
 
 rm -rf /tmp/forum-vanilla
