@@ -86,7 +86,7 @@ export default defineComponent({
       return decode((this.currentRecord.entry as any).Present.entry) as {{pascal_case entry_type.name}};
     },
     is{{pascal_case entry_type.name}}Valid() {
-      return true{{#each entry_type.fields}}{{#if widget}} && {{#if (eq cardinality "single")}}this.{{camel_case field_name}}{{/if}}{{#if (eq cardinality "vector")}}this.{{camel_case field_name}}.all(e => e !== undefined){{/if}}{{/if}}{{/each}};
+      return true{{#each entry_type.fields}}{{#if widget}} && {{#if (eq cardinality "single")}}this.{{camel_case field_name}}{{/if}}{{#if (eq cardinality "vector")}}this.{{camel_case field_name}}.every(e => e !== undefined){{/if}}{{/if}}{{/each}};
     },
   },
   methods: {

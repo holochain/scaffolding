@@ -44,7 +44,7 @@ export class Create{{pascal_case entry_type.name}} extends LitElement {
   {{/each}}
 
   is{{pascal_case entry_type.name}}Valid() {
-    return true{{#each entry_type.fields}}{{#if widget}}{{#if (eq cardinality "single")}} && this._{{camel_case field_name}}{{/if}}{{#if (eq cardinality "vector")}} && this._{{camel_case field_name}}.all(e => e !== undefined){{/if}}{{/if}}{{/each}};
+    return true{{#each entry_type.fields}}{{#if widget}}{{#if (eq cardinality "single")}} && this._{{camel_case field_name}}{{/if}}{{#if (eq cardinality "vector")}} && this._{{camel_case field_name}}.every(e => e !== undefined){{/if}}{{/if}}{{/each}};
   }
 
   @contextProvided({ context: appWebsocketContext })
