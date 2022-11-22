@@ -6,7 +6,7 @@
 {{#each entry_type.fields}}
   {{#if widget}}
     {{#if (not (eq cardinality "vector") )}}
-    {{> (concat field_type "/" widget "/edit/render") label=(title_case field_name) initial_value_variable=(concat "current" pascal_case ../entry_type.name "." (camel_case field_name) ) variable_to_change=(concat "" (camel_case field_name) ) required=(eq cardinality "single")}}
+    {{> (concat field_type "/" widget "/edit/render") label=(title_case field_name) initial_value_variable=(concat "current" (pascal_case ../entry_type.name) "." (camel_case field_name) ) variable_to_change=(concat "" (camel_case field_name) ) required=(eq cardinality "single")}}
     {{else}}
     {{> Vec/edit/render field_name=field_name field_type=field_type widget=widget }}
     {{/if}}
@@ -56,13 +56,14 @@ export default defineComponent({
   {{/if}}
 {{/each}}
   } {
+    const current{{pascal_case entry_type.name}} = decode((this.currentRecord.entry as any).Present.entry) as {{pascal_case entry_type.name}};
     return { 
       {{#each entry_type.fields}}
         {{#if widget}}
           {{#if (not (eq cardinality "vector" ) )}}
-      {{camel_case field_name}}: () => this.current{{pascal_case ../entry_type.name}}().{{camel_case field_name}},
+      {{camel_case field_name}}: current{{pascal_case ../entry_type.name}}.{{camel_case field_name}},
           {{else}}
-      {{camel_case field_name}}: () => this.current{{pascal_case ../entry_type.name}}().{{camel_case field_name}},
+      {{camel_case field_name}}: current{{pascal_case ../entry_type.name}}.{{camel_case field_name}},
           {{/if}}
         {{/if}}
       {{/each}}
@@ -104,7 +105,7 @@ export default defineComponent({
 {{/each}}
 {{#each entry_type.fields}}
   {{#if (not widget)}}
-        {{snake_case field_name}}: this.current{{pascal_case ../entry_type.name}}().{{snake_case field_name}},
+        {{snake_case field_name}}: this.current{{pascal_case ../entry_type.name}}.{{snake_case field_name}},
   {{/if}}
 {{/each}}
       };
