@@ -42,20 +42,6 @@ pub fn choose_reference_entry_hash(prompt: &String, recommended: bool) -> Scaffo
     }
 }
 
-pub fn choose_fixed() -> ScaffoldResult<bool> {
-    let selection = Select::with_theme(&ColorfulTheme::default())
-        .with_prompt(String::from("Is this entry type fixed?"))
-        .default(0)
-        .item("Not fixed: can be updated and deleted, referred to by ActionHash (recommended)")
-        .item("Fixed: can't be deleted or updated, referred to by EntryHash")
-        .interact()?;
-
-    match selection {
-        0 => Ok(false),
-        _ => Ok(true),
-    }
-}
-
 fn inner_choose_referenceable(
     all_entries: &Vec<EntryTypeReference>,
     prompt: &String,

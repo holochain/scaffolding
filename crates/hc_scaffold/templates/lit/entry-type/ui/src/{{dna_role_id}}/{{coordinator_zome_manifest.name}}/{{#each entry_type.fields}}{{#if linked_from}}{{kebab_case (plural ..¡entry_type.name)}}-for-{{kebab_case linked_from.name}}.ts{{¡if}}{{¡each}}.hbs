@@ -8,22 +8,22 @@ import { Task } from '@lit-labs/task';
 import { appWebsocketContext, appInfoContext } from '../../contexts';
 import './{{kebab_case ../entry_type.name}}-detail';
 
-@customElement('{{kebab_case (plural ../entry_type.name)}}-for-{{kebab_case referenceable.name}}')
-export class {{pascal_case (plural ../entry_type.name)}}For{{pascal_case referenceable.name }} extends LitElement {
+@customElement('{{kebab_case (plural ../entry_type.name)}}-for-{{kebab_case linked_from.name}}')
+export class {{pascal_case (plural ../entry_type.name)}}For{{pascal_case linked_from.name }} extends LitElement {
 
   @property({
-    hasChanged: (newVal: {{referenceable.hash_type}}, oldVal: {{referenceable.hash_type}}) => newVal.toString() !== oldVal.toString()
+    hasChanged: (newVal: {{linked_from.hash_type}}, oldVal: {{linked_from.hash_type}}) => newVal.toString() !== oldVal.toString()
   })
-  {{camel_case referenceable.singular_arg}}!: {{referenceable.hash_type}};
+  {{camel_case linked_from.singular_arg}}!: {{linked_from.hash_type}};
 
-  _fetch{{pascal_case (plural ../entry_type.name)}} = new Task(this, ([{{camel_case referenceable.singular_arg}}]) => this.appWebsocket.callZome({
+  _fetch{{pascal_case (plural ../entry_type.name)}} = new Task(this, ([{{camel_case linked_from.singular_arg}}]) => this.appWebsocket.callZome({
       cap_secret: null,
       cell_id: this.cellData.cell_id,
       zome_name: '{{../coordinator_zome_manifest.name}}',
-      fn_name: 'get_{{snake_case (plural ../entry_type.name)}}_for_{{snake_case referenceable.name}}',
-      payload: {{camel_case referenceable.singular_arg}},
+      fn_name: 'get_{{snake_case (plural ../entry_type.name)}}_for_{{snake_case linked_from.name}}',
+      payload: {{camel_case linked_from.singular_arg}},
       provenance: this.cellData.cell_id[1]
-  }) as Promise<Array<{{#if ../entry_type.fixed}}EntryHash{{else}}ActionHash{{/if}}>>, () => [this.{{camel_case referenceable.singular_arg}}]);
+  }) as Promise<Array<{{#if ../entry_type.reference_entry_hash}}EntryHash{{else}}ActionHash{{/if}}>>, () => [this.{{camel_case linked_from.singular_arg}}]);
 
   @contextProvided({ context: appWebsocketContext })
   appWebsocket!: AppWebsocket;
@@ -35,8 +35,8 @@ export class {{pascal_case (plural ../entry_type.name)}}For{{pascal_case referen
     return this.appInfo.cell_data.find((c: InstalledCell) => c.role_id === '{{../dna_role_id}}')!;
   }
 
-  renderList(hashes: Array<{{#if ../entry_type.fixed}}EntryHash{{else}}ActionHash{{/if}}>) {
-    if (hashes.length === 0) return html`<span>No {{lower_case (plural ../entry_type.name)}} found for this {{lower_case referenceable.name}}.</span>`;
+  renderList(hashes: Array<{{#if ../entry_type.reference_entry_hash}}EntryHash{{else}}ActionHash{{/if}}>) {
+    if (hashes.length === 0) return html`<span>No {{lower_case (plural ../entry_type.name)}} found for this {{lower_case linked_from.name}}.</span>`;
     
     return html`
       <div style="display: flex; flex-direction: column">

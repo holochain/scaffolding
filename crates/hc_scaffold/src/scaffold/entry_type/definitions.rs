@@ -3,11 +3,9 @@ use proc_macro2::TokenStream;
 use quote::quote;
 use rand::Rng;
 use serde::{ser::SerializeStruct, Deserialize, Serialize, Serializer};
-use std::collections::BTreeMap;
 
 use crate::{
     error::{ScaffoldError, ScaffoldResult},
-    scaffold::entry_type::DependsOnItself,
     utils::check_snake_case,
 };
 
@@ -26,6 +24,24 @@ pub enum FieldType {
     AgentPubKey,
     ActionHash,
     EntryHash,
+}
+
+impl TryFrom<String> for FieldType {
+    type Error = ScaffoldError;
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        let list = FieldType::list();
+
+        for el in list {
+            if value.eq(&el.to_string()) {
+                return Ok(el);
+            }
+        }
+
+        Err(ScaffoldError::InvalidArguments(format!(
+            "Invalid field type: only {:?} are allowed",
+            FieldType::list()
+        )))
+    }
 }
 
 impl ToString for FieldType {
@@ -157,12 +173,13 @@ pub enum Cardinality {
     Option,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Debug, Clone)]
 pub struct FieldDefinition {
     pub field_name: String,
     pub field_type: FieldType,
     pub widget: Option<String>,
     pub cardinality: Cardinality,
+    pub linked_from: Option<Referenceable>,
 }
 
 impl FieldDefinition {
@@ -212,7 +229,10 @@ impl EntryTypeReference {
     }
     pub fn field_name(&self, cardinality: &Cardinality) -> String {
         match cardinality {
-            Cardinality::Vector => format!("{}_hashes", self.entry_type.to_case(Case::Snake)),
+            Cardinality::Vector => format!(
+                "{}_hashes",
+                pluralizer::pluralize(self.entry_type.as_str(), 2, false).to_case(Case::Snake)
+            ),
             _ => format!("{}_hash", self.entry_type.to_case(Case::Snake)),
         }
     }
@@ -226,7 +246,7 @@ impl EntryTypeReference {
 
 pub fn parse_entry_type_reference(s: &str) -> ScaffoldResult<EntryTypeReference> {
     let sp: Vec<&str> = s.split(":").collect();
-    check_snake_case(sp[0].to_string(), "entry type reference")?;
+    check_snake_case(&sp[0].to_string(), "entry type reference")?;
 
     let reference_entry_hash = match sp.len() {
         0 | 1 => false,
@@ -266,7 +286,7 @@ impl Serialize for Referenceable {
 pub fn parse_referenceable(s: &str) -> ScaffoldResult<Referenceable> {
     let sp: Vec<&str> = s.split(":").collect();
 
-    check_snake_case(sp[0].to_string(), "referenceable")?;
+    check_snake_case(&sp[0].to_string(), "referenceable")?;
 
     Ok(match sp[0] {
         "agent" => match sp.len() {
@@ -312,19 +332,10 @@ impl Referenceable {
 }
 
 #[derive(Serialize, Clone, Debug)]
-pub struct DependsOn {
-    pub referenceable: Referenceable,
-    pub cardinality: Cardinality,
-    pub field_name: String,
-}
-
-#[derive(Serialize, Clone)]
 pub struct EntryDefinition {
     pub name: String,
     pub fields: Vec<FieldDefinition>,
-    pub depends_on: Vec<DependsOn>,
-    pub depends_on_itself: DependsOnItself,
-    pub fixed: bool,
+    pub reference_entry_hash: bool,
 }
 
 impl EntryDefinition {
@@ -345,15 +356,7 @@ impl EntryDefinition {
     pub fn referenceable(&self) -> Referenceable {
         Referenceable::EntryType(EntryTypeReference {
             entry_type: self.name.clone(),
-            reference_entry_hash: self.fixed,
+            reference_entry_hash: self.reference_entry_hash,
         })
     }
 }
-
-pub struct CoordinatorZomeDefinition {}
-
-pub struct IntegrityZomeDefinition {
-    pub entry_types: BTreeMap<String, EntryDefinition>,
-}
-
-pub struct DnaDefinition {}

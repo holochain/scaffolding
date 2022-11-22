@@ -294,25 +294,46 @@ pub fn render_template_file_tree<'a, T: Serialize>(
                 .filter(|s| !s.is_empty())
                 .collect();
 
-            let delimiter = "\n----END_OF_FILE_DELIMITER----\n";
+            if files_to_create.len() > 0 {
+                let delimiter = "\n----END_OF_FILE_DELIMITER----\n";
 
-            let b = re.replace(path.to_str().unwrap(), "${b}");
-            let new_all_contents = format!(
-                "{{{{#each {} }}}}\n{}{}{{{{/each}}}}",
-                b, contents, delimiter
-            );
-            let new_contents =
-                render_template_file(&h, existing_app_file_tree, &path, &new_all_contents, &value)?;
-            let new_contents_split: Vec<String> = new_contents
-                .split(delimiter)
-                .into_iter()
-                .map(|s| s.to_string())
-                .collect();
+                let each_if_re = Regex::new(
+                    r"(?P<c>(.)*)/\{\{#each (?P<b>([^\{\}])*)\}\}\{\{#if (?P<d>([^\{\}])*)\}\}(?P<a>(.)*)\{\{/if\}\}\{\{/each\}\}.hbs\z",
+                )
+                .unwrap();
+                let b = re.replace(path.to_str().unwrap(), "${b}");
+                let new_all_contents = match each_if_re.is_match(path.to_str().unwrap()) {
+                    true => {
+                        let d = each_if_re.replace(path.to_str().unwrap(), "${d}");
+                        format!(
+                            "{{{{#each {} }}}}{{{{#if {} }}}}\n{}{}{{{{/if}}}}{{{{/each}}}}",
+                            b, d, contents, delimiter
+                        )
+                    }
 
-            for (i, f) in files_to_create.into_iter().enumerate() {
-                let target_path = PathBuf::from(path_prefix.clone()).join(f);
+                    false => format!(
+                        "{{{{#each {} }}}}\n{}{}{{{{/each}}}}",
+                        b, contents, delimiter
+                    ),
+                };
+                let new_contents = render_template_file(
+                    &h,
+                    existing_app_file_tree,
+                    &path,
+                    &new_all_contents,
+                    &value,
+                )?;
+                let new_contents_split: Vec<String> = new_contents
+                    .split(delimiter)
+                    .into_iter()
+                    .map(|s| s.to_string())
+                    .collect();
 
-                transformed_templates.insert(target_path, new_contents_split[i].clone());
+                for (i, f) in files_to_create.into_iter().enumerate() {
+                    let target_path = PathBuf::from(path_prefix.clone()).join(f);
+
+                    transformed_templates.insert(target_path, new_contents_split[i].clone());
+                }
             }
         } else if if_regex.is_match(path.to_str().unwrap()) {
             let path_prefix = if_regex.replace(path.to_str().unwrap(), "${c}");

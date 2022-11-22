@@ -135,9 +135,9 @@ pub fn input_no_whitespace(prompt: &String) -> ScaffoldResult<String> {
 }
 
 /// Raises an error if input is not snake_case
-pub fn check_snake_case(input: String, identifier: &str) -> ScaffoldResult<String> {
+pub fn check_snake_case(input: &String, identifier: &str) -> ScaffoldResult<()> {
     match input.is_snake_case() {
-        true => Ok(input),
+        true => Ok(()),
         false => Err(ScaffoldError::InvalidStringFormat(format!(
             "{} must be snake_case",
             identifier
@@ -146,12 +146,12 @@ pub fn check_snake_case(input: String, identifier: &str) -> ScaffoldResult<Strin
 }
 
 /// Raises an error if input is contains white spaces
-pub fn check_no_whitespace(input: String, identifier: &str) -> ScaffoldResult<String> {
+pub fn check_no_whitespace(input: &String, identifier: &str) -> ScaffoldResult<()> {
     match input.as_str().contains(char::is_whitespace) {
         true => Err(ScaffoldError::InvalidStringFormat(format!(
             "{} must *not* contain whitespaces.",
             identifier
         ))),
-        false => Ok(input),
+        false => Ok(()),
     }
 }

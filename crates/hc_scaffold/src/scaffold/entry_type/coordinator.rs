@@ -12,8 +12,7 @@ use crate::{
 
 use super::{
     crud::Crud,
-    definitions::{Cardinality, DependsOn, EntryDefinition},
-    depends_on_itself_field_name,
+    definitions::{Cardinality, EntryDefinition},
 };
 
 pub fn no_update_read_handler(entry_def: &EntryDefinition) -> String {
@@ -107,7 +106,7 @@ pub fn create_link_for_cardinality(
     link_type_name: &String,
     cardinality: &Cardinality,
 ) -> String {
-    let link_target = match entry_def.fixed {
+    let link_target = match entry_def.reference_entry_hash {
         true => format!("{}_entry_hash", entry_def.name.to_case(Case::Snake)),
         false => format!("{}_hash", entry_def.name.to_case(Case::Snake)),
     };
@@ -142,30 +141,29 @@ pub fn create_link_for_cardinality(
 }
 
 pub fn create_handler(entry_def: &EntryDefinition) -> String {
-    let mut create_links_str: Vec<String> = match entry_def.fixed {
-        true => vec![format!(
+    let linked_from_count = entry_def
+        .fields
+        .iter()
+        .filter(|f| f.linked_from.is_some())
+        .count();
+    let mut create_links_str: Vec<String> = match entry_def.reference_entry_hash {
+        true if linked_from_count > 0 => vec![format!(
             r#"let {}_entry_hash = hash_entry(&{})?;"#,
             entry_def.name.to_case(Case::Snake),
             entry_def.name.to_case(Case::Snake)
         )],
-        false => vec![],
+        _ => vec![],
     };
 
-    for d in &entry_def.depends_on {
-        create_links_str.push(create_link_for_cardinality(
-            entry_def,
-            &d.field_name,
-            &link_type_name(&d.referenceable, &entry_def.referenceable()),
-            &d.cardinality,
-        ));
-    }
-    if let Some(c) = &entry_def.depends_on_itself {
-        create_links_str.push(create_link_for_cardinality(
-            entry_def,
-            &depends_on_itself_field_name(&entry_def.name, c),
-            &link_type_name(&entry_def.referenceable(), &entry_def.referenceable()),
-            &c.clone().into(),
-        ));
+    for f in &entry_def.fields {
+        if let Some(linked_from) = &f.linked_from {
+            create_links_str.push(create_link_for_cardinality(
+                entry_def,
+                &f.field_name,
+                &link_type_name(&linked_from, &entry_def.referenceable()),
+                &f.cardinality,
+            ));
+        }
     }
 
     let create_links_str = create_links_str.join("\n\n");
@@ -285,14 +283,6 @@ pub fn delete_{}(original_{}_hash: ActionHash) -> ExternResult<ActionHash> {{
     )
 }
 
-fn depends_on_handler(entry_def: &EntryDefinition, depends_on: &DependsOn) -> String {
-    get_links_handler(&depends_on.referenceable, &entry_def.referenceable())
-}
-
-fn depends_on_itself_handler(entry_def: &EntryDefinition) -> String {
-    get_links_handler(&entry_def.referenceable(), &entry_def.referenceable())
-}
-
 fn initial_crud_handlers(
     integrity_zome_name: &String,
     entry_def: &EntryDefinition,
@@ -326,11 +316,10 @@ use {}::*;
         initial.push_str(delete_handler(&entry_def.name).as_str());
     }
 
-    for d in &entry_def.depends_on {
-        initial.push_str(depends_on_handler(&entry_def, &d).as_str());
-    }
-    if let Some(_cardinality) = &entry_def.depends_on_itself {
-        initial.push_str(depends_on_itself_handler(&entry_def).as_str());
+    for f in &entry_def.fields {
+        if let Some(linked_from) = &f.linked_from {
+            initial.push_str(get_links_handler(&linked_from, &entry_def.referenceable()).as_str());
+        }
     }
 
     initial

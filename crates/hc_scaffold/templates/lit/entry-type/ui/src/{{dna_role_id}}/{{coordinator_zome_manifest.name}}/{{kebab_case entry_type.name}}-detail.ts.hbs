@@ -22,9 +22,9 @@ import { {{pascal_case entry_type.name}} } from './types';
 @customElement('{{kebab_case entry_type.name}}-detail')
 export class {{pascal_case entry_type.name}}Detail extends LitElement {
   @property({
-    hasChanged: (newVal: {{#if entry_type.fixed}}EntryHash{{else}}ActionHash{{/if}}, oldVal: {{#if entry_type.fixed}}EntryHash{{else}}ActionHash{{/if}}) => newVal.toString() !== oldVal.toString()
+    hasChanged: (newVal: {{#if entry_type.reference_entry_hash}}EntryHash{{else}}ActionHash{{/if}}, oldVal: {{#if entry_type.reference_entry_hash}}EntryHash{{else}}ActionHash{{/if}}) => newVal.toString() !== oldVal.toString()
   })
-  {{camel_case entry_type.name}}Hash!: {{#if entry_type.fixed}}EntryHash{{else}}ActionHash{{/if}};
+  {{camel_case entry_type.name}}Hash!: {{#if entry_type.reference_entry_hash}}EntryHash{{else}}ActionHash{{/if}};
 
   _fetchRecord = new Task(this, ([{{camel_case entry_type.name}}Hash]) => this.appWebsocket.callZome({
       cap_secret: null,

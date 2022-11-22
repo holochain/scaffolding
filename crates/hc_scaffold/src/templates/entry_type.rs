@@ -13,7 +13,7 @@ use super::{
     build_handlebars, render_template_file_tree_and_merge_with_existing, ScaffoldedTemplate,
 };
 
-#[derive(Serialize)]
+#[derive(Serialize, Debug)]
 pub struct ScaffoldEntryTypeData {
     dna_role_id: String,
     coordinator_zome_manifest: ZomeManifest,
@@ -37,7 +37,6 @@ pub fn scaffold_entry_type_templates(
         crud: crud.clone(),
         link_from_original_to_each_update: link_from_original_to_each_update.clone(),
     };
-
     let h = build_handlebars(&template_file_tree)?;
 
     let field_types_path = PathBuf::from("entry-type");

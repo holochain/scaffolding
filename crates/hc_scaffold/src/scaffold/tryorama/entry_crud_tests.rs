@@ -139,7 +139,7 @@ pub fn read_entry_test(
     happ_bundle_location_from_tests_root: &PathBuf,
     coordinator_zome: &String,
 ) -> String {
-    let hash_to_get_from = match entry_definition.fixed {
+    let hash_to_get_from = match entry_definition.reference_entry_hash {
         true => format!("(record.signed_action.hashed.content as NewEntryAction).entry_hash"),
         false => format!("record.signed_action.hashed.hash"),
     };

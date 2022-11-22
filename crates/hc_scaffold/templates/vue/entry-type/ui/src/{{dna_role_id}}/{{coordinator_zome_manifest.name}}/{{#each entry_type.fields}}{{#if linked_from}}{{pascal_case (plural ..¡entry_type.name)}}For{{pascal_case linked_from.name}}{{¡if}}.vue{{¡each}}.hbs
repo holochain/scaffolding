@@ -8,7 +8,7 @@
         style="margin-bottom: 8px">
       </{{pascal_case ../entry_type.name}}Detail>
     </div>
-    <span v-else>No {{lower_case (plural ../entry_type.name)}} found for this {{lower_case referenceable.name}}.</span>
+    <span v-else>No {{lower_case (plural ../entry_type.name)}} found for this {{lower_case linked_from.name}}.</span>
   </div>
 
   <div v-else style="display: flex; flex: 1; align-items: center; justify-content: center">
@@ -29,12 +29,12 @@ export default defineComponent({
     {{pascal_case ../entry_type.name}}Detail
   },
   props: {
-    {{camel_case referenceable.singular_arg}}Hash: {
+    {{camel_case linked_from.singular_arg}}Hash: {
       type: Object,
       required: true
     }
   },
-  data(): { hashes: Array<{{#if ../entry_type.fixed}}EntryHash{{else}}ActionHash{{/if}}> | undefined; loading: boolean; error: any } {
+  data(): { hashes: Array<{{#if ../entry_type.reference_entry_hash}}EntryHash{{else}}ActionHash{{/if}}> | undefined; loading: boolean; error: any } {
     return {
       hashes: undefined,
       loading: true,
@@ -49,8 +49,8 @@ export default defineComponent({
         cap_secret: null,
         cell_id: cellData.cell_id,
         zome_name: '{{../coordinator_zome_manifest.name}}',
-        fn_name: 'get_{{snake_case (plural ../entry_type.name)}}_for_{{snake_case referenceable.name}}',
-        payload: this.{{camel_case referenceable.singular_arg}}Hash,
+        fn_name: 'get_{{snake_case (plural ../entry_type.name)}}_for_{{snake_case linked_from.name}}',
+        payload: this.{{camel_case linked_from.singular_arg}}Hash,
         provenance: cellData.cell_id[1]
       });
     } catch (e) {

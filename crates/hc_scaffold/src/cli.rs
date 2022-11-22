@@ -5,9 +5,10 @@ use crate::scaffold::app::AppFileTree;
 use crate::scaffold::dna::{scaffold_dna, DnaFileTree};
 use crate::scaffold::entry_type::crud::{parse_crud, Crud};
 use crate::scaffold::entry_type::definitions::{
-    parse_entry_type_reference, parse_referenceable, EntryTypeReference, FieldType, Referenceable,
+    parse_entry_type_reference, parse_referenceable, EntryTypeReference, FieldDefinition,
+    Referenceable,
 };
-use crate::scaffold::entry_type::{parse_depends_on_itself, scaffold_entry_type, DependsOnItself};
+use crate::scaffold::entry_type::{fields::parse_fields, scaffold_entry_type};
 use crate::scaffold::index::{scaffold_index, IndexType};
 use crate::scaffold::link_type::scaffold_link_type;
 use crate::scaffold::web_app::scaffold_web_app;
@@ -114,9 +115,9 @@ pub enum HcScaffold {
         name: Option<String>,
 
         #[structopt(long)]
-        /// Whether this entry should be "fixed" or not
-        /// Fixed entries cannot be updated or deleted, and they are referenced to by with its "EntryHash"
-        fixed: Option<bool>,
+        /// Whether this entry type should be refereced with its "EntryHash" or its "ActionHash"
+        /// If referred to by "EntryHash", the entries can't be updated or deleted
+        reference_entry_hash: Option<bool>,
 
         #[structopt(long, parse(try_from_str = parse_crud))]
         /// The Create, "Read", "Update", and "Delete" zome call functions that should be scaffolded for this entry type
@@ -128,17 +129,11 @@ pub enum HcScaffold {
         /// Only applies if update is selected in the "crud" argument
         link_from_original_to_each_update: Option<bool>,
 
-        #[structopt(long, value_delimiter = ",", parse(try_from_str = parse_referenceable))]
-        /// The entry types (or agent roles) that the new entry type depends on
-        depends_on: Option<Vec<Referenceable>>,
-
-        #[structopt(long, parse(try_from_str = parse_depends_on_itself))]
-        /// The fields that the entry type struct should contain
-        depends_on_itself: Option<DependsOnItself>,
-
         #[structopt(long, value_delimiter = ",", parse(try_from_str = parse_fields))]
         /// The fields that the entry type struct should contain
-        fields: Option<Vec<(String, FieldType)>>,
+        /// Grammar: <FIELD_NAME>:<FIELD_TYPE>:<WIDGET>:<LINKED_FROM> , (widget and linked_from are optional)
+        /// Eg. "title:String:TextField" , "posts_hashes:Vec\<ActionHash\>::Post"
+        fields: Option<Vec<FieldDefinition>>,
 
         #[structopt(short, long)]
         /// The template to scaffold the dna from
@@ -199,10 +194,6 @@ pub enum HcScaffold {
     },
 }
 
-pub fn parse_fields(_fields_str: &str) -> Result<(String, FieldType), String> {
-    Err(String::from("TODO!"))
-}
-
 impl HcScaffold {
     pub async fn run(self) -> anyhow::Result<()> {
         match self {
@@ -216,7 +207,10 @@ impl HcScaffold {
             } => {
                 let prompt = String::from("App name (no whitespaces):");
                 let name: String = match name {
-                    Some(n) => check_no_whitespace(n, "app name")?,
+                    Some(n) => {
+                        check_no_whitespace(&n, "app name")?;
+                        n
+                    }
                     None => input_no_whitespace(&prompt)?,
                 };
 
@@ -344,7 +338,10 @@ Then, add new DNAs to your app with:
             } => {
                 let prompt = String::from("DNA name (snake_case):");
                 let name: String = match name {
-                    Some(n) => check_snake_case(n, "dna name")?,
+                    Some(n) => {
+                        check_snake_case(&n, "dna name")?;
+                        n
+                    }
                     None => input_snake_case(&prompt)?,
                 };
 
@@ -394,7 +391,7 @@ Add new zomes to your DNA with:
                 let template_file_tree = choose_or_get_template_file_tree(&file_tree, &template)?;
 
                 if let Some(n) = name.clone() {
-                    check_snake_case(n, "zome name")?;
+                    check_snake_case(&n, "zome name")?;
                 }
 
                 let (scaffold_integrity, scaffold_coordinator) =
@@ -518,10 +515,8 @@ Add new entry definitions to your zome with:
                 zome,
                 name,
                 crud,
-                fixed: reference_entry_hash,
+                reference_entry_hash,
                 link_from_original_to_each_update,
-                depends_on,
-                depends_on_itself,
                 fields,
                 template,
             } => {
@@ -530,7 +525,10 @@ Add new entry definitions to your zome with:
                 let template_file_tree = choose_or_get_template_file_tree(&file_tree, &template)?;
 
                 let name: String = match name {
-                    Some(n) => check_snake_case(n, "entry type name")?,
+                    Some(n) => {
+                        check_snake_case(&n, "entry type name")?;
+                        n
+                    }
                     None => input_snake_case(&String::from("Entry type name (snake_case):"))?,
                 };
 
@@ -548,8 +546,6 @@ Add new entry definitions to your zome with:
                     &crud,
                     &reference_entry_hash,
                     &link_from_original_to_each_update,
-                    &depends_on,
-                    &depends_on_itself,
                     &fields,
                 )?;
 
@@ -633,7 +629,10 @@ Link type scaffolded!
 
                 let prompt = String::from("Index name (snake_case, eg. \"all_posts\"):");
                 let name: String = match index_name {
-                    Some(n) => check_snake_case(n, "index name")?,
+                    Some(n) => {
+                        check_snake_case(&n, "index name")?;
+                        n
+                    }
                     None => input_snake_case(&prompt)?,
                 };
 
