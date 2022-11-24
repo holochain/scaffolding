@@ -2,18 +2,17 @@
 import { onMount, getContext } from 'svelte';
 import '@material/mwc-circular-progress';
 import { decode } from '@msgpack/msgpack';
-import { InstalledCell, Record, AgentPubKey, ActionHash, AppWebsocket, InstalledAppInfo } from '@holochain/client';
+import { InstalledCell, Record, ActionHash, AppWebsocket, InstalledAppInfo } from '@holochain/client';
 import { appInfoContext, appWebsocketContext } from '../../contexts';
-import {{pascal_case referenceable.name}}Detail from './{{pascal_case referenceable.name}}Detail.svelte';
+import {{pascal_case to_referenceable.name}}Detail from './{{pascal_case to_referenceable.name}}Detail.svelte';
 
-{{#if (eq index_type.type "ByAuthor")}}
-export let author: AgentPubKey;
-{{/if}}
+export let {{camel_case from_referenceable.singular_arg}}: {{from_referenceable.hash_type}};
 
 let appInfo = getContext(appInfoContext).getAppInfo();
 let appWebsocket = getContext(appWebsocketContext).getAppWebsocket();
 
-let hashes: Array<{{referenceable.hash_type}}> | undefined;
+let hashes: Array<{{to_referenceable.hash_type}}> | undefined;
+
 let loading = true;
 let error: any = undefined;
 
@@ -21,37 +20,36 @@ $: hashes, loading, error;
 
 onMount(async () => {
   const cellData = appInfo.cell_data.find((c: InstalledCell) => c.role_id === '{{dna_role_id}}')!;
-
+  
   try {
     hashes = await appWebsocket.callZome({
       cap_secret: null,
       cell_id: cellData.cell_id,
       zome_name: '{{coordinator_zome_manifest.name}}',
-      fn_name: 'get_{{snake_case index_name}}',
-      payload: {{#if (eq index_type.type "ByAuthor")}}author{{else}}null{{/if}},
+      fn_name: 'get_{{snake_case (plural to_referenceable.name)}}_for_{{snake_case from_referenceable.name}}',
+      payload: {{camel_case from_referenceable.singular_arg}},
       provenance: cellData.cell_id[1]
     });
   } catch (e) {
     error = e;
   }
-  loading = false;
+  loading = true;
 });
 
 </script>
 
-{#if loading}
+{#if loading }
 <div style="display: flex; flex: 1; align-items: center; justify-content: center">
   <mwc-circular-progress indeterminate></mwc-circular-progress>
 </div>
 {:else if error}
-<span>Error fetching the {{lower_case (plural referenceable.name)}}: {error.data.data}.</span>
+<span>Error fetching {{lower_case (plural to_referenceable.name)}}: {error.data.data}.</span>
 {:else if hashes.length === 0}
-<span>No {{lower_case (plural referenceable.name)}} found{{#if (eq index_type.type "ByAuthor")}} for this author{{/if}}.</span>
+<span>No {{lower_case (plural to_referenceable.name)}} found for this {{lower_case from_referenceable.name}}.</span>
 {:else}
 <div style="display: flex; flex-direction: column">
   {#each hashes as hash}
-    <{{pascal_case referenceable.name}}Detail {{camel_case referenceable.name}}Hash={hash} style="margin-bottom: 8px;"></{{pascal_case referenceable.name}}Detail>
+    <{{pascal_case to_referenceable.name}}Detail {{camel_case to_referenceable.name}}Hash={hash} style="margin-bottom: 8px;"></{{pascal_case to_referenceable.name}}Detail>
   {/each}
 </div>
 {/if}
-
