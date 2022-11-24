@@ -1,0 +1,9 @@
+{{#if (eq index_type.type "Global")}}
+At first, the UI for this application is empty. If you want the newly scaffolded index to be the entry point for its UI, import the element in `ui/src/holochain-app.ts`:
+
+  import './{{dna_role_id}}/{{coordinator_zome_manifest.name}}/{{kebab_case index_name}}';
+  
+And insert it in the `<div id="content"></div>` like this:
+
+  <div id="content"><{{kebab_case index_name}}></{{kebab_case index_name}}></div>
+{{/if}}
