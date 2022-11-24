@@ -1,5 +1,9 @@
 <template>
-  <div v-if="loading" style="display: flex; flex-direction: column">
+  <div v-if="loading" style="display: flex; flex: 1; align-items: center; justify-content: center">
+    <mwc-circular-progress indeterminate></mwc-circular-progress>
+  </div>
+  
+  <div v-else style="display: flex; flex-direction: column">
     <span v-if="error">Error fetching the {{lower_case (plural ../entry_type.name)}}: {{{{raw}}}} {{error.data.data}}.{{{{/raw}}}}</span>
     <div v-else-if="hashes && hashes.length > 0">
       <{{pascal_case ../entry_type.name}}Detail 
@@ -9,10 +13,6 @@
       </{{pascal_case ../entry_type.name}}Detail>
     </div>
     <span v-else>No {{lower_case (plural ../entry_type.name)}} found for this {{lower_case linked_from.name}}.</span>
-  </div>
-
-  <div v-else style="display: flex; flex: 1; align-items: center; justify-content: center">
-    <mwc-circular-progress indeterminate></mwc-circular-progress>
   </div>
 
 </template>

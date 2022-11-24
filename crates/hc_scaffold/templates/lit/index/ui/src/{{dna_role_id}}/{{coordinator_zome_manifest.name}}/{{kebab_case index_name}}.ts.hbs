@@ -13,7 +13,7 @@ export class {{pascal_case index_name}} extends LitElement {
   {{#if (eq index_type.type "ByAuthor")}}
 
   @property({
-    hasChanged: (newVal: AgentPubKey, oldVal: AgentPubKey) => newVal.toString() !== oldVal.toString()
+    hasChanged: (newVal: AgentPubKey, oldVal: AgentPubKey) => newVal?.toString() !== oldVal?.toString()
   })
   author!: AgentPubKey;
   {{/if}}
@@ -38,7 +38,7 @@ export class {{pascal_case index_name}} extends LitElement {
   }
 
   renderList(hashes: Array<{{referenceable.hash_type}}>) {
-    if (hashes.length === 0) return html`<span>No {{lower_case (plural referenceable.name)}} found.</span>`;
+    if (hashes.length === 0) return html`<span>No {{lower_case (plural referenceable.name)}} found{{#if (eq index_type.type "ByAuthor")}} for this author{{/if}}.</span>`;
     
     return html`
       <div style="display: flex; flex-direction: column">

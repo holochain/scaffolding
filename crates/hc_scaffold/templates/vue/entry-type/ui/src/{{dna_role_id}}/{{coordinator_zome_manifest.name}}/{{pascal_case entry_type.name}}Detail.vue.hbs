@@ -28,7 +28,7 @@
 {{#each entry_type.fields}}
   {{#if widget}}	  
     {{#if (not (eq cardinality "vector") )}}
-      <div style="display: flex; flex-direction: row">
+      <div style="display: flex; flex-direction: row; margin-bottom: 16px;">
 	<span><strong>{{title_case field_name}}</strong></span>
  	<span style="white-space: pre-line">{{> (concat field_type "/" widget "/detail/render") variable_to_read=(concat (camel_case ../entry_type.name) "?." (snake_case field_name) ) }}</span>
       </div>
@@ -63,8 +63,10 @@ import '@material/mwc-icon-button';
 import '@material/mwc-snackbar';
 import { Snackbar } from '@material/mwc-snackbar';
 {{#each entry_type.fields}}
-{{> (concat field_type.type "/detail/imports") }}
+  {{#if widget}}
+{{> (concat field_type "/" widget "/detail/imports") }}
 
+  {{/if}}
 {{/each}}
 {{#if crud.update}}
 import Edit{{pascal_case entry_type.name}} from './Edit{{pascal_case entry_type.name}}.vue';

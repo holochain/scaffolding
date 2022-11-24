@@ -1,0 +1,1 @@
+<mwc-textarea outlined label="{{label}}" {{#if initial_value_variable}}value={ {{initial_value_variable}} }{{/if}} on:input={e => { {{variable_to_change}} = (e.target as any).value;} } {{#if required}}required{{/if}}></mwc-textarea>

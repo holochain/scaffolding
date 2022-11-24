@@ -6,11 +6,15 @@
   
 {{#each entry_type.fields}}
   {{#if widget}}
+    <div style="margin-bottom: 16px">
     {{#if (not (eq cardinality "vector") )}}
-    {{> (concat field_type "/" widget "/edit/render") label=(title_case field_name) variable_to_change=(concat "" (camel_case field_name) ) required=(eq cardinality "single")}}
+      {{> (concat field_type "/" widget "/edit/render") label=(title_case field_name) variable_to_change=(concat "" (camel_case field_name) ) required=(eq cardinality "single")}}
     {{else}}
-    {{> Vec/edit/render field_name=field_name field_type=field_type widget=widget }}
+      {{> Vec/edit/render field_name=field_name field_type=field_type widget=widget }}
     {{/if}}
+
+    </div>
+
  {{/if}}
 {{/each}}
   
@@ -31,8 +35,10 @@ import '@material/mwc-icon-button';
 import '@material/mwc-snackbar';
 import { Snackbar } from '@material/mwc-snackbar';
 {{#each entry_type.fields}}
-{{> (concat field_type.type "/edit/imports") }}
+  {{#if widget}}
+{{> (concat field_type "/" widget "/edit/imports") }}
 
+  {{/if}}
 {{/each}}
 
 export default defineComponent({
@@ -71,14 +77,18 @@ export default defineComponent({
   },
   computed: {
     is{{pascal_case entry_type.name}}Valid() {
-      return true{{#each entry_type.fields}}{{#if widget}} && {{#if (eq cardinality "single")}}this.{{camel_case field_name}}{{/if}}{{#if (eq cardinality "vector")}}this.{{camel_case field_name}}.every(e => e !== undefined){{/if}}{{/if}}{{/each}}
+      return true{{#each entry_type.fields}}{{#if widget}} && {{#if (eq cardinality "single")}}this.{{camel_case field_name}} !== undefined{{/if}}{{#if (eq cardinality "vector")}}this.{{camel_case field_name}}.every(e => e !== undefined){{/if}}{{/if}}{{/each}}
     },
   },
   methods: {
     async create{{pascal_case entry_type.name}}() {
       const cellData = this.appInfo.cell_data.find((c: InstalledCell) => c.role_id === '{{dna_role_id}}')!;
       const {{camel_case entry_type.name}}: {{pascal_case entry_type.name}} = { {{#each entry_type.fields}}
+        {{#if (eq cardinality "single") }}
         {{snake_case field_name}}: this.{{camel_case field_name}}!,
+        {{else}}
+        {{snake_case field_name}}: this.{{camel_case field_name}}{{#if (eq cardinality "vector") }} as Array<{{> (concat field_type "/type") }}>{{/if}},
+        {{/if}}
   {{/each}}
       };
 

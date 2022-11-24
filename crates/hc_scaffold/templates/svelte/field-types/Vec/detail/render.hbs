@@ -1,0 +1,4 @@
+<div style="display: flex; flex-direction: column">
+  <span><strong>{{title_case field_name}}</strong></span>
+  ${ {{variable_to_read}}.map(el => html`<span style="white-space: pre-line">{{> (concat field_type "/" widget "/detail/render") variable_to_read="el"}}</span>`)}
+</div>

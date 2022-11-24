@@ -1,0 +1,6 @@
+<div style="display: flex; flex-direction: column" @input=${() => this.requestUpdate()} @change=${() => this.requestUpdate()}>
+  <span>{{title_case field_name}}</span>
+  
+  ${this._{{camel_case field_name}}.map((el, i) => html`{{> (concat field_type "/" widget "/edit/render") label="" initial_value_variable="el" variable_to_change=(concat "this._" (camel_case field_name) "[i]" ) }} }`)}
+  <mwc-button icon="add" label="Add {{title_case field_name}}" @click=${() => { this._{{camel_case field_name}} = [...this._{{camel_case field_name}}, undefined]; } }></mwc-button>
+</div>
