@@ -20,13 +20,13 @@ path = "src/lib.rs"
 [dependencies]
 holochain_types = "0.0.68"
 holochain_util = { features = ["backtrace"], version = "0.0.13" }
+mr_bundle = "0.0.19"
 
 ignore = "0.4"
 anyhow = "1.0"
 build-fs-tree = "0.4.0"
 cargo_metadata = "0.15.0"
 dialoguer = "0.10.2"
-mr_bundle = "0.0.17"
 path-clean = "0.1.0"
 regex = "1.6.0"
 serde_yaml = "0.8"
@@ -37,7 +37,7 @@ thiserror = "1.0.22"
 tokio = { version = "1.11", features = ["full"] }
 toml = "0.5.9"
 convert_case = "0.1.0"
-syn = "1.0.102"
+syn = { version = "1.0.102", features = ["full", "extra-traits"] }
 quote = "1.0.21"
 pluralizer = "0.3.1"
 prettyplease = "0.1.21"

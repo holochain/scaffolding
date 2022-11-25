@@ -244,7 +244,7 @@ pub fn get_all_entry_types(
                             .first()
                             .expect("Extern function must have one argument")
                         {
-                            syn::FnArg::Typed(typed) => (*typed.ty).eq(&entry_hash_type),
+                            syn::FnArg::Typed(typed) => entry_hash_type.eq(&(*typed.ty)),
                             _ => false,
                         }
                     }

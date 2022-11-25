@@ -211,6 +211,7 @@ pub fn scaffold_dna(
                 network_seed: None,
                 origin_time: None,
                 properties: None,
+                quantum_time: None,
             },
             version: None,
             clone_limit: 0,
