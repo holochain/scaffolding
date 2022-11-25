@@ -18,11 +18,11 @@ use super::{
 
 #[derive(Serialize)]
 pub struct ScaffoldIndexData {
-    dna_role_id: String,
-    coordinator_zome_manifest: ZomeManifest,
-    index_type: IndexType,
-    index_name: String,
-    referenceable: Referenceable,
+    pub dna_role_id: String,
+    pub coordinator_zome_manifest: ZomeManifest,
+    pub index_type: IndexType,
+    pub index_name: String,
+    pub referenceable: Referenceable,
 }
 pub fn scaffold_index_templates(
     mut app_file_tree: FileTree,

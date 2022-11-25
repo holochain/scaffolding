@@ -1,27 +1,29 @@
 //! # Using the scaffolding CLI tool:
 //!
+//! After having installed it, these are the commands that are available:
+//!
 //! ```bash
-//! # Scaffold an empty web-app, using a built-in template
+//! // Scaffold an empty web-app, using a built-in template
 //! hc-scaffold web-app forum
 //!
 //! cd forum
 //!
-//! # Scaffold a dna inside the newly scaffolded app
+//! // Scaffold a dna inside the newly scaffolded app
 //! hc-scaffold dna forum
 //!
-//! # Scaffold a zome inside the newly scaffolded dna
+//! // Scaffold a zome inside the newly scaffolded dna
 //! hc-scaffold zome posts
 //!
-//! # Scaffold an entry-type inside the newly scaffolded zome
+//! // Scaffold an entry-type inside the newly scaffolded zome
 //! hc-scaffold entry-type post
 //!
-//! # Scaffold an index for the newly scaffolded entry-type
+//! // Scaffold an index for the newly scaffolded entry-type
 //! hc-scaffold index global all_posts
 //!
-//! # Scaffold a new link-type
+//! // Scaffold a new link-type
 //! hc-scaffold link-type
 //!
-//! # Will show all the commands that are available
+//! // Will show all the commands that are available
 //! hc-scaffold --help
 //! ```
 //!
@@ -54,13 +56,15 @@
 //!
 //! From this point on, any command that you execute with the scaffolding tool is going to use that custom template instead of the built-in ones.
 //!
-//! If the template adds some new features and you want to include them in your repository, you can just run this command again:
+//! If later on the template adds some new features and you want to include them in your repository, you can just run this command again:
 //!
 //! `hc-scaffold template get https://github.com/holochain-open-dev/templates`
 //!
 //! And select "Merge with existing template", to overwrite the old one.
 //!
 //! ## How to create a custom template
+//!
+//! Creating and maintaining your own template can be challenging at first, so look for existing templates that you can reuse before diving in to create your own.
 //!
 //! The best way to start creating a custom template is to go from one of the built-in ones, and modify it.
 //!
@@ -96,16 +100,16 @@
 //!   - Eg. in `hc-scaffold web-app`, one of the fields of the context is `app_name`, which is the name of the app that the user input.
 //! 8. Lastly, it will merge the resulting directory structure with the existing repository structure. If a file already existed, it will overwrite its contents.
 //!
-//! You can take a look at [Writing templates](/#writing-templates) to learn how to write your own templates.
+//! You can take a look at [Writing templates](#writing-templates) to learn how to write your own templates.
 //!
 //! This is the list of commands and the templates they use:
 //!
-//! - `web-app`: uses the `web-app` folder. [This is the data that you have available in this context](ScaffoldWebAppData).
-//! - `dna`: uses the `dna` folder. [This is the data that you have available in this context](ScaffoldDnaData).
-//! - `zome`: uses the `coordinator-zome` folder if scaffolding a coordinator zome, and the `integrity-zome` folder if scaffolding an integrity zome. [This is the data that you have available in this context](ScaffoldCoordinatorZomeData).
-//! - `entry-type`: uses the `entry-type` folder. [This is the data that you have available in this context](ScaffoldEntryTypeData).
-//! - `link-type`: uses the `link-type` folder. [This is the data that you have available in this context](ScaffoldLinkTypeData).
-//! - `index`: uses the `index` folder. [This is the data that you have available in this context](ScaffoldIndexData).
+//! - `web-app`: uses the `web-app` folder. [Available data](`crate::templates::web_app::ScaffoldWebAppData`).
+//! - `dna`: uses the `dna` folder. [Available data](`crate::templates::dna::ScaffoldDnaData`).
+//! - `zome`: uses the `coordinator-zome` folder if scaffolding a coordinator zome, and the `integrity-zome` folder if scaffolding an integrity zome. [Available data](`crate::templates::coordinator::ScaffoldCoordinatorZomeData`).
+//! - `entry-type`: uses the `entry-type` folder. [Available data](`crate::templates::entry_type::ScaffoldEntryTypeData`).
+//! - `link-type`: uses the `link-type` folder. [Available data](`crate::templates::link_type::ScaffoldLinkTypeData`).
+//! - `index`: uses the `index` folder. [Available data](`crate::templates::index::ScaffoldIndexData`).
 //!
 //! ### Field types
 //!
@@ -185,16 +189,16 @@
 //! The template engine used in the template files is [handlebars](https://handlebarsjs.com/). You can look at its documentation to learn how to write your own templates.
 //!
 //! Here are the available helpers:
-//!  - All the built-in helpers described in [the handlebars crate](https://docs.rs/handlebars/latest/handlebars/#built-in-helpers).
-//!  - Case helpers:
+//! - All the built-in helpers described in [the handlebars crate](https://docs.rs/handlebars/latest/handlebars/#built-in-helpers).
+//! - Case helpers:
 //!   - `pascal_case`: converts the string to pascal case.
 //!   - `title_case`: converts the string to title case.
 //!   - `lower_case`: converts the string to lower case.
 //!   - `snake_case`: converts the string to snake case.
 //!   - `camel_case`: converts the string to camel case.
-//!  - `plural`: converts the given string to its plural.
-//!  - `concat`: concatenize strings.
-//!  - `merge_scope`: takes existing code as its first argument, and the opening of an scope as its second. It then replaces the contents of that scope with the contents of the block:
+//! - `plural`: converts the given string to its plural.
+//! - `concat`: concatenize strings.
+//! - `merge_scope`: takes existing code as its first argument, and the opening of an scope as its second. It then replaces the contents of that scope with the contents of the block:
 //!   - Example usage:
 //! ```hbs
 //! {{#merge_scope previous_file_content "export class ExistingClass {" }}

@@ -13,8 +13,8 @@ use super::{
 
 #[derive(Serialize)]
 pub struct ScaffoldDnaData {
-    app_name: String,
-    dna_name: String,
+    pub app_name: String,
+    pub dna_name: String,
 }
 pub fn scaffold_dna_templates(
     mut app_file_tree: FileTree,

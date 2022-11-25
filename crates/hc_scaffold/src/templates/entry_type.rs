@@ -15,11 +15,11 @@ use super::{
 
 #[derive(Serialize, Debug)]
 pub struct ScaffoldEntryTypeData {
-    dna_role_id: String,
-    coordinator_zome_manifest: ZomeManifest,
-    entry_type: EntryDefinition,
-    crud: Crud,
-    link_from_original_to_each_update: bool,
+    pub dna_role_id: String,
+    pub coordinator_zome_manifest: ZomeManifest,
+    pub entry_type: EntryDefinition,
+    pub crud: Crud,
+    pub link_from_original_to_each_update: bool,
 }
 pub fn scaffold_entry_type_templates(
     mut app_file_tree: FileTree,

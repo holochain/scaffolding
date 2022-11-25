@@ -15,11 +15,11 @@ use super::{
 
 #[derive(Serialize)]
 pub struct ScaffoldLinkTypeData {
-    dna_role_id: String,
-    coordinator_zome_manifest: ZomeManifest,
-    from_referenceable: Referenceable,
-    to_referenceable: Option<Referenceable>,
-    bidireccional: bool,
+    pub dna_role_id: String,
+    pub coordinator_zome_manifest: ZomeManifest,
+    pub from_referenceable: Referenceable,
+    pub to_referenceable: Option<Referenceable>,
+    pub bidireccional: bool,
 }
 pub fn scaffold_link_type_templates(
     mut app_file_tree: FileTree,

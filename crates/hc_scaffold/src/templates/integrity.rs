@@ -14,8 +14,8 @@ use super::{
 
 #[derive(Serialize)]
 pub struct ScaffoldIntegrityZomeData {
-    dna_role_id: String,
-    zome_manifest: ZomeManifest,
+    pub dna_role_id: String,
+    pub zome_manifest: ZomeManifest,
 }
 
 pub fn scaffold_integrity_zome_templates(

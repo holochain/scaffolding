@@ -38,3 +38,7 @@ hc-scaffold index global all_posts
 # Scaffold a new link-type
 hc-scaffold link-type
 ```
+
+## Documentation
+
+See the [docs.rs documentation](https://docs.rs/holochain_scaffolding_cli) to learn how to use and create custom templates.

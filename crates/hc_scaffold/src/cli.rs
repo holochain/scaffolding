@@ -42,7 +42,7 @@ pub enum HcScaffold {
         /// Name of the app to scaffold
         name: Option<String>,
 
-        /// [OPTIONAL] Description of the app to scaffold
+        /// Description of the app to scaffold
         description: Option<String>,
 
         #[structopt(long)]

@@ -14,8 +14,8 @@ use super::{
 
 #[derive(Serialize)]
 pub struct ScaffoldWebAppData {
-    app_name: String,
-    holochain_client_version: String,
+    pub app_name: String,
+    pub holochain_client_version: String,
 }
 
 pub fn scaffold_web_app_template(
