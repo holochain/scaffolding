@@ -1,59 +1,44 @@
-# RAD Scaffolding tools for Holochain applications
+# Holochain Scaffolding CLI
 
-RAD tools to enable quick scaffolding of Holochain application.
+CLI to easily generate and edit holochain apps.
 
-# Usage
+## Install
+
+Install the CLI globally with this command.
 
 ```bash
-npm init @holochain
+cargo install holochain_scaffolding_cli
 ```
 
-This will open a tab in your browser that will guide you through the process of scaffolding a Holochain app.
+In the near future the scaffolding tool is going to be integrated together with holonix and the overall holochain development environment.
 
-# Development Setup
+Until then, you can just install it from crates to get a preview of its functionality.
 
-## Structure
-
-The Holochain scaffolding tools are structured as an Yarn monorepo, to allow for composability and decoupling of its building blocks.
-
-Packages:
-
-- `@holochain/scaffolding` (located in `packages/scaffolding`): types, elements and vanilla JS functions to help design and generate Holochain applications.
-- `@holochain-scaffolding/ui` (located in `packages/client`): Vue app that serves as the client for `@holochain/create`.
-- `@holochain/create` (located in `packages/create`): aggregator package that can be executed to scaffold fully working Holochain apps.
 
 ## Usage
 
-### Installing
-
-From the root folder of the repository, run:
-
 ```bash
-yarn
+# Scaffold an empty web-app
+hc-scaffold web-app forum
+
+cd forum
+
+# Scaffold a dna inside the newly scaffolded app
+hc-scaffold dna forum
+
+# Scaffold a zome inside the newly scaffolded dna
+hc-scaffold zome posts
+
+# Scaffold an entry-type inside the newly scaffolded zome
+hc-scaffold entry-type post
+
+# Scaffold an index for the newly scaffolded entry-type
+hc-scaffold index global all_posts
+
+# Scaffold a new link-type
+hc-scaffold link-type
 ```
 
-### Testing
+## Documentation
 
-From the root folder of the repository, run:
-
-```bash
-npm test
-```
-
-This will scaffold a fully working holochain application and run its tests.
-
-### Starting
-
-From the root folder of the repository, run:
-
-```bash
-npm start
-```
-
-### Building @holochain/create
-
-From the root of the repository, run:
-
-```bash
-npm run build
-```
+See the [docs.rs documentation](https://docs.rs/holochain_scaffolding_cli) to learn how to use and create custom templates.
