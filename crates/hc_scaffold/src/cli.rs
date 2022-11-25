@@ -671,6 +671,7 @@ Index "{}" scaffolded!
 #[derive(Debug, StructOpt)]
 #[structopt(setting = structopt::clap::AppSettings::InferSubcommands)]
 pub enum HcScaffoldTemplate {
+    /// Download a custom template from a remote repository to this folder
     Get {
         /// The git repository URL from which to download the template
         template_url: String,
@@ -683,6 +684,7 @@ pub enum HcScaffoldTemplate {
         /// The folder to download the template to, will end up at ".templates/<TO TEMPLATE>"
         to_template: Option<String>,
     },
+    /// Initialize a new custom template from a built-in one
     Init {
         /// The UI framework to use as the template for this web-app
         template: Option<UiFramework>,
