@@ -68,7 +68,7 @@ pub fn scaffold_link_type(
         None => input_snake_case(&String::from("Enter link type name:"))?.to_case(Case::Pascal),
     };
 
-    let bidireccional = match (to_referenceable, bidireccional) {
+    let bidireccional = match (&to_referenceable, bidireccional) {
         (None, _) => false,
         (_, Some(b)) => b.clone(),
         (_, None) => Confirm::with_theme(&ColorfulTheme::default())
