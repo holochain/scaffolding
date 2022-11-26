@@ -29,6 +29,8 @@ fn metadata_handlers(
         .to_string(&Cardinality::Single)
         .to_case(Case::Pascal);
     let snake_link_type_name = link_type_name.to_case(Case::Snake);
+    let plural_snake_link_type_name =
+        pluralizer::pluralize(&link_type_name.to_case(Case::Snake), 2, false);
     let pascal_link_type_name = link_type_name.to_case(Case::Pascal);
 
     format!(
@@ -48,13 +50,13 @@ pub fn add_{snake_link_type_name}_for_{snake_from}(input: Add{pascal_link_type_n
 }}
 
 #[hdk_extern]
-pub fn get_{snake_link_type_name}_for_{snake_from}({snake_from_arg}: {from_arg_type}) -> ExternResult<Vec<String>> {{
+pub fn get_{plural_snake_link_type_name}_for_{snake_from}({snake_from_arg}: {from_arg_type}) -> ExternResult<Vec<String>> {{
     let links = get_links({snake_from_arg}, LinkTypes::{pascal_link_type_name}, None)?;
     
     let {snake_link_type_name}: Vec<String> = links
         .into_iter()
         .map(|link| 
-          String::from_utf8(link.target.into_inner())
+          String::from_utf8(link.tag.into_inner())
             .map_err(|e| wasm_error!(WasmErrorInner::Guest(format!("Error converting link tag to string: {{:?}}", e))))
         )
         .collect::<ExternResult<Vec<String>>>()?;
