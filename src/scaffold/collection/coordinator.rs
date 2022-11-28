@@ -17,16 +17,16 @@ use crate::{
     },
 };
 
-use super::IndexType;
+use super::CollectionType;
 
-fn global_index_getter(
+fn global_collection_getter(
     integrity_zome_name: &String,
-    index_name: &String,
+    collection_name: &String,
     link_type_name: &String,
     entry_type_reference: &EntryTypeReference,
 ) -> String {
     let to_hash_type = entry_type_reference.hash_type().to_string();
-    let snake_index_name = index_name.to_case(Case::Snake);
+    let snake_collection_name = collection_name.to_case(Case::Snake);
     let map_line = match entry_type_reference.reference_entry_hash {
         true => String::from(".filter_map(|r| r.action().entry_hash().cloned())"),
         false => String::from(".map(|r| r.action_address().clone())"),
@@ -37,8 +37,8 @@ fn global_index_getter(
 use {integrity_zome_name}::*;
 
 #[hdk_extern]
-pub fn get_{snake_index_name}(_: ()) -> ExternResult<Vec<{to_hash_type}>> {{
-    let path = Path::from("{snake_index_name}");
+pub fn get_{snake_collection_name}(_: ()) -> ExternResult<Vec<{to_hash_type}>> {{
+    let path = Path::from("{snake_collection_name}");
 
     let links = get_links(path.path_entry_hash()?, LinkTypes::{link_type_name}, None)?;
     
@@ -62,9 +62,9 @@ pub fn get_{snake_index_name}(_: ()) -> ExternResult<Vec<{to_hash_type}>> {{
     )
 }
 
-fn by_author_index_getter(
+fn by_author_collection_getter(
     integrity_zome_name: &String,
-    index_name: &String,
+    collection_name: &String,
     link_type_name: &String,
     entry_type_reference: &EntryTypeReference,
 ) -> String {
@@ -79,7 +79,7 @@ fn by_author_index_getter(
 use {integrity_zome_name}::*;
 
 #[hdk_extern]
-pub fn get_{index_name}(author: AgentPubKey) -> ExternResult<Vec<{to_hash_type}>> {{
+pub fn get_{collection_name}(author: AgentPubKey) -> ExternResult<Vec<{to_hash_type}>> {{
     let links = get_links(author, LinkTypes::{link_type_name}, None)?;
     
     let get_input: Vec<GetInput> = links
@@ -105,9 +105,9 @@ pub fn get_{index_name}(author: AgentPubKey) -> ExternResult<Vec<{to_hash_type}>
 fn add_create_link_in_create_function(
     dna_file_tree: DnaFileTree,
     coordinator_zomes_for_integrity: &Vec<ZomeManifest>,
-    index_name: &String,
+    collection_name: &String,
     link_type_name: &String,
-    index_type: &IndexType,
+    collection_type: &CollectionType,
     entry_type_reference: &EntryTypeReference,
 ) -> ScaffoldResult<DnaFileTree> {
     let dna_manifest_path = dna_file_tree.dna_manifest_path.clone();
@@ -120,7 +120,7 @@ fn add_create_link_in_create_function(
             entry_type_reference.entry_type.to_case(Case::Snake)
         ),
         &format!(
-            "At the end of which function should the {} entries be indexed?",
+            "At the end of which function should the {} entries be collectioned?",
             entry_type_reference.entry_type.to_case(Case::Pascal)
         ),
     )?;
@@ -142,15 +142,15 @@ fn add_create_link_in_create_function(
         false => format!("{}_hash", snake_case_entry_type),
     };
 
-    match index_type {
-        IndexType::Global => {
-            create_link_stmts.push(format!(r#"let path = Path::from("{}");"#, index_name));
+    match collection_type {
+        CollectionType::Global => {
+            create_link_stmts.push(format!(r#"let path = Path::from("{}");"#, collection_name));
             create_link_stmts.push(format!(
                 r#"create_link(path.path_entry_hash()?, {}.clone(), LinkTypes::{}, ())?;"#,
                 link_to_variable, link_type_name
             ));
         }
-        IndexType::ByAuthor => {
+        CollectionType::ByAuthor => {
             create_link_stmts.push(format!(
                 r#"let my_agent_pub_key = agent_info()?.agent_latest_pubkey;"#,
             ));
@@ -220,11 +220,11 @@ fn add_create_link_in_create_function(
     Ok(dna_file_tree)
 }
 
-pub fn add_index_to_coordinators(
+pub fn add_collection_to_coordinators(
     integrity_zome_file_tree: ZomeFileTree,
-    index_name: &String,
+    collection_name: &String,
     link_type_name: &String,
-    index_type: &IndexType,
+    collection_type: &CollectionType,
     entry_type: &EntryTypeReference,
 ) -> ScaffoldResult<(DnaFileTree, ZomeManifest)> {
     let integrity_zome_name = integrity_zome_file_tree.zome_manifest.name.0.to_string();
@@ -251,7 +251,7 @@ pub fn add_index_to_coordinators(
                 .collect();
             let selection = Select::with_theme(&ColorfulTheme::default())
                 .with_prompt(
-                    "Which coordinator zome should the index getter functions be scaffolded in?",
+                    "Which coordinator zome should the collection getter functions be scaffolded in?",
                 )
                 .default(0)
                 .items(&names[..])
@@ -268,22 +268,22 @@ pub fn add_index_to_coordinators(
         coordinator_zome.clone(),
     )?;
 
-    let snake_link_type_name = index_name.to_case(Case::Snake);
+    let snake_link_type_name = collection_name.to_case(Case::Snake);
 
-    let getter = match index_type {
-        IndexType::Global => {
-            global_index_getter(&integrity_zome_name, index_name, link_type_name, entry_type)
+    let getter = match collection_type {
+        CollectionType::Global => {
+            global_collection_getter(&integrity_zome_name, collection_name, link_type_name, entry_type)
         }
-        IndexType::ByAuthor => {
-            by_author_index_getter(&integrity_zome_name, index_name, link_type_name, entry_type)
+        CollectionType::ByAuthor => {
+            by_author_collection_getter(&integrity_zome_name, collection_name, link_type_name, entry_type)
         }
     };
 
     let mut file_tree = zome_file_tree.dna_file_tree.file_tree();
 
     let crate_src_path = zome_file_tree.zome_crate_path.join("src");
-    let index_path = crate_src_path.join(format!("{}.rs", snake_link_type_name.clone()));
-    insert_file(&mut file_tree, &index_path, &getter)?;
+    let collection_path = crate_src_path.join(format!("{}.rs", snake_link_type_name.clone()));
+    insert_file(&mut file_tree, &collection_path, &getter)?;
 
     // 2. Add this file as a module in the entry point for the crate
 
@@ -303,9 +303,9 @@ pub fn add_index_to_coordinators(
     dna_file_tree = add_create_link_in_create_function(
         dna_file_tree,
         &coordinator_zomes_for_integrity,
-        index_name,
+        collection_name,
         link_type_name,
-        index_type,
+        collection_type,
         entry_type,
     )?;
 

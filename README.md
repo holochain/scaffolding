@@ -32,8 +32,8 @@ hc-scaffold zome posts
 # Scaffold an entry-type inside the newly scaffolded zome
 hc-scaffold entry-type post
 
-# Scaffold an index for the newly scaffolded entry-type
-hc-scaffold index global all_posts
+# Scaffold an collection for the newly scaffolded entry-type
+hc-scaffold collection global all_posts
 
 # Scaffold a new link-type
 hc-scaffold link-type

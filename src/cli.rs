@@ -9,7 +9,7 @@ use crate::scaffold::entry_type::definitions::{
     Referenceable,
 };
 use crate::scaffold::entry_type::{fields::parse_fields, scaffold_entry_type};
-use crate::scaffold::index::{scaffold_index, IndexType};
+use crate::scaffold::collection::{scaffold_collection, CollectionType};
 use crate::scaffold::link_type::scaffold_link_type;
 use crate::scaffold::web_app::scaffold_web_app;
 use crate::scaffold::web_app::uis::{choose_ui_framework, template_for_ui_framework, UiFramework};
@@ -167,8 +167,8 @@ pub enum HcScaffold {
         /// The template must be located at the ".templates/<TEMPLATE NAME>" folder of the repository
         template: Option<String>,
     },
-    /// Scaffold an indexing link-type and appropriate zome functions to index entries into an existing zome
-    Index {
+    /// Scaffold a collection of entries in an existing zome
+    Collection {
         #[structopt(long)]
         /// Name of the dna in which you want to scaffold the zome
         dna: Option<String>,
@@ -177,14 +177,14 @@ pub enum HcScaffold {
         /// Name of the integrity zome in which you want to scaffold the link type
         zome: Option<String>,
 
-        /// Index type: "global" or "by-author"
-        index_type: Option<IndexType>,
+        /// Collection type: "global" or "by-author"
+        collection_type: Option<CollectionType>,
 
-        /// Index name, just to differentiate it from other indexes
-        index_name: Option<String>,
+        /// Collection name, just to differentiate it from other collections
+        collection_name: Option<String>,
 
         #[structopt(parse(try_from_str = parse_entry_type_reference))]
-        /// Entry type that is going to be indexed by this index
+        /// Entry type that is going to be added to the collection
         entry_type: Option<EntryTypeReference>,
 
         #[structopt(short, long)]
@@ -564,9 +564,9 @@ Entry type "{}" scaffolded!"#,
                 } else {
                     println!(
                         r#"
-Add new indexes for that entry type with:
+Add new collections for that entry type with:
 
-  hc-scaffold index
+  hc-scaffold collection
 "#,
                     );
                 }
@@ -611,11 +611,11 @@ Link type scaffolded!
                     println!("{}", i);
                 }
             }
-            HcScaffold::Index {
+            HcScaffold::Collection {
                 dna,
                 zome,
-                index_name,
-                index_type,
+                collection_name,
+                collection_type,
                 entry_type,
                 template,
             } => {
@@ -627,10 +627,10 @@ Link type scaffolded!
 
                 let zome_file_tree = ZomeFileTree::get_or_choose_integrity(dna_file_tree, &zome)?;
 
-                let prompt = String::from("Index name (snake_case, eg. \"all_posts\"):");
-                let name: String = match index_name {
+                let prompt = String::from("Collection name (snake_case, eg. \"all_posts\"):");
+                let name: String = match collection_name {
                     Some(n) => {
-                        check_snake_case(&n, "index name")?;
+                        check_snake_case(&n, "collection name")?;
                         n
                     }
                     None => input_snake_case(&prompt)?,
@@ -639,11 +639,11 @@ Link type scaffolded!
                 let ScaffoldedTemplate {
                     file_tree,
                     next_instructions,
-                } = scaffold_index(
+                } = scaffold_collection(
                     zome_file_tree,
                     &template_file_tree,
                     &name,
-                    &index_type,
+                    &collection_type,
                     &entry_type,
                 )?;
 
@@ -653,7 +653,7 @@ Link type scaffolded!
 
                 println!(
                     r#"
-Index "{}" scaffolded!
+Collection "{}" scaffolded!
 "#,
                     name
                 );

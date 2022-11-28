@@ -190,23 +190,26 @@ pub fn choose_field(
                         .into_iter()
                         .map(|r| r.entry_type)
                         .collect();
-
+                    
+if let Cardinality::Option | Cardinality::Vector = cardinality {
                     all_options.push(format!(
                         "{} (itself)",
                         entry_type_name.to_case(Case::Pascal)
                     ));
+                        }
 
                     let selection = Select::with_theme(&ColorfulTheme::default())
                         .with_prompt(String::from("Which entry type is this field referring to?"))
                         .default(0)
                         .items(&all_options[..])
                         .interact()?;
+
                     let reference_entry_hash = match field_type {
                         FieldType::EntryHash => true,
                         _ => false,
                     };
 
-                    match selection == all_options.len() - 1 {
+                    match selection == all_entry_types.len() {
                         true => Some(Referenceable::EntryType(EntryTypeReference {
                             entry_type: entry_type_name.clone(),
                             reference_entry_hash,

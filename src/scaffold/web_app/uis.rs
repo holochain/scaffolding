@@ -4,7 +4,7 @@ use std::{ffi::OsString, path::PathBuf, str::FromStr};
 
 use crate::{
     error::{ScaffoldError, ScaffoldResult},
-    file_tree::{dir_exists, dir_to_file_tree, FileTree},
+    file_tree::{dir_exists, dir_to_file_tree, file_exists, FileTree},
 };
 
 static LIT_TEMPLATES: Dir<'static> = include_dir!("$CARGO_MANIFEST_DIR/templates/lit");
@@ -51,27 +51,29 @@ impl FromStr for UiFramework {
 
 pub fn guess_or_choose_framework(app_file_tree: &FileTree) -> ScaffoldResult<UiFramework> {
     let ui_package_json_path = PathBuf::from("ui/package.json");
-    let v: Vec<OsString> = ui_package_json_path
-        .iter()
-        .map(|s| s.to_os_string())
-        .collect();
-    let ui_package_json = app_file_tree
-        .path(&mut v.iter())
-        .ok_or(ScaffoldError::PathNotFound(ui_package_json_path.clone()))?
-        .file_content()
-        .ok_or(ScaffoldError::PathNotFound(ui_package_json_path.clone()))?
-        .clone();
 
-    if ui_package_json.contains("lit") {
-        return Ok(UiFramework::Lit);
-    } else if ui_package_json.contains("svelte") {
-        return Ok(UiFramework::Svelte);
-    } else if ui_package_json.contains("vue") {
-        return Ok(UiFramework::Vue);
-    } else if !dir_exists(app_file_tree, &PathBuf::from("ui/src")) {
-        return Ok(UiFramework::Vanilla);
+    if file_exists(app_file_tree, &ui_package_json_path) {
+        let v: Vec<OsString> = ui_package_json_path
+            .iter()
+            .map(|s| s.to_os_string())
+            .collect();
+        let ui_package_json = app_file_tree
+            .path(&mut v.iter())
+            .ok_or(ScaffoldError::PathNotFound(ui_package_json_path.clone()))?
+            .file_content()
+            .ok_or(ScaffoldError::PathNotFound(ui_package_json_path.clone()))?
+            .clone();
+
+        if ui_package_json.contains("lit") {
+            return Ok(UiFramework::Lit);
+        } else if ui_package_json.contains("svelte") {
+            return Ok(UiFramework::Svelte);
+        } else if ui_package_json.contains("vue") {
+            return Ok(UiFramework::Vue);
+        } else if !dir_exists(app_file_tree, &PathBuf::from("ui/src")) {
+            return Ok(UiFramework::Vanilla);
+        }
     }
-
     choose_ui_framework()
 }
 

@@ -8,7 +8,7 @@ use crate::{
     file_tree::{file_content, FileTree},
     scaffold::{
         entry_type::definitions::{EntryTypeReference, Referenceable},
-        index::IndexType,
+        collection::CollectionType,
     },
 };
 
@@ -17,33 +17,33 @@ use super::{
 };
 
 #[derive(Serialize)]
-pub struct ScaffoldIndexData {
+pub struct ScaffoldCollectionData {
     pub dna_role_id: String,
     pub coordinator_zome_manifest: ZomeManifest,
-    pub index_type: IndexType,
-    pub index_name: String,
+    pub collection_type: CollectionType,
+    pub collection_name: String,
     pub referenceable: Referenceable,
 }
-pub fn scaffold_index_templates(
+pub fn scaffold_collection_templates(
     mut app_file_tree: FileTree,
     template_file_tree: &FileTree,
     dna_role_id: &String,
     coordinator_zome_manifest: &ZomeManifest,
-    index_type: &IndexType,
-    index_name: &String,
+    collection_type: &CollectionType,
+    collection_name: &String,
     entry_type_reference: &EntryTypeReference,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
-    let data = ScaffoldIndexData {
+    let data = ScaffoldCollectionData {
         dna_role_id: dna_role_id.clone(),
         coordinator_zome_manifest: coordinator_zome_manifest.clone(),
-        index_name: index_name.clone(),
-        index_type: index_type.clone(),
+        collection_name: collection_name.clone(),
+        collection_type: collection_type.clone(),
         referenceable: Referenceable::EntryType(entry_type_reference.clone()),
     };
 
     let h = build_handlebars(&template_file_tree)?;
 
-    let field_types_path = PathBuf::from("index");
+    let field_types_path = PathBuf::from("collection");
     let v: Vec<OsString> = field_types_path.iter().map(|s| s.to_os_string()).collect();
 
     if let Some(web_app_template) = template_file_tree.path(&mut v.iter()) {
@@ -57,7 +57,7 @@ pub fn scaffold_index_templates(
 
     let next_instructions = match file_content(
         &template_file_tree,
-        &PathBuf::from("index.instructions.hbs"),
+        &PathBuf::from("collection.instructions.hbs"),
     ) {
         Ok(content) => Some(h.render_template(content.as_str(), &data)?),
         Err(_) => None,

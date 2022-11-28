@@ -13,10 +13,10 @@ hc-scaffold entry-type comment --reference-entry-hash false --crud crud --link-f
 hc-scaffold entry-type like --reference-entry-hash false --crud crd --fields like_hash:Option\<ActionHash\>::Like
 hc-scaffold entry-type certificate --reference-entry-hash true --crud cr --fields post_hash:ActionHash::Post,agent:AgentPubKey::certified,certifications_hashes:Vec\<EntryHash\>::Certificate
 
-hc-scaffold index global all_posts post 
-hc-scaffold index by-author posts_by_author post
-hc-scaffold index global all_posts_entry_hash post:EntryHash
-hc-scaffold index by-author posts_by_author_entry_hash post:EntryHash
+hc-scaffold collection global all_posts post 
+hc-scaffold collection by-author posts_by_author post
+hc-scaffold collection global all_posts_entry_hash post:EntryHash
+hc-scaffold collection by-author posts_by_author_entry_hash post:EntryHash
 
 hc-scaffold link-type post like --bidireccional false
 hc-scaffold link-type comment like:EntryHash --bidireccional true
@@ -41,10 +41,10 @@ hc-scaffold entry-type comment --reference-entry-hash false --crud crud --link-f
 hc-scaffold entry-type like --reference-entry-hash false --crud crd --fields like_hash:Option\<ActionHash\>::Like
 hc-scaffold entry-type certificate --reference-entry-hash true --crud cr --fields post_hash:ActionHash::Post,agent:AgentPubKey::certified,certifications_hashes:Vec\<EntryHash\>::Certificate
 
-hc-scaffold index global all_posts post 
-hc-scaffold index by-author posts_by_author post
-hc-scaffold index global all_posts_entry_hash post:EntryHash
-hc-scaffold index by-author posts_by_author_entry_hash post:EntryHash
+hc-scaffold collection global all_posts post 
+hc-scaffold collection by-author posts_by_author post
+hc-scaffold collection global all_posts_entry_hash post:EntryHash
+hc-scaffold collection by-author posts_by_author_entry_hash post:EntryHash
 
 hc-scaffold link-type post like --bidireccional false
 hc-scaffold link-type comment like:EntryHash --bidireccional true
@@ -70,10 +70,10 @@ hc-scaffold entry-type comment --reference-entry-hash false --crud crud --link-f
 hc-scaffold entry-type like --reference-entry-hash false --crud crd --fields like_hash:Option\<ActionHash\>::Like
 hc-scaffold entry-type certificate --reference-entry-hash true --crud cr --fields post_hash:ActionHash::Post,agent:AgentPubKey::certified,certifications_hashes:Vec\<EntryHash\>::Certificate
 
-hc-scaffold index global all_posts post 
-hc-scaffold index by-author posts_by_author post
-hc-scaffold index global all_posts_entry_hash post:EntryHash
-hc-scaffold index by-author posts_by_author_entry_hash post:EntryHash
+hc-scaffold collection global all_posts post 
+hc-scaffold collection by-author posts_by_author post
+hc-scaffold collection global all_posts_entry_hash post:EntryHash
+hc-scaffold collection by-author posts_by_author_entry_hash post:EntryHash
 
 hc-scaffold link-type post like --bidireccional false
 hc-scaffold link-type comment like:EntryHash --bidireccional true
@@ -101,10 +101,10 @@ hc-scaffold entry-type comment --reference-entry-hash false --crud crud --link-f
 hc-scaffold entry-type like --reference-entry-hash false --crud crd --fields like_hash:Option\<ActionHash\>::Like
 hc-scaffold entry-type certificate --reference-entry-hash true --crud cr --fields post_hash:ActionHash::Post,agent:AgentPubKey::certified,certifications_hashes:Vec\<EntryHash\>::Certificate
 
-hc-scaffold index global all_posts post 
-hc-scaffold index by-author posts_by_author post
-hc-scaffold index global all_posts_entry_hash post:EntryHash
-hc-scaffold index by-author posts_by_author_entry_hash post:EntryHash
+hc-scaffold collection global all_posts post 
+hc-scaffold collection by-author posts_by_author post
+hc-scaffold collection global all_posts_entry_hash post:EntryHash
+hc-scaffold collection by-author posts_by_author_entry_hash post:EntryHash
 
 hc-scaffold link-type post like --bidireccional false
 hc-scaffold link-type comment like:EntryHash --bidireccional true

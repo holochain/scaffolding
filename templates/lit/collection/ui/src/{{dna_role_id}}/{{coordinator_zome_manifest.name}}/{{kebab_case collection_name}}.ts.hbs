@@ -8,9 +8,9 @@ import '@material/mwc-circular-progress';
 
 import './{{kebab_case referenceable.name}}-detail';
 
-@customElement('{{kebab_case index_name}}')
-export class {{pascal_case index_name}} extends LitElement {
-  {{#if (eq index_type.type "ByAuthor")}}
+@customElement('{{kebab_case collection_name}}')
+export class {{pascal_case collection_name}} extends LitElement {
+  {{#if (eq collection_type.type "ByAuthor")}}
 
   @property({
     hasChanged: (newVal: AgentPubKey, oldVal: AgentPubKey) => newVal?.toString() !== oldVal?.toString()
@@ -18,14 +18,14 @@ export class {{pascal_case index_name}} extends LitElement {
   author!: AgentPubKey;
   {{/if}}
   
-  _fetch{{pascal_case (plural referenceable.name)}} = new Task(this, ([{{#if (eq index_type.type "ByAuthor")}}author{{/if}}]) => this.appWebsocket.callZome({
+  _fetch{{pascal_case (plural referenceable.name)}} = new Task(this, ([{{#if (eq collection_type.type "ByAuthor")}}author{{/if}}]) => this.appWebsocket.callZome({
       cap_secret: null,
       cell_id: this.cellData.cell_id,
       zome_name: '{{coordinator_zome_manifest.name}}',
-      fn_name: 'get_{{snake_case index_name}}',
-      payload: {{#if (eq index_type.type "ByAuthor")}}author{{else}}null{{/if}},
+      fn_name: 'get_{{snake_case collection_name}}',
+      payload: {{#if (eq collection_type.type "ByAuthor")}}author{{else}}null{{/if}},
       provenance: this.cellData.cell_id[1]
-  }) as Promise<Array<{{referenceable.hash_type}}>>, () => [{{#if (eq index_type.type "ByAuthor")}}this.author{{/if}}]);
+  }) as Promise<Array<{{referenceable.hash_type}}>>, () => [{{#if (eq collection_type.type "ByAuthor")}}this.author{{/if}}]);
 
   @contextProvided({ context: appWebsocketContext })
   appWebsocket!: AppWebsocket;
@@ -38,7 +38,7 @@ export class {{pascal_case index_name}} extends LitElement {
   }
 
   renderList(hashes: Array<{{referenceable.hash_type}}>) {
-    if (hashes.length === 0) return html`<span>No {{lower_case (plural referenceable.name)}} found{{#if (eq index_type.type "ByAuthor")}} for this author{{/if}}.</span>`;
+    if (hashes.length === 0) return html`<span>No {{lower_case (plural referenceable.name)}} found{{#if (eq collection_type.type "ByAuthor")}} for this author{{/if}}.</span>`;
     
     return html`
       <div style="display: flex; flex-direction: column">

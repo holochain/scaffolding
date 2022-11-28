@@ -17,8 +17,8 @@
 //! // Scaffold an entry-type inside the newly scaffolded zome
 //! hc-scaffold entry-type post
 //!
-//! // Scaffold an index for the newly scaffolded entry-type
-//! hc-scaffold index global all_posts
+//! // Scaffold an collection for the newly scaffolded entry-type
+//! hc-scaffold collection global all_posts
 //!
 //! // Scaffold a new link-type
 //! hc-scaffold link-type
@@ -81,7 +81,7 @@
 //! dna/
 //! entry-type/
 //! field-types/
-//! index/
+//! collection/
 //! integrity-zome/
 //! link-type/
 //! web-app/
@@ -109,7 +109,7 @@
 //! - `zome`: uses the `coordinator-zome` folder if scaffolding a coordinator zome, and the `integrity-zome` folder if scaffolding an integrity zome. [Available data](`crate::templates::coordinator::ScaffoldCoordinatorZomeData`).
 //! - `entry-type`: uses the `entry-type` folder. [Available data](`crate::templates::entry_type::ScaffoldEntryTypeData`).
 //! - `link-type`: uses the `link-type` folder. [Available data](`crate::templates::link_type::ScaffoldLinkTypeData`).
-//! - `index`: uses the `index` folder. [Available data](`crate::templates::index::ScaffoldIndexData`).
+//! - `collection`: uses the `collection` folder. [Available data](`crate::templates::collection::ScaffoldCollectionData`).
 //!
 //! ### Field types
 //!
