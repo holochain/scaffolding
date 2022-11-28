@@ -17,7 +17,7 @@
 //! // Scaffold an entry-type inside the newly scaffolded zome
 //! hc-scaffold entry-type post
 //!
-//! // Scaffold an collection for the newly scaffolded entry-type
+//! // Scaffold a collection for the newly scaffolded entry-type
 //! hc-scaffold collection global all_posts
 //!
 //! // Scaffold a new link-type
