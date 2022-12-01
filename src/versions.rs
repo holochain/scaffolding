@@ -7,13 +7,19 @@ pub fn holochain_client_version() -> String {
 }
 
 pub fn hdi_version() -> String {
-    String::from("0.1")
+    holochain::HDI_VERSION.to_string()
 }
 
 pub fn hdk_version() -> String {
-    String::from("0.0.162")
+    holochain::HDK_VERSION.to_string()
+}
+
+pub fn holochain_version() -> String {
+    holochain::HOLOCHAIN_VERSION.to_string()
 }
 
 pub fn holochain_nix_version() -> String {
-    String::from("v0_0_174")
+    let version_str = format!("{}", holochain_version());
+
+    format!("v{}", version_str.replacen(".", "_", 2))
 }

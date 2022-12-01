@@ -199,12 +199,12 @@ pub fn scaffold_dna(
 
     let mut roles = app_file_tree.app_manifest.app_roles();
 
-    if let Some(_) = roles.iter().find(|r| r.id.eq(dna_name)) {
+    if let Some(_) = roles.iter().find(|r| r.name.eq(dna_name)) {
         return Err(ScaffoldError::DnaAlreadyExists(dna_name.clone()));
     }
 
     roles.push(AppRoleManifest {
-        id: dna_name.clone(),
+        name: dna_name.clone(),
         dna: AppRoleDnaManifest {
             location: Some(Location::Bundled(dna_bundle_path)),
             modifiers: DnaModifiersOpt {

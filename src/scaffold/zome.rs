@@ -329,10 +329,16 @@ fn try_to_guess_coordinator_zomes_location(
 pub fn add_common_zome_dependencies_to_workspace_cargo(
     file_tree: FileTree,
 ) -> ScaffoldResult<FileTree> {
-    let file_tree =
-        add_workspace_external_dependency(file_tree, &"hdi".to_string(), &hdi_version())?;
-    let file_tree =
-        add_workspace_external_dependency(file_tree, &"hdk".to_string(), &hdk_version())?;
+    let file_tree = add_workspace_external_dependency(
+        file_tree,
+        &"hdi".to_string(),
+        &format!("{}", hdi_version()),
+    )?;
+    let file_tree = add_workspace_external_dependency(
+        file_tree,
+        &"hdk".to_string(),
+        &format!("{}", hdk_version()),
+    )?;
     let file_tree =
         add_workspace_external_dependency(file_tree, &"serde".to_string(), &"1".to_string())?;
 

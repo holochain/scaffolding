@@ -1,6 +1,6 @@
 use std::{ffi::OsString, path::PathBuf};
 
-use holochain_types::prelude::ZomeManifest;
+use holochain::prelude::ZomeManifest;
 use serde::Serialize;
 
 use crate::{
