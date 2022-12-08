@@ -120,7 +120,7 @@ fn add_create_link_in_create_function(
             entry_type_reference.entry_type.to_case(Case::Snake)
         ),
         &format!(
-            "At the end of which function should the {} entries be collectioned?",
+            "At the end of which function should the {} entries be collected?",
             entry_type_reference.entry_type.to_case(Case::Pascal)
         ),
     )?;

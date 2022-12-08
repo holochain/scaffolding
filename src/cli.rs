@@ -2,6 +2,7 @@ use crate::error::{ScaffoldError, ScaffoldResult};
 use crate::file_tree::{dir_content, file_content, load_directory_into_memory, FileTree};
 use crate::scaffold::app::cargo::exec_metadata;
 use crate::scaffold::app::AppFileTree;
+use crate::scaffold::collection::{scaffold_collection, CollectionType};
 use crate::scaffold::dna::{scaffold_dna, DnaFileTree};
 use crate::scaffold::entry_type::crud::{parse_crud, Crud};
 use crate::scaffold::entry_type::definitions::{
@@ -9,7 +10,6 @@ use crate::scaffold::entry_type::definitions::{
     Referenceable,
 };
 use crate::scaffold::entry_type::{fields::parse_fields, scaffold_entry_type};
-use crate::scaffold::collection::{scaffold_collection, CollectionType};
 use crate::scaffold::link_type::scaffold_link_type;
 use crate::scaffold::web_app::scaffold_web_app;
 use crate::scaffold::web_app::uis::{choose_ui_framework, template_for_ui_framework, UiFramework};
@@ -309,7 +309,10 @@ impl HcScaffold {
 
                 println!(
                     r#"
-Web hApp "{}" scaffolded!"#,
+Web hApp "{}" scaffolded! Notice that this is an empty skeleton for a Holochain web-app, so:
+
+- It won't compile until you add a DNA to it, and then a zome to that DNA.
+- The UI is empty, you'll need to import the appropriate components to the top level app component."#,
                     name
                 );
 

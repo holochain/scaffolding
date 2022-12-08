@@ -64,7 +64,7 @@ export class Create{{pascal_case entry_type.name}} extends LitElement {
         {{#if (eq cardinality "single") }}
         {{snake_case field_name}}: this._{{camel_case field_name}}!,
         {{else}}
-        {{snake_case field_name}}: this._{{camel_case field_name}}{{#if (eq cardinality "vector") }}as Array<{{> (concat field_type "/type") }}>{{/if}},,
+        {{snake_case field_name}}: this._{{camel_case field_name}}{{#if (eq cardinality "vector") }} as Array<{{> (concat field_type "/type") }}>{{/if}},
         {{/if}}
       {{/if}}
     {{/each}}

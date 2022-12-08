@@ -96,7 +96,7 @@ pub fn scaffold_collection(
         },
         None => choose_entry_type_reference(
             &all_entries,
-            &"Which entry type should be collectioned?".to_string(),
+            &"Which entry type should be collected?".to_string(),
         ),
     }?;
 

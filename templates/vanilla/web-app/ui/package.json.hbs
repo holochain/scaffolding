@@ -5,7 +5,7 @@
   "version": "0.0.0",
   "scripts": {
     "start": "wds",
-    "build": "mkdir dist && cp index.html dist",
+    "build": "rimraf dist && rollup -c rollup.config.js",
     "package": "npm run build && cd dist && bestzip ../dist.zip *"
   },
   "dependencies": {

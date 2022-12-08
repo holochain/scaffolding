@@ -1,0 +1,5 @@
+<div style="display: flex; flex-direction: row">
+  <span style="margin-right: 4px">{{label}}</span>
+
+  <mwc-slider {{#if initial_value_variable}}value={ ({{initial_value_variable}} }{{/if}} on:input={e => { {{variable_to_change}} = e.detail.value; } }></mwc-slider>
+</div>
