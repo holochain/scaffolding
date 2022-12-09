@@ -20,7 +20,8 @@ serde = {{ workspace = true }}
 
 pub fn initial_lib_rs() -> String {
     format!(
-        r#"use hdi::prelude::*;
+        r#"#[allow(unused_variables)]
+use hdi::prelude::*;
 
 #[hdk_extern]
 pub fn genesis_self_check(data: GenesisSelfCheckData) -> ExternResult<ValidateCallbackResult> {{
@@ -35,10 +36,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {{
             OpEntry::CreateEntry {{
                 entry_hash,
                 entry_type,
-            }} => Ok(ValidateCallbackResult::Invalid(
-                "There are no entry types in this integrity zome yet".to_string(),
-            )),
-            OpEntry::UpdateEntry {{
+            }} | OpEntry::UpdateEntry {{
                 entry_hash,
                 entry_type,
                 ..
