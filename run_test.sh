@@ -6,6 +6,9 @@ cd /tmp
 
 hc-scaffold web-app forum-svelte --setup-nix true --template svelte
 cd forum-svelte
+
+nix-shell . --run "
+
 hc-scaffold dna forum 
 hc-scaffold zome posts --integrity dnas/forum/zomes/integrity/ --coordinator dnas/forum/zomes/coordinator/
 hc-scaffold entry-type post --reference-entry-hash false --crud crud --link-from-original-to-each-update true --fields title:String:TextField,content:String:TextArea
@@ -23,7 +26,6 @@ hc-scaffold link-type comment like:EntryHash --bidireccional true
 hc-scaffold link-type certificate:EntryHash like --bidireccional false
 hc-scaffold link-type agent:creator post:EntryHash --bidireccional true
 
-nix-shell . --run "
 set -e
 npm i
 npm run build -w ui
@@ -34,6 +36,8 @@ cd /tmp
 
 hc-scaffold web-app forum-vue --setup-nix true --template vue
 cd forum-vue
+nix-shell . --run "
+
 hc-scaffold dna forum 
 hc-scaffold zome posts --integrity dnas/forum/zomes/integrity/ --coordinator dnas/forum/zomes/coordinator/
 hc-scaffold entry-type post --reference-entry-hash false --crud crud --link-from-original-to-each-update true --fields title:String:TextField,content:String:TextArea
@@ -51,7 +55,6 @@ hc-scaffold link-type comment like:EntryHash --bidireccional true
 hc-scaffold link-type certificate:EntryHash like --bidireccional false
 hc-scaffold link-type agent:creator post:EntryHash --bidireccional true
 
-nix-shell . --run "
 set -e
 npm i
 npm run build -w ui
@@ -63,6 +66,8 @@ cd /tmp
 hc-scaffold web-app forum-lit --setup-nix true --template lit
 cd forum-lit
 
+nix-shell . --run "
+
 hc-scaffold dna forum 
 hc-scaffold zome posts --integrity dnas/forum/zomes/integrity/ --coordinator dnas/forum/zomes/coordinator/
 hc-scaffold entry-type post --reference-entry-hash false --crud crud --link-from-original-to-each-update true --fields title:String:TextField,content:String:TextArea
@@ -80,7 +85,6 @@ hc-scaffold link-type comment like:EntryHash --bidireccional true
 hc-scaffold link-type certificate:EntryHash like --bidireccional false
 hc-scaffold link-type agent:creator post:EntryHash --bidireccional true
 
-nix-shell . --run "
 set -e
 npm i
 npm run build -w ui
@@ -94,6 +98,9 @@ cd /tmp
 
 hc-scaffold web-app forum-vanilla --setup-nix true --template vanilla
 cd forum-vanilla
+
+nix-shell . --run "
+
 hc-scaffold dna forum 
 hc-scaffold zome posts --integrity dnas/forum/zomes/integrity/ --coordinator dnas/forum/zomes/coordinator/
 hc-scaffold entry-type post --reference-entry-hash false --crud crud --link-from-original-to-each-update true --fields title:String:TextField,content:String:TextArea
@@ -111,7 +118,6 @@ hc-scaffold link-type comment like:EntryHash --bidireccional true
 hc-scaffold link-type certificate:EntryHash like --bidireccional false
 hc-scaffold link-type agent:creator post:EntryHash --bidireccional true
 
-nix-shell . --run "
 set -e
 npm i
 npm t

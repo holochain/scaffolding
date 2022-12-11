@@ -14,18 +14,18 @@ use super::{
 
 #[derive(Serialize)]
 pub struct ScaffoldIntegrityZomeData {
-    pub dna_role_id: String,
+    pub dna_role_name: String,
     pub zome_manifest: ZomeManifest,
 }
 
 pub fn scaffold_integrity_zome_templates(
     mut app_file_tree: FileTree,
     template_file_tree: &FileTree,
-    dna_role_id: &String,
+    dna_role_name: &String,
     zome_manifest: &ZomeManifest,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     let data = ScaffoldIntegrityZomeData {
-        dna_role_id: dna_role_id.clone(),
+        dna_role_name: dna_role_name.clone(),
         zome_manifest: zome_manifest.clone(),
     };
 

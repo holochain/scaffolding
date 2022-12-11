@@ -327,7 +327,7 @@ Web hApp "{}" scaffolded! Notice that this is an empty skeleton for a Holochain 
 
 Then, add new DNAs to your app with:
 
-  hc-scaffold dna
+  hc scaffold dna
 "#,
                         name, maybe_nix
                     );
@@ -377,7 +377,7 @@ DNA "{}" scaffolded!"#,
                         r#"
 Add new zomes to your DNA with:
 
-  hc-scaffold zome
+  hc scaffold zome
 "#,
                     );
                 }
@@ -508,7 +508,7 @@ Add new zomes to your DNA with:
                         r#"
 Add new entry definitions to your zome with:
 
-  hc-scaffold entry-type
+  hc scaffold entry-type
 "#,
                     ),
                 }
@@ -569,7 +569,7 @@ Entry type "{}" scaffolded!"#,
                         r#"
 Add new collections for that entry type with:
 
-  hc-scaffold collection
+  hc scaffold collection
 "#,
                     );
                 }

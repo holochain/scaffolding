@@ -1,0 +1,100 @@
+<script lang="ts">
+import { createEventDispatcher, getContext } from 'svelte';
+import { InstalledCell, AppWebsocket, InstalledAppInfo, Record, EntryHash, AgentPubKey, ActionHash } from '@holochain/client';
+import { appWebsocketContext, appInfoContext } from '../../contexts';
+import { {{pascal_case entry_type.name}} } from './types';
+import '@material/mwc-button';
+import '@material/mwc-snackbar';
+import { Snackbar } from '@material/mwc-snackbar';
+{{#each entry_type.fields}}
+  {{#if widget}}
+{{> (concat field_type "/" widget "/edit/imports") }}
+
+  {{/if}}
+{{/each}}
+
+let appInfo = getContext(appInfoContext).getAppInfo();
+let appWebsocket = getContext(appWebsocketContext).getAppWebsocket();
+
+const dispatch = createEventDispatcher();
+
+{{#each entry_type.fields}}
+  {{#if (not widget) }}
+    {{#if (not (eq cardinality "vector" ) )}}
+export let {{camel_case field_name}}!: {{> (concat field_type "/type") }};
+
+    {{else}}
+export let {{camel_case field_name}}!: {{> (concat field_type "/type") }};
+
+    {{/if}}
+  {{/if}}
+{{/each}}
+
+{{#each entry_type.fields}}
+  {{#if widget }}
+    {{#if (not (eq cardinality "vector" ) )}}
+let {{camel_case field_name}}: {{> (concat field_type "/type")}} | undefined;
+    {{else}}
+let {{camel_case field_name}}: Array<{{> (concat field_type "/type")}} | undefined> = [undefined];
+    {{/if}}
+  {{/if}}
+{{/each}}
+
+let errorSnackbar: Snackbar;
+
+$: {{#each entry_type.fields}}{{camel_case field_name}}{{#unless @last}}, {{/unless}}{{/each}};
+$: is{{pascal_case entry_type.name}}Valid = true{{#each entry_type.fields}}{{#if widget}}{{#if (eq cardinality "single")}} && {{camel_case field_name}} !== undefined{{/if}}{{#if (eq cardinality "vector")}} && {{camel_case field_name}}.every(e => e !== undefined){{/if}}{{/if}}{{/each}};
+
+async function create{{pascal_case entry_type.name}}() {
+  const cellData = appInfo.cell_data.find((c: InstalledCell) => c.role_name === '{{dna_role_name}}')!;
+  
+  const {{camel_case entry_type.name}}: {{pascal_case entry_type.name}} = { 
+  {{#each entry_type.fields}}
+    {{snake_case field_name}}: {{camel_case field_name}}{{#if (eq cardinality "single")}}!{{/if}},
+  {{/each}}
+  };
+  
+  try {
+    const record: Record = await appWebsocket.callZome({
+      cap_secret: null,
+      cell_id: cellData.cell_id,
+      zome_name: '{{coordinator_zome_manifest.name}}',
+      fn_name: 'create_{{snake_case entry_type.name}}',
+      payload: {{camel_case entry_type.name}},
+      provenance: cellData.cell_id[1]
+    });
+    dispatch('{{kebab_case entry_type.name}}-created', { {{camel_case entry_type.name}}Hash: record.signed_action.hashed.hash });
+  } catch (e) {
+    errorSnackbar.labelText = `Error creating the {{lower_case entry_type.name}}: ${e.data.data}`;
+    errorSnackbar.show();
+  }
+}
+
+</script>
+<mwc-snackbar bind:this={errorSnackbar} leading>
+</mwc-snackbar>
+<div style="display: flex; flex-direction: column">
+  <span style="font-size: 18px">Create {{pascal_case entry_type.name}}</span>
+  
+
+{{#each entry_type.fields}}
+  {{#if widget}}
+  <div style="margin-bottom: 16px">
+    {{#if (not (eq cardinality "vector") )}}
+    {{> (concat field_type "/" widget "/edit/render") label=(title_case field_name) variable_to_change=(camel_case field_name) required=(eq cardinality "single") }}
+    {{else}}
+    {{> Vec/edit/render field_name=field_name field_type=field_type widget=widget }}
+    {{/if}}
+          
+  </div>
+            
+  {{/if}}
+{{/each}}
+
+  <mwc-button 
+    raised
+    label="Create {{pascal_case entry_type.name}}"
+    disabled={!is{{pascal_case entry_type.name}}Valid}
+    on:click={() => create{{pascal_case entry_type.name}}()}
+  ></mwc-button>
+</div>

@@ -19,24 +19,24 @@ Until then, you can just install it from crates to get a preview of its function
 
 ```bash
 # Scaffold an empty web-app
-hc-scaffold web-app forum
+hc scaffold web-app forum
 
 cd forum
 
 # Scaffold a dna inside the newly scaffolded app
-hc-scaffold dna forum
+hc scaffold dna forum
 
 # Scaffold a zome inside the newly scaffolded dna
-hc-scaffold zome posts
+hc scaffold zome posts
 
 # Scaffold an entry-type inside the newly scaffolded zome
-hc-scaffold entry-type post
+hc scaffold entry-type post
 
 # Scaffold a collection for the newly scaffolded entry-type
-hc-scaffold collection global all_posts
+hc scaffold collection global all_posts
 
 # Scaffold a new link-type
-hc-scaffold link-type
+hc scaffold link-type
 ```
 
 ## Documentation

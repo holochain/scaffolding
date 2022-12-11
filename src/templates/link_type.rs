@@ -15,7 +15,7 @@ use super::{
 
 #[derive(Serialize)]
 pub struct ScaffoldLinkTypeData {
-    pub dna_role_id: String,
+    pub dna_role_name: String,
     pub coordinator_zome_manifest: ZomeManifest,
     pub from_referenceable: Referenceable,
     pub to_referenceable: Option<Referenceable>,
@@ -24,14 +24,14 @@ pub struct ScaffoldLinkTypeData {
 pub fn scaffold_link_type_templates(
     mut app_file_tree: FileTree,
     template_file_tree: &FileTree,
-    dna_role_id: &String,
+    dna_role_name: &String,
     coordinator_zome_manifest: &ZomeManifest,
     from_referenceable: &Referenceable,
     to_referenceable: &Option<Referenceable>,
     bidireccional: bool,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     let data = ScaffoldLinkTypeData {
-        dna_role_id: dna_role_id.clone(),
+        dna_role_name: dna_role_name.clone(),
         coordinator_zome_manifest: coordinator_zome_manifest.clone(),
         from_referenceable: from_referenceable.clone(),
         to_referenceable: to_referenceable.clone(),
