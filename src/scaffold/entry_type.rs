@@ -165,6 +165,8 @@ pub fn scaffold_entry_type(
         zome_file_tree = add_link_type_to_integrity_zome(
             zome_file_tree,
             &link_type_name(&l, &entry_def.referenceable()),
+            false,
+            &PathBuf::from(format!("{}.rs", entry_def.name.to_case(Case::Snake))),
         )?;
     }
 
@@ -195,8 +197,12 @@ pub fn scaffold_entry_type(
     }?;
 
     if link_from_original_to_each_update {
-        zome_file_tree =
-            add_link_type_to_integrity_zome(zome_file_tree, &updates_link_name(&entry_def.name))?;
+        zome_file_tree = add_link_type_to_integrity_zome(
+            zome_file_tree,
+            &updates_link_name(&entry_def.name),
+            false,
+            &PathBuf::from(format!("{}.rs", entry_def.name.to_case(Case::Snake))),
+        )?;
     }
 
     let zome_file_tree =

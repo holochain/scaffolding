@@ -21,10 +21,10 @@ hc-scaffold collection by-author posts_by_author post
 hc-scaffold collection global all_posts_entry_hash post:EntryHash
 hc-scaffold collection by-author posts_by_author_entry_hash post:EntryHash
 
-hc-scaffold link-type post like --bidireccional false
-hc-scaffold link-type comment like:EntryHash --bidireccional true
-hc-scaffold link-type certificate:EntryHash like --bidireccional false
-hc-scaffold link-type agent:creator post:EntryHash --bidireccional true
+hc-scaffold link-type post like --delete true --bidireccional false
+hc-scaffold link-type comment like:EntryHash --delete true --bidireccional true
+hc-scaffold link-type certificate:EntryHash like --delete false --bidireccional false
+hc-scaffold link-type agent:creator post:EntryHash --delete false --bidireccional true
 
 set -e
 npm i
@@ -50,10 +50,10 @@ hc-scaffold collection by-author posts_by_author post
 hc-scaffold collection global all_posts_entry_hash post:EntryHash
 hc-scaffold collection by-author posts_by_author_entry_hash post:EntryHash
 
-hc-scaffold link-type post like --bidireccional false
-hc-scaffold link-type comment like:EntryHash --bidireccional true
-hc-scaffold link-type certificate:EntryHash like --bidireccional false
-hc-scaffold link-type agent:creator post:EntryHash --bidireccional true
+hc-scaffold link-type post like --delete true --bidireccional false
+hc-scaffold link-type comment like:EntryHash --delete true --bidireccional true
+hc-scaffold link-type certificate:EntryHash like --delete false --bidireccional false
+hc-scaffold link-type agent:creator post:EntryHash --delete false --bidireccional true
 
 set -e
 npm i
@@ -80,10 +80,10 @@ hc-scaffold collection by-author posts_by_author post
 hc-scaffold collection global all_posts_entry_hash post:EntryHash
 hc-scaffold collection by-author posts_by_author_entry_hash post:EntryHash
 
-hc-scaffold link-type post like --bidireccional false
-hc-scaffold link-type comment like:EntryHash --bidireccional true
-hc-scaffold link-type certificate:EntryHash like --bidireccional false
-hc-scaffold link-type agent:creator post:EntryHash --bidireccional true
+hc-scaffold link-type post like --delete true --bidireccional false
+hc-scaffold link-type comment like:EntryHash --delete true --bidireccional true
+hc-scaffold link-type certificate:EntryHash like --delete false --bidireccional false
+hc-scaffold link-type agent:creator post:EntryHash --delete false --bidireccional true
 
 set -e
 npm i
@@ -113,10 +113,10 @@ hc-scaffold collection by-author posts_by_author post
 hc-scaffold collection global all_posts_entry_hash post:EntryHash
 hc-scaffold collection by-author posts_by_author_entry_hash post:EntryHash
 
-hc-scaffold link-type post like --bidireccional false
-hc-scaffold link-type comment like:EntryHash --bidireccional true
-hc-scaffold link-type certificate:EntryHash like --bidireccional false
-hc-scaffold link-type agent:creator post:EntryHash --bidireccional true
+hc-scaffold link-type post like --delete true --bidireccional false
+hc-scaffold link-type comment like:EntryHash --delete true --bidireccional true
+hc-scaffold link-type certificate:EntryHash like --delete false --bidireccional false
+hc-scaffold link-type agent:creator post:EntryHash --delete false --bidireccional true
 
 set -e
 npm i

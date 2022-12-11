@@ -1,9 +1,11 @@
+use std::path::PathBuf;
+
 use convert_case::{Case, Casing};
 use dialoguer::{theme::ColorfulTheme, Confirm, Select};
 
 use crate::{
     error::{ScaffoldError, ScaffoldResult},
-    file_tree::FileTree,
+    file_tree::{insert_file, map_file, FileTree},
     templates::{link_type::scaffold_link_type_templates, ScaffoldedTemplate},
     utils::input_snake_case,
 };
@@ -13,6 +15,7 @@ use self::{
 };
 
 use super::{
+    dna::DnaFileTree,
     entry_type::{
         definitions::{Cardinality, Referenceable},
         utils::{get_or_choose_optional_reference_type, get_or_choose_referenceable},
@@ -49,8 +52,12 @@ pub fn scaffold_link_type(
     template_file_tree: &FileTree,
     from_referenceable: &Option<Referenceable>,
     to_referenceable: &Option<Referenceable>,
+    delete: &Option<bool>,
     bidireccional: &Option<bool>,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
+    let dna_manifest_path = zome_file_tree.dna_file_tree.dna_manifest_path.clone();
+    let zome_manifest = zome_file_tree.zome_manifest.clone();
+
     let from_referenceable = get_or_choose_referenceable(
         &zome_file_tree,
         from_referenceable,
@@ -75,14 +82,59 @@ pub fn scaffold_link_type(
             .with_prompt("Should the link be bidireccional?")
             .interact()?,
     };
+    let delete = match delete {
+        Some(d) => d.clone(),
+        None => Confirm::with_theme(&ColorfulTheme::default())
+            .with_prompt("Can the link be deleted?")
+            .interact()?,
+    };
 
-    let mut zome_file_tree = add_link_type_to_integrity_zome(zome_file_tree, &link_type)?;
+    // 1. Create an LINK_TYPE_NAME.rs in "src/", with the link type validation
+    let crate_src_path = zome_file_tree.zome_crate_path.join("src");
+
+    let link_type_file_name = PathBuf::from(format!("{}.rs", link_type.to_case(Case::Snake)));
+
+    let mut file_tree = zome_file_tree.dna_file_tree.file_tree();
+
+    insert_file(
+        &mut file_tree,
+        &crate_src_path.join(&link_type_file_name),
+        &format!(
+            "use hdi::prelude::*;
+
+"
+        ),
+    )?;
+
+    // 2. Add this file as a module in the entry point for the crate
+
+    let lib_rs_path = crate_src_path.join("lib.rs");
+
+    map_file(&mut file_tree, &lib_rs_path, |s| {
+        format!(
+            r#"pub mod {};
+pub use {}::*;
+
+{}"#,
+            link_type.to_case(Case::Snake),
+            link_type.to_case(Case::Snake),
+            s
+        )
+    })?;
+
+    let dna_file_tree = DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
+    let zome_file_tree = ZomeFileTree::from_zome_manifest(dna_file_tree, zome_manifest)?;
+
+    let mut zome_file_tree =
+        add_link_type_to_integrity_zome(zome_file_tree, &link_type, delete, &link_type_file_name)?;
 
     if bidireccional {
         if let Some(to) = &to_referenceable {
             zome_file_tree = add_link_type_to_integrity_zome(
                 zome_file_tree,
                 &link_type_name(&to, &from_referenceable),
+                delete,
+                &link_type_file_name,
             )?;
         }
     }
@@ -128,6 +180,7 @@ pub fn scaffold_link_type(
         &link_type,
         &from_referenceable,
         &to_referenceable,
+        delete,
         bidireccional,
     )?;
 

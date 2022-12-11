@@ -7,8 +7,8 @@ use crate::{
     error::ScaffoldResult,
     file_tree::{file_content, FileTree},
     scaffold::{
-        entry_type::definitions::{EntryTypeReference, Referenceable},
         collection::CollectionType,
+        entry_type::definitions::{EntryTypeReference, Referenceable},
     },
 };
 

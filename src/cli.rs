@@ -159,8 +159,12 @@ pub enum HcScaffold {
         to_referenceable: Option<Referenceable>,
 
         #[structopt(long)]
-        /// Whether to create the inverse link, from the "--to-referenceable" entry type to the "--fromreferenceable" entry type
+        /// Whether to create the inverse link, from the "--to-referenceable" entry type to the "--from-referenceable" entry type
         bidireccional: Option<bool>,
+
+        #[structopt(long)]
+        /// Whether this link type can be deleted
+        delete: Option<bool>,
 
         #[structopt(short, long)]
         /// The template to scaffold the dna from
@@ -309,10 +313,8 @@ impl HcScaffold {
 
                 println!(
                     r#"
-Web hApp "{}" scaffolded! Notice that this is an empty skeleton for a Holochain web-app, so:
-
-- It won't compile until you add a DNA to it, and then a zome to that DNA.
-- The UI is empty, you'll need to import the appropriate components to the top level app component."#,
+Web hApp "{}" scaffolded!
+"#,
                     name
                 );
 
@@ -320,7 +322,13 @@ Web hApp "{}" scaffolded! Notice that this is an empty skeleton for a Holochain 
                     println!("{}", i);
                 } else {
                     println!(
-                        r#"Set up your development environment with:
+                        r#"
+Notice that this is an empty skeleton for a Holochain web-app, so:
+
+- It won't compile until you add a DNA to it, and then add a zome to that DNA.
+- The UI is empty, you'll need to import the appropriate components to the top level app component.
+
+Set up your development environment with:
 
   cd {}{}
   npm install
@@ -579,6 +587,7 @@ Add new collections for that entry type with:
                 zome,
                 from_referenceable,
                 to_referenceable,
+                delete,
                 bidireccional,
                 template,
             } => {
@@ -598,6 +607,7 @@ Add new collections for that entry type with:
                     &template_file_tree,
                     &from_referenceable,
                     &to_referenceable,
+                    &delete,
                     &bidireccional,
                 )?;
 

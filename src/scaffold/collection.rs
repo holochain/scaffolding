@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{path::PathBuf, str::FromStr};
 
 use convert_case::{Case, Casing};
 use dialoguer::{theme::ColorfulTheme, Select};
@@ -102,8 +102,12 @@ pub fn scaffold_collection(
 
     let link_type_name = collection_name.to_case(Case::Pascal);
 
-    let zome_file_tree =
-        add_link_type_to_integrity_zome(integrity_zome_file_tree, &link_type_name)?;
+    let zome_file_tree = add_link_type_to_integrity_zome(
+        integrity_zome_file_tree,
+        &link_type_name,
+        false,
+        &PathBuf::from(format!("{}.rs", entry_type.entry_type.to_case(Case::Snake))),
+    )?;
 
     let (dna_file_tree, coordinator_zome) = add_collection_to_coordinators(
         zome_file_tree,

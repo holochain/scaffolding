@@ -1,16 +1,22 @@
 use std::{ffi::OsString, path::PathBuf};
 
 use convert_case::{Case, Casing};
+use proc_macro2::TokenStream;
+use quote::{format_ident, quote};
 
 use crate::{
     error::{ScaffoldError, ScaffoldResult},
     file_tree::{find_map_rust_files, map_rust_files},
-    scaffold::{dna::DnaFileTree, zome::ZomeFileTree},
+    scaffold::{
+        dna::DnaFileTree, entry_type::integrity::find_ending_match_expr, zome::ZomeFileTree,
+    },
 };
 
 pub fn add_link_type_to_integrity_zome(
     zome_file_tree: ZomeFileTree,
     link_type_name: &String,
+    delete: bool,
+    file_to_add_validation_to: &PathBuf,
 ) -> ScaffoldResult<ZomeFileTree> {
     let crate_src_path = zome_file_tree.zome_crate_path.join("src");
 
@@ -54,6 +60,7 @@ pub fn add_link_type_to_integrity_zome(
         .iter()
         .map(|s| s.to_os_string())
         .collect();
+
     // Find the #[hdk_link_types] macro and add the new link type to it
     map_rust_files(
         file_tree
@@ -67,12 +74,41 @@ pub fn add_link_type_to_integrity_zome(
                       pub enum LinkTypes {}
                         ",
                 )?);
+                for item in &mut file.items {
+                    if let syn::Item::Fn(item_fn) = item {
+                        if item_fn.sig.ident.to_string().eq(&String::from("validate")) {
+                            for stmt in &mut item_fn.block.stmts {
+                                if let syn::Stmt::Expr(syn::Expr::Match(match_expr)) = stmt {
+                                    if let syn::Expr::Try(try_expr) = &mut *match_expr.expr {
+                                        if let syn::Expr::MethodCall(call) = &mut *try_expr.expr {
+                                            if call.method.to_string().eq(&String::from("to_type"))
+                                            {
+                                                if let Some(turbofish) = &mut call.turbofish {
+                                                    if let Some(last_arg) =
+                                                        turbofish.args.last_mut()
+                                                    {
+                                                        *last_arg =
+                                                            syn::GenericMethodArgument::Type(
+                                                                syn::parse_str::<syn::Type>(
+                                                                    "LinkTypes",
+                                                                )?,
+                                                            );
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
 
             file.items =
                 file.items
                     .into_iter()
-                    .map(|i| {
+                    .map(|mut i| {
                         if let syn::Item::Enum(mut item_enum) = i.clone() {
                             if item_enum.attrs.iter().any(|a| {
                                 a.path.segments.iter().any(|s| s.ident.eq("hdk_link_types"))
@@ -96,10 +132,127 @@ pub fn add_link_type_to_integrity_zome(
                                 return Ok(syn::Item::Enum(item_enum));
                             }
                         }
+            
+        if let syn::Item::Fn(item_fn) = &mut i {
+                        if item_fn.sig.ident.to_string().eq(&String::from("validate")) {
+                            for stmt in &mut item_fn.block.stmts {
+                                if let syn::Stmt::Expr(syn::Expr::Match(match_expr)) = stmt {
+                                    if let syn::Expr::Try(try_expr) = &mut *match_expr.expr {
+                                        if let syn::Expr::MethodCall(call) = &mut *try_expr.expr {
+                                            if call.method.to_string().eq(&String::from("to_type"))
+                                            {
+                                                for arm in &mut match_expr.arms {
+                                                    if let syn::Pat::Struct(pat_struct) =
+                                                        &mut arm.pat
+                                                    {
+                                                        if let Some(path_segment) =
+                                                            pat_struct.path.segments.last()
+                                                        {
+                                                            let path_segment_str = path_segment
+                                                                .ident
+                                                                .to_string();
+                                                                
+                                                            if path_segment_str.eq(&String::from("RegisterCreateLink"))
+                                                            {
+                                                                                    // Add new link type to match arm
+                                                                                    if let Some(_) = find_ending_match_expr( &mut *arm.body) {} else {
+                                                                                        // Change empty invalid to match on link_type
+                                                                                        *arm.body = syn::parse_str::<syn::Expr>("match link_type {}")?;
+                                                                                    }
+                                                                                    
+                                                                                    
+                                                                                    // Add new link type to match arm
+                                                                                    if let Some(link_type_match) = find_ending_match_expr(&mut *arm.body) { 
+                                                                                        let new_arm: syn::Arm = syn::parse_str(
+                                                                                            format!("LinkTypes::{} => validate_create_link_{}(base_address, target_address),", 
+                                                                                               link_type_name.to_case(Case::Pascal),
+                                                                                             link_type_name.to_case(Case::Snake)
+                                                                                            ).as_str()
+                                                                                        )?;
+                                                                                        link_type_match.arms.push(new_arm);
+                                                                }
+                    } else if path_segment_str.eq(&String::from("RegisterDeleteLink"))
+                                                            {
+                                                                                    // Add new link type to match arm
+                                                                                    if let Some(_) = find_ending_match_expr( &mut *arm.body) {} else {
+                                                                                        // Change empty invalid to match on link_type
+                                                                                        *arm.body = syn::parse_str::<syn::Expr>("match link_type {}")?;
+                                                                                    }
+                                                                                    
+                                                                                    
+                                                                                    // Add new link type to match arm
+                                                                                    if let Some(link_type_match) = find_ending_match_expr(&mut *arm.body) { 
+                                                                                        let new_arm: syn::Arm = syn::parse_str(
+                                                                                            format!("LinkTypes::{} => validate_delete_link_{}(base_address, target_address),", 
+                                                                                               link_type_name.to_case(Case::Pascal),
+                                                                                             link_type_name.to_case(Case::Snake)
+                                                                                            ).as_str()
+                                                                                        )?;
+                                                                                        link_type_match.arms.push(new_arm);
+                                                                }
+                    }
+}}}}}}}}}                    }
+            
 
                         Ok(i)
                     })
                     .collect::<ScaffoldResult<Vec<syn::Item>>>()?;
+
+            Ok(file)
+        },
+    )
+    .map_err(|e| match e {
+        ScaffoldError::MalformedFile(path, error) => {
+            ScaffoldError::MalformedFile(crate_src_path.join(&path), error)
+        }
+        _ => e,
+    })?;
+
+    // Add validation function to appropriate file
+    map_rust_files(
+        file_tree
+            .path_mut(&mut v.iter())
+            .ok_or(ScaffoldError::PathNotFound(crate_src_path.clone()))?,
+        |file_path, mut file| {
+    
+            if file_path.eq(file_to_add_validation_to) {
+    
+    let validate_create_fn =
+        format_ident!("validate_create_link_{}", link_type_name.to_case(Case::Snake));
+
+    let validate_delete_fn =
+        format_ident!("validate_delete_link_{}", link_type_name.to_case(Case::Snake));
+
+    let deleted_invalid_reason = format!("{} links cannot be deleted", link_type_name.to_case(Case::Pascal));
+
+    let validate_delete_result: TokenStream = match delete {
+        true => quote! {
+            // TODO: add the appropriate validation rules
+            Ok(ValidateCallbackResult::Valid)
+        },
+        false => quote! {
+            Ok(ValidateCallbackResult::Invalid(String::from(#deleted_invalid_reason)))
+        },
+    };
+
+    let create_token_stream = quote! {
+      pub fn #validate_create_fn(base: AnyLinkableHash, target: AnyLinkableHash) -> ExternResult<ValidateCallbackResult> {
+          // TODO: add the appropriate validation rules
+          Ok(ValidateCallbackResult::Valid)
+      }
+    };
+
+    let delete_token_stream = quote! {
+      pub fn #validate_delete_fn(base: AnyLinkableHash, target: AnyLinkableHash) -> ExternResult<ValidateCallbackResult> {
+          #validate_delete_result
+      }
+    };
+
+    let item: syn::Item = syn::parse_str(create_token_stream.to_string().as_str())?;
+                file.items.push(item);
+    let item: syn::Item = syn::parse_str(delete_token_stream.to_string().as_str())?;
+                file.items.push(item);
+            }
 
             Ok(file)
         },

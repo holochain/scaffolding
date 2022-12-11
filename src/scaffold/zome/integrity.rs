@@ -20,8 +20,7 @@ serde = {{ workspace = true }}
 
 pub fn initial_lib_rs() -> String {
     format!(
-        r#"#[allow(unused_variables)]
-use hdi::prelude::*;
+        r#"use hdi::prelude::*;
 
 #[hdk_extern]
 pub fn genesis_self_check(data: GenesisSelfCheckData) -> ExternResult<ValidateCallbackResult> {{
@@ -90,23 +89,16 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {{
             }} => Ok(ValidateCallbackResult::Invalid(
                 "There are no entry types in this integrity zome yet".to_string(),
             )),
-            OpDelete::PrivateEntry {{
-                original_action_hash,
-                original_entry_hash,
-                original_entry_type,
-            }} => todo!(),
+            OpDelete::PrivateEntry {{ .. }} => Ok(ValidateCallbackResult::Valid),
             OpDelete::Agent {{
                 original_key,
                 original_action_hash,
             }} => todo!(),
-            OpDelete::CapClaim {{
-                original_action_hash,
-                original_entry_hash,
-            }} => todo!(),
+            OpDelete::CapClaim {{ .. }} => Ok(ValidateCallbackResult::Valid),
             OpDelete::CapGrant {{
                 original_action_hash,
                 original_entry_hash,
-            }} => todo!(),
+            }} => Ok(ValidateCallbackResult::Valid),
         }},
         OpType::RegisterCreateLink {{
             link_type,
