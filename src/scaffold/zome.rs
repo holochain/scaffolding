@@ -360,21 +360,21 @@ pub fn scaffold_integrity_zome_with_path(
         Some(f) => f.to_string(),
         None => zome_name.clone(),
     };
-
+    println!("A");
     let mut file_tree =
         add_workspace_path_dependency(file_tree, zome_name, &path.join(&folder_name))?;
 
     // Add zome to workspace Cargo.toml
-
+    println!("B");
     let zome: FileTree = dir! {
         "Cargo.toml" => file!(integrity::initial_cargo_toml(zome_name)),
         "src" => dir! {
             "lib.rs" => file!(integrity::initial_lib_rs())
         }
     };
-
+    println!("C");
     insert_file_tree_in_dir(&mut file_tree, path, (OsString::from(folder_name), zome))?;
-
+    println!("D");
     let dna_file_tree = DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
 
     let zome_manifest = new_integrity_zome_manifest(&dna_file_tree, &zome_name)?;

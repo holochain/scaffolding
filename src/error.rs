@@ -129,6 +129,9 @@ pub enum ScaffoldError {
     #[error("Invalid collection type: \"{0}\". Allowed collection types: \"{1}\"")]
     InvalidCollectionType(String, String),
 
+    #[error("Invalid example type: \"{0}\". Allowed example types: \"{1}\"")]
+    InvalidExampleType(String, String),
+
     #[error("No entry type definitions (#[hdk_entry_defs]) were found in dna \"{0}\" for the integrity zome \"{1}\"")]
     NoEntryTypesDefFoundForIntegrityZome(String, String),
 
