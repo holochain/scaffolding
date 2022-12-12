@@ -702,6 +702,9 @@ Collection "{}" scaffolded!
                 let name = example.to_string();
 
                 let app_dir = std::env::current_dir()?.join(&name);
+                if app_dir.as_path().exists() {
+                    return Err(ScaffoldError::FolderAlreadyExists(app_dir.clone()))?;
+                }
 
                 let ui_framework = match example {
                     Example::HelloWorld => UiFramework::Vanilla,
