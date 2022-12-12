@@ -1,21 +1,24 @@
 use crate::error::{ScaffoldError, ScaffoldResult};
 use crate::file_tree::{dir_content, file_content, load_directory_into_memory, FileTree};
 use crate::scaffold::app::cargo::exec_metadata;
-use crate::scaffold::app::AppFileTree;
+use crate::scaffold::app::{AppFileTree, self};
 use crate::scaffold::dna::{scaffold_dna, DnaFileTree};
 use crate::scaffold::entry_type::crud::{parse_crud, Crud};
 use crate::scaffold::entry_type::definitions::{
     parse_entry_type_reference, parse_referenceable, EntryTypeReference, FieldDefinition,
     Referenceable,
 };
-use crate::scaffold::entry_type::{fields::parse_fields, scaffold_entry_type};
+
+
 use crate::scaffold::collection::{scaffold_collection, CollectionType};
+use crate::scaffold::entry_type::{fields::parse_fields, scaffold_entry_type};
+use crate::scaffold::example::{ExampleType};
 use crate::scaffold::link_type::scaffold_link_type;
 use crate::scaffold::web_app::scaffold_web_app;
 use crate::scaffold::web_app::uis::{choose_ui_framework, template_for_ui_framework, UiFramework};
 use crate::scaffold::zome::utils::select_integrity_zomes;
 use crate::scaffold::zome::{
-    integrity_zome_name, scaffold_coordinator_zome, scaffold_integrity_zome, ZomeFileTree,
+    integrity_zome_name, scaffold_coordinator_zome, scaffold_integrity_zome, ZomeFileTree, scaffold_integrity_zome_with_path,
 };
 use crate::templates::get::get_template;
 use crate::templates::{
@@ -192,6 +195,15 @@ pub enum HcScaffold {
         /// The template must be located at the ".templates/<TEMPLATE NAME>" folder of the repository
         template: Option<String>,
     },
+
+    Example {
+        /// Name of the example to scaffold. One of ['hello-world', 'forum'].
+        example: ExampleType,
+
+        #[structopt(long)]
+        /// Name of the app to scaffold
+        name: Option<String>,
+    }
 }
 
 impl HcScaffold {
@@ -662,6 +674,135 @@ Collection "{}" scaffolded!
                     println!("{}", i);
                 }
             }
+            HcScaffold::Example {
+                example,
+                name,
+            } => {
+                println!("You chose example '{:?}'", example);
+
+
+                let prompt = String::from("Choose Project folder name (no whitespaces):");
+                let name: String = match name {
+                    Some(n) => {
+                        check_no_whitespace(&n, "app name")?;
+                        n
+                    }
+                    None => input_no_whitespace(&prompt)?,
+                };
+
+                // Match on example types
+                match example {
+                    ExampleType::HelloWorld => {
+
+
+                        // Choose UI framework
+                        let ui_framework = choose_ui_framework()?;
+                        let template_file_tree = template_for_ui_framework(&ui_framework)?;
+                        let template_name = format!("{:?}", ui_framework);
+
+                        // scaffold web-app
+                        println!("Running: `hc scaffold web-app {}` ...", name);
+                        let ScaffoldedTemplate {
+                            file_tree,
+                            next_instructions,
+                        } = scaffold_web_app(
+                            name.clone(),
+                            Some(String::from("A simple 'hello world' application.")),
+                            false,
+                            template_file_tree,
+                            template_name.clone(),
+                            false,
+                        )?;
+
+                        let file_tree = MergeableFileSystemTree::<OsString, String>::from(file_tree);
+                        file_tree.build(&".".into())?;
+
+
+                        // set up nix
+                        println!("Setting up nix-shell...");
+                        if cfg!(target_os = "windows") {
+                            return Err(anyhow::anyhow!("Windows doesn't support nix"));
+                        } else {
+                            let output = Command::new("nix-shell")
+                            .stdout(Stdio::inherit())
+                            .current_dir(std::env::current_dir()?.join(&name))
+                            .args(["-I", "nixpkgs=https://github.com/NixOS/nixpkgs/archive/nixos-21.11.tar.gz", "-p", "niv", "--run", "niv init && niv drop nixpkgs && niv drop niv && niv add -b main holochain/holonix"])
+                            .output()?;
+
+                            if !output.status.success() {
+                                return Err(ScaffoldError::NixSetupError)?;
+                            }
+                        };
+
+
+                        // switch into the project directory
+                        let app_dir = std::env::current_dir()?.join(&name);
+
+                        // scaffold dna hello_world
+                        println!("Running: `hc scaffold dna hello` ...");
+                        let dna_name = String::from("hello");
+                        let file_tree = load_directory_into_memory(&app_dir)?;
+                        let template_file_tree = choose_or_get_template_file_tree(&file_tree, &Some(template_name.clone()))?;
+
+                        let app_file_tree = AppFileTree::get_or_choose(file_tree, &Some(name.clone()))?;
+
+                        let ScaffoldedTemplate {
+                            file_tree,
+                            next_instructions,
+                        } = scaffold_dna(app_file_tree, &template_file_tree, &dna_name)?;
+
+                        let file_tree = MergeableFileSystemTree::<OsString, String>::from(file_tree);
+                        file_tree.build(&app_dir)?;
+
+
+                        // scaffold integrity zome hello_world
+                        println!("Running: `hc scaffold zome --integrity ./dnas/hello/zomes/integrity`");
+
+                        let file_tree = load_directory_into_memory(&app_dir)?;
+                        println!("1");
+                        let template_file_tree = choose_or_get_template_file_tree(&file_tree, &Some(template_name))?;
+                        println!("2");
+                        let mut dna_file_tree = DnaFileTree::get_or_choose(file_tree, &Some(dna_name.clone()))?;
+                        let dna_manifest_path = dna_file_tree.dna_manifest_path.clone();
+                        println!("3");
+                        let integrity_zome_name = String::from("world");
+                        println!("4");
+                        let integrity_zome_path = app_dir.join("dnas").join(dna_name).join("zomes").join("integrity");
+                        println!("5");
+                        let ScaffoldedTemplate {
+                            file_tree,
+                            next_instructions,
+                        } = scaffold_integrity_zome_with_path(
+                            dna_file_tree,
+                            &template_file_tree,
+                            &integrity_zome_name,
+                            &integrity_zome_path,
+                        )?;
+
+                        dna_file_tree =
+                            DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
+
+                        let file_tree =
+                        MergeableFileSystemTree::<OsString, String>::from(dna_file_tree.file_tree());
+
+                        let f = file_tree.clone();
+
+                        file_tree.build(&app_dir)?;
+
+                        // Execute cargo metadata to set up the cargo workspace in case this zome is the first crate
+                        exec_metadata(&f)?;
+
+
+
+                        // add function "pub fn greet"
+
+                        // add component into <div id="content"></div>
+                    },
+                    ExampleType::Forum => {
+                        println!("Not implemented yet.")
+                    }
+                }
+            }
         }
 
         Ok(())
@@ -830,3 +971,6 @@ impl HcScaffoldTemplate {
         }
     }
 }
+
+
+
