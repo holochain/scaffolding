@@ -15,7 +15,7 @@ use super::{
 
 #[derive(Serialize, Debug)]
 pub struct ScaffoldEntryTypeData {
-    pub dna_role_id: String,
+    pub dna_role_name: String,
     pub coordinator_zome_manifest: ZomeManifest,
     pub entry_type: EntryDefinition,
     pub crud: Crud,
@@ -24,14 +24,14 @@ pub struct ScaffoldEntryTypeData {
 pub fn scaffold_entry_type_templates(
     mut app_file_tree: FileTree,
     template_file_tree: &FileTree,
-    dna_role_id: &String,
+    dna_role_name: &String,
     coordinator_zome: &ZomeManifest,
     entry_type: &EntryDefinition,
     crud: &Crud,
     link_from_original_to_each_update: bool,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     let data = ScaffoldEntryTypeData {
-        dna_role_id: dna_role_id.clone(),
+        dna_role_name: dna_role_name.clone(),
         coordinator_zome_manifest: coordinator_zome.clone(),
         entry_type: entry_type.clone(),
         crud: crud.clone(),

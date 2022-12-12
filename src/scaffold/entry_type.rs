@@ -105,19 +105,21 @@ pub fn scaffold_entry_type(
     let reference_entry_hash = match maybe_reference_entry_hash {
         Some(r) => r.clone(),
         None => {
-            let selection = Select::with_theme(&ColorfulTheme::default())
-                .with_prompt(String::from(
-                    "Choose hash type to refererence this entry type:",
-                ))
-                .default(0)
-                .item("ActionHash (recommended)")
-                .item("EntryHash")
-                .interact()?;
+            // TODO: understand if this question is necessary, or if we can assume ActionHash
+            // let selection = Select::with_theme(&ColorfulTheme::default())
+            //     .with_prompt(String::from(
+            //         "Choose hash type to refererence this entry type:",
+            //     ))
+            //     .default(0)
+            //     .item("ActionHash (recommended)")
+            //     .item("EntryHash")
+            //     .interact()?;
 
-            match selection {
-                0 => false,
-                _ => true,
-            }
+            // match selection {
+            //     0 => false,
+            //     _ => true,
+            // }
+            false
         }
     };
 
@@ -151,7 +153,7 @@ pub fn scaffold_entry_type(
 
     let integrity_zome_name = zome_file_tree.zome_manifest.name.0.to_string();
 
-    let mut zome_file_tree = add_entry_type_to_integrity_zome(zome_file_tree, &entry_def)?;
+    let mut zome_file_tree = add_entry_type_to_integrity_zome(zome_file_tree, &entry_def, &crud)?;
 
     let linked_from: Vec<Referenceable> = entry_def
         .fields
@@ -163,6 +165,8 @@ pub fn scaffold_entry_type(
         zome_file_tree = add_link_type_to_integrity_zome(
             zome_file_tree,
             &link_type_name(&l, &entry_def.referenceable()),
+            false,
+            &PathBuf::from(format!("{}.rs", entry_def.name.to_case(Case::Snake))),
         )?;
     }
 
@@ -193,8 +197,12 @@ pub fn scaffold_entry_type(
     }?;
 
     if link_from_original_to_each_update {
-        zome_file_tree =
-            add_link_type_to_integrity_zome(zome_file_tree, &updates_link_name(&entry_def.name))?;
+        zome_file_tree = add_link_type_to_integrity_zome(
+            zome_file_tree,
+            &updates_link_name(&entry_def.name),
+            false,
+            &PathBuf::from(format!("{}.rs", entry_def.name.to_case(Case::Snake))),
+        )?;
     }
 
     let zome_file_tree =

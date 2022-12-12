@@ -120,7 +120,7 @@ fn add_create_link_in_create_function(
             entry_type_reference.entry_type.to_case(Case::Snake)
         ),
         &format!(
-            "At the end of which function should the {} entries be collectioned?",
+            "At the end of which function should the {} entries be collected?",
             entry_type_reference.entry_type.to_case(Case::Pascal)
         ),
     )?;
@@ -271,12 +271,18 @@ pub fn add_collection_to_coordinators(
     let snake_link_type_name = collection_name.to_case(Case::Snake);
 
     let getter = match collection_type {
-        CollectionType::Global => {
-            global_collection_getter(&integrity_zome_name, collection_name, link_type_name, entry_type)
-        }
-        CollectionType::ByAuthor => {
-            by_author_collection_getter(&integrity_zome_name, collection_name, link_type_name, entry_type)
-        }
+        CollectionType::Global => global_collection_getter(
+            &integrity_zome_name,
+            collection_name,
+            link_type_name,
+            entry_type,
+        ),
+        CollectionType::ByAuthor => by_author_collection_getter(
+            &integrity_zome_name,
+            collection_name,
+            link_type_name,
+            entry_type,
+        ),
     };
 
     let mut file_tree = zome_file_tree.dna_file_tree.file_tree();

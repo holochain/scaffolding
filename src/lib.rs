@@ -4,27 +4,27 @@
 //!
 //! ```bash
 //! // Scaffold an empty web-app, using a built-in template
-//! hc-scaffold web-app forum
+//! hc scaffold web-app forum
 //!
 //! cd forum
 //!
 //! // Scaffold a dna inside the newly scaffolded app
-//! hc-scaffold dna forum
+//! hc scaffold dna forum
 //!
 //! // Scaffold a zome inside the newly scaffolded dna
-//! hc-scaffold zome posts
+//! hc scaffold zome posts
 //!
 //! // Scaffold an entry-type inside the newly scaffolded zome
-//! hc-scaffold entry-type post
+//! hc scaffold entry-type post
 //!
 //! // Scaffold a collection for the newly scaffolded entry-type
-//! hc-scaffold collection global all_posts
+//! hc scaffold collection global all_posts
 //!
 //! // Scaffold a new link-type
-//! hc-scaffold link-type
+//! hc scaffold link-type
 //!
 //! // Will show all the commands that are available
-//! hc-scaffold --help
+//! hc scaffold --help
 //! ```
 //!
 //! # Custom Templates
@@ -46,11 +46,11 @@
 //!
 //! If you know of some already existing template that you want to use, simply scaffold a new web-app pointing to its git repository with:
 //!
-//! `hc-scaffold web-app forum --templates-url https://github.com/holochain-open-dev/templates`
+//! `hc scaffold web-app forum --templates-url https://github.com/holochain-open-dev/templates`
 //!
 //! If instead, you want to use that template within an already existing repository, you can use this command instead:
 //!
-//! `hc-scaffold template get https://github.com/holochain-open-dev/templates`
+//! `hc scaffold template get https://github.com/holochain-open-dev/templates`
 //!
 //! Both of the previous commands will create a `.templates` folder in the root folder of your repository, with a copy of the template.
 //!
@@ -58,7 +58,7 @@
 //!
 //! If later on the template adds some new features and you want to include them in your repository, you can just run this command again:
 //!
-//! `hc-scaffold template get https://github.com/holochain-open-dev/templates`
+//! `hc scaffold template get https://github.com/holochain-open-dev/templates`
 //!
 //! And select "Merge with existing template", to overwrite the old one.
 //!
@@ -70,7 +70,7 @@
 //!
 //! To create a custom template, run this command and select the built-in template that you want to go from, and also give a name to your template.
 //!
-//! `hc-scaffold template init`
+//! `hc scaffold template init`
 //!
 //! At this point, you'll have a `.templates/<TEMPLATE NAME>` folder. That's where your custom template lives.
 //!
@@ -89,15 +89,15 @@
 //!
 //! Each folder corresponds to the templates that are going to be created when running a specific command. This is the steps that are executed:
 //!
-//! 1. The user executes a scaffolding command, like `hc-scaffold web-app`.
+//! 1. The user executes a scaffolding command, like `hc scaffold web-app`.
 //! 2. The scaffolding tool asks the user to input all the necessary information.
 //! 3. The apropriate **backend** and **testing** code is created automatically, the custom template can't influence it.
 //! 4. The scaffolding tool looks for a custom template in the `.templates` folder.
 //! 5. If there is one, it will look for a folder inside that custom template that corresponds to the command being run.
-//!   - Eg. `hc-scaffold web-app` will look for a folder named `web-app`.
+//!   - Eg. `hc scaffold web-app` will look for a folder named `web-app`.
 //! 6. If there is one, it will copy the directory structure inside that folder and select the files with the `.hbs` extension.
 //! 7. It will render the contents of each of the files using as context the appropriate data from the command.
-//!   - Eg. in `hc-scaffold web-app`, one of the fields of the context is `app_name`, which is the name of the app that the user input.
+//!   - Eg. in `hc scaffold web-app`, one of the fields of the context is `app_name`, which is the name of the app that the user input.
 //! 8. Lastly, it will merge the resulting directory structure with the existing repository structure. If a file already existed, it will overwrite its contents.
 //!
 //! You can take a look at [Writing templates](#writing-templates) to learn how to write your own templates.
@@ -182,7 +182,7 @@
 //!
 //! This is a great way to guide the users of your template towards next steps that they need to take while using your template.
 //!
-//! So for example, if there is a `coordinator-zome.instructions.hbs` file in the root folder of your template and the user runs `hc-scaffold zome posts --coordinator dnas/forum/zomes/coordinator`, then the scaffolding tool will render its contents and display them to the user when it has finished creating the zome.
+//! So for example, if there is a `coordinator-zome.instructions.hbs` file in the root folder of your template and the user runs `hc scaffold zome posts --coordinator dnas/forum/zomes/coordinator`, then the scaffolding tool will render its contents and display them to the user when it has finished creating the zome.
 //!
 //! ### Writing templates
 //!

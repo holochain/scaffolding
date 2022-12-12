@@ -1,0 +1,61 @@
+import { LitElement, html } from 'lit';
+import { state, customElement, property } from 'lit/decorators.js';
+import { InstalledCell, AgentPubKey, EntryHash, ActionHash, Record, AppWebsocket, InstalledAppInfo } from '@holochain/client';
+import { consume } from '@lit-labs/context';
+import { Task } from '@lit-labs/task';
+import { appWebsocketContext, appInfoContext } from '../../contexts';
+import '@material/mwc-circular-progress';
+
+import './{{kebab_case referenceable.name}}-detail';
+
+@customElement('{{kebab_case collection_name}}')
+export class {{pascal_case collection_name}} extends LitElement {
+  {{#if (eq collection_type.type "ByAuthor")}}
+
+  @property({
+    hasChanged: (newVal: AgentPubKey, oldVal: AgentPubKey) => newVal?.toString() !== oldVal?.toString()
+  })
+  author!: AgentPubKey;
+  {{/if}}
+  
+  _fetch{{pascal_case (plural referenceable.name)}} = new Task(this, ([{{#if (eq collection_type.type "ByAuthor")}}author{{/if}}]) => this.appWebsocket.callZome({
+      cap_secret: null,
+      cell_id: this.cellData.cell_id,
+      zome_name: '{{coordinator_zome_manifest.name}}',
+      fn_name: 'get_{{snake_case collection_name}}',
+      payload: {{#if (eq collection_type.type "ByAuthor")}}author{{else}}null{{/if}},
+      provenance: this.cellData.cell_id[1]
+  }) as Promise<Array<{{referenceable.hash_type}}>>, () => [{{#if (eq collection_type.type "ByAuthor")}}this.author{{/if}}]);
+
+  @consume({ context: appWebsocketContext })
+  appWebsocket!: AppWebsocket;
+
+  @consume({ context: appInfoContext })
+  appInfo!: InstalledAppInfo;
+  
+  get cellData() {
+    return this.appInfo.cell_data.find((c: InstalledCell) => c.role_name === '{{dna_role_name}}')!;
+  }
+
+  renderList(hashes: Array<{{referenceable.hash_type}}>) {
+    if (hashes.length === 0) return html`<span>No {{lower_case (plural referenceable.name)}} found{{#if (eq collection_type.type "ByAuthor")}} for this author{{/if}}.</span>`;
+    
+    return html`
+      <div style="display: flex; flex-direction: column">
+        ${hashes.map(hash => 
+          html`<{{kebab_case referenceable.name}}-detail .{{camel_case referenceable.name}}Hash=${hash} style="margin-bottom: 16px;"></{{kebab_case referenceable.name}}-detail>`
+        )}
+      </div>
+    `;
+  }
+
+  render() {
+    return this._fetch{{pascal_case (plural referenceable.name)}}.render({
+      pending: () => html`<div style="display: flex; flex: 1; align-items: center; justify-content: center">
+        <mwc-circular-progress indeterminate></mwc-circular-progress>
+      </div>`,
+      complete: (hashes) => this.renderList(hashes),
+      error: (e: any) => html`<span>Error fetching the {{lower_case (plural referenceable.name)}}: ${e.data.data}.</span>`
+    });
+  }
+}

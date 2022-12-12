@@ -3,7 +3,7 @@
 // 	link_type_
 //     entry_definition: &EntryDefinition,
 //     happ_bundle_location_from_tests_root: &PathBuf,
-//     dna_role_id: &String,
+//     dna_role_name: &String,
 //     coordinator_zome: &String,
 //     crud: &Crud,
 // ) -> String {
@@ -21,7 +21,7 @@
 //         create_entry_test(
 //             entry_definition,
 //             happ_bundle_location_from_tests_root,
-//             dna_role_id,
+//             dna_role_name,
 //             coordinator_zome,
 //         )
 //     )

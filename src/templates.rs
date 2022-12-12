@@ -21,10 +21,10 @@ use crate::scaffold::web_app::uis::{guess_or_choose_framework, template_for_ui_f
 
 pub mod get;
 
+pub mod collection;
 pub mod coordinator;
 pub mod dna;
 pub mod entry_type;
-pub mod collection;
 pub mod integrity;
 pub mod link_type;
 pub mod web_app;

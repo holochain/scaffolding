@@ -190,13 +190,13 @@ pub fn choose_field(
                         .into_iter()
                         .map(|r| r.entry_type)
                         .collect();
-                    
-if let Cardinality::Option | Cardinality::Vector = cardinality {
-                    all_options.push(format!(
-                        "{} (itself)",
-                        entry_type_name.to_case(Case::Pascal)
-                    ));
-                        }
+
+                    if let Cardinality::Option | Cardinality::Vector = cardinality {
+                        all_options.push(format!(
+                            "{} (itself)",
+                            entry_type_name.to_case(Case::Pascal)
+                        ));
+                    }
 
                     let selection = Select::with_theme(&ColorfulTheme::default())
                         .with_prompt(String::from("Which entry type is this field referring to?"))

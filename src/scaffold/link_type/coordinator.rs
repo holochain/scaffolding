@@ -278,6 +278,7 @@ fn normal_handlers(
     integrity_zome_name: &String,
     from_referenceable: &Referenceable,
     to_referenceable: &Referenceable,
+    delete: bool,
     bidireccional: bool,
 ) -> String {
     let inverse_get = match bidireccional {
@@ -288,6 +289,11 @@ fn normal_handlers(
             get_links_handler(to_referenceable, from_referenceable)
         ),
         false => format!(""),
+    };
+
+    let delete_link_handler = match delete {
+        true => remove_link_handlers(from_referenceable, to_referenceable, bidireccional),
+        false => String::from(""),
     };
 
     format!(
@@ -303,7 +309,7 @@ use {integrity_zome_name}::*;
         add_link_handler(from_referenceable, to_referenceable, bidireccional),
         get_links_handler(from_referenceable, to_referenceable),
         inverse_get,
-        remove_link_handlers(from_referenceable, to_referenceable, bidireccional)
+        delete_link_handler
     )
 }
 
@@ -313,6 +319,7 @@ pub fn add_link_type_functions_to_coordinator(
     link_type_name: &String,
     from_referenceable: &Referenceable,
     to_referenceable: &Option<Referenceable>,
+    delete: bool,
     bidireccional: bool,
 ) -> ScaffoldResult<ZomeFileTree> {
     let dna_manifest_path = coordinator_zome_file_tree
@@ -336,7 +343,13 @@ pub fn add_link_type_functions_to_coordinator(
 
     let handlers = match to_referenceable {
         None => metadata_handlers(integrity_zome_name, link_type_name, from_referenceable),
-        Some(r) => normal_handlers(integrity_zome_name, from_referenceable, r, bidireccional),
+        Some(r) => normal_handlers(
+            integrity_zome_name,
+            from_referenceable,
+            r,
+            delete,
+            bidireccional,
+        ),
     };
 
     insert_file(&mut file_tree, &new_file_path, &handlers)?;

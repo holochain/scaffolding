@@ -1,18 +1,16 @@
 use crate::error::{ScaffoldError, ScaffoldResult};
 use crate::file_tree::{dir_content, file_content, load_directory_into_memory, FileTree};
 use crate::scaffold::app::cargo::exec_metadata;
-use crate::scaffold::app::{AppFileTree, self};
+use crate::scaffold::app::AppFileTree;
+use crate::scaffold::collection::{scaffold_collection, CollectionType};
 use crate::scaffold::dna::{scaffold_dna, DnaFileTree};
 use crate::scaffold::entry_type::crud::{parse_crud, Crud};
 use crate::scaffold::entry_type::definitions::{
     parse_entry_type_reference, parse_referenceable, EntryTypeReference, FieldDefinition,
     Referenceable,
 };
-
-
-use crate::scaffold::collection::{scaffold_collection, CollectionType};
-use crate::scaffold::entry_type::{fields::parse_fields, scaffold_entry_type};
 use crate::scaffold::example::{ExampleType};
+use crate::scaffold::entry_type::{fields::parse_fields, scaffold_entry_type};
 use crate::scaffold::link_type::scaffold_link_type;
 use crate::scaffold::web_app::scaffold_web_app;
 use crate::scaffold::web_app::uis::{choose_ui_framework, template_for_ui_framework, UiFramework};
@@ -162,8 +160,12 @@ pub enum HcScaffold {
         to_referenceable: Option<Referenceable>,
 
         #[structopt(long)]
-        /// Whether to create the inverse link, from the "--to-referenceable" entry type to the "--fromreferenceable" entry type
+        /// Whether to create the inverse link, from the "--to-referenceable" entry type to the "--from-referenceable" entry type
         bidireccional: Option<bool>,
+
+        #[structopt(long)]
+        /// Whether this link type can be deleted
+        delete: Option<bool>,
 
         #[structopt(short, long)]
         /// The template to scaffold the dna from
@@ -321,7 +323,8 @@ impl HcScaffold {
 
                 println!(
                     r#"
-Web hApp "{}" scaffolded!"#,
+Web hApp "{}" scaffolded!
+"#,
                     name
                 );
 
@@ -329,14 +332,20 @@ Web hApp "{}" scaffolded!"#,
                     println!("{}", i);
                 } else {
                     println!(
-                        r#"Set up your development environment with:
+                        r#"
+Notice that this is an empty skeleton for a Holochain web-app, so:
+
+- It won't compile until you add a DNA to it, and then add a zome to that DNA.
+- The UI is empty, you'll need to import the appropriate components to the top level app component.
+
+Set up your development environment with:
 
   cd {}{}
   npm install
 
 Then, add new DNAs to your app with:
 
-  hc-scaffold dna
+  hc scaffold dna
 "#,
                         name, maybe_nix
                     );
@@ -386,7 +395,7 @@ DNA "{}" scaffolded!"#,
                         r#"
 Add new zomes to your DNA with:
 
-  hc-scaffold zome
+  hc scaffold zome
 "#,
                     );
                 }
@@ -517,7 +526,7 @@ Add new zomes to your DNA with:
                         r#"
 Add new entry definitions to your zome with:
 
-  hc-scaffold entry-type
+  hc scaffold entry-type
 "#,
                     ),
                 }
@@ -578,7 +587,7 @@ Entry type "{}" scaffolded!"#,
                         r#"
 Add new collections for that entry type with:
 
-  hc-scaffold collection
+  hc scaffold collection
 "#,
                     );
                 }
@@ -588,6 +597,7 @@ Add new collections for that entry type with:
                 zome,
                 from_referenceable,
                 to_referenceable,
+                delete,
                 bidireccional,
                 template,
             } => {
@@ -607,6 +617,7 @@ Add new collections for that entry type with:
                     &template_file_tree,
                     &from_referenceable,
                     &to_referenceable,
+                    &delete,
                     &bidireccional,
                 )?;
 
