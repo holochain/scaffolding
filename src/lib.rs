@@ -3,28 +3,31 @@
 //! After having installed it, these are the commands that are available:
 //!
 //! ```bash
+//! // Scaffold an example Holochain app
+//! hc-scaffold example
+//!
 //! // Scaffold an empty web-app, using a built-in template
-//! hc scaffold web-app forum
+//! hc-scaffold web-app forum
 //!
 //! cd forum
 //!
 //! // Scaffold a dna inside the newly scaffolded app
-//! hc scaffold dna forum
+//! hc-scaffold dna forum
 //!
 //! // Scaffold a zome inside the newly scaffolded dna
-//! hc scaffold zome posts
+//! hc-scaffold zome posts
 //!
 //! // Scaffold an entry-type inside the newly scaffolded zome
-//! hc scaffold entry-type post
+//! hc-scaffold entry-type post
 //!
 //! // Scaffold a collection for the newly scaffolded entry-type
-//! hc scaffold collection global all_posts
+//! hc-scaffold collection global all_posts
 //!
 //! // Scaffold a new link-type
-//! hc scaffold link-type
+//! hc-scaffold link-type
 //!
 //! // Will show all the commands that are available
-//! hc scaffold --help
+//! hc-scaffold --help
 //! ```
 //!
 //! # Custom Templates
@@ -80,6 +83,7 @@
 //! coordinator-zome/
 //! dna/
 //! entry-type/
+//! example/
 //! field-types/
 //! collection/
 //! integrity-zome/
@@ -110,6 +114,7 @@
 //! - `entry-type`: uses the `entry-type` folder. [Available data](`crate::templates::entry_type::ScaffoldEntryTypeData`).
 //! - `link-type`: uses the `link-type` folder. [Available data](`crate::templates::link_type::ScaffoldLinkTypeData`).
 //! - `collection`: uses the `collection` folder. [Available data](`crate::templates::collection::ScaffoldCollectionData`).
+//! - `example`: uses the `example` folder. [Available data](`crate::templates::example::ScaffoldExampleData`).
 //!
 //! ### Field types
 //!

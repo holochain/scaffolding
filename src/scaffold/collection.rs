@@ -86,7 +86,7 @@ pub fn scaffold_collection(
         .map(|e| e.entry_type)
         .collect();
     let entry_type = match maybe_entry_type {
-        Some(et) => match all_entries_names.contains(&et.entry_type) {
+        Some(et) => match all_entries_names.contains(&et.entry_type.to_case(Case::Pascal)) {
             true => Ok(et.clone()),
             false => Err(ScaffoldError::EntryTypeNotFound(
                 et.entry_type.clone(),

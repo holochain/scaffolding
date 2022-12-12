@@ -59,7 +59,7 @@ fn check_field_definitions(
         .collect();
 
     match linked_from_entry_type.into_iter().find(|l| {
-        !entry_types_names.contains(&l.entry_type)
+        !entry_types_names.contains(&l.entry_type.to_case(Case::Pascal))
             && !l
                 .entry_type
                 .to_case(Case::Pascal)

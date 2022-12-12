@@ -191,6 +191,7 @@ pub use {}::*;
         &coordinator_zome,
         &from_referenceable,
         &to_referenceable,
+        delete,
         bidireccional,
     )
 }

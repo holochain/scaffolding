@@ -22,7 +22,7 @@ fn web_app_skeleton(
     app_name: String,
     description: Option<String>,
     skip_nix: bool,
-    template_file_tree: FileTree,
+    template_file_tree: &FileTree,
     template_name: String,
     scaffold_template: bool,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
@@ -73,7 +73,7 @@ pub fn scaffold_web_app(
     app_name: String,
     description: Option<String>,
     skip_nix: bool,
-    template_file_tree: FileTree,
+    template_file_tree: &FileTree,
     template_name: String,
     scaffold_template: bool,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
@@ -81,14 +81,12 @@ pub fn scaffold_web_app(
         app_name.clone(),
         description,
         skip_nix,
-        template_file_tree,
+        &template_file_tree,
         template_name,
         scaffold_template,
     )?;
     Ok(ScaffoldedTemplate {
-        file_tree: dir! {
-          app_name.clone() => scaffolded_template.file_tree
-        },
+        file_tree: scaffolded_template.file_tree,
         next_instructions: scaffolded_template.next_instructions,
     })
 }

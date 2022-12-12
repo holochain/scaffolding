@@ -88,6 +88,17 @@ pub fn choose_ui_framework() -> ScaffoldResult<UiFramework> {
     UiFramework::from_str(frameworks[selection].to_lowercase().as_str())
 }
 
+pub fn choose_non_vanilla_ui_framework() -> ScaffoldResult<UiFramework> {
+    let frameworks = vec!["Lit", "Svelte", "Vue"];
+    let selection = Select::with_theme(&ColorfulTheme::default())
+        .with_prompt("Choose UI framework:")
+        .default(0)
+        .items(&frameworks[..])
+        .interact()?;
+
+    UiFramework::from_str(frameworks[selection].to_lowercase().as_str())
+}
+
 pub fn template_for_ui_framework(framework: &UiFramework) -> ScaffoldResult<FileTree> {
     let dir = match framework {
         UiFramework::Lit => &LIT_TEMPLATES,

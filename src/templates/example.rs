@@ -1,11 +1,10 @@
-use std::{ffi::OsString, path::PathBuf};
-
-use holochain::prelude::ZomeManifest;
 use serde::Serialize;
+use std::{ffi::OsString, path::PathBuf};
 
 use crate::{
     error::ScaffoldResult,
     file_tree::{file_content, FileTree},
+    scaffold::example::Example,
 };
 
 use super::{
@@ -13,42 +12,35 @@ use super::{
 };
 
 #[derive(Serialize)]
-pub struct ScaffoldCoordinatorZomeData {
-    pub dna_role_name: String,
-    pub zome_manifest: ZomeManifest,
+pub struct ScaffoldExampleData {
+    pub example: String,
 }
 
-pub fn scaffold_coordinator_zome_templates(
+pub fn scaffold_example(
     mut app_file_tree: FileTree,
     template_file_tree: &FileTree,
-    dna_role_name: &String,
-    zome_manifest: &ZomeManifest,
+    example: &Example,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
-    let data = ScaffoldCoordinatorZomeData {
-        dna_role_name: dna_role_name.clone(),
-        zome_manifest: zome_manifest.clone(),
+    let data = ScaffoldExampleData {
+        example: example.to_string(),
     };
-
     let h = build_handlebars(&template_file_tree)?;
 
-    let coordinator_zome_path = PathBuf::from("coordinator-zome");
-    let v: Vec<OsString> = coordinator_zome_path
-        .iter()
-        .map(|s| s.to_os_string())
-        .collect();
+    let example_path = PathBuf::from("example");
+    let v: Vec<OsString> = example_path.iter().map(|s| s.to_os_string()).collect();
 
-    if let Some(coordinator_template) = template_file_tree.path(&mut v.iter()) {
+    if let Some(example_template) = template_file_tree.path(&mut v.iter()) {
         app_file_tree = render_template_file_tree_and_merge_with_existing(
             app_file_tree,
             &h,
-            coordinator_template,
+            example_template,
             &data,
         )?;
     }
 
     let next_instructions = match file_content(
         &template_file_tree,
-        &PathBuf::from("coordinator-zome.instructions.hbs"),
+        &PathBuf::from("example.instructions.hbs"),
     ) {
         Ok(content) => Some(h.render_template(content.as_str(), &data)?),
         Err(_) => None,

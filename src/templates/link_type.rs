@@ -19,6 +19,7 @@ pub struct ScaffoldLinkTypeData {
     pub coordinator_zome_manifest: ZomeManifest,
     pub from_referenceable: Referenceable,
     pub to_referenceable: Option<Referenceable>,
+    pub delete: bool,
     pub bidireccional: bool,
 }
 pub fn scaffold_link_type_templates(
@@ -28,6 +29,7 @@ pub fn scaffold_link_type_templates(
     coordinator_zome_manifest: &ZomeManifest,
     from_referenceable: &Referenceable,
     to_referenceable: &Option<Referenceable>,
+    delete: bool,
     bidireccional: bool,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     let data = ScaffoldLinkTypeData {
@@ -35,19 +37,20 @@ pub fn scaffold_link_type_templates(
         coordinator_zome_manifest: coordinator_zome_manifest.clone(),
         from_referenceable: from_referenceable.clone(),
         to_referenceable: to_referenceable.clone(),
+        delete,
         bidireccional,
     };
 
     let h = build_handlebars(&template_file_tree)?;
 
-    let field_types_path = PathBuf::from("link-type");
-    let v: Vec<OsString> = field_types_path.iter().map(|s| s.to_os_string()).collect();
+    let link_type_path = PathBuf::from("link-type");
+    let v: Vec<OsString> = link_type_path.iter().map(|s| s.to_os_string()).collect();
 
-    if let Some(web_app_template) = template_file_tree.path(&mut v.iter()) {
+    if let Some(link_type_template) = template_file_tree.path(&mut v.iter()) {
         app_file_tree = render_template_file_tree_and_merge_with_existing(
             app_file_tree,
             &h,
-            web_app_template,
+            link_type_template,
             &data,
         )?;
     }

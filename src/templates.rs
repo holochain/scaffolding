@@ -25,6 +25,7 @@ pub mod collection;
 pub mod coordinator;
 pub mod dna;
 pub mod entry_type;
+pub mod example;
 pub mod integrity;
 pub mod link_type;
 pub mod web_app;
