@@ -252,44 +252,42 @@ pub use {}::*;
                 }
             }
 
-            file.items = file
-                .items
-                .into_iter()
-                .map(|mut i| {
-                    if let syn::Item::Enum(mut item_enum) = i.clone() {
-                        if item_enum
-                            .attrs
-                            .iter()
-                            .any(|a| a.path.segments.iter().any(|s| s.ident.eq("hdk_entry_defs")))
-                        {
-                            if item_enum
-                                .variants
-                                .iter()
-                                .any(|v| v.ident.to_string().eq(&pascal_entry_def_name))
-                            {
-                                return Err(ScaffoldError::EntryTypeAlreadyExists(
-                                    pascal_entry_def_name.clone(),
-                                    dna_manifest.name(),
-                                    zome_file_tree.zome_manifest.name.0.to_string(),
-                                ));
+            file.items =
+                file.items
+                    .into_iter()
+                    .map(|mut i| {
+                        if let syn::Item::Enum(mut item_enum) = i.clone() {
+                            if item_enum.attrs.iter().any(|a| {
+                                a.path.segments.iter().any(|s| s.ident.eq("hdk_entry_defs"))
+                            }) {
+                                if item_enum
+                                    .variants
+                                    .iter()
+                                    .any(|v| v.ident.to_string().eq(&pascal_entry_def_name))
+                                {
+                                    return Err(ScaffoldError::EntryTypeAlreadyExists(
+                                        pascal_entry_def_name.clone(),
+                                        dna_manifest.name(),
+                                        zome_file_tree.zome_manifest.name.0.to_string(),
+                                    ));
+                                }
+
+                                found = true;
+                                let new_variant = syn::parse_str::<syn::Variant>(
+                                    format!("{}({})", pascal_entry_def_name, pascal_entry_def_name)
+                                        .as_str(),
+                                )
+                                .unwrap();
+                                item_enum.variants.push(new_variant);
+                                return Ok(syn::Item::Enum(item_enum));
                             }
-
-                            found = true;
-                            let new_variant = syn::parse_str::<syn::Variant>(
-                                format!("{}({})", pascal_entry_def_name, pascal_entry_def_name)
-                                    .as_str(),
-                            )
-                            .unwrap();
-                            item_enum.variants.push(new_variant);
-                            return Ok(syn::Item::Enum(item_enum));
                         }
-                    } 
 
-                    add_entry_type_to_validation_arms(&mut i, &entry_def)?;
+                        add_entry_type_to_validation_arms(&mut i, &entry_def)?;
 
-                    Ok(i)
-                })
-                .collect::<ScaffoldResult<Vec<syn::Item>>>()?;
+                        Ok(i)
+                    })
+                    .collect::<ScaffoldResult<Vec<syn::Item>>>()?;
 
             // If the file is lib.rs, we already have the entry struct imported so no need to import it again
             if found && file_path.file_name() != Some(OsString::from("lib.rs").as_os_str()) {
@@ -397,48 +395,57 @@ pub fn get_all_entry_types(
     }
 }
 
-fn add_entry_type_to_validation_arms(item: &mut syn::Item, entry_def: &EntryDefinition) -> ScaffoldResult<()> {
+fn add_entry_type_to_validation_arms(
+    item: &mut syn::Item,
+    entry_def: &EntryDefinition,
+) -> ScaffoldResult<()> {
     if let syn::Item::Fn(item_fn) = item {
         if item_fn.sig.ident.to_string().eq(&String::from("validate")) {
             for stmt in &mut item_fn.block.stmts {
                 if let syn::Stmt::Expr(syn::Expr::Match(match_expr)) = stmt {
                     if let syn::Expr::Try(try_expr) = &mut *match_expr.expr {
                         if let syn::Expr::MethodCall(call) = &mut *try_expr.expr {
-                            if call.method.to_string().eq(&String::from("to_type"))
-                            {
+                            if call.method.to_string().eq(&String::from("to_type")) {
                                 for arm in &mut match_expr.arms {
-                                    if let syn::Pat::TupleStruct(pat_tuple_struct) =
-                                        &mut arm.pat
-                                    {
+                                    if let syn::Pat::TupleStruct(pat_tuple_struct) = &mut arm.pat {
                                         if let Some(path_segment) =
                                             pat_tuple_struct.path.segments.last()
                                         {
-                                            let path_segment_str = path_segment
-                                                .ident
-                                                .to_string();
-                                                
-                                            if path_segment_str.eq(&String::from("StoreEntry"))
-                                            {
-                                                if let Some(op_entry_match_expr) = find_ending_match_expr(&mut *arm.body)
+                                            let path_segment_str = path_segment.ident.to_string();
+
+                                            if path_segment_str.eq(&String::from("StoreEntry")) {
+                                                if let Some(op_entry_match_expr) =
+                                                    find_ending_match_expr(&mut *arm.body)
                                                 {
                                                     for op_entry_arm in
-                                                        &mut op_entry_match_expr
-                                                            .arms
+                                                        &mut op_entry_match_expr.arms
                                                     {
-                                                        if is_create_or_update_entry(&op_entry_arm.pat) {
+                                                        if is_create_or_update_entry(
+                                                            &op_entry_arm.pat,
+                                                        ) {
                                                             // Add new entry type to match arm
-                             if let Some(_) = find_ending_match_expr( &mut *op_entry_arm.body) {} else {
+                                                            if let Some(_) = find_ending_match_expr(
+                                                                &mut *op_entry_arm.body,
+                                                            ) {
+                                                            } else {
                                                                 // Change empty invalid to match on entry_type
-                                 *op_entry_arm.body = syn::parse_str::<syn::Expr>("match entry_type {}")?;
+                                                                *op_entry_arm.body =
+                                                                    syn::parse_str::<syn::Expr>(
+                                                                        "match entry_type {}",
+                                                                    )?;
                                                             }
-                                                            
+
                                                             // Add new entry type to match arm
-                                      if let Some(entry_type_match) = find_ending_match_expr(&mut *op_entry_arm.body) {
+                                                            if let Some(entry_type_match) =
+                                                                find_ending_match_expr(
+                                                                    &mut *op_entry_arm.body,
+                                                                )
+                                                            {
                                                                 let new_arm: syn::Arm = syn::parse_str(
                                                                     format!("EntryTypes::{}({}) => validate_create_{}({}),", 
-                                                                        entry_def.name.to_case(Case::Pascal), 
-                                                                        entry_def.name.to_case(Case::Snake), 
-                                                                        entry_def.name.to_case(Case::Snake), 
+                                                                        entry_def.name.to_case(Case::Pascal),
+                                                                        entry_def.name.to_case(Case::Snake),
+                                                                        entry_def.name.to_case(Case::Snake),
                                                                         entry_def.name.to_case(Case::Snake)).as_str()
                                                                 )?;
                                                                 entry_type_match.arms.push(new_arm);
@@ -446,63 +453,106 @@ fn add_entry_type_to_validation_arms(item: &mut syn::Item, entry_def: &EntryDefi
                                                         }
                                                     }
                                                 }
-                                            } else if path_segment_str.eq(&String::from("RegisterUpdate")) {
-                                                if let Some(op_entry_match_expr) = find_ending_match_expr(&mut *arm.body)
+                                            } else if path_segment_str
+                                                .eq(&String::from("RegisterUpdate"))
+                                            {
+                                                if let Some(op_entry_match_expr) =
+                                                    find_ending_match_expr(&mut *arm.body)
                                                 {
                                                     for op_entry_arm in
-                                                        &mut op_entry_match_expr
-                                                               .arms
+                                                        &mut op_entry_match_expr.arms
                                                     {
-                                                       if let syn::Pat::Struct(pat_struct) = &mut op_entry_arm.pat {
-                                                            if let Some(ps) = pat_struct.path.segments.last() {
-                                                                if ps.ident.to_string().eq(&String::from("Entry")) {                                                                              
+                                                        if let syn::Pat::Struct(pat_struct) =
+                                                            &mut op_entry_arm.pat
+                                                        {
+                                                            if let Some(ps) =
+                                                                pat_struct.path.segments.last()
+                                                            {
+                                                                if ps
+                                                                    .ident
+                                                                    .to_string()
+                                                                    .eq(&String::from("Entry"))
+                                                                {
                                                                     // Add new entry type to match arm
-                                     if let Some(_) = find_ending_match_expr( &mut *op_entry_arm.body) {} else {
+                                                                    if let Some(_) =
+                                                                        find_ending_match_expr(
+                                                                            &mut *op_entry_arm.body,
+                                                                        )
+                                                                    {
+                                                                    } else {
                                                                         // Change empty invalid to match on entry_type
-                                         *op_entry_arm.body = syn::parse_str::<syn::Expr>("match new_entry_type {}")?;
+                                                                        *op_entry_arm.body = syn::parse_str::<syn::Expr>("match new_entry_type {}")?;
                                                                     }
-                                                                    
+
                                                                     // Add new entry type to match arm
-                                            if let Some(entry_type_match) = find_ending_match_expr(&mut *op_entry_arm.body) {
+                                                                    if let Some(entry_type_match) =
+                                                                        find_ending_match_expr(
+                                                                            &mut *op_entry_arm.body,
+                                                                        )
+                                                                    {
                                                                         let new_arm: syn::Arm = syn::parse_str(
                                                                             format!("EntryTypes::{}({}) => validate_update_{}({}),", 
-                                                                                entry_def.name.to_case(Case::Pascal), 
-                                                                                entry_def.name.to_case(Case::Snake), 
-                                                                                entry_def.name.to_case(Case::Snake), 
+                                                                                entry_def.name.to_case(Case::Pascal),
+                                                                                entry_def.name.to_case(Case::Snake),
+                                                                                entry_def.name.to_case(Case::Snake),
                                                                                 entry_def.name.to_case(Case::Snake)).as_str()
                                                                         )?;
-                                                                        entry_type_match.arms.push(new_arm);
+                                                                        entry_type_match
+                                                                            .arms
+                                                                            .push(new_arm);
                                                                     }
                                                                 }
                                                             }
                                                         }
                                                     }
                                                 }
-                                            } else if path_segment_str.eq(&String::from("RegisterDelete")) {
-                                                if let Some(op_entry_match_expr) = find_ending_match_expr(&mut *arm.body)
+                                            } else if path_segment_str
+                                                .eq(&String::from("RegisterDelete"))
+                                            {
+                                                if let Some(op_entry_match_expr) =
+                                                    find_ending_match_expr(&mut *arm.body)
                                                 {
                                                     for op_entry_arm in
-                                                        &mut op_entry_match_expr
-                                                            .arms
+                                                        &mut op_entry_match_expr.arms
                                                     {
-                                                       if let syn::Pat::Struct(pat_struct) = &mut op_entry_arm.pat {
-                                                            if let Some(ps) = pat_struct.path.segments.last() {
-                                                                if ps.ident.to_string().eq(&String::from("Entry")) {                                                                              
-                                          // Add new entry type to match arm
-                                          if let Some(_) = find_ending_match_expr( &mut *op_entry_arm.body) {} else {
-                                              // Change empty invalid to match on entry_type
-                                              *op_entry_arm.body = syn::parse_str::<syn::Expr>("match original_entry_type {}")?;
-                                          }
-                                          // Add new entry type to match arm
-                                          if let Some(entry_type_match) = find_ending_match_expr(&mut *op_entry_arm.body) {
-                                              let new_arm: syn::Arm = syn::parse_str(
-                                                  format!("EntryTypes::{}({}) => validate_delete_{}({}),", 
-                                                      entry_def.name.to_case(Case::Pascal),
-                                                      entry_def.name.to_case(Case::Snake),
-                                                      entry_def.name.to_case(Case::Snake),
-                                                      entry_def.name.to_case(Case::Snake)).as_str()
-                                              )?;
-                                              entry_type_match.arms.push(new_arm);
+                                                        if let syn::Pat::Struct(pat_struct) =
+                                                            &mut op_entry_arm.pat
+                                                        {
+                                                            if let Some(ps) =
+                                                                pat_struct.path.segments.last()
+                                                            {
+                                                                if ps
+                                                                    .ident
+                                                                    .to_string()
+                                                                    .eq(&String::from("Entry"))
+                                                                {
+                                                                    // Add new entry type to match arm
+                                                                    if let Some(_) =
+                                                                        find_ending_match_expr(
+                                                                            &mut *op_entry_arm.body,
+                                                                        )
+                                                                    {
+                                                                    } else {
+                                                                        // Change empty invalid to match on entry_type
+                                                                        *op_entry_arm.body = syn::parse_str::<syn::Expr>("match original_entry_type {}")?;
+                                                                    }
+                                                                    // Add new entry type to match arm
+                                                                    if let Some(entry_type_match) =
+                                                                        find_ending_match_expr(
+                                                                            &mut *op_entry_arm.body,
+                                                                        )
+                                                                    {
+                                                                        let new_arm: syn::Arm = syn::parse_str(
+                                                                            format!("EntryTypes::{}({}) => validate_delete_{}({}),", 
+                                                                                entry_def.name.to_case(Case::Pascal),
+                                                                                entry_def.name.to_case(Case::Snake),
+                                                                                entry_def.name.to_case(Case::Snake),
+                                                                                entry_def.name.to_case(Case::Snake)
+                                                                            ).as_str()
+                                                                        )?;
+                                                                        entry_type_match
+                                                                            .arms
+                                                                            .push(new_arm);
                                                                     }
                                                                 }
                                                             }
