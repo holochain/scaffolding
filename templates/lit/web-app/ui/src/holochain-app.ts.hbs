@@ -5,7 +5,7 @@ import {
   ActionHash,
   InstalledAppInfo,
 } from '@holochain/client';
-import { contextProvider } from '@lit-labs/context';
+import { provide } from '@lit-labs/context';
 import '@material/mwc-circular-progress';
 
 import { appWebsocketContext, appInfoContext } from './contexts';
@@ -14,11 +14,11 @@ import { appWebsocketContext, appInfoContext } from './contexts';
 export class HolochainApp extends LitElement {
   @state() loading = true;
 
-  @contextProvider({ context: appWebsocketContext })
+  @provide({ context: appWebsocketContext })
   @property({ type: Object })
   appWebsocket!: AppWebsocket;
 
-  @contextProvider({ context: appInfoContext })
+  @provide({ context: appInfoContext })
   @property({ type: Object })
   appInfo!: InstalledAppInfo;
 

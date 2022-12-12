@@ -1,7 +1,7 @@
 import { LitElement, html } from 'lit';
 import { state, customElement, property } from 'lit/decorators.js';
 import { InstalledCell, Record, AppWebsocket, EntryHash, ActionHash, InstalledAppInfo, AgentPubKey } from '@holochain/client';
-import { contextProvided } from '@lit-labs/context';
+import { consume } from '@lit-labs/context';
 import '@material/mwc-circular-progress';
 import { Task } from '@lit-labs/task';
 
@@ -25,10 +25,10 @@ export class {{pascal_case (plural ../entry_type.name)}}For{{pascal_case linked_
       provenance: this.cellData.cell_id[1]
   }) as Promise<Array<{{#if ../entry_type.reference_entry_hash}}EntryHash{{else}}ActionHash{{/if}}>>, () => [this.{{camel_case linked_from.singular_arg}}]);
 
-  @contextProvided({ context: appWebsocketContext })
+  @consume({ context: appWebsocketContext })
   appWebsocket!: AppWebsocket;
 
-  @contextProvided({ context: appInfoContext })
+  @consume({ context: appInfoContext })
   appInfo!: InstalledAppInfo;
 
   get cellData() {

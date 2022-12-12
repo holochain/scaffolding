@@ -1,7 +1,7 @@
 import { LitElement, html } from 'lit';
 import { state, customElement, property } from 'lit/decorators.js';
 import { InstalledCell, ActionHash, Record, AgentPubKey, EntryHash, AppWebsocket, InstalledAppInfo } from '@holochain/client';
-import { contextProvided } from '@lit-labs/context';
+import { consume } from '@lit-labs/context';
 import '@material/mwc-button';
 import '@material/mwc-snackbar';
 import { Snackbar } from '@material/mwc-snackbar';
@@ -49,10 +49,10 @@ export class Create{{pascal_case entry_type.name}} extends LitElement {
     return true{{#each entry_type.fields}}{{#if widget}}{{#if (eq cardinality "single")}} && this._{{camel_case field_name}} !== undefined{{/if}}{{#if (eq cardinality "vector")}} && this._{{camel_case field_name}}.every(e => e !== undefined){{/if}}{{/if}}{{/each}};
   }
 
-  @contextProvided({ context: appWebsocketContext })
+  @consume({ context: appWebsocketContext })
   appWebsocket!: AppWebsocket;
 
-  @contextProvided({ context: appInfoContext })
+  @consume({ context: appInfoContext })
   appInfo!: InstalledAppInfo;
 
   async create{{pascal_case entry_type.name}}() {

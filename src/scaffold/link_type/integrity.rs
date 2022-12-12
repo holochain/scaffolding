@@ -132,67 +132,8 @@ pub fn add_link_type_to_integrity_zome(
                                 return Ok(syn::Item::Enum(item_enum));
                             }
                         }
-            
-        if let syn::Item::Fn(item_fn) = &mut i {
-                        if item_fn.sig.ident.to_string().eq(&String::from("validate")) {
-                            for stmt in &mut item_fn.block.stmts {
-                                if let syn::Stmt::Expr(syn::Expr::Match(match_expr)) = stmt {
-                                    if let syn::Expr::Try(try_expr) = &mut *match_expr.expr {
-                                        if let syn::Expr::MethodCall(call) = &mut *try_expr.expr {
-                                            if call.method.to_string().eq(&String::from("to_type"))
-                                            {
-                                                for arm in &mut match_expr.arms {
-                                                    if let syn::Pat::Struct(pat_struct) =
-                                                        &mut arm.pat
-                                                    {
-                                                        if let Some(path_segment) =
-                                                            pat_struct.path.segments.last()
-                                                        {
-                                                            let path_segment_str = path_segment
-                                                                .ident
-                                                                .to_string();
-                                                                
-                                                            if path_segment_str.eq(&String::from("RegisterCreateLink"))
-                                                            {
-                                                                                    // Add new link type to match arm
-                                                                                    if let Some(_) = find_ending_match_expr( &mut *arm.body) {} else {
-                                                                                        // Change empty invalid to match on link_type
-                                                                                        *arm.body = syn::parse_str::<syn::Expr>("match link_type {}")?;
-                                                                                    }
-                                                                                    
-                                                                                    
-                                                                                    // Add new link type to match arm
-                                                                                    if let Some(link_type_match) = find_ending_match_expr(&mut *arm.body) { 
-                                                                                        let new_arm: syn::Arm = syn::parse_str(
-                                                                                            format!("LinkTypes::{} => validate_create_link_{}(base_address, target_address),", 
-                                                                                               link_type_name.to_case(Case::Pascal),
-                                                                                             link_type_name.to_case(Case::Snake)
-                                                                                            ).as_str()
-                                                                                        )?;
-                                                                                        link_type_match.arms.push(new_arm);
-                                                                }
-                    } else if path_segment_str.eq(&String::from("RegisterDeleteLink"))
-                                                            {
-                                                                                    // Add new link type to match arm
-                                                                                    if let Some(_) = find_ending_match_expr( &mut *arm.body) {} else {
-                                                                                        // Change empty invalid to match on link_type
-                                                                                        *arm.body = syn::parse_str::<syn::Expr>("match link_type {}")?;
-                                                                                    }
-                                                                                    
-                                                                                    
-                                                                                    // Add new link type to match arm
-                                                                                    if let Some(link_type_match) = find_ending_match_expr(&mut *arm.body) { 
-                                                                                        let new_arm: syn::Arm = syn::parse_str(
-                                                                                            format!("LinkTypes::{} => validate_delete_link_{}(base_address, target_address),", 
-                                                                                               link_type_name.to_case(Case::Pascal),
-                                                                                             link_type_name.to_case(Case::Snake)
-                                                                                            ).as_str()
-                                                                                        )?;
-                                                                                        link_type_match.arms.push(new_arm);
-                                                                }
-                    }
-}}}}}}}}}                    }
-            
+
+                        add_link_type_to_validation_arms(&mut i, &link_type_name)?;
 
                         Ok(i)
                     })
@@ -214,43 +155,54 @@ pub fn add_link_type_to_integrity_zome(
             .path_mut(&mut v.iter())
             .ok_or(ScaffoldError::PathNotFound(crate_src_path.clone()))?,
         |file_path, mut file| {
-    
             if file_path.eq(file_to_add_validation_to) {
-    
-    let validate_create_fn =
-        format_ident!("validate_create_link_{}", link_type_name.to_case(Case::Snake));
+                let validate_create_fn = format_ident!(
+                    "validate_create_link_{}",
+                    link_type_name.to_case(Case::Snake)
+                );
 
-    let validate_delete_fn =
-        format_ident!("validate_delete_link_{}", link_type_name.to_case(Case::Snake));
+                let validate_delete_fn = format_ident!(
+                    "validate_delete_link_{}",
+                    link_type_name.to_case(Case::Snake)
+                );
 
-    let deleted_invalid_reason = format!("{} links cannot be deleted", link_type_name.to_case(Case::Pascal));
+                let deleted_invalid_reason = format!(
+                    "{} links cannot be deleted",
+                    link_type_name.to_case(Case::Pascal)
+                );
 
-    let validate_delete_result: TokenStream = match delete {
-        true => quote! {
-            // TODO: add the appropriate validation rules
-            Ok(ValidateCallbackResult::Valid)
-        },
-        false => quote! {
-            Ok(ValidateCallbackResult::Invalid(String::from(#deleted_invalid_reason)))
-        },
-    };
+                let validate_delete_result: TokenStream = match delete {
+                    true => quote! {
+                        // TODO: add the appropriate validation rules
+                        Ok(ValidateCallbackResult::Valid)
+                    },
+                    false => quote! {
+                        Ok(ValidateCallbackResult::Invalid(String::from(#deleted_invalid_reason)))
+                    },
+                };
 
-    let create_token_stream = quote! {
-      pub fn #validate_create_fn(base: AnyLinkableHash, target: AnyLinkableHash) -> ExternResult<ValidateCallbackResult> {
-          // TODO: add the appropriate validation rules
-          Ok(ValidateCallbackResult::Valid)
-      }
-    };
+                let create_token_stream = quote! {
+                    pub fn #validate_create_fn(
+                        base: AnyLinkableHash,
+                        target: AnyLinkableHash
+                    ) -> ExternResult<ValidateCallbackResult> {
+                        // TODO: add the appropriate validation rules
+                        Ok(ValidateCallbackResult::Valid)
+                  }
+                };
 
-    let delete_token_stream = quote! {
-      pub fn #validate_delete_fn(base: AnyLinkableHash, target: AnyLinkableHash) -> ExternResult<ValidateCallbackResult> {
-          #validate_delete_result
-      }
-    };
+                let delete_token_stream = quote! {
+                    pub fn #validate_delete_fn(
+                        base: AnyLinkableHash,
+                        target: AnyLinkableHash
+                    ) -> ExternResult<ValidateCallbackResult> {
+                        #validate_delete_result
+                  }
+                };
 
-    let item: syn::Item = syn::parse_str(create_token_stream.to_string().as_str())?;
+                let item: syn::Item = syn::parse_str(create_token_stream.to_string().as_str())?;
                 file.items.push(item);
-    let item: syn::Item = syn::parse_str(delete_token_stream.to_string().as_str())?;
+                let item: syn::Item = syn::parse_str(delete_token_stream.to_string().as_str())?;
                 file.items.push(item);
             }
 
@@ -268,4 +220,87 @@ pub fn add_link_type_to_integrity_zome(
     let zome_file_tree = ZomeFileTree::from_zome_manifest(dna_file_tree, zome_manifest)?;
 
     Ok(zome_file_tree)
+}
+
+fn add_link_type_to_validation_arms(
+    item: &mut syn::Item,
+    link_type_name: &String,
+) -> ScaffoldResult<()> {
+    if let syn::Item::Fn(item_fn) = item {
+        if item_fn.sig.ident.to_string().eq(&String::from("validate")) {
+            for stmt in &mut item_fn.block.stmts {
+                if let syn::Stmt::Expr(syn::Expr::Match(match_expr)) = stmt {
+                    if let syn::Expr::Try(try_expr) = &mut *match_expr.expr {
+                        if let syn::Expr::MethodCall(call) = &mut *try_expr.expr {
+                            if call.method.to_string().eq(&String::from("to_type")) {
+                                for arm in &mut match_expr.arms {
+                                    if let syn::Pat::Struct(pat_struct) = &mut arm.pat {
+                                        if let Some(path_segment) = pat_struct.path.segments.last()
+                                        {
+                                            let path_segment_str = path_segment.ident.to_string();
+
+                                            if path_segment_str
+                                                .eq(&String::from("RegisterCreateLink"))
+                                            {
+                                                // Add new link type to match arm
+                                                if let Some(_) =
+                                                    find_ending_match_expr(&mut *arm.body)
+                                                {
+                                                } else {
+                                                    // Change empty invalid to match on link_type
+                                                    *arm.body = syn::parse_str::<syn::Expr>(
+                                                        "match link_type {}",
+                                                    )?;
+                                                }
+
+                                                // Add new link type to match arm
+                                                if let Some(link_type_match) =
+                                                    find_ending_match_expr(&mut *arm.body)
+                                                {
+                                                    let new_arm: syn::Arm = syn::parse_str(
+                                                        format!("LinkTypes::{} => validate_create_link_{}(base_address, target_address),", 
+                                                            link_type_name.to_case(Case::Pascal),
+                                                            link_type_name.to_case(Case::Snake)
+                                                        ).as_str()
+                                                    )?;
+                                                    link_type_match.arms.push(new_arm);
+                                                }
+                                            } else if path_segment_str
+                                                .eq(&String::from("RegisterDeleteLink"))
+                                            {
+                                                // Add new link type to match arm
+                                                if let Some(_) =
+                                                    find_ending_match_expr(&mut *arm.body)
+                                                {
+                                                } else {
+                                                    // Change empty invalid to match on link_type
+                                                    *arm.body = syn::parse_str::<syn::Expr>(
+                                                        "match link_type {}",
+                                                    )?;
+                                                }
+
+                                                // Add new link type to match arm
+                                                if let Some(link_type_match) =
+                                                    find_ending_match_expr(&mut *arm.body)
+                                                {
+                                                    let new_arm: syn::Arm = syn::parse_str(
+                                                                            format!("LinkTypes::{} => validate_delete_link_{}(base_address, target_address),", 
+                                                                               link_type_name.to_case(Case::Pascal),
+                                                                             link_type_name.to_case(Case::Snake)
+                                                                            ).as_str()
+                                                                        )?;
+                                                    link_type_match.arms.push(new_arm);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    Ok(())
 }

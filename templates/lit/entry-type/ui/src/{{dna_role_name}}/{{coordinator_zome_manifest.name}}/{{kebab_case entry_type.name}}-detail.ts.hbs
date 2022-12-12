@@ -1,7 +1,7 @@
 import { LitElement, html } from 'lit';
 import { state, customElement, property } from 'lit/decorators.js';
 import { InstalledCell, AppWebsocket, EntryHash, Record, ActionHash, InstalledAppInfo } from '@holochain/client';
-import { contextProvided } from '@lit-labs/context';
+import { consume } from '@lit-labs/context';
 import { Task } from '@lit-labs/task';
 import { decode } from '@msgpack/msgpack';
 import '@material/mwc-circular-progress';
@@ -42,10 +42,10 @@ export class {{pascal_case entry_type.name}}Detail extends LitElement {
   _editing = false;
   {{/if}}
 
-  @contextProvided({ context: appWebsocketContext })
+  @consume({ context: appWebsocketContext })
   appWebsocket!: AppWebsocket;
 
-  @contextProvided({ context: appInfoContext })
+  @consume({ context: appInfoContext })
   appInfo!: InstalledAppInfo;
 
   get cellData() {
