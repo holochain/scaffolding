@@ -9,7 +9,7 @@
       <{{pascal_case referenceable.name}}Detail 
         v-for="hash in hashes" 
         :{{kebab_case referenceable.name}}-hash="hash"
-        @{{kebab_case referenceable.name}}-deleted="{{pascal_case referenceable.name}}()"
+        @{{kebab_case referenceable.name}}-deleted="fetch{{pascal_case referenceable.name}}()"
         style="margin-bottom: 8px">
       </{{pascal_case referenceable.name}}Detail>
     </div>
@@ -43,7 +43,7 @@ export default defineComponent({
     }
   },
   async mounted() {
-    await this.{{pascal_case referenceable.name}}();
+    await this.fetch{{pascal_case referenceable.name}}();
   },
   methods: {
     async fetch{{pascal_case referenceable.name}}() {
