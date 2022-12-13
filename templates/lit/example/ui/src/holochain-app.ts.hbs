@@ -40,7 +40,7 @@ export class HolochainApp extends LitElement {
   }
   
   get allPosts(): AllPosts | undefined {
-    return this.shadowRoot?.getElementById('all-posts');
+    return this.shadowRoot?.getElementById('all-posts') as AllPosts;
   }
 
   render() {

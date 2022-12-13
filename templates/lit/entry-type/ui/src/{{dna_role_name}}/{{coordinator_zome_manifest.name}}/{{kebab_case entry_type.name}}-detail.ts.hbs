@@ -8,12 +8,15 @@ import '@material/mwc-circular-progress';
 import '@material/mwc-icon-button';
 import '@material/mwc-snackbar';
 import { Snackbar } from '@material/mwc-snackbar';
-{{#each entry_type.fields}}
-  {{#if widget}}
+{{#uniq_lines}}
+  {{#each entry_type.fields}}
+    {{#if widget}}
 {{> (concat field_type "/" widget "/detail/imports") }}
 
-  {{/if}}
-{{/each}}
+    {{/if}}
+  {{/each}}
+{{/uniq_lines}}
+
 {{#if crud.update}}
 import './edit-{{kebab_case entry_type.name}}';
 {{/if}}

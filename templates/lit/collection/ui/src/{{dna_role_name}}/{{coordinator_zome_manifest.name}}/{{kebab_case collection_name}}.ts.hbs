@@ -43,7 +43,7 @@ export class {{pascal_case collection_name}} extends LitElement {
     return html`
       <div style="display: flex; flex-direction: column">
         ${hashes.map(hash => 
-          html`<{{kebab_case referenceable.name}}-detail .{{camel_case referenceable.name}}Hash=${hash} style="margin-bottom: 16px;"></{{kebab_case referenceable.name}}-detail>`
+          html`<{{kebab_case referenceable.name}}-detail .{{camel_case referenceable.name}}Hash=${hash} style="margin-bottom: 16px;" @{{kebab_case referenceable.name}}-deleted=${() => this._fetch{{pascal_case (plural referenceable.name)}}.run()}></{{kebab_case referenceable.name}}-detail>`
         )}
       </div>
     `;

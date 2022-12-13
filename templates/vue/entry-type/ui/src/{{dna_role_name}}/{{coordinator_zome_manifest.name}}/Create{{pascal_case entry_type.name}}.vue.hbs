@@ -34,12 +34,14 @@ import '@material/mwc-button';
 import '@material/mwc-icon-button';
 import '@material/mwc-snackbar';
 import { Snackbar } from '@material/mwc-snackbar';
-{{#each entry_type.fields}}
-  {{#if widget}}
+{{#uniq_lines}}
+  {{#each entry_type.fields}}
+    {{#if widget}}
 {{> (concat field_type "/" widget "/edit/imports") }}
 
-  {{/if}}
-{{/each}}
+    {{/if}}
+  {{/each}}
+{{/uniq_lines}}
 
 export default defineComponent({
   data(): {

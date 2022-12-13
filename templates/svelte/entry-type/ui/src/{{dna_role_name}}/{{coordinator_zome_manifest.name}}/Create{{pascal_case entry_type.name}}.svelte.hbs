@@ -6,12 +6,14 @@ import { {{pascal_case entry_type.name}} } from './types';
 import '@material/mwc-button';
 import '@material/mwc-snackbar';
 import { Snackbar } from '@material/mwc-snackbar';
-{{#each entry_type.fields}}
-  {{#if widget}}
+{{#uniq_lines}}
+  {{#each entry_type.fields}}
+    {{#if widget}}
 {{> (concat field_type "/" widget "/edit/imports") }}
 
-  {{/if}}
-{{/each}}
+    {{/if}}
+  {{/each}}
+{{/uniq_lines}}
 
 let appInfo = getContext(appInfoContext).getAppInfo();
 let appWebsocket = getContext(appWebsocketContext).getAppWebsocket();

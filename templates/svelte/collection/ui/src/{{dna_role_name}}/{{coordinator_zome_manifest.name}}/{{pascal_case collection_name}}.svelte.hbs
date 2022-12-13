@@ -19,7 +19,9 @@ let error: any = undefined;
 
 $: hashes, loading, error;
 
-onMount(async () => {
+onMount(() => fetch{{pascal_case (plural referenceable.name)}}());
+
+async function fetch{{pascal_case (plural referenceable.name)}}() {
   const cellData = appInfo.cell_data.find((c: InstalledCell) => c.role_name === '{{dna_role_name}}')!;
 
   try {
@@ -35,7 +37,7 @@ onMount(async () => {
     error = e;
   }
   loading = false;
-});
+}
 
 </script>
 
@@ -50,7 +52,7 @@ onMount(async () => {
 {:else}
 <div style="display: flex; flex-direction: column">
   {#each hashes as hash}
-    <{{pascal_case referenceable.name}}Detail {{camel_case referenceable.name}}Hash={hash} style="margin-bottom: 8px;"></{{pascal_case referenceable.name}}Detail>
+    <{{pascal_case referenceable.name}}Detail {{camel_case referenceable.name}}Hash={hash} style="margin-bottom: 8px;" on:{{pascal_case referenceable.name}}-deleted={() => fetch{{pascal_case (plural referenceable.name)}}()}></{{pascal_case referenceable.name}}Detail>
   {/each}
 </div>
 {/if}

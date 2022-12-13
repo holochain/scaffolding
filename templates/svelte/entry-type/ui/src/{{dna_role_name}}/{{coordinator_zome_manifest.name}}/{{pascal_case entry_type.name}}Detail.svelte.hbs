@@ -12,12 +12,14 @@ import '@material/mwc-icon-button';
 {{#if crud.update}}
 import Edit{{pascal_case entry_type.name}} from './Edit{{pascal_case entry_type.name}}.svelte'; 
 {{/if}}
-{{#each entry_type.fields}}
-  {{#if widget}}
+{{#uniq_lines}}
+  {{#each entry_type.fields}}
+    {{#if widget}}
 {{> (concat field_type "/" widget "/detail/imports") }}
 
-  {{/if}}
-{{/each}}
+    {{/if}}
+  {{/each}}
+{{/uniq_lines}}
 
 const dispatch = createEventDispatcher();
 

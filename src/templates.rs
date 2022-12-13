@@ -4,11 +4,11 @@ use dialoguer::theme::ColorfulTheme;
 use dialoguer::Select;
 use handlebars::{
     handlebars_helper, Context, Handlebars, Helper, HelperDef, HelperResult, Output, RenderContext,
-    RenderError, Renderable,
+    RenderError, Renderable, StringOutput,
 };
 use regex::Regex;
 use serde_json::Value;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashSet};
 use std::ffi::OsString;
 use std::path::PathBuf;
 
@@ -57,6 +57,7 @@ pub fn register_helpers<'a>(h: Handlebars<'a>) -> Handlebars<'a> {
     let h = register_case_helpers(h);
     let h = register_pluralize_helpers(h);
     let h = register_merge_scope(h);
+    let h = register_uniq_lines(h);
 
     h
 }
@@ -169,6 +170,45 @@ impl HelperDef for MergeScope {
 }
 pub fn register_merge_scope<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
     h.register_helper("merge_scope", Box::new(MergeScope));
+
+    h
+}
+
+#[derive(Clone, Copy)]
+pub struct UniqLines;
+
+impl HelperDef for UniqLines {
+    fn call<'reg: 'rc, 'rc>(
+        &self,
+        h: &Helper<'reg, 'rc>,
+        r: &'reg Handlebars<'reg>,
+        ctx: &'rc Context,
+        rc: &mut RenderContext<'reg, 'rc>,
+        out: &mut dyn Output,
+    ) -> HelperResult {
+        let t = h.template().ok_or(RenderError::new(
+            "uniq_lines helper cannot have empty content",
+        ))?;
+
+        let mut string_output = StringOutput::new();
+        t.render(r, ctx, rc, &mut string_output)?;
+
+        let rendered_string = string_output.into_string()?;
+
+        let unique_lines: Vec<String> = rendered_string
+            .split('\n')
+            .into_iter()
+            .map(|s| s.to_string())
+            .collect::<HashSet<String>>()
+            .into_iter()
+            .collect();
+
+        out.write(unique_lines.join("\n").as_str())?;
+        Ok(())
+    }
+}
+pub fn register_uniq_lines<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
+    h.register_helper("uniq_lines", Box::new(UniqLines));
 
     h
 }

@@ -19,13 +19,11 @@ export default defineComponent({
     appWebsocket: AppWebsocket | undefined;
     loading: boolean;
     appInfo: InstalledAppInfo | undefined;
-    actionHash: ActionHash | undefined;
   } {
     return {
       appWebsocket: undefined,
       loading: true,
       appInfo: undefined,
-      actionHash: undefined,
     };
   },
   async mounted() {

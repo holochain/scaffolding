@@ -5,12 +5,14 @@ import { consume } from '@lit-labs/context';
 import '@material/mwc-button';
 import '@material/mwc-snackbar';
 import { Snackbar } from '@material/mwc-snackbar';
-{{#each entry_type.fields}}
-  {{#if widget}}
+{{#uniq_lines}}
+  {{#each entry_type.fields}}
+    {{#if widget}}
 {{> (concat field_type "/" widget "/edit/imports") }}
 
-  {{/if}}
-{{/each}}
+    {{/if}}
+  {{/each}}
+{{/uniq_lines}}
 
 import { appWebsocketContext, appInfoContext } from '../../contexts';
 import { {{pascal_case entry_type.name}} } from './types';
