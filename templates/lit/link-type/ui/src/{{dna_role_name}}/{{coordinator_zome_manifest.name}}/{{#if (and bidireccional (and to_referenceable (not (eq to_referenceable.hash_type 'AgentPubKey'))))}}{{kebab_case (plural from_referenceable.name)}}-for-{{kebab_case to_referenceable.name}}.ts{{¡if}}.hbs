@@ -10,6 +10,12 @@ import './{{kebab_case from_referenceable.name}}-detail';
 @customElement('{{kebab_case (plural from_referenceable.name)}}-for-{{kebab_case to_referenceable.name}}')
 export class {{pascal_case (plural from_referenceable.name)}}For{{pascal_case to_referenceable.name}} extends LitElement {
 
+  @consume({ context: appWebsocketContext })
+  appWebsocket!: AppWebsocket;
+
+  @consume({ context: appInfoContext })
+  appInfo!: InstalledAppInfo;
+  
   @property({
     hasChanged: (newVal: {{to_referenceable.hash_type}}, oldVal: {{to_referenceable.hash_type}}) => newVal?.toString() !== oldVal?.toString()
   })
@@ -23,12 +29,6 @@ export class {{pascal_case (plural from_referenceable.name)}}For{{pascal_case to
       payload: {{camel_case to_referenceable.singular_arg}},
       provenance: this.cellData.cell_id[1]
   }) as Promise<Array<{{from_referenceable.hash_type}}>>, () => [this.{{camel_case to_referenceable.singular_arg}}]);
-
-  @consume({ context: appWebsocketContext })
-  appWebsocket!: AppWebsocket;
-
-  @consume({ context: appInfoContext })
-  appInfo!: InstalledAppInfo;
 
   get cellData() {
     return this.appInfo.cell_data.find((c: InstalledCell) => c.role_name === '{{dna_role_name}}')!;

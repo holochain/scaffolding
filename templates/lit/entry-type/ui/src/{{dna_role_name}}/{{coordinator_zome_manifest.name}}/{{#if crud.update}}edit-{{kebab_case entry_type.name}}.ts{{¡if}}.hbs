@@ -19,6 +19,12 @@ import { {{pascal_case entry_type.name}} } from './types';
 @customElement('edit-{{kebab_case entry_type.name}}')
 export class Edit{{pascal_case entry_type.name}} extends LitElement {
 
+  @consume({ context: appWebsocketContext })
+  appWebsocket!: AppWebsocket;
+
+  @consume({ context: appInfoContext })
+  appInfo!: InstalledAppInfo;
+  
   {{#if link_from_original_to_each_update}}
   @property({
       hasChanged: (newVal: ActionHash, oldVal: ActionHash) => newVal?.toString() !== oldVal?.toString()
@@ -51,12 +57,6 @@ export class Edit{{pascal_case entry_type.name}} extends LitElement {
   is{{pascal_case entry_type.name}}Valid() {
     return true{{#each entry_type.fields}}{{#if widget}}{{#if (eq cardinality "single")}} && this._{{camel_case field_name}} !== undefined{{/if}}{{#if (eq cardinality "vector")}} && this._{{camel_case field_name}}.every(e => e !== undefined){{/if}}{{/if}}{{/each}};
   }
-
-  @consume({ context: appWebsocketContext })
-  appWebsocket!: AppWebsocket;
-
-  @consume({ context: appInfoContext })
-  appInfo!: InstalledAppInfo;
   
   connectedCallback() {
     super.connectedCallback();

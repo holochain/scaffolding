@@ -23,6 +23,12 @@ import { {{pascal_case entry_type.name}} } from './types';
 
 @customElement('{{kebab_case entry_type.name}}-detail')
 export class {{pascal_case entry_type.name}}Detail extends LitElement {
+  @consume({ context: appWebsocketContext })
+  appWebsocket!: AppWebsocket;
+
+  @consume({ context: appInfoContext })
+  appInfo!: InstalledAppInfo;
+
   @property({
     hasChanged: (newVal: {{#if entry_type.reference_entry_hash}}EntryHash{{else}}ActionHash{{/if}}, oldVal: {{#if entry_type.reference_entry_hash}}EntryHash{{else}}ActionHash{{/if}}) => newVal?.toString() !== oldVal?.toString()
   })
@@ -41,12 +47,6 @@ export class {{pascal_case entry_type.name}}Detail extends LitElement {
   @state()
   _editing = false;
   {{/if}}
-
-  @consume({ context: appWebsocketContext })
-  appWebsocket!: AppWebsocket;
-
-  @consume({ context: appInfoContext })
-  appInfo!: InstalledAppInfo;
 
   get cellData() {
     return this.appInfo.cell_data.find((c: InstalledCell) => c.role_name === '{{dna_role_name}}')!;

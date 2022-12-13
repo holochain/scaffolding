@@ -11,6 +11,7 @@ import '@material/mwc-circular-progress';
 import { appWebsocketContext, appInfoContext } from './contexts';
 
 import './forum/posts/all-posts';
+import { AllPosts } from './forum/posts/all-posts';
 import './forum/posts/create-post';
 
 @customElement('holochain-app')
@@ -32,13 +33,13 @@ export class HolochainApp extends LitElement {
     );
 
     this.appInfo = await this.appWebsocket.appInfo({
-      installed_app_id: '{{app_name}}',
+      installed_app_id: 'forum',
     });
     
     this.loading = false;
   }
   
-  get allPosts(): LitElement | undefined {
+  get allPosts(): AllPosts | undefined {
     return this.shadowRoot?.getElementById('all-posts');
   }
 
@@ -54,7 +55,7 @@ export class HolochainApp extends LitElement {
 
         <div id="content">
           <all-posts id="all-posts" style="margin-bottom: 16px"></all-posts>
-          <create-post @post-created=${() => this.allPosts?.firstUpdated()}></create-post>
+          <create-post @post-created=${() => this.allPosts?._fetchPosts.run()}></create-post>
         </div>
       </main>
     `;

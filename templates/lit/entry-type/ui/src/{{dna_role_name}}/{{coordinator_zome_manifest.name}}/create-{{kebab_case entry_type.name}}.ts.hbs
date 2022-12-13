@@ -17,6 +17,12 @@ import { {{pascal_case entry_type.name}} } from './types';
 
 @customElement('create-{{kebab_case entry_type.name}}')
 export class Create{{pascal_case entry_type.name}} extends LitElement {
+  @consume({ context: appWebsocketContext })
+  appWebsocket!: AppWebsocket;
+
+  @consume({ context: appInfoContext })
+  appInfo!: InstalledAppInfo;
+
   {{#each entry_type.fields}}
     {{#if (not widget) }}
       {{#if (not (eq cardinality "vector" ) )}}
@@ -48,12 +54,6 @@ export class Create{{pascal_case entry_type.name}} extends LitElement {
   is{{pascal_case entry_type.name}}Valid() {
     return true{{#each entry_type.fields}}{{#if widget}}{{#if (eq cardinality "single")}} && this._{{camel_case field_name}} !== undefined{{/if}}{{#if (eq cardinality "vector")}} && this._{{camel_case field_name}}.every(e => e !== undefined){{/if}}{{/if}}{{/each}};
   }
-
-  @consume({ context: appWebsocketContext })
-  appWebsocket!: AppWebsocket;
-
-  @consume({ context: appInfoContext })
-  appInfo!: InstalledAppInfo;
 
   async create{{pascal_case entry_type.name}}() {
     const cellData = this.appInfo.cell_data.find((c: InstalledCell) => c.role_name === '{{dna_role_name}}')!;

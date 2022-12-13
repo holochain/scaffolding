@@ -10,6 +10,12 @@ import './{{kebab_case referenceable.name}}-detail';
 
 @customElement('{{kebab_case collection_name}}')
 export class {{pascal_case collection_name}} extends LitElement {
+  @consume({ context: appWebsocketContext })
+  appWebsocket!: AppWebsocket;
+
+  @consume({ context: appInfoContext })
+  appInfo!: InstalledAppInfo;
+  
   {{#if (eq collection_type.type "ByAuthor")}}
 
   @property({
@@ -26,12 +32,6 @@ export class {{pascal_case collection_name}} extends LitElement {
       payload: {{#if (eq collection_type.type "ByAuthor")}}author{{else}}null{{/if}},
       provenance: this.cellData.cell_id[1]
   }) as Promise<Array<{{referenceable.hash_type}}>>, () => [{{#if (eq collection_type.type "ByAuthor")}}this.author{{/if}}]);
-
-  @consume({ context: appWebsocketContext })
-  appWebsocket!: AppWebsocket;
-
-  @consume({ context: appInfoContext })
-  appInfo!: InstalledAppInfo;
   
   get cellData() {
     return this.appInfo.cell_data.find((c: InstalledCell) => c.role_name === '{{dna_role_name}}')!;

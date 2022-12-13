@@ -18,7 +18,7 @@
     appWebsocket = await AppWebsocket.connect(`ws://localhost:${process.env.HC_PORT}`);
 
     appInfo = await appWebsocket.appInfo({
-      installed_app_id: '{{app_name}}',
+      installed_app_id: 'forum',
     });
     loading = false;
   });

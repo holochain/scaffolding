@@ -82,7 +82,7 @@ pub fn render_entry_definition_file(
 
     let deleted_invalid_reason = format!("{} cannot be deleted", plural_name_title);
 
-    let validate_delete_result: TokenStream = match crud.update {
+    let validate_delete_result: TokenStream = match crud.delete {
         true => quote! {
             // TODO: add the appropriate validation rules
             Ok(ValidateCallbackResult::Valid)

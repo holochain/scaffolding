@@ -18,7 +18,7 @@
         background-color: #ededed;
       }
     </style>
-    <title>lit-element</title>
+    <title>Example hApp</title>
   </head>
 
   <body>
@@ -33,7 +33,7 @@
         );
 
         const appInfo = await appWebsocket.appInfo({
-          installed_app_id: '{{app_name}}',
+          installed_app_id: 'hello_world',
         });
         
         const cellData = appInfo.cell_data[0];
