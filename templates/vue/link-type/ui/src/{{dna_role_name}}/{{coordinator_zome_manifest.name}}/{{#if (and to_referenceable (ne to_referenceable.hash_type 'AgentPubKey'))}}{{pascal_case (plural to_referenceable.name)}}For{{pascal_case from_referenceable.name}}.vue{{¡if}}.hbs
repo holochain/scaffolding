@@ -2,7 +2,8 @@
   <div v-if="loading" style="display: flex; flex: 1; align-items: center; justify-content: center">
     <mwc-circular-progress indeterminate></mwc-circular-progress>
   </div>
-  
+
+{{eq from_referenceable.hash_type 'AgentPubKey'}}
   <div v-else style="display: flex; flex-direction: column">
     <span v-if="error">Error fetching the {{lower_case (plural to_referenceable.name)}}: {{{{raw}}}} {{error.data.data}}.{{{{/raw}}}}</span>
     <div v-else-if="hashes && hashes.length > 0">
