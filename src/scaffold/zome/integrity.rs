@@ -31,7 +31,7 @@ pub fn genesis_self_check(data: GenesisSelfCheckData) -> ExternResult<ValidateCa
 
 /// Validation the network performs when you try to join, you can't perform this validation yourself as you are not a member yet.
 /// There *is* access to network calls in this function
-pub fn validate_agent_joining(agent_pub_key: AgentPubKey, membrane_proof: Option<MembraneProof>) -> ExternResult<ValidateCallbackResult> {{
+pub fn validate_agent_joining(agent_pub_key: AgentPubKey, membrane_proof: &Option<MembraneProof>) -> ExternResult<ValidateCallbackResult> {{
     Ok(ValidateCallbackResult::Valid)
 }}
 
@@ -87,7 +87,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {{
                 action
             }} => Ok(ValidateCallbackResult::Valid),
             OpRecord::UpdateCapGrant {{
-                original_action
+                original_action,
                 action
             }} => Ok(ValidateCallbackResult::Valid),
             OpRecord::Dna {{
@@ -167,7 +167,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {{
                 action
             }} => {{
                 let previous_action = must_get_action(action.hashed.content.prev_action())?;
-                match previous_action {{
+                match previous_action.action() {{
                     Action::AgentValidationPkg(AgentValidationPkg {{ membrane_proof, .. }}) => validate_agent_joining(agent, membrane_proof),
                     _ => Ok(ValidateCallbackResult::Invalid("The previous action for a `CreateAgent` action must be an `AgentValidationPkg`".to_string()))
                 }}

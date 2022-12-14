@@ -270,11 +270,11 @@ fn add_link_type_to_validation_arms(
                         if let syn::Expr::MethodCall(call) = &mut *try_expr.expr {
                             if call.method.to_string().eq(&String::from("to_type")) {
                                 for arm in &mut match_expr.arms {
-                                    if let syn::Pat::Struct(pat_struct) = &mut arm.pat {
-                                        if let Some(path_segment) = pat_struct.path.segments.last()
+                                    if let syn::Pat::TupleStruct(tuple_struct) = &mut arm.pat {
+                                        if let Some(path_segment) =
+                                            tuple_struct.path.segments.last()
                                         {
                                             let path_segment_str = path_segment.ident.to_string();
-
                                             if path_segment_str.eq(&String::from("StoreRecord")) {
                                                 if let Some(op_entry_match_expr) =
                                                     find_ending_match_expr(&mut *arm.body)
@@ -342,7 +342,15 @@ fn add_link_type_to_validation_arms(
                                                         }
                                                     }
                                                 }
-                                            } else if path_segment_str
+                                            }
+                                        }
+                                    }
+                                    if let syn::Pat::Struct(pat_struct) = &mut arm.pat {
+                                        if let Some(path_segment) = pat_struct.path.segments.last()
+                                        {
+                                            let path_segment_str = path_segment.ident.to_string();
+
+                                            if path_segment_str
                                                 .eq(&String::from("RegisterCreateLink"))
                                             {
                                                 // Add new link type to match arm
