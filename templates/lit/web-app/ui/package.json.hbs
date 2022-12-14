@@ -8,7 +8,7 @@
     "lint": "eslint --ext .ts,.html . --ignore-path .gitignore && prettier \"**/*.ts\" --check --ignore-path .gitignore",
     "format": "eslint --ext .ts,.html . --fix --ignore-path .gitignore && prettier \"**/*.ts\" --write --ignore-path .gitignore",
     "build": "rimraf dist && tsc && rollup -c rollup.config.js",
-    "build:watch": "run-singleton \"tsc --watch --preserveWatchOutput\"",
+    "build:watch": "tsc && concurrently \"tsc --watch --preserveWatchOutput\" \"rollup -c rollup.config.js -w\"",
     "start": "tsc && concurrently -r \"npm run build:watch\" \"wds\"",
     "package": "npm run build && cd dist && bestzip ../dist.zip *"
   },

@@ -6,15 +6,14 @@
     "tests"
   ],
   "scripts": {
-    "start": "npm run network 2",
-    "network": "hc s clean && npm run build:happ && concurrently-repeat \"npm run start:agent\"",
-    "start:agent": "cross-env HC_PORT=$(port) concurrently -k \"npm run start:happ\" \"sleep 5 && npm run start -w ui\"",
+    "start": "AGENTS=2 npm run network",
+    "network": "hc s clean && npm run build:happ && concurrently \"npm run build:watch -w ui\" \"npm run launch:happ\" \"npm run playground\"",
     "test": "npm run build:zomes && hc app pack workdir --recursive && npm t -w tests",
-    "start:happ": "concurrently \"RUST_LOG=warn echo \"pass\" | hc s --piped generate workdir/{{app_name}}.happ --run=$HC_PORT -a {{app_name}} network mdns\" \"npm run playground\"",
+    "launch:happ": "RUST_LOG=warn echo \"pass\" | hc launch --piped -n $AGENTS workdir/{{app_name}}.happ --ui-path ui/dist network mdns",
     "package": "npm run build:happ && npm run package -w ui && hc web-app pack workdir --recursive",
     "build:happ": "npm run build:zomes && hc app pack workdir --recursive",
     "build:zomes": "RUSTFLAGS='' CARGO_TARGET_DIR=target cargo build --release --target wasm32-unknown-unknown",
-    "playground": "run-singleton \"holochain-playground\""
+    "playground": "holochain-playground"
   },
   "devDependencies": {
     "@holochain-playground/cli": "^0.0.11",

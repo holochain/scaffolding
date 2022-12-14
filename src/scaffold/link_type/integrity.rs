@@ -1,6 +1,7 @@
 use std::{ffi::OsString, path::PathBuf};
 
 use convert_case::{Case, Casing};
+use holochain::test_utils::itertools::Itertools;
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 
@@ -69,11 +70,26 @@ pub fn add_link_type_to_integrity_zome(
         |file_path, mut file| {
             // If there are no link types in this zome, first add the empty enum
             if hdk_link_types_instances.len() == 0 && file_path == PathBuf::from("lib.rs") {
-                file.items.push(syn::parse_str::<syn::Item>(
+                let link_types_item = syn::parse_str::<syn::Item>(
                     "#[hdk_link_types]
                       pub enum LinkTypes {}
                         ",
-                )?);
+                )?;
+
+                // Insert the link types just before the first function
+                match file.items.iter().find_position(|i| {
+                    if let syn::Item::Fn(_) = i {
+                        true
+                    } else {
+                        false
+                    }
+                }) {
+                    Some((i, _)) => {
+                        file.items.insert(i, link_types_item);
+                    }
+                    None => file.items.push(link_types_item),
+                }
+
                 for item in &mut file.items {
                     if let syn::Item::Fn(item_fn) = item {
                         if item_fn.sig.ident.to_string().eq(&String::from("validate")) {
@@ -221,6 +237,26 @@ pub fn add_link_type_to_integrity_zome(
 
     Ok(zome_file_tree)
 }
+fn is_create_link(pat: &syn::Pat) -> bool {
+    if let syn::Pat::Struct(pat_struct) = pat {
+        if let Some(ps) = pat_struct.path.segments.last() {
+            if ps.ident.to_string().eq(&String::from("CreateLink")) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+fn is_delete_link(pat: &syn::Pat) -> bool {
+    if let syn::Pat::Struct(pat_struct) = pat {
+        if let Some(ps) = pat_struct.path.segments.last() {
+            if ps.ident.to_string().eq(&String::from("DeleteLink")) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
 
 fn add_link_type_to_validation_arms(
     item: &mut syn::Item,
@@ -239,7 +275,74 @@ fn add_link_type_to_validation_arms(
                                         {
                                             let path_segment_str = path_segment.ident.to_string();
 
-                                            if path_segment_str
+                                            if path_segment_str.eq(&String::from("StoreRecord")) {
+                                                if let Some(op_entry_match_expr) =
+                                                    find_ending_match_expr(&mut *arm.body)
+                                                {
+                                                    for op_record_arm in
+                                                        &mut op_entry_match_expr.arms
+                                                    {
+                                                        if is_create_link(&op_record_arm.pat) {
+                                                            // Add new link type to match arm
+                                                            if let Some(_) = find_ending_match_expr(
+                                                                &mut *op_record_arm.body,
+                                                            ) {
+                                                            } else {
+                                                                // Change empty invalid to match on link_type
+                                                                *op_record_arm.body =
+                                                                    syn::parse_str::<syn::Expr>(
+                                                                        "match link_type {}",
+                                                                    )?;
+                                                            }
+
+                                                            // Add new link type to match arm
+                                                            if let Some(link_type_match) =
+                                                                find_ending_match_expr(
+                                                                    &mut *op_record_arm.body,
+                                                                )
+                                                            {
+                                                                let new_arm: syn::Arm = syn::parse_str(
+                                                                    format!("LinkTypes::{} => validate_create_link_{}(base_address, target_address),", 
+                                                                        link_type_name.to_case(Case::Pascal),
+                                                                        link_type_name.to_case(Case::Snake)
+                                                                    ).as_str()
+                                                                )?;
+                                                                link_type_match.arms.push(new_arm);
+                                                            }
+                                                        } else if is_delete_link(&op_record_arm.pat)
+                                                        {
+                                                            // Add new link type to match arm
+                                                            if let Some(_) = find_ending_match_expr(
+                                                                &mut *op_record_arm.body,
+                                                            ) {
+                                                            } else {
+                                                                // Change empty invalid to match on link_type
+                                                                *op_record_arm.body =
+                                                                    syn::parse_str::<syn::Expr>(
+                                                                        "match link_type {}",
+                                                                    )?;
+                                                            }
+
+                                                            // Add new entry type to match arm
+                                                            if let Some(link_type_match) =
+                                                                find_ending_match_expr(
+                                                                    &mut *op_record_arm.body,
+                                                                )
+                                                            {
+                                                                let new_arm: syn::Arm =
+                                                                    syn::parse_str(
+                                                                        format!("LinkTypes::{}({}) => validate_delete_link_{}(base_address, target_address),", 
+                                                                            link_type_name.to_case(Case::Pascal),
+                                                                            link_type_name.to_case(Case::Snake),
+                                                                            link_type_name.to_case(Case::Snake),
+                                                                        ).as_str()
+                                                                    )?;
+                                                                link_type_match.arms.push(new_arm);
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            } else if path_segment_str
                                                 .eq(&String::from("RegisterCreateLink"))
                                             {
                                                 // Add new link type to match arm
