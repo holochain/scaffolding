@@ -1,6 +1,7 @@
 use std::{ffi::OsString, path::PathBuf};
 
 use convert_case::{Case, Casing};
+use holochain::test_utils::itertools::Itertools;
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 
@@ -69,11 +70,26 @@ pub fn add_link_type_to_integrity_zome(
         |file_path, mut file| {
             // If there are no link types in this zome, first add the empty enum
             if hdk_link_types_instances.len() == 0 && file_path == PathBuf::from("lib.rs") {
-                file.items.push(syn::parse_str::<syn::Item>(
+                let link_types_item = syn::parse_str::<syn::Item>(
                     "#[hdk_link_types]
                       pub enum LinkTypes {}
                         ",
-                )?);
+                )?;
+
+                // Insert the link types just before the first function
+                match file.items.iter().find_position(|i| {
+                    if let syn::Item::Fn(_) = i {
+                        true
+                    } else {
+                        false
+                    }
+                }) {
+                    Some((i, _)) => {
+                        file.items.insert(i, link_types_item);
+                    }
+                    None => file.items.push(link_types_item),
+                }
+
                 for item in &mut file.items {
                     if let syn::Item::Fn(item_fn) = item {
                         if item_fn.sig.ident.to_string().eq(&String::from("validate")) {

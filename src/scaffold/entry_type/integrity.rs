@@ -1,4 +1,5 @@
 use convert_case::{Case, Casing};
+use holochain::test_utils::itertools::Itertools;
 use prettyplease::unparse;
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
@@ -214,12 +215,30 @@ pub use {}::*;
 
             // If there are no entry types definitions in this zome, first add the empty enum
             if entry_types.is_none() && file_path == PathBuf::from("lib.rs") {
-                file.items.push(syn::parse_str::<syn::Item>(
+                let entry_types_item = syn::parse_str::<syn::Item>(
                     "#[hdk_entry_defs]
                      #[unit_enum(UnitEntryTypes)]
                       pub enum EntryTypes {}
                         ",
-                )?);
+                )?;
+
+                // Insert the entry types just before LinkTypes or before the first function if LinkTypes doesn't exist
+                match file.items.iter().find_position(|i| {
+                    if let syn::Item::Enum(item_enum) = i {
+                        if item_enum.ident.to_string().eq(&String::from("LinkTypes")) {
+                            return true;
+                        }
+                    }
+                    if let syn::Item::Fn(_) = i {
+                        return true;
+                    }
+                    false
+                }) {
+                    Some((i, _)) => {
+                        file.items.insert(i, entry_types_item);
+                    }
+                    None => file.items.push(entry_types_item),
+                }
 
                 for item in &mut file.items {
                     if let syn::Item::Fn(item_fn) = item {
