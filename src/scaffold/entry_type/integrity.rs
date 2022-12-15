@@ -58,7 +58,8 @@ pub fn render_entry_definition_file(
 
     let validate_update_fn =
         format_ident!("validate_update_{}", entry_def.name.to_case(Case::Snake));
-    let new_post_arg = format_ident!("new_{}", entry_def.name.to_case(Case::Snake));
+    let new_entry_arg = format_ident!("{}", entry_def.name.to_case(Case::Snake));
+    let original_entry_arg = format_ident!("original_{}", entry_def.name.to_case(Case::Snake));
 
     let updated_invalid_reason = format!("{} cannot be updated", plural_name_title);
 
@@ -72,14 +73,14 @@ pub fn render_entry_definition_file(
         },
     };
     let validate_update: TokenStream = quote! {
-        pub fn #validate_update_fn(#new_post_arg: #name_pascal) -> ExternResult<ValidateCallbackResult> {
+        pub fn #validate_update_fn(action: Update, #new_entry_arg: #name_pascal, original_action: EntryCreationAction, #original_entry_arg: #name_pascal) -> ExternResult<ValidateCallbackResult> {
             #validate_update_result
         }
     };
 
     let validate_delete_fn =
         format_ident!("validate_delete_{}", entry_def.name.to_case(Case::Snake));
-    let deleted_post_arg = format_ident!("deleted_{}", entry_def.name.to_case(Case::Snake));
+    let deleted_post_arg = format_ident!("original_{}", entry_def.name.to_case(Case::Snake));
 
     let deleted_invalid_reason = format!("{} cannot be deleted", plural_name_title);
 
@@ -93,7 +94,7 @@ pub fn render_entry_definition_file(
         },
     };
     let validate_delete: TokenStream = quote! {
-        pub fn #validate_delete_fn(#deleted_post_arg: #name_pascal) -> ExternResult<ValidateCallbackResult> {
+        pub fn #validate_delete_fn(action: Delete, original_action: EntryCreationAction, #deleted_post_arg: #name_pascal) -> ExternResult<ValidateCallbackResult> {
             #validate_delete_result
         }
     };
@@ -110,7 +111,7 @@ pub fn render_entry_definition_file(
       #[derive(Clone)]
       #entry_def_token_stream
 
-      pub fn #validate_create_fn(#name_snake: #name_pascal) -> ExternResult<ValidateCallbackResult> {
+      pub fn #validate_create_fn(action: EntryCreationAction, #name_snake: #name_pascal) -> ExternResult<ValidateCallbackResult> {
           // TODO: add the appropriate validation rules
           Ok(ValidateCallbackResult::Valid)
       }
@@ -124,23 +125,7 @@ pub fn render_entry_definition_file(
 
     Ok(file)
 }
-fn is_create_or_update_entry(pat: &syn::Pat) -> bool {
-    if let syn::Pat::Struct(pat_struct) = pat {
-        if let Some(ps) = pat_struct.path.segments.last() {
-            if ps.ident.to_string().eq(&String::from("CreateEntry"))
-                || ps.ident.to_string().eq(&String::from("UpdateEntry"))
-            {
-                return true;
-            }
-        }
-    }
-    if let syn::Pat::Or(pat_or) = pat {
-        if let Some(_) = pat_or.cases.iter().find(|p| is_create_or_update_entry(p)) {
-            return true;
-        }
-    }
-    return false;
-}
+
 fn is_create_entry(pat: &syn::Pat) -> bool {
     if let syn::Pat::Struct(pat_struct) = pat {
         if let Some(ps) = pat_struct.path.segments.last() {
@@ -151,6 +136,18 @@ fn is_create_entry(pat: &syn::Pat) -> bool {
     }
     return false;
 }
+
+fn is_update_entry(pat: &syn::Pat) -> bool {
+    if let syn::Pat::Struct(pat_struct) = pat {
+        if let Some(ps) = pat_struct.path.segments.last() {
+            if ps.ident.to_string().eq(&String::from("UpdateEntry")) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 fn is_delete_entry(pat: &syn::Pat) -> bool {
     if let syn::Pat::Struct(pat_struct) = pat {
         if let Some(ps) = pat_struct.path.segments.last() {
@@ -289,6 +286,18 @@ pub use {}::*;
                         }
                     }
                 }
+
+                file.items.push(syn::parse_str::<syn::Item>("
+fn record_to_app_entry(record: &Record) -> ExternResult<Option<EntryTypes>> {
+    if let Record { signed_action, entry: RecordEntry::Present(entry) } = record {
+        if let Some(EntryType::App(AppEntryDef { entry_index, zome_index, .. })) = signed_action.action().entry_type() {
+            return EntryTypes::deserialize_from_type(zome_index.clone(), entry_index.clone(), &entry);
+        }
+    }
+
+    Ok(None)
+}
+")?);
             }
 
             file.items =
@@ -438,6 +447,8 @@ fn add_entry_type_to_validation_arms(
     item: &mut syn::Item,
     entry_def: &EntryDefinition,
 ) -> ScaffoldResult<()> {
+    let pascal_entry_def_name = entry_def.name.to_case(Case::Pascal);
+    let snake_entry_def_name = entry_def.name.to_case(Case::Snake);
     if let syn::Item::Fn(item_fn) = item {
         if item_fn.sig.ident.to_string().eq(&String::from("validate")) {
             for stmt in &mut item_fn.block.stmts {
@@ -459,9 +470,7 @@ fn add_entry_type_to_validation_arms(
                                                     for op_record_arm in
                                                         &mut op_entry_match_expr.arms
                                                     {
-                                                        if is_create_or_update_entry(
-                                                            &op_record_arm.pat,
-                                                        ) {
+                                                        if is_create_entry(&op_record_arm.pat) {
                                                             // Add new entry type to match arm
                                                             if let Some(_) = find_ending_match_expr(
                                                                 &mut *op_record_arm.body,
@@ -470,7 +479,7 @@ fn add_entry_type_to_validation_arms(
                                                                 // Change empty invalid to match on entry_type
                                                                 *op_record_arm.body =
                                                                     syn::parse_str::<syn::Expr>(
-                                                                        "match entry_type {}",
+                                                                        "match app_entry {}",
                                                                     )?;
                                                             }
 
@@ -481,35 +490,73 @@ fn add_entry_type_to_validation_arms(
                                                                 )
                                                             {
                                                                 let new_arm: syn::Arm =
-                                                                    if is_create_entry(
-                                                                        &op_record_arm.pat,
-                                                                    ) {
                                                                         syn::parse_str(
-                                                                    format!("EntryTypes::{}({}) => validate_create_{}({}),", 
+                                                                    format!("EntryTypes::{}({}) => validate_create_{}(EntryCreationAction::Create(action), {}),", 
                                                                         entry_def.name.to_case(Case::Pascal),
                                                                         entry_def.name.to_case(Case::Snake),
                                                                         entry_def.name.to_case(Case::Snake),
                                                                         entry_def.name.to_case(Case::Snake)).as_str()
-                                                                )?
-                                                                    } else {
+                                                                )?;
+                                                                entry_type_match.arms.push(new_arm);
+                                                            }
+                                                        } else if is_update_entry(
+                                                            &op_record_arm.pat,
+                                                        ) {
+                                                            // Add new entry type to match arm
+                                                            if let Some(_) = find_ending_match_expr(
+                                                                &mut *op_record_arm.body,
+                                                            ) {
+                                                            } else {
+                                                                // Change empty invalid to match on entry_type
+                                                                *op_record_arm.body =
+                                                                    syn::parse_str::<syn::Expr>(
+                                                                        r#"{
+                    let original_record = must_get_valid_record(original_action_hash)?;
+                    let original_action = original_record.action().clone();
+                    let original_action = match original_action {
+                        Action::Create(create) => EntryCreationAction::Create(create),
+                        Action::Update(update) => EntryCreationAction::Update(update),
+                        _ => {
+                            return Ok(ValidateCallbackResult::Invalid("Original action for an update must be a Create or Update action".to_string()));
+                        }
+                    };
+                    let original_app_entry = match record_to_app_entry(&original_record).map_err(|e| wasm_error!(e))? { 
+                        Some(original_app_entry) => original_app_entry,
+                        None => {
+                            return Ok(ValidateCallbackResult::Valid);
+                        }
+                    };
+                    match app_entry { }
+                }"#,
+                                                                    )?;
+                                                            }
+
+                                                            // Add new entry type to match arm
+                                                            if let Some(entry_type_match) =
+                                                                find_ending_match_expr(
+                                                                    &mut *op_record_arm.body,
+                                                                )
+                                                            {
+                                                                let new_arm: syn::Arm =
                                                                         syn::parse_str(
                                                                     format!(
-        "EntryTypes::{}({}) => {{
-            let result = validate_create_{}({})?;
+        r#"EntryTypes::{pascal_entry_def_name}({snake_entry_def_name}) => {{
+            let result = validate_create_{snake_entry_def_name}(EntryCreationAction::Update(action.clone()), {snake_entry_def_name}.clone())?;
             if let ValidateCallbackResult::Valid = result {{
-                validate_update_{}({})
+                let original_{snake_entry_def_name}: Option<{pascal_entry_def_name}> = original_record.entry().to_app_option().map_err(|e| wasm_error!(e))?;
+                let original_{snake_entry_def_name} = match original_{snake_entry_def_name} {{
+                    Some({snake_entry_def_name}) => {snake_entry_def_name},
+                    None => {{
+                        return Ok(ValidateCallbackResult::Invalid("The updated entry type must be the same as the original entry type".to_string()));
+                    }}
+                }};
+                validate_update_{snake_entry_def_name}(action, {snake_entry_def_name}, original_action, original_{snake_entry_def_name})
             }} else {{
                 Ok(result)
             }}
-        }},", 
-                                                                        entry_def.name.to_case(Case::Pascal),
-                                                                        entry_def.name.to_case(Case::Snake),
-                                                                        entry_def.name.to_case(Case::Snake),
-                                                                        entry_def.name.to_case(Case::Snake),
-                                                                        entry_def.name.to_case(Case::Snake),
-                                                                        entry_def.name.to_case(Case::Snake)).as_str()
-                                                                )?
-                                                                    };
+        }},"#, 
+                                                                    ).as_str()
+                                                                )?;
                                                                 entry_type_match.arms.push(new_arm);
                                                             }
                                                         } else if is_delete_entry(
@@ -523,7 +570,24 @@ fn add_entry_type_to_validation_arms(
                                                                 // Change empty invalid to match on entry_type
                                                                 *op_record_arm.body =
                                                                     syn::parse_str::<syn::Expr>(
-                                                                        "match entry_type {}",
+                                                                        r#"{
+                    let original_record = must_get_valid_record(original_action_hash)?;
+                    let original_action = original_record.action().clone();
+                    let original_action = match original_action {
+                        Action::Create(create) => EntryCreationAction::Create(create),
+                        Action::Update(update) => EntryCreationAction::Update(update),
+                        _ => {
+                            return Ok(ValidateCallbackResult::Invalid("Original action for an update must be a Create or Update action".to_string()));
+                        }
+                    };
+                    let original_app_entry = match record_to_app_entry(&original_record)? { 
+                        Some(original_app_entry) => original_app_entry,
+                        None => {
+                            return Ok(ValidateCallbackResult::Valid);
+                        }
+                    };
+                    match original_app_entry { }
+                }"#,
                                                                     )?;
                                                             }
 
@@ -535,7 +599,7 @@ fn add_entry_type_to_validation_arms(
                                                             {
                                                                 let new_arm: syn::Arm =
                                                                         syn::parse_str(
-                                                                    format!("EntryTypes::{}({}) => validate_delete_{}({}),", 
+                                                                    format!("EntryTypes::{}(original_{}) => validate_delete_{}(action, original_action, original_{}),", 
                                                                         entry_def.name.to_case(Case::Pascal),
                                                                         entry_def.name.to_case(Case::Snake),
                                                                         entry_def.name.to_case(Case::Snake),
@@ -555,9 +619,7 @@ fn add_entry_type_to_validation_arms(
                                                     for op_entry_arm in
                                                         &mut op_entry_match_expr.arms
                                                     {
-                                                        if is_create_or_update_entry(
-                                                            &op_entry_arm.pat,
-                                                        ) {
+                                                        if is_create_entry(&op_entry_arm.pat) {
                                                             // Add new entry type to match arm
                                                             if let Some(_) = find_ending_match_expr(
                                                                 &mut *op_entry_arm.body,
@@ -566,7 +628,7 @@ fn add_entry_type_to_validation_arms(
                                                                 // Change empty invalid to match on entry_type
                                                                 *op_entry_arm.body =
                                                                     syn::parse_str::<syn::Expr>(
-                                                                        "match entry_type {}",
+                                                                        "match app_entry {}",
                                                                     )?;
                                                             }
 
@@ -577,7 +639,36 @@ fn add_entry_type_to_validation_arms(
                                                                 )
                                                             {
                                                                 let new_arm: syn::Arm = syn::parse_str(
-                                                                    format!("EntryTypes::{}({}) => validate_create_{}({}),", 
+                                                                    format!("EntryTypes::{}({}) => validate_create_{}(EntryCreationAction::Create(action), {}),", 
+                                                                        entry_def.name.to_case(Case::Pascal),
+                                                                        entry_def.name.to_case(Case::Snake),
+                                                                        entry_def.name.to_case(Case::Snake),
+                                                                        entry_def.name.to_case(Case::Snake)).as_str()
+                                                                )?;
+                                                                entry_type_match.arms.push(new_arm);
+                                                            }
+                                                        } else if is_update_entry(&op_entry_arm.pat)
+                                                        {
+                                                            // Add new entry type to match arm
+                                                            if let Some(_) = find_ending_match_expr(
+                                                                &mut *op_entry_arm.body,
+                                                            ) {
+                                                            } else {
+                                                                // Change empty invalid to match on entry_type
+                                                                *op_entry_arm.body =
+                                                                    syn::parse_str::<syn::Expr>(
+                                                                        "match app_entry {}",
+                                                                    )?;
+                                                            }
+
+                                                            // Add new entry type to match arm
+                                                            if let Some(entry_type_match) =
+                                                                find_ending_match_expr(
+                                                                    &mut *op_entry_arm.body,
+                                                                )
+                                                            {
+                                                                let new_arm: syn::Arm = syn::parse_str(
+                                                                    format!("EntryTypes::{}({}) => validate_create_{}(EntryCreationAction::Update(action), {}),", 
                                                                         entry_def.name.to_case(Case::Pascal),
                                                                         entry_def.name.to_case(Case::Snake),
                                                                         entry_def.name.to_case(Case::Snake),
@@ -616,7 +707,14 @@ fn add_entry_type_to_validation_arms(
                                                                     {
                                                                     } else {
                                                                         // Change empty invalid to match on entry_type
-                                                                        *op_entry_arm.body = syn::parse_str::<syn::Expr>("match new_entry_type {}")?;
+                                                                        *op_entry_arm.body =
+                                                                            syn::parse_str::<
+                                                                                syn::Expr,
+                                                                            >(
+                                                                                r#"match (app_entry, original_app_entry) {
+     _ => Ok(ValidateCallbackResult::Invalid("Original and updated entry types must be the same".to_string()))
+ }"#,
+                                                                            )?;
                                                                     }
 
                                                                     // Add new entry type to match arm
@@ -626,15 +724,14 @@ fn add_entry_type_to_validation_arms(
                                                                         )
                                                                     {
                                                                         let new_arm: syn::Arm = syn::parse_str(
-                                                                            format!("EntryTypes::{}({}) => validate_update_{}({}),", 
-                                                                                entry_def.name.to_case(Case::Pascal),
-                                                                                entry_def.name.to_case(Case::Snake),
-                                                                                entry_def.name.to_case(Case::Snake),
-                                                                                entry_def.name.to_case(Case::Snake)).as_str()
+                                                                             format!(
+"(EntryTypes::{pascal_entry_def_name}({snake_entry_def_name}), EntryTypes::{pascal_entry_def_name}(original_{snake_entry_def_name})) => 
+    validate_update_{snake_entry_def_name}(action, {snake_entry_def_name}, original_action, original_{snake_entry_def_name}),", 
+                                                                            ).as_str()
                                                                         )?;
                                                                         entry_type_match
                                                                             .arms
-                                                                            .push(new_arm);
+                                                                            .insert(0, new_arm);
                                                                     }
                                                                 }
                                                             }
@@ -669,7 +766,7 @@ fn add_entry_type_to_validation_arms(
                                                                     {
                                                                     } else {
                                                                         // Change empty invalid to match on entry_type
-                                                                        *op_entry_arm.body = syn::parse_str::<syn::Expr>("match original_entry_type {}")?;
+                                                                        *op_entry_arm.body = syn::parse_str::<syn::Expr>("match original_app_entry {}")?;
                                                                     }
                                                                     // Add new entry type to match arm
                                                                     if let Some(entry_type_match) =
@@ -678,7 +775,7 @@ fn add_entry_type_to_validation_arms(
                                                                         )
                                                                     {
                                                                         let new_arm: syn::Arm = syn::parse_str(
-                                                                            format!("EntryTypes::{}({}) => validate_delete_{}({}),", 
+                                                                            format!("EntryTypes::{}({}) => validate_delete_{}(action, original_action, {}),", 
                                                                                 entry_def.name.to_case(Case::Pascal),
                                                                                 entry_def.name.to_case(Case::Snake),
                                                                                 entry_def.name.to_case(Case::Snake),

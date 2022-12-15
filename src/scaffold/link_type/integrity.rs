@@ -199,8 +199,10 @@ pub fn add_link_type_to_integrity_zome(
 
                 let create_token_stream = quote! {
                     pub fn #validate_create_fn(
-                        base: AnyLinkableHash,
-                        target: AnyLinkableHash
+                        action: CreateLink,
+                        base_address: AnyLinkableHash,
+                        target_address: AnyLinkableHash,
+                        tag: LinkTag,
                     ) -> ExternResult<ValidateCallbackResult> {
                         // TODO: add the appropriate validation rules
                         Ok(ValidateCallbackResult::Valid)
@@ -209,8 +211,11 @@ pub fn add_link_type_to_integrity_zome(
 
                 let delete_token_stream = quote! {
                     pub fn #validate_delete_fn(
+                        action: DeleteLink,
+                        original_action: CreateLink,
                         base: AnyLinkableHash,
-                        target: AnyLinkableHash
+                        target: AnyLinkableHash,
+                        tag: LinkTag
                     ) -> ExternResult<ValidateCallbackResult> {
                         #validate_delete_result
                   }
@@ -302,7 +307,8 @@ fn add_link_type_to_validation_arms(
                                                                 )
                                                             {
                                                                 let new_arm: syn::Arm = syn::parse_str(
-                                                                    format!("LinkTypes::{} => validate_create_link_{}(base_address, target_address),", 
+                                                                    format!(
+    "LinkTypes::{} => validate_create_link_{}(action, base_address, target_address, tag),", 
                                                                         link_type_name.to_case(Case::Pascal),
                                                                         link_type_name.to_case(Case::Snake)
                                                                     ).as_str()
@@ -319,7 +325,22 @@ fn add_link_type_to_validation_arms(
                                                                 // Change empty invalid to match on link_type
                                                                 *op_record_arm.body =
                                                                     syn::parse_str::<syn::Expr>(
-                                                                        "match link_type {}",
+                                                                        r#"{
+        let record = must_get_valid_record(original_action_hash)?;
+        let create_link = match record.action() {
+            Action::CreateLink(create_link) => create_link.clone(),
+            _ => {
+                return Ok(ValidateCallbackResult::Invalid("The action that a DeleteLink deletes must be a CreateLink".to_string()));
+            }
+        };
+        let link_type = match LinkTypes::from_type(create_link.zome_index.clone(), create_link.link_type.clone())? {
+            Some(lt) => lt,
+            None => {
+                return Ok(ValidateCallbackResult::Valid);
+            }
+        };
+        match link_type {}
+    }"#,
                                                                     )?;
                                                             }
 
@@ -331,9 +352,9 @@ fn add_link_type_to_validation_arms(
                                                             {
                                                                 let new_arm: syn::Arm =
                                                                     syn::parse_str(
-                                                                        format!("LinkTypes::{}({}) => validate_delete_link_{}(base_address, target_address),", 
+                                                                        format!(
+"LinkTypes::{} => validate_delete_link_{}(action, create_link.clone(), base_address, create_link.target_address, create_link.tag),", 
                                                                             link_type_name.to_case(Case::Pascal),
-                                                                            link_type_name.to_case(Case::Snake),
                                                                             link_type_name.to_case(Case::Snake),
                                                                         ).as_str()
                                                                     )?;
@@ -369,10 +390,12 @@ fn add_link_type_to_validation_arms(
                                                     find_ending_match_expr(&mut *arm.body)
                                                 {
                                                     let new_arm: syn::Arm = syn::parse_str(
-                                                        format!("LinkTypes::{} => validate_create_link_{}(base_address, target_address),", 
+                                                        format!(
+    "LinkTypes::{} => validate_create_link_{}(action, base_address, target_address, tag),", 
                                                             link_type_name.to_case(Case::Pascal),
                                                             link_type_name.to_case(Case::Snake)
-                                                        ).as_str()
+                                                        )
+                                                        .as_str(),
                                                     )?;
                                                     link_type_match.arms.push(new_arm);
                                                 }
@@ -395,11 +418,12 @@ fn add_link_type_to_validation_arms(
                                                     find_ending_match_expr(&mut *arm.body)
                                                 {
                                                     let new_arm: syn::Arm = syn::parse_str(
-                                                                            format!("LinkTypes::{} => validate_delete_link_{}(base_address, target_address),", 
-                                                                               link_type_name.to_case(Case::Pascal),
-                                                                             link_type_name.to_case(Case::Snake)
-                                                                            ).as_str()
-                                                                        )?;
+                                                        format!(
+        "LinkTypes::{} => validate_delete_link_{}(action, original_action, base_address, target_address, tag),", 
+                                                            link_type_name.to_case(Case::Pascal),
+                                                            link_type_name.to_case(Case::Snake)
+                                                        ).as_str()
+                                                    )?;
                                                     link_type_match.arms.push(new_arm);
                                                 }
                                             }
