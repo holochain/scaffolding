@@ -520,7 +520,7 @@ fn add_entry_type_to_validation_arms(
                             return Ok(ValidateCallbackResult::Invalid("Original action for an update must be a Create or Update action".to_string()));
                         }
                     };
-                    let original_app_entry = match record_to_app_entry(&original_record).map_err(|e| wasm_error!(e))? { 
+                    let original_app_entry = match record_to_app_entry(&original_record)? { 
                         Some(original_app_entry) => original_app_entry,
                         None => {
                             return Ok(ValidateCallbackResult::Valid);

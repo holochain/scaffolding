@@ -206,7 +206,6 @@ pub fn map_rust_files<F: Fn(PathBuf, syn::File) -> ScaffoldResult<syn::File> + C
                 let rust_file: syn::File = syn::parse_str(s.as_str()).map_err(|e| {
                     ScaffoldError::MalformedFile(file_path.clone(), format!("{}", e))
                 })?;
-
                 let new_file = map_fn(file_path, rust_file)?;
 
                 return Ok(unparse(&new_file));
