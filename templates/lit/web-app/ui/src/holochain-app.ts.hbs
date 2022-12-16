@@ -23,9 +23,7 @@ export class HolochainApp extends LitElement {
   appInfo!: InstalledAppInfo;
 
   async firstUpdated() {
-    this.appWebsocket = await AppWebsocket.connect(
-      `ws://localhost:${process.env.HC_PORT}`
-    );
+    this.appWebsocket = await AppWebsocket.connect(``);
 
     this.appInfo = await this.appWebsocket.appInfo({
       installed_app_id: '{{app_name}}',

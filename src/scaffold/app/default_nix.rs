@@ -8,11 +8,6 @@ pub fn default_nix() -> FileTree {
         r#"let
   holonixPath = (import ./nix/sources.nix).holonix; # points to the current state of the Holochain repository
   holonix = import (holonixPath) {{
-    rustVersion = {{
-      track = "stable";
-      version = "1.64.0";
-    }};
-
     holochainVersionId = "{}"; # specifies the Holochain version
   }};
   nixpkgs = holonix.pkgs;

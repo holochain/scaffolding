@@ -1,35 +1,13 @@
 {
   "name": "ui",
-  "version": "1.0.0",
-  "private": true,
+  "version": "0.1.0",
   "scripts": {
-    "prepare": "npm run build",
-    "start": "concurrently \"npm run build:watch\" \"wds --config web-dev-server.config.mjs\"",
-    "build": "rollup -c",
-    "build:watch": "run-singleton \"rollup -c -w\"",
+    "build": "rimraf dist && rollup -c rollup.config.js",
+    "build:watch": "rollup -c rollup.config.js -w",
     "package": "npm run build && cd public && bestzip ../dist.zip *"
   },
-  "devDependencies": {
-    "@rollup/plugin-commonjs": "^17.0.0",
-    "@rollup/plugin-node-resolve": "^11.0.0",
-    "@rollup/plugin-replace": "^3.0.0",
-    "@rollup/plugin-typescript": "^8.0.0",
-    "@web/dev-server": "0.1.21",
-    "@web/dev-server-rollup": "^0.3.10",
-    "@tsconfig/svelte": "^2.0.0",
-    "bestzip": "^2.2.0",
-    "concurrently": "^6.2.2",
-    "rollup": "^2.3.4",
-    "rollup-plugin-css-only": "^3.1.0",
-    "rollup-plugin-livereload": "^2.0.0",
-    "rollup-plugin-svelte": "^7.0.0",
-    "rollup-plugin-terser": "^7.0.0",
-    "run-singleton-cli": "^0.0.7",
-    "svelte": "^3.0.0",
-    "svelte-preprocess": "^4.10.4"
-  },
   "dependencies": {
-    "@holochain/client": "^0.8.0",
+    "@holochain/client": "{{holochain_client_version}}",
     "@material/mwc-circular-progress": "^0.27.0",
     "@material/mwc-button": "^0.27.0",
     "@material/mwc-textfield": "^0.27.0",
@@ -40,5 +18,21 @@
     "@material/mwc-slider": "^0.27.0",
     "@material/mwc-formfield": "^0.27.0",
     "@msgpack/msgpack": "^2.7.2"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^17.0.0",
+    "@rollup/plugin-node-resolve": "^11.0.0",
+    "@rollup/plugin-replace": "^3.0.0",
+    "@rollup/plugin-typescript": "^8.0.0",
+    "@tsconfig/svelte": "^2.0.0",
+    "bestzip": "^2.2.0",
+    "concurrently": "^6.2.2",
+    "rollup": "^2.3.4",
+    "rollup-plugin-css-only": "^3.1.0",
+    "rollup-plugin-livereload": "^2.0.0",
+    "rollup-plugin-svelte": "^7.0.0",
+    "rollup-plugin-terser": "^7.0.0",
+    "svelte": "^3.0.0",
+    "svelte-preprocess": "^4.10.4"
   }
 }

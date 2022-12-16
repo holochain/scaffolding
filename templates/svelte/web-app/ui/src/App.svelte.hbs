@@ -8,12 +8,11 @@
   let appWebsocket: AppWebsocket | undefined;
   let appInfo: InstalledAppInfo | undefined;
   let loading = true;
-  let actionHash: ActionHash | undefined;
 
-  $: appWebsocket, appInfo, actionHash, loading;
+  $: appWebsocket, appInfo, loading;
 
   onMount(async () => {
-    appWebsocket = await AppWebsocket.connect(`ws://localhost:${process.env.HC_PORT}`);
+    appWebsocket = await AppWebsocket.connect(``);
 
     appInfo = await appWebsocket.appInfo({
       installed_app_id: '{{app_name}}',

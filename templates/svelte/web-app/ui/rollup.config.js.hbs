@@ -5,7 +5,6 @@ import typescript from '@rollup/plugin-typescript';
 import { terser } from 'rollup-plugin-terser';
 import sveltePreprocess from 'svelte-preprocess';
 import css from 'rollup-plugin-css-only';
-import replace from '@rollup/plugin-replace';
 
 const production = !process.env.ROLLUP_WATCH;
 
@@ -21,15 +20,6 @@ export default {
     clearScreen: false,
   },
   plugins: [
-    production &&
-      replace({
-        'process.env.HC_PORT': JSON.stringify(process.env.HC_PORT),
-        delimiters: ['', ''],
-      }),
-    replace({
-      'node:': '',
-      delimiters: ['', ''],
-    }),
     svelte({
       compilerOptions: {
         // enable run-time checks when not in production
