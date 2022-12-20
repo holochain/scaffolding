@@ -1,7 +1,7 @@
 <script lang="ts">
 import { createEventDispatcher, getContext } from 'svelte';
-import { InstalledCell, AppWebsocket, InstalledAppInfo, Record, EntryHash, AgentPubKey, ActionHash } from '@holochain/client';
-import { appWebsocketContext, appInfoContext } from '../../contexts';
+import { AppAgentClient, Record, EntryHash, AgentPubKey, ActionHash } from '@holochain/client';
+import { clientContext } from '../../contexts';
 import { {{pascal_case entry_type.name}} } from './types';
 import '@material/mwc-button';
 import '@material/mwc-snackbar';
@@ -15,8 +15,7 @@ import { Snackbar } from '@material/mwc-snackbar';
   {{/each}}
 {{/uniq_lines}}
 
-let appInfo = getContext(appInfoContext).getAppInfo();
-let appWebsocket = getContext(appWebsocketContext).getAppWebsocket();
+let client: AppAgentClient = getContext(clientContext).getClient();
 
 const dispatch = createEventDispatcher();
 
@@ -47,9 +46,7 @@ let errorSnackbar: Snackbar;
 $: {{#each entry_type.fields}}{{camel_case field_name}}{{#unless @last}}, {{/unless}}{{/each}};
 $: is{{pascal_case entry_type.name}}Valid = true{{#each entry_type.fields}}{{#if widget}}{{#if (eq cardinality "single")}} && {{camel_case field_name}} !== undefined{{/if}}{{#if (eq cardinality "vector")}} && {{camel_case field_name}}.every(e => e !== undefined){{/if}}{{/if}}{{/each}};
 
-async function create{{pascal_case entry_type.name}}() {
-  const cellData = appInfo.cell_data.find((c: InstalledCell) => c.role_name === '{{dna_role_name}}')!;
-  
+async function create{{pascal_case entry_type.name}}() {  
   const {{camel_case entry_type.name}}: {{pascal_case entry_type.name}} = { 
   {{#each entry_type.fields}}
     {{snake_case field_name}}: {{camel_case field_name}}{{#if (eq cardinality "single")}}!{{/if}},
@@ -57,13 +54,12 @@ async function create{{pascal_case entry_type.name}}() {
   };
   
   try {
-    const record: Record = await appWebsocket.callZome({
+    const record: Record = await client.callZome({
       cap_secret: null,
-      cell_id: cellData.cell_id,
+      role_name: '{{dna_role_name}}',
       zome_name: '{{coordinator_zome_manifest.name}}',
       fn_name: 'create_{{snake_case entry_type.name}}',
       payload: {{camel_case entry_type.name}},
-      provenance: cellData.cell_id[1]
     });
     dispatch('{{kebab_case entry_type.name}}-created', { {{camel_case entry_type.name}}Hash: record.signed_action.hashed.hash });
   } catch (e) {

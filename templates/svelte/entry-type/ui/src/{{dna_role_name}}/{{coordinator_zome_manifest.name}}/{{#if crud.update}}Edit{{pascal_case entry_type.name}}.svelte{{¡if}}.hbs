@@ -1,8 +1,8 @@
 <script lang="ts">
 import { createEventDispatcher, getContext } from 'svelte';
-import { InstalledCell, AppWebsocket, InstalledAppInfo, Record, EntryHash, AgentPubKey, ActionHash } from '@holochain/client';
+import { AppAgentClient, Record, EntryHash, AgentPubKey, ActionHash } from '@holochain/client';
 import { decode } from '@msgpack/msgpack';
-import { appWebsocketContext, appInfoContext } from '../../contexts';
+import { clientContext } from '../../contexts';
 import { {{pascal_case entry_type.name}} } from './types';
 import '@material/mwc-button';
 import '@material/mwc-snackbar';
@@ -16,8 +16,7 @@ import { Snackbar } from '@material/mwc-snackbar';
   {{/each}}
 {{/uniq_lines}}
 
-let appInfo = getContext(appInfoContext).getAppInfo();
-let appWebsocket = getContext(appWebsocketContext).getAppWebsocket();
+let client: AppAgentClient = getContext(clientContext).getClient();
 
 const dispatch = createEventDispatcher();
 
@@ -44,8 +43,7 @@ $: {{#each entry_type.fields}}{{#if widget}}{{camel_case field_name}}{{#unless @
 $: is{{pascal_case entry_type.name}}Valid = true{{#each entry_type.fields}}{{#if widget}}{{#if (eq cardinality "single")}} && {{camel_case field_name}} !== undefined{{/if}}{{#if (eq cardinality "vector")}} && {{camel_case field_name}}.every(e => e !== undefined){{/if}}{{/if}}{{/each}};
 
 async function update{{pascal_case entry_type.name}}() {
-  const cellData = appInfo.cell_data.find((c: InstalledCell) => c.role_name === '{{dna_role_name}}')!;
-  
+
   const {{camel_case entry_type.name}}: {{pascal_case entry_type.name}} = { 
   {{#each entry_type.fields}}
     {{#if widget}}
@@ -64,9 +62,9 @@ async function update{{pascal_case entry_type.name}}() {
   };
 
   try {
-    const updateRecord: Record = await appWebsocket.callZome({
+    const updateRecord: Record = await client.callZome({
       cap_secret: null,
-      cell_id: cellData.cell_id,
+      role_name: '{{dna_role_name}}',
       zome_name: '{{coordinator_zome_manifest.name}}',
       fn_name: 'update_{{snake_case entry_type.name}}',
       payload: {
@@ -75,8 +73,7 @@ async function update{{pascal_case entry_type.name}}() {
         {{/if}}
         previous_{{snake_case entry_type.name}}_hash: currentRecord.signed_action.hashed.hash,
         updated_{{snake_case entry_type.name}}: {{camel_case entry_type.name}}
-      },
-      provenance: cellData.cell_id[1]
+      }
     });
   
     dispatch('{{kebab_case entry_type.name}}-updated', { actionHash: updateRecord.signed_action.hashed.hash });

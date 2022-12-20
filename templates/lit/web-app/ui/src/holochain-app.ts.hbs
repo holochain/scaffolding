@@ -1,33 +1,27 @@
 import { LitElement, css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import {
-  AppWebsocket,
+  AppAgentWebsocket,
   ActionHash,
-  InstalledAppInfo,
+  AppWebsocket,
+  AppAgentClient,
 } from '@holochain/client';
 import { provide } from '@lit-labs/context';
 import '@material/mwc-circular-progress';
 
-import { appWebsocketContext, appInfoContext } from './contexts';
+import { clientContext } from './contexts';
 
 @customElement('holochain-app')
 export class HolochainApp extends LitElement {
   @state() loading = true;
 
-  @provide({ context: appWebsocketContext })
+  @provide({ context: clientContext })
   @property({ type: Object })
-  appWebsocket!: AppWebsocket;
-
-  @provide({ context: appInfoContext })
-  @property({ type: Object })
-  appInfo!: InstalledAppInfo;
+  client!: AppAgentClient;
 
   async firstUpdated() {
-    this.appWebsocket = await AppWebsocket.connect(``);
-
-    this.appInfo = await this.appWebsocket.appInfo({
-      installed_app_id: '{{app_name}}',
-    });
+    const appWebsocket = await AppWebsocket.connect(``);
+    this.client = new AppAgentWebsocket(appWebsocket, '{{app_name}}');
 
     this.loading = false;
   }

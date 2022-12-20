@@ -1,34 +1,26 @@
 <script lang="ts">
   import { onMount, setContext } from 'svelte';
-  import { AppWebsocket, ActionHash, InstalledAppInfo } from '@holochain/client';
+  import { AppWebsocket, ActionHash, AppAgentClient, AppAgentWebsocket } from '@holochain/client';
   import '@material/mwc-circular-progress';
   import AllPosts from './forum/posts/AllPosts.svelte';
   import CreatePost from './forum/posts/CreatePost.svelte';
 
-  import { appWebsocketContext, appInfoContext } from './contexts';
+  import { clientContext } from './contexts';
 
-  let appWebsocket: AppWebsocket | undefined;
-  let appInfo: InstalledAppInfo | undefined;
+  let client: AppAgentClient | undefined;
   let loading = true;
-  let actionHash: ActionHash | undefined;
 
-  $: appWebsocket, appInfo, actionHash, loading;
+  $: client, loading;
 
   onMount(async () => {
-    appWebsocket = await AppWebsocket.connect(`ws://localhost:${process.env.HC_PORT}`);
+    const appWebsocket = await AppWebsocket.connect(``);
 
-    appInfo = await appWebsocket.appInfo({
-      installed_app_id: 'forum',
-    });
+    client = new AppAgentWebsocket(appWebsocket, 'forum');
     loading = false;
   });
 
-  setContext(appWebsocketContext, {
-    getAppWebsocket: () => appWebsocket,
-  });
-
-  setContext(appInfoContext, {
-    getAppInfo: () => appInfo,
+  setContext(clientContext, {
+    getClient: () => client,
   });
 </script>
 

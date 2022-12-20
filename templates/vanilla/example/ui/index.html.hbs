@@ -25,26 +25,20 @@
     <div id="content"></div>
 
     <script type="module">
-      import { AppWebsocket } from '@holochain/client';
+      import { AppWebsocket, AppAgentWebsocket } from '@holochain/client';
       
       async function connect() {
         const appWebsocket = await AppWebsocket.connect(
           `ws://localhost:${process.env.HC_PORT}`
         );
+        const client = new AppAgentWebsocket(appWebsocket, 'hello-world');
 
-        const appInfo = await appWebsocket.appInfo({
-          installed_app_id: 'hello-world',
-        });
-        
-        const cellData = appInfo.cell_data[0];
-        
         const result = await appWebsocket.callZome({
           cap_secret: null,
-          cell_id: cellData.cell_id,
+          role_name: 'hello_world',
           zome_name: 'hello_world',
           fn_name: 'hello_world',
           payload: null,
-          provenance: cellData.cell_id[1]
         });
     
         document.getElementById('content').innerHTML = `<span>${result}</span>`

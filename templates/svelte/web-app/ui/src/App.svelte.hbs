@@ -1,31 +1,24 @@
 <script lang="ts">
   import { onMount, setContext } from 'svelte';
-  import { AppWebsocket, ActionHash, InstalledAppInfo } from '@holochain/client';
+  import { AppWebsocket, ActionHash, AppAgentClient, AppAgentWebsocket } from '@holochain/client';
   import '@material/mwc-circular-progress';
 
-  import { appWebsocketContext, appInfoContext } from './contexts';
+  import { clientContext } from './contexts';
 
-  let appWebsocket: AppWebsocket | undefined;
-  let appInfo: InstalledAppInfo | undefined;
+  let client: AppAgentClient | undefined;
   let loading = true;
 
-  $: appWebsocket, appInfo, loading;
+  $: client, loading;
 
   onMount(async () => {
-    appWebsocket = await AppWebsocket.connect(``);
+    const appWebsocket = await AppWebsocket.connect(``);
 
-    appInfo = await appWebsocket.appInfo({
-      installed_app_id: '{{app_name}}',
-    });
+    client = new AppAgentWebsocket(appWebsocket, '{{app_name}}');
     loading = false;
   });
 
-  setContext(appWebsocketContext, {
-    getAppWebsocket: () => appWebsocket,
-  });
-
-  setContext(appInfoContext, {
-    getAppInfo: () => appInfo,
+  setContext(clientContext, {
+    getClient: () => client,
   });
 </script>
 

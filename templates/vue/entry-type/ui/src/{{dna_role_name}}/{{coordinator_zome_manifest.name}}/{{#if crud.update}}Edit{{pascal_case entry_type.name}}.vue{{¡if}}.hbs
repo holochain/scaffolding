@@ -37,7 +37,7 @@
 </template>
 <script lang="ts">
 import { defineComponent, inject, ComputedRef } from 'vue';
-import { InstalledCell, AppWebsocket, InstalledAppInfo, Record, AgentPubKey, EntryHash, ActionHash } from '@holochain/client';
+import { AppAgentClient, Record, AgentPubKey, EntryHash, ActionHash } from '@holochain/client';
 import { {{pascal_case entry_type.name}} } from './types';
 import '@material/mwc-button';
 import '@material/mwc-snackbar';
@@ -99,7 +99,6 @@ export default defineComponent({
   },
   methods: {
     async update{{pascal_case entry_type.name}}() {
-      const cellData = this.appInfo.cell_data.find((c: InstalledCell) => c.role_name === '{{dna_role_name}}')!;
 
       const {{camel_case entry_type.name}}: {{pascal_case entry_type.name}} = { 
 {{#each entry_type.fields}}
@@ -119,9 +118,9 @@ export default defineComponent({
       };
 
       try {
-        const updateRecord: Record = await this.appWebsocket.callZome({
+        const updateRecord: Record = await this.client.callZome({
           cap_secret: null,
-          cell_id: cellData.cell_id,
+          role_name: '{{dna_role_name}}',
           zome_name: '{{coordinator_zome_manifest.name}}',
           fn_name: 'update_{{snake_case entry_type.name}}',
           payload: {
@@ -130,8 +129,7 @@ export default defineComponent({
 {{/if}}
             previous_{{snake_case entry_type.name}}_hash: this.currentRecord.signed_action.hashed.hash,
             updated_{{snake_case entry_type.name}}: {{camel_case entry_type.name}}
-          },
-          provenance: cellData.cell_id[1]
+          }
         });
         this.$emit('{{kebab_case entry_type.name}}-updated', updateRecord.signed_action.hashed.hash);
       } catch (e: any) {
@@ -143,11 +141,9 @@ export default defineComponent({
   },
   emits: ['{{kebab_case entry_type.name}}-updated', 'edit-canceled'],
   setup() {
-    const appWebsocket = (inject('appWebsocket') as ComputedRef<AppWebsocket>).value;
-    const appInfo = (inject('appInfo') as ComputedRef<InstalledAppInfo>).value;
+    const client = (inject('client') as ComputedRef<AppAgentClient>).value;
     return {
-      appInfo,
-      appWebsocket,
+      client,
     };
   },
 })

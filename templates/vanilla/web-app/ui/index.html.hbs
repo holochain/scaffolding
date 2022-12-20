@@ -25,14 +25,11 @@
     <div id="content"></div>
 
     <script type="module">
-      import { AppWebsocket } from '@holochain/client';
+      import { AppWebsocket, AppAgentWebsocket } from '@holochain/client';
       
       async function connect() {
         const appWebsocket = await AppWebsocket.connect('');
-
-        const appInfo = await appWebsocket.appInfo({
-          installed_app_id: '{{app_name}}',
-        });
+        const appAgentWebsocket = new AppAgentWebsocket(appWebsocket, '{{app_name}}');
         
         alert("Connected to holochain!");
       }

@@ -9,7 +9,7 @@
     "start": "AGENTS=2 npm run network",
     "network": "hc s clean && npm run build:happ && concurrently \"npm run build:watch -w ui\" \"npm run launch:happ\" \"npm run playground\"",
     "test": "npm run build:zomes && hc app pack workdir --recursive && npm t -w tests",
-    "launch:happ": "RUST_LOG=warn echo \"pass\" | hc launch --piped -n $AGENTS workdir/{{app_name}}.happ -w --ui-path ui/dist network mdns",
+    "launch:happ": "RUST_LOG=warn echo \"pass\" | hc launch --piped -n $AGENTS workdir/{{app_name}}.happ -w --ui-path ui/public network mdns",
     "package": "npm run build:happ && npm run package -w ui && hc web-app pack workdir --recursive",
     "build:happ": "npm run build:zomes && hc app pack workdir --recursive",
     "build:zomes": "RUSTFLAGS='' CARGO_TARGET_DIR=target cargo build --release --target wasm32-unknown-unknown",

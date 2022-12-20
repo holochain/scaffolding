@@ -2,7 +2,7 @@
   "name": "ui",
   "version": "0.1.0",
   "scripts": {
-    "build": "rimraf dist && rollup -c rollup.config.js",
+    "build": "rollup -c rollup.config.js",
     "build:watch": "rollup -c rollup.config.js -w",
     "package": "npm run build && cd public && bestzip ../dist.zip *"
   },

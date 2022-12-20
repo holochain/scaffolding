@@ -2,8 +2,8 @@
 import { createEventDispatcher, onMount, getContext } from 'svelte';
 import '@material/mwc-circular-progress';
 import { decode } from '@msgpack/msgpack';
-import { InstalledCell, Record, ActionHash, AppWebsocket, InstalledAppInfo } from '@holochain/client';
-import { appInfoContext, appWebsocketContext } from '../../contexts';
+import { Record, ActionHash, AppAgentClient, EntryHash, AgentPubKey } from '@holochain/client';
+import { clientContext } from '../../contexts';
 import { {{pascal_case entry_type.name}} } from './types';
 import '@material/mwc-circular-progress';
 import { Snackbar } from '@material/mwc-snackbar';
@@ -25,9 +25,7 @@ const dispatch = createEventDispatcher();
 
 export let {{camel_case entry_type.name}}Hash: {{#if entry_type.reference_entry_hash}}EntryHash{{else}}ActionHash{{/if}};
 
-let appInfo = getContext(appInfoContext).getAppInfo();
-let appWebsocket = getContext(appWebsocketContext).getAppWebsocket();
-const cellData = appInfo.cell_data.find((c: InstalledCell) => c.role_name === '{{dna_role_name}}')!;
+let client: AppAgentClient = getContext(clientContext).getClient();
 
 let loading = true;
 let error: any = undefined;
@@ -54,13 +52,12 @@ async function fetch{{pascal_case entry_type.name}}() {
   {{camel_case entry_type.name}} = undefined;
   
   try {
-    record = await appWebsocket.callZome({
+    record = await client.callZome({
       cap_secret: null,
-      cell_id: cellData.cell_id,
+      role_name: '{{dna_role_name}}',
       zome_name: '{{coordinator_zome_manifest.name}}',
       fn_name: 'get_{{snake_case entry_type.name}}',
       payload: {{camel_case entry_type.name}}Hash,
-      provenance: cellData.cell_id[1]
     });
     if (record) {
       {{camel_case entry_type.name}} = decode((record.entry as any).Present.entry) as {{pascal_case entry_type.name}};
@@ -75,15 +72,14 @@ async function fetch{{pascal_case entry_type.name}}() {
 {{#if crud.delete}}
 async function delete{{pascal_case entry_type.name}}() {
   try {
-    await appWebsocket.callZome({
+    await client.callZome({
       cap_secret: null,
-      cell_id: cellData.cell_id,
+      role_name: '{{dna_role_name}}',
       zome_name: '{{coordinator_zome_manifest.name}}',
       fn_name: 'delete_{{snake_case entry_type.name}}',
       payload: {{camel_case entry_type.name}}Hash,
-      provenance: cellData.cell_id[1]
     });
-        dispatch('{{kebab_case entry_type.name}}-deleted', { {{camel_case entry_type.name}}Hash: {{camel_case entry_type.name}}Hash });
+    dispatch('{{kebab_case entry_type.name}}-deleted', { {{camel_case entry_type.name}}Hash: {{camel_case entry_type.name}}Hash });
   } catch (e: any) {
     errorSnackbar.labelText = `Error deleting the {{lower_case entry_type.name}}: ${e.data.data}`;
     errorSnackbar.show();

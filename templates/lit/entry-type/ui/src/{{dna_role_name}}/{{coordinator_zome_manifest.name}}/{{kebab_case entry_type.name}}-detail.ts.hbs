@@ -1,6 +1,6 @@
 import { LitElement, html } from 'lit';
 import { state, customElement, property } from 'lit/decorators.js';
-import { InstalledCell, AppWebsocket, EntryHash, Record, ActionHash, InstalledAppInfo } from '@holochain/client';
+import { EntryHash, Record, ActionHash, AppAgentClient } from '@holochain/client';
 import { consume } from '@lit-labs/context';
 import { Task } from '@lit-labs/task';
 import { decode } from '@msgpack/msgpack';
@@ -21,29 +21,25 @@ import { Snackbar } from '@material/mwc-snackbar';
 import './edit-{{kebab_case entry_type.name}}';
 {{/if}}
 
-import { appInfoContext, appWebsocketContext } from '../../contexts';
+import { clientContext } from '../../contexts';
 import { {{pascal_case entry_type.name}} } from './types';
 
 @customElement('{{kebab_case entry_type.name}}-detail')
 export class {{pascal_case entry_type.name}}Detail extends LitElement {
-  @consume({ context: appWebsocketContext })
-  appWebsocket!: AppWebsocket;
-
-  @consume({ context: appInfoContext })
-  appInfo!: InstalledAppInfo;
+  @consume({ context: clientContext })
+  client!: AppAgentClient;
 
   @property({
     hasChanged: (newVal: {{#if entry_type.reference_entry_hash}}EntryHash{{else}}ActionHash{{/if}}, oldVal: {{#if entry_type.reference_entry_hash}}EntryHash{{else}}ActionHash{{/if}}) => newVal?.toString() !== oldVal?.toString()
   })
   {{camel_case entry_type.name}}Hash!: {{#if entry_type.reference_entry_hash}}EntryHash{{else}}ActionHash{{/if}};
 
-  _fetchRecord = new Task(this, ([{{camel_case entry_type.name}}Hash]) => this.appWebsocket.callZome({
+  _fetchRecord = new Task(this, ([{{camel_case entry_type.name}}Hash]) => this.client.callZome({
       cap_secret: null,
-      cell_id: this.cellData.cell_id,
+      role_name: '{{dna_role_name}}',
       zome_name: '{{coordinator_zome_manifest.name}}',
       fn_name: 'get_{{snake_case entry_type.name}}',
       payload: {{camel_case entry_type.name}}Hash,
-      provenance: this.cellData.cell_id[1]
   }) as Promise<Record | undefined>, () => [this.{{camel_case entry_type.name}}Hash]);
 
   {{#if crud.update}}
@@ -51,20 +47,15 @@ export class {{pascal_case entry_type.name}}Detail extends LitElement {
   _editing = false;
   {{/if}}
 
-  get cellData() {
-    return this.appInfo.cell_data.find((c: InstalledCell) => c.role_name === '{{dna_role_name}}')!;
-  }
-
   {{#if crud.delete}}
   async delete{{pascal_case entry_type.name}}() {
     try {
-      await this.appWebsocket.callZome({
+      await this.client.callZome({
         cap_secret: null,
-        cell_id: this.cellData.cell_id,
+        role_name: '{{dna_role_name}}',
         zome_name: '{{coordinator_zome_manifest.name}}',
         fn_name: 'delete_{{snake_case entry_type.name}}',
         payload: this.{{camel_case entry_type.name}}Hash,
-        provenance: this.cellData.cell_id[1]
       });
       this.dispatchEvent(new CustomEvent('{{kebab_case entry_type.name}}-deleted', {
         bubbles: true,

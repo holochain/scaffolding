@@ -56,7 +56,7 @@
 <script lang="ts">
 import { defineComponent, inject, ComputedRef } from 'vue';
 import { decode } from '@msgpack/msgpack';
-import { InstalledCell, AppWebsocket, InstalledAppInfo, Record, AgentPubKey, EntryHash, ActionHash } from '@holochain/client';
+import { AppAgentClient, Record, AgentPubKey, EntryHash, ActionHash } from '@holochain/client';
 import { {{pascal_case entry_type.name}} } from './types';
 import '@material/mwc-circular-progress';
 import '@material/mwc-icon-button';
@@ -96,9 +96,6 @@ export default defineComponent({
     }
   },
   computed: {
-    cellData() {
-      return this.appInfo.cell_data.find((c: InstalledCell) => c.role_name === '{{dna_role_name}}')!;
-    },
     {{camel_case entry_type.name}}() {
       if (!this.record) return undefined;
       return decode((this.record.entry as any).Present.entry) as {{pascal_case entry_type.name}};
@@ -112,13 +109,12 @@ export default defineComponent({
       this.loading = true;
       this.record = undefined;
 
-      this.record = await this.appWebsocket.callZome({
+      this.record = await this.client.callZome({
         cap_secret: null,
-        cell_id: this.cellData.cell_id,
+        role_name: '{{dna_role_name}}',
         zome_name: '{{coordinator_zome_manifest.name}}',
         fn_name: 'get_{{snake_case entry_type.name}}',
         payload: this.{{camel_case entry_type.name}}Hash,
-        provenance: this.cellData.cell_id[1]
       });
 
       this.loading = false;
@@ -126,13 +122,12 @@ export default defineComponent({
 {{#if crud.delete}}    
     async delete{{pascal_case entry_type.name}}() {
       try {
-        await this.appWebsocket.callZome({
+        await this.client.callZome({
           cap_secret: null,
-          cell_id: this.cellData.cell_id,
+          role_name: '{{dna_role_name}}',
           zome_name: '{{coordinator_zome_manifest.name}}',
           fn_name: 'delete_{{snake_case entry_type.name}}',
           payload: this.{{camel_case entry_type.name}}Hash,
-          provenance: this.cellData.cell_id[1]
         });
         this.$emit('{{kebab_case entry_type.name}}-deleted', this.{{camel_case entry_type.name}}Hash);
         this.fetch{{pascal_case entry_type.name}}();
@@ -145,11 +140,9 @@ export default defineComponent({
 {{/if}}
   },
   setup() {
-    const appWebsocket = (inject('appWebsocket') as ComputedRef<AppWebsocket>).value;
-    const appInfo = (inject('appInfo') as ComputedRef<InstalledAppInfo>).value;
+    const client = (inject('client') as ComputedRef<AppAgentClient>).value;
     return {
-      appInfo,
-      appWebsocket,
+      client
     };
   },
 })

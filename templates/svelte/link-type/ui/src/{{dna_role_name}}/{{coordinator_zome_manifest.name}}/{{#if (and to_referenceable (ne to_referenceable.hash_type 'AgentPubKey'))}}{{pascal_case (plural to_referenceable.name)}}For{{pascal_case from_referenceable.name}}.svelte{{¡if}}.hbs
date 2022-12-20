@@ -2,14 +2,13 @@
 import { onMount, getContext } from 'svelte';
 import '@material/mwc-circular-progress';
 import { decode } from '@msgpack/msgpack';
-import { InstalledCell, Record, ActionHash, AppWebsocket, InstalledAppInfo } from '@holochain/client';
-import { appInfoContext, appWebsocketContext } from '../../contexts';
+import { Record, EntryHash, ActionHash, AgentPubKey, AppAgentClient } from '@holochain/client';
+import { clientContext } from '../../contexts';
 import {{pascal_case to_referenceable.name}}Detail from './{{pascal_case to_referenceable.name}}Detail.svelte';
 
 export let {{camel_case from_referenceable.singular_arg}}: {{from_referenceable.hash_type}};
 
-let appInfo = getContext(appInfoContext).getAppInfo();
-let appWebsocket = getContext(appWebsocketContext).getAppWebsocket();
+let client: AppAgentClient = getContext(clientContext).getClient();
 
 let hashes: Array<{{to_referenceable.hash_type}}> | undefined;
 
@@ -18,17 +17,14 @@ let error: any = undefined;
 
 $: hashes, loading, error;
 
-onMount(async () => {
-  const cellData = appInfo.cell_data.find((c: InstalledCell) => c.role_name === '{{dna_role_name}}')!;
-  
+onMount(async () => {  
   try {
-    hashes = await appWebsocket.callZome({
+    hashes = await client.callZome({
       cap_secret: null,
-      cell_id: cellData.cell_id,
+      role_name: '{{dna_role_name}}',
       zome_name: '{{coordinator_zome_manifest.name}}',
       fn_name: 'get_{{snake_case (plural to_referenceable.name)}}_for_{{snake_case from_referenceable.name}}',
       payload: {{camel_case from_referenceable.singular_arg}},
-      provenance: cellData.cell_id[1]
     });
   } catch (e) {
     error = e;

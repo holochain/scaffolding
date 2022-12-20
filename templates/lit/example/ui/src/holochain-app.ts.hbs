@@ -1,14 +1,10 @@
 import { LitElement, css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import {
-  AppWebsocket,
-  ActionHash,
-  InstalledAppInfo,
-} from '@holochain/client';
+import { AppAgentClient, AppWebsocket, AppAgentWebsocket } from '@holochain/client';
 import { provide } from '@lit-labs/context';
 import '@material/mwc-circular-progress';
 
-import { appWebsocketContext, appInfoContext } from './contexts';
+import { clientContext } from './contexts';
 
 import './forum/posts/all-posts';
 import { AllPosts } from './forum/posts/all-posts';
@@ -19,22 +15,13 @@ export class HolochainApp extends LitElement {
   @state() loading = true;
   @state() result: string | undefined;
 
-  @provide({ context: appWebsocketContext })
+  @provide({ context: clientContext })
   @property({ type: Object })
-  appWebsocket!: AppWebsocket;
-
-  @provide({ context: appInfoContext })
-  @property({ type: Object })
-  appInfo!: InstalledAppInfo;
+  client!: AppAgentClient;
 
   async firstUpdated() {
-    this.appWebsocket = await AppWebsocket.connect(
-      `ws://localhost:${process.env.HC_PORT}`
-    );
-
-    this.appInfo = await this.appWebsocket.appInfo({
-      installed_app_id: 'forum',
-    });
+    const appWebsocket = await AppWebsocket.connect(``);
+    this.client = new AppAgentWebsocket(appWebsocket, 'forum');
     
     this.loading = false;
   }
