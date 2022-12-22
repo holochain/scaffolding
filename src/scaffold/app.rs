@@ -56,7 +56,7 @@ impl AppFileTree {
     }
 }
 
-fn choose_app(
+pub fn choose_app(
     app_manifests: BTreeMap<PathBuf, AppManifest>,
 ) -> ScaffoldResult<(PathBuf, AppManifest)> {
     let manifest_vec: Vec<(PathBuf, AppManifest)> = app_manifests.into_iter().collect();

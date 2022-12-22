@@ -13,7 +13,7 @@
   onMount(async () => {
     const appWebsocket = await AppWebsocket.connect(``);
 
-    client = new AppAgentWebsocket(appWebsocket, '{{app_name}}');
+    client = await AppAgentWebsocket.connect(appWebsocket, '{{app_name}}');
     loading = false;
   });
 

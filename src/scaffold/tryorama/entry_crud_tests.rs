@@ -9,7 +9,7 @@ use super::utils::common_tests_setup;
 
 pub fn entry_crud_tests(
     entry_definition: &EntryDefinition,
-    dna_bundle_location_from_tests_root: &PathBuf,
+    app_bundle_location_from_tests_root: &PathBuf,
     coordinator_zome: &String,
     crud: &Crud,
     link_original_to_each_update: bool,
@@ -21,14 +21,14 @@ import test from 'node:test';
 import assert from 'node:assert';
 
 import {{ runScenario, pause }} from '@holochain/tryorama';
-import {{ NewEntryAction, ActionHash, Record, DnaSource }} from '@holochain/client';
+import {{ NewEntryAction, ActionHash, Record, AppBundleSource }} from '@holochain/client';
 import {{ decode }} from '@msgpack/msgpack';
 
 {}
 "#,
         create_entry_test(
             entry_definition,
-            dna_bundle_location_from_tests_root,
+            app_bundle_location_from_tests_root,
             coordinator_zome,
             create_fns_of_entry_type_this_entry_type_depends_on
         )
@@ -37,7 +37,7 @@ import {{ decode }} from '@msgpack/msgpack';
     initial_test_file.push_str(
         read_entry_test(
             entry_definition,
-            dna_bundle_location_from_tests_root,
+            app_bundle_location_from_tests_root,
             coordinator_zome,
         )
         .as_str(),
@@ -47,7 +47,7 @@ import {{ decode }} from '@msgpack/msgpack';
         initial_test_file.push_str(
             update_entry_test(
                 entry_definition,
-                dna_bundle_location_from_tests_root,
+                app_bundle_location_from_tests_root,
                 coordinator_zome,
                 link_original_to_each_update,
             )
@@ -59,7 +59,7 @@ import {{ decode }} from '@msgpack/msgpack';
         initial_test_file.push_str(
             delete_entry_test(
                 entry_definition,
-                dna_bundle_location_from_tests_root,
+                app_bundle_location_from_tests_root,
                 coordinator_zome,
             )
             .as_str(),

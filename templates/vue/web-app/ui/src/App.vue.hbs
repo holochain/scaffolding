@@ -28,7 +28,7 @@ export default defineComponent({
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     const appWebsocket = await AppWebsocket.connect('');
-    this.client = new AppAgentWebsocket(appWebsocket, '{{app_name}}');
+    this.client = await AppAgentWebsocket.connect(appWebsocket, '{{app_name}}');
 
     this.loading = false;
   },

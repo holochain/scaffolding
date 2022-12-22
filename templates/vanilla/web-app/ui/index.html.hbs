@@ -29,7 +29,7 @@
       
       async function connect() {
         const appWebsocket = await AppWebsocket.connect('');
-        const appAgentWebsocket = new AppAgentWebsocket(appWebsocket, '{{app_name}}');
+        const appAgentWebsocket = await AppAgentWebsocket.connect(appWebsocket, '{{app_name}}');
         
         alert("Connected to holochain!");
       }

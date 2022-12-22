@@ -15,7 +15,7 @@
   onMount(async () => {
     const appWebsocket = await AppWebsocket.connect(``);
 
-    client = new AppAgentWebsocket(appWebsocket, 'forum');
+    client = await AppAgentWebsocket.connect(appWebsocket, 'forum');
     loading = false;
   });
 

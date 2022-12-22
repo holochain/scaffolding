@@ -31,7 +31,7 @@
         const appWebsocket = await AppWebsocket.connect(
           `ws://localhost:${process.env.HC_PORT}`
         );
-        const client = new AppAgentWebsocket(appWebsocket, 'hello-world');
+        const client = await AppAgentWebsocket.connect(appWebsocket, 'hello-world');
 
         const result = await appWebsocket.callZome({
           cap_secret: null,
