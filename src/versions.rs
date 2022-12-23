@@ -1,9 +1,9 @@
 pub fn tryorama_version() -> String {
-    String::from("^0.10.0")
+    String::from("^0.10.1")
 }
 
 pub fn holochain_client_version() -> String {
-    String::from("^0.11.8")
+    String::from("^0.11.9")
 }
 
 pub fn hdi_version() -> String {

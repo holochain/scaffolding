@@ -161,7 +161,7 @@ test('create and read {}', {{ concurrency: 1 }}, async t => {{
     assert.ok(record);
     
     // Wait for the created entry to be propagated to the other node.
-    await pause(300);
+    await pause(800);
 
     // Bob gets the created {}
     const createReadOutput: Record = await bob.cells[0].callZome({{
@@ -195,7 +195,7 @@ pub fn update_entry_test(
         format!(
             r#"
     // Wait for the updated entry to be propagated to the other node.
-    await pause(300);
+    await pause(800);
         
     // Bob gets the updated {}
     const readUpdatedOutput{n}: Record = await bob.cells[0].callZome({{
@@ -305,7 +305,7 @@ pub fn delete_entry_test(
     let read_after_update = format!(
         r#"
     // Wait for the entry deletion to be propagated to the other node.
-    await pause(300);
+    await pause(800);
         
     // Bob tries to get the deleted {}
     const readDeletedOutput = await bob.cells[0].callZome({{

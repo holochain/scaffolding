@@ -28,12 +28,10 @@
       import { AppWebsocket, AppAgentWebsocket } from '@holochain/client';
       
       async function connect() {
-        const appWebsocket = await AppWebsocket.connect(
-          `ws://localhost:${process.env.HC_PORT}`
-        );
+        const appWebsocket = await AppWebsocket.connect(``);
         const client = await AppAgentWebsocket.connect(appWebsocket, 'hello-world');
 
-        const result = await appWebsocket.callZome({
+        const result = await client.callZome({
           cap_secret: null,
           role_name: 'hello_world',
           zome_name: 'hello_world',
