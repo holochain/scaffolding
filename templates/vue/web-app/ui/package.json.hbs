@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "scripts": {
     "build": "vue-tsc --noEmit && vite build",
-    "build:watch": "concurrently \"vue-tsc --noEmit --watch\" \"vite build --watch\"",
+    "build:watch": "concurrently \"vue-tsc --noEmit --watch\" \"vite build --watch --clearScreen false\"",
     "preview": "vite preview",
     "package": "npm run build && cd dist && bestzip ../dist.zip *"
   },
