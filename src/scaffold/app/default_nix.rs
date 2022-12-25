@@ -19,10 +19,6 @@ in nixpkgs.mkShell {{
     # any additional packages needed for this project, e. g. Nodejs
   ];
 
-  shellHook = ''
-    export GIO_MODULE_DIR="${{nixpkgs.glib-networking}}/lib/gio/modules/";
-  '';
-
 }}"#,
         holochain_nix_version()
     ))

@@ -2331,7 +2331,7 @@ dependencies = [
 
 [[package]]
 name = "holochain_scaffolding_cli"
-version = "0.0.5"
+version = "0.0.6"
 dependencies = [
  "Inflector",
  "anyhow",
