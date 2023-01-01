@@ -12,11 +12,13 @@ export default {
     entryFileNames: '[hash].js',
     chunkFileNames: '[hash].js',
     assetFileNames: '[hash][extname]',
+    sourceMap: !production,
     format: 'es',
     dir: 'dist',
   },
   preserveEntrySignatures: false,
-
+  context: 'null',
+  
   watch: {
     clearScreen: false,
   },
