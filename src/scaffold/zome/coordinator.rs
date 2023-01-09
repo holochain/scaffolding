@@ -43,14 +43,48 @@ serde = {{ workspace = true }}
     )
 }
 
-pub fn initial_lib_rs() -> String {
+pub fn initial_lib_rs(dependencies: &Option<Vec<String>>) -> String {
+    let integrity_imports = match dependencies {
+        None => String::from(""),
+        Some(deps) => {
+            let mut s = String::from("");
+            for d in deps {
+                s.push_str(format!("use {d}::*;\n").as_str());
+            }
+
+            s
+        }
+    };
+
     format!(
         r#"use hdk::prelude::*;
+{integrity_imports}
 
+/// Called the first time a zome call is made to the cell containing this zome
 #[hdk_extern]
 pub fn init(_: ()) -> ExternResult<InitCallbackResult> {{
   Ok(InitCallbackResult::Pass)
 }}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(tag = "type")]
+pub enum Signal {{
+}}
+
+/// Whenever an action is committed, we emit a signal to the UI elements to reactively update them
+#[hdk_extern(infallible)]
+pub fn post_commit(committed_actions: Vec<SignedActionHashed>) {{
+    for action in committed_actions {{
+        if let Err(err) = signal_action(action) {{
+            error!("Error signaling new action: {{:?}}", err);
+        }}
+    }}
+}}
+
+fn signal_action(action: SignedActionHashed) -> ExternResult<()> {{
+    Ok(())
+}}
+
 "#
     )
 }

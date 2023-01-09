@@ -7,9 +7,11 @@ use quote::{format_ident, quote};
 
 use crate::{
     error::{ScaffoldError, ScaffoldResult},
-    file_tree::{find_map_rust_files, map_rust_files},
+    file_tree::{find_map_rust_files, map_rust_files, FileTree},
     scaffold::{
-        dna::DnaFileTree, entry_type::integrity::find_ending_match_expr, zome::ZomeFileTree,
+        dna::DnaFileTree,
+        entry_type::integrity::{find_ending_match_expr, find_ending_match_expr_in_block},
+        zome::{utils::get_coordinator_zomes_for_integrity, ZomeFileTree},
     },
 };
 
@@ -237,11 +239,161 @@ pub fn add_link_type_to_integrity_zome(
         _ => e,
     })?;
 
+    let coordinator_zomes_for_integrity = get_coordinator_zomes_for_integrity(
+        &dna_manifest,
+        &zome_file_tree.zome_manifest.name.0.to_string(),
+    );
+
+    for coordinator_zome in coordinator_zomes_for_integrity {
+        let dna_file_tree = DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
+        let zome_file_tree =
+            ZomeFileTree::from_zome_manifest(dna_file_tree, coordinator_zome.clone())?;
+        file_tree = add_link_type_signals(
+            zome_file_tree.dna_file_tree.file_tree(),
+            &zome_file_tree.zome_crate_path,
+        )?;
+    }
     let dna_file_tree = DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
     let zome_file_tree = ZomeFileTree::from_zome_manifest(dna_file_tree, zome_manifest)?;
 
     Ok(zome_file_tree)
 }
+
+fn add_link_type_signals(
+    mut file_tree: FileTree,
+    zome_crate_path: &PathBuf,
+) -> ScaffoldResult<FileTree> {
+    let crate_src_path = zome_crate_path.join("src");
+    let v: Vec<OsString> = crate_src_path
+        .clone()
+        .iter()
+        .map(|s| s.to_os_string())
+        .collect();
+    map_rust_files(
+        file_tree
+            .path_mut(&mut v.iter())
+            .ok_or(ScaffoldError::PathNotFound(crate_src_path.clone()))?,
+        |file_path, mut file| {
+            if file_path == PathBuf::from("lib.rs") {
+                for item in &mut file.items {
+                    if let syn::Item::Enum(item_enum) = item {
+                        if item_enum.ident.to_string().eq(&String::from("Signal")) {
+                            if !signal_has_link_types(item_enum) {
+                                for v in signal_link_types_variants()? {
+                                    item_enum.variants.push(v);
+                                }
+                            }
+                        }
+                    }
+
+                    if let syn::Item::Fn(item_fn) = item {
+                        if item_fn
+                            .sig
+                            .ident
+                            .to_string()
+                            .eq(&String::from("signal_action"))
+                        {
+                            if let None = find_ending_match_expr_in_block(&mut item_fn.block) {
+                                item_fn.block = Box::new(syn::parse_str::<syn::Block>(
+                                    "{ match action.hashed.content { _ => Ok(()) } }",
+                                )?);
+                            }
+
+                            if let Some(expr_match) =
+                                find_ending_match_expr_in_block(&mut item_fn.block)
+                            {
+                                if !signal_action_has_link_types(expr_match) {
+                                    for arm in signal_action_match_arms()? {
+                                        expr_match.arms.insert(expr_match.arms.len() - 1, arm);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            Ok(file)
+        },
+    )?;
+    Ok(file_tree)
+}
+
+fn signal_has_link_types(signal_enum: &syn::ItemEnum) -> bool {
+    signal_enum
+        .variants
+        .iter()
+        .find(|v| v.ident.to_string().eq(&String::from("LinkCreated")))
+        .is_some()
+}
+
+fn signal_action_has_link_types(expr_match: &syn::ExprMatch) -> bool {
+    expr_match
+        .arms
+        .iter()
+        .find(|arm| {
+            if let syn::Pat::TupleStruct(tuple_struct_pat) = &arm.pat {
+                if let Some(first_segment) = tuple_struct_pat.path.segments.last() {
+                    if first_segment
+                        .ident
+                        .to_string()
+                        .eq(&String::from("CreateLink"))
+                    {
+                        return true;
+                    }
+                }
+            }
+            false
+        })
+        .is_some()
+}
+
+fn signal_link_types_variants() -> ScaffoldResult<Vec<syn::Variant>> {
+    Ok(vec![
+        syn::parse_str::<syn::Variant>(
+            "LinkCreated {
+        action: CreateLink,
+        link_type: LinkTypes,
+    }",
+        )?,
+        syn::parse_str::<syn::Variant>(
+            "LinkDeleted {
+        action: DeleteLink,
+        link_type: LinkTypes,
+    }",
+        )?,
+    ])
+}
+
+fn signal_action_match_arms() -> ScaffoldResult<Vec<syn::Arm>> {
+    Ok(vec![
+        syn::parse_str::<syn::Arm>("Action::CreateLink(create_link) => {
+            let link_type = LinkTypes::from_type(create_link.zome_index, create_link.link_type)?.ok_or(wasm_error!(WasmErrorInner::Guest(\"Link type should be exist\".to_string())))?;
+            emit_signal(Signal::LinkCreated {
+                action: create_link,
+                link_type
+            })?;
+            Ok(())
+        }")?,
+        syn::parse_str::<syn::Arm>("Action::DeleteLink(delete_link) => {
+            let record = get(delete_link.link_add_address.clone(), GetOptions::default())?
+                .ok_or(wasm_error!(WasmErrorInner::Guest(\"Create Link should exist\".to_string())))?;
+            match record.action() {
+                Action::CreateLink(create_link) => {
+                    let link_type = LinkTypes::from_type(create_link.zome_index, create_link.link_type)?.ok_or(wasm_error!(WasmErrorInner::Guest(\"Link type should be exist\".to_string())))?;
+                    emit_signal(Signal::LinkDeleted {
+                        action: delete_link,
+                        link_type
+                    })?;
+                    Ok(())
+                },
+                _ => {
+                    return Err(wasm_error!(WasmErrorInner::Guest(\"Create Link should exist\".to_string())));
+                }
+            }
+        }")?
+    ])
+}
+
 fn is_create_link(pat: &syn::Pat) -> bool {
     if let syn::Pat::Struct(pat_struct) = pat {
         if let Some(ps) = pat_struct.path.segments.last() {

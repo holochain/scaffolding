@@ -334,10 +334,9 @@ pub fn add_link_type_functions_to_coordinator(
         .zome_crate_path
         .join("src")
         .join(format!("{}.rs", snake_link_type_name.clone()));
-    let lib_rs_path = coordinator_zome_file_tree
-        .zome_crate_path
-        .join("src")
-        .join("lib.rs");
+    let crate_src_path = coordinator_zome_file_tree.zome_crate_path.join("src");
+
+    let lib_rs_path = crate_src_path.join("lib.rs");
 
     let mut file_tree = coordinator_zome_file_tree.dna_file_tree.file_tree();
 

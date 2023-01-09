@@ -159,19 +159,22 @@ fn is_delete_entry(pat: &syn::Pat) -> bool {
     return false;
 }
 
+pub fn find_ending_match_expr_in_block<'a>(
+    block: &'a mut syn::Block,
+) -> Option<&'a mut syn::ExprMatch> {
+    if let Some(e) = block.stmts.last_mut() {
+        match e {
+            syn::Stmt::Expr(syn::Expr::Match(e_m)) => Some(e_m),
+            _ => None,
+        }
+    } else {
+        None
+    }
+}
 pub fn find_ending_match_expr<'a>(e: &'a mut syn::Expr) -> Option<&'a mut syn::ExprMatch> {
     match e {
         syn::Expr::Match(expr_match) => Some(expr_match),
-        syn::Expr::Block(expr_block) => {
-            if let Some(e) = expr_block.block.stmts.last_mut() {
-                match e {
-                    syn::Stmt::Expr(syn::Expr::Match(e_m)) => Some(e_m),
-                    _ => None,
-                }
-            } else {
-                None
-            }
-        }
+        syn::Expr::Block(expr_block) => find_ending_match_expr_in_block(&mut expr_block.block),
         _ => None,
     }
 }
@@ -234,9 +237,9 @@ pub use {}::*;
             if entry_types.is_none() && file_path == PathBuf::from("lib.rs") {
                 let entry_types_item = syn::parse_str::<syn::Item>(
                     "#[hdk_entry_defs]
+                     #[derive(Serialize, Deserialize)]
                      #[unit_enum(UnitEntryTypes)]
-                      pub enum EntryTypes {}
-                        ",
+                      pub enum EntryTypes {}",
                 )?;
 
                 // Insert the entry types just before LinkTypes or before the first function if LinkTypes doesn't exist

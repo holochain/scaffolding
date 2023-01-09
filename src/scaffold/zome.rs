@@ -447,7 +447,7 @@ pub fn scaffold_coordinator_zome_in_path(
     let zome: FileTree = dir! {
         "Cargo.toml" => file!(coordinator::initial_cargo_toml(zome_name, dependencies)),
         "src" => dir! {
-            "lib.rs" => file!(coordinator::initial_lib_rs())
+            "lib.rs" => file!(coordinator::initial_lib_rs(dependencies))
         }
     };
 

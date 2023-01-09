@@ -1,8 +1,10 @@
+use std::{ffi::OsString, path::PathBuf};
+
 use convert_case::{Case, Casing};
 
 use crate::{
-    error::ScaffoldResult,
-    file_tree::{insert_file, map_file},
+    error::{ScaffoldError, ScaffoldResult},
+    file_tree::{insert_file, map_file, map_rust_files},
     scaffold::{
         dna::DnaFileTree,
         link_type::{coordinator::get_links_handler, link_type_name},
@@ -13,6 +15,7 @@ use crate::{
 use super::{
     crud::Crud,
     definitions::{Cardinality, EntryDefinition},
+    integrity::find_ending_match_expr_in_block,
 };
 
 pub fn no_update_read_handler(entry_def: &EntryDefinition) -> String {
@@ -325,6 +328,86 @@ use {}::*;
     initial
 }
 
+fn signal_has_entry_types(signal_enum: &syn::ItemEnum) -> bool {
+    signal_enum
+        .variants
+        .iter()
+        .find(|v| v.ident.to_string().eq(&String::from("EntryCreated")))
+        .is_some()
+}
+
+fn signal_action_has_entry_types(expr_match: &syn::ExprMatch) -> bool {
+    expr_match
+        .arms
+        .iter()
+        .find(|arm| {
+            if let syn::Pat::TupleStruct(tuple_struct_pat) = &arm.pat {
+                if let Some(first_segment) = tuple_struct_pat.path.segments.last() {
+                    if first_segment.ident.to_string().eq(&String::from("Create")) {
+                        return true;
+                    }
+                }
+            }
+            false
+        })
+        .is_some()
+}
+
+fn signal_entry_types_variants() -> ScaffoldResult<Vec<syn::Variant>> {
+    Ok(vec![
+        syn::parse_str::<syn::Variant>(
+            "EntryCreated {
+        action: Create,
+        app_entry: EntryTypes,
+    }",
+        )?,
+        syn::parse_str::<syn::Variant>(
+            "EntryUpdated {
+        action: Update,
+        app_entry: EntryTypes,
+        original_app_entry: EntryTypes,
+    }",
+        )?,
+        syn::parse_str::<syn::Variant>(
+            "EntryDeleted {
+        action: Delete,
+        original_app_entry: EntryTypes,
+    }",
+        )?,
+    ])
+}
+
+fn signal_action_match_arms() -> ScaffoldResult<Vec<syn::Arm>> {
+    Ok(vec![
+        syn::parse_str::<syn::Arm>("Action::Create(create) => {
+            let app_entry = get_entry_for_action(&action.hashed.hash)?.ok_or(wasm_error!(WasmErrorInner::Guest(\"Create should carry an entry\".to_string())))?;
+            emit_signal(Signal::EntryCreated {
+                action: create,
+                app_entry
+            })?;
+            Ok(())
+        }")?,
+        syn::parse_str::<syn::Arm>("Action::Update(update) => {
+            let app_entry = get_entry_for_action(&action.hashed.hash)?.ok_or(wasm_error!(WasmErrorInner::Guest(\"Update should carry an entry\".to_string())))?;
+            let original_app_entry = get_entry_for_action(&update.original_action_address)?.ok_or(wasm_error!(WasmErrorInner::Guest(\"Updated action should carry an entry\".to_string())))?;
+            emit_signal(Signal::EntryUpdated {
+                action: update,
+                app_entry,
+                original_app_entry
+            })?;
+            Ok(())
+        }")?,
+        syn::parse_str::<syn::Arm>("Action::Delete(delete) => {
+            let original_app_entry = get_entry_for_action(&delete.deletes_address)?.ok_or(wasm_error!(WasmErrorInner::Guest(\"Deleted action should carry an entry\".to_string())))?;
+            emit_signal(Signal::EntryDeleted {
+                action: delete,
+                original_app_entry,
+            })?;
+            Ok(())
+        }")?
+    ])
+}
+
 pub fn add_crud_functions_to_coordinator(
     zome_file_tree: ZomeFileTree,
     integrity_zome_name: &String,
@@ -363,6 +446,85 @@ pub fn add_crud_functions_to_coordinator(
             s
         )
     })?;
+
+    let v: Vec<OsString> = crate_src_path
+        .clone()
+        .iter()
+        .map(|s| s.to_os_string())
+        .collect();
+    map_rust_files(
+        file_tree
+            .path_mut(&mut v.iter())
+            .ok_or(ScaffoldError::PathNotFound(crate_src_path.clone()))?,
+        |file_path, mut file| {
+            if file_path == PathBuf::from("lib.rs") {
+                let mut first_entry_type_scaffolded = false;
+
+                for item in &mut file.items {
+                    if let syn::Item::Enum(item_enum) = item {
+                        if item_enum.ident.to_string().eq(&String::from("Signal")) {
+                            if !signal_has_entry_types(item_enum) {
+                                first_entry_type_scaffolded = true;
+                                for v in signal_entry_types_variants()? {
+                                    item_enum.variants.push(v);
+                                }
+                            }
+                        }
+                    }
+
+                    if let syn::Item::Fn(item_fn) = item {
+                        if item_fn
+                            .sig
+                            .ident
+                            .to_string()
+                            .eq(&String::from("signal_action"))
+                        {
+                            if let None = find_ending_match_expr_in_block(&mut item_fn.block) {
+                                item_fn.block = Box::new(syn::parse_str::<syn::Block>(
+                                    "{ match action.hashed.content { _ => Ok(()) } }",
+                                )?);
+                            }
+
+                            if let Some(expr_match) =
+                                find_ending_match_expr_in_block(&mut item_fn.block)
+                            {
+                                if !signal_action_has_entry_types(expr_match) {
+                                    for arm in signal_action_match_arms()? {
+                                        expr_match.arms.insert(expr_match.arms.len() - 1, arm);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if first_entry_type_scaffolded {
+                    file.items.push(syn::parse_str::<syn::Item>("fn get_entry_for_action(action_hash: &ActionHash) -> ExternResult<Option<EntryTypes>> {
+    let record = match get(action_hash.clone(), GetOptions::default())? {
+        Some(record) => record,
+        None => { return Ok(None); }
+    };
+    let entry = match record.entry().as_option() {
+        Some(entry) => entry,
+        None => { return Ok(None); }
+    };
+
+    let (zome_index, entry_index) = match record.action().entry_type() {
+        Some(EntryType::App(AppEntryDef {
+            zome_index,
+            entry_index,
+            ..
+        })) => (zome_index, entry_index),
+        _ => { return Ok(None); }
+    };
+
+    Ok(EntryTypes::deserialize_from_type(zome_index.clone(), entry_index.clone(), entry)?)
+}")?);
+                }
+            }
+            Ok(file)
+        },
+    )?;
 
     let dna_file_tree = DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
     let zome_file_tree = ZomeFileTree::from_zome_manifest(dna_file_tree, zome_manifest)?;
