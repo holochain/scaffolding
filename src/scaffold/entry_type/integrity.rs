@@ -1,6 +1,5 @@
 use convert_case::{Case, Casing};
 use holochain::test_utils::itertools::Itertools;
-use prettyplease::unparse;
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use std::{ffi::OsString, path::PathBuf};
@@ -10,6 +9,7 @@ use crate::file_tree::insert_file;
 use crate::scaffold::dna::DnaFileTree;
 use crate::scaffold::zome::coordinator::find_extern_function_in_zomes;
 use crate::scaffold::zome::utils::get_coordinator_zomes_for_integrity;
+use crate::utils::unparse;
 use crate::{
     file_tree::{find_map_rust_files, map_file, map_rust_files},
     scaffold::zome::ZomeFileTree,
@@ -46,7 +46,6 @@ pub fn render_entry_definition_file(
 ) -> ScaffoldResult<syn::File> {
     let entry_def_token_stream = render_entry_definition_struct(entry_def)?;
     let name_pascal: syn::Expr = syn::parse_str(entry_def.name.to_case(Case::Pascal).as_str())?;
-    let name_snake: syn::Expr = syn::parse_str(entry_def.name.to_case(Case::Snake).as_str())?;
     let plural_name_title =
         pluralizer::pluralize(entry_def.name.as_str(), 2, false).to_case(Case::Title);
 
@@ -58,14 +57,14 @@ pub fn render_entry_definition_file(
 
     let validate_update_fn =
         format_ident!("validate_update_{}", entry_def.name.to_case(Case::Snake));
-    let new_entry_arg = format_ident!("{}", entry_def.name.to_case(Case::Snake));
-    let original_entry_arg = format_ident!("original_{}", entry_def.name.to_case(Case::Snake));
+    let new_entry_arg = format_ident!("_{}", entry_def.name.to_case(Case::Snake));
+    let original_entry_arg = format_ident!("_original_{}", entry_def.name.to_case(Case::Snake));
 
     let updated_invalid_reason = format!("{} cannot be updated", plural_name_title);
 
     let validate_update_result: TokenStream = match crud.update {
         true => quote! {
-            // TODO: add the appropriate validation rules
+            /// TODO: add the appropriate validation rules
             Ok(ValidateCallbackResult::Valid)
         },
         false => quote! {
@@ -73,20 +72,20 @@ pub fn render_entry_definition_file(
         },
     };
     let validate_update: TokenStream = quote! {
-        pub fn #validate_update_fn(action: Update, #new_entry_arg: #name_pascal, original_action: EntryCreationAction, #original_entry_arg: #name_pascal) -> ExternResult<ValidateCallbackResult> {
+        pub fn #validate_update_fn(_action: Update, #new_entry_arg: #name_pascal, _original_action: EntryCreationAction, #original_entry_arg: #name_pascal) -> ExternResult<ValidateCallbackResult> {
             #validate_update_result
         }
     };
 
     let validate_delete_fn =
         format_ident!("validate_delete_{}", entry_def.name.to_case(Case::Snake));
-    let deleted_post_arg = format_ident!("original_{}", entry_def.name.to_case(Case::Snake));
+    let deleted_post_arg = format_ident!("_original_{}", entry_def.name.to_case(Case::Snake));
 
     let deleted_invalid_reason = format!("{} cannot be deleted", plural_name_title);
 
     let validate_delete_result: TokenStream = match crud.delete {
         true => quote! {
-            // TODO: add the appropriate validation rules
+            /// TODO: add the appropriate validation rules
             Ok(ValidateCallbackResult::Valid)
         },
         false => quote! {
@@ -94,7 +93,7 @@ pub fn render_entry_definition_file(
         },
     };
     let validate_delete: TokenStream = quote! {
-        pub fn #validate_delete_fn(action: Delete, original_action: EntryCreationAction, #deleted_post_arg: #name_pascal) -> ExternResult<ValidateCallbackResult> {
+        pub fn #validate_delete_fn(_action: Delete, _original_action: EntryCreationAction, #deleted_post_arg: #name_pascal) -> ExternResult<ValidateCallbackResult> {
             #validate_delete_result
         }
     };
@@ -111,8 +110,8 @@ pub fn render_entry_definition_file(
       #[derive(Clone)]
       #entry_def_token_stream
 
-      pub fn #validate_create_fn(action: EntryCreationAction, #name_snake: #name_pascal) -> ExternResult<ValidateCallbackResult> {
-          // TODO: add the appropriate validation rules
+      pub fn #validate_create_fn(_action: EntryCreationAction, #new_entry_arg: #name_pascal) -> ExternResult<ValidateCallbackResult> {
+          /// TODO: add the appropriate validation rules
           Ok(ValidateCallbackResult::Valid)
       }
 
@@ -236,10 +235,10 @@ pub use {}::*;
             // If there are no entry types definitions in this zome, first add the empty enum
             if entry_types.is_none() && file_path == PathBuf::from("lib.rs") {
                 let entry_types_item = syn::parse_str::<syn::Item>(
-                    "#[hdk_entry_defs]
-                     #[derive(Serialize, Deserialize)]
+                    "#[derive(Serialize, Deserialize)]
+                     #[hdk_entry_defs]
                      #[unit_enum(UnitEntryTypes)]
-                      pub enum EntryTypes {}",
+                     pub enum EntryTypes {}",
                 )?;
 
                 // Insert the entry types just before LinkTypes or before the first function if LinkTypes doesn't exist
@@ -289,18 +288,6 @@ pub use {}::*;
                         }
                     }
                 }
-
-                file.items.push(syn::parse_str::<syn::Item>("
-fn record_to_app_entry(record: &Record) -> ExternResult<Option<EntryTypes>> {
-    if let Record { signed_action, entry: RecordEntry::Present(entry) } = record {
-        if let Some(EntryType::App(AppEntryDef { entry_index, zome_index, .. })) = signed_action.action().entry_type() {
-            return EntryTypes::deserialize_from_type(zome_index.clone(), entry_index.clone(), &entry);
-        }
-    }
-
-    Ok(None)
-}
-")?);
             }
 
             file.items =
@@ -523,12 +510,6 @@ fn add_entry_type_to_validation_arms(
                             return Ok(ValidateCallbackResult::Invalid("Original action for an update must be a Create or Update action".to_string()));
                         }
                     };
-                    let original_app_entry = match record_to_app_entry(&original_record)? { 
-                        Some(original_app_entry) => original_app_entry,
-                        None => {
-                            return Ok(ValidateCallbackResult::Valid);
-                        }
-                    };
                     match app_entry { }
                 }"#,
                                                                     )?;
@@ -580,13 +561,39 @@ fn add_entry_type_to_validation_arms(
                         Action::Create(create) => EntryCreationAction::Create(create),
                         Action::Update(update) => EntryCreationAction::Update(update),
                         _ => {
-                            return Ok(ValidateCallbackResult::Invalid("Original action for an update must be a Create or Update action".to_string()));
+                            return Ok(ValidateCallbackResult::Invalid("Original action for a delete must be a Create or Update action".to_string()));
                         }
                     };
-                    let original_app_entry = match record_to_app_entry(&original_record)? { 
-                        Some(original_app_entry) => original_app_entry,
-                        None => {
+                    let app_entry_type = match original_action.entry_type() {
+                        EntryType::App(app_entry_type) => app_entry_type,
+                        _ => {
                             return Ok(ValidateCallbackResult::Valid);
+                        }
+                    };
+                    let entry = match original_record.entry().as_option() {
+                        Some(entry) => entry,
+                        None => {
+                            if original_action.entry_type().visibility().is_public() {
+                                return Ok(ValidateCallbackResult::Invalid(
+                                "Original record for a delete of a public entry must contain an entry"
+                                    .to_string(),
+                            ));
+                            } else {
+                                return Ok(ValidateCallbackResult::Valid);
+                            }
+                        }
+                    };
+                    let original_app_entry = match EntryTypes::deserialize_from_type(
+                        app_entry_type.zome_index.clone(),
+                        app_entry_type.entry_index.clone(),
+                        &entry,
+                    )? {
+                        Some(app_entry) => app_entry,
+                        None => {
+                            return Ok(ValidateCallbackResult::Invalid(
+                                "Original app entry must be one of the defined entry types for this zome"
+                                    .to_string(),
+                            ));
                         }
                     };
                     match original_app_entry { }

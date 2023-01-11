@@ -25,13 +25,13 @@ pub fn initial_lib_rs() -> String {
 /// Validation you perform during the genesis process. Nobody else on the network performs it, only you.
 /// There *is no* access to network calls in this callback
 #[hdk_extern]
-pub fn genesis_self_check(data: GenesisSelfCheckData) -> ExternResult<ValidateCallbackResult> {{
+pub fn genesis_self_check(_data: GenesisSelfCheckData) -> ExternResult<ValidateCallbackResult> {{
     Ok(ValidateCallbackResult::Valid)
 }}
 
 /// Validation the network performs when you try to join, you can't perform this validation yourself as you are not a member yet.
 /// There *is* access to network calls in this function
-pub fn validate_agent_joining(agent_pub_key: AgentPubKey, membrane_proof: &Option<MembraneProof>) -> ExternResult<ValidateCallbackResult> {{
+pub fn validate_agent_joining(_agent_pub_key: AgentPubKey, _membrane_proof: &Option<MembraneProof>) -> ExternResult<ValidateCallbackResult> {{
     Ok(ValidateCallbackResult::Valid)
 }}
 
@@ -54,6 +54,7 @@ pub fn validate_agent_joining(agent_pub_key: AgentPubKey, membrane_proof: &Optio
 /// - Link tags don't exceed the maximum tag size (currently 1KB)
 /// - Countersigned entries include an action from each required signer
 ///
+/// You can read more about validation here: https://docs.rs/hdi/latest/hdi/index.html#data-validation
 #[hdk_extern]
 pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {{
     match op.to_type::<(), ()>()? {{
@@ -126,17 +127,17 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {{
             /// Notice that doing so will cause `must_get_valid_record` for this record to return a valid record even if the other validations failed
             OpRecord::UpdateEntry {{
                 original_action_hash,
-                original_entry_hash,
                 app_entry,
-                action
+                action,
+                ..
             }} => Ok(ValidateCallbackResult::Invalid("There are no entry types in this integrity zome".to_string())),
             /// Complementary validation to the `RegisterDelete` Op, in which the record itself is validated
             /// If you want to optimize performance, you can remove the validation for an entry type here and keep it in `RegisterDelete`
             /// Notice that doing so will cause `must_get_valid_record` for this record to return a valid record even if the `RegisterDelete` validation failed
             OpRecord::DeleteEntry {{
                 original_action_hash,
-                original_entry_hash,
-                action
+                action,
+                ..
             }} => Ok(ValidateCallbackResult::Invalid("There are no entry types in this integrity zome".to_string())),
             /// Complementary validation to the `RegisterCreateLink` Op, in which the record itself is validated
             /// If you want to optimize performance, you can remove the validation for an entry type here and keep it in `RegisterCreateLink`
@@ -156,47 +157,16 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {{
                 base_address,
                 action
             }} => Ok(ValidateCallbackResult::Invalid("There are no link types in this integrity zome".to_string())),
-            OpRecord::CreatePrivateEntry {{
-                app_entry_type,
-                action
-            }}=> Ok(ValidateCallbackResult::Valid),
-            OpRecord::UpdatePrivateEntry {{
-                original_action_hash,
-                original_entry_hash,
-                app_entry_type,
-                action
-            }}=> Ok(ValidateCallbackResult::Valid),
-            OpRecord::CreateCapClaim {{
-                action
-            }} => Ok(ValidateCallbackResult::Valid),
-            OpRecord::CreateCapGrant {{
-                action
-            }} => Ok(ValidateCallbackResult::Valid),
-            OpRecord::UpdateCapClaim {{
-                original_action_hash,
-                original_entry_hash,
-                action
-            }} => Ok(ValidateCallbackResult::Valid),
-            OpRecord::UpdateCapGrant {{
-                original_action_hash,
-                original_entry_hash,
-                action
-            }} => Ok(ValidateCallbackResult::Valid),
-            OpRecord::Dna {{
-                dna_hash,
-                action
-            }} => Ok(ValidateCallbackResult::Valid),
-            OpRecord::OpenChain {{
-                previous_dna_hash,
-                action
-            }} => Ok(ValidateCallbackResult::Valid),
-            OpRecord::CloseChain {{
-                new_dna_hash,
-                action
-            }} => Ok(ValidateCallbackResult::Valid),
-            OpRecord::InitZomesComplete {{
-                action
-            }} => Ok(ValidateCallbackResult::Valid),
+            OpRecord::CreatePrivateEntry {{ .. }}=> Ok(ValidateCallbackResult::Valid),
+            OpRecord::UpdatePrivateEntry {{ .. }}=> Ok(ValidateCallbackResult::Valid),
+            OpRecord::CreateCapClaim {{ .. }} => Ok(ValidateCallbackResult::Valid),
+            OpRecord::CreateCapGrant {{ .. }} => Ok(ValidateCallbackResult::Valid),
+            OpRecord::UpdateCapClaim {{ .. }} => Ok(ValidateCallbackResult::Valid),
+            OpRecord::UpdateCapGrant {{ .. }} => Ok(ValidateCallbackResult::Valid),
+            OpRecord::Dna {{ .. }} => Ok(ValidateCallbackResult::Valid),
+            OpRecord::OpenChain {{ .. }} => Ok(ValidateCallbackResult::Valid),
+            OpRecord::CloseChain {{ .. }} => Ok(ValidateCallbackResult::Valid),
+            OpRecord::InitZomesComplete {{ .. }} => Ok(ValidateCallbackResult::Valid),
             _ => Ok(ValidateCallbackResult::Valid)
         }},
         OpType::RegisterAgentActivity(agent_activity) => match agent_activity {{

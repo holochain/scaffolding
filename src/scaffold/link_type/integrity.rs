@@ -73,9 +73,9 @@ pub fn add_link_type_to_integrity_zome(
             // If there are no link types in this zome, first add the empty enum
             if hdk_link_types_instances.len() == 0 && file_path == PathBuf::from("lib.rs") {
                 let link_types_item = syn::parse_str::<syn::Item>(
-                    "#[hdk_link_types]
-                      pub enum LinkTypes {}
-                        ",
+                    "#[derive(Serialize, Deserialize)]
+                     #[hdk_link_types]
+                     pub enum LinkTypes {}",
                 )?;
 
                 // Insert the link types just before the first function
@@ -191,7 +191,7 @@ pub fn add_link_type_to_integrity_zome(
 
                 let validate_delete_result: TokenStream = match delete {
                     true => quote! {
-                        // TODO: add the appropriate validation rules
+                        /// TODO: add the appropriate validation rules
                         Ok(ValidateCallbackResult::Valid)
                     },
                     false => quote! {
@@ -201,23 +201,23 @@ pub fn add_link_type_to_integrity_zome(
 
                 let create_token_stream = quote! {
                     pub fn #validate_create_fn(
-                        action: CreateLink,
-                        base_address: AnyLinkableHash,
-                        target_address: AnyLinkableHash,
-                        tag: LinkTag,
+                        _action: CreateLink,
+                        _base_address: AnyLinkableHash,
+                        _target_address: AnyLinkableHash,
+                        _tag: LinkTag,
                     ) -> ExternResult<ValidateCallbackResult> {
-                        // TODO: add the appropriate validation rules
+                        /// TODO: add the appropriate validation rules
                         Ok(ValidateCallbackResult::Valid)
                   }
                 };
 
                 let delete_token_stream = quote! {
                     pub fn #validate_delete_fn(
-                        action: DeleteLink,
-                        original_action: CreateLink,
-                        base: AnyLinkableHash,
-                        target: AnyLinkableHash,
-                        tag: LinkTag
+                        _action: DeleteLink,
+                        _original_action: CreateLink,
+                        _base: AnyLinkableHash,
+                        _target: AnyLinkableHash,
+                        _tag: LinkTag
                     ) -> ExternResult<ValidateCallbackResult> {
                         #validate_delete_result
                   }

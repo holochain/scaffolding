@@ -1,12 +1,12 @@
 use build_fs_tree::{dir, file, FileSystemTree};
 use ignore::WalkBuilder;
 use include_dir::Dir;
-use prettyplease::unparse;
 use std::collections::BTreeMap;
 use std::ffi::OsString;
 use std::{fs, path::PathBuf};
 
 use crate::error::{ScaffoldError, ScaffoldResult};
+use crate::utils::unparse;
 
 pub type FileTree = FileSystemTree<OsString, String>;
 
