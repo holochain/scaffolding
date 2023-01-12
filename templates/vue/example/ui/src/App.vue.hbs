@@ -13,7 +13,7 @@
 </template>
 <script lang="ts">
 import { defineComponent, computed } from 'vue';
-import { AppAgentWebsocket, AppWebsocket, AppAgentClient } from '@holochain/client';
+import { AppAgentWebsocket, AppAgentClient } from '@holochain/client';
 import '@material/mwc-circular-progress';
 import AllPosts from './forum/posts/AllPosts.vue';
 import CreatePost from './forum/posts/CreatePost.vue';
@@ -34,10 +34,8 @@ export default defineComponent({
     };
   },
   async mounted() {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    const appWebsocket = await AppWebsocket.connect(``);
-    this.client = await AppAgentWebsocket.connect(appWebsocket, 'forum');
+    // We pass '' as url because it will dynamically be replaced in launcher environments
+    this.client = await AppAgentWebsocket.connect('', 'forum');
     
     this.loading = false;
   },

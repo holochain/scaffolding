@@ -8,7 +8,7 @@
 </template>
 <script lang="ts">
 import { defineComponent, computed } from 'vue';
-import { AppWebsocket, ActionHash, AppAgentClient, AppAgentWebsocket } from '@holochain/client';
+import { AppAgentClient, AppAgentWebsocket } from '@holochain/client';
 import '@material/mwc-circular-progress';
 
 export default defineComponent({
@@ -25,10 +25,8 @@ export default defineComponent({
     };
   },
   async mounted() {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    const appWebsocket = await AppWebsocket.connect('');
-    this.client = await AppAgentWebsocket.connect(appWebsocket, '{{app_name}}');
+    // We pass '' as url because it will dynamically be replaced in launcher environments
+    this.client = await AppAgentWebsocket.connect('', '{{app_name}}');
 
     this.loading = false;
   },

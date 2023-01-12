@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, setContext } from 'svelte';
-  import { AppWebsocket, ActionHash, AppAgentClient, AppAgentWebsocket } from '@holochain/client';
+  import { ActionHash, AppAgentClient, AppAgentWebsocket } from '@holochain/client';
   import '@material/mwc-circular-progress';
 
   import { clientContext } from './contexts';
@@ -11,9 +11,8 @@
   $: client, loading;
 
   onMount(async () => {
-    const appWebsocket = await AppWebsocket.connect(``);
-
-    client = await AppAgentWebsocket.connect(appWebsocket, '{{app_name}}');
+    // We pass '' as url because it will dynamically be replaced in launcher environments
+    client = await AppAgentWebsocket.connect('', '{{app_name}}');
     loading = false;
   });
 

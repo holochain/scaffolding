@@ -3,7 +3,6 @@ import { customElement, property, state } from 'lit/decorators.js';
 import {
   AppAgentWebsocket,
   ActionHash,
-  AppWebsocket,
   AppAgentClient,
 } from '@holochain/client';
 import { provide } from '@lit-labs/context';
@@ -20,8 +19,8 @@ export class HolochainApp extends LitElement {
   client!: AppAgentClient;
 
   async firstUpdated() {
-    const appWebsocket = await AppWebsocket.connect(``);
-    this.client = await AppAgentWebsocket.connect(appWebsocket, '{{app_name}}');
+    // We pass '' as url because it will dynamically be replaced in launcher environments
+    this.client = await AppAgentWebsocket.connect('', '{{app_name}}');
 
     this.loading = false;
   }

@@ -28,8 +28,8 @@
       import { AppWebsocket, AppAgentWebsocket } from '@holochain/client';
       
       async function connect() {
-        const appWebsocket = await AppWebsocket.connect(``);
-        const client = await AppAgentWebsocket.connect(appWebsocket, 'hello-world');
+        // We pass '' as url because it will dynamically be replaced in launcher environments
+        const client = await AppAgentWebsocket.connect('', 'hello-world');
 
         const result = await client.callZome({
           cap_secret: null,

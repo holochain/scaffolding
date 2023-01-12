@@ -28,8 +28,8 @@
       import { AppWebsocket, AppAgentWebsocket } from '@holochain/client';
       
       async function connect() {
-        const appWebsocket = await AppWebsocket.connect('');
-        const appAgentWebsocket = await AppAgentWebsocket.connect(appWebsocket, '{{app_name}}');
+        // We pass '' as url because it will dynamically be replaced in launcher environments
+        const appAgentWebsocket = await AppAgentWebsocket.connect('', '{{app_name}}');
         
         alert("Connected to holochain!");
       }

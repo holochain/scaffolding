@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, setContext } from 'svelte';
-  import { AppWebsocket, ActionHash, AppAgentClient, AppAgentWebsocket } from '@holochain/client';
+  import { ActionHash, AppAgentClient, AppAgentWebsocket } from '@holochain/client';
   import '@material/mwc-circular-progress';
   import AllPosts from './forum/posts/AllPosts.svelte';
   import CreatePost from './forum/posts/CreatePost.svelte';
@@ -13,9 +13,8 @@
   $: client, loading;
 
   onMount(async () => {
-    const appWebsocket = await AppWebsocket.connect(``);
-
-    client = await AppAgentWebsocket.connect(appWebsocket, 'forum');
+    // We pass '' as url because it will dynamically be replaced in launcher environments
+    client = await AppAgentWebsocket.connect('', 'forum');
     loading = false;
   });
 
