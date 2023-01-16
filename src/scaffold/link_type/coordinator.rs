@@ -175,13 +175,9 @@ fn get_links_handler_to_entry(
         .to_string(&Cardinality::Vector)
         .to_case(Case::Snake);
 
-    let map_line = match to_entry_type.reference_entry_hash {
-        true => String::from(".filter_map(|r| r.action().entry_hash().cloned())"),
-        false => String::from(".map(|r| r.action_address().clone())"),
-    };
     format!(
         r#"#[hdk_extern]
-pub fn get_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}({from_arg_name}: {from_hash_type}) -> ExternResult<Vec<{to_hash_type}>> {{
+pub fn get_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}({from_arg_name}: {from_hash_type}) -> ExternResult<Vec<Record>> {{
     let links = get_links({from_arg_name}, LinkTypes::{pascal_link_type_name}, None)?;
     
     let get_input: Vec<GetInput> = links
@@ -192,13 +188,12 @@ pub fn get_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}({fr
     // Get the records to filter out the deleted ones
     let records = HDK.with(|hdk| hdk.borrow().get(get_input))?;
 
-    let hashes: Vec<{to_hash_type}> = records
+    let records: Vec<Record> = records
         .into_iter()
         .filter_map(|r| r)
-        {map_line}
         .collect();
 
-    Ok(hashes)
+    Ok(record)
 }}"#,
     )
 }

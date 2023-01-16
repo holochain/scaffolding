@@ -10,16 +10,16 @@ export let {{camel_case from_referenceable.singular_arg}}: {{from_referenceable.
 
 let client: AppAgentClient = getContext(clientContext).getClient();
 
-let hashes: Array<{{to_referenceable.hash_type}}> | undefined;
+let records: Array<Record> | undefined;
 
 let loading = true;
 let error: any = undefined;
 
-$: hashes, loading, error;
+$: records, loading, error;
 
 onMount(async () => {  
   try {
-    hashes = await client.callZome({
+    records = await client.callZome({
       cap_secret: null,
       role_name: '{{dna_role_name}}',
       zome_name: '{{coordinator_zome_manifest.name}}',
@@ -40,12 +40,12 @@ onMount(async () => {
 </div>
 {:else if error}
 <span>Error fetching {{lower_case (plural to_referenceable.name)}}: {error.data.data}.</span>
-{:else if hashes.length === 0}
+{:else if records.length === 0}
 <span>No {{lower_case (plural to_referenceable.name)}} found for this {{lower_case from_referenceable.name}}.</span>
 {:else}
 <div style="display: flex; flex-direction: column">
-  {#each hashes as hash}
-    <{{pascal_case to_referenceable.name}}Detail {{camel_case to_referenceable.name}}Hash={hash} style="margin-bottom: 8px;"></{{pascal_case to_referenceable.name}}Detail>
+  {#each records as record}
+    <{{pascal_case to_referenceable.name}}Detail {{camel_case to_referenceable.name}}Hash={record.signed_action.hashed.hash} style="margin-bottom: 8px;"></{{pascal_case to_referenceable.name}}Detail>
   {/each}
 </div>
 {/if}

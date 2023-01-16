@@ -27,17 +27,13 @@ fn global_collection_getter(
 ) -> String {
     let to_hash_type = entry_type_reference.hash_type().to_string();
     let snake_collection_name = collection_name.to_case(Case::Snake);
-    let map_line = match entry_type_reference.reference_entry_hash {
-        true => String::from(".filter_map(|r| r.action().entry_hash().cloned())"),
-        false => String::from(".map(|r| r.action_address().clone())"),
-    };
 
     format!(
         r#"use hdk::prelude::*;
 use {integrity_zome_name}::*;
 
 #[hdk_extern]
-pub fn get_{snake_collection_name}(_: ()) -> ExternResult<Vec<{to_hash_type}>> {{
+pub fn get_{snake_collection_name}(_: ()) -> ExternResult<Vec<Record>> {{
     let path = Path::from("{snake_collection_name}");
 
     let links = get_links(path.path_entry_hash()?, LinkTypes::{link_type_name}, None)?;
@@ -50,13 +46,12 @@ pub fn get_{snake_collection_name}(_: ()) -> ExternResult<Vec<{to_hash_type}>> {
     // Get the records to filter out the deleted ones
     let records = HDK.with(|hdk| hdk.borrow().get(get_input))?;
 
-    let hashes: Vec<{to_hash_type}> = records
+    let records: Vec<Record> = records
         .into_iter()
         .filter_map(|r| r)
-        {map_line}
         .collect();
 
-    Ok(hashes)
+    Ok(records)
 }}
 "#,
     )
@@ -69,17 +64,13 @@ fn by_author_collection_getter(
     entry_type_reference: &EntryTypeReference,
 ) -> String {
     let to_hash_type = entry_type_reference.hash_type().to_string();
-    let map_line = match entry_type_reference.reference_entry_hash {
-        true => String::from(".filter_map(|r| r.action().entry_hash().cloned())"),
-        false => String::from(".map(|r| r.action_address().clone())"),
-    };
 
     format!(
         r#"use hdk::prelude::*;
 use {integrity_zome_name}::*;
 
 #[hdk_extern]
-pub fn get_{collection_name}(author: AgentPubKey) -> ExternResult<Vec<{to_hash_type}>> {{
+pub fn get_{collection_name}(author: AgentPubKey) -> ExternResult<Vec<Record>> {{
     let links = get_links(author, LinkTypes::{link_type_name}, None)?;
     
     let get_input: Vec<GetInput> = links
@@ -90,13 +81,12 @@ pub fn get_{collection_name}(author: AgentPubKey) -> ExternResult<Vec<{to_hash_t
     // Get the records to filter out the deleted ones
     let records = HDK.with(|hdk| hdk.borrow().get(get_input))?;
 
-    let hashes: Vec<{to_hash_type}> = records
+    let records: Vec<Record> = records
         .into_iter()
         .filter_map(|r| r)
-        {map_line}
         .collect();
 
-    Ok(hashes)
+    Ok(records)
 }}
 "#,
     )
