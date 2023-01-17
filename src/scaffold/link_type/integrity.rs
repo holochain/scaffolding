@@ -40,7 +40,8 @@ fn validate_referenceable(
                     let action_hash = ActionHash::from(#address_ident);
                     let record = must_get_valid_record(action_hash)?;
 
-                    let #entry_type_snake: Option<crate::#entry_type_pascal> = record.entry().to_app_option().map_err(|e| wasm_error!(e))?;
+                    let #entry_type_snake: crate::#entry_type_pascal = record.entry().to_app_option()
+                      .map_err(|e| wasm_error!(e))?.ok_or(wasm_error!(WasmErrorInner::Guest(String::from("Linked action must reference an entry"))))?;
                 },
             }
         }

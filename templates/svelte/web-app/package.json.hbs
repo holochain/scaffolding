@@ -7,7 +7,7 @@
   ],
   "scripts": {
     "start": "AGENTS=2 npm run network",
-    "network": "hc s clean && npm run build:happ && UI_PORT=8888 concurrently \"npm run build:watch -w ui\" \"npm run launch:happ\" \"npm run playground\"",
+    "network": "hc s clean && npm run build:happ && UI_PORT=8888 concurrently \"npm start -w ui\" \"npm run launch:happ\" \"npm run playground\"",
     "test": "npm run build:zomes && hc app pack workdir --recursive && npm t -w tests",
     "launch:happ": "echo \"pass\" | RUST_LOG=warn hc launch --piped -n $AGENTS workdir/{{app_name}}.happ -w --ui-port $UI_PORT network mdns",
     "package": "npm run build:happ && npm run package -w ui && hc web-app pack workdir --recursive",

@@ -16,7 +16,7 @@ use crate::{
 };
 
 use super::crud::Crud;
-use super::definitions::{EntryDefinition, EntryTypeReference};
+use super::definitions::{Cardinality, EntryDefinition, EntryTypeReference, FieldDefinition, Referenceable};
 
 pub fn render_entry_definition_struct(entry_def: &EntryDefinition) -> ScaffoldResult<TokenStream> {
     let name: syn::Expr = syn::parse_str(entry_def.name.to_case(Case::Pascal).as_str())?;
@@ -72,7 +72,12 @@ pub fn render_entry_definition_file(
         },
     };
     let validate_update: TokenStream = quote! {
-        pub fn #validate_update_fn(_action: Update, #new_entry_arg: #name_pascal, _original_action: EntryCreationAction, #original_entry_arg: #name_pascal) -> ExternResult<ValidateCallbackResult> {
+        pub fn #validate_update_fn(
+            _action: Update, 
+            #new_entry_arg: #name_pascal, 
+            _original_action: EntryCreationAction, 
+            #original_entry_arg: #name_pascal
+        ) -> ExternResult<ValidateCallbackResult> {
             #validate_update_result
         }
     };
@@ -93,13 +98,65 @@ pub fn render_entry_definition_file(
         },
     };
     let validate_delete: TokenStream = quote! {
-        pub fn #validate_delete_fn(_action: Delete, _original_action: EntryCreationAction, #deleted_post_arg: #name_pascal) -> ExternResult<ValidateCallbackResult> {
+        pub fn #validate_delete_fn(
+            _action: Delete, 
+            _original_action: EntryCreationAction, 
+            #deleted_post_arg: #name_pascal
+        ) -> ExternResult<ValidateCallbackResult> {
             #validate_delete_result
         }
     };
 
     let validate_create_fn =
         format_ident!("validate_create_{}", entry_def.name.to_case(Case::Snake));
+
+    let deps: Vec<(FieldDefinition, EntryTypeReference)> = entry_def
+        .fields
+        .iter()
+        .filter_map(|f| match &f.linked_from {
+            Some(Referenceable::EntryType(entry_type_reference)) => Some((f.clone(), entry_type_reference.clone())),
+          _ => None  
+        })
+        .collect();
+
+    let create_new_entry_arg = match deps.len() {
+        0 => format_ident!("_{}", entry_def.name.to_case(Case::Snake)),
+        _ => format_ident!("{}", entry_def.name.to_case(Case::Snake)),
+    };
+    let deps_validation: Vec<TokenStream> = deps
+        .into_iter()
+        .map(|(field_def, reference)| { let field_name = format_ident!("{}",field_def.field_name);
+            
+            let dependant_entry_type_snake = format_ident!("_{}", reference.entry_type.to_case(Case::Snake));
+            let dependant_entry_type_pascal = format_ident!("{}", reference.entry_type.to_case(Case::Pascal));
+            match field_def.cardinality {
+            Cardinality::Single => quote! {
+                let record = must_get_valid_record(#create_new_entry_arg.#field_name.clone())?;
+
+                let #dependant_entry_type_snake: crate::#dependant_entry_type_pascal = record.entry().to_app_option()
+                    .map_err(|e| wasm_error!(e))?
+                    .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("Dependant action must be accompanied by an entry"))))?;
+            },
+            Cardinality::Option => quote! {
+                if let Some(action_hash) = #create_new_entry_arg.#field_name.clone() {
+                    let record = must_get_valid_record(action_hash)?;
+
+                    let #dependant_entry_type_snake: crate::#dependant_entry_type_pascal = record.entry().to_app_option()
+                        .map_err(|e| wasm_error!(e))?
+                        .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("Dependant action must be accompanied by an entry"))))?;
+                }
+            },
+            Cardinality::Vector => quote! {
+                for action_hash in #create_new_entry_arg.#field_name.clone() {
+                    let record = must_get_valid_record(action_hash)?;
+
+                    let #dependant_entry_type_snake: crate::#dependant_entry_type_pascal = record.entry().to_app_option()
+                        .map_err(|e| wasm_error!(e))?
+                        .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("Dependant action must be accompanied by an entry"))))?;
+                }
+            },
+        }})
+        .collect();
 
     let token_stream = quote! {
       use hdi::prelude::*;
@@ -110,7 +167,12 @@ pub fn render_entry_definition_file(
       #[derive(Clone)]
       #entry_def_token_stream
 
-      pub fn #validate_create_fn(_action: EntryCreationAction, #new_entry_arg: #name_pascal) -> ExternResult<ValidateCallbackResult> {
+      pub fn #validate_create_fn(
+          _action: EntryCreationAction, 
+          #create_new_entry_arg: #name_pascal
+      ) -> ExternResult<ValidateCallbackResult> {
+          #(#deps_validation)*
+
           /// TODO: add the appropriate validation rules
           Ok(ValidateCallbackResult::Valid)
       }
