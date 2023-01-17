@@ -125,14 +125,22 @@ pub use {}::*;
     let dna_file_tree = DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
     let zome_file_tree = ZomeFileTree::from_zome_manifest(dna_file_tree, zome_manifest)?;
 
-    let mut zome_file_tree =
-        add_link_type_to_integrity_zome(zome_file_tree, &link_type, delete, &link_type_file_name)?;
+    let mut zome_file_tree = add_link_type_to_integrity_zome(
+        zome_file_tree,
+        &link_type,
+        &Some(from_referenceable.clone()),
+        &to_referenceable,
+        delete,
+        &link_type_file_name,
+    )?;
 
     if bidireccional {
         if let Some(to) = &to_referenceable {
             zome_file_tree = add_link_type_to_integrity_zome(
                 zome_file_tree,
                 &link_type_name(&to, &from_referenceable),
+                &to_referenceable,
+                &Some(from_referenceable.clone()),
                 delete,
                 &link_type_file_name,
             )?;

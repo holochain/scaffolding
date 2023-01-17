@@ -6,6 +6,7 @@ use serde::{ser::SerializeStruct, Deserialize, Serialize, Serializer};
 
 use crate::{
     error::{ScaffoldError, ScaffoldResult},
+    scaffold::tryorama::entry_crud_tests::hash_from_record,
     utils::check_snake_case,
 };
 
@@ -200,6 +201,25 @@ impl FieldDefinition {
     }
 
     pub fn js_sample_value(&self) -> String {
+        if let Some(Referenceable::EntryType(entry_type_ref)) = &self.linked_from {
+            let pascal_dependant = entry_type_ref.entry_type.to_case(Case::Pascal);
+            return match self.cardinality {
+                Cardinality::Vector => {
+                    format!(
+                        "[{}]",
+                        hash_from_record(
+                            format!("(await create{pascal_dependant}(cell))"),
+                            entry_type_ref.reference_entry_hash
+                        )
+                    )
+                }
+                Cardinality::Single | Cardinality::Option => hash_from_record(
+                    format!("(await create{pascal_dependant}(cell))"),
+                    entry_type_ref.reference_entry_hash,
+                ),
+            };
+        }
+
         match self.cardinality {
             Cardinality::Vector => format!(
                 "[{}]",

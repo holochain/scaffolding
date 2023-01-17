@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "scripts": {
     "build": "vue-tsc --noEmit && vite build",
-    "build:watch": "concurrently \"vue-tsc --noEmit --watch\" \"vite build --watch --clearScreen false\"",
+    "start": "concurrently \"vue-tsc --noEmit --watch\" \"vite --port $UI_PORT --clearScreen false\"",
     "preview": "vite preview",
     "package": "npm run build && cd dist && bestzip ../dist.zip *"
   },
@@ -20,7 +20,6 @@
     "@material/mwc-formfield": "^0.27.0",
     "@material/mwc-icon-button": "^0.27.0",
     "@msgpack/msgpack": "^2.7.2",
-    "@types/ws": "^8.5.1",
     "@vaadin/date-time-picker": "^23.2.8",
     "vue": "^3.2.25"
   },

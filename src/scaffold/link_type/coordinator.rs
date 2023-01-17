@@ -186,14 +186,12 @@ pub fn get_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}({fr
         .collect();
 
     // Get the records to filter out the deleted ones
-    let records = HDK.with(|hdk| hdk.borrow().get(get_input))?;
-
-    let records: Vec<Record> = records
+    let records: Vec<Record> = HDK.with(|hdk| hdk.borrow().get(get_input))?
         .into_iter()
         .filter_map(|r| r)
         .collect();
 
-    Ok(record)
+    Ok(records)
 }}"#,
     )
 }

@@ -10,14 +10,49 @@ use crate::{
     file_tree::{find_map_rust_files, map_rust_files, FileTree},
     scaffold::{
         dna::DnaFileTree,
-        entry_type::integrity::{find_ending_match_expr, find_ending_match_expr_in_block},
+        entry_type::{
+            definitions::Referenceable,
+            integrity::{find_ending_match_expr, find_ending_match_expr_in_block},
+        },
         zome::{utils::get_coordinator_zomes_for_integrity, ZomeFileTree},
     },
 };
 
+fn validate_referenceable(
+    referenceable: &Referenceable,
+    address_ident: &syn::Ident,
+) -> TokenStream {
+    match referenceable {
+        Referenceable::EntryType(entry_type) => {
+            let entry_type_snake = format_ident!("_{}", entry_type.entry_type.to_case(Case::Snake));
+            let entry_type_pascal =
+                format_ident!("{}", entry_type.entry_type.to_case(Case::Pascal));
+            match entry_type.reference_entry_hash {
+                true => quote! {
+                    /// Check the entry type for the given entry hash
+                    let entry_hash = EntryHash::from(#address_ident);
+                    let entry = must_get_entry(entry_hash)?.entry;
+
+                    let #entry_type_snake = crate::#entry_type_pascal::try_from(&entry).map_err(|e| wasm_error!(e))?;
+                },
+                false => quote! {
+                    /// Check the entry type for the given action hash
+                    let action_hash = ActionHash::from(#address_ident);
+                    let record = must_get_valid_record(action_hash)?;
+
+                    let #entry_type_snake: Option<crate::#entry_type_pascal> = record.entry().to_app_option().map_err(|e| wasm_error!(e))?;
+                },
+            }
+        }
+        _ => quote! {},
+    }
+}
+
 pub fn add_link_type_to_integrity_zome(
     zome_file_tree: ZomeFileTree,
     link_type_name: &String,
+    from_referenceable: &Option<Referenceable>,
+    to_referenceable: &Option<Referenceable>,
     delete: bool,
     file_to_add_validation_to: &PathBuf,
 ) -> ScaffoldResult<ZomeFileTree> {
@@ -199,13 +234,36 @@ pub fn add_link_type_to_integrity_zome(
                     },
                 };
 
+                let base_address_ident = match from_referenceable.is_some() {
+                    true => format_ident!("base_address"),
+                    false => format_ident!("_base_address"),
+                };
+
+                let validate_create_from = match from_referenceable {
+                    Some(r) => Some(validate_referenceable(r, &base_address_ident)),
+                    _ => None,
+                };
+                let target_address_ident = match to_referenceable.is_some() {
+                    true => format_ident!("target_address"),
+                    false => format_ident!("_target_address"),
+                };
+
+                let validate_create_to = match to_referenceable {
+                    Some(r) => Some(validate_referenceable(r, &target_address_ident)),
+                    _ => None,
+                };
+
                 let create_token_stream = quote! {
                     pub fn #validate_create_fn(
                         _action: CreateLink,
-                        _base_address: AnyLinkableHash,
-                        _target_address: AnyLinkableHash,
+                        #base_address_ident: AnyLinkableHash,
+                        #target_address_ident: AnyLinkableHash,
                         _tag: LinkTag,
                     ) -> ExternResult<ValidateCallbackResult> {
+                        #validate_create_from
+
+                        #validate_create_to
+
                         /// TODO: add the appropriate validation rules
                         Ok(ValidateCallbackResult::Valid)
                   }

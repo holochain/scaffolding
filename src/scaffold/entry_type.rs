@@ -1,4 +1,4 @@
-use std::{collections::BTreeMap, ffi::OsString, path::PathBuf};
+use std::{ffi::OsString, path::PathBuf};
 
 use crate::{
     file_tree::FileTree,
@@ -8,7 +8,6 @@ use crate::{
 use build_fs_tree::dir;
 use convert_case::{Case, Casing};
 use dialoguer::{theme::ColorfulTheme, MultiSelect, Select};
-use holochain_types::prelude::ZomeManifest;
 
 use crate::error::{ScaffoldError, ScaffoldResult};
 
@@ -23,10 +22,7 @@ use self::{
 use super::{
     link_type::{integrity::add_link_type_to_integrity_zome, link_type_name},
     tryorama::add_tryorama_tests_for_entry_def,
-    zome::{
-        coordinator::find_extern_function_or_choose, utils::get_coordinator_zomes_for_integrity,
-        ZomeFileTree,
-    },
+    zome::{utils::get_coordinator_zomes_for_integrity, ZomeFileTree},
 };
 
 pub mod coordinator;
@@ -165,6 +161,8 @@ pub fn scaffold_entry_type(
         zome_file_tree = add_link_type_to_integrity_zome(
             zome_file_tree,
             &link_type_name(&l, &entry_def.referenceable()),
+            &Some(l),
+            &Some(entry_def.referenceable()),
             false,
             &PathBuf::from(format!("{}.rs", entry_def.name.to_case(Case::Snake))),
         )?;
@@ -200,6 +198,8 @@ pub fn scaffold_entry_type(
         zome_file_tree = add_link_type_to_integrity_zome(
             zome_file_tree,
             &updates_link_name(&entry_def.name),
+            &Some(entry_def.referenceable()),
+            &Some(entry_def.referenceable()),
             false,
             &PathBuf::from(format!("{}.rs", entry_def.name.to_case(Case::Snake))),
         )?;
@@ -216,30 +216,6 @@ pub fn scaffold_entry_type(
         link_from_original_to_each_update,
     )?;
 
-    let mut create_fns_for_depends_on: BTreeMap<String, (ZomeManifest, String)> = BTreeMap::new();
-
-    for l in linked_from.clone() {
-        if let Referenceable::EntryType(entry_type_reference) = l {
-            let (zome, fn_name) = find_extern_function_or_choose(
-                &zome_file_tree.dna_file_tree,
-                &coordinator_zomes_for_integrity,
-                &format!(
-                    "create_{}",
-                    entry_type_reference.entry_type.to_case(Case::Snake)
-                ),
-                &format!(
-                    "In which function is a {} created?",
-                    entry_type_reference.entry_type.to_case(Case::Pascal)
-                ),
-            )?;
-
-            create_fns_for_depends_on.insert(
-                entry_type_reference.entry_type.clone(),
-                (zome, fn_name.sig.ident.to_string()),
-            );
-        }
-    }
-
     let dna_manifest = zome_file_tree.dna_file_tree.dna_manifest.clone();
 
     let app_file_tree = add_tryorama_tests_for_entry_def(
@@ -247,7 +223,6 @@ pub fn scaffold_entry_type(
         &entry_def,
         &crud,
         link_from_original_to_each_update,
-        &create_fns_for_depends_on,
     )?;
 
     scaffold_entry_type_templates(

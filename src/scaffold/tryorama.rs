@@ -15,7 +15,6 @@ use build_fs_tree::file;
 use convert_case::{Case, Casing};
 use entry_crud_tests::entry_crud_tests;
 use holochain::prelude::AppManifest;
-use holochain_types::prelude::ZomeManifest;
 use mr_bundle::Location;
 
 use super::{
@@ -65,7 +64,6 @@ pub fn add_tryorama_tests_for_entry_def(
     entry_def: &EntryDefinition,
     crud: &Crud,
     link_original_to_each_update: bool,
-    create_fns_for_depends_on: &BTreeMap<String, (ZomeManifest, String)>,
 ) -> ScaffoldResult<FileTree> {
     let tryorama_path = find_or_choose_tryorama_package_path(
         coordinator_zome_file_tree.dna_file_tree.file_tree_ref(),
@@ -111,7 +109,6 @@ pub fn add_tryorama_tests_for_entry_def(
         &coordinator_zome_name,
         crud,
         link_original_to_each_update,
-        &create_fns_for_depends_on,
     );
 
     let test_path = tryorama_path

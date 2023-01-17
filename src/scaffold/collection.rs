@@ -14,7 +14,8 @@ use self::coordinator::add_collection_to_coordinators;
 
 use super::{
     entry_type::{
-        definitions::EntryTypeReference, integrity::get_all_entry_types,
+        definitions::{EntryTypeReference, Referenceable},
+        integrity::get_all_entry_types,
         utils::choose_entry_type_reference,
     },
     link_type::integrity::add_link_type_to_integrity_zome,
@@ -105,6 +106,8 @@ pub fn scaffold_collection(
     let zome_file_tree = add_link_type_to_integrity_zome(
         integrity_zome_file_tree,
         &link_type_name,
+        &None,
+        &Some(Referenceable::EntryType(entry_type.clone())),
         false,
         &PathBuf::from(format!("{}.rs", entry_type.entry_type.to_case(Case::Snake))),
     )?;
