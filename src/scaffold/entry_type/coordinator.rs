@@ -481,7 +481,7 @@ pub fn add_crud_functions_to_coordinator(
                         {
                             if let None = find_ending_match_expr_in_block(&mut item_fn.block) {
                                 item_fn.block = Box::new(syn::parse_str::<syn::Block>(
-                                    "{ match action.hashed.content { _ => Ok(()) } }",
+                                    "{ match action.hashed.content.clone() { _ => Ok(()) } }",
                                 )?);
                             }
 
