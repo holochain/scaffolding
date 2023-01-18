@@ -6,14 +6,11 @@ use crate::templates::web_app::scaffold_web_app_template;
 use crate::templates::{templates_path, ScaffoldedTemplate};
 use crate::{error::ScaffoldError, file_tree::FileTree};
 
-use super::{
-    app::{
-        cargo::workspace_cargo_toml,
-        default_nix::default_nix,
-        gitignore::gitignore,
-        manifests::{empty_happ_manifest, web_happ_manifest},
-    },
-    tryorama::{package_json::tryorama_package_json, tsconfig_json::tryorama_tsconfig},
+use super::app::{
+    cargo::workspace_cargo_toml,
+    default_nix::default_nix,
+    gitignore::gitignore,
+    manifests::{empty_happ_manifest, web_happ_manifest},
 };
 
 pub mod uis;
@@ -31,11 +28,6 @@ fn web_app_skeleton(
       "workdir" => dir!{
         "happ.yaml" => file!(empty_happ_manifest(app_name.clone(), description)?)
         "web-happ.yaml" => file!(web_happ_manifest(app_name.clone(), format!("./{}.happ", app_name), String::from("../ui/dist.zip"))?)
-      }
-      "tests" => dir!{
-        "package.json" => file!(tryorama_package_json())
-        "tsconfig.json" => file!(tryorama_tsconfig())
-        "src" => dir! {}
       }
       "Cargo.toml" => file!(workspace_cargo_toml())
       "dnas" => dir! {},

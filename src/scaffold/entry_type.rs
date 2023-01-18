@@ -20,8 +20,8 @@ use self::{
 };
 
 use super::{
+    app::AppFileTree,
     link_type::{integrity::add_link_type_to_integrity_zome, link_type_name},
-    tryorama::add_tryorama_tests_for_entry_def,
     zome::{utils::get_coordinator_zomes_for_integrity, ZomeFileTree},
 };
 
@@ -218,16 +218,15 @@ pub fn scaffold_entry_type(
 
     let dna_manifest = zome_file_tree.dna_file_tree.dna_manifest.clone();
 
-    let app_file_tree = add_tryorama_tests_for_entry_def(
-        zome_file_tree,
-        &entry_def,
-        &crud,
-        link_from_original_to_each_update,
-    )?;
+    let app_file_tree =
+        AppFileTree::get_or_choose(zome_file_tree.dna_file_tree.file_tree(), &None)?;
+
+    let app_name = app_file_tree.app_manifest.app_name().to_string();
 
     scaffold_entry_type_templates(
-        app_file_tree,
+        app_file_tree.file_tree(),
         template_file_tree,
+        &app_name,
         &dna_manifest.name(),
         &coordinator_zome,
         &entry_def,
