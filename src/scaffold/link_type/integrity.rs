@@ -410,13 +410,13 @@ fn signal_link_types_variants() -> ScaffoldResult<Vec<syn::Variant>> {
     Ok(vec![
         syn::parse_str::<syn::Variant>(
             "LinkCreated {
-        action: CreateLink,
+        action: SignedActionHashed,
         link_type: LinkTypes,
     }",
         )?,
         syn::parse_str::<syn::Variant>(
             "LinkDeleted {
-        action: DeleteLink,
+        action: SignedActionHashed,
         link_type: LinkTypes,
     }",
         )?,
@@ -428,7 +428,7 @@ fn signal_action_match_arms() -> ScaffoldResult<Vec<syn::Arm>> {
         syn::parse_str::<syn::Arm>("Action::CreateLink(create_link) => {
             let link_type = LinkTypes::from_type(create_link.zome_index, create_link.link_type)?.ok_or(wasm_error!(WasmErrorInner::Guest(\"Link type should be exist\".to_string())))?;
             emit_signal(Signal::LinkCreated {
-                action: create_link,
+                action,
                 link_type
             })?;
             Ok(())
@@ -440,7 +440,7 @@ fn signal_action_match_arms() -> ScaffoldResult<Vec<syn::Arm>> {
                 Action::CreateLink(create_link) => {
                     let link_type = LinkTypes::from_type(create_link.zome_index, create_link.link_type)?.ok_or(wasm_error!(WasmErrorInner::Guest(\"Link type should be exist\".to_string())))?;
                     emit_signal(Signal::LinkDeleted {
-                        action: delete_link,
+                        action,
                         link_type
                     })?;
                     Ok(())

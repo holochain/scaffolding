@@ -13,6 +13,7 @@ import './forum/posts/create-post';
 @customElement('holochain-app')
 export class HolochainApp extends LitElement {
   @state() loading = true;
+
   @state() result: string | undefined;
 
   @provide({ context: clientContext })
@@ -25,10 +26,6 @@ export class HolochainApp extends LitElement {
     this.loading = false;
   }
   
-  get allPosts(): AllPosts | undefined {
-    return this.shadowRoot?.getElementById('all-posts') as AllPosts;
-  }
-
   render() {
     if (this.loading)
       return html`
@@ -41,7 +38,7 @@ export class HolochainApp extends LitElement {
 
         <div id="content">
           <all-posts id="all-posts" style="margin-bottom: 16px"></all-posts>
-          <create-post @post-created=${() => this.allPosts?._fetchPosts.run()}></create-post>
+          <create-post></create-post>
         </div>
       </main>
     `;

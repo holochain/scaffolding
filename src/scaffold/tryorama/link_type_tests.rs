@@ -1,28 +1,26 @@
-// TODO: Actually implement these tests
-// pub fn link_type_tests(
-// 	link_type_
-//     entry_definition: &EntryDefinition,
-//     happ_bundle_location_from_tests_root: &PathBuf,
-//     dna_role_name: &String,
-//     coordinator_zome: &String,
-//     crud: &Crud,
+// pub fn link_tye_tests(
+// 	link_type_    entry_defiition: &EntryDefinition,
+//     happ_bundl_location_from_tests_root: &PathBuf,
+//     dna_role_nme: &String,
+//     coordinato_zome: &String,
+//     crud: &Cru,
 // ) -> String {
-//     let mut initial_test_file = format!(
+//     let mut intial_test_file = format!(
 //         r#"
-// import test from 'node:test';
-// import assert from 'node:assert';
+// import test frm 'node:test';
+// import assert rom 'node:assert';
 
-// import {{ runScenario, pause }} from '@holochain/tryorama';
-// import {{ ActionHash, Record }} from '@holochain/client';
-// import {{ decode }} from '@msgpack/msgpack';
+// import {{ runSenario, pause }} from '@holochain/tryorama';
+// import {{ ActinHash, Record }} from '@holochain/client';
+// import {{ decoe }} from '@msgpack/msgpack';
 
 // {}
 // "#,
-//         create_entry_test(
-//             entry_definition,
-//             happ_bundle_location_from_tests_root,
-//             dna_role_name,
-//             coordinator_zome,
+//         createentry_test(
+//             enry_definition,
+//             hap_bundle_location_from_tests_root,
+//             dn_role_name,
+//             cordinator_zome,
 //         )
 //     )
 // }

@@ -357,20 +357,20 @@ fn signal_entry_types_variants() -> ScaffoldResult<Vec<syn::Variant>> {
     Ok(vec![
         syn::parse_str::<syn::Variant>(
             "EntryCreated {
-        action: Create,
+        action: SignedActionHashed,
         app_entry: EntryTypes,
     }",
         )?,
         syn::parse_str::<syn::Variant>(
             "EntryUpdated {
-        action: Update,
+        action: SignedActionHashed,
         app_entry: EntryTypes,
         original_app_entry: EntryTypes,
     }",
         )?,
         syn::parse_str::<syn::Variant>(
             "EntryDeleted {
-        action: Delete,
+        action: SignedActionHashed,
         original_app_entry: EntryTypes,
     }",
         )?,
@@ -379,10 +379,10 @@ fn signal_entry_types_variants() -> ScaffoldResult<Vec<syn::Variant>> {
 
 fn signal_action_match_arms() -> ScaffoldResult<Vec<syn::Arm>> {
     Ok(vec![
-        syn::parse_str::<syn::Arm>("Action::Create(create) => {
+        syn::parse_str::<syn::Arm>("Action::Create(_create) => {
             let app_entry = get_entry_for_action(&action.hashed.hash)?.ok_or(wasm_error!(WasmErrorInner::Guest(\"Create should carry an entry\".to_string())))?;
             emit_signal(Signal::EntryCreated {
-                action: create,
+                action,
                 app_entry
             })?;
             Ok(())
@@ -391,7 +391,7 @@ fn signal_action_match_arms() -> ScaffoldResult<Vec<syn::Arm>> {
             let app_entry = get_entry_for_action(&action.hashed.hash)?.ok_or(wasm_error!(WasmErrorInner::Guest(\"Update should carry an entry\".to_string())))?;
             let original_app_entry = get_entry_for_action(&update.original_action_address)?.ok_or(wasm_error!(WasmErrorInner::Guest(\"Updated action should carry an entry\".to_string())))?;
             emit_signal(Signal::EntryUpdated {
-                action: update,
+                action,
                 app_entry,
                 original_app_entry
             })?;
@@ -400,7 +400,7 @@ fn signal_action_match_arms() -> ScaffoldResult<Vec<syn::Arm>> {
         syn::parse_str::<syn::Arm>("Action::Delete(delete) => {
             let original_app_entry = get_entry_for_action(&delete.deletes_address)?.ok_or(wasm_error!(WasmErrorInner::Guest(\"Deleted action should carry an entry\".to_string())))?;
             emit_signal(Signal::EntryDeleted {
-                action: delete,
+                action,
                 original_app_entry,
             })?;
             Ok(())
