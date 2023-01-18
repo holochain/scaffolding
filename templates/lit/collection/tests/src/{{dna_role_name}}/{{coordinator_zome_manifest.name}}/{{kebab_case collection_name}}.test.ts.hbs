@@ -1,0 +1,51 @@
+import test from 'node:test';
+import assert from 'node:assert';
+
+import { runScenario, pause, CallableCell } from '@holochain/tryorama';
+import { NewEntryAction, ActionHash, Record, AppBundleSource } from '@holochain/client';
+import { decode } from '@msgpack/msgpack';
+
+import { create{{pascal_case referenceable.name}} } from './{{kebab_case referenceable.name}}.test.js';
+
+test('create a {{pascal_case referenceable.name}} and get {{pascal_case entry_type.name}}', { concurrency: 1 }, async t => {
+  await runScenario(async scenario => {
+    // Construct proper paths for your app.
+    // This assumes app bundle created by the `hc app pack` command.
+    const testAppPath = process.cwd() + '/../workdir/{{app_name}}.happ';
+
+    // Set up the app to be installed 
+    const appSource = { appBundleSource: { path: testAppPath } };
+
+    // Add 2 players with the test app to the Scenario. The returned players
+    // can be destructured.
+    const [alice, bob] = await scenario.addPlayersWithApps([appSource, appSource]);
+
+    // Shortcut peer discovery through gossip and register all agents in every
+    // conductor of the scenario.
+    await scenario.shareAllAgents();
+
+    // Bob gets {{pascal_case collection_name}}
+    let collectionOutput: Record[] = await bob.cells[0].callZome({
+      zome_name: "{{coordinator_zome_manifest.name}}",
+      fn_name: "{{snake_case collection_name}}",
+      payload: {{#if (eq collection_type "Global")}}null{{else}}alice.agentPubKey{{/if}}
+    });
+    assert.equal(collectionOutput.length, 0);
+
+    // Alice creates a {{pascal_case entry_type.name}}
+    const createdRecord: Record = await create{{pascal_case entry_type.name}}(alice.cells[0]);
+    assert.ok(createdRecord);
+    
+    await pause(800);
+    
+    // Bob gets {{pascal_case collection_name}} again
+    collectionOutput = await bob.cells[0].callZome({
+      zome_name: "{{coordinator_zome_manifest.name}}",
+      fn_name: "{{snake_case collection_name}}",
+      payload: {{#if (eq collection_type "Global")}}null{{else}}alice.agentPubKey{{/if}}
+    });
+    assert.equal(collectionOutput.length, 1);
+    assert.deepEqual(createdRecord, collectionOutput[0]);    
+  });
+});
+
