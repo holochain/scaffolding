@@ -1,6 +1,6 @@
 import { LitElement, html } from 'lit';
 import { state, customElement, property } from 'lit/decorators.js';
-import { AppAgentClient, AgentPubKey, EntryHash, ActionHash, Record } from '@holochain/client';
+import { AppAgentClient, AgentPubKey, EntryHash, ActionHash, Record, NewEntryAction } from '@holochain/client';
 import { consume } from '@lit-labs/context';
 import { Task } from '@lit-labs/task';
 import { clientContext } from '../../contexts';
@@ -14,15 +14,14 @@ export class {{pascal_case collection_name}} extends LitElement {
   client!: AppAgentClient;
   
   {{#if (eq collection_type.type "ByAuthor")}}
-
   @property({
     hasChanged: (newVal: AgentPubKey, oldVal: AgentPubKey) => newVal?.toString() !== oldVal?.toString()
   })
   author!: AgentPubKey;
+
   {{/if}}
-  
   @state()
-  signaledHashes: Array<ActionHash> = [];
+  signaledHashes: Array<{{referenceable.hash_type}}> = [];
   
   _fetch{{pascal_case (plural referenceable.name)}} = new Task(this, ([{{#if (eq collection_type.type "ByAuthor")}}author{{/if}}]) => this.client.callZome({
       cap_secret: null,
@@ -34,13 +33,17 @@ export class {{pascal_case collection_name}} extends LitElement {
   
   firstUpdated() {
     this.client.on('signal', signal => {
-      if (signal.zome_name === '{{coordinator_zome_manifest.name}}' && signal.payload.type === 'EntryCreated') {
-        this.signaledHashes = [signal.action.hashed.hash, ...this.signaledHashes];
-      }
+      const payload = signal.payload as any;
+      if (!(signal.zome_name === '{{coordinator_zome_manifest.name}}' && payload.type === 'EntryCreated')) return;
+      if (payload.app_entry.type !== '{{pascal_case referenceable.name}}') return;
+{{#if (eq collection_type.type "ByAuthor")}}
+      if (this.author.toString() !== this.client.myPubKey.toString()) return;
+{{/if}}
+      this.signaledHashes = [{{#if (eq referenceable.hash_type "ActionHash")}}payload.action.hashed.hash{{else}}(payload.action.hashed.content as NewEntryAction).entry_hash{{/if}}, ...this.signaledHashes];
     });
   }
   
-  renderList(hashes: Array<ActionHash>) {
+  renderList(hashes: Array<{{referenceable.hash_type}}>) {
     if (hashes.length === 0) return html`<span>No {{lower_case (plural referenceable.name)}} found{{#if (eq collection_type.type "ByAuthor")}} for this author{{/if}}.</span>`;
     
     return html`
@@ -57,7 +60,7 @@ export class {{pascal_case collection_name}} extends LitElement {
       pending: () => html`<div style="display: flex; flex: 1; align-items: center; justify-content: center">
         <mwc-circular-progress indeterminate></mwc-circular-progress>
       </div>`,
-      complete: (records) => this.renderList([...this.signaledHashes, ...records.map(r => r.signed_action.hashed.hash)]),
+      complete: (records) => this.renderList([...this.signaledHashes, ...records.map(r => {{#if (eq referenceable.hash_type "ActionHash")}}r.signed_action.hashed.hash{{else}}(r.signed_action.hashed.content as NewEntryAction).entry_hash{{/if}})]),
       error: (e: any) => html`<span>Error fetching the {{lower_case (plural referenceable.name)}}: ${e.data.data}.</span>`
     });
   }

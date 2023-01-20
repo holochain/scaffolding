@@ -15,30 +15,36 @@ use super::{
 
 #[derive(Serialize)]
 pub struct ScaffoldLinkTypeData {
+    pub app_name: String,
     pub dna_role_name: String,
     pub coordinator_zome_manifest: ZomeManifest,
+    pub link_type_name: String,
     pub from_referenceable: Referenceable,
     pub to_referenceable: Option<Referenceable>,
     pub delete: bool,
-    pub bidireccional: bool,
+    pub bidireccional: Option<String>,
 }
 pub fn scaffold_link_type_templates(
     mut app_file_tree: FileTree,
     template_file_tree: &FileTree,
+    app_name: &String,
     dna_role_name: &String,
     coordinator_zome_manifest: &ZomeManifest,
+    link_type_name: &String,
     from_referenceable: &Referenceable,
     to_referenceable: &Option<Referenceable>,
     delete: bool,
-    bidireccional: bool,
+    bidireccional: &Option<String>,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     let data = ScaffoldLinkTypeData {
+        app_name: app_name.clone(),
         dna_role_name: dna_role_name.clone(),
         coordinator_zome_manifest: coordinator_zome_manifest.clone(),
         from_referenceable: from_referenceable.clone(),
+        link_type_name: link_type_name.clone(),
         to_referenceable: to_referenceable.clone(),
         delete,
-        bidireccional,
+        bidireccional: bidireccional.clone(),
     };
 
     let h = build_handlebars(&template_file_tree)?;

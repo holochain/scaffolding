@@ -1,0 +1,131 @@
+import test from 'node:test';
+import assert from 'node:assert';
+
+import { runScenario, pause, CallableCell } from '@holochain/tryorama';
+import { NewEntryAction, ActionHash, Record, AppBundleSource } from '@holochain/client';
+import { decode } from '@msgpack/msgpack';
+
+{{#if (ne from_referenceable.hash_type "AgentPubKey")}}
+import { create{{pascal_case from_referenceable.name}} } from './{{kebab_case from_referenceable.name}}.test.js';
+{{/if}}
+{{#if (ne to_referenceable.hash_type "AgentPubKey")}}
+import { create{{pascal_case to_referenceable.name}} } from './{{kebab_case to_referenceable.name}}.test.js';
+{{/if}}
+
+test('link a {{pascal_case from_referenceable.name}} to a {{pascal_case to_referenceable.name}}', { concurrency: 1 }, async t => {
+  await runScenario(async scenario => {
+    // Construct proper paths for your app.
+    // This assumes app bundle created by the `hc app pack` command.
+    const testAppPath = process.cwd() + '/../workdir/{{app_name}}.happ';
+
+    // Set up the app to be installed 
+    const appSource = { appBundleSource: { path: testAppPath } };
+
+    // Add 2 players with the test app to the Scenario. The returned players
+    // can be destructured.
+    const [alice, bob] = await scenario.addPlayersWithApps([appSource, appSource]);
+
+    // Shortcut peer discovery through gossip and register all agents in every
+    // conductor of the scenario.
+    await scenario.shareAllAgents();
+
+{{#if (eq from_referenceable.hash_type "AgentPubKey")}}
+    const baseAddress = alice.agentPubKey;
+{{else}}
+    const baseRecord = await create{{pascal_case from_referenceable.name}}(alice.cells[0]);
+  {{#if (eq from_referenceable.hash_type "EntryHash")}}
+    const baseAddress = (baseRecord.signed_action.hashed.content as NewEntryAction).entry_hash;
+  {{else}}
+    const baseAddress = baseRecord.signed_action.hashed.hash;
+  {{/if}}
+{{/if}}
+{{#if (eq to_referenceable.hash_type "AgentPubKey")}}
+    const targetAddress = alice.agentPubKey;
+{{else}}
+    const targetRecord = await create{{pascal_case to_referenceable.name}}(alice.cells[0]);
+  {{#if (eq to_referenceable.hash_type "EntryHash")}}
+    const targetAddress = (targetRecord.signed_action.hashed.content as NewEntryAction).entry_hash;
+  {{else}}
+    const targetAddress = targetRecord.signed_action.hashed.hash;
+  {{/if}}
+{{/if}}
+
+    // Bob gets the links, should be empty
+    let linksOutput: Record[] = await bob.cells[0].callZome({
+      zome_name: "{{coordinator_zome_manifest.name}}",
+      fn_name: "get_{{plural (snake_case to_referenceable.name)}}_for_{{snake_case from_referenceable.name}}",
+      payload: baseAddress
+    });
+    assert.equal(linksOutput.length, 0);
+
+    // Alice creates a link from {{pascal_case from_referenceable.name}} to {{pascal_case to_referenceable.name}}
+    await alice.cells[0].callZome({
+      zome_name: "{{coordinator_zome_manifest.name}}",
+      fn_name: "add_{{snake_case to_referenceable.name}}_for_{{snake_case from_referenceable.name}}",
+      payload: {
+        {{snake_case from_referenceable.name}}{{#if (ne to_referenceable.hash_type "AgentPubKey")}}_hash{{/if}}: baseAddress,
+        {{snake_case to_referenceable.name}}{{#if (ne to_referenceable.hash_type "AgentPubKey")}}_hash{{/if}}: targetAddress
+      }
+    });
+    
+    await pause(800);
+    
+    // Bob gets the links again
+    linksOutput = await bob.cells[0].callZome({
+      zome_name: "{{coordinator_zome_manifest.name}}",
+      fn_name: "get_{{plural (snake_case to_referenceable.name)}}_for_{{snake_case from_referenceable.name}}",
+      payload: baseAddress
+    });
+    assert.equal(linksOutput.length, 1);
+{{#if (ne to_referenceable.hash_type "AgentPubKey")}}
+    assert.deepEqual(targetRecord, linksOutput[0]);
+{{/if}}
+
+{{#if bidireccional}}
+
+    // Bob gets the links in the inverse direction
+    linksOutput = await bob.cells[0].callZome({
+      zome_name: "{{coordinator_zome_manifest.name}}",
+      fn_name: "get_{{plural (snake_case from_referenceable.name)}}_for_{{snake_case to_referenceable.name}}",
+      payload: targetAddress
+    });
+    assert.equal(linksOutput.length, 1);
+  {{#if (ne from_referenceable.hash_type "AgentPubKey")}}
+    assert.deepEqual(targetRecord, linksOutput[0]);
+  {{/if}}
+{{/if}}
+
+{{#if delete}}
+    await alice.cells[0].callZome({
+      zome_name: "{{coordinator_zome_manifest.name}}",
+      fn_name: "remove_{{snake_case to_referenceable.name}}_for_{{snake_case from_referenceable.name}}",
+      payload: {
+        {{snake_case from_referenceable.name}}{{#if (ne to_referenceable.hash_type "AgentPubKey")}}_hash{{/if}}: baseAddress,
+        {{snake_case to_referenceable.name}}{{#if (ne to_referenceable.hash_type "AgentPubKey")}}_hash{{/if}}: targetAddress
+      }
+    });
+    
+    await pause(800);
+
+    // Bob gets the links again
+    linksOutput = await bob.cells[0].callZome({
+      zome_name: "{{coordinator_zome_manifest.name}}",
+      fn_name: "get_{{plural (snake_case to_referenceable.name)}}_for_{{snake_case from_referenceable.name}}",
+      payload: baseAddress
+    });
+    assert.equal(linksOutput.length, 0);
+
+  {{#if bidireccional}}
+    // Bob gets the links in the inverse direction
+    linksOutput = await bob.cells[0].callZome({
+      zome_name: "{{coordinator_zome_manifest.name}}",
+      fn_name: "get_{{plural (snake_case from_referenceable.name)}}_for_{{snake_case to_referenceable.name}}",
+      payload: targetAddress
+    });
+    assert.equal(linksOutput.length, 0);
+  {{/if}}
+
+{{/if}}
+  });
+});
+

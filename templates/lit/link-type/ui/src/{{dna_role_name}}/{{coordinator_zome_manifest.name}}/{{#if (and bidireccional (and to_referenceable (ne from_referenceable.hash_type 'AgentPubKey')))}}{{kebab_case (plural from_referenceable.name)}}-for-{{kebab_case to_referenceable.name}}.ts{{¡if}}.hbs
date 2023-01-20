@@ -25,13 +25,26 @@ export class {{pascal_case (plural from_referenceable.name)}}For{{pascal_case to
       payload: {{camel_case to_referenceable.singular_arg}},
   }) as Promise<Array<Record>>, () => [this.{{camel_case to_referenceable.singular_arg}}]);
 
-  renderList(records: Array<Record>) {
-    if (records.length === 0) return html`<span>No {{lower_case (plural from_referenceable.name)}} found for this {{lower_case to_referenceable.name}}</span>`;
+  @state()
+  signaledHashes: Array<{{from_referenceable.hash_type}}> = [];
+
+  firstUpdated() {
+    this.client.on('signal', signal => {
+      const payload = signal.payload as any;
+      if (!(signal.zome_name === '{{coordinator_zome_manifest.name}}' && payload.type === 'LinkCreated')) return;
+      if (payload.link_type !== '{{pascal_case bidireccional}}') return;
+
+      this.signaledHashes = [payload.action.hashed.content.target_address, ...this.signaledHashes];
+    });
+  }
+
+  renderList(hashes: Array<{{to_referenceable.hash_type}}>) {
+    if (hashes.length === 0) return html`<span>No {{lower_case (plural from_referenceable.name)}} found for this {{lower_case to_referenceable.name}}</span>`;
     
     return html`
       <div style="display: flex; flex-direction: column">
-        ${records.map(record => 
-          html`<{{kebab_case from_referenceable.name}}-detail .{{camel_case from_referenceable.name}}Hash=${record.signed_action.hashed.hash} style="margin-bottom: 16px;"></{{kebab_case from_referenceable.name}}-detail>`
+        ${hashes.map(hash => 
+          html`<{{kebab_case from_referenceable.name}}-detail .{{camel_case from_referenceable.name}}Hash=${hash} style="margin-bottom: 16px;"></{{kebab_case from_referenceable.name}}-detail>`
         )}
       </div>
     `;
@@ -42,7 +55,7 @@ export class {{pascal_case (plural from_referenceable.name)}}For{{pascal_case to
       pending: () => html`<div style="display: flex; flex: 1; align-items: center; justify-content: center">
         <mwc-circular-progress indeterminate></mwc-circular-progress>
       </div>`,
-      complete: (records) => this.renderList(records),
+      complete: (records) => this.renderList([...this.signaledHashes, ...records.map(r => {{#if (eq from_referenceable.hash_type "ActionHash")}}r.signed_action.hashed.hash{{else}}(r.signed_action.hashed.content as NewEntryAction).entry_hash{{/if}})]),
       error: (e: any) => html`<span>Error fetching the {{lower_case (plural from_referenceable.name)}}: ${e.data.data}.</span>`
     });
   }

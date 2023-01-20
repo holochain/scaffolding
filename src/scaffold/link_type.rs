@@ -15,6 +15,7 @@ use self::{
 };
 
 use super::{
+    app::AppFileTree,
     dna::DnaFileTree,
     entry_type::{
         definitions::{Cardinality, Referenceable},
@@ -134,18 +135,24 @@ pub use {}::*;
         &link_type_file_name,
     )?;
 
-    if bidireccional {
+    let inverse_link_type = if bidireccional {
         if let Some(to) = &to_referenceable {
+            let inverse_link_type = link_type_name(&to, &from_referenceable);
             zome_file_tree = add_link_type_to_integrity_zome(
                 zome_file_tree,
-                &link_type_name(&to, &from_referenceable),
+                &inverse_link_type,
                 &to_referenceable,
                 &Some(from_referenceable.clone()),
                 delete,
                 &link_type_file_name,
             )?;
+            Some(inverse_link_type)
+        } else {
+            None
         }
-    }
+    } else {
+        None
+    };
 
     let integrity_zome_name = zome_file_tree.zome_manifest.name.0.to_string();
 
@@ -182,7 +189,7 @@ pub use {}::*;
     let zome_file_tree =
         ZomeFileTree::from_zome_manifest(zome_file_tree.dna_file_tree, coordinator_zome.clone())?;
 
-    let app_file_tree = add_link_type_functions_to_coordinator(
+    let zome_file_tree = add_link_type_functions_to_coordinator(
         zome_file_tree,
         &integrity_zome_name,
         &link_type,
@@ -192,14 +199,21 @@ pub use {}::*;
         bidireccional,
     )?;
 
+    let app_file_tree =
+        AppFileTree::get_or_choose(zome_file_tree.dna_file_tree.file_tree(), &None)?;
+
+    let app_name = app_file_tree.app_manifest.app_name().to_string();
+
     scaffold_link_type_templates(
-        app_file_tree.dna_file_tree.file_tree(),
+        app_file_tree.file_tree(),
         &template_file_tree,
+        &app_name,
         &dna_manifest.name(),
         &coordinator_zome,
+        &link_type,
         &from_referenceable,
         &to_referenceable,
         delete,
-        bidireccional,
+        &inverse_link_type,
     )
 }

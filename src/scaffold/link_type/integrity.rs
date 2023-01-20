@@ -31,9 +31,9 @@ fn validate_referenceable(
                 true => quote! {
                     /// Check the entry type for the given entry hash
                     let entry_hash = EntryHash::from(#address_ident);
-                    let entry = must_get_entry(entry_hash)?.entry;
+                    let entry = must_get_entry(entry_hash)?.content;
 
-                    let #entry_type_snake = crate::#entry_type_pascal::try_from(&entry).map_err(|e| wasm_error!(e))?;
+                    let #entry_type_snake = crate::#entry_type_pascal::try_from(entry)?;
                 },
                 false => quote! {
                     /// Check the entry type for the given action hash
@@ -235,18 +235,18 @@ pub fn add_link_type_to_integrity_zome(
                     },
                 };
 
-                let base_address_ident = match from_referenceable.is_some() {
-                    true => format_ident!("base_address"),
-                    false => format_ident!("_base_address"),
+                let base_address_ident = match from_referenceable {
+                    Some(Referenceable::EntryType(_)) => format_ident!("base_address"),
+                    _ => format_ident!("_base_address"),
                 };
 
                 let validate_create_from = match from_referenceable {
                     Some(r) => Some(validate_referenceable(r, &base_address_ident)),
                     _ => None,
                 };
-                let target_address_ident = match to_referenceable.is_some() {
-                    true => format_ident!("target_address"),
-                    false => format_ident!("_target_address"),
+                let target_address_ident = match to_referenceable {
+                    Some(Referenceable::EntryType(_)) => format_ident!("target_address"),
+                    _ => format_ident!("_target_address"),
                 };
 
                 let validate_create_to = match to_referenceable {

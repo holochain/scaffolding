@@ -5,10 +5,10 @@
 
   <div v-else style="display: flex; flex-direction: column">
     <span v-if="error">Error fetching the {{lower_case (plural to_referenceable.name)}}: {{{{raw}}}} {{error.data.data}}.{{{{/raw}}}}</span>
-    <div v-else-if="records && records.length > 0">
+    <div v-else-if="hashes && hashes.length > 0">
       <{{pascal_case to_referenceable.name}}Detail 
-        v-for="record in records" 
-        :{{kebab_case to_referenceable.name}}-hash="records.signed_action.hashed.hash" 
+        v-for="hash in hashes" 
+        :{{kebab_case to_referenceable.name}}-hash="hash" 
         style="margin-bottom: 8px">
       </{{pascal_case to_referenceable.name}}Detail>
     </div>
@@ -35,26 +35,35 @@ export default defineComponent({
       required: true
     }
   },
-  data(): { records: Array<Record> | undefined; loading: boolean; error: any } {
+  data(): { hashes: Array<{{to_referenceable.hash_type}}> | undefined; loading: boolean; error: any } {
     return {
-      records: undefined,
+      hashes: undefined,
       loading: true,
       error: undefined
     }
   },
   async mounted() {
     try {
-      this.records = await this.client.callZome({
+      const records: Array<Record> = await this.client.callZome({
         cap_secret: null,
         role_name: '{{dna_role_name}}',
         zome_name: '{{coordinator_zome_manifest.name}}',
         fn_name: 'get_{{snake_case (plural to_referenceable.name)}}_for_{{snake_case from_referenceable.name}}',
         payload: this.{{camel_case from_referenceable.singular_arg}},
       });
+      this.hashes = records.map(r => {{#if (eq to_referenceable.hash_type "ActionHash")}}r.signed_action.hashed.hash{{else}}(r.signed_action.hashed.content as NewEntryAction).entry_hash{{/if}});
     } catch (e) {
       this.error = e;
     }
     this.loading = false;
+    
+    this.client.on('signal', signal => {
+      const payload = signal.payload as any;
+      if (!(signal.zome_name === '{{coordinator_zome_manifest.name}}' && payload.type === 'LinkCreated')) return;
+      if (payload.link_type !== '{{pascal_case link_type_name}}') return;
+
+      this.hashes.push(payload.action.hashed.content.target_address);
+    });
   },
   setup() {
     const client = (inject('client') as ComputedRef<AppAgentClient>).value;

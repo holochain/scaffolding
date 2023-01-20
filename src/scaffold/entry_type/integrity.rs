@@ -125,37 +125,58 @@ pub fn render_entry_definition_file(
     };
     let deps_validation: Vec<TokenStream> = deps
         .into_iter()
-        .map(|(field_def, reference)| { let field_name = format_ident!("{}",field_def.field_name);
+        .map(|(field_def, reference)| { 
+            let field_name = format_ident!("{}",field_def.field_name);
             
             let dependant_entry_type_snake = format_ident!("_{}", reference.entry_type.to_case(Case::Snake));
             let dependant_entry_type_pascal = format_ident!("{}", reference.entry_type.to_case(Case::Pascal));
-            match field_def.cardinality {
-            Cardinality::Single => quote! {
-                let record = must_get_valid_record(#create_new_entry_arg.#field_name.clone())?;
-
-                let #dependant_entry_type_snake: crate::#dependant_entry_type_pascal = record.entry().to_app_option()
-                    .map_err(|e| wasm_error!(e))?
-                    .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("Dependant action must be accompanied by an entry"))))?;
-            },
-            Cardinality::Option => quote! {
-                if let Some(action_hash) = #create_new_entry_arg.#field_name.clone() {
-                    let record = must_get_valid_record(action_hash)?;
+            match (field_def.cardinality, reference.reference_entry_hash) {
+                (Cardinality::Single,false) => quote! {
+                    let record = must_get_valid_record(#create_new_entry_arg.#field_name.clone())?;
 
                     let #dependant_entry_type_snake: crate::#dependant_entry_type_pascal = record.entry().to_app_option()
                         .map_err(|e| wasm_error!(e))?
                         .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("Dependant action must be accompanied by an entry"))))?;
-                }
-            },
-            Cardinality::Vector => quote! {
-                for action_hash in #create_new_entry_arg.#field_name.clone() {
-                    let record = must_get_valid_record(action_hash)?;
+                },
+                (Cardinality::Option, false) => quote! {
+                    if let Some(action_hash) = #create_new_entry_arg.#field_name.clone() {
+                        let record = must_get_valid_record(action_hash)?;
 
-                    let #dependant_entry_type_snake: crate::#dependant_entry_type_pascal = record.entry().to_app_option()
-                        .map_err(|e| wasm_error!(e))?
-                        .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("Dependant action must be accompanied by an entry"))))?;
-                }
-            },
-        }})
+                        let #dependant_entry_type_snake: crate::#dependant_entry_type_pascal = record.entry().to_app_option()
+                            .map_err(|e| wasm_error!(e))?
+                            .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("Dependant action must be accompanied by an entry"))))?;
+                    }
+                },
+                (Cardinality::Vector, false) => quote! {
+                    for action_hash in #create_new_entry_arg.#field_name.clone() {
+                        let record = must_get_valid_record(action_hash)?;
+
+                        let #dependant_entry_type_snake: crate::#dependant_entry_type_pascal = record.entry().to_app_option()
+                            .map_err(|e| wasm_error!(e))?
+                            .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("Dependant action must be accompanied by an entry"))))?;
+                    }
+                },
+                (Cardinality::Single,true) => quote! {
+                    let entry = must_get_entry(#create_new_entry_arg.#field_name.clone())?;
+
+                    let #dependant_entry_type_snake = crate::#dependant_entry_type_pascal::try_from(entry)?;
+                },
+                (Cardinality::Option, true) => quote! {
+                    if let Some(entry_hash) = #create_new_entry_arg.#field_name.clone() {
+                        let entry = must_get_entry(entry_hash)?;
+
+                        let #dependant_entry_type_snake = crate::#dependant_entry_type_pascal::try_from(entry)?;
+                    }
+                },
+                (Cardinality::Vector, true) => quote! {
+                    for entry_hash in #create_new_entry_arg.#field_name.clone() {
+                        let entry = must_get_entry(entry_hash)?;
+
+                        let #dependant_entry_type_snake = crate::#dependant_entry_type_pascal::try_from(entry)?;
+                    }
+                },
+            }
+        })
         .collect();
 
     let token_stream = quote! {
@@ -298,6 +319,7 @@ pub use {}::*;
             if entry_types.is_none() && file_path == PathBuf::from("lib.rs") {
                 let entry_types_item = syn::parse_str::<syn::Item>(
                     "#[derive(Serialize, Deserialize)]
+                     #[serde(tag = \"type\")]
                      #[hdk_entry_defs]
                      #[unit_enum(UnitEntryTypes)]
                      pub enum EntryTypes {}",

@@ -18,6 +18,7 @@ use super::{
 
 #[derive(Serialize)]
 pub struct ScaffoldCollectionData {
+    pub app_name: String,
     pub dna_role_name: String,
     pub coordinator_zome_manifest: ZomeManifest,
     pub collection_type: CollectionType,
@@ -27,6 +28,7 @@ pub struct ScaffoldCollectionData {
 pub fn scaffold_collection_templates(
     mut app_file_tree: FileTree,
     template_file_tree: &FileTree,
+    app_name: &String,
     dna_role_name: &String,
     coordinator_zome_manifest: &ZomeManifest,
     collection_type: &CollectionType,
@@ -34,6 +36,7 @@ pub fn scaffold_collection_templates(
     entry_type_reference: &EntryTypeReference,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     let data = ScaffoldCollectionData {
+        app_name: app_name.clone(),
         dna_role_name: dna_role_name.clone(),
         coordinator_zome_manifest: coordinator_zome_manifest.clone(),
         collection_name: collection_name.clone(),

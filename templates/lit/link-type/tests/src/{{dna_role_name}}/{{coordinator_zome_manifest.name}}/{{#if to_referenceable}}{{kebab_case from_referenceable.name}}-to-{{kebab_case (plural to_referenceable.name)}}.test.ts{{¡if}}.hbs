@@ -63,8 +63,8 @@ test('link a {{pascal_case from_referenceable.name}} to a {{pascal_case to_refer
       zome_name: "{{coordinator_zome_manifest.name}}",
       fn_name: "add_{{snake_case to_referenceable.name}}_for_{{snake_case from_referenceable.name}}",
       payload: {
-        {{snake_case from_referenceable.name}}: baseAddress,
-        {{snake_case to_referenceable.name}}: targetAddress
+        {{snake_case from_referenceable.name}}{{#if (ne to_referenceable.hash_type "AgentPubKey")}}_hash{{/if}}: baseAddress,
+        {{snake_case to_referenceable.name}}{{#if (ne to_referenceable.hash_type "AgentPubKey")}}_hash{{/if}}: targetAddress
       }
     });
     
@@ -100,8 +100,8 @@ test('link a {{pascal_case from_referenceable.name}} to a {{pascal_case to_refer
       zome_name: "{{coordinator_zome_manifest.name}}",
       fn_name: "remove_{{snake_case to_referenceable.name}}_for_{{snake_case from_referenceable.name}}",
       payload: {
-        {{snake_case from_referenceable.name}}: baseAddress,
-        {{snake_case to_referenceable.name}}: targetAddress
+        {{snake_case from_referenceable.name}}{{#if (ne to_referenceable.hash_type "AgentPubKey")}}_hash{{/if}}: baseAddress,
+        {{snake_case to_referenceable.name}}{{#if (ne to_referenceable.hash_type "AgentPubKey")}}_hash{{/if}}: targetAddress
       }
     });
     

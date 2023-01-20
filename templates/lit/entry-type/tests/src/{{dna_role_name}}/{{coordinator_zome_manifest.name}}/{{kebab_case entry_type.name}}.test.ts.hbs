@@ -133,7 +133,7 @@ test('create and update {{pascal_case entry_type.name}}', { concurrency: 1 }, as
     // Alice updates the {{pascal_case entry_type.name}}
     let contentUpdate: any = await sample{{pascal_case entry_type.name}}(alice.cells[0]);
     let updateInput = {
-{{#if link_original_to_each_update}}
+{{#if link_from_original_to_each_update}}
       original_{{snake_case entry_type.name}}_hash: originalActionHash,
 {{/if}}
       previous_{{snake_case entry_type.name}}_hash: originalActionHash,
@@ -161,7 +161,7 @@ test('create and update {{pascal_case entry_type.name}}', { concurrency: 1 }, as
     // Alice updates the {{pascal_case entry_type.name}} again
     contentUpdate = await sample{{pascal_case entry_type.name}}(alice.cells[0]);
     updateInput = { 
-{{#if link_original_to_each_update}}
+{{#if link_from_original_to_each_update}}
       original_{{snake_case entry_type.name}}_hash: originalActionHash,
 {{/if}}
       previous_{{snake_case entry_type.name}}_hash: updatedRecord.signed_action.hashed.hash,
