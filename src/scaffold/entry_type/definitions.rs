@@ -6,7 +6,6 @@ use serde::{ser::SerializeStruct, Deserialize, Serialize, Serializer};
 
 use crate::{
     error::{ScaffoldError, ScaffoldResult},
-    scaffold::tryorama::entry_crud_tests::hash_from_record,
     utils::check_snake_case,
 };
 
@@ -199,40 +198,6 @@ impl FieldDefinition {
             }
         }
     }
-
-    pub fn js_sample_value(&self) -> String {
-        if let Some(Referenceable::EntryType(entry_type_ref)) = &self.linked_from {
-            let pascal_dependant = entry_type_ref.entry_type.to_case(Case::Pascal);
-            return match self.cardinality {
-                Cardinality::Vector => {
-                    format!(
-                        "[{}]",
-                        hash_from_record(
-                            format!("(await create{pascal_dependant}(cell))"),
-                            entry_type_ref.reference_entry_hash
-                        )
-                    )
-                }
-                Cardinality::Single | Cardinality::Option => hash_from_record(
-                    format!("(await create{pascal_dependant}(cell))"),
-                    entry_type_ref.reference_entry_hash,
-                ),
-            };
-        }
-
-        match self.cardinality {
-            Cardinality::Vector => format!(
-                "[{}]",
-                vec![
-                    self.field_type.js_sample_value(),
-                    self.field_type.js_sample_value(),
-                    self.field_type.js_sample_value()
-                ]
-                .join(", ")
-            ),
-            Cardinality::Single | Cardinality::Option => self.field_type.js_sample_value(),
-        }
-    }
 }
 
 #[derive(Serialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
@@ -359,20 +324,6 @@ pub struct EntryDefinition {
 }
 
 impl EntryDefinition {
-    pub fn js_sample_object(&self) -> String {
-        let fields_samples: Vec<String> = self
-            .fields
-            .iter()
-            .map(|field_def| format!("{}: {}", field_def.field_name, field_def.js_sample_value()))
-            .collect();
-        format!(
-            r#"{{
-  {}
-}}"#,
-            fields_samples.join(",\n  ")
-        )
-    }
-
     pub fn referenceable(&self) -> Referenceable {
         Referenceable::EntryType(EntryTypeReference {
             entry_type: self.name.clone(),

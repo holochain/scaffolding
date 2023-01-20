@@ -36,7 +36,7 @@ test('create a {{pascal_case referenceable.name}} and get {{lower_case collectio
     const createdRecord: Record = await create{{pascal_case referenceable.name}}(alice.cells[0]);
     assert.ok(createdRecord);
     
-    await pause(800);
+    await pause(1200);
     
     // Bob gets {{lower_case collection_name}} again
     collectionOutput = await bob.cells[0].callZome({

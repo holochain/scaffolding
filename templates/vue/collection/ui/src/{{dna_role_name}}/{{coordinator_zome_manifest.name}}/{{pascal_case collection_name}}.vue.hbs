@@ -44,20 +44,20 @@ export default defineComponent({
   },
   async mounted() {
     await this.fetch{{pascal_case referenceable.name}}();
-    client.on('signal', signal => {
+    this.client.on('signal', signal => {
       const payload = signal.payload as any;
       if (!(signal.zome_name === '{{coordinator_zome_manifest.name}}' && payload.type === 'EntryCreated')) return;
       if (payload.app_entry.type !== '{{pascal_case referenceable.name}}') return;
 {{#if (eq collection_type.type "ByAuthor")}}
       if (this.author.toString() !== this.client.myPubKey.toString()) return;
 {{/if}}
-      this.hashes.push({{#if (eq referenceable.hash_type "ActionHash")}}payload.action.hashed.hash{{else}}(payload.action.hashed.content as NewEntryAction).entry_hash{{/if}});
+      if (this.hashes) this.hashes.push({{#if (eq referenceable.hash_type "ActionHash")}}payload.action.hashed.hash{{else}}(payload.action.hashed.content as NewEntryAction).entry_hash{{/if}});
     });
   },
   methods: {
     async fetch{{pascal_case referenceable.name}}() {
       try {
-        const records = await this.client.callZome({
+        const records: Array<Record> = await this.client.callZome({
           cap_secret: null,
           role_name: '{{dna_role_name}}',
           zome_name: '{{coordinator_zome_manifest.name}}',

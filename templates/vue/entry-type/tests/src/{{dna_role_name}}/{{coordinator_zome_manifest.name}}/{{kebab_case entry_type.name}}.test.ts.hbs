@@ -8,7 +8,9 @@ import { decode } from '@msgpack/msgpack';
 {{#each entry_type.fields}}
   {{#if linked_from}}
     {{#if (ne linked_from.hash_type "AgentPubKey")}}
+      {{#if (ne linked_from.name entry_type.name)}}
 import { create{{pascal_case linked_from.name}} } from './{{kebab_case linked_from.name}}.test.js';
+      {{/if}}
     {{/if}}
   
   {{/if}}
@@ -21,10 +23,20 @@ async function sample{{pascal_case entry_type.name}}(cell: CallableCell, partial
   {{#if linked_from}}
     {{#if (ne linked_from.hash_type "AgentPubKey")}}
       {{#if (eq field.cardinality "Vector")}}
-	  {{field_name}}: [(await create{{pascal_case linked_from.name}}(cell)).signed_action.hashed.hash],
+          {{#if (eq linked_from.name entry_type.name)}}
+          {{field_name}}: []
+          {{else}}
+          {{field_name}}: [(await create{{pascal_case linked_from.name}}(cell)).signed_action.hashed.hash],
+          {{/if}}
       {{else}}
-	  {{field_name}}: (await create{{pascal_case linked_from.name}}(cell)).signed_action.hashed.hash,
+	 {{#if (eq linked_from.name entry_type.name)}}
+         {{field_name}}: (await create{{pascal_case linked_from.name}}(cell)).signed_action.hashed.hash,
+         {{else}}
+         {{field_name}}: undefined
+         {{/if}}
       {{/if}}
+    {{else}}
+          {{field_name}}: cell.cell_id[1]
     {{/if}}
   {{else}}
       {{#if (eq field.cardinality "Vector")}}
@@ -94,7 +106,7 @@ test('create and read {{pascal_case entry_type.name}}', { concurrency: 1 }, asyn
     assert.ok(record);
 
     // Wait for the created entry to be propagated to the other node.
-    await pause(800);
+    await pause(1200);
 
     // Bob gets the created {{pascal_case entry_type.name}}
     const createReadOutput: Record = await bob.cells[0].callZome({
@@ -148,7 +160,7 @@ test('create and update {{pascal_case entry_type.name}}', { concurrency: 1 }, as
     assert.ok(updatedRecord);
 
     // Wait for the updated entry to be propagated to the other node.
-    await pause(800);
+    await pause(1200);
         
     // Bob gets the updated {{pascal_case entry_type.name}}
     const readUpdatedOutput0: Record = await bob.cells[0].callZome({
@@ -176,7 +188,7 @@ test('create and update {{pascal_case entry_type.name}}', { concurrency: 1 }, as
     assert.ok(updatedRecord);
 
     // Wait for the updated entry to be propagated to the other node.
-    await pause(800);
+    await pause(1200);
         
     // Bob gets the updated {{pascal_case entry_type.name}}
     const readUpdatedOutput1: Record = await bob.cells[0].callZome({
@@ -220,7 +232,7 @@ test('create and delete {{pascal_case entry_type.name}}', { concurrency: 1 }, as
     assert.ok(deleteActionHash);
 
     // Wait for the entry deletion to be propagated to the other node.
-    await pause(800);
+    await pause(1200);
         
     // Bob tries to get the deleted {{pascal_case entry_type.name}}
     const readDeletedOutput = await bob.cells[0].callZome({

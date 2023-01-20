@@ -2,10 +2,10 @@
 import { createEventDispatcher, getContext } from 'svelte';
 import { AppAgentClient, Record, EntryHash, AgentPubKey, ActionHash } from '@holochain/client';
 import { clientContext } from '../../contexts';
-import { {{pascal_case entry_type.name}} } from './types';
+import type { {{pascal_case entry_type.name}} } from './types';
 import '@material/mwc-button';
 import '@material/mwc-snackbar';
-import { Snackbar } from '@material/mwc-snackbar';
+import type { Snackbar } from '@material/mwc-snackbar';
 {{#uniq_lines}}
   {{#each entry_type.fields}}
     {{#if widget}}

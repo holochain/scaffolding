@@ -62,7 +62,7 @@ export default defineComponent({
       if (!(signal.zome_name === '{{coordinator_zome_manifest.name}}' && payload.type === 'LinkCreated')) return;
       if (payload.link_type !== '{{pascal_case link_type_name}}') return;
 
-      this.hashes.push(payload.action.hashed.content.target_address);
+      if (this.hashes) this.hashes.push(payload.action.hashed.content.target_address);
     });
   },
   setup() {
