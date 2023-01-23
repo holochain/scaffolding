@@ -1,7 +1,6 @@
 <script lang="ts">
 import { onMount, getContext } from 'svelte';
 import '@material/mwc-circular-progress';
-import { decode } from '@msgpack/msgpack';
 import { EntryHash, Record, AgentPubKey, ActionHash, AppAgentClient, NewEntryAction } from '@holochain/client';
 import { clientContext } from '../../contexts';
 import {{pascal_case referenceable.name}}Detail from './{{pascal_case referenceable.name}}Detail.svelte';
@@ -10,7 +9,7 @@ import {{pascal_case referenceable.name}}Detail from './{{pascal_case referencea
 export let author: AgentPubKey;
 {{/if}}
 
-let client: AppAgentClient = getContext(clientContext).getClient();
+let client: AppAgentClient = (getContext(clientContext) as any).getClient();
 
 let hashes: Array<{{referenceable.hash_type}}> | undefined;
 let loading = true;
@@ -60,7 +59,9 @@ async function fetch{{pascal_case (plural referenceable.name)}}() {
 {:else}
 <div style="display: flex; flex-direction: column">
   {#each hashes as hash}
-    <{{pascal_case referenceable.name}}Detail {{camel_case referenceable.name}}Hash={hash} style="margin-bottom: 8px;" on:{{pascal_case referenceable.name}}-deleted={() => fetch{{pascal_case (plural referenceable.name)}}()}></{{pascal_case referenceable.name}}Detail>
+    <div style="margin-bottom: 8px;">
+      <{{pascal_case referenceable.name}}Detail {{camel_case referenceable.name}}Hash={hash}  on:{{kebab_case referenceable.name}}-deleted={() => fetch{{pascal_case (plural referenceable.name)}}()}></{{pascal_case referenceable.name}}Detail>
+    </div>
   {/each}
 </div>
 {/if}

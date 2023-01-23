@@ -67,7 +67,13 @@ export default defineComponent({
       {{/each}}
     }
   },
+{{#uniq_lines}}
+  {{#each entry_type.fields}}
+    {{#if (not widget)}}
   props: {
+    {{/if}}
+  {{/each}}
+{{/uniq_lines}}
     {{#each entry_type.fields}}
       {{#if (not widget)}}
     {{camel_case field_name}}: {
@@ -76,7 +82,13 @@ export default defineComponent({
     },
       {{/if}}
     {{/each}}
+{{#uniq_lines}}
+  {{#each entry_type.fields}}
+    {{#if (not widget)}}
   },
+    {{/if}}
+  {{/each}}
+{{/uniq_lines}}
   computed: {
     is{{pascal_case entry_type.name}}Valid() {
       return true{{#each entry_type.fields}}{{#if widget}} && {{#if (eq cardinality "single")}}this.{{camel_case field_name}} !== undefined{{/if}}{{#if (eq cardinality "vector")}}this.{{camel_case field_name}}.every(e => e !== undefined){{/if}}{{/if}}{{/each}}

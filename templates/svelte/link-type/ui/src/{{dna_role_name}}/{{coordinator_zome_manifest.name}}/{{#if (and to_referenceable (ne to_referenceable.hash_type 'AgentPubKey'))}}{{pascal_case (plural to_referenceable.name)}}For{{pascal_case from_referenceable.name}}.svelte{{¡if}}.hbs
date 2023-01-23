@@ -1,14 +1,13 @@
 <script lang="ts">
 import { onMount, getContext } from 'svelte';
 import '@material/mwc-circular-progress';
-import { decode } from '@msgpack/msgpack';
 import { Record, EntryHash, ActionHash, AgentPubKey, AppAgentClient, NewEntryAction } from '@holochain/client';
 import { clientContext } from '../../contexts';
 import {{pascal_case to_referenceable.name}}Detail from './{{pascal_case to_referenceable.name}}Detail.svelte';
 
 export let {{camel_case from_referenceable.singular_arg}}: {{from_referenceable.hash_type}};
 
-let client: AppAgentClient = getContext(clientContext).getClient();
+let client: AppAgentClient = (getContext(clientContext) as any).getClient();
 
 let hashes: Array<{{to_referenceable.hash_type}}> | undefined;
 

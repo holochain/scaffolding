@@ -1,15 +1,14 @@
 <script lang="ts">
 import { onMount, getContext } from 'svelte';
 import '@material/mwc-circular-progress';
-import { decode } from '@msgpack/msgpack';
 import { AppAgentClient, Record, ActionHash, EntryHash, AgentPubKey } from '@holochain/client';
 import { clientContext } from '../../contexts';
-import { {{pascal_case ../entry_type.name}} } from '../../../types/{{../coordinator_zome_manifest.name}}';
+import { {{pascal_case ../entry_type.name}} } from './types';
 import {{pascal_case ../entry_type.name}}Detail from './{{pascal_case ../entry_type.name}}Detail.svelte';
 
 export let {{camel_case linked_from.singular_arg}}: {{linked_from.hash_type}};
 
-let client: AppAgentClient = getContext(clientContext).getClient();
+let client: AppAgentClient = (getContext(clientContext) as any).getClient();
 
 let hashes: Array<{{#if ../entry_type.reference_entry_hash}}EntryHash{{else}}ActionHash{{/if}}> | undefined;
 
@@ -40,13 +39,15 @@ onMount(async () => {
   <mwc-circular-progress indeterminate></mwc-circular-progress>
 </div>
 {:else if error}
-<span>Error fetching {{lower_case (plural ../entry_type.name)}}: ${e.data.data}.</span>
+<span>Error fetching {{lower_case (plural ../entry_type.name)}}: ${error.data.data}.</span>
 {:else if hashes.length === 0}
 <span>No {{lower_case (plural ../entry_type.name)}} found for this {{lower_case linked_from.name}}.</span>
 {:else}
 <div style="display: flex; flex-direction: column">
   {#each hashes as hash}
-    <{{pascal_case ../entry_type.name}}Detail {{camel_case ../entry_type.name}}Hash={hash} style="margin-bottom: 8px;"></{{pascal_case ../entry_type.name}}Detail>
+    <div style="margin-bottom: 8px;">
+      <{{pascal_case ../entry_type.name}}Detail {{camel_case ../entry_type.name}}Hash={hash}></{{pascal_case ../entry_type.name}}Detail>
+    </div>
   {/each}
 </div>
 {/if}

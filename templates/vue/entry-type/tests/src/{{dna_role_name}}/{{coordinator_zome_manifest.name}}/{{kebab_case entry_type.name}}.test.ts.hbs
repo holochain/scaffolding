@@ -8,11 +8,10 @@ import { decode } from '@msgpack/msgpack';
 {{#each entry_type.fields}}
   {{#if linked_from}}
     {{#if (ne linked_from.hash_type "AgentPubKey")}}
-      {{#if (ne linked_from.name entry_type.name)}}
+      {{#if (ne (pascal_case linked_from.name) (pascal_case ../entry_type.name))}}
 import { create{{pascal_case linked_from.name}} } from './{{kebab_case linked_from.name}}.test.js';
       {{/if}}
     {{/if}}
-  
   {{/if}}
 {{/each}}
 
@@ -22,24 +21,32 @@ async function sample{{pascal_case entry_type.name}}(cell: CallableCell, partial
 {{#each entry_type.fields}}
   {{#if linked_from}}
     {{#if (ne linked_from.hash_type "AgentPubKey")}}
-      {{#if (eq field.cardinality "Vector")}}
-          {{#if (eq linked_from.name entry_type.name)}}
-          {{field_name}}: []
-          {{else}}
+      {{#if (eq cardinality "vector")}}
+        {{#if (eq (pascal_case linked_from.name) (pascal_case ../entry_type.name))}}
+          {{field_name}}: [],
+        {{else}}
+          {{#if (eq linked_from.hash_type "ActionHash")}}
           {{field_name}}: [(await create{{pascal_case linked_from.name}}(cell)).signed_action.hashed.hash],
+          {{else}}
+          {{field_name}}: [((await create{{pascal_case linked_from.name}}(cell)).signed_action.hashed.content as NewEntryAction).entry_hash],
           {{/if}}
+        {{/if}}
       {{else}}
-	 {{#if (eq linked_from.name entry_type.name)}}
-         {{field_name}}: (await create{{pascal_case linked_from.name}}(cell)).signed_action.hashed.hash,
-         {{else}}
-         {{field_name}}: undefined
-         {{/if}}
+        {{#if (eq (pascal_case linked_from.name) (pascal_case ../entry_type.name))}}
+          {{field_name}}: undefined,
+        {{else}}
+	  {{#if (eq linked_from.hash_type "ActionHash")}}
+          {{field_name}}: (await create{{pascal_case linked_from.name}}(cell)).signed_action.hashed.hash,
+          {{else}}
+          {{field_name}}: ((await create{{pascal_case linked_from.name}}(cell)).signed_action.hashed.content as NewEntryAction).entry_hash,
+          {{/if}}
+        {{/if}}
       {{/if}}
     {{else}}
-          {{field_name}}: cell.cell_id[1]
+          {{field_name}}: cell.cell_id[1],
     {{/if}}
   {{else}}
-      {{#if (eq field.cardinality "Vector")}}
+      {{#if (eq cardinality "vector")}}
 	  {{field_name}}: [{{> (concat field_type "/sample")}}],
       {{else}}
 	  {{field_name}}: {{> (concat field_type "/sample")}},

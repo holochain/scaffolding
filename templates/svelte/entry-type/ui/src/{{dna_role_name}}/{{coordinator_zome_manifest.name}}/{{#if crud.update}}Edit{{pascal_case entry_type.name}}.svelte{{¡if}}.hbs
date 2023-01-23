@@ -6,7 +6,7 @@ import { clientContext } from '../../contexts';
 import { {{pascal_case entry_type.name}} } from './types';
 import '@material/mwc-button';
 import '@material/mwc-snackbar';
-import { Snackbar } from '@material/mwc-snackbar';
+import type { Snackbar } from '@material/mwc-snackbar';
 {{#uniq_lines}}
   {{#each entry_type.fields}}
     {{#if widget}}
@@ -16,7 +16,7 @@ import { Snackbar } from '@material/mwc-snackbar';
   {{/each}}
 {{/uniq_lines}}
 
-let client: AppAgentClient = getContext(clientContext).getClient();
+let client: AppAgentClient = (getContext(clientContext) as any).getClient();
 
 const dispatch = createEventDispatcher();
 

@@ -96,7 +96,7 @@ set -e
 rm -rf /tmp/forum-vanilla
 cd /tmp
 
-hc-scaffold web-app forum-vanilla --setup-nix true --template lit
+hc-scaffold web-app forum-vanilla --setup-nix true --template vanilla
 cd forum-vanilla
 
 hc-scaffold dna forum 

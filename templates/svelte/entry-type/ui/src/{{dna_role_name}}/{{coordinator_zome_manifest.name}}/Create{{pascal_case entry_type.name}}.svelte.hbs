@@ -15,7 +15,7 @@ import type { Snackbar } from '@material/mwc-snackbar';
   {{/each}}
 {{/uniq_lines}}
 
-let client: AppAgentClient = getContext(clientContext).getClient();
+let client: AppAgentClient = (getContext(clientContext) as any).getClient();
 
 const dispatch = createEventDispatcher();
 
@@ -47,7 +47,7 @@ $: {{#each entry_type.fields}}{{camel_case field_name}}{{#unless @last}}, {{/unl
 $: is{{pascal_case entry_type.name}}Valid = true{{#each entry_type.fields}}{{#if widget}}{{#if (eq cardinality "single")}} && {{camel_case field_name}} !== undefined{{/if}}{{#if (eq cardinality "vector")}} && {{camel_case field_name}}.every(e => e !== undefined){{/if}}{{/if}}{{/each}};
 
 async function create{{pascal_case entry_type.name}}() {  
-  const {{camel_case entry_type.name}}: {{pascal_case entry_type.name}} = { 
+  const {{camel_case entry_type.name}}Entry: {{pascal_case entry_type.name}} = { 
   {{#each entry_type.fields}}
     {{snake_case field_name}}: {{camel_case field_name}}{{#if (eq cardinality "single")}}!{{/if}},
   {{/each}}
@@ -59,7 +59,7 @@ async function create{{pascal_case entry_type.name}}() {
       role_name: '{{dna_role_name}}',
       zome_name: '{{coordinator_zome_manifest.name}}',
       fn_name: 'create_{{snake_case entry_type.name}}',
-      payload: {{camel_case entry_type.name}},
+      payload: {{camel_case entry_type.name}}Entry,
     });
     dispatch('{{kebab_case entry_type.name}}-created', { {{camel_case entry_type.name}}Hash: record.signed_action.hashed.hash });
   } catch (e) {

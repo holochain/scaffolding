@@ -25,7 +25,7 @@ const dispatch = createEventDispatcher();
 
 export let {{camel_case entry_type.name}}Hash: {{#if entry_type.reference_entry_hash}}EntryHash{{else}}ActionHash{{/if}};
 
-let client: AppAgentClient = getContext(clientContext).getClient();
+let client: AppAgentClient = (getContext(clientContext) as any).getClient();
 
 let loading = true;
 let error: any = undefined;
@@ -111,7 +111,6 @@ async function delete{{pascal_case entry_type.name}}() {
     await fetch{{pascal_case entry_type.name}}()
   } }
   on:edit-canceled={() => { editing = false; } }
-  style="display: flex; flex: 1;"
 ></Edit{{pascal_case entry_type.name}}>
 {{/if}}
 {:else}
