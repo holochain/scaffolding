@@ -3,7 +3,7 @@ pub fn tryorama_version() -> String {
 }
 
 pub fn holochain_client_version() -> String {
-    String::from("^0.11.14")
+    String::from("^0.11.15")
 }
 
 pub fn hdi_version() -> String {
