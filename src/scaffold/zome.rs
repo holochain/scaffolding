@@ -331,12 +331,12 @@ pub fn add_common_zome_dependencies_to_workspace_cargo(
     let file_tree = add_workspace_external_dependency(
         file_tree,
         &"hdi".to_string(),
-        &format!("{}", hdi_version()),
+        &format!("={}", hdi_version()),
     )?;
     let file_tree = add_workspace_external_dependency(
         file_tree,
         &"hdk".to_string(),
-        &format!("{}", hdk_version()),
+        &format!("={}", hdk_version()),
     )?;
     let file_tree =
         add_workspace_external_dependency(file_tree, &"serde".to_string(), &"1".to_string())?;
