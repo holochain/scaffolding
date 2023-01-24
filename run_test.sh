@@ -29,6 +29,7 @@ nix-shell . --run "
 set -e
 npm i
 npm run build -w ui
+npm t
 "
 
 rm -rf /tmp/forum-vue
@@ -58,6 +59,7 @@ nix-shell . --run "
 set -e
 npm i
 npm run build -w ui
+npm t
 "
 
 rm -rf /tmp/forum-lit
@@ -90,6 +92,7 @@ npm i
 npm run build -w ui
 npm run format -w ui
 npm run lint -w ui
+npm t
 "
 
 

@@ -53,7 +53,9 @@ onMount(async () => {
 {:else}
 <div style="display: flex; flex-direction: column">
   {#each hashes as hash}
-    <{{pascal_case from_referenceable.name}}Detail {{camel_case from_referenceable.name}}Hash={hash} style="margin-bottom: 8px;"></{{pascal_case from_referenceable.name}}Detail>
+    <div style="margin-bottom: 8px;">
+      <{{pascal_case from_referenceable.name}}Detail {{camel_case from_referenceable.name}}Hash={hash}></{{pascal_case from_referenceable.name}}Detail>
+    </div>
   {/each}
 </div>
 {/if}

@@ -21,11 +21,11 @@ const dispatch = createEventDispatcher();
 
 {{#each entry_type.fields}}
   {{#if (not widget) }}
-    {{#if (not (eq cardinality "vector" ) )}}
-export let {{camel_case field_name}}!: {{> (concat field_type "/type") }};
+    {{#if (eq cardinality "vector")}}
+export let {{camel_case field_name}}!: Array<{{> (concat field_type "/type") }}>;
 
     {{else}}
-export let {{camel_case field_name}}!: {{> (concat field_type "/type") }};
+export let {{camel_case field_name}}{{#if (eq cardinality "single")}}!{{/if}}: {{> (concat field_type "/type") }}{{#if (eq cardinality "option")}} | undefined{{/if}};
 
     {{/if}}
   {{/if}}
