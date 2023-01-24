@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, setContext } from 'svelte';
-  import { ActionHash, AppAgentClient, AppAgentWebsocket } from '@holochain/client';
+  import type { ActionHash, AppAgentClient } from '@holochain/client';
+  import { AppAgentWebsocket } from '@holochain/client';
   import '@material/mwc-circular-progress';
   import AllPosts from './forum/posts/AllPosts.svelte';
   import CreatePost from './forum/posts/CreatePost.svelte';

@@ -1,7 +1,7 @@
 <template>
   <div v-if="!loading">
 {{#if crud.update}}
-    <div v-if="editing">
+    <div v-if="editing" style="display: flex; flex: 1;">
       <Edit{{pascal_case entry_type.name}}
 {{#if link_from_original_to_each_update}}
         :original-{{kebab_case entry_type.name}}-hash="{{camel_case entry_type.name}}Hash"
@@ -9,7 +9,6 @@
         :current-record="record!"
         @{{kebab_case entry_type.name}}-updated="editing = false; fetch{{pascal_case entry_type.name}}();"
         @edit-canceled="editing = false"
-        style="display: flex; flex: 1;"
       ></Edit{{pascal_case entry_type.name}}>
     </div>
 {{/if}}

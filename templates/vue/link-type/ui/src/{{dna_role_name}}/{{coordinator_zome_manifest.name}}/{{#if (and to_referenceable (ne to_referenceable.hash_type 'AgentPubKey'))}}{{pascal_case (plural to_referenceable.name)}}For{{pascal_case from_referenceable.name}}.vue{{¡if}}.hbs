@@ -5,12 +5,11 @@
 
   <div v-else style="display: flex; flex-direction: column">
     <span v-if="error">Error fetching the {{lower_case (plural to_referenceable.name)}}: {{{{raw}}}} {{error.data.data}}.{{{{/raw}}}}</span>
-    <div v-else-if="hashes && hashes.length > 0">
+    <div v-else-if="hashes && hashes.length > 0" style="margin-bottom: 8px">
       <{{pascal_case to_referenceable.name}}Detail 
         v-for="hash in hashes" 
         :{{kebab_case to_referenceable.name}}-hash="hash" 
-        style="margin-bottom: 8px">
-      </{{pascal_case to_referenceable.name}}Detail>
+      ></{{pascal_case to_referenceable.name}}Detail>
     </div>
     <span v-else>No {{lower_case (plural to_referenceable.name)}} found for this {{lower_case from_referenceable.name}}.</span>
   </div>
@@ -19,7 +18,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, inject, ComputedRef } from 'vue';
+import { defineComponent, toRaw, inject, ComputedRef } from 'vue';
 import { decode } from '@msgpack/msgpack';
 import { AppAgentClient, Record, AgentPubKey, EntryHash, ActionHash } from '@holochain/client';
 import '@material/mwc-circular-progress';
@@ -57,7 +56,7 @@ export default defineComponent({
     }
     this.loading = false;
     
-    this.client.on('signal', signal => {
+    toRaw(this.client).on('signal', signal => {
       const payload = signal.payload as any;
       if (!(signal.zome_name === '{{coordinator_zome_manifest.name}}' && payload.type === 'LinkCreated')) return;
       if (payload.link_type !== '{{pascal_case link_type_name}}') return;
