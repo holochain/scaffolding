@@ -500,9 +500,9 @@ pub fn add_crud_functions_to_coordinator(
 
                 if first_entry_type_scaffolded {
                     file.items.push(syn::parse_str::<syn::Item>("fn get_entry_for_action(action_hash: &ActionHash) -> ExternResult<Option<EntryTypes>> {
-    let record = match get(action_hash.clone(), GetOptions::default())? {
-        Some(record) => record,
-        None => { return Ok(None); }
+    let record = match get_details(action_hash.clone(), GetOptions::default())? {
+        Some(Details::Record(record_details)) => record_details.record,
+        _ => { return Ok(None); }
     };
     let entry = match record.entry().as_option() {
         Some(entry) => entry,

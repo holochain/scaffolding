@@ -1,5 +1,5 @@
 pub fn tryorama_version() -> String {
-    String::from("^0.10.4")
+    String::from("^0.10.5")
 }
 
 pub fn holochain_client_version() -> String {

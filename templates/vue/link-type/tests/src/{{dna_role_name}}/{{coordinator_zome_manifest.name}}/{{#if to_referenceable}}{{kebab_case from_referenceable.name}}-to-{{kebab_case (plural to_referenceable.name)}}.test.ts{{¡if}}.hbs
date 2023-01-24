@@ -91,7 +91,7 @@ test('link a {{pascal_case from_referenceable.name}} to a {{pascal_case to_refer
     });
     assert.equal(linksOutput.length, 1);
   {{#if (ne from_referenceable.hash_type "AgentPubKey")}}
-    assert.deepEqual(targetRecord, linksOutput[0]);
+    assert.deepEqual(baseRecord, linksOutput[0]);
   {{/if}}
 {{/if}}
 

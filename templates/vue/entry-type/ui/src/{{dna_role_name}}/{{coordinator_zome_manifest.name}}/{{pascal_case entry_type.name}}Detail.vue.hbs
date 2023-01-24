@@ -139,6 +139,7 @@ export default defineComponent({
     }
 {{/if}}
   },
+  emits: ['{{kebab_case entry_type.name}}-deleted'],
   setup() {
     const client = (inject('client') as ComputedRef<AppAgentClient>).value;
     return {
