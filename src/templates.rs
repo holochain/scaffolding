@@ -56,6 +56,7 @@ pub fn register_helpers<'a>(h: Handlebars<'a>) -> Handlebars<'a> {
     let h = register_contains_helper(h);
     let h = register_includes_helper(h);
     let h = register_case_helpers(h);
+    let h = register_replace_helper(h);
     let h = register_pluralize_helpers(h);
     let h = register_merge_scope(h);
     let h = register_uniq_lines(h);
@@ -224,6 +225,13 @@ pub fn register_contains_helper<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
 pub fn register_includes_helper<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
     handlebars_helper!(includes: |string: String, substring: String| string.contains(&substring));
     h.register_helper("includes", Box::new(includes));
+
+    h
+}
+
+pub fn register_replace_helper<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
+    handlebars_helper!(replace: |s: String, pattern: String, replaced_by: String| s.replace(&pattern, replaced_by.as_str()));
+    h.register_helper("replace", Box::new(replace));
 
     h
 }

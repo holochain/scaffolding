@@ -1,4 +1,8 @@
-{{previous_file_content}}
+{{#if (includes previous_file_content "export type EntryTypes = {};")}}
+{{replace previous_file_content "export type EntryTypes = {};" (concat "export type EntryTypes =\n | ({  type: '" (pascal_case entry_type.name) "'; } & " (pascal_case entry_type.name) ");")}}
+{{else}}
+{{replace previous_file_content "export type EntryTypes =" (concat "export type EntryTypes =\n | ({ type: '" (pascal_case entry_type.name) "'; } & " (pascal_case entry_type.name) ")")}}
+{{/if}}
 
 export interface {{pascal_case entry_type.name}} { {{#each entry_type.fields}}
   {{#if (not (eq cardinality "vector" ) )}}
