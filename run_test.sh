@@ -35,8 +35,9 @@ npm t
 rm -rf /tmp/forum-vue
 cd /tmp
 
-hc-scaffold web-app forum-vue --setup-nix true --template vue
+hc-scaffold web-app forum-vue --setup-nix false --template vue
 cd forum-vue
+cp -R /tmp/forum-svelte/nix /tmp/forum-svelte/default.nix .
 
 hc-scaffold dna forum 
 hc-scaffold zome posts --integrity dnas/forum/zomes/integrity/ --coordinator dnas/forum/zomes/coordinator/
@@ -65,9 +66,9 @@ npm t
 rm -rf /tmp/forum-lit
 cd /tmp
 
-hc-scaffold web-app forum-lit --setup-nix true --template lit
+hc-scaffold web-app forum-lit --setup-nix false --template lit
 cd forum-lit
-
+cp -R /tmp/forum-svelte/nix /tmp/forum-svelte/default.nix .
 
 hc-scaffold dna forum 
 hc-scaffold zome posts --integrity dnas/forum/zomes/integrity/ --coordinator dnas/forum/zomes/coordinator/
@@ -99,8 +100,9 @@ npm t
 rm -rf /tmp/forum-vanilla
 cd /tmp
 
-hc-scaffold web-app forum-vanilla --setup-nix true --template vanilla
+hc-scaffold web-app forum-vanilla --setup-nix false --template vanilla
 cd forum-vanilla
+cp -R /tmp/forum-svelte/nix /tmp/forum-svelte/default.nix .
 
 hc-scaffold dna forum 
 hc-scaffold zome posts --integrity dnas/forum/zomes/integrity/ --coordinator dnas/forum/zomes/coordinator/
