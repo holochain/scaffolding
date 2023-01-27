@@ -23,6 +23,7 @@ import { decode } from '@msgpack/msgpack';
 import { AppAgentClient, Record, AgentPubKey, EntryHash, ActionHash, NewEntryAction } from '@holochain/client';
 import '@material/mwc-circular-progress';
 import {{pascal_case to_referenceable.name}}Detail from './{{pascal_case to_referenceable.name}}Detail.vue';
+import { {{pascal_case coordinator_zome_manifest.name}}Signal } from './types';
 
 export default defineComponent({
   components: {
@@ -57,8 +58,9 @@ export default defineComponent({
     this.loading = false;
     
     toRaw(this.client).on('signal', signal => {
-      const payload = signal.payload as any;
-      if (!(signal.zome_name === '{{coordinator_zome_manifest.name}}' && payload.type === 'LinkCreated')) return;
+      if (signal.zome_name !== '{{coordinator_zome_manifest.name}}') return; 
+      const payload = signal.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;
+      if (payload.type !== 'LinkCreated') return;
       if (payload.link_type !== '{{pascal_case link_type_name}}') return;
 
       if (this.hashes) this.hashes.push(payload.action.hashed.content.target_address);

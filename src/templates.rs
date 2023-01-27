@@ -54,6 +54,7 @@ pub fn build_handlebars<'a>(templates_dir: &FileTree) -> ScaffoldResult<Handleba
 pub fn register_helpers<'a>(h: Handlebars<'a>) -> Handlebars<'a> {
     let h = register_concat_helper(h);
     let h = register_contains_helper(h);
+    let h = register_includes_helper(h);
     let h = register_case_helpers(h);
     let h = register_pluralize_helpers(h);
     let h = register_merge_scope(h);
@@ -127,7 +128,7 @@ impl HelperDef for MergeScope {
             "Given scope opener not found in the given parameter",
         ))?;
 
-        index += scope_opener.len();
+        index += scope_opener.len() - 1;
         let scope_opener_index = index.clone();
         let mut scope_count = 1;
 
@@ -219,6 +220,14 @@ pub fn register_contains_helper<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
 
     h
 }
+
+pub fn register_includes_helper<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
+    handlebars_helper!(includes: |string: String, substring: String| string.contains(&substring));
+    h.register_helper("includes", Box::new(includes));
+
+    h
+}
+
 pub fn register_pluralize_helpers<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
     handlebars_helper!(singular: |s: String| pluralizer::pluralize(s.as_str(), 1, false));
     h.register_helper("singular", Box::new(singular));

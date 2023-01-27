@@ -4,6 +4,8 @@ import { AgentPubKey, EntryHash, ActionHash, Record, AppAgentClient, NewEntryAct
 import { consume } from '@lit-labs/context';
 import { Task } from '@lit-labs/task';
 import { clientContext } from '../../contexts';
+import { {{coordinator_zome_manifest.name}}Signal } from './types';
+
 import '@material/mwc-circular-progress';
 import './{{kebab_case from_referenceable.name}}-detail';
 
@@ -30,8 +32,9 @@ export class {{pascal_case (plural from_referenceable.name)}}For{{pascal_case to
 
   firstUpdated() {
     this.client.on('signal', signal => {
-      const payload = signal.payload as any;
-      if (!(signal.zome_name === '{{coordinator_zome_manifest.name}}' && payload.type === 'LinkCreated')) return;
+      if (signal.zome_name !== '{{coordinator_zome_manifest.name}}') return;
+      const payload = signal.payload as {{coordinator_zome_manifest.name}}Signal;
+      if (payload.type !== 'LinkCreated') return;
       if (payload.link_type !== '{{pascal_case bidireccional}}') return;
 
       this.signaledHashes = [payload.action.hashed.content.target_address, ...this.signaledHashes];

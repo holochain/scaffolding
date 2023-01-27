@@ -4,6 +4,7 @@ import '@material/mwc-circular-progress';
 import type { Record, ActionHash, EntryHash, AgentPubKey, AppAgentClient, NewEntryAction } from '@holochain/client';
 import { clientContext } from '../../contexts';
 import {{pascal_case from_referenceable.name}}Detail from './{{pascal_case from_referenceable.name}}Detail.svelte';
+import { {{pascal_case coordinator_zome_manifest.name}}Signal } from './types';
 
 export let {{camel_case to_referenceable.singular_arg}}: {{to_referenceable.hash_type}};
 
@@ -21,7 +22,7 @@ onMount(async () => {
     const records = await client.callZome({
       cap_secret: null,
       role_name: '{{dna_role_name}}',
-      zome_name: '{{coordinator_zome_manifest.name}}',
+      zome_name: '{{snake_case coordinator_zome_manifest.name}}',
       fn_name: 'get_{{snake_case (plural from_referenceable.name)}}_for_{{snake_case to_referenceable.name}}',
       payload: {{camel_case to_referenceable.singular_arg}},
     });
@@ -32,8 +33,9 @@ onMount(async () => {
   loading = false;
   
   client.on('signal', signal => {
-    const payload = signal.payload as any;
-    if (!(signal.zome_name === '{{coordinator_zome_manifest.name}}' && payload.type === 'LinkCreated')) return;
+    if (signal.zome_name !== '{{coordinator_zome_manifest.name}}') return;
+    const payload = signal.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;
+    if (payload.type !== 'LinkCreated') return;
     if (payload.link_type !== '{{pascal_case bidireccional}}') return;
 
     hashes = [...hashes, payload.action.hashed.content.target_address];
