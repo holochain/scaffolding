@@ -4,7 +4,7 @@ import '@material/mwc-circular-progress';
 import type { EntryHash, Record, AgentPubKey, ActionHash, AppAgentClient, NewEntryAction } from '@holochain/client';
 import { clientContext } from '../../contexts';
 import {{pascal_case referenceable.name}}Detail from './{{pascal_case referenceable.name}}Detail.svelte';
-import { {{pascal_case coordinator_zome_manifest.name}}Signal } from './types';
+import type { {{pascal_case coordinator_zome_manifest.name}}Signal } from './types';
 
 {{#if (eq collection_type.type "ByAuthor")}}
 export let author: AgentPubKey;
