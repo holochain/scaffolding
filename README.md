@@ -2,22 +2,25 @@
 
 CLI to easily generate and edit holochain apps.
 
-## Install
+## Obtaining the scaffolding tool through holonix
 
-Install the CLI globally with this command.
+The easiest way to start using the scaffolding tool is through holonix:
 
 ```bash
-cargo install holochain_scaffolding_cli
+nix-shell https://holochain.love
+hc-scaffold --version
 ```
 
-In the near future the scaffolding tool is going to be integrated together with holonix and the overall holochain development environment.
-
-Until then, you can just install it from crates to get a preview of its functionality.
-
+Should print the version of the scaffolding tool.
 
 ## Usage
 
+These are the commands that you can run with the scaffolding tool:
+
 ```bash
+# Scaffold an example app
+hc scaffold example
+
 # Scaffold an empty web-app
 hc scaffold web-app forum
 
@@ -42,3 +45,11 @@ hc scaffold link-type
 ## Documentation
 
 See the [docs.rs documentation](https://docs.rs/holochain_scaffolding_cli) to learn how to use and create custom templates.
+
+## Manual installation
+
+Install the CLI globally with this command.
+
+```bash
+cargo install holochain_scaffolding_cli
+```
