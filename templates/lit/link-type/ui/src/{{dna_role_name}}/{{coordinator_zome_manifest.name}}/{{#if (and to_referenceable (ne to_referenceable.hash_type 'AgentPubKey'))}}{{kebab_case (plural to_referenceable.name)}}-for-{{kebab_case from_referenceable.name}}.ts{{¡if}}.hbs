@@ -7,7 +7,7 @@ import '@material/mwc-circular-progress';
 
 import { clientContext } from '../../contexts';
 import './{{kebab_case to_referenceable.name}}-detail';
-import { {{coordinator_zome_manifest.name}}Signal } from './types';
+import { {{pascal_case coordinator_zome_manifest.name}}Signal } from './types';
 
 @customElement('{{kebab_case (plural to_referenceable.name)}}-for-{{kebab_case from_referenceable.name}}')
 export class {{pascal_case (plural to_referenceable.name)}}For{{pascal_case from_referenceable.name}} extends LitElement {
@@ -33,7 +33,7 @@ export class {{pascal_case (plural to_referenceable.name)}}For{{pascal_case from
   firstUpdated() {
     this.client.on('signal', signal => {
       if (signal.zome_name !== '{{coordinator_zome_manifest.name}}') return;
-      const payload = signal.payload as {{coordinator_zome_manifest.name}}Signal;
+      const payload = signal.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;
       if (payload.type !== 'LinkCreated') return;
       if (payload.link_type !== '{{pascal_case link_type_name}}') return;
 
