@@ -352,7 +352,11 @@ Set up your development environment with:
   cd {}{}
   npm install
 
-Then, add new DNAs to your app with:
+Then, at any point in time you can start your application with:
+
+  npm start
+
+To continue scaffolding your application, add new DNAs to your app with:
 
   hc scaffold dna
 "#,
