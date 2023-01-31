@@ -426,27 +426,32 @@ fn signal_link_types_variants() -> ScaffoldResult<Vec<syn::Variant>> {
 fn signal_action_match_arms() -> ScaffoldResult<Vec<syn::Arm>> {
     Ok(vec![
         syn::parse_str::<syn::Arm>("Action::CreateLink(create_link) => {
-            let link_type = LinkTypes::from_type(create_link.zome_index, create_link.link_type)?.ok_or(wasm_error!(WasmErrorInner::Guest(\"Link type should be exist\".to_string())))?;
-            emit_signal(Signal::LinkCreated {
-                action,
-                link_type
-            })?;
+            if let Ok(Some(link_type)) =
+                LinkTypes::from_type(create_link.zome_index, create_link.link_type)
+            {
+                emit_signal(Signal::LinkCreated { action, link_type })?;
+            }
             Ok(())
         }")?,
         syn::parse_str::<syn::Arm>("Action::DeleteLink(delete_link) => {
-            let record = get(delete_link.link_add_address.clone(), GetOptions::default())?
-                .ok_or(wasm_error!(WasmErrorInner::Guest(\"Create Link should exist\".to_string())))?;
+            let record = get(delete_link.link_add_address.clone(), GetOptions::default())?.ok_or(
+                wasm_error!(WasmErrorInner::Guest(
+                    \"Failed to fetch CreateLink action\".to_string()
+                )),
+            )?;
             match record.action() {
                 Action::CreateLink(create_link) => {
-                    let link_type = LinkTypes::from_type(create_link.zome_index, create_link.link_type)?.ok_or(wasm_error!(WasmErrorInner::Guest(\"Link type should be exist\".to_string())))?;
-                    emit_signal(Signal::LinkDeleted {
-                        action,
-                        link_type
-                    })?;
+                    if let Ok(Some(link_type)) =
+                        LinkTypes::from_type(create_link.zome_index, create_link.link_type)
+                    {
+                        emit_signal(Signal::LinkDeleted { action, link_type })?;
+                    }
                     Ok(())
-                },
+                }
                 _ => {
-                    return Err(wasm_error!(WasmErrorInner::Guest(\"Create Link should exist\".to_string())));
+                    return Err(wasm_error!(WasmErrorInner::Guest(
+                        \"Create Link should exist\".to_string()
+                    )));
                 }
             }
         }")?

@@ -380,29 +380,32 @@ fn signal_entry_types_variants() -> ScaffoldResult<Vec<syn::Variant>> {
 fn signal_action_match_arms() -> ScaffoldResult<Vec<syn::Arm>> {
     Ok(vec![
         syn::parse_str::<syn::Arm>("Action::Create(_create) => {
-            let app_entry = get_entry_for_action(&action.hashed.hash)?.ok_or(wasm_error!(WasmErrorInner::Guest(\"Create should carry an entry\".to_string())))?;
-            emit_signal(Signal::EntryCreated {
-                action,
-                app_entry
-            })?;
+            if let Ok(Some(app_entry)) = get_entry_for_action(&action.hashed.hash) {
+                emit_signal(Signal::EntryCreated { action, app_entry })?;
+            }
             Ok(())
         }")?,
         syn::parse_str::<syn::Arm>("Action::Update(update) => {
-            let app_entry = get_entry_for_action(&action.hashed.hash)?.ok_or(wasm_error!(WasmErrorInner::Guest(\"Update should carry an entry\".to_string())))?;
-            let original_app_entry = get_entry_for_action(&update.original_action_address)?.ok_or(wasm_error!(WasmErrorInner::Guest(\"Updated action should carry an entry\".to_string())))?;
-            emit_signal(Signal::EntryUpdated {
-                action,
-                app_entry,
-                original_app_entry
-            })?;
+            if let Ok(Some(app_entry)) = get_entry_for_action(&action.hashed.hash) {
+                if let Ok(Some(original_app_entry)) =
+                    get_entry_for_action(&update.original_action_address)
+                {
+                    emit_signal(Signal::EntryUpdated {
+                        action,
+                        app_entry,
+                        original_app_entry,
+                    })?;
+                }
+            }
             Ok(())
         }")?,
         syn::parse_str::<syn::Arm>("Action::Delete(delete) => {
-            let original_app_entry = get_entry_for_action(&delete.deletes_address)?.ok_or(wasm_error!(WasmErrorInner::Guest(\"Deleted action should carry an entry\".to_string())))?;
-            emit_signal(Signal::EntryDeleted {
-                action,
-                original_app_entry,
-            })?;
+            if let Ok(Some(original_app_entry)) = get_entry_for_action(&delete.deletes_address) {
+                emit_signal(Signal::EntryDeleted {
+                    action,
+                    original_app_entry,
+                })?;
+            }
             Ok(())
         }")?
     ])
