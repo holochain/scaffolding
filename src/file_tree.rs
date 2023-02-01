@@ -216,30 +216,36 @@ pub fn map_rust_files<F: Fn(PathBuf, syn::File) -> ScaffoldResult<syn::File> + C
     })
 }
 
-pub fn flatten_file_tree(file_tree: &FileTree) -> BTreeMap<PathBuf, String> {
-    find_files(file_tree, &|_, _| true)
+pub fn flatten_file_tree(file_tree: &FileTree) -> BTreeMap<PathBuf, Option<String>> {
+    walk_file_tree_rec(file_tree, &PathBuf::new())
 }
 
-pub fn unflatten_file_tree(flattened_tree: &BTreeMap<PathBuf, String>) -> ScaffoldResult<FileTree> {
+pub fn unflatten_file_tree(
+    flattened_tree: &BTreeMap<PathBuf, Option<String>>,
+) -> ScaffoldResult<FileTree> {
     let mut file_tree: FileTree = FileTree::Directory(BTreeMap::new());
 
-    for (path, contents) in flattened_tree.iter() {
-        let mut folder_path = path.clone();
-        folder_path.pop();
+    for (path, maybe_contents) in flattened_tree.iter() {
+        if let Some(contents) = maybe_contents {
+            let mut folder_path = path.clone();
+            folder_path.pop();
 
-        create_dir_all(&mut file_tree, &folder_path)?;
+            create_dir_all(&mut file_tree, &folder_path)?;
 
-        let v: Vec<OsString> = folder_path
-            .clone()
-            .iter()
-            .map(|s| s.to_os_string())
-            .collect();
-        file_tree
-            .path_mut(&mut v.iter())
-            .ok_or(ScaffoldError::PathNotFound(folder_path.clone()))?
-            .dir_content_mut()
-            .ok_or(ScaffoldError::PathNotFound(folder_path.clone()))?
-            .insert(path.file_name().unwrap().to_os_string(), file!(contents));
+            let v: Vec<OsString> = folder_path
+                .clone()
+                .iter()
+                .map(|s| s.to_os_string())
+                .collect();
+            file_tree
+                .path_mut(&mut v.iter())
+                .ok_or(ScaffoldError::PathNotFound(folder_path.clone()))?
+                .dir_content_mut()
+                .ok_or(ScaffoldError::PathNotFound(folder_path.clone()))?
+                .insert(path.file_name().unwrap().to_os_string(), file!(contents));
+        } else {
+            create_dir_all(&mut file_tree, &path)?;
+        }
     }
 
     Ok(file_tree)
@@ -314,17 +320,46 @@ pub fn dir_to_file_tree(dir: &Dir<'_>) -> ScaffoldResult<FileTree> {
     unflatten_file_tree(&flattened)
 }
 
-fn walk_dir(dir: &Dir<'_>) -> BTreeMap<PathBuf, String> {
-    let mut contents: BTreeMap<PathBuf, String> = BTreeMap::new();
+fn walk_dir(dir: &Dir<'_>) -> BTreeMap<PathBuf, Option<String>> {
+    let mut contents: BTreeMap<PathBuf, Option<String>> = BTreeMap::new();
 
     for f in dir.files() {
         if let Some(s) = f.contents_utf8() {
-            contents.insert(f.path().to_path_buf(), s.to_string());
+            contents.insert(f.path().to_path_buf(), Some(s.to_string()));
         }
     }
     for d in dir.dirs() {
+        contents.insert(d.path().to_path_buf(), None);
         contents.extend(walk_dir(d));
     }
 
     contents
+}
+
+fn walk_file_tree_rec(
+    file_tree: &FileTree,
+    current_path: &PathBuf,
+) -> BTreeMap<PathBuf, Option<String>> {
+    let mut found_files: BTreeMap<PathBuf, Option<String>> = BTreeMap::new();
+
+    match file_tree {
+        FileTree::File(_) => {}
+        FileTree::Directory(directory_contents) => {
+            for (file_name, child_file_tree) in directory_contents {
+                let child_path = current_path.join(file_name);
+
+                if let FileTree::File(contents) = child_file_tree {
+                    found_files.insert(child_path, Some(contents.clone()));
+                } else {
+                    found_files.insert(child_path.clone(), None);
+                    let sub_paths = walk_file_tree_rec(child_file_tree, &child_path);
+                    for (grandchild_path, contents) in sub_paths {
+                        found_files.insert(grandchild_path, contents);
+                    }
+                }
+            }
+        }
+    }
+
+    found_files
 }

@@ -321,115 +321,121 @@ pub fn render_template_file_tree<'a, T: Serialize>(
 ) -> ScaffoldResult<FileTree> {
     let flattened_templates = flatten_file_tree(templates_file_tree);
 
-    let mut transformed_templates: BTreeMap<PathBuf, String> = BTreeMap::new();
+    let mut transformed_templates: BTreeMap<PathBuf, Option<String>> = BTreeMap::new();
 
     let new_data = serde_json::to_string(data)?;
     let value: serde_json::Value = serde_json::from_str(new_data.as_str())?;
 
-    for (path, contents) in flattened_templates {
-        let path = PathBuf::from(path.to_str().unwrap().replace('¡', "/"));
-        let path = PathBuf::from(path.to_str().unwrap().replace('\'', "\""));
+    for (path, maybe_contents) in flattened_templates {
+        if let Some(contents) = maybe_contents {
+            let path = PathBuf::from(path.to_str().unwrap().replace('¡', "/"));
+            let path = PathBuf::from(path.to_str().unwrap().replace('\'', "\""));
 
-        let re = Regex::new(
-            r"(?P<c>(.)*)/\{\{#each (?P<b>([^\{\}])*)\}\}(?P<a>(.)*)\{\{/each\}\}.hbs\z",
-        )
-        .unwrap();
-        let if_regex =
-            Regex::new(r"(?P<c>(.)*)/\{\{#if (?P<b>([^\{\}])*)\}\}(?P<a>(.)*)\{\{/if\}\}.hbs\z")
-                .unwrap();
+            let re = Regex::new(
+                r"(?P<c>(.)*)/\{\{#each (?P<b>([^\{\}])*)\}\}(?P<a>(.)*)\{\{/each\}\}.hbs\z",
+            )
+            .unwrap();
+            let if_regex = Regex::new(
+                r"(?P<c>(.)*)/\{\{#if (?P<b>([^\{\}])*)\}\}(?P<a>(.)*)\{\{/if\}\}.hbs\z",
+            )
+            .unwrap();
 
-        if re.is_match(path.to_str().unwrap()) {
-            let path_prefix = re.replace(path.to_str().unwrap(), "${c}");
-            let path_prefix = h.render_template(path_prefix.to_string().as_str(), data)?;
+            if re.is_match(path.to_str().unwrap()) {
+                let path_prefix = re.replace(path.to_str().unwrap(), "${c}");
+                let path_prefix = h.render_template(path_prefix.to_string().as_str(), data)?;
 
-            let new_path_suffix =
-                re.replace(path.to_str().unwrap(), "{{#each ${b} }}${a}.hbs{{/each}}");
+                let new_path_suffix =
+                    re.replace(path.to_str().unwrap(), "{{#each ${b} }}${a}.hbs{{/each}}");
 
-            let all_paths = h.render_template(new_path_suffix.to_string().as_str(), data)?;
+                let all_paths = h.render_template(new_path_suffix.to_string().as_str(), data)?;
 
-            let files_to_create: Vec<String> = all_paths
-                .split(".hbs")
-                .map(|s| s.to_string())
-                .filter(|s| !s.is_empty())
-                .collect();
+                let files_to_create: Vec<String> = all_paths
+                    .split(".hbs")
+                    .map(|s| s.to_string())
+                    .filter(|s| !s.is_empty())
+                    .collect();
 
-            if files_to_create.len() > 0 {
-                let delimiter = "\n----END_OF_FILE_DELIMITER----\n";
+                if files_to_create.len() > 0 {
+                    let delimiter = "\n----END_OF_FILE_DELIMITER----\n";
 
-                let each_if_re = Regex::new(
+                    let each_if_re = Regex::new(
                     r"(?P<c>(.)*)/\{\{#each (?P<b>([^\{\}])*)\}\}\{\{#if (?P<d>([^\{\}])*)\}\}(?P<a>(.)*)\{\{/if\}\}\{\{/each\}\}.hbs\z",
                 )
                 .unwrap();
-                let b = re.replace(path.to_str().unwrap(), "${b}");
-                let new_all_contents = match each_if_re.is_match(path.to_str().unwrap()) {
-                    true => {
-                        let d = each_if_re.replace(path.to_str().unwrap(), "${d}");
-                        format!(
-                            "{{{{#each {} }}}}{{{{#if {} }}}}\n{}{}{{{{/if}}}}{{{{/each}}}}",
-                            b, d, contents, delimiter
-                        )
+                    let b = re.replace(path.to_str().unwrap(), "${b}");
+                    let new_all_contents = match each_if_re.is_match(path.to_str().unwrap()) {
+                        true => {
+                            let d = each_if_re.replace(path.to_str().unwrap(), "${d}");
+                            format!(
+                                "{{{{#each {} }}}}{{{{#if {} }}}}\n{}{}{{{{/if}}}}{{{{/each}}}}",
+                                b, d, contents, delimiter
+                            )
+                        }
+
+                        false => format!(
+                            "{{{{#each {} }}}}\n{}{}{{{{/each}}}}",
+                            b, contents, delimiter
+                        ),
+                    };
+                    let new_contents = render_template_file(
+                        &h,
+                        existing_app_file_tree,
+                        &path,
+                        &new_all_contents,
+                        &value,
+                    )?;
+                    let new_contents_split: Vec<String> = new_contents
+                        .split(delimiter)
+                        .into_iter()
+                        .map(|s| s.to_string())
+                        .collect();
+
+                    for (i, f) in files_to_create.into_iter().enumerate() {
+                        let target_path = PathBuf::from(path_prefix.clone()).join(f);
+
+                        transformed_templates
+                            .insert(target_path, Some(new_contents_split[i].clone()));
                     }
+                }
+            } else if if_regex.is_match(path.to_str().unwrap()) {
+                let path_prefix = if_regex.replace(path.to_str().unwrap(), "${c}");
+                let path_prefix = h.render_template(path_prefix.to_string().as_str(), data)?;
 
-                    false => format!(
-                        "{{{{#each {} }}}}\n{}{}{{{{/each}}}}",
-                        b, contents, delimiter
-                    ),
-                };
-                let new_contents = render_template_file(
-                    &h,
-                    existing_app_file_tree,
-                    &path,
-                    &new_all_contents,
-                    &value,
-                )?;
-                let new_contents_split: Vec<String> = new_contents
-                    .split(delimiter)
-                    .into_iter()
-                    .map(|s| s.to_string())
-                    .collect();
+                let new_path_suffix =
+                    if_regex.replace(path.to_str().unwrap(), "{{#if ${b} }}${a}.hbs{{/if}}");
 
-                for (i, f) in files_to_create.into_iter().enumerate() {
-                    let target_path = PathBuf::from(path_prefix.clone()).join(f);
+                let new_template = h.render_template(new_path_suffix.to_string().as_str(), data)?;
 
-                    transformed_templates.insert(target_path, new_contents_split[i].clone());
+                if let Some(file_name) = new_template.strip_suffix(".hbs") {
+                    let target_path = PathBuf::from(path_prefix.clone()).join(file_name);
+
+                    let new_contents = render_template_file(
+                        &h,
+                        existing_app_file_tree,
+                        &target_path,
+                        &contents,
+                        &value,
+                    )?;
+                    transformed_templates.insert(target_path, Some(new_contents));
+                }
+            } else if let Some(e) = path.extension() {
+                if e == "hbs" {
+                    let new_path = h.render_template(path.as_os_str().to_str().unwrap(), data)?;
+                    let target_path = PathBuf::from(new_path).with_extension("");
+
+                    let new_contents = render_template_file(
+                        &h,
+                        existing_app_file_tree,
+                        &target_path,
+                        &contents,
+                        &value,
+                    )?;
+
+                    transformed_templates.insert(target_path, Some(new_contents));
                 }
             }
-        } else if if_regex.is_match(path.to_str().unwrap()) {
-            let path_prefix = if_regex.replace(path.to_str().unwrap(), "${c}");
-            let path_prefix = h.render_template(path_prefix.to_string().as_str(), data)?;
-
-            let new_path_suffix =
-                if_regex.replace(path.to_str().unwrap(), "{{#if ${b} }}${a}.hbs{{/if}}");
-
-            let new_template = h.render_template(new_path_suffix.to_string().as_str(), data)?;
-
-            if let Some(file_name) = new_template.strip_suffix(".hbs") {
-                let target_path = PathBuf::from(path_prefix.clone()).join(file_name);
-
-                let new_contents = render_template_file(
-                    &h,
-                    existing_app_file_tree,
-                    &target_path,
-                    &contents,
-                    &value,
-                )?;
-                transformed_templates.insert(target_path, new_contents);
-            }
-        } else if let Some(e) = path.extension() {
-            if e == "hbs" {
-                let new_path = h.render_template(path.as_os_str().to_str().unwrap(), data)?;
-                let target_path = PathBuf::from(new_path).with_extension("");
-
-                let new_contents = render_template_file(
-                    &h,
-                    existing_app_file_tree,
-                    &target_path,
-                    &contents,
-                    &value,
-                )?;
-
-                transformed_templates.insert(target_path, new_contents);
-            }
+        } else {
+            transformed_templates.insert(path, None);
         }
     }
 
