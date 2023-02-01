@@ -352,13 +352,13 @@ Set up your development environment with:
   cd {}{}
   npm install
 
-Then, at any point in time you can start your application with:
-
-  npm start
-
 To continue scaffolding your application, add new DNAs to your app with:
 
   hc scaffold dna
+
+Then, at any point in time you can start your application with:
+
+  npm start
 "#,
                         name, maybe_nix
                     );
