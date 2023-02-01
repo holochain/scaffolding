@@ -129,8 +129,9 @@ impl HelperDef for MergeScope {
             "Given scope opener not found in the given parameter",
         ))?;
 
-        index += scope_opener.len() - 1;
+        index += scope_opener.len();
         let scope_opener_index = index.clone();
+        index -= 1;
         let mut scope_count = 1;
 
         while scope_count > 0 {
