@@ -5,21 +5,22 @@ use crate::versions::holochain_nix_version;
 
 pub fn default_nix() -> FileTree {
     file!(format!(
-        r#"let
-  holonixPath = (import ./nix/sources.nix).holonix; # points to the current state of the Holochain repository
-  holonix = import (holonixPath) {{
-    holochainVersionId = "{}"; # specifies the Holochain version
-  }};
-  nixpkgs = holonix.pkgs;
-in nixpkgs.mkShell {{
-  inputsFrom = [ holonix.main ];
-  packages = with nixpkgs; [
-    niv
-    nodejs-18_x
-    # any additional packages needed for this project, e. g. Nodejs
-  ];
+        r#"{
+  description = "Template for Holochain app development";
 
-}}"#,
-        holochain_nix_version()
-    ))
+  inputs = {
+    nixpkgs.follows = "holonix/nixpkgs";
+    holonix.url = "github:holochain/holochain/pr_holonix_on_flakes";
+  };
+
+  outputs = inputs@{ ... }:
+    inputs.holonix.inputs.flake-parts.lib.mkFlake { inherit inputs; } {
+      systems = builtins.attrNames inputs.holonix.devShells;
+      perSystem = { config, pkgs, system, ... }: {
+        devShells.default = pkgs.mkShell {
+          inputsFrom = [ inputs.holonix.devShells.${system}.holonix ];
+        };
+      };
+    };
+}"#))
 }

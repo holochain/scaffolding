@@ -37,7 +37,7 @@ fn web_app_skeleton(
         app_file_tree
             .dir_content_mut()
             .ok_or(ScaffoldError::PathNotFound(PathBuf::new()))?
-            .insert(OsString::from("default.nix"), default_nix());
+            .insert(OsString::from("flake.nix"), default_nix());
     }
     if scaffold_template {
         app_file_tree
