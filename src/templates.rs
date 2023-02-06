@@ -328,10 +328,9 @@ pub fn render_template_file_tree<'a, T: Serialize>(
     let value: serde_json::Value = serde_json::from_str(new_data.as_str())?;
 
     for (path, maybe_contents) in flattened_templates {
+        let path = PathBuf::from(path.to_str().unwrap().replace('¡', "/"));
+        let path = PathBuf::from(path.to_str().unwrap().replace('\'', "\""));
         if let Some(contents) = maybe_contents {
-            let path = PathBuf::from(path.to_str().unwrap().replace('¡', "/"));
-            let path = PathBuf::from(path.to_str().unwrap().replace('\'', "\""));
-
             let re = Regex::new(
                 r"(?P<c>(.)*)/\{\{#each (?P<b>([^\{\}])*)\}\}(?P<a>(.)*)\{\{/each\}\}.hbs\z",
             )
@@ -436,7 +435,8 @@ pub fn render_template_file_tree<'a, T: Serialize>(
                 }
             }
         } else {
-            transformed_templates.insert(path, None);
+            let new_path = h.render_template(path.as_os_str().to_str().unwrap(), data)?;
+            transformed_templates.insert(PathBuf::from(new_path), None);
         }
     }
 
