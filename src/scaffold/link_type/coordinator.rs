@@ -39,8 +39,8 @@ use {integrity_zome_name}::*;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Add{pascal_link_type_name}For{pascal_from}Input {{
-    {snake_from_arg}: {from_arg_type},
-    {snake_link_type_name}: String,
+    pub {snake_from_arg}: {from_arg_type},
+    pub {snake_link_type_name}: String,
 }}
 #[hdk_extern]
 pub fn add_{snake_link_type_name}_for_{snake_from}(input: Add{pascal_link_type_name}For{pascal_from}Input) -> ExternResult<()> {{
@@ -101,8 +101,8 @@ pub fn add_link_handler(
     format!(
         r#"#[derive(Serialize, Deserialize, Debug)]
 pub struct Add{singular_pascal_to_entry_type}For{singular_pascal_from_entry_type}Input {{
-    {from_arg_name}: {from_hash_type},
-    {to_arg_name}: {to_hash_type},
+    pub {from_arg_name}: {from_hash_type},
+    pub {to_arg_name}: {to_hash_type},
 }}
 #[hdk_extern]
 pub fn add_{singular_snake_to_entry_type}_for_{singular_snake_from_entry_type}(input: Add{singular_pascal_to_entry_type}For{singular_pascal_from_entry_type}Input) -> ExternResult<()> {{
@@ -248,8 +248,8 @@ fn remove_link_handlers(
     format!(
         r#"#[derive(Serialize, Deserialize, Debug)]
 pub struct Remove{singular_pascal_to_entry_type}For{singular_pascal_from_entry_type}Input {{
-    {from_arg_name}: {from_hash_type},
-    {to_arg_name}: {to_hash_type},
+    pub {from_arg_name}: {from_hash_type},
+    pub {to_arg_name}: {to_hash_type},
 }}
 #[hdk_extern]
 pub fn remove_{singular_snake_to_entry_type}_for_{singular_snake_from_entry_type}(input: Remove{singular_pascal_to_entry_type}For{singular_pascal_from_entry_type}Input ) -> ExternResult<()> {{
