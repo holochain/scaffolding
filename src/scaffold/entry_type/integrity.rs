@@ -185,7 +185,7 @@ pub fn render_entry_definition_file(
       #(#type_definitions)*
 
       #[hdk_entry_helper]
-      #[derive(Clone)]
+      #[derive(Clone, PartialEq)]
       #entry_def_token_stream
 
       pub fn #validate_create_fn(
