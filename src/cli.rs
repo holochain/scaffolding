@@ -319,7 +319,7 @@ impl HcScaffold {
                         let output = Command::new("nix-shell")
                         .stdout(Stdio::inherit())
                         .current_dir(std::env::current_dir()?.join(&name))
-                        .args(["-I", "nixpkgs=https://github.com/NixOS/nixpkgs/archive/nixos-21.11.tar.gz", "-p", "niv", "--run", "niv init && niv drop nixpkgs && niv drop niv && niv add -b main holochain/holonix"])
+                        .args(["-I", "nixpkgs=https://github.com/NixOS/nixpkgs/archive/nixos-22.11.tar.gz", "-p", "niv", "--run", "niv init && niv drop nixpkgs && niv drop niv && niv add -b pr_holonix_on_flakes holochain/holochain"])
                         .output()?;
 
                         if !output.status.success() {
