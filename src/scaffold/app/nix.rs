@@ -80,7 +80,10 @@ pub fn add_extra_experimental_features() -> ScaffoldResult<()> {
         "Config dir doesn't exist".to_string(),
     ))?;
 
-    let nix_conf_path = config_path.join("nix").join("nix.conf");
+    let nix_conf_dir = config_path.join("nix");
+    fs::create_dir_all(&nix_conf_dir)?;
+
+    let nix_conf_path = nix_conf_dir.join("nix.conf");
     if let Ok(contents) = fs::read_to_string(&nix_conf_path) {
         if contents.contains(EXTRA_EXPERIMENTAL_FEATURES_LINE) {
             return Ok(());
