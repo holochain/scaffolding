@@ -2,6 +2,7 @@ use build_fs_tree::{dir, file};
 use std::{ffi::OsString, path::PathBuf};
 
 use crate::error::ScaffoldResult;
+use crate::reserved_words::check_for_reserved_words;
 use crate::templates::web_app::scaffold_web_app_template;
 use crate::templates::{templates_path, ScaffoldedTemplate};
 use crate::{error::ScaffoldError, file_tree::FileTree};
@@ -23,6 +24,8 @@ fn web_app_skeleton(
     template_name: String,
     scaffold_template: bool,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
+    check_for_reserved_words(&app_name)?;
+
     let mut app_file_tree = dir! {
       ".gitignore" => file!(gitignore())
       "workdir" => dir!{

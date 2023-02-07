@@ -8,7 +8,7 @@
   {{#if widget}}
     <div style="margin-bottom: 16px">
     {{#if (not (eq cardinality "vector") )}}
-      {{> (concat field_type "/" widget "/edit/render") label=(title_case field_name) variable_to_change=(concat "" (camel_case field_name) ) required=(eq cardinality "single")}}
+      {{> (concat field_type.type "/" widget "/edit/render") label=(title_case field_name) variable_to_change=(concat "" (camel_case field_name) ) required=(eq cardinality "single")}}
     {{else}}
       {{> Vec/edit/render field_name=field_name field_type=field_type widget=widget }}
     {{/if}}
@@ -29,7 +29,7 @@
 <script lang="ts">
 import { defineComponent, inject, ComputedRef } from 'vue';
 import { AppAgentClient, Record, AgentPubKey, EntryHash, ActionHash } from '@holochain/client';
-import { {{pascal_case entry_type.name}} } from './types';
+import { {{pascal_case entry_type.name}}{{#each entry_type.fields}}{{#if (eq field_type.type "Enum")}}, {{field_type.label}}{{/if}}{{/each}} } from './types';
 import '@material/mwc-button';
 import '@material/mwc-icon-button';
 import '@material/mwc-snackbar';
@@ -37,7 +37,7 @@ import { Snackbar } from '@material/mwc-snackbar';
 {{#uniq_lines}}
   {{#each entry_type.fields}}
     {{#if widget}}
-{{> (concat field_type "/" widget "/edit/imports") }}
+{{> (concat field_type.type "/" widget "/edit/imports") }}
 
     {{/if}}
   {{/each}}
@@ -48,9 +48,9 @@ export default defineComponent({
 {{#each entry_type.fields}}
   {{#if widget}}
     {{#if (not (eq cardinality "vector" ) )}}
-    {{camel_case field_name}}: {{> (concat field_type "/type")}} | undefined;
+    {{camel_case field_name}}: {{> (concat field_type.type "/type")}} | undefined;
     {{else}}
-    {{camel_case field_name}}: Array<{{> (concat field_type "/type")}} | undefined>;
+    {{camel_case field_name}}: Array<{{> (concat field_type.type "/type")}} | undefined>;
     {{/if}}
   {{/if}}
 {{/each}}
@@ -100,7 +100,7 @@ export default defineComponent({
         {{#if (eq cardinality "single") }}
         {{snake_case field_name}}: this.{{camel_case field_name}}!,
         {{else}}
-        {{snake_case field_name}}: this.{{camel_case field_name}}{{#if (eq cardinality "vector") }} as Array<{{> (concat field_type "/type") }}>{{/if}},
+        {{snake_case field_name}}: this.{{camel_case field_name}}{{#if (eq cardinality "vector") }} as Array<{{> (concat field_type.type "/type") }}>{{/if}},
         {{/if}}
   {{/each}}
       };

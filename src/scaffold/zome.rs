@@ -5,6 +5,7 @@ use std::{ffi::OsString, path::PathBuf};
 
 use crate::{
     file_tree::{file_exists, insert_file_tree_in_dir, FileTree},
+    reserved_words::check_for_reserved_words,
     templates::{
         coordinator::scaffold_coordinator_zome_templates,
         integrity::scaffold_integrity_zome_templates, ScaffoldedTemplate,
@@ -350,6 +351,8 @@ pub fn scaffold_integrity_zome_with_path(
     zome_name: &String,
     path: &PathBuf,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
+    check_for_reserved_words(zome_name)?;
+
     let dna_manifest_path = dna_file_tree.dna_manifest_path.clone();
     let dna_manifest = dna_file_tree.dna_manifest.clone();
 
@@ -430,6 +433,8 @@ pub fn scaffold_coordinator_zome_in_path(
     dependencies: &Option<Vec<String>>,
     path: &PathBuf,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
+    check_for_reserved_words(zome_name)?;
+
     let dna_manifest = dna_file_tree.dna_manifest.clone();
 
     let coordinator_zome_manifest =

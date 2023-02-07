@@ -8,14 +8,14 @@ import { Snackbar } from '@material/mwc-snackbar';
 {{#uniq_lines}}
   {{#each entry_type.fields}}
     {{#if widget}}
-{{> (concat field_type "/" widget "/edit/imports") }}
+{{> (concat field_type.type "/" widget "/edit/imports") }}
 
     {{/if}}
   {{/each}}
 {{/uniq_lines}}
 
 import { clientContext } from '../../contexts';
-import { {{pascal_case entry_type.name}} } from './types';
+import { {{pascal_case entry_type.name}}{{#each entry_type.fields}}{{#if (eq field_type.type "Enum")}}, {{field_type.label}}{{/if}}{{/each}} } from './types';
 
 @customElement('create-{{kebab_case entry_type.name}}')
 export class Create{{pascal_case entry_type.name}} extends LitElement {
@@ -26,11 +26,11 @@ export class Create{{pascal_case entry_type.name}} extends LitElement {
     {{#if (not widget) }}
       {{#if (not (eq cardinality "vector" ) )}}
   @property()
-  {{camel_case field_name}}!: {{> (concat field_type "/type") }};
+  {{camel_case field_name}}!: {{> (concat field_type.type "/type") }};
 
       {{else}}
   @property()
-  {{camel_case field_name}}!: Array<{{> (concat field_type "/type") }}>;
+  {{camel_case field_name}}!: Array<{{> (concat field_type.type "/type") }}>;
 
       {{/if}}
     {{/if}}
@@ -40,11 +40,11 @@ export class Create{{pascal_case entry_type.name}} extends LitElement {
     {{#if widget }}
       {{#if (not (eq cardinality "vector" ) )}}
   @state()
-  _{{camel_case field_name}}: {{> (concat field_type "/type") }} | undefined;
+  _{{camel_case field_name}}: {{> (concat field_type.type "/type") }} | undefined;
 
       {{else}}
   @state()
-  _{{camel_case field_name}}: Array<{{> (concat field_type "/type") }} | undefined> = [];
+  _{{camel_case field_name}}: Array<{{> (concat field_type.type "/type") }} | undefined> = [];
 
       {{/if}}
     {{/if}}
@@ -61,7 +61,7 @@ export class Create{{pascal_case entry_type.name}} extends LitElement {
         {{#if (eq cardinality "single") }}
         {{snake_case field_name}}: this._{{camel_case field_name}}!,
         {{else}}
-        {{snake_case field_name}}: this._{{camel_case field_name}}{{#if (eq cardinality "vector") }} as Array<{{> (concat field_type "/type") }}>{{/if}},
+        {{snake_case field_name}}: this._{{camel_case field_name}}{{#if (eq cardinality "vector") }} as Array<{{> (concat field_type.type "/type") }}>{{/if}},
         {{/if}}
       {{/if}}
     {{/each}}
@@ -107,7 +107,7 @@ export class Create{{pascal_case entry_type.name}} extends LitElement {
   {{#if widget}}
           <div style="margin-bottom: 16px">
     {{#if (not (eq cardinality "vector") )}}
-            {{> (concat field_type "/" widget "/edit/render") label=(title_case field_name) variable_to_change=(concat "this._" (camel_case field_name) ) required=(eq cardinality "single") }}
+            {{> (concat field_type.type "/" widget "/edit/render") label=(title_case field_name) variable_to_change=(concat "this._" (camel_case field_name) ) required=(eq cardinality "single") }}
     {{else}}
             {{> Vec/edit/render field_name=field_name field_type=field_type widget=widget }}
     {{/if}}

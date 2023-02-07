@@ -2,6 +2,7 @@ use std::{ffi::OsString, path::PathBuf};
 
 use crate::{
     file_tree::FileTree,
+    reserved_words::check_for_reserved_words,
     templates::{entry_type::scaffold_entry_type_templates, ScaffoldedTemplate},
 };
 
@@ -79,6 +80,8 @@ pub fn scaffold_entry_type(
     maybe_link_from_original_to_each_update: &Option<bool>,
     maybe_fields: &Option<Vec<FieldDefinition>>,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
+    check_for_reserved_words(name)?;
+
     let fields = match maybe_fields {
         Some(f) => {
             check_field_definitions(name, &zome_file_tree, f)?;

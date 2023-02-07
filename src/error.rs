@@ -20,12 +20,6 @@ pub enum ScaffoldError {
     #[error(transparent)]
     CargoMetadataError(#[from] cargo_metadata::Error),
 
-    /*
-
-    /// SerializedBytesError
-    #[error("Internal serialization error: {0}")]
-    SerializedBytesError(#[from] SerializedBytesError),
-    */
     /// serde_yaml::Error
     #[error("YAML serialization error: {0}")]
     SerdeYamlError(#[from] serde_yaml::Error),
@@ -56,6 +50,9 @@ pub enum ScaffoldError {
 
     #[error("Folder already exists: {0}")]
     FolderAlreadyExists(PathBuf),
+
+    #[error("Invalid reserved word: {0}")]
+    InvalidReservedWord(String),
 
     #[error("Invalid path {0}: {1}")]
     InvalidPath(PathBuf, String),

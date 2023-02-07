@@ -203,6 +203,13 @@
 //!   - `camel_case`: converts the string to camel case.
 //! - `plural`: converts the given string to its plural.
 //! - `concat`: concatenize strings.
+//! - `includes`: check whether a string includes a substring.
+//!   - Example usage:
+//! ```hbs
+//! {{#if (includes entry_type.name "Profile")}}
+//! ...
+//! {{/if}}
+//! ```
 //! - `merge_scope`: takes existing code as its first argument, and the opening of an scope as its second. It then replaces the contents of that scope with the contents of the block:
 //!   - Example usage:
 //! ```hbs
@@ -218,6 +225,7 @@
 pub mod cli;
 pub mod error;
 pub mod file_tree;
+pub mod reserved_words;
 pub mod scaffold;
 pub mod templates;
 pub mod utils;

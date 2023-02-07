@@ -11,7 +11,7 @@ import { Snackbar } from '@material/mwc-snackbar';
 {{#uniq_lines}}
   {{#each entry_type.fields}}
     {{#if widget}}
-{{> (concat field_type "/" widget "/detail/imports") }}
+{{> (concat field_type.type "/" widget "/detail/imports") }}
 
     {{/if}}
   {{/each}}
@@ -22,7 +22,7 @@ import './edit-{{kebab_case entry_type.name}}';
 {{/if}}
 
 import { clientContext } from '../../contexts';
-import { {{pascal_case entry_type.name}} } from './types';
+import { {{pascal_case entry_type.name}}{{#each entry_type.fields}}{{#if (eq field_type.type "Enum")}}, {{field_type.label}}{{/if}}{{/each}} } from './types';
 
 @customElement('{{kebab_case entry_type.name}}-detail')
 export class {{pascal_case entry_type.name}}Detail extends LitElement {
@@ -98,7 +98,7 @@ export class {{pascal_case entry_type.name}}Detail extends LitElement {
     {{#if (not (eq cardinality "vector") )}}
         <div style="display: flex; flex-direction: row; margin-bottom: 16px">
 	  <span><strong>{{title_case field_name}}</strong></span>
- 	  <span style="white-space: pre-line">{{> (concat field_type "/" widget "/detail/render") variable_to_read=(concat (camel_case ../entry_type.name) "." (snake_case field_name) ) }}</span>
+ 	  <span style="white-space: pre-line">{{> (concat field_type.type "/" widget "/detail/render") variable_to_read=(concat (camel_case ../entry_type.name) "." (snake_case field_name) ) }}</span>
         </div>
     {{else}}
         {{> Vec/detail/render variable_to_read=(concat (camel_case ../entry_type.name) "." (snake_case field_name) ) field_name=field_name field_type=field_type widget=widget }}

@@ -30,12 +30,14 @@ use crate::templates::{
     choose_or_get_template, choose_or_get_template_file_tree, templates_path, ScaffoldedTemplate,
 };
 use crate::utils::{
-    check_no_whitespace, check_snake_case, input_no_whitespace, input_snake_case, input_yes_or_no,
+    check_case, check_no_whitespace, input_no_whitespace, input_with_case, input_yes_or_no,
 };
 
 use build_fs_tree::{dir, Build, MergeableFileSystemTree};
+use convert_case::Case;
 use dialoguer::Input;
 use dialoguer::{theme::ColorfulTheme, Select};
+use std::fs;
 use std::str::FromStr;
 use std::{ffi::OsString, path::PathBuf};
 use structopt::StructOpt;
@@ -313,7 +315,12 @@ impl HcScaffold {
                 let mut maybe_nix = "";
 
                 if setup_nix {
-                    setup_nix_developer_environment(&std::env::current_dir()?.join(&name))?;
+                    let app_dir = std::env::current_dir()?.join(&name);
+                    if let Err(err) = setup_nix_developer_environment(&app_dir) {
+                        fs::remove_dir_all(&app_dir)?;
+
+                        return Err(err)?;
+                    }
 
                     maybe_nix = "\n  nix develop";
                 }
@@ -361,10 +368,10 @@ Then, at any point in time you can start your application with:
                 let prompt = String::from("DNA name (snake_case):");
                 let name: String = match name {
                     Some(n) => {
-                        check_snake_case(&n, "dna name")?;
+                        check_case(&n, "dna name", Case::Snake)?;
                         n
                     }
-                    None => input_snake_case(&prompt)?,
+                    None => input_with_case(&prompt, Case::Snake)?,
                 };
 
                 let current_dir = std::env::current_dir()?;
@@ -413,7 +420,7 @@ Add new zomes to your DNA with:
                 let template_file_tree = choose_or_get_template_file_tree(&file_tree, &template)?;
 
                 if let Some(n) = name.clone() {
-                    check_snake_case(&n, "zome name")?;
+                    check_case(&n, "zome name", Case::Snake)?;
                 }
 
                 let (scaffold_integrity, scaffold_coordinator) =
@@ -445,7 +452,7 @@ Add new zomes to your DNA with:
 
                 let name: String = match name {
                     Some(n) => n,
-                    None => input_snake_case(&name_prompt)?,
+                    None => input_with_case(&name_prompt, Case::Snake)?,
                 };
 
                 let mut dna_file_tree = DnaFileTree::get_or_choose(file_tree, &dna)?;
@@ -548,10 +555,13 @@ Add new entry definitions to your zome with:
 
                 let name: String = match name {
                     Some(n) => {
-                        check_snake_case(&n, "entry type name")?;
+                        check_case(&n, "entry type name", Case::Snake)?;
                         n
                     }
-                    None => input_snake_case(&String::from("Entry type name (snake_case):"))?,
+                    None => input_with_case(
+                        &String::from("Entry type name (snake_case):"),
+                        Case::Snake,
+                    )?,
                 };
 
                 let dna_file_tree = DnaFileTree::get_or_choose(file_tree, &dna)?;
@@ -654,10 +664,10 @@ Link type scaffolded!
                 let prompt = String::from("Collection name (snake_case, eg. \"all_posts\"):");
                 let name: String = match collection_name {
                     Some(n) => {
-                        check_snake_case(&n, "collection name")?;
+                        check_case(&n, "collection name", Case::Snake)?;
                         n
                     }
-                    None => input_snake_case(&prompt)?,
+                    None => input_with_case(&prompt, Case::Snake)?,
                 };
 
                 let ScaffoldedTemplate {
@@ -959,7 +969,11 @@ pub fn hello_world(_: ()) -> ExternResult<String> {{
                 file_tree.build(&app_dir)?;
 
                 // set up nix
-                setup_nix_developer_environment(&app_dir)?;
+                if let Err(err) = setup_nix_developer_environment(&app_dir) {
+                    fs::remove_dir_all(&app_dir)?;
+
+                    return Err(err)?;
+                }
 
                 println!(
                     r#"
