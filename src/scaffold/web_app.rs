@@ -8,9 +8,9 @@ use crate::{error::ScaffoldError, file_tree::FileTree};
 
 use super::app::{
     cargo::workspace_cargo_toml,
-    default_nix::default_nix,
     gitignore::gitignore,
     manifests::{empty_happ_manifest, web_happ_manifest},
+    nix::flake_nix,
 };
 
 pub mod uis;
@@ -37,7 +37,7 @@ fn web_app_skeleton(
         app_file_tree
             .dir_content_mut()
             .ok_or(ScaffoldError::PathNotFound(PathBuf::new()))?
-            .insert(OsString::from("flake.nix"), default_nix());
+            .insert(OsString::from("flake.nix"), flake_nix());
     }
     if scaffold_template {
         app_file_tree

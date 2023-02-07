@@ -3,6 +3,7 @@ use crate::file_tree::{
     dir_content, file_content, insert_file, load_directory_into_memory, FileTree,
 };
 use crate::scaffold::app::cargo::exec_metadata;
+use crate::scaffold::app::nix::setup_nix_developer_environment;
 use crate::scaffold::app::AppFileTree;
 use crate::scaffold::collection::{scaffold_collection, CollectionType};
 use crate::scaffold::dna::{scaffold_dna, DnaFileTree};
@@ -35,9 +36,8 @@ use crate::utils::{
 use build_fs_tree::{dir, Build, MergeableFileSystemTree};
 use dialoguer::Input;
 use dialoguer::{theme::ColorfulTheme, Select};
-use std::process::Stdio;
 use std::str::FromStr;
-use std::{ffi::OsString, path::PathBuf, process::Command};
+use std::{ffi::OsString, path::PathBuf};
 use structopt::StructOpt;
 
 /// The list of subcommands for `hc scaffold`
@@ -313,21 +313,9 @@ impl HcScaffold {
                 let mut maybe_nix = "";
 
                 if setup_nix {
-                    if cfg!(target_os = "windows") {
-                        return Err(anyhow::anyhow!("Windows doesn't support nix"));
-                    } else {
-                        let output = Command::new("nix-shell")
-                        .stdout(Stdio::inherit())
-                        .current_dir(std::env::current_dir()?.join(&name))
-                        .args(["-I", "nixpkgs=https://github.com/NixOS/nixpkgs/archive/nixos-21.11.tar.gz", "-p", "niv", "--run", "niv init && niv drop nixpkgs && niv drop niv && niv add -b main holochain/holonix"])
-                        .output()?;
+                    setup_nix_developer_environment(&std::env::current_dir()?.join(&name))?;
 
-                        if !output.status.success() {
-                            return Err(ScaffoldError::NixSetupError)?;
-                        }
-
-                        maybe_nix = "\n  nix-shell";
-                    };
+                    maybe_nix = "\n  nix develop";
                 }
 
                 println!(
@@ -971,20 +959,7 @@ pub fn hello_world(_: ()) -> ExternResult<String> {{
                 file_tree.build(&app_dir)?;
 
                 // set up nix
-                println!("Setting up nix-shell...");
-                if cfg!(target_os = "windows") {
-                    return Err(anyhow::anyhow!("Windows doesn't support nix"));
-                } else {
-                    let output = Command::new("nix-shell")
-                            .stdout(Stdio::inherit())
-                            .current_dir(&app_dir)
-                            .args(["-I", "nixpkgs=https://github.com/NixOS/nixpkgs/archive/nixos-21.11.tar.gz", "-p", "niv", "--run", "niv init && niv drop nixpkgs && niv drop niv && niv add -b main holochain/holonix"])
-                            .output()?;
-
-                    if !output.status.success() {
-                        return Err(ScaffoldError::NixSetupError)?;
-                    }
-                };
+                setup_nix_developer_environment(&app_dir)?;
 
                 println!(
                     r#"
