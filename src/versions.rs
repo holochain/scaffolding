@@ -19,5 +19,5 @@ pub fn holochain_version() -> String {
 }
 
 pub fn holochain_nix_version() -> String {
-    String::from("0.1")
+    String::from("0_1")
 }
