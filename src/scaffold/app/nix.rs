@@ -1,6 +1,6 @@
 use build_fs_tree::file;
 use dirs::config_dir;
-use std::fs::OpenOptions;
+use std::fs::{self, OpenOptions};
 use std::io::Write;
 use std::path::PathBuf;
 use std::process::{Command, Stdio};
@@ -55,26 +55,25 @@ pub fn setup_nix_developer_environment(dir: &PathBuf) -> ScaffoldResult<()> {
     }
 
     println!("Setting up nix-shell...");
+
+    add_extra_experimental_features()?;
+
     let output = Command::new("nix")
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
         .current_dir(dir)
-        .args([
-            "flake",
-            "update",
-            "--extra-experimental-features",
-            "nix-command flakes",
-        ])
+        .args(["flake", "update"])
         .output()?;
 
     if !output.status.success() {
         return Err(ScaffoldError::NixSetupError("".to_string()))?;
     }
 
-    add_extra_experimental_features()?;
-
     Ok(())
 }
+
+const EXTRA_EXPERIMENTAL_FEATURES_LINE: &'static str =
+    "extra-experimental-features = flakes nix-command";
 
 pub fn add_extra_experimental_features() -> ScaffoldResult<()> {
     let config_path = config_dir().ok_or(ScaffoldError::NixSetupError(
@@ -82,6 +81,11 @@ pub fn add_extra_experimental_features() -> ScaffoldResult<()> {
     ))?;
 
     let nix_conf_path = config_path.join("nix").join("nix.conf");
+    if let Ok(contents) = fs::read_to_string(&nix_conf_path) {
+        if contents.contains(EXTRA_EXPERIMENTAL_FEATURES_LINE) {
+            return Ok(());
+        }
+    }
 
     let mut file = OpenOptions::new()
         .read(true)
@@ -89,7 +93,7 @@ pub fn add_extra_experimental_features() -> ScaffoldResult<()> {
         .create(true)
         .open(nix_conf_path)?;
 
-    file.write_all(b"extra-experimental-features = flakes nix-command")?;
+    file.write_all(EXTRA_EXPERIMENTAL_FEATURES_LINE.as_bytes())?;
 
     Ok(())
 }
