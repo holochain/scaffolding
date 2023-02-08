@@ -8,7 +8,7 @@ on:
     branches: [ main, develop, holochain-0.1 ]
 
 jobs:
-  testbuild:
+  checkdiff:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
