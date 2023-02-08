@@ -3,10 +3,11 @@ set -e
 
 rm -rf /tmp/forum-svelte
 
-hc-scaffold web-app forum-svelte --setup-nix true --template svelte
-mv forum-svelte /tmp
+cd /tmp
 
-cd /tmp/forum-svelte
+hc-scaffold web-app forum-svelte --setup-nix true --template svelte
+
+cd forum-svelte
 
 hc-scaffold dna forum 
 hc-scaffold zome posts --integrity dnas/forum/zomes/integrity/ --coordinator dnas/forum/zomes/coordinator/

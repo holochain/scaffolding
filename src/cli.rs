@@ -317,7 +317,7 @@ impl HcScaffold {
                 if setup_nix {
                     let app_dir = std::env::current_dir()?.join(&name);
                     if let Err(err) = setup_nix_developer_environment(&app_dir) {
-                        fs::remove_dir_all(&app_dir)?;
+                        // fs::remove_dir_all(&app_dir)?;
 
                         return Err(err)?;
                     }
