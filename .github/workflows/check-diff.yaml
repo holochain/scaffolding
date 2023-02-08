@@ -29,11 +29,11 @@ jobs:
           nix-shell . \
             --keep NIX_PATH \
             --pure \
-            --run "cargo install --path ."
+            --run "cargo generate-lockfile --offline"
 
-      - name: Test
+      - name: Exit if diff
         run: |
           nix-shell . \
             --keep NIX_PATH \
             --pure \
-            --run "sh run_test.sh"
+            --run "git diff --exit-code"
