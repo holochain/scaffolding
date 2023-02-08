@@ -2,9 +2,11 @@
 set -e
 
 rm -rf /tmp/forum-svelte
+cp -R nix default.nix /tmp
 cd /tmp
 
-hc-scaffold web-app forum-svelte --setup-nix true --template svelte
+hc-scaffold web-app forum-svelte --setup-nix false --template svelte
+mv nix default.nix forum-svelte
 cd forum-svelte
 
 hc-scaffold dna forum 

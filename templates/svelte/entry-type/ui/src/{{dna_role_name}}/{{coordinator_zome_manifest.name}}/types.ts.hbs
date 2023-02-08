@@ -11,8 +11,8 @@ export interface {{field_type.label}} {
     {{#each field_type.variants}}
     | '{{this}}'
     {{/each}};
-  {{/if}}
 }
+  {{/if}}
 {{/each}}
 
 export interface {{pascal_case entry_type.name}} { {{#each entry_type.fields}}
