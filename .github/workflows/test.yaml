@@ -26,14 +26,8 @@ jobs:
 
       - name: Install
         run: |
-          nix-shell . \
-            --keep NIX_PATH \
-            --pure \
-            --run "cargo install --path ."
+          nix develop --command bash -c "cargo install --path ."
 
       - name: Test
         run: |
-          nix-shell . \
-            --keep NIX_PATH \
-            --pure \
-            --run "sh run_test.sh"
+          nix develop --command bash -c "sh run_test.sh"

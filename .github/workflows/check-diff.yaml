@@ -26,14 +26,8 @@ jobs:
 
       - name: Install
         run: |
-          nix-shell . \
-            --keep NIX_PATH \
-            --pure \
-            --run "cargo generate-lockfile --offline"
+          nix develop --command bash -c "cargo generate-lockfile --offline"
 
       - name: Exit if diff
         run: |
-          nix-shell . \
-            --keep NIX_PATH \
-            --pure \
-            --run "git diff --exit-code"
+          nix develop --command bash -c "git diff --exit-code"

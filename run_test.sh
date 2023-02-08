@@ -2,12 +2,9 @@
 set -e
 
 rm -rf /tmp/forum-svelte
-cp -R nix default.nix /tmp
 cd /tmp
 
-hc-scaffold web-app forum-svelte --setup-nix false --template svelte
-mv nix default.nix forum-svelte
-cd forum-svelte
+hc-scaffold web-app forum-svelte --setup-nix true --template svelte
 
 hc-scaffold dna forum 
 hc-scaffold zome posts --integrity dnas/forum/zomes/integrity/ --coordinator dnas/forum/zomes/coordinator/
@@ -27,7 +24,7 @@ hc-scaffold link-type certificate:EntryHash like --delete false --bidireccional 
 hc-scaffold link-type agent:creator post:EntryHash --delete false --bidireccional true
 
 
-nix-shell . --run "
+nix develop --command bash -c "
 set -e
 npm i
 npm run build -w ui
@@ -37,9 +34,8 @@ npm t
 rm -rf /tmp/forum-vue
 cd /tmp
 
-hc-scaffold web-app forum-vue --setup-nix false --template vue
+hc-scaffold web-app forum-vue --setup-nix true --template vue
 cd forum-vue
-cp -R /tmp/forum-svelte/nix /tmp/forum-svelte/default.nix .
 
 hc-scaffold dna forum 
 hc-scaffold zome posts --integrity dnas/forum/zomes/integrity/ --coordinator dnas/forum/zomes/coordinator/
@@ -70,7 +66,6 @@ cd /tmp
 
 hc-scaffold web-app forum-lit --setup-nix false --template lit
 cd forum-lit
-cp -R /tmp/forum-svelte/nix /tmp/forum-svelte/default.nix .
 
 hc-scaffold dna forum 
 hc-scaffold zome posts --integrity dnas/forum/zomes/integrity/ --coordinator dnas/forum/zomes/coordinator/
@@ -89,7 +84,7 @@ hc-scaffold link-type comment like:EntryHash --delete true --bidireccional true
 hc-scaffold link-type certificate:EntryHash like --delete false --bidireccional false
 hc-scaffold link-type agent:creator post:EntryHash --delete false --bidireccional true
 
-nix-shell . --run "
+nix develop --command bash -c "
 set -e
 npm i
 npm run build -w ui
@@ -102,9 +97,8 @@ npm t
 rm -rf /tmp/forum-vanilla
 cd /tmp
 
-hc-scaffold web-app forum-vanilla --setup-nix false --template vanilla
+hc-scaffold web-app forum-vanilla --setup-nix true --template vanilla
 cd forum-vanilla
-cp -R /tmp/forum-svelte/nix /tmp/forum-svelte/default.nix .
 
 hc-scaffold dna forum 
 hc-scaffold zome posts --integrity dnas/forum/zomes/integrity/ --coordinator dnas/forum/zomes/coordinator/
@@ -124,7 +118,7 @@ hc-scaffold link-type certificate:EntryHash like --delete false --bidireccional 
 hc-scaffold link-type agent:creator post:EntryHash --delete false --bidireccional true
 
 
-nix-shell . --run "
+nix develop --command bash -c "
 set -e
 npm i
 npm t
