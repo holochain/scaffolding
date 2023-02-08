@@ -24,10 +24,7 @@ jobs:
         with:
           name: holochain-ci
 
-      - name: Install
+      - name: Install and test
         run: |
-          nix develop --command bash -c "cargo install --path ."
+          nix develop --command bash -c "cargo install --path . && sh run_test.sh"
 
-      - name: Test
-        run: |
-          nix develop --command bash -c "sh run_test.sh"
