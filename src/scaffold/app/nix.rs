@@ -19,8 +19,8 @@ pub fn flake_nix() -> FileTree {
     nixpkgs.follows = "holochain/nixpkgs";
 
     holochain = {{
-      url = "github:holochain/holochain/pr_holonix_on_flakes";
-      inputs.versions.url = "github:holochain/holochain/pr_holonix_on_flakes?dir=versions/{holochain_version}";
+      url = "github:holochain/holochain";
+      inputs.versions.url = "github:holochain/holochain/?dir=versions/{holochain_version}";
     }};
   }};
 
