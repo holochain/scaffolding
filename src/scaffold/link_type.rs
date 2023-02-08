@@ -7,7 +7,7 @@ use crate::{
     error::{ScaffoldError, ScaffoldResult},
     file_tree::{insert_file, map_file, FileTree},
     templates::{link_type::scaffold_link_type_templates, ScaffoldedTemplate},
-    utils::input_snake_case,
+    utils::input_with_case,
 };
 
 use self::{
@@ -73,7 +73,7 @@ pub fn scaffold_link_type(
 
     let link_type = match to_referenceable.clone() {
         Some(to_referenceable) => link_type_name(&from_referenceable, &to_referenceable),
-        None => input_snake_case(&String::from("Enter link type name:"))?.to_case(Case::Pascal),
+        None => input_with_case(&String::from("Enter link type name:"), Case::Pascal)?,
     };
 
     let bidireccional = match (&to_referenceable, bidireccional) {

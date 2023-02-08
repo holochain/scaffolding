@@ -8,7 +8,7 @@ use crate::{
     error::ScaffoldResult,
     file_tree::{dir_content, FileTree},
     scaffold::zome::ZomeFileTree,
-    utils::{check_snake_case, input_snake_case, input_snake_case_with_initial_text},
+    utils::{check_case, input_with_case, input_with_case_and_initial_text},
 };
 
 use super::{
@@ -16,12 +16,26 @@ use super::{
     integrity::get_all_entry_types,
 };
 
+fn parse_enum(fields_str: &str) -> ScaffoldResult<FieldType> {
+    let sp: Vec<&str> = fields_str.split(":").collect();
+
+    let label = sp[3].to_string().to_case(Case::Pascal);
+
+    let variants = sp[4]
+        .to_string()
+        .split(".")
+        .map(|v| v.to_case(Case::Pascal))
+        .collect();
+
+    Ok(FieldType::Enum { label, variants })
+}
+
 pub fn parse_fields(fields_str: &str) -> ScaffoldResult<FieldDefinition> {
     let sp: Vec<&str> = fields_str.split(":").collect();
 
     let field_name = sp[0].to_string();
 
-    check_snake_case(&field_name, "field_name")?;
+    check_case(&field_name, "field_name", Case::Snake)?;
 
     let field_type_str = sp[1].to_string();
 
@@ -30,18 +44,35 @@ pub fn parse_fields(fields_str: &str) -> ScaffoldResult<FieldDefinition> {
 
     let (field_type, cardinality) = if vec_regex.is_match(field_type_str.as_str()) {
         let field_type = vec_regex.replace(field_type_str.as_str(), "${a}");
-        (
-            FieldType::try_from(field_type.to_string())?,
-            Cardinality::Vector,
-        )
+
+        if field_type == "Enum" {
+            (parse_enum(fields_str)?, Cardinality::Vector)
+        } else {
+            (
+                FieldType::try_from(field_type.to_string())?,
+                Cardinality::Vector,
+            )
+        }
     } else if option_regex.is_match(field_type_str.as_str()) {
         let field_type = option_regex.replace(field_type_str.as_str(), "${a}");
-        (
-            FieldType::try_from(field_type.to_string())?,
-            Cardinality::Option,
-        )
+
+        if field_type == "Enum" {
+            (parse_enum(fields_str)?, Cardinality::Option)
+        } else {
+            (
+                FieldType::try_from(field_type.to_string())?,
+                Cardinality::Option,
+            )
+        }
     } else {
-        (FieldType::try_from(field_type_str)?, Cardinality::Single)
+        if field_type_str == "Enum" {
+            (parse_enum(fields_str)?, Cardinality::Single)
+        } else {
+            (
+                FieldType::try_from(field_type_str.to_string())?,
+                Cardinality::Single,
+            )
+        }
     };
 
     let widget = match sp[2] {
@@ -77,6 +108,7 @@ pub fn parse_fields(fields_str: &str) -> ScaffoldResult<FieldDefinition> {
         linked_from,
     })
 }
+
 pub fn choose_widget(
     field_type: &FieldType,
     field_types_templates: &FileTree,
@@ -139,7 +171,7 @@ pub fn choose_field(
         .interact()?;
 
     // If user selected vector
-    let (cardinality, field_type) = if selection == field_type_names.len() {
+    let (cardinality, mut field_type) = if selection == field_type_names.len() {
         let selection = Select::with_theme(&ColorfulTheme::default())
             .with_prompt("Option of which field type?")
             .default(0)
@@ -159,6 +191,30 @@ pub fn choose_field(
         (Cardinality::Single, field_types[selection].clone())
     };
 
+    if let FieldType::Enum { .. } = field_type {
+        let label = input_with_case(&String::from("Enter the name of the enum:"), Case::Pascal)?;
+
+        let mut variants: Vec<String> = Vec::new();
+
+        let mut another_field = true;
+
+        while another_field {
+            let variant = input_with_case(
+                &String::from("Enter the name of the next variant:"),
+                Case::Pascal,
+            )?;
+            variants.push(variant);
+            another_field = Confirm::with_theme(&ColorfulTheme::default())
+                .with_prompt("Add another variant to the enum?")
+                .report(false)
+                .interact()?;
+        }
+
+        println!("");
+
+        field_type = FieldType::Enum { label, variants };
+    }
+
     let maybe_linked_from = match &field_type {
         FieldType::AgentPubKey => {
             let link_from = Confirm::with_theme(&ColorfulTheme::default())
@@ -168,9 +224,9 @@ pub fn choose_field(
             match link_from {
                 false => None,
                 true => {
-                    let role = input_snake_case(&String::from(
+                    let role = input_with_case(&String::from(
                         "Which role does this agent play in the relationship ? (eg. \"creator\", \"invitee\")",
-                    ))?;
+                    ), Case::Snake)?;
                     Some(Referenceable::Agent { role })
                 }
             }
@@ -231,7 +287,7 @@ pub fn choose_field(
     };
 
     let field_name: String =
-        input_snake_case_with_initial_text(&String::from("Field name:"), &initial_text)?;
+        input_with_case_and_initial_text(&String::from("Field name:"), Case::Snake, &initial_text)?;
 
     let widget = choose_widget(&field_type, field_types_templates)?;
 

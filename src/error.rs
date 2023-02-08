@@ -20,12 +20,6 @@ pub enum ScaffoldError {
     #[error(transparent)]
     CargoMetadataError(#[from] cargo_metadata::Error),
 
-    /*
-
-    /// SerializedBytesError
-    #[error("Internal serialization error: {0}")]
-    SerializedBytesError(#[from] SerializedBytesError),
-    */
     /// serde_yaml::Error
     #[error("YAML serialization error: {0}")]
     SerdeYamlError(#[from] serde_yaml::Error),
@@ -57,11 +51,14 @@ pub enum ScaffoldError {
     #[error("Folder already exists: {0}")]
     FolderAlreadyExists(PathBuf),
 
+    #[error("Invalid reserved word: {0}")]
+    InvalidReservedWord(String),
+
     #[error("Invalid path {0}: {1}")]
     InvalidPath(PathBuf, String),
 
-    #[error("Error setting up the nix environment")]
-    NixSetupError,
+    #[error("Error setting up the nix environment {0}")]
+    NixSetupError(String),
 
     #[error("No app manifest (happ.yaml) was found in this directory tree")]
     AppManifestNotFound,

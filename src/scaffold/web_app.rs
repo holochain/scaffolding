@@ -2,15 +2,16 @@ use build_fs_tree::{dir, file};
 use std::{ffi::OsString, path::PathBuf};
 
 use crate::error::ScaffoldResult;
+use crate::reserved_words::check_for_reserved_words;
 use crate::templates::web_app::scaffold_web_app_template;
 use crate::templates::{templates_path, ScaffoldedTemplate};
 use crate::{error::ScaffoldError, file_tree::FileTree};
 
 use super::app::{
     cargo::workspace_cargo_toml,
-    default_nix::default_nix,
     gitignore::gitignore,
     manifests::{empty_happ_manifest, web_happ_manifest},
+    nix::flake_nix,
 };
 
 pub mod uis;
@@ -23,6 +24,8 @@ fn web_app_skeleton(
     template_name: String,
     scaffold_template: bool,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
+    check_for_reserved_words(&app_name)?;
+
     let mut app_file_tree = dir! {
       ".gitignore" => file!(gitignore())
       "workdir" => dir!{
@@ -37,7 +40,7 @@ fn web_app_skeleton(
         app_file_tree
             .dir_content_mut()
             .ok_or(ScaffoldError::PathNotFound(PathBuf::new()))?
-            .insert(OsString::from("default.nix"), default_nix());
+            .insert(OsString::from("flake.nix"), flake_nix());
     }
     if scaffold_template {
         app_file_tree

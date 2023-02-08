@@ -1,15 +1,15 @@
 use convert_case::{Case, Casing};
 use proc_macro2::TokenStream;
-use quote::quote;
-use rand::Rng;
+use quote::{format_ident, quote};
 use serde::{ser::SerializeStruct, Deserialize, Serialize, Serializer};
 
 use crate::{
     error::{ScaffoldError, ScaffoldResult},
-    utils::check_snake_case,
+    utils::check_case,
 };
 
 #[derive(Deserialize, Debug, Clone, Serialize)]
+#[serde(tag = "type")]
 pub enum FieldType {
     #[serde(rename = "bool")]
     Bool,
@@ -24,6 +24,10 @@ pub enum FieldType {
     AgentPubKey,
     ActionHash,
     EntryHash,
+    Enum {
+        label: String,
+        variants: Vec<String>,
+    },
 }
 
 impl TryFrom<String> for FieldType {
@@ -57,6 +61,7 @@ impl ToString for FieldType {
             ActionHash => "ActionHash",
             EntryHash => "EntryHash",
             AgentPubKey => "AgentPubKey",
+            Enum { .. } => "Enum",
         }
         .into()
     }
@@ -74,6 +79,10 @@ impl FieldType {
             FieldType::ActionHash,
             FieldType::EntryHash,
             FieldType::AgentPubKey,
+            FieldType::Enum {
+                label: String::from(""),
+                variants: vec![],
+            },
         ]
     }
 
@@ -89,76 +98,38 @@ impl FieldType {
             ActionHash => quote!(ActionHash),
             EntryHash => quote!(EntryHash),
             AgentPubKey => quote!(AgentPubKey),
+            Enum { label, .. } => {
+                let ident = format_ident!("{}", label);
+                quote!(#ident)
+            }
         }
     }
 
     // Define a non-primitive rust type for this widget
     pub fn rust_type_definition(&self) -> Option<TokenStream> {
         match self {
-            // RadioButton { label, options } => {
-            //     let options_expressions: Vec<syn::Expr> = options
-            //         .iter()
-            //         .cloned()
-            //         .map(|option| {
-            //             let e: syn::Expr = syn::parse_str(option.to_case(Case::Pascal).as_str())
-            //                 .expect("Unable to parse");
-            //             e
-            //         })
-            //         .collect();
+            FieldType::Enum { label, variants } => {
+                let variants_expressions: Vec<syn::Expr> = variants
+                    .iter()
+                    .cloned()
+                    .map(|variant| {
+                        let e: syn::Expr = syn::parse_str(variant.to_case(Case::Pascal).as_str())
+                            .expect("Unable to parse");
+                        e
+                    })
+                    .collect();
 
-            //     let enum_definition = quote! {enum #label {
-            //       #(#options_expressions),*
-            //     }};
-            //     Some(enum_definition)
-            // }
+                let label_ident = format_ident!("{}", label);
+                let enum_definition = quote! {
+                    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+                    #[serde(tag = "type")]
+                    pub enum #label_ident {
+                      #(#variants_expressions),*
+                    }
+                };
+                Some(enum_definition)
+            }
             _ => None,
-        }
-    }
-
-    pub fn js_sample_value(&self) -> String {
-        match self {
-           FieldType::String => String::from("'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed nec eros quis enim hendrerit aliquet.'"),
-            FieldType::Bool => String::from("true"),
-            FieldType::Timestamp => String::from("1665499212508"),
-            FieldType::U32 => {
-                let mut rng = rand::thread_rng();
-                format!("{}", rng.gen_range(0..100))
-            },
-            FieldType::I32 => {
-                let mut rng = rand::thread_rng();
-                format!("{}", rng.gen_range(-100..100))
-            },
-            FieldType::F32 => {
-                let mut rng = rand::thread_rng();
-                format!("{}", rng.gen_range(-100.0..100.0))
-            },
-            FieldType::ActionHash => format!(
-                    "Buffer.from(new Uint8Array([{}]))",
-                    vec![0x84, 0x29, 0x24]
-                        .into_iter()
-                        .chain(vec![0x00; 36].into_iter())
-                        .map(|i| i.to_string())
-                        .collect::<Vec<String>>()
-                        .join(", ")
-                ),
-            FieldType::EntryHash => format!(
-                    "Buffer.from(new Uint8Array([{}]))",
-                    vec![0x84, 0x21, 0x24]
-                        .into_iter()
-                        .chain(vec![0x00; 36].into_iter())
-                        .map(|i| i.to_string())
-                        .collect::<Vec<String>>()
-                        .join(", ")
-                ),
-            FieldType::AgentPubKey => format!(
-                    "Buffer.from(new Uint8Array([{}]))",
-                    vec![0x84, 0x20, 0x24]
-                        .into_iter()
-                        .chain(vec![0x00; 36].into_iter())
-                        .map(|i| i.to_string())
-                        .collect::<Vec<String>>()
-                        .join(", ")
-            )
         }
     }
 }
@@ -231,7 +202,7 @@ impl EntryTypeReference {
 
 pub fn parse_entry_type_reference(s: &str) -> ScaffoldResult<EntryTypeReference> {
     let sp: Vec<&str> = s.split(":").collect();
-    check_snake_case(&sp[0].to_string(), "entry type reference")?;
+    check_case(&sp[0].to_string(), "entry type reference", Case::Snake)?;
 
     let reference_entry_hash = match sp.len() {
         0 | 1 => false,
@@ -271,7 +242,7 @@ impl Serialize for Referenceable {
 pub fn parse_referenceable(s: &str) -> ScaffoldResult<Referenceable> {
     let sp: Vec<&str> = s.split(":").collect();
 
-    check_snake_case(&sp[0].to_string(), "referenceable")?;
+    check_case(&sp[0].to_string(), "referenceable", Case::Snake)?;
 
     Ok(match sp[0] {
         "agent" => match sp.len() {

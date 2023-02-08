@@ -19,7 +19,5 @@ pub fn holochain_version() -> String {
 }
 
 pub fn holochain_nix_version() -> String {
-    let version_str = format!("{}", holochain_version());
-
-    format!("v{}", version_str.replace(".", "_"))
+    String::from("0_1")
 }

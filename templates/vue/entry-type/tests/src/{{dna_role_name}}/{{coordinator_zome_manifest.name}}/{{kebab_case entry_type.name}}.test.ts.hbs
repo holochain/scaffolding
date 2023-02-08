@@ -47,9 +47,9 @@ async function sample{{pascal_case entry_type.name}}(cell: CallableCell, partial
     {{/if}}
   {{else}}
       {{#if (eq cardinality "vector")}}
-	  {{field_name}}: [{{> (concat field_type "/sample")}}],
+	  {{field_name}}: [{{> (concat field_type.type "/sample")}}],
       {{else}}
-	  {{field_name}}: {{> (concat field_type "/sample")}},
+	  {{field_name}}: {{> (concat field_type.type "/sample")}},
       {{/if}}
   {{/if}}
 {{/each}}

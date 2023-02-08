@@ -1,9 +1,11 @@
+use convert_case::Case;
 use dialoguer::{theme::ColorfulTheme, Select};
 
 use crate::{
     error::{ScaffoldError, ScaffoldResult},
+    reserved_words::check_for_reserved_words,
     scaffold::zome::ZomeFileTree,
-    utils::input_snake_case,
+    utils::input_with_case,
 };
 
 use super::{
@@ -66,9 +68,10 @@ fn inner_choose_referenceable(
         .interact()?;
 
     if selection == all_entries.len() {
-        let role = input_snake_case(&String::from(
+        let role = input_with_case(&String::from(
             "Which role does this agent play in the relationship ? (eg. \"creator\", \"invitee\")",
-        ))?;
+        ), Case::Snake)?;
+        check_for_reserved_words(&role)?;
         return Ok(Some(Referenceable::Agent { role }));
     } else if selection == all_entries.len() + 1 {
         return Ok(None);
@@ -127,7 +130,10 @@ pub fn get_or_choose_referenceable(
 
     match &entry_type {
         None => choose_referenceable(&all_entries, prompt),
-        Some(Referenceable::Agent { role }) => Ok(Referenceable::Agent { role: role.clone() }),
+        Some(Referenceable::Agent { role }) => {
+            check_for_reserved_words(&role)?;
+            Ok(Referenceable::Agent { role: role.clone() })
+        }
         Some(Referenceable::EntryType(app_entry_reference)) => {
             let all_entries: Vec<String> = all_entries.into_iter().map(|e| e.entry_type).collect();
 

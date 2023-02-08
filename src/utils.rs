@@ -1,8 +1,8 @@
 use std::collections::BTreeMap;
 use std::{ffi::OsString, path::PathBuf};
 
+use convert_case::{Case, Casing};
 use dialoguer::{theme::ColorfulTheme, Input, Select};
-use inflector::Inflector;
 
 use crate::error::{ScaffoldError, ScaffoldResult};
 use crate::file_tree::{dir_content, FileTree};
@@ -89,12 +89,12 @@ pub fn input_yes_or_no(prompt: &String, recommended: Option<bool>) -> ScaffoldRe
     }
 }
 
-pub fn input_snake_case(prompt: &String) -> ScaffoldResult<String> {
+pub fn input_with_case(prompt: &String, case: Case) -> ScaffoldResult<String> {
     let input: String = Input::with_theme(&ColorfulTheme::default())
         .with_prompt(prompt)
-        .validate_with(|input: &String| -> Result<(), &str> {
-            match input.is_snake_case() {
-                false => Err("Input must be snake_case."),
+        .validate_with(|input: &String| -> Result<(), String> {
+            match input.is_case(case.clone()) {
+                false => Err(format!("Input must be {:?} case.", case)),
                 true => Ok(()),
             }
         })
@@ -102,16 +102,18 @@ pub fn input_snake_case(prompt: &String) -> ScaffoldResult<String> {
 
     Ok(input)
 }
-pub fn input_snake_case_with_initial_text(
+
+pub fn input_with_case_and_initial_text(
     prompt: &String,
+    case: Case,
     initial_text: &String,
 ) -> ScaffoldResult<String> {
     let input: String = Input::with_theme(&ColorfulTheme::default())
         .with_prompt(prompt)
         .with_initial_text(initial_text)
-        .validate_with(|input: &String| -> Result<(), &str> {
-            match input.is_snake_case() {
-                false => Err("Input must be snake_case."),
+        .validate_with(|input: &String| -> Result<(), String> {
+            match input.is_case(case.clone()) {
+                false => Err(format!("Input must be {:?} case.", case)),
                 true => Ok(()),
             }
         })
@@ -134,9 +136,9 @@ pub fn input_no_whitespace(prompt: &String) -> ScaffoldResult<String> {
     Ok(input)
 }
 
-/// Raises an error if input is not snake_case
-pub fn check_snake_case(input: &String, identifier: &str) -> ScaffoldResult<()> {
-    match input.is_snake_case() {
+/// Raises an error if input is not of the appropriate_case
+pub fn check_case(input: &String, identifier: &str, case: Case) -> ScaffoldResult<()> {
+    match input.is_case(case) {
         true => Ok(()),
         false => Err(ScaffoldError::InvalidStringFormat(format!(
             "{} must be snake_case",

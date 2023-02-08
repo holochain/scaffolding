@@ -7,6 +7,7 @@ use serde::Serialize;
 use crate::{
     error::{ScaffoldError, ScaffoldResult},
     file_tree::FileTree,
+    reserved_words::check_for_reserved_words,
     templates::{collection::scaffold_collection_templates, ScaffoldedTemplate},
 };
 
@@ -70,6 +71,8 @@ pub fn scaffold_collection(
     maybe_collection_type: &Option<CollectionType>,
     maybe_entry_type: &Option<EntryTypeReference>,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
+    check_for_reserved_words(collection_name)?;
+
     let all_entries = get_all_entry_types(&integrity_zome_file_tree)?.ok_or(
         ScaffoldError::NoEntryTypesDefFoundForIntegrityZome(
             integrity_zome_file_tree.dna_file_tree.dna_manifest.name(),
