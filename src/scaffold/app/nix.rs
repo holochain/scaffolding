@@ -54,7 +54,7 @@ pub fn setup_nix_developer_environment(dir: &PathBuf) -> ScaffoldResult<()> {
         ));
     }
 
-    println!("Setting up nix-shell...");
+    println!("Setting up nix development environment...");
 
     add_extra_experimental_features()?;
 
