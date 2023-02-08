@@ -1,4 +1,4 @@
-name: "check-diff"
+name: "check-lockfile"
 on:
   # Trigger the workflow on push or pull request,
   # but only for the main branch
@@ -26,8 +26,5 @@ jobs:
 
       - name: Install
         run: |
-          nix develop --command bash -c "cargo generate-lockfile --offline"
+          nix develop --command bash -c "cargo build --frozen"
 
-      - name: Exit if diff
-        run: |
-          nix develop --command bash -c "git diff --exit-code"
