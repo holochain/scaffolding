@@ -1,5 +1,5 @@
 <div style="display: flex; flex-direction: row">
   <span style="margin-right: 4px">{{label}}</span>
 
-  <mwc-slider {{#if initial_value_variable}}.value=${ {{initial_value_variable}} }{{/if}} @input=${(e: CustomEvent) => { {{variable_to_change}} = e.detail.value; } } discrete></mwc-slider>
+  <mwc-slider {{#if variable_to_read}}.value=${ {{variable_to_read}} }{{/if}} @input=${(e: CustomEvent) => { {{variable_to_change}} = e.detail.value; } } discrete></mwc-slider>
 </div>

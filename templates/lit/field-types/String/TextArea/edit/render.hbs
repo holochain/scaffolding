@@ -1,1 +1,1 @@
-<mwc-textarea outlined label="{{label}}" {{#if initial_value_variable}}.value=${ {{initial_value_variable}}{{#if (not required)}} || ''{{/if}} }{{/if}} @input=${(e: CustomEvent) => { {{variable_to_change}} = (e.target as any).value;} } {{#if required}}required{{/if}}></mwc-textarea>
+<mwc-textarea outlined label="{{label}}" .value=${ {{variable_to_read}} } @input=${(e: CustomEvent) => { {{variable_to_change}} = (e.target as any).value;} } {{#if required}}required{{/if}}></mwc-textarea>
