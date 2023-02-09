@@ -45,6 +45,9 @@ impl TryFrom<String> for FieldType {
         Err(ScaffoldError::InvalidArguments(format!(
             "Invalid field type: only {:?} are allowed",
             FieldType::list()
+                .into_iter()
+                .map(|ft| ft.to_string())
+                .collect::<String>()
         )))
     }
 }
