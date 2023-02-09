@@ -83,6 +83,8 @@ export class {{pascal_case entry_type.name}}Detail extends LitElement {
 
       <div style="display: flex; flex-direction: column">
       	<div style="display: flex; flex-direction: row">
+      	  <span style="flex: 1"></span>
+      	
           {{#if crud.update}}
           <mwc-icon-button style="margin-left: 8px" icon="edit" @click=${() => { this._editing = true; } }></mwc-icon-button>
           {{/if}}
@@ -95,7 +97,7 @@ export class {{pascal_case entry_type.name}}Detail extends LitElement {
   {{#if widget}}	  
     {{#if (not (eq cardinality "vector") )}}
         <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-	  <span><strong>{{title_case field_name}}: </strong></span>
+	  <span style="margin-right: 4px"><strong>{{title_case field_name}}: </strong></span>
  	  <span style="white-space: pre-line">{{> (concat field_type.type "/" widget "/detail/render") variable_to_read=(concat (camel_case ../entry_type.name) "." (snake_case field_name) ) }}</span>
         </div>
     {{else}}

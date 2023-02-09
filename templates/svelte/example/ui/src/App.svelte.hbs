@@ -30,10 +30,15 @@
       <mwc-circular-progress indeterminate />
     </div>
   {:else}
-    <div id="content">
-      <AllPosts style="margin-bottom: 16px" />
-      <CreatePost />
-    </div>
+    <main>
+      <h1>Forum</h1>
+
+      <div id="content">
+        <h2>All Posts</h2>
+        <AllPosts style="margin-bottom: 16px" />
+        <CreatePost />
+      </div>
+    </main>
   {/if}
 </main>
 
