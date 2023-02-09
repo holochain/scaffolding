@@ -32,7 +32,7 @@ async function sample{{pascal_case entry_type.name}}(cell: CallableCell, partial
         {{/if}}
       {{else}}
         {{#if (eq (pascal_case linked_from.name) (pascal_case ../entry_type.name))}}
-          {{field_name}}: undefined,
+          {{field_name}}: null,
         {{else}}
 	  {{#if (eq linked_from.hash_type "ActionHash")}}
           {{field_name}}: (await create{{pascal_case linked_from.name}}(cell)).signed_action.hashed.hash,
