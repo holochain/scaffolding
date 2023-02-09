@@ -330,7 +330,7 @@ impl HcScaffold {
                     .stdout(Stdio::inherit())
                     .stderr(Stdio::inherit())
                     .current_dir(&app_dir)
-                    .args(["init", "--initial-branch", "main"])
+                    .args(["init", "--initial-branch=main"])
                     .output()?;
 
                 if !output.status.success() {
@@ -1001,7 +1001,7 @@ pub fn hello_world(_: ()) -> ExternResult<String> {{
                     .stdout(Stdio::inherit())
                     .stderr(Stdio::inherit())
                     .current_dir(&app_dir)
-                    .args(["init", "--initial-branch", "main"])
+                    .args(["init", "--initial-branch=main"])
                     .output()?;
 
                 if !output.status.success() {
