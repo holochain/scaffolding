@@ -57,7 +57,7 @@ hc-scaffold link-type comment like:EntryHash --delete true --bidireccional true
 hc-scaffold link-type certificate:EntryHash like --delete false --bidireccional false
 hc-scaffold link-type agent:creator post:EntryHash --delete false --bidireccional true
 
-nix-shell . --run "
+nix develop --command bash -c "
 set -e
 npm i
 npm run build -w ui
@@ -67,7 +67,7 @@ npm t
 rm -rf /tmp/forum-lit
 cd /tmp
 
-hc-scaffold web-app forum-lit --setup-nix false --template lit
+hc-scaffold web-app forum-lit --setup-nix true --template lit
 cd forum-lit
 
 hc-scaffold dna forum 
