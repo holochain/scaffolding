@@ -1,5 +1,5 @@
 use build_fs_tree::file;
-use dirs::config_dir;
+use dirs::home_dir;
 use std::fs::{self, OpenOptions};
 use std::io::Write;
 use std::path::PathBuf;
@@ -76,11 +76,11 @@ const EXTRA_EXPERIMENTAL_FEATURES_LINE: &'static str =
     "extra-experimental-features = flakes nix-command";
 
 pub fn add_extra_experimental_features() -> ScaffoldResult<()> {
-    let config_path = config_dir().ok_or(ScaffoldError::NixSetupError(
+    let config_path = home_dir().ok_or(ScaffoldError::NixSetupError(
         "Config dir doesn't exist".to_string(),
     ))?;
 
-    let nix_conf_dir = config_path.join("nix");
+    let nix_conf_dir = config_path.join(".config").join("nix");
     fs::create_dir_all(&nix_conf_dir)?;
 
     let nix_conf_path = nix_conf_dir.join("nix.conf");
