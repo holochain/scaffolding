@@ -36,6 +36,9 @@ pub enum ScaffoldError {
     #[error(transparent)]
     SynError(#[from] syn::Error),
 
+    #[error("Error setting up the git repository")]
+    GitInitError,
+
     #[error(transparent)]
     IgnoreError(#[from] ignore::Error),
 

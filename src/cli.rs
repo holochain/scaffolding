@@ -38,6 +38,7 @@ use convert_case::Case;
 use dialoguer::Input;
 use dialoguer::{theme::ColorfulTheme, Select};
 use std::fs;
+use std::process::{Command, Stdio};
 use std::str::FromStr;
 use std::{ffi::OsString, path::PathBuf};
 use structopt::StructOpt;
@@ -314,8 +315,8 @@ impl HcScaffold {
 
                 let mut maybe_nix = "";
 
+                let app_dir = std::env::current_dir()?.join(&name);
                 if setup_nix {
-                    let app_dir = std::env::current_dir()?.join(&name);
                     if let Err(err) = setup_nix_developer_environment(&app_dir) {
                         fs::remove_dir_all(&app_dir)?;
 
@@ -323,6 +324,27 @@ impl HcScaffold {
                     }
 
                     maybe_nix = "\n  nix develop";
+                }
+
+                let output = Command::new("git")
+                    .stdout(Stdio::inherit())
+                    .stderr(Stdio::inherit())
+                    .current_dir(&app_dir)
+                    .args(["init", "--initial-branch", "main"])
+                    .output()?;
+
+                if !output.status.success() {
+                    return Err(ScaffoldError::GitInitError)?;
+                }
+                let output = Command::new("git")
+                    .stdout(Stdio::inherit())
+                    .stderr(Stdio::inherit())
+                    .current_dir(&app_dir)
+                    .args(["add", "."])
+                    .output()?;
+
+                if !output.status.success() {
+                    return Err(ScaffoldError::GitInitError)?;
                 }
 
                 println!(
@@ -973,6 +995,27 @@ pub fn hello_world(_: ()) -> ExternResult<String> {{
                     fs::remove_dir_all(&app_dir)?;
 
                     return Err(err)?;
+                }
+
+                let output = Command::new("git")
+                    .stdout(Stdio::inherit())
+                    .stderr(Stdio::inherit())
+                    .current_dir(&app_dir)
+                    .args(["init", "--initial-branch", "main"])
+                    .output()?;
+
+                if !output.status.success() {
+                    return Err(ScaffoldError::GitInitError)?;
+                }
+                let output = Command::new("git")
+                    .stdout(Stdio::inherit())
+                    .stderr(Stdio::inherit())
+                    .current_dir(&app_dir)
+                    .args(["add", "."])
+                    .output()?;
+
+                if !output.status.success() {
+                    return Err(ScaffoldError::GitInitError)?;
                 }
 
                 println!(
