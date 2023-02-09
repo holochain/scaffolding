@@ -54,7 +54,7 @@ export class Edit{{pascal_case entry_type.name}} extends LitElement {
   {{/each}}
 
   is{{pascal_case entry_type.name}}Valid() {
-    return true{{#each entry_type.fields}}{{#if widget}}{{#if (eq cardinality "single")}} && {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate=(camel_case field_name) }}{{/if}}{{#if (eq cardinality "vector")}} && this._{{camel_case field_name}}.every(e => {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate="e" }}){{/if}}{{/if}}{{/each}};
+    return true{{#each entry_type.fields}}{{#if widget}}{{#if (eq cardinality "single")}} && {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate=(concat "this._" (camel_case field_name)) }}{{/if}}{{#if (eq cardinality "vector")}} && this._{{camel_case field_name}}.every(e => {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate="e" }}){{/if}}{{/if}}{{/each}};
   }
   
   connectedCallback() {

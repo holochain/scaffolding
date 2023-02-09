@@ -8,7 +8,7 @@
   {{#if widget}}
     <div style="margin-bottom: 16px">
     {{#if (not (eq cardinality "vector") )}}
-      {{> (concat field_type.type "/" widget "/edit/render") label=(title_case field_name) variable_to_change=(concat "" (camel_case field_name) ) required=(eq cardinality "single")}}
+      {{> (concat field_type.type "/" widget "/edit/render") label=(title_case field_name) variable_to_read=(camel_case field_name) variable_to_change=(camel_case field_name) required=(eq cardinality "single")}}
     {{else}}
       {{> Vec/edit/render field_name=field_name field_type=field_type widget=widget }}
     {{/if}}
@@ -48,9 +48,9 @@ export default defineComponent({
 {{#each entry_type.fields}}
   {{#if widget}}
     {{#if (not (eq cardinality "vector" ) )}}
-    {{camel_case field_name}}: {{> (concat field_type.type "/type")}} | undefined;
+    {{camel_case field_name}}: {{> (concat field_type.type "/type")}}{{#if (eq cardinality "option")}}| undefined{{/if}};
     {{else}}
-    {{camel_case field_name}}: Array<{{> (concat field_type.type "/type")}} | undefined>;
+    {{camel_case field_name}}: Array<{{> (concat field_type.type "/type")}}>;
     {{/if}}
   {{/if}}
 {{/each}}
@@ -59,9 +59,9 @@ export default defineComponent({
       {{#each entry_type.fields}}
         {{#if widget}}
           {{#if (not (eq cardinality "vector" ) )}}
-      {{camel_case field_name}}: undefined,
+      {{camel_case field_name}}: {{> (concat field_type.type "/" widget "/initial-value") field_type=field_type}},
           {{else}}
-      {{camel_case field_name}}: [],
+      {{camel_case field_name}}: [{{> (concat field_type.type "/" widget "/initial-value") field_type=field_type}}],
           {{/if}}
         {{/if}}
       {{/each}}
@@ -91,7 +91,7 @@ export default defineComponent({
 {{/uniq_lines}}
   computed: {
     is{{pascal_case entry_type.name}}Valid() {
-      return true{{#each entry_type.fields}}{{#if widget}} && {{#if (eq cardinality "single")}}this.{{camel_case field_name}} !== undefined{{/if}}{{#if (eq cardinality "vector")}}this.{{camel_case field_name}}.every(e => e !== undefined){{/if}}{{/if}}{{/each}}
+    return true{{#each entry_type.fields}}{{#if widget}}{{#if (eq cardinality "single")}} && {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate=(concat "this." (camel_case field_name)) }}{{/if}}{{#if (eq cardinality "vector")}} && this.{{camel_case field_name}}.every(e => {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate="e" }}){{/if}}{{/if}}{{/each}};
     },
   },
   methods: {

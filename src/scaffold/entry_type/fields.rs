@@ -210,8 +210,6 @@ pub fn choose_field(
                 .interact()?;
         }
 
-        println!("");
-
         field_type = FieldType::Enum { label, variants };
     }
 

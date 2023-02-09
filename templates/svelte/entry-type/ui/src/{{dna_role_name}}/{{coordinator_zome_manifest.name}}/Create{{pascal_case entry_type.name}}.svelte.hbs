@@ -34,9 +34,9 @@ export let {{camel_case field_name}}{{#if (eq cardinality "single")}}!{{/if}}: {
 {{#each entry_type.fields}}
   {{#if widget }}
     {{#if (not (eq cardinality "vector" ) )}}
-let {{camel_case field_name}}: {{> (concat field_type.type "/type")}} | undefined;
+let {{camel_case field_name}}: {{> (concat field_type.type "/type") }}{{#if (eq cardinality "option")}} | undefined{{/if}} = {{> (concat field_type.type "/" widget "/initial-value") field_type=field_type}};
     {{else}}
-let {{camel_case field_name}}: Array<{{> (concat field_type.type "/type")}} | undefined> = [undefined];
+let {{camel_case field_name}}: Array<{{> (concat field_type.type "/type")}}> = [{{> (concat field_type.type "/" widget "/initial-value") field_type=field_type}}];
     {{/if}}
   {{/if}}
 {{/each}}
@@ -44,7 +44,7 @@ let {{camel_case field_name}}: Array<{{> (concat field_type.type "/type")}} | un
 let errorSnackbar: Snackbar;
 
 $: {{#each entry_type.fields}}{{camel_case field_name}}{{#unless @last}}, {{/unless}}{{/each}};
-$: is{{pascal_case entry_type.name}}Valid = true{{#each entry_type.fields}}{{#if widget}}{{#if (eq cardinality "single")}} && {{camel_case field_name}} !== undefined{{/if}}{{#if (eq cardinality "vector")}} && {{camel_case field_name}}.every(e => e !== undefined){{/if}}{{/if}}{{/each}};
+$: is{{pascal_case entry_type.name}}Valid = true{{#each entry_type.fields}}{{#if widget}}{{#if (eq cardinality "single")}} && {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate=(camel_case field_name) }}{{/if}}{{#if (eq cardinality "vector")}} && {{camel_case field_name}}.every(e => {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate="e" }}){{/if}}{{/if}}{{/each}};
 
 async function create{{pascal_case entry_type.name}}() {  
   const {{camel_case entry_type.name}}Entry: {{pascal_case entry_type.name}} = { 
@@ -79,7 +79,7 @@ async function create{{pascal_case entry_type.name}}() {
   {{#if widget}}
   <div style="margin-bottom: 16px">
     {{#if (not (eq cardinality "vector") )}}
-    {{> (concat field_type.type "/" widget "/edit/render") label=(title_case field_name) variable_to_change=(camel_case field_name) required=(eq cardinality "single") }}
+    {{> (concat field_type.type "/" widget "/edit/render") label=(title_case field_name) variable_to_read=(camel_case field_name) variable_to_change=(camel_case field_name) required=(eq cardinality "single") }}
     {{else}}
     {{> Vec/edit/render field_name=field_name field_type=field_type widget=widget }}
     {{/if}}

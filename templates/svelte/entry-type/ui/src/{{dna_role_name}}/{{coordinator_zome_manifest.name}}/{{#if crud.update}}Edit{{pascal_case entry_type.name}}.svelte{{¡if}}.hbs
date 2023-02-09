@@ -40,7 +40,8 @@ let {{camel_case field_name}}: Array<{{> (concat field_type.type "/type")}} | un
 let errorSnackbar: Snackbar;
 
 $: {{#each entry_type.fields}}{{#if widget}}{{camel_case field_name}}{{#unless @last}}, {{/unless}}{{/if}}{{/each}};
-$: is{{pascal_case entry_type.name}}Valid = true{{#each entry_type.fields}}{{#if widget}}{{#if (eq cardinality "single")}} && {{camel_case field_name}} !== undefined{{/if}}{{#if (eq cardinality "vector")}} && {{camel_case field_name}}.every(e => e !== undefined){{/if}}{{/if}}{{/each}};
+$: is{{pascal_case entry_type.name}}Valid = true{{#each entry_type.fields}}{{#if widget}}{{#if (eq cardinality "single")}} && {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate=(camel_case field_name) }}{{/if}}{{#if (eq cardinality "vector")}} && {{camel_case field_name}}.every(e => {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate="e" }}){{/if}}{{/if}}{{/each}};
+
 
 async function update{{pascal_case entry_type.name}}() {
 
