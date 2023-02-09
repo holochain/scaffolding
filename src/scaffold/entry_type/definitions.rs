@@ -24,6 +24,7 @@ pub enum FieldType {
     AgentPubKey,
     ActionHash,
     EntryHash,
+    DnaHash,
     Enum {
         label: String,
         variants: Vec<String>,
@@ -60,6 +61,7 @@ impl ToString for FieldType {
             Timestamp => "Timestamp",
             ActionHash => "ActionHash",
             EntryHash => "EntryHash",
+            DnaHash => "DnaHash",
             AgentPubKey => "AgentPubKey",
             Enum { .. } => "Enum",
         }
@@ -78,6 +80,7 @@ impl FieldType {
             FieldType::Timestamp,
             FieldType::ActionHash,
             FieldType::EntryHash,
+            // FieldType::DnaHash,
             FieldType::AgentPubKey,
             FieldType::Enum {
                 label: String::from(""),
@@ -96,6 +99,7 @@ impl FieldType {
             F32 => quote!(f32),
             Timestamp => quote!(Timestamp),
             ActionHash => quote!(ActionHash),
+            DnaHash => quote!(DnaHash),
             EntryHash => quote!(EntryHash),
             AgentPubKey => quote!(AgentPubKey),
             Enum { label, .. } => {

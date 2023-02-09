@@ -90,13 +90,15 @@ pub fn add_extra_experimental_features() -> ScaffoldResult<()> {
         }
     }
 
-    let mut file = OpenOptions::new()
+    if let Ok(mut file) = OpenOptions::new()
         .read(true)
         .append(true)
         .create(true)
-        .open(nix_conf_path)?;
-
-    file.write_all(EXTRA_EXPERIMENTAL_FEATURES_LINE.as_bytes())?;
-
+        .open(nix_conf_path)
+    {
+        file.write_all(EXTRA_EXPERIMENTAL_FEATURES_LINE.as_bytes())?;
+    } else {
+        println!("Warning: could not write extra-experimental-features to nix.conf");
+    }
     Ok(())
 }

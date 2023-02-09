@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert';
 
 import { runScenario, pause, CallableCell } from '@holochain/tryorama';
-import { NewEntryAction, ActionHash, Record, AppBundleSource } from '@holochain/client';
+import { NewEntryAction, ActionHash, Record, AppBundleSource,  fakeActionHash, fakeAgentPubKey, fakeEntryHash } from '@holochain/client';
 import { decode } from '@msgpack/msgpack';
 
 {{#each entry_type.fields}}
