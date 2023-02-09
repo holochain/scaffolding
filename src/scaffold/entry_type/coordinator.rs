@@ -83,7 +83,7 @@ pub fn read_handler_with_linking_to_updates(entry_def_name: &String) -> String {
 pub fn get_{}(original_{}_hash: ActionHash) -> ExternResult<Option<Record>> {{
   let links = get_links(original_{}_hash.clone(), LinkTypes::{}, None)?;
 
-  let latest_link = links.into_iter().max_by(|link_a, link_b| link_b.timestamp.cmp(&link_a.timestamp));
+  let latest_link = links.into_iter().max_by(|link_a, link_b| link_a.timestamp.cmp(&link_b.timestamp));
   
   let latest_{}_hash = match latest_link {{
     Some(link) => ActionHash::from(link.target.clone()),
@@ -379,13 +379,16 @@ fn signal_entry_types_variants() -> ScaffoldResult<Vec<syn::Variant>> {
 
 fn signal_action_match_arms() -> ScaffoldResult<Vec<syn::Arm>> {
     Ok(vec![
-        syn::parse_str::<syn::Arm>("Action::Create(_create) => {
+        syn::parse_str::<syn::Arm>(
+            "Action::Create(_create) => {
             if let Ok(Some(app_entry)) = get_entry_for_action(&action.hashed.hash) {
                 emit_signal(Signal::EntryCreated { action, app_entry })?;
             }
             Ok(())
-        }")?,
-        syn::parse_str::<syn::Arm>("Action::Update(update) => {
+        }",
+        )?,
+        syn::parse_str::<syn::Arm>(
+            "Action::Update(update) => {
             if let Ok(Some(app_entry)) = get_entry_for_action(&action.hashed.hash) {
                 if let Ok(Some(original_app_entry)) =
                     get_entry_for_action(&update.original_action_address)
@@ -398,8 +401,10 @@ fn signal_action_match_arms() -> ScaffoldResult<Vec<syn::Arm>> {
                 }
             }
             Ok(())
-        }")?,
-        syn::parse_str::<syn::Arm>("Action::Delete(delete) => {
+        }",
+        )?,
+        syn::parse_str::<syn::Arm>(
+            "Action::Delete(delete) => {
             if let Ok(Some(original_app_entry)) = get_entry_for_action(&delete.deletes_address) {
                 emit_signal(Signal::EntryDeleted {
                     action,
@@ -407,7 +412,8 @@ fn signal_action_match_arms() -> ScaffoldResult<Vec<syn::Arm>> {
                 })?;
             }
             Ok(())
-        }")?
+        }",
+        )?,
     ])
 }
 
