@@ -5,23 +5,27 @@
 //! ```bash
 //! // Scaffold an example Holochain app
 //! hc-scaffold example
+//! ```
 //!
+//! Or if you want to scaffold your own custom app, for example a to-do app:
+//!
+//! ```bash
 //! // Scaffold an empty web-app, using a built-in template
-//! hc-scaffold web-app forum
+//! hc-scaffold web-app todos
 //!
-//! cd forum
+//! cd todos
 //!
 //! // Scaffold a dna inside the newly scaffolded app
-//! hc-scaffold dna forum
+//! hc-scaffold dna todos
 //!
 //! // Scaffold a zome inside the newly scaffolded dna
-//! hc-scaffold zome posts
+//! hc-scaffold zome todos
 //!
 //! // Scaffold an entry-type inside the newly scaffolded zome
-//! hc-scaffold entry-type post
+//! hc-scaffold entry-type todo
 //!
 //! // Scaffold a collection for the newly scaffolded entry-type
-//! hc-scaffold collection global all_posts
+//! hc-scaffold collection global all_todos
 //!
 //! // Scaffold a new link-type
 //! hc-scaffold link-type
@@ -34,10 +38,9 @@
 //!
 //! The scaffolding tool comes with 4 built-in templates:
 //!
-//! - Vanilla
-//! - Lit
 //! - Vue
 //! - Svelte
+//! - Lit
 //!
 //! These templates provide most of the skeleton you need to start your own holochain app.
 //!

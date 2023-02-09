@@ -3,7 +3,27 @@
     <div v-if="loading">
       <mwc-circular-progress indeterminate></mwc-circular-progress>
     </div>
-    <div v-else><div id="content"></div></div>
+    <div v-else>
+      <div id="content" style="display: flex; flex-direction: column; flex: 1;">
+        <h2>EDIT ME! Add the components of your app here.</h2>
+        <span>For example, if you have scaffolded a "todos" dna, a "todos" zome and a collection called "all_todos", an <code>&lt;AllTodos&gt;</code> element will have been generated.</span>
+          
+        <span>To use that element here:</span>
+        <ol>
+          <li>Import the element with <code>import AllTodos from './todos/todos/AllTodos.vue'</code>.</li>
+          <li>Add it into the subcomponents for the `App` component: 
+            <code>export default defineComponent({
+                   components: {
+                     // Add your subcomponents here
+                     AllTodos
+                   },  
+                   ...
+            </code>
+          </li>
+          <li>Replace this "EDIT ME!" section with <code>&lt;AllTodos&gt;&lt;/AllTodos&gt;</code>.</li>
+        </ol>
+      </div>
+    </div>
   </div>
 </template>
 <script lang="ts">
