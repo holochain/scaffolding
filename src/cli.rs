@@ -1007,12 +1007,18 @@ pub fn hello_world(_: ()) -> ExternResult<String> {{
                     .stdout(Stdio::inherit())
                     .stderr(Stdio::inherit())
                     .current_dir(&app_dir)
-                    .args(["init", "--initial-branch=main"])
+                    .args(["init"])
                     .output()?;
 
                 if !output.status.success() {
-                    return Err(ScaffoldError::GitInitError)?;
+                    println!("Warning: error running git init");
                 }
+
+                let _output = Command::new("git")
+                    .current_dir(&app_dir)
+                    .args(["branch", "main"])
+                    .output()?;
+
                 let output = Command::new("git")
                     .stdout(Stdio::inherit())
                     .stderr(Stdio::inherit())
@@ -1021,7 +1027,7 @@ pub fn hello_world(_: ()) -> ExternResult<String> {{
                     .output()?;
 
                 if !output.status.success() {
-                    return Err(ScaffoldError::GitInitError)?;
+                    println!("Warning: error running git add .");
                 }
 
                 println!(
