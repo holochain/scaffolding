@@ -62,7 +62,7 @@ export class Create{{pascal_case entry_type.name}} extends LitElement {
     const {{camel_case entry_type.name}}: {{pascal_case entry_type.name}} = { 
     {{#each entry_type.fields}}
       {{#if widget}}
-        {{snake_case field_name}}: this._{{camel_case field_name}}
+        {{snake_case field_name}}: this._{{camel_case field_name}},
       {{else}}
         {{snake_case field_name}}: this.{{camel_case field_name}},
       {{/if}}
