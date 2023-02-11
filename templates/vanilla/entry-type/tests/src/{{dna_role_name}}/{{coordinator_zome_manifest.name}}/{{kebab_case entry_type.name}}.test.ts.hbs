@@ -1,71 +1,12 @@
-import test from "tape-promise/tape.js";
+import { assert, test } from "vitest";
 
 import { runScenario, pause, CallableCell } from '@holochain/tryorama';
 import { NewEntryAction, ActionHash, Record, AppBundleSource,  fakeActionHash, fakeAgentPubKey, fakeEntryHash } from '@holochain/client';
 import { decode } from '@msgpack/msgpack';
 
-{{#each entry_type.fields}}
-  {{#if linked_from}}
-    {{#if (ne linked_from.hash_type "AgentPubKey")}}
-      {{#if (ne (pascal_case linked_from.name) (pascal_case ../entry_type.name))}}
-import { create{{pascal_case linked_from.name}} } from './{{kebab_case linked_from.name}}.test.js';
-      {{/if}}
-    {{/if}}
-  {{/if}}
-{{/each}}
+import { create{{pascal_case entry_type.name}}, sample{{pascal_case entry_type.name}} } from './common.js';
 
-async function sample{{pascal_case entry_type.name}}(cell: CallableCell, partial{{pascal_case entry_type.name}} = {}) {
-    return {
-        ...{
-{{#each entry_type.fields}}
-  {{#if linked_from}}
-    {{#if (ne linked_from.hash_type "AgentPubKey")}}
-      {{#if (eq cardinality "vector")}}
-        {{#if (eq (pascal_case linked_from.name) (pascal_case ../entry_type.name))}}
-          {{field_name}}: [],
-        {{else}}
-          {{#if (eq linked_from.hash_type "ActionHash")}}
-          {{field_name}}: [(await create{{pascal_case linked_from.name}}(cell)).signed_action.hashed.hash],
-          {{else}}
-          {{field_name}}: [((await create{{pascal_case linked_from.name}}(cell)).signed_action.hashed.content as NewEntryAction).entry_hash],
-          {{/if}}
-        {{/if}}
-      {{else}}
-        {{#if (eq (pascal_case linked_from.name) (pascal_case ../entry_type.name))}}
-          {{field_name}}: null,
-        {{else}}
-	  {{#if (eq linked_from.hash_type "ActionHash")}}
-          {{field_name}}: (await create{{pascal_case linked_from.name}}(cell)).signed_action.hashed.hash,
-          {{else}}
-          {{field_name}}: ((await create{{pascal_case linked_from.name}}(cell)).signed_action.hashed.content as NewEntryAction).entry_hash,
-          {{/if}}
-        {{/if}}
-      {{/if}}
-    {{else}}
-          {{field_name}}: cell.cell_id[1],
-    {{/if}}
-  {{else}}
-      {{#if (eq cardinality "vector")}}
-	  {{field_name}}: [{{> (concat field_type.type "/sample") field_type=field_type}}],
-      {{else}}
-	  {{field_name}}: {{> (concat field_type.type "/sample") field_type=field_type}},
-      {{/if}}
-  {{/if}}
-{{/each}}
-        },
-        ...partial{{pascal_case entry_type.name}}
-    };
-}
-
-export async function create{{pascal_case entry_type.name}}(cell: CallableCell, {{camel_case entry_type.name}} = undefined): Promise<Record> {
-    return cell.callZome({
-      zome_name: "{{coordinator_zome_manifest.name}}",
-      fn_name: "create_{{snake_case entry_type.name}}",
-      payload: {{camel_case entry_type.name}} || await sample{{pascal_case entry_type.name}}(cell),
-    });
-}
-
-test('create {{pascal_case entry_type.name}}', async t => {
+test('create {{pascal_case entry_type.name}}', async () => {
   await runScenario(async scenario => {
     // Construct proper paths for your app.
     // This assumes app bundle created by the `hc app pack` command.
@@ -84,11 +25,11 @@ test('create {{pascal_case entry_type.name}}', async t => {
 
     // Alice creates a {{pascal_case entry_type.name}}
     const record: Record = await create{{pascal_case entry_type.name}}(alice.cells[0]);
-    t.ok(record);
+    assert.ok(record);
   });
 });
 
-test('create and read {{pascal_case entry_type.name}}', async t => {
+test('create and read {{pascal_case entry_type.name}}', async () => {
   await runScenario(async scenario => {
     // Construct proper paths for your app.
     // This assumes app bundle created by the `hc app pack` command.
@@ -109,7 +50,7 @@ test('create and read {{pascal_case entry_type.name}}', async t => {
 
     // Alice creates a {{pascal_case entry_type.name}}
     const record: Record = await create{{pascal_case entry_type.name}}(alice.cells[0], sample);
-    t.ok(record);
+    assert.ok(record);
 
     // Wait for the created entry to be propagated to the other node.
     await pause(1200);
@@ -120,12 +61,12 @@ test('create and read {{pascal_case entry_type.name}}', async t => {
       fn_name: "get_{{snake_case entry_type.name}}",
       payload: {{#if entry_type.reference_entry_hash}}(record.signed_action.hashed.content as NewEntryAction).entry_hash{{else}}record.signed_action.hashed.hash{{/if}},
     });
-    t.deepEqual(sample, decode((createReadOutput.entry as any).Present.entry) as any);
+    assert.deepEqual(sample, decode((createReadOutput.entry as any).Present.entry) as any);
   });
 });
 
 {{#if crud.update}}
-test('create and update {{pascal_case entry_type.name}}', async t => {
+test('create and update {{pascal_case entry_type.name}}', async () => {
   await runScenario(async scenario => {
     // Construct proper paths for your app.
     // This assumes app bundle created by the `hc app pack` command.
@@ -144,7 +85,7 @@ test('create and update {{pascal_case entry_type.name}}', async t => {
 
     // Alice creates a {{pascal_case entry_type.name}}
     const record: Record = await create{{pascal_case entry_type.name}}(alice.cells[0]);
-    t.ok(record);
+    assert.ok(record);
         
     const originalActionHash = record.signed_action.hashed.hash;
  
@@ -163,7 +104,7 @@ test('create and update {{pascal_case entry_type.name}}', async t => {
       fn_name: "update_{{snake_case entry_type.name}}",
       payload: updateInput,
     });
-    t.ok(updatedRecord);
+    assert.ok(updatedRecord);
 
     // Wait for the updated entry to be propagated to the other node.
     await pause(1200);
@@ -174,7 +115,7 @@ test('create and update {{pascal_case entry_type.name}}', async t => {
       fn_name: "get_{{snake_case entry_type.name}}",
       payload: updatedRecord.signed_action.hashed.hash,
     });
-    t.deepEqual(contentUpdate, decode((readUpdatedOutput0.entry as any).Present.entry) as any);
+    assert.deepEqual(contentUpdate, decode((readUpdatedOutput0.entry as any).Present.entry) as any);
 
     // Alice updates the {{pascal_case entry_type.name}} again
     contentUpdate = await sample{{pascal_case entry_type.name}}(alice.cells[0]);
@@ -191,7 +132,7 @@ test('create and update {{pascal_case entry_type.name}}', async t => {
       fn_name: "update_{{snake_case entry_type.name}}",
       payload: updateInput,
     });
-    t.ok(updatedRecord);
+    assert.ok(updatedRecord);
 
     // Wait for the updated entry to be propagated to the other node.
     await pause(1200);
@@ -202,13 +143,13 @@ test('create and update {{pascal_case entry_type.name}}', async t => {
       fn_name: "get_{{snake_case entry_type.name}}",
       payload: updatedRecord.signed_action.hashed.hash,
     });
-    t.deepEqual(contentUpdate, decode((readUpdatedOutput1.entry as any).Present.entry) as any);
+    assert.deepEqual(contentUpdate, decode((readUpdatedOutput1.entry as any).Present.entry) as any);
   });
 });
 {{/if}}
 
 {{#if crud.delete}}
-test('create and delete {{pascal_case entry_type.name}}', async t => {
+test('create and delete {{pascal_case entry_type.name}}', async () => {
   await runScenario(async scenario => {
     // Construct proper paths for your app.
     // This assumes app bundle created by the `hc app pack` command.
@@ -227,7 +168,7 @@ test('create and delete {{pascal_case entry_type.name}}', async t => {
 
     // Alice creates a {{pascal_case entry_type.name}}
     const record: Record = await create{{pascal_case entry_type.name}}(alice.cells[0]);
-    t.ok(record);
+    assert.ok(record);
         
     // Alice deletes the {{pascal_case entry_type.name}}
     const deleteActionHash = await alice.cells[0].callZome({
@@ -235,7 +176,7 @@ test('create and delete {{pascal_case entry_type.name}}', async t => {
       fn_name: "delete_{{snake_case entry_type.name}}",
       payload: record.signed_action.hashed.hash,
     });
-    t.ok(deleteActionHash);
+    assert.ok(deleteActionHash);
 
     // Wait for the entry deletion to be propagated to the other node.
     await pause(1200);
@@ -246,7 +187,7 @@ test('create and delete {{pascal_case entry_type.name}}', async t => {
       fn_name: "get_{{snake_case entry_type.name}}",
       payload: record.signed_action.hashed.hash,
     });
-    t.notOk(readDeletedOutput);
+    assert.notOk(readDeletedOutput);
   });
 });
 {{/if}}

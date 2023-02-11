@@ -5,7 +5,7 @@ rm -rf /tmp/forum-svelte
 
 cd /tmp
 
-hc-scaffold web-app forum-svelte --setup-nix true --template lit
+hc-scaffold web-app forum-svelte --setup-nix true --template svelte
 
 cd forum-svelte
 

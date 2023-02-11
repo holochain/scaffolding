@@ -1,12 +1,12 @@
-import test from "tape-promise/tape.js";
+import { assert, test } from "vitest";
 
 import { runScenario, pause, CallableCell } from '@holochain/tryorama';
 import { NewEntryAction, ActionHash, Record, AppBundleSource,  fakeActionHash, fakeAgentPubKey, fakeEntryHash } from '@holochain/client';
 import { decode } from '@msgpack/msgpack';
 
-import { create{{pascal_case referenceable.name}} } from './{{kebab_case referenceable.name}}.test.js';
+import { create{{pascal_case referenceable.name}} } from './common.js';
 
-test('create a {{pascal_case referenceable.name}} and get {{lower_case collection_name}}', async t => {
+test('create a {{pascal_case referenceable.name}} and get {{lower_case collection_name}}', async () => {
   await runScenario(async scenario => {
     // Construct proper paths for your app.
     // This assumes app bundle created by the `hc app pack` command.
@@ -29,11 +29,11 @@ test('create a {{pascal_case referenceable.name}} and get {{lower_case collectio
       fn_name: "get_{{snake_case collection_name}}",
       payload: {{#if (eq collection_type.type "Global")}}null{{else}}alice.agentPubKey{{/if}}
     });
-    t.equal(collectionOutput.length, 0);
+    assert.equal(collectionOutput.length, 0);
 
     // Alice creates a {{pascal_case referenceable.name}}
     const createdRecord: Record = await create{{pascal_case referenceable.name}}(alice.cells[0]);
-    t.ok(createdRecord);
+    assert.ok(createdRecord);
     
     await pause(1200);
     
@@ -43,8 +43,8 @@ test('create a {{pascal_case referenceable.name}} and get {{lower_case collectio
       fn_name: "get_{{snake_case collection_name}}",
       payload: {{#if (eq collection_type.type "Global")}}null{{else}}alice.agentPubKey{{/if}}
     });
-    t.equal(collectionOutput.length, 1);
-    t.deepEqual(createdRecord, collectionOutput[0]);    
+    assert.equal(collectionOutput.length, 1);
+    assert.deepEqual(createdRecord, collectionOutput[0]);    
   });
 });
 

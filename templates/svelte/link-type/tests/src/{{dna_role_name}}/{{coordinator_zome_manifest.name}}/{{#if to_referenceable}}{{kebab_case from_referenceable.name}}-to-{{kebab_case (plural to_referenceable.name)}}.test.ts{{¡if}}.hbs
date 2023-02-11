@@ -1,17 +1,17 @@
-import test from "tape-promise/tape.js";
+import { assert, test } from "vitest";
 
 import { runScenario, pause, CallableCell } from '@holochain/tryorama';
 import { NewEntryAction, ActionHash, Record, AppBundleSource,  fakeActionHash, fakeAgentPubKey, fakeEntryHash } from '@holochain/client';
 import { decode } from '@msgpack/msgpack';
 
 {{#if (ne from_referenceable.hash_type "AgentPubKey")}}
-import { create{{pascal_case from_referenceable.name}} } from './{{kebab_case from_referenceable.name}}.test.js';
+import { create{{pascal_case from_referenceable.name}} } from './common.js';
 {{/if}}
 {{#if (ne to_referenceable.hash_type "AgentPubKey")}}
-import { create{{pascal_case to_referenceable.name}} } from './{{kebab_case to_referenceable.name}}.test.js';
+import { create{{pascal_case to_referenceable.name}} } from './common.js';
 {{/if}}
 
-test('link a {{pascal_case from_referenceable.name}} to a {{pascal_case to_referenceable.name}}', async t => {
+test('link a {{pascal_case from_referenceable.name}} to a {{pascal_case to_referenceable.name}}', async () => {
   await runScenario(async scenario => {
     // Construct proper paths for your app.
     // This assumes app bundle created by the `hc app pack` command.
@@ -55,7 +55,7 @@ test('link a {{pascal_case from_referenceable.name}} to a {{pascal_case to_refer
       fn_name: "get_{{plural (snake_case to_referenceable.name)}}_for_{{snake_case from_referenceable.name}}",
       payload: baseAddress
     });
-    t.equal(linksOutput.length, 0);
+    assert.equal(linksOutput.length, 0);
 
     // Alice creates a link from {{pascal_case from_referenceable.name}} to {{pascal_case to_referenceable.name}}
     await alice.cells[0].callZome({
@@ -75,9 +75,9 @@ test('link a {{pascal_case from_referenceable.name}} to a {{pascal_case to_refer
       fn_name: "get_{{plural (snake_case to_referenceable.name)}}_for_{{snake_case from_referenceable.name}}",
       payload: baseAddress
     });
-    t.equal(linksOutput.length, 1);
+    assert.equal(linksOutput.length, 1);
 {{#if (ne to_referenceable.hash_type "AgentPubKey")}}
-    t.deepEqual(targetRecord, linksOutput[0]);
+    assert.deepEqual(targetRecord, linksOutput[0]);
 {{/if}}
 
 {{#if bidireccional}}
@@ -88,9 +88,9 @@ test('link a {{pascal_case from_referenceable.name}} to a {{pascal_case to_refer
       fn_name: "get_{{plural (snake_case from_referenceable.name)}}_for_{{snake_case to_referenceable.name}}",
       payload: targetAddress
     });
-    t.equal(linksOutput.length, 1);
+    assert.equal(linksOutput.length, 1);
   {{#if (ne from_referenceable.hash_type "AgentPubKey")}}
-    t.deepEqual(baseRecord, linksOutput[0]);
+    assert.deepEqual(baseRecord, linksOutput[0]);
   {{/if}}
 {{/if}}
 
@@ -112,7 +112,7 @@ test('link a {{pascal_case from_referenceable.name}} to a {{pascal_case to_refer
       fn_name: "get_{{plural (snake_case to_referenceable.name)}}_for_{{snake_case from_referenceable.name}}",
       payload: baseAddress
     });
-    t.equal(linksOutput.length, 0);
+    assert.equal(linksOutput.length, 0);
 
   {{#if bidireccional}}
     // Bob gets the links in the inverse direction
@@ -121,7 +121,7 @@ test('link a {{pascal_case from_referenceable.name}} to a {{pascal_case to_refer
       fn_name: "get_{{plural (snake_case from_referenceable.name)}}_for_{{snake_case to_referenceable.name}}",
       payload: targetAddress
     });
-    t.equal(linksOutput.length, 0);
+    assert.equal(linksOutput.length, 0);
   {{/if}}
 
 {{/if}}
