@@ -1,1 +1,1 @@
-<mwc-textfield outlined label="{{label}}" {{#if initial_value_variable}}value={ {{initial_value_variable}} }{{/if}} on:input={e => { {{variable_to_change}} = e.target.value; } } {{#if required}}required{{/if}}></mwc-textfield>
+<mwc-textfield outlined label="{{label}}" {{#if variable_to_read}}value={ {{variable_to_read}} }{{/if}} on:input={e => { {{variable_to_change}} = e.target.value; } } {{#if required}}required{{/if}}></mwc-textfield>

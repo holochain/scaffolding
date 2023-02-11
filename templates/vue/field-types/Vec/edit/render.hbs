@@ -2,8 +2,8 @@
   <span>{{title_case field_name}}</span>
   
   <div v-for="(el, i) in {{camel_case field_name}}">
-    {{> (concat field_type.type "/" widget "/edit/render") label="" initial_value_variable="el" variable_to_change=(concat (camel_case field_name) "[i]" ) }} }
+    {{> (concat field_type.type "/" widget "/edit/render") label="" variable_to_read="el" variable_to_change=(concat (camel_case field_name) "[i]" ) }} }
   </div>
 
-  <mwc-button icon="add" label="Add {{title_case field_name}}" @click="{{camel_case field_name}}.push(undefined)"></mwc-button>
+  <mwc-button icon="add" label="Add {{title_case field_name}}" @click="{{camel_case field_name}}.push({{> (concat field_type.type "/" widget "/initial-value") field_type=field_type}})"></mwc-button>
 </div>
