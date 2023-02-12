@@ -326,32 +326,7 @@ impl HcScaffold {
                     maybe_nix = "\n  nix develop";
                 }
 
-                let output = Command::new("git")
-                    .stdout(Stdio::inherit())
-                    .stderr(Stdio::inherit())
-                    .current_dir(&app_dir)
-                    .args(["init"])
-                    .output()?;
-
-                if !output.status.success() {
-                    println!("Warning: error running git init");
-                }
-
-                let _output = Command::new("git")
-                    .current_dir(&app_dir)
-                    .args(["branch", "main"])
-                    .output()?;
-
-                let output = Command::new("git")
-                    .stdout(Stdio::inherit())
-                    .stderr(Stdio::inherit())
-                    .current_dir(&app_dir)
-                    .args(["add", "."])
-                    .output()?;
-
-                if !output.status.success() {
-                    println!("Warning: error running git add .");
-                }
+                setup_git_environment(&app_dir)?;
 
                 println!(
                     r#"
@@ -1003,32 +978,7 @@ pub fn hello_world(_: ()) -> ExternResult<String> {{
                     return Err(err)?;
                 }
 
-                let output = Command::new("git")
-                    .stdout(Stdio::inherit())
-                    .stderr(Stdio::inherit())
-                    .current_dir(&app_dir)
-                    .args(["init"])
-                    .output()?;
-
-                if !output.status.success() {
-                    println!("Warning: error running git init");
-                }
-
-                let _output = Command::new("git")
-                    .current_dir(&app_dir)
-                    .args(["branch", "main"])
-                    .output()?;
-
-                let output = Command::new("git")
-                    .stdout(Stdio::inherit())
-                    .stderr(Stdio::inherit())
-                    .current_dir(&app_dir)
-                    .args(["add", "."])
-                    .output()?;
-
-                if !output.status.success() {
-                    println!("Warning: error running git add .");
-                }
+                setup_git_environment(&app_dir)?;
 
                 println!(
                     r#"
@@ -1208,4 +1158,42 @@ impl HcScaffoldTemplate {
             }
         }
     }
+}
+
+fn setup_git_environment(path: &PathBuf) -> ScaffoldResult<()> {
+    let output = Command::new("git")
+        .stdout(Stdio::inherit())
+        .current_dir(path)
+        .args(["init", "--initial-branch=main"])
+        .output()?;
+
+    if !output.status.success() {
+        let output = Command::new("git")
+            .stdout(Stdio::inherit())
+            .stderr(Stdio::inherit())
+            .current_dir(path)
+            .args(["init"])
+            .output()?;
+        if !output.status.success() {
+            println!("Warning: error running \"git init\"");
+            return Ok(());
+        }
+
+        let _output = Command::new("git")
+            .current_dir(path)
+            .args(["branch", "main"])
+            .output()?;
+    }
+
+    let output = Command::new("git")
+        .stdout(Stdio::inherit())
+        .stderr(Stdio::inherit())
+        .current_dir(&path)
+        .args(["add", "."])
+        .output()?;
+
+    if !output.status.success() {
+        println!("Warning: error running \"git add .\"");
+    }
+    Ok(())
 }
