@@ -26,7 +26,5 @@ jobs:
 
       - name: Install and test
         run: |
-          nix-shell . \
-            --pure \
-            --run "npm i && npm t"
+          nix develop --command bash -c "npm i && npm t"
 
