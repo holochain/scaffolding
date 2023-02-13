@@ -38,6 +38,14 @@ jobs:
           nix-shell htttps://holochain.love --run "sh run_test.sh"
 
       - name: Discord notification
+        if: success()
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        uses: Ilshidur/action-discord@master
+        with:
+          args: 'The instructions on https://developer.holochain.org are working :)'
+
+      - name: Discord notification
         if: failure()
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
