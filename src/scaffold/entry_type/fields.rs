@@ -75,9 +75,13 @@ pub fn parse_fields(fields_str: &str) -> ScaffoldResult<FieldDefinition> {
         }
     };
 
-    let widget = match sp[2] {
-        "" => None,
-        _ => Some(sp[2].to_string()),
+    let widget = if sp.len() > 2 {
+        match sp[2] {
+            "" => None,
+            _ => Some(sp[2].to_string()),
+        }
+    } else {
+        None
     };
 
     let linked_from = match field_type {
