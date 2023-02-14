@@ -83,7 +83,7 @@ impl FieldType {
             FieldType::Timestamp,
             FieldType::ActionHash,
             FieldType::EntryHash,
-            // FieldType::DnaHash,
+            FieldType::DnaHash,
             FieldType::AgentPubKey,
             FieldType::Enum {
                 label: String::from(""),
