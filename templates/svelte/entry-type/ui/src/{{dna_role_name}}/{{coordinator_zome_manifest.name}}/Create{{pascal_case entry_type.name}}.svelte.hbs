@@ -1,6 +1,6 @@
 <script lang="ts">
 import { createEventDispatcher, getContext } from 'svelte';
-import type { AppAgentClient, Record, EntryHash, AgentPubKey, ActionHash } from '@holochain/client';
+import type { AppAgentClient, Record, EntryHash, AgentPubKey, ActionHash, DnaHash } from '@holochain/client';
 import { clientContext } from '../../contexts';
 import type { {{pascal_case entry_type.name}}{{#each entry_type.fields}}{{#if (eq field_type.type "Enum")}}, {{field_type.label}}{{/if}}{{/each}} } from './types';
 import '@material/mwc-button';
