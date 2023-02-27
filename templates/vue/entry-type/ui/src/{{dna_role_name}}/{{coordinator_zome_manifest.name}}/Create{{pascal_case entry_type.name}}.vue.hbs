@@ -94,6 +94,17 @@ export default defineComponent({
     return true{{#each entry_type.fields}}{{#if widget}}{{#if (eq cardinality "single")}} && {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate=(concat "this." (camel_case field_name)) }}{{/if}}{{#if (eq cardinality "vector")}} && this.{{camel_case field_name}}.every(e => {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate="e" }}){{/if}}{{/if}}{{/each}};
     },
   },
+  mounted() {
+{{#each entry_type.fields}}
+  {{#if (not widget) }}
+    {{#if (ne cardinality "option")}}
+    if (this.{{camel_case field_name}} === undefined) {
+      throw new Error(`The {{camel_case field_name}} input is required for the Create{{pascal_case ../entry_type.name}} element`);
+    }
+    {{/if}}
+  {{/if}}
+{{/each}}
+  },
   methods: {
     async create{{pascal_case entry_type.name}}() {
       const {{camel_case entry_type.name}}: {{pascal_case entry_type.name}} = { {{#each entry_type.fields}}

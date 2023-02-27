@@ -46,6 +46,12 @@ export class {{pascal_case entry_type.name}}Detail extends LitElement {
   @state()
   _editing = false;
   {{/if}}
+  
+  firstUpdated() {
+    if (this.{{camel_case entry_type.name}}Hash === undefined) {
+      throw new Error(`The {{camel_case entry_type.name}}Hash property is required for the {{kebab_case entry_type.name}}-detail element`);
+    }
+  }
 
   {{#if crud.delete}}
   async delete{{pascal_case entry_type.name}}() {

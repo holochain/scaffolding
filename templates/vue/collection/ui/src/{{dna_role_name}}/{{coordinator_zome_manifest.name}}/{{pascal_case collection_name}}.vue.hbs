@@ -46,6 +46,12 @@ export default defineComponent({
     }
   },
   async mounted() {
+  {{#if (eq collection_type.type "ByAuthor")}}
+    if (this.author === undefined) {
+      throw new Error(`The author property is required for the {{pascal_case collection_name}} element`);
+    }
+
+  {{/if}}
     await this.fetch{{pascal_case referenceable.name}}();
     toRaw(this.client).on('signal', signal => {
       if (signal.zome_name !== '{{coordinator_zome_manifest.name}}') return; 

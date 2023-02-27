@@ -1,5 +1,5 @@
 <script lang="ts">
-import { createEventDispatcher, getContext } from 'svelte';
+import { createEventDispatcher, getContext, onMount } from 'svelte';
 import type { AppAgentClient, Record, EntryHash, AgentPubKey, DnaHash, ActionHash } from '@holochain/client';
 import { decode } from '@msgpack/msgpack';
 import { clientContext } from '../../contexts';
@@ -42,6 +42,16 @@ let errorSnackbar: Snackbar;
 $: {{#each entry_type.fields}}{{#if widget}}{{camel_case field_name}}{{#unless @last}}, {{/unless}}{{/if}}{{/each}};
 $: is{{pascal_case entry_type.name}}Valid = true{{#each entry_type.fields}}{{#if widget}}{{#if (eq cardinality "single")}} && {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate=(camel_case field_name) }}{{/if}}{{#if (eq cardinality "vector")}} && {{camel_case field_name}}.every(e => {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate="e" }}){{/if}}{{/if}}{{/each}};
 
+onMount(() => {
+  if (currentRecord === undefined) {
+    throw new Error(`The currentRecord input is required for the Edit{{pascal_case entry_type.name}} element`);
+  }
+{{#if link_from_original_to_each_update}}
+  if (original{{pascal_case entry_type.name}}Hash === undefined) {
+    throw new Error(`The original{{pascal_case entry_type.name}}Hash input is required for the Edit{{pascal_case entry_type.name}} element`);
+  }
+{{/if}}
+});
 
 async function update{{pascal_case entry_type.name}}() {
 

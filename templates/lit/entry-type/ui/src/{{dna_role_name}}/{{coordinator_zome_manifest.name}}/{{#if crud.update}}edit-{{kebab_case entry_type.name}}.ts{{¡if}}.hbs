@@ -59,10 +59,20 @@ export class Edit{{pascal_case entry_type.name}} extends LitElement {
   
   connectedCallback() {
     super.connectedCallback();
-{{#each entry_type.fields}}
-{{#if widget}}
-    this._{{camel_case field_name}} = this.current{{pascal_case ../entry_type.name}}.{{snake_case field_name}};
+    if (this.currentRecord === undefined) {
+      throw new Error(`The currentRecord property is required for the edit-{{kebab_case entry_type.name}} element`);
+    }
+{{#if link_from_original_to_each_update}}
+
+    if (this.original{{pascal_case entry_type.name}}Hash === undefined) {
+      throw new Error(`The original{{pascal_case entry_type.name}}Hash property is required for the edit-{{kebab_case entry_type.name}} element`);
+    }
 {{/if}}
+    
+{{#each entry_type.fields}}
+  {{#if widget}}
+    this._{{camel_case field_name}} = this.current{{pascal_case ../entry_type.name}}.{{snake_case field_name}};
+  {{/if}}
 {{/each}}
   }
 

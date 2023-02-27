@@ -53,6 +53,18 @@ export class Create{{pascal_case entry_type.name}} extends LitElement {
       {{/if}}
     {{/if}}
   {{/each}}
+  
+  firstUpdated() {
+{{#each entry_type.fields}}
+  {{#if (not widget) }}
+    {{#if (ne cardinality "option")}}
+    if (this.{{camel_case field_name}} === undefined) {
+      throw new Error(`The {{camel_case field_name}} input is required for the create-{{kebab_case ../entry_type.name}} element`);
+    }
+    {{/if}}
+  {{/if}}
+{{/each}}
+  }
 
   is{{pascal_case entry_type.name}}Valid() {
     return true{{#each entry_type.fields}}{{#if widget}}{{#if (eq cardinality "single")}} && {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate=(concat "this._" (camel_case field_name)) }}{{/if}}{{#if (eq cardinality "vector")}} && this._{{camel_case field_name}}.every(e => {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate="e" }}){{/if}}{{/if}}{{/each}};

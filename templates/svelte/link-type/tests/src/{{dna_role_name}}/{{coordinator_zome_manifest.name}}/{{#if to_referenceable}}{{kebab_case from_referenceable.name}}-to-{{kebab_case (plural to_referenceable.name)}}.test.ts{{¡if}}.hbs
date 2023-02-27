@@ -62,8 +62,8 @@ test('link a {{pascal_case from_referenceable.name}} to a {{pascal_case to_refer
       zome_name: "{{coordinator_zome_manifest.name}}",
       fn_name: "add_{{snake_case to_referenceable.name}}_for_{{snake_case from_referenceable.name}}",
       payload: {
-        {{snake_case from_referenceable.singular_arg}}: baseAddress,
-        {{snake_case to_referenceable.singular_arg}}: targetAddress
+        base_{{snake_case from_referenceable.singular_arg}}: baseAddress,
+        target_{{snake_case to_referenceable.singular_arg}}: targetAddress
       }
     });
     
@@ -99,8 +99,8 @@ test('link a {{pascal_case from_referenceable.name}} to a {{pascal_case to_refer
       zome_name: "{{coordinator_zome_manifest.name}}",
       fn_name: "remove_{{snake_case to_referenceable.name}}_for_{{snake_case from_referenceable.name}}",
       payload: {
-        {{snake_case from_referenceable.singular_arg}}: baseAddress,
-        {{snake_case to_referenceable.singular_arg}}: targetAddress
+        base_{{snake_case from_referenceable.singular_arg}}: baseAddress,
+        target_{{snake_case to_referenceable.singular_arg}}: targetAddress
       }
     });
     

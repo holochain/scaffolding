@@ -26,6 +26,12 @@ export class {{pascal_case (plural ../entry_type.name)}}For{{pascal_case linked_
       payload: {{camel_case linked_from.singular_arg}},
   }) as Promise<Array<{{#if ../entry_type.reference_entry_hash}}EntryHash{{else}}ActionHash{{/if}}>>, () => [this.{{camel_case linked_from.singular_arg}}]);
 
+  firstUpdated() {
+    if (this.{{camel_case linked_from.singular_arg}} === undefined) {
+      throw new Error(`The {{camel_case linked_from.singular_arg}} property is required for the {{kebab_case (plural ../entry_type.name)}}-for-{{kebab_case linked_from.name}} element`);
+    }
+  }
+
   renderList(hashes: Array<{{#if ../entry_type.reference_entry_hash}}EntryHash{{else}}ActionHash{{/if}}>) {
     if (hashes.length === 0) return html`<span>No {{lower_case (plural ../entry_type.name)}} found for this {{lower_case linked_from.name}}.</span>`;
     
