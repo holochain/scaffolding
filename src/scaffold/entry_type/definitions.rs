@@ -289,7 +289,7 @@ impl Referenceable {
 
         match c {
             Cardinality::Vector => pluralizer::pluralize(singular.as_str(), 2, false),
-            _ => pluralizer::pluralize(singular.as_str(), 1, false),
+            _ => singular,
         }
     }
 }

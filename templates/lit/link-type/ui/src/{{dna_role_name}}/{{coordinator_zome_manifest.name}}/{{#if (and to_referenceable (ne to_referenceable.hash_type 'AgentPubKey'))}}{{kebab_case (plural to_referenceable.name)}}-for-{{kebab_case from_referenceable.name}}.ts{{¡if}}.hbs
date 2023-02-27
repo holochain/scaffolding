@@ -31,6 +31,10 @@ export class {{pascal_case (plural to_referenceable.name)}}For{{pascal_case from
   }) as Promise<Array<Record>>, () => [this.{{camel_case from_referenceable.singular_arg}}]);
 
   firstUpdated() {
+    if (this.{{camel_case from_referenceable.singular_arg}} === undefined) {
+      throw new Error(`The {{camel_case from_referenceable.singular_arg}} property is required for the {{kebab_case (plural to_referenceable.name)}}-for-{{kebab_case from_referenceable.name}} element`);
+    }
+
     this.client.on('signal', signal => {
       if (signal.zome_name !== '{{coordinator_zome_manifest.name}}') return;
       const payload = signal.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;

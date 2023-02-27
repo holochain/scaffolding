@@ -19,6 +19,13 @@ let error: any = undefined;
 $: hashes, loading, error;
 
 onMount(async () => {
+  {{#if (eq collection_type.type "ByAuthor")}}
+    if (author === undefined) {
+      throw new Error(`The author input is required for the {{pascal_case collection_name}} element`);
+    }
+
+  {{/if}}
+
   await fetch{{pascal_case (plural referenceable.name)}}();
   client.on('signal', signal => {
     if (signal.zome_name !== '{{coordinator_zome_manifest.name}}') return;

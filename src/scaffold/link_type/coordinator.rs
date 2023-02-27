@@ -93,7 +93,7 @@ pub fn add_link_handler(
 
     let bidireccional_create = match bidireccional {
         true => format!(
-            r#"create_link(input.{to_arg_name}, input.{from_arg_name}, LinkTypes::{inverse_link_type_name}, ())?;"#
+            r#"create_link(input.target_{to_arg_name}, input.base_{from_arg_name}, LinkTypes::{inverse_link_type_name}, ())?;"#
         ),
         false => format!(""),
     };
@@ -101,12 +101,12 @@ pub fn add_link_handler(
     format!(
         r#"#[derive(Serialize, Deserialize, Debug)]
 pub struct Add{singular_pascal_to_entry_type}For{singular_pascal_from_entry_type}Input {{
-    pub {from_arg_name}: {from_hash_type},
-    pub {to_arg_name}: {to_hash_type},
+    pub base_{from_arg_name}: {from_hash_type},
+    pub target_{to_arg_name}: {to_hash_type},
 }}
 #[hdk_extern]
 pub fn add_{singular_snake_to_entry_type}_for_{singular_snake_from_entry_type}(input: Add{singular_pascal_to_entry_type}For{singular_pascal_from_entry_type}Input) -> ExternResult<()> {{
-    create_link(input.{from_arg_name}.clone(), input.{to_arg_name}.clone(), LinkTypes::{normal_link_type_name}, ())?;
+    create_link(input.base_{from_arg_name}.clone(), input.target_{to_arg_name}.clone(), LinkTypes::{normal_link_type_name}, ())?;
     {bidireccional_create}
 
     Ok(())    
@@ -235,10 +235,10 @@ fn remove_link_handlers(
     let bidireccional_remove = match bidireccional {
         true => format!(
             r#"
-    let links = get_links(input.{to_arg_name}.clone(), LinkTypes::{inverse_link_type_name}, None)?;
+    let links = get_links(input.target_{to_arg_name}.clone(), LinkTypes::{inverse_link_type_name}, None)?;
 
     for link in links {{
-        if {from_inverse}.eq(&input.{from_arg_name}) {{
+        if {from_inverse}.eq(&input.base_{from_arg_name}) {{
             delete_link(link.create_link_hash)?;
         }}
     }}"#
@@ -248,15 +248,15 @@ fn remove_link_handlers(
     format!(
         r#"#[derive(Serialize, Deserialize, Debug)]
 pub struct Remove{singular_pascal_to_entry_type}For{singular_pascal_from_entry_type}Input {{
-    pub {from_arg_name}: {from_hash_type},
-    pub {to_arg_name}: {to_hash_type},
+    pub base_{from_arg_name}: {from_hash_type},
+    pub target_{to_arg_name}: {to_hash_type},
 }}
 #[hdk_extern]
 pub fn remove_{singular_snake_to_entry_type}_for_{singular_snake_from_entry_type}(input: Remove{singular_pascal_to_entry_type}For{singular_pascal_from_entry_type}Input ) -> ExternResult<()> {{
-    let links = get_links(input.{from_arg_name}.clone(), LinkTypes::{pascal_link_type_name}, None)?;
+    let links = get_links(input.base_{from_arg_name}.clone(), LinkTypes::{pascal_link_type_name}, None)?;
     
     for link in links {{
-        if {from_link}.eq(&input.{to_arg_name}) {{
+        if {from_link}.eq(&input.target_{to_arg_name}) {{
             delete_link(link.create_link_hash)?;
         }}
     }}

@@ -43,6 +43,10 @@ export default defineComponent({
     }
   },
   async mounted() {
+    if (this.{{camel_case from_referenceable.singular_arg}} === undefined) {
+      throw new Error(`The {{camel_case from_referenceable.singular_arg}} input is required for the {{pascal_case (plural to_referenceable.name)}}For{{pascal_case from_referenceable.name}} element`);
+    }
+
     try {
       const records: Array<Record> = await this.client.callZome({
         cap_secret: null,

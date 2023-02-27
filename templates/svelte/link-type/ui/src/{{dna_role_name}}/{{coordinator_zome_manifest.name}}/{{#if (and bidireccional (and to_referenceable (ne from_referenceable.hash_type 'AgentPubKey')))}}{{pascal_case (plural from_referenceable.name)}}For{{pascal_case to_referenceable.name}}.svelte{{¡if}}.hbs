@@ -18,6 +18,10 @@ let error: any = undefined;
 $: hashes, loading, error;
 
 onMount(async () => {
+  if ({{camel_case to_referenceable.singular_arg}} === undefined) {
+    throw new Error(`The {{camel_case to_referenceable.singular_arg}} input is required for the {{pascal_case (plural from_referenceable.name)}}For{{pascal_case to_referenceable.name}} element`);
+  }
+
   try {
     const records = await client.callZome({
       cap_secret: null,

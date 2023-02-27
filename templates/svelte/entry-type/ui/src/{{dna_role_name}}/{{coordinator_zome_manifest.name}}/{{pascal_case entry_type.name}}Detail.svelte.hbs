@@ -43,7 +43,12 @@ let errorSnackbar: Snackbar;
   
 $: {{#if crud.update}}editing, {{/if}} error, loading, record, {{camel_case entry_type.name}};
 
-onMount(() => fetch{{pascal_case entry_type.name}}());
+onMount(async () => {
+  if ({{camel_case entry_type.name}}Hash === undefined) {
+    throw new Error(`The {{camel_case entry_type.name}}Hash input is required for the {{pascal_case entry_type.name}}Detail element`);
+  }
+  await fetch{{pascal_case entry_type.name}}();
+});
 
 async function fetch{{pascal_case entry_type.name}}() {
   loading = true;

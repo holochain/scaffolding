@@ -94,8 +94,18 @@ export default defineComponent({
       return decode((this.currentRecord.entry as any).Present.entry) as {{pascal_case entry_type.name}};
     },
     is{{pascal_case entry_type.name}}Valid() {
-    return true{{#each entry_type.fields}}{{#if widget}}{{#if (eq cardinality "single")}} && {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate=(concat "this." (camel_case field_name)) }}{{/if}}{{#if (eq cardinality "vector")}} && this.{{camel_case field_name}}.every(e => {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate="e" }}){{/if}}{{/if}}{{/each}};
+      return true{{#each entry_type.fields}}{{#if widget}}{{#if (eq cardinality "single")}} && {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate=(concat "this." (camel_case field_name)) }}{{/if}}{{#if (eq cardinality "vector")}} && this.{{camel_case field_name}}.every(e => {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate="e" }}){{/if}}{{/if}}{{/each}};
     },
+  },
+  mounted() {
+    if (this.currentRecord === undefined) {
+      throw new Error(`The currentRecord input is required for the Edit{{pascal_case entry_type.name}} element`);
+    }
+  {{#if link_from_original_to_each_update}}
+    if (this.original{{pascal_case entry_type.name}}Hash === undefined) {
+      throw new Error(`The original{{pascal_case entry_type.name}}Hash input is required for the Edit{{pascal_case entry_type.name}} element`);
+    }
+  {{/if}}
   },
   methods: {
     async update{{pascal_case entry_type.name}}() {

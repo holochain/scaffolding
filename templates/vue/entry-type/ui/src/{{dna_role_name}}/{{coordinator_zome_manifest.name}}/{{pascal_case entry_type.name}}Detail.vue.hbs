@@ -101,6 +101,10 @@ export default defineComponent({
     }
   },
   async mounted() {
+    if (this.{{camel_case entry_type.name}}Hash === undefined) {
+      throw new Error(`The {{camel_case entry_type.name}}Hash input is required for the {{pascal_case entry_type.name}}Detail element`);
+    }
+
     await this.fetch{{pascal_case entry_type.name}}();
   },
   methods: {
