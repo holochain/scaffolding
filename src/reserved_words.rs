@@ -2,7 +2,24 @@ use convert_case::{Case, Casing};
 
 use crate::error::{ScaffoldError, ScaffoldResult};
 
-const RESERVED_WORDS: [&str; 9] = [
+const RESERVED_WORDS: [&str; 26] = [
+    "type",
+    "role",
+    "enum",
+    "pub",
+    "fn",
+    "mod",
+    "struct",
+    "const",
+    "Option",
+    "Result",
+    "crate",
+    "hdi",
+    "hdk",
+    "return",
+    "if",
+    "else",
+    "match",
     "Action",
     "Entry",
     "Record",
