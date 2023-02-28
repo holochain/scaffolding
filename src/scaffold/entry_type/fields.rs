@@ -220,7 +220,9 @@ pub fn choose_field(
     let maybe_linked_from = match &field_type {
         FieldType::AgentPubKey => {
             let link_from = Confirm::with_theme(&ColorfulTheme::default())
-                .with_prompt("Should a link from this field be created when this entry is created?")
+                .with_prompt(
+                    "Should a link from the AgentPubKey provided in this field also be created when entries of this type are created?"
+                )
                 .interact()?;
 
             match link_from {
@@ -240,7 +242,9 @@ pub fn choose_field(
             } else {
                 let link_from = Confirm::with_theme(&ColorfulTheme::default())
                     .with_prompt(
-                        "Should a link from this field be created when this entry is created?",
+                        format!(
+                            "Should a link from the {} provided in this field also be created when entries of this type are created?", 
+                            field_type.to_string())
                     )
                     .interact()?;
 
