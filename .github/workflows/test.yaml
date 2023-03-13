@@ -11,14 +11,8 @@ jobs:
   testbuild:
     runs-on: ubuntu-latest
     steps:
-      - name: Maximize build space
-        uses: easimon/maximize-build-space@v6
-        with:
-          remove-dotnet: true
-          remove-android: true
-          remove-haskell: true
-          root-reserve-mb: 512
-          swap-size-mb: 1024
+      - name: Extend space
+        uses: ./.github/actions/extend-space
 
       - uses: actions/checkout@v2
               
