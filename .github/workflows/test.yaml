@@ -11,8 +11,6 @@ jobs:
   testbuild:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-
       - name: Maximize build space
         uses: easimon/maximize-build-space@v6
         with:
@@ -21,7 +19,9 @@ jobs:
           remove-haskell: true
           root-reserve-mb: 512
           swap-size-mb: 1024
-        
+
+      - uses: actions/checkout@v2
+              
       - name: Install nix
         uses: cachix/install-nix-action@v18
         with:
