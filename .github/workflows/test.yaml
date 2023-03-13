@@ -13,6 +13,16 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Maximize build space
+        uses: easimon/maximize-build-space@v6
+        with:
+          remove-dotnet: true
+          remove-android: true
+          remove-haskell: true
+          build-mount-path: /mnt/extended
+          root-reserve-mb: 512
+          swap-size-mb: 1024
+        
       - name: Install nix
         uses: cachix/install-nix-action@v18
         with:
@@ -20,7 +30,7 @@ jobs:
           extra_nix_config: |
             experimental-features = flakes nix-command
 
-      - uses: cachix/cachix-action@v10
+      - uses: cachix/cachix-action@v12
         with:
           name: holochain-ci
 
