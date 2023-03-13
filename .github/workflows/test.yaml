@@ -35,5 +35,6 @@ jobs:
 
       - name: Install and test
         run: |
+          ls
           nix develop --command bash -c "cargo install --path . && sh run_test.sh"
 
