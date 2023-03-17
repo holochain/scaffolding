@@ -7,15 +7,16 @@ CLI to easily generate and edit holochain apps.
 The easiest way to start using the scaffolding tool is through holonix:
 
 ```bash
-nix run github:holochain/holochain#hc-scaffold -- example forum
-hc-scaffold --version
+nix run github:holochain/holochain#hc-scaffold -- --version
 ```
 
 Should print the version of the scaffolding tool.
 
 ## Usage
 
-These are the commands that you can run with the scaffolding tool:
+Refer to [the holochain developer instructions](https://developer.holochain.org/get-building/) to know how you can use the scaffolding tool to create your own apps.
+
+These are the commands that you can run with the scaffolding tool inside of a holonix develop shell:
 
 ```bash
 # Scaffold an example app
