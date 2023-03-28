@@ -430,6 +430,7 @@ pub fn scaffold_coordinator_zome_in_path(
     dna_file_tree: DnaFileTree,
     template_file_tree: &FileTree,
     zome_name: &String,
+    simplified: bool,
     dependencies: &Option<Vec<String>>,
     path: &PathBuf,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
@@ -452,7 +453,7 @@ pub fn scaffold_coordinator_zome_in_path(
     let zome: FileTree = dir! {
         "Cargo.toml" => file!(coordinator::initial_cargo_toml(zome_name, dependencies)),
         "src" => dir! {
-            "lib.rs" => file!(coordinator::initial_lib_rs(dependencies))
+            "lib.rs" => file!(coordinator::initial_lib_rs(simplified, dependencies))
         }
     };
 
@@ -496,6 +497,7 @@ pub fn scaffold_coordinator_zome(
         dna_file_tree,
         template_file_tree,
         zome_name,
+        false,
         dependencies,
         &path_to_scaffold_in,
     )

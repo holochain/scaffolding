@@ -75,6 +75,7 @@ pub fn scaffold_entry_type(
     zome_file_tree: ZomeFileTree,
     template_file_tree: &FileTree,
     name: &String,
+    simplified: bool, // skips all crud functions and simplifies inital lib files
     maybe_crud: &Option<Crud>,
     maybe_reference_entry_hash: &Option<bool>,
     maybe_link_from_original_to_each_update: &Option<bool>,
@@ -208,16 +209,18 @@ pub fn scaffold_entry_type(
         )?;
     }
 
-    let zome_file_tree =
+    let mut zome_file_tree =
         ZomeFileTree::from_zome_manifest(zome_file_tree.dna_file_tree, coordinator_zome.clone())?;
 
-    let zome_file_tree = add_crud_functions_to_coordinator(
-        zome_file_tree,
-        &integrity_zome_name,
-        &entry_def,
-        &crud,
-        link_from_original_to_each_update,
-    )?;
+    if !simplified {
+        zome_file_tree = add_crud_functions_to_coordinator(
+            zome_file_tree,
+            &integrity_zome_name,
+            &entry_def,
+            &crud,
+            link_from_original_to_each_update,
+        )?;
+    }
 
     let dna_manifest = zome_file_tree.dna_file_tree.dna_manifest.clone();
 
