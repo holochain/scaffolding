@@ -1,5 +1,5 @@
 use convert_case::{Case, Casing};
-use holochain::test_utils::itertools::Itertools;
+use itertools::Itertools;
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use std::{ffi::OsString, path::PathBuf};
