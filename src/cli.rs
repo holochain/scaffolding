@@ -72,6 +72,9 @@ pub enum HcScaffold {
         /// If "--templates-url" is given, the template must be located at the ".templates/<TEMPLATE NAME>" folder of the repository
         /// If not, the template must be an option from the built-in templates: "vanilla", "vue", "lit", "svelte"
         template: Option<String>,
+
+        #[structopt(long="holo", hidden = true)]
+        holo_enabled: bool,
     },
     /// Set up the template used in this project
     Template(HcScaffoldTemplate),
@@ -228,6 +231,7 @@ impl HcScaffold {
                 template,
                 templates_url,
                 templates_path,
+                holo_enabled
             } => {
                 let prompt = String::from("App name (no whitespaces):");
                 let name: String = match name {
@@ -305,6 +309,7 @@ impl HcScaffold {
                     &template_file_tree,
                     template_name,
                     scaffold_template,
+                    holo_enabled
                 )?;
 
                 let file_tree = MergeableFileSystemTree::<OsString, String>::from(dir! {
@@ -733,6 +738,7 @@ Collection "{}" scaffolded!
                             &template_file_tree,
                             template_name.clone(),
                             false,
+                            false,
                         )?;
 
                         // scaffold dna hello_world
@@ -809,6 +815,7 @@ pub fn hello_world(_: ()) -> ExternResult<String> {{
                             &template_file_tree,
                             template_name.clone(),
                             false,
+                            false
                         )?;
 
                         // scaffold dna hello_world

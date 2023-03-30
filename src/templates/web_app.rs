@@ -22,12 +22,14 @@ pub struct ScaffoldWebAppData {
     pub hdi_version: String,
     pub holochain_client_version: String,
     pub tryorama_version: String,
+    pub holo_enabled: bool,
 }
 
 pub fn scaffold_web_app_template(
     mut app_file_tree: FileTree,
     template_file_tree: &FileTree,
     app_name: &String,
+    holo_enabled: bool,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     let data = ScaffoldWebAppData {
         app_name: app_name.clone(),
@@ -36,6 +38,7 @@ pub fn scaffold_web_app_template(
         hdi_version: hdi_version(),
         holochain_client_version: holochain_client_version(),
         tryorama_version: tryorama_version(),
+        holo_enabled,
     };
 
     let h = build_handlebars(template_file_tree)?;
