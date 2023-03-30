@@ -578,7 +578,6 @@ Add new entry definitions to your zome with:
                     zome_file_tree,
                     &template_file_tree,
                     &name,
-                    false,
                     &crud,
                     &reference_entry_hash,
                     &link_from_original_to_each_update,
@@ -736,90 +735,6 @@ Collection "{}" scaffolded!
                             false,
                         )?;
 
-                        // // scaffold dna hello_world
-                        // let dna_name = String::from("hello_world");
-
-                        // let app_file_tree =
-                        //     AppFileTree::get_or_choose(file_tree, &Some(name.clone()))?;
-                        // let ScaffoldedTemplate { file_tree, .. } =
-                        //     scaffold_dna(app_file_tree, &template_file_tree, &dna_name)?;
-
-                        // // scaffold integrity zome hello_world
-                        // let dna_file_tree =
-                        //     DnaFileTree::get_or_choose(file_tree, &Some(dna_name.clone()))?;
-                        // let dna_manifest_path = dna_file_tree.dna_manifest_path.clone();
-
-                        // let integrity_zome_name = String::from("hello_world_integrity");
-                        // let integrity_zome_path = PathBuf::new()
-                        //     .join("dnas")
-                        //     .join(&dna_name)
-                        //     .join("zomes")
-                        //     .join("integrity");
-                        // let ScaffoldedTemplate { file_tree, .. } =
-                        //     scaffold_integrity_zome_with_path(
-                        //         dna_file_tree,
-                        //         &template_file_tree,
-                        //         &integrity_zome_name,
-                        //         &integrity_zome_path,
-                        //     )?;
-
-                        // // scaffold integrity zome hello_world
-                        // let dna_file_tree =
-                        //     DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
-
-                        // let coordinator_zome_name = String::from("hello_world");
-                        // let coordinator_zome_path = PathBuf::new()
-                        //     .join("dnas")
-                        //     .join(dna_name)
-                        //     .join("zomes")
-                        //     .join("coordinator");
-                        // let ScaffoldedTemplate { file_tree, .. } =
-                        //     scaffold_coordinator_zome_in_path(
-                        //         dna_file_tree,
-                        //         &template_file_tree,
-                        //         &coordinator_zome_name,
-                        //         true,
-                        //         &Some(vec![integrity_zome_name.clone()]),
-                        //         &coordinator_zome_path,
-                        //     )?;
-
-
-                        // // Scaffold the app here to enable ZomeFileTree::from_manifest(), which calls `cargo metadata`
-                        // MergeableFileSystemTree::<OsString, String>::from(file_tree.clone())
-                        //     .build(&app_dir)?;
-
-                        // std::env::set_current_dir(&app_dir)?;
-
-                        // let dna_file_tree =
-                        //     DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
-                            
-                        // let zome_file_tree = ZomeFileTree::get_or_choose_integrity(
-                        //     dna_file_tree,
-                        //     &Some(integrity_zome_name.clone()),
-                        // )?;
-    
-                        // let ScaffoldedTemplate { file_tree, .. } = scaffold_entry_type(
-                        //     zome_file_tree,
-                        //     &template_file_tree,
-                        //     &String::from("hello"),
-                        //     true,
-                        //     &Some(Crud {
-                        //         update: false,
-                        //         delete: false,
-                        //     }),
-                        //     &Some(false),
-                        //     &Some(true),
-                        //     &Some(vec![
-                        //         FieldDefinition {
-                        //             field_name: String::from("hello"),
-                        //             field_type: FieldType::String,
-                        //             widget: None,
-                        //             cardinality: Cardinality::Single,
-                        //             linked_from: None,
-                        //         },
-                        //     ]),
-                        // )?;
-
                         file_tree
                     }
                     Example::Forum => {
@@ -874,7 +789,6 @@ Collection "{}" scaffolded!
                                 dna_file_tree,
                                 &template_file_tree,
                                 &coordinator_zome_name,
-                                false,
                                 &Some(vec![integrity_zome_name.clone()]),
                                 &coordinator_zome_path,
                             )?;
@@ -897,7 +811,6 @@ Collection "{}" scaffolded!
                             zome_file_tree,
                             &template_file_tree,
                             &String::from("post"),
-                            false,
                             &Some(Crud {
                                 update: true,
                                 delete: true,
@@ -934,7 +847,6 @@ Collection "{}" scaffolded!
                             zome_file_tree,
                             &template_file_tree,
                             &String::from("comment"),
-                            false,
                             &Some(Crud {
                                 update: false,
                                 delete: true,

@@ -43,7 +43,7 @@ serde = {{ workspace = true }}
     )
 }
 
-pub fn initial_lib_rs(simplified: bool, dependencies: &Option<Vec<String>>) -> String {
+pub fn initial_lib_rs(dependencies: &Option<Vec<String>>) -> String {
     let integrity_imports = match dependencies {
         None => String::from(""),
         Some(deps) => {
@@ -55,20 +55,7 @@ pub fn initial_lib_rs(simplified: bool, dependencies: &Option<Vec<String>>) -> S
             s
         }
     };
-    if simplified {
-        format!(
-            r#"use hdk::prelude::*;
-    {integrity_imports}
-    
-    /// Called the first time a zome call is made to the cell containing this zome
-    #[hdk_extern]
-    pub fn init(_: ()) -> ExternResult<InitCallbackResult> {{
-      Ok(InitCallbackResult::Pass)
-    }}
-"#)
-    }
-    else {
-        format!(
+    format!(
         r#"use hdk::prelude::*;
 {integrity_imports}
 
@@ -101,7 +88,7 @@ fn signal_action(action: SignedActionHashed) -> ExternResult<()> {{
 }}
 
 "#
-    )}
+    )
 }
 
 fn choose_extern_function(
