@@ -11,43 +11,43 @@
 
   let loading = true; 
 
-  {{#if holo_enabled}}
-    const IS_HOLO = ['true', '1', 't'].includes(import.meta.env.VITE_APP_IS_HOLO?.toLowerCase())
+{{#if holo_enabled}}
+  const IS_HOLO = ['true', '1', 't'].includes(import.meta.env.VITE_APP_IS_HOLO?.toLowerCase())
 
-    const logout = async () => {
-      await (client as WebSdk).signOut();
-      (client as WebSdk).signIn({ cancellable: false })
-    }
-  {{/if}}
+  const logout = async () => {
+    await (client as WebSdk).signOut();
+    (client as WebSdk).signIn({ cancellable: false })
+  }
+{{/if}}
 
   onMount(async () => {
-    {{#if holo_enabled}}
-      if (IS_HOLO) {        
-        client = await WebSdk.connect({
-          chaperoneUrl: import.meta.env.VITE_APP_CHAPERONE_URL,
-          authFormCustomization: {
-            appName: '{{app_name}}',
-          }
-        });
-
-      (client as WebSdk).on('agent-state', agent_state => {
-        loading = !agent_state.isAvailable || agent_state.isAnonymous
+  {{#if holo_enabled}}
+    if (IS_HOLO) {        
+      client = await WebSdk.connect({
+        chaperoneUrl: import.meta.env.VITE_APP_CHAPERONE_URL,
+        authFormCustomization: {
+          appName: '{{app_name}}',
+        }
       });
-      
-      (client as WebSdk).signUp({ cancellable: false });
 
-      } else {
-        // We pass '' as url because it will dynamically be replaced in launcher environments
-        client = await AppAgentWebsocket.connect('', '{{app_name}}');
+    (client as WebSdk).on('agent-state', agent_state => {
+      loading = !agent_state.isAvailable || agent_state.isAnonymous
+    });
+    
+    (client as WebSdk).signUp({ cancellable: false });
 
-        loading = false;
-      }
-    {{else}}
+    } else {
       // We pass '' as url because it will dynamically be replaced in launcher environments
       client = await AppAgentWebsocket.connect('', '{{app_name}}');
 
       loading = false;
-    {{/if}}
+    }
+  {{else}}
+    // We pass '' as url because it will dynamically be replaced in launcher environments
+    client = await AppAgentWebsocket.connect('', '{{app_name}}');
+
+    loading = false;
+  {{/if}}
   });
 
   setContext(clientContext, {
@@ -79,16 +79,16 @@ import CreateTodo from './todos/todos/CreateTodo.svelte';
         <li>Replace this "EDIT ME!" section with <code>&lt;CreateTodo&gt;&lt;/CreateTodo&gt;&lt;AllTodos&gt;&lt;/AllTodos&gt;</code>.</li>
         </ol>
     </div>
-    {{#if holo_enabled}}
-      {#if IS_HOLO}
-        <mwc-button
-          style="margin-top: 16px"
-          raised
-          label="Logout"
-          on:click={() => logout()}
-        />
-      {/if}
-    {{/if}}
+  {{#if holo_enabled}}
+    {#if IS_HOLO}
+      <mwc-button
+        style="margin-top: 16px"
+        raised
+        label="Logout"
+        on:click={() => logout()}
+      />
+    {/if}
+  {{/if}}
   {/if}
 </main>
 
