@@ -39,13 +39,15 @@
       } else {
         // We pass '' as url because it will dynamically be replaced in launcher environments
         client = await AppAgentWebsocket.connect('', '{{app_name}}');
+
+        loading = false;
       }
     {{else}}
       // We pass '' as url because it will dynamically be replaced in launcher environments
       client = await AppAgentWebsocket.connect('', '{{app_name}}');
-    {{/if}}
 
-    loading = false;
+      loading = false;
+    {{/if}}
   });
 
   setContext(clientContext, {
@@ -79,11 +81,12 @@ import CreateTodo from './todos/todos/CreateTodo.svelte';
     </div>
     {{#if holo_enabled}}
       {#if IS_HOLO}
-        <mwc-button 
+        <mwc-button
+          style="margin-top: 16px"
           raised
           label="Logout"
           on:click={() => logout()}
-        ></mwc-button>
+        />
       {/if}
     {{/if}}
   {/if}
