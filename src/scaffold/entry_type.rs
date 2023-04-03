@@ -208,10 +208,10 @@ pub fn scaffold_entry_type(
         )?;
     }
 
-    let zome_file_tree =
+    let mut zome_file_tree =
         ZomeFileTree::from_zome_manifest(zome_file_tree.dna_file_tree, coordinator_zome.clone())?;
 
-    let zome_file_tree = add_crud_functions_to_coordinator(
+    zome_file_tree = add_crud_functions_to_coordinator(
         zome_file_tree,
         &integrity_zome_name,
         &entry_def,
