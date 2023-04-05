@@ -81,7 +81,7 @@ pub fn scaffold_web_app(
         &template_file_tree,
         template_name,
         scaffold_template,
-        holo_enabled
+        holo_enabled,
     )?;
     Ok(ScaffoldedTemplate {
         file_tree: scaffolded_template.file_tree,

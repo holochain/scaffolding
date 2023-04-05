@@ -2,7 +2,9 @@
   import { onMount, setContext } from 'svelte';
   import type { ActionHash, AppAgentClient } from '@holochain/client';
   import { AppAgentWebsocket } from '@holochain/client';
+{{#if holo_enabled}}
   import WebSdk from '@holo-host/web-sdk'
+{{/if}}
   import '@material/mwc-circular-progress';
 
   import { clientContext } from './contexts';
