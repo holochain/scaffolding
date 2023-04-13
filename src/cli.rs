@@ -1,7 +1,5 @@
 use crate::error::{ScaffoldError, ScaffoldResult};
-use crate::file_tree::{
-    dir_content, file_content, load_directory_into_memory, FileTree,
-};
+use crate::file_tree::{dir_content, file_content, load_directory_into_memory, FileTree};
 use crate::scaffold::app::cargo::exec_metadata;
 use crate::scaffold::app::nix::setup_nix_developer_environment;
 use crate::scaffold::app::AppFileTree;
@@ -72,6 +70,9 @@ pub enum HcScaffold {
         /// If "--templates-url" is given, the template must be located at the ".templates/<TEMPLATE NAME>" folder of the repository
         /// If not, the template must be an option from the built-in templates: "vanilla", "vue", "lit", "svelte"
         template: Option<String>,
+
+        #[structopt(long = "holo", hidden = true)]
+        holo_enabled: bool,
     },
     /// Set up the template used in this project
     Template(HcScaffoldTemplate),
@@ -228,6 +229,7 @@ impl HcScaffold {
                 template,
                 templates_url,
                 templates_path,
+                holo_enabled,
             } => {
                 let prompt = String::from("App name (no whitespaces):");
                 let name: String = match name {
@@ -305,6 +307,7 @@ impl HcScaffold {
                     &template_file_tree,
                     template_name,
                     scaffold_template,
+                    holo_enabled,
                 )?;
 
                 let file_tree = MergeableFileSystemTree::<OsString, String>::from(dir! {
@@ -733,6 +736,7 @@ Collection "{}" scaffolded!
                             &template_file_tree,
                             template_name.clone(),
                             false,
+                            false,
                         )?;
 
                         file_tree
@@ -745,6 +749,7 @@ Collection "{}" scaffolded!
                             false,
                             &template_file_tree,
                             template_name.clone(),
+                            false,
                             false,
                         )?;
 

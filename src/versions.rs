@@ -6,6 +6,10 @@ pub fn holochain_client_version() -> String {
     String::from("^0.12.2")
 }
 
+pub fn web_sdk_version() -> String {
+    String::from("^0.6.10-prerelease")
+}
+
 pub fn hdi_version() -> String {
     holochain::HDI_VERSION.to_string()
 }
