@@ -8,6 +8,7 @@ homepage = "https://developer.holochain.org"
 documentation = "https://docs.rs/holochain_scaffolding_cli"
 repository = "https://github.com/holochain/scaffolding"
 readme = "README.md"
+resolver = "2"
 
 [[bin]]
 name = "hc-scaffold"

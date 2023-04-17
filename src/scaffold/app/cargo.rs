@@ -12,6 +12,7 @@ members = [
   "dnas/*/zomes/coordinator/*",
   "dnas/*/zomes/integrity/*",
 ]
+resolver = "2"
 
 [profile.dev]
 opt-level = "z"
