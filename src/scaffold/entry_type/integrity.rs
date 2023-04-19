@@ -350,7 +350,7 @@ pub use {}::*;
                                 if let syn::Stmt::Expr(syn::Expr::Match(match_expr)) = stmt {
                                     if let syn::Expr::Try(try_expr) = &mut *match_expr.expr {
                                         if let syn::Expr::MethodCall(call) = &mut *try_expr.expr {
-                                            if call.method.to_string().eq(&String::from("to_type"))
+                                            if call.method.to_string().eq(&String::from("flattened"))
                                             {
                                                 if let Some(turbofish) = &mut call.turbofish {
                                                     if let Some(first_arg) =
@@ -529,7 +529,7 @@ fn add_entry_type_to_validation_arms(
                 if let syn::Stmt::Expr(syn::Expr::Match(match_expr)) = stmt {
                     if let syn::Expr::Try(try_expr) = &mut *match_expr.expr {
                         if let syn::Expr::MethodCall(call) = &mut *try_expr.expr {
-                            if call.method.to_string().eq(&String::from("to_type")) {
+                            if call.method.to_string().eq(&String::from("flattened")) {
                                 for arm in &mut match_expr.arms {
                                     if let syn::Pat::TupleStruct(pat_tuple_struct) = &mut arm.pat {
                                         if let Some(path_segment) =
