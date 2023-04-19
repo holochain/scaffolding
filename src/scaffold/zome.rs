@@ -339,7 +339,7 @@ pub fn add_common_zome_dependencies_to_workspace_cargo(
         &"hdk".to_string(),
         &format!("={}", hdk_version()),
     )?;
-    // TODO temporary: force pin the version because HDI does not require a specific version (^0.1.1 currently)
+    // TODO temporary: force pin the version because HDI does not require a specific version (^0.1.2 currently)
     let file_tree = add_workspace_external_dependency(
         file_tree,
         &"holochain_integrity_types".to_string(),
