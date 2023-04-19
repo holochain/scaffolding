@@ -329,25 +329,22 @@ fn try_to_guess_coordinator_zomes_location(
 pub fn add_common_zome_dependencies_to_workspace_cargo(
     file_tree: FileTree,
 ) -> ScaffoldResult<FileTree> {
-    println!("^&* HDI version according to holochain {}", hdi_version());
-    println!("^&* HDK version according to holochain {}", hdk_version());
-
     let file_tree = add_workspace_external_dependency(
         file_tree,
         &"hdi".to_string(),
-        &format!("={}", "0.2.2"),
+        &format!("={}", hdi_version()),
     )?;
     let file_tree = add_workspace_external_dependency(
         file_tree,
         &"hdk".to_string(),
-        &format!("={}", "0.1.2"),
+        &format!("={}", hdk_version()),
     )?;
-// // TODO temporary: force pin the version because HDI does not require a specific version (^0.1.1 currently)
-// let file_tree = add_workspace_external_dependency(
-//     file_tree,
-//     &"holochain_integrity_types".to_string(),
-//     &"=0.1.2".to_string(),
-// )?;
+    // TODO temporary: force pin the version because HDI does not require a specific version (^0.1.1 currently)
+    let file_tree = add_workspace_external_dependency(
+        file_tree,
+        &"holochain_integrity_types".to_string(),
+        &"=0.1.2".to_string(),
+    )?;
     let file_tree =
         add_workspace_external_dependency(file_tree, &"serde".to_string(), &"1".to_string())?;
 
