@@ -11,6 +11,7 @@ name = "{}"
 
 [dependencies]
 hdi = {{ workspace = true }}
+holochain_integrity_types = {{ workspace = true }}
 
 serde = {{ workspace = true }}
 "#,
@@ -57,8 +58,8 @@ pub fn validate_agent_joining(_agent_pub_key: AgentPubKey, _membrane_proof: &Opt
 /// You can read more about validation here: https://docs.rs/hdi/latest/hdi/index.html#data-validation
 #[hdk_extern]
 pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {{
-    match op.to_type::<(), ()>()? {{
-        OpType::StoreEntry(store_entry) => match store_entry {{
+    match op.flattened::<(), ()>()? {{
+        FlatOp::StoreEntry(store_entry) => match store_entry {{
             OpEntry::CreateEntry {{
                 app_entry,
                 action,
@@ -74,7 +75,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {{
             )),
             _ => Ok(ValidateCallbackResult::Valid)
         }},
-        OpType::RegisterUpdate(update_entry) => match update_entry {{
+        FlatOp::RegisterUpdate(update_entry) => match update_entry {{
             OpUpdate::Entry {{
                 original_action,
                 original_app_entry,
@@ -85,7 +86,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {{
             )),
             _ => Ok(ValidateCallbackResult::Valid)
         }},
-        OpType::RegisterDelete(delete_entry) => match delete_entry {{
+        FlatOp::RegisterDelete(delete_entry) => match delete_entry {{
             OpDelete::Entry {{
                 original_action,
                 original_app_entry,
@@ -95,7 +96,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {{
             )),
             _ => Ok(ValidateCallbackResult::Valid),
         }},
-        OpType::RegisterCreateLink {{
+        FlatOp::RegisterCreateLink {{
             link_type,
             base_address,
             target_address,
@@ -104,7 +105,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {{
         }} => Ok(ValidateCallbackResult::Invalid(String::from(
             "There are no link types in this integrity zome",
         ))),
-        OpType::RegisterDeleteLink {{
+        FlatOp::RegisterDeleteLink {{
             link_type,
             base_address,
             target_address,
@@ -114,7 +115,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {{
         }} => Ok(ValidateCallbackResult::Invalid(String::from(
             "There are no link types in this integrity zome",
         ))),
-        OpType::StoreRecord(store_record) => match store_record {{
+        FlatOp::StoreRecord(store_record) => match store_record {{
             /// Complementary validation to the `StoreEntry` Op, in which the record itself is validated
             /// If you want to optimize performance, you can remove the validation for an entry type here and keep it in `StoreEntry`
             /// Notice that doing so will cause `must_get_valid_record` for this record to return a valid record even if the `StoreEntry` validation failed
@@ -169,7 +170,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {{
             OpRecord::InitZomesComplete {{ .. }} => Ok(ValidateCallbackResult::Valid),
             _ => Ok(ValidateCallbackResult::Valid)
         }},
-        OpType::RegisterAgentActivity(agent_activity) => match agent_activity {{
+        FlatOp::RegisterAgentActivity(agent_activity) => match agent_activity {{
             OpActivity::CreateAgent {{
                 agent,
                 action
