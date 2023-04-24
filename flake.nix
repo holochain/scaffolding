@@ -7,6 +7,7 @@
     holochain = {
       url = "github:holochain/holochain";
       inputs.versions.url = "github:holochain/holochain?dir=versions/0_1";
+      inputs.holochain.url = "github:holochain/holochain/holochain-0.1.5-beta-rc.0";
     };
   };
 
@@ -25,8 +26,7 @@
           }: {
             devShells.default = pkgs.mkShell {
               inputsFrom = [ inputs.holochain.devShells.${system}.holonix ];
-              # TODO: remove sqlite package once https://github.com/holochain/holochain/pull/2248 is released
-              packages = [ pkgs.nodejs-18_x pkgs.sqlite ]; 
+              packages = [ pkgs.nodejs-18_x ]; 
             };
           };
       };

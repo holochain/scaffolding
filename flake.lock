@@ -161,11 +161,7 @@
         "crate2nix": "crate2nix",
         "flake-compat": "flake-compat_2",
         "flake-parts": "flake-parts",
-        "holochain": [
-          "holochain",
-          "versions",
-          "holochain"
-        ],
+        "holochain": "holochain_2",
         "lair": [
           "holochain",
           "versions",
@@ -201,6 +197,23 @@
       }
     },
     "holochain_2": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1682362638,
+        "narHash": "sha256-pL+3zQo6/4ctj/hEI0vihAPpBRiZ+9n7Vxl0fDRZc3g=",
+        "owner": "holochain",
+        "repo": "holochain",
+        "rev": "9242f34515dfaeaf722629f9550d064b7f248121",
+        "type": "github"
+      },
+      "original": {
+        "owner": "holochain",
+        "ref": "holochain-0.1.5-beta-rc.0",
+        "repo": "holochain",
+        "type": "github"
+      }
+    },
+    "holochain_3": {
       "flake": false,
       "locked": {
         "lastModified": 1681507583,
@@ -376,18 +389,18 @@
     },
     "versions": {
       "inputs": {
-        "holochain": "holochain_2",
+        "holochain": "holochain_3",
         "lair": "lair",
         "launcher": "launcher",
         "scaffolding": "scaffolding"
       },
       "locked": {
         "dir": "versions/0_1",
-        "lastModified": 1681885243,
-        "narHash": "sha256-5aWhXFe/MG7Kr+/6eF+DMHisQJWzY0fAmwaKz+UhZeU=",
+        "lastModified": 1682364754,
+        "narHash": "sha256-ut470AYaBnPcqB1Apgv08Nzl/7x++bg4BBI7lxZ8viA=",
         "owner": "holochain",
         "repo": "holochain",
-        "rev": "df2862d6f1964146e2e451433edfdf9381ac0dac",
+        "rev": "576adc8a04bb03ecd707e492a7fc978f4a302f41",
         "type": "github"
       },
       "original": {
