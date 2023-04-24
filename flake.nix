@@ -2,22 +2,27 @@
   description = "Template for Holochain app development";
 
   inputs = {
-    nixpkgs.follows = "holochain/nixpkgs";
+    nixpkgs.follows = "holochain-flake/nixpkgs";
 
-    holochain = {
+    # this can now be udpated directly, e.g.:
+    # nix flake lock --override-input holochain github:holochain/holochain/holochain-0.1.3
+    holochain.url = "github:holochain/holochain";
+    holochain.flake = false;
+
+    holochain-flake = {
       url = "github:holochain/holochain";
-      inputs.versions.url = "github:holochain/holochain?dir=versions/0_1";
+      inputs.versions.url = "github:holochain/holochain/?dir=versions/0_1";
       inputs.holochain.url = "github:holochain/holochain/holochain-0.2.0-beta-rc.6";
     };
   };
 
   outputs = inputs @ { ... }:
-    inputs.holochain.inputs.flake-parts.lib.mkFlake
+    inputs.holochain-flake.inputs.flake-parts.lib.mkFlake
       {
         inherit inputs;
       }
       {
-        systems = builtins.attrNames inputs.holochain.devShells;
+        systems = builtins.attrNames inputs.holochain-flake.devShells;
         perSystem =
           { config
           , pkgs
@@ -25,9 +30,11 @@
           , ...
           }: {
             devShells.default = pkgs.mkShell {
-              inputsFrom = [ inputs.holochain.devShells.${system}.holonix ];
-              # TODO: remove sqlite package once https://github.com/holochain/holochain/pull/2248 is released
-              packages = [ pkgs.nodejs-18_x pkgs.sqlite ]; 
+              inputsFrom = [ inputs.holochain-flake.devShells.${system}.holonix ];
+              packages = with pkgs; [
+                  # more packages go here
+                  pkgs.nodejs-18_x pkgs.binaryen 
+              ];
             };
           };
       };
