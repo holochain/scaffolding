@@ -1503,7 +1503,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "551a778172a450d7fc12e629ca3b0428d00f6afa9a43da1b630d54604e97371c"
 dependencies = [
  "cfg-if 0.1.10",
- "dirs-sys",
+ "dirs-sys 0.3.7",
 ]
 
 [[package]]
@@ -1512,7 +1512,16 @@ version = "4.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ca3aa72a6f96ea37bbc5aa912f6788242832f75369bdfdadcb0e38423f100059"
 dependencies = [
- "dirs-sys",
+ "dirs-sys 0.3.7",
+]
+
+[[package]]
+name = "dirs"
+version = "5.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dece029acd3353e3a58ac2e3eb3c8d6c35827a892edc6cc4138ef9c33df46ecd"
+dependencies = [
+ "dirs-sys 0.4.0",
 ]
 
 [[package]]
@@ -1524,6 +1533,17 @@ dependencies = [
  "libc",
  "redox_users",
  "winapi 0.3.9",
+]
+
+[[package]]
+name = "dirs-sys"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "04414300db88f70d74c5ff54e50f9e1d1737d9a5b90f53fcf2e95ca2a9ab554b"
+dependencies = [
+ "libc",
+ "redox_users",
+ "windows-sys 0.45.0",
 ]
 
 [[package]]
@@ -2210,7 +2230,7 @@ dependencies = [
  "rmpv",
  "serde",
  "serde_bytes",
- "sodoken",
+ "sodoken 0.0.7",
 ]
 
 [[package]]
@@ -2424,7 +2444,7 @@ dependencies = [
  "serde_json",
  "serde_yaml 0.9.21",
  "shrinkwraprs",
- "sodoken",
+ "sodoken 0.0.7",
  "structopt",
  "strum",
  "subtle-encoding",
@@ -2542,7 +2562,7 @@ dependencies = [
  "parking_lot 0.11.2",
  "serde",
  "serde_bytes",
- "sodoken",
+ "sodoken 0.0.7",
  "thiserror",
  "tokio 1.27.0",
  "tracing",
@@ -2589,7 +2609,7 @@ dependencies = [
  "convert_case 0.6.0",
  "degit",
  "dialoguer",
- "dirs",
+ "dirs 4.0.0",
  "handlebars",
  "holochain",
  "holochain_types",
@@ -2832,7 +2852,7 @@ dependencies = [
  "num_cpus",
  "once_cell",
  "rpassword 7.2.0",
- "sodoken",
+ "sodoken 0.0.7",
  "tokio 1.27.0",
 ]
 
@@ -3215,6 +3235,16 @@ checksum = "26b24dd0826eee92c56edcda7ff190f2cf52115c49eadb2c2da8063e2673a8c2"
 dependencies = [
  "libc",
  "windows-sys 0.42.0",
+]
+
+[[package]]
+name = "if-addrs"
+version = "0.10.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2cfc4a06638d2fd0dda83b01126fefd38ef9f04f54d2fc717a938df68b83a68d"
+dependencies = [
+ "libc",
+ "windows-sys 0.45.0",
 ]
 
 [[package]]
@@ -3805,6 +3835,16 @@ checksum = "b67380fd3b2fbe7527a606e18729d21c6f3951633d0500574c4dc22d2d638b9f"
 dependencies = [
  "cfg-if 1.0.0",
  "winapi 0.3.9",
+]
+
+[[package]]
+name = "libloading"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d580318f95776505201b28cf98eb1fa5e4be3b689633ba6a3e6cd880ff22d8cb"
+dependencies = [
+ "cfg-if 1.0.0",
+ "windows-sys 0.48.0",
 ]
 
 [[package]]
@@ -6287,6 +6327,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "sodoken"
+version = "0.0.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4ebd7d30290221181652f7a08112f5e7871e3deffde718dfa621025aa0e9c290"
+dependencies = [
+ "libc",
+ "libsodium-sys-stable",
+ "num_cpus",
+ "once_cell",
+ "one_err",
+ "parking_lot 0.12.1",
+ "tokio 1.27.0",
+]
+
+[[package]]
 name = "spin"
 version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7267,9 +7322,9 @@ dependencies = [
 
 [[package]]
 name = "tx5-core"
-version = "0.0.1-alpha.4"
+version = "0.0.1-alpha.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "115dcaf6103f82161164ec106df7f9b78f89093c66b5847540d81052e4081a3d"
+checksum = "ceeeff809f86347164035661f475c0a9bbf4040c4a6755183d0b84c8c6491d25"
 dependencies = [
  "base64 0.13.1",
  "once_cell",
@@ -7281,9 +7336,9 @@ dependencies = [
 
 [[package]]
 name = "tx5-go-pion"
-version = "0.0.1-alpha.7"
+version = "0.0.1-alpha.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4c40a2a06014d8c061ece18eb9a695395262b2986b6da3ad8fc3b0104d472820"
+checksum = "a3f4cf8c2763b07e1eac6a60030c0456685142ac85741a761949a7ea275e8591"
 dependencies = [
  "parking_lot 0.12.1",
  "tokio 1.27.0",
@@ -7294,16 +7349,16 @@ dependencies = [
 
 [[package]]
 name = "tx5-go-pion-sys"
-version = "0.0.1-alpha.9"
+version = "0.0.1-alpha.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c92a9d445cc2ec59c1b68d78d7673eb17e0fd114bdfb3ecf81187492d697acee"
+checksum = "8967286bdd9d20c56b2f32d8f48db754cf7b6e7eca2de4cf880a45dcca70091d"
 dependencies = [
  "Inflector",
  "base64 0.13.1",
- "dirs",
+ "dirs 5.0.0",
  "dunce",
  "libc",
- "libloading",
+ "libloading 0.8.0",
  "once_cell",
  "ouroboros",
  "sha2",
@@ -7314,14 +7369,14 @@ dependencies = [
 
 [[package]]
 name = "tx5-go-pion-turn"
-version = "0.0.1-alpha.4"
+version = "0.0.1-alpha.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e6517d958b39b693a1a26ded427bfdbd5bd40ae377c5daa91f2a93ed4536717e"
+checksum = "71db717f9fe2e83925a4489f0a3f542546a8797e225f23afd125799214c44a8f"
 dependencies = [
  "base64 0.13.1",
- "dirs",
+ "dirs 5.0.0",
  "dunce",
- "get_if_addrs",
+ "if-addrs 0.10.1",
  "once_cell",
  "sha2",
  "tokio 1.27.0",
@@ -7360,18 +7415,18 @@ dependencies = [
 
 [[package]]
 name = "tx5-signal-srv"
-version = "0.0.1-alpha.5"
+version = "0.0.1-alpha.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a3c93ec8a0c5ea84e09c3068db716584959c925428a25972cdae200a6e60e3e6"
+checksum = "9671d940802c9ff79974d96c2add464f8bf4e4d02e340d3d3a0ddb739fae6bfb"
 dependencies = [
  "clap 4.2.4",
- "dirs",
+ "dirs 5.0.0",
  "futures 0.3.28",
- "get_if_addrs",
+ "if-addrs 0.10.1",
  "once_cell",
  "prometheus",
  "rand 0.8.5",
- "sodoken",
+ "sodoken 0.0.9",
  "tokio 1.27.0",
  "tracing",
  "tracing-subscriber",
@@ -7884,7 +7939,7 @@ dependencies = [
  "enum-iterator",
  "enumset",
  "leb128",
- "libloading",
+ "libloading 0.7.4",
  "loupe",
  "object 0.28.4",
  "rkyv",
