@@ -2230,7 +2230,7 @@ dependencies = [
  "rmpv",
  "serde",
  "serde_bytes",
- "sodoken 0.0.7",
+ "sodoken",
 ]
 
 [[package]]
@@ -2444,7 +2444,7 @@ dependencies = [
  "serde_json",
  "serde_yaml 0.9.21",
  "shrinkwraprs",
- "sodoken 0.0.7",
+ "sodoken",
  "structopt",
  "strum",
  "subtle-encoding",
@@ -2562,7 +2562,7 @@ dependencies = [
  "parking_lot 0.11.2",
  "serde",
  "serde_bytes",
- "sodoken 0.0.7",
+ "sodoken",
  "thiserror",
  "tokio 1.27.0",
  "tracing",
@@ -2634,6 +2634,8 @@ dependencies = [
  "thiserror",
  "tokio 1.27.0",
  "toml 0.5.11",
+ "tx5",
+ "tx5-signal-srv",
 ]
 
 [[package]]
@@ -2852,7 +2854,7 @@ dependencies = [
  "num_cpus",
  "once_cell",
  "rpassword 7.2.0",
- "sodoken 0.0.7",
+ "sodoken",
  "tokio 1.27.0",
 ]
 
@@ -4580,9 +4582,9 @@ checksum = "624a8340c38c1b80fd549087862da4ba43e08858af025b236e509b6649fc13d5"
 
 [[package]]
 name = "openssl"
-version = "0.10.51"
+version = "0.10.52"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "97ea2d98598bf9ada7ea6ee8a30fb74f9156b63bbe495d64ec2b87c269d2dda3"
+checksum = "01b8574602df80f7b85fdfc5392fa884a4e3b3f4f35402c070ab34c3d3f78d56"
 dependencies = [
  "bitflags",
  "cfg-if 1.0.0",
@@ -4612,9 +4614,9 @@ checksum = "ff011a302c396a5197692431fc1948019154afc178baf7d8e37367442a4601cf"
 
 [[package]]
 name = "openssl-sys"
-version = "0.9.86"
+version = "0.9.87"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "992bac49bdbab4423199c654a5515bd2a6c6a23bf03f2dd3bdb7e5ae6259bc69"
+checksum = "8e17f59264b2809d77ae94f0e1ebabc434773f370d6ca667bd223ea10e06cc7e"
 dependencies = [
  "cc",
  "libc",
@@ -6327,21 +6329,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "sodoken"
-version = "0.0.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4ebd7d30290221181652f7a08112f5e7871e3deffde718dfa621025aa0e9c290"
-dependencies = [
- "libc",
- "libsodium-sys-stable",
- "num_cpus",
- "once_cell",
- "one_err",
- "parking_lot 0.12.1",
- "tokio 1.27.0",
-]
-
-[[package]]
 name = "spin"
 version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6574,9 +6561,9 @@ dependencies = [
 
 [[package]]
 name = "target-lexicon"
-version = "0.12.6"
+version = "0.12.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8ae9980cab1db3fceee2f6c6f643d5d8de2997c58ee8d25fb0cc8a9e9e7348e5"
+checksum = "fd1ba337640d60c3e96bc6f0638a939b9c9a7f2c316a1598c279828b3d1dc8c5"
 
 [[package]]
 name = "task-motel"
@@ -7415,18 +7402,18 @@ dependencies = [
 
 [[package]]
 name = "tx5-signal-srv"
-version = "0.0.1-alpha.7"
+version = "0.0.1-alpha.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9671d940802c9ff79974d96c2add464f8bf4e4d02e340d3d3a0ddb739fae6bfb"
+checksum = "a3c93ec8a0c5ea84e09c3068db716584959c925428a25972cdae200a6e60e3e6"
 dependencies = [
  "clap 4.2.4",
- "dirs 5.0.0",
+ "dirs 4.0.0",
  "futures 0.3.28",
- "if-addrs 0.10.1",
+ "get_if_addrs",
  "once_cell",
  "prometheus",
  "rand 0.8.5",
- "sodoken 0.0.9",
+ "sodoken",
  "tokio 1.27.0",
  "tracing",
  "tracing-subscriber",
