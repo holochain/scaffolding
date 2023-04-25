@@ -86,7 +86,9 @@ pub fn get_{}(original_{}_hash: ActionHash) -> ExternResult<Option<Record>> {{
   let latest_link = links.into_iter().max_by(|link_a, link_b| link_a.timestamp.cmp(&link_b.timestamp));
   
   let latest_{}_hash = match latest_link {{
-    Some(link) => ActionHash::from(link.target.clone()),
+    Some(link) => link.target.clone().into_action_hash().ok_or(wasm_error!(
+      WasmErrorInner::Guest(String::from("No action hash associated with link"))
+    ))?,
     None => original_{}_hash.clone()   
   }};
  

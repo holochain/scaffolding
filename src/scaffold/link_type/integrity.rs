@@ -30,14 +30,16 @@ fn validate_referenceable(
             match entry_type.reference_entry_hash {
                 true => quote! {
                     /// Check the entry type for the given entry hash
-                    let entry_hash = #address_ident.into_entry_hash().ok_or(wasm_error!(WasmErrorInner::Guest(String::from("Linked action must reference an entry"))))?;
+                    let entry_hash = #address_ident.into_entry_hash().ok_or(wasm_error!(WasmErrorInner::Guest(String::from("No entry hash associated with link"))))?;
                     let entry = must_get_entry(entry_hash)?.content;
 
                     let #entry_type_snake = crate::#entry_type_pascal::try_from(entry)?;
                 },
                 false => quote! {
                     /// Check the entry type for the given action hash
-                    let action_hash = ActionHash::from(#address_ident);
+                    let action_hash = #address_ident.into_action_hash().ok_or(wasm_error!(
+                        WasmErrorInner::Guest(String::from("No action hash associated with link"))
+                    ))?;
                     let record = must_get_valid_record(action_hash)?;
 
                     let #entry_type_snake: crate::#entry_type_pascal = record.entry().to_app_option()
