@@ -21,6 +21,7 @@ pub fn flake_nix() -> FileTree {
     holochain = {{
       url = "github:holochain/holochain";
       inputs.versions.url = "github:holochain/holochain/?dir=versions/{holochain_version}";
+      inputs.holochain.url = "github:holochain/holochain/holochain-0.2.0-beta-rc.6";
     }};
   }};
 
