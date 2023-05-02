@@ -10,28 +10,29 @@ use crate::file_tree::*;
 use crate::versions::holochain_nix_version;
 
 pub fn flake_nix() -> FileTree {
-    let holochain_version = holochain_nix_version();
+    let holochain_nix_version = holochain_nix_version();
     file!(format!(
         r#"{{
   description = "Template for Holochain app development";
 
   inputs = {{
-    nixpkgs.follows = "holochain/nixpkgs";
-
-    holochain = {{
+    holochain-nix-versions.url  = "github:holochain/holochain?dir=versions/{holochain_nix_version}";
+    holochain-flake = {{
       url = "github:holochain/holochain";
-      inputs.versions.url = "github:holochain/holochain/?dir=versions/{holochain_version}";
-      inputs.holochain.url = "github:holochain/holochain/holochain-0.2.0-beta-rc.6";
+      inputs.versions.follows = "holochain-nix-versions";
     }};
+
+    nixpkgs.follows = "holochain-flake/nixpkgs";
+    flake-parts.follows = "holochain-flake/flake-parts";
   }};
 
-  outputs = inputs @ {{ ... }}:
-    inputs.holochain.inputs.flake-parts.lib.mkFlake
+  outputs = inputs @ {{ flake-parts, holochain-flake, ... }}:
+    flake-parts.lib.mkFlake
       {{
         inherit inputs;
       }}
       {{
-        systems = builtins.attrNames inputs.holochain.devShells;
+        systems = builtins.attrNames holochain-flake.devShells;
         perSystem =
           {{ config
           , pkgs
@@ -39,7 +40,7 @@ pub fn flake_nix() -> FileTree {
           , ...
           }}: {{
             devShells.default = pkgs.mkShell {{
-              inputsFrom = [ inputs.holochain.devShells.${{system}}.holonix ];
+              inputsFrom = [ holochain-flake.devShells.${{system}}.holonix ];
               packages = [ pkgs.nodejs-18_x ];
             }};
           }};
