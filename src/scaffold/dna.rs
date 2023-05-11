@@ -217,6 +217,7 @@ pub fn scaffold_dna(
                 quantum_time: None,
             },
             installed_hash: None,
+            _version: None,
             clone_limit: 0,
         },
         provisioning: Some(CellProvisioning::Create { deferred: false }),
