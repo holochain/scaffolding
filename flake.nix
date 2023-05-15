@@ -8,6 +8,7 @@
     holochain-flake = {
       url = "github:holochain/holochain";
       inputs.versions.follows = "versions";
+      inputs.holochain.url = "github:holochain/holochain/holochain-0.2.1-beta-dev.0";
     };
   };
 

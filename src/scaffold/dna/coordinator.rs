@@ -17,13 +17,14 @@ pub fn new_coordinator_zome_manifest(
     let location = zome_wasm_location(&dna_file_tree, &name);
     let zome_manifest = ZomeManifest {
         name: name.clone().into(),
-        hash: None,
+        hash: None,        
         location,
         dependencies: maybe_dependencies.clone().map(|dz| {
             dz.into_iter()
                 .map(|d| ZomeDependency { name: d.into() })
                 .collect()
         }),
+        dylib: None,
     };
 
     Ok(zome_manifest)
