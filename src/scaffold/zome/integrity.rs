@@ -52,7 +52,7 @@ pub fn validate_agent_joining(_agent_pub_key: AgentPubKey, _membrane_proof: &Opt
 /// - If the `Op` is an update, the original entry exists and is of the same type as the new one
 /// - If the `Op` is a delete link, the original action exists and is a `CreateLink` action
 /// - Link tags don't exceed the maximum tag size (currently 1KB)
-/// - Countersigned entries include an action from each required signer
+/// - Countersigned entries include an action from each required signer 
 ///
 /// You can read more about validation here: https://docs.rs/hdi/latest/hdi/index.html#data-validation
 #[hdk_extern]
