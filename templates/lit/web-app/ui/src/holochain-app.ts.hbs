@@ -19,8 +19,8 @@ export class HolochainApp extends LitElement {
   client!: AppAgentClient;
 
   async firstUpdated() {
-    // We pass '' as url because it will dynamically be replaced in launcher environments
-    this.client = await AppAgentWebsocket.connect(new Url(''), '{{app_name}}');
+    // We pass an unused string as the url because it will dynamically be replaced in launcher environments
+    this.client = await AppAgentWebsocket.connect(new URL('https://UNUSED'), '{{app_name}}');
 
     this.loading = false;
   }

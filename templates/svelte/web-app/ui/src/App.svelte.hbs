@@ -12,8 +12,8 @@
   $: client, loading;
 
   onMount(async () => {
-    // We pass '' as url because it will dynamically be replaced in launcher environments
-    client = await AppAgentWebsocket.connect(new Url(''), '{{app_name}}');
+    // We pass an unused string as the url because it will dynamically be replaced in launcher environments
+    client = await AppAgentWebsocket.connect(new URL('https://UNUSED'), '{{app_name}}');
     loading = false;
   });
 

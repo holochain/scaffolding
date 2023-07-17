@@ -21,7 +21,7 @@ export class HolochainApp extends LitElement {
   client!: AppAgentClient;
 
   async firstUpdated() {
-    this.client = await AppAgentWebsocket.connect(new Url(``), 'forum');
+    this.client = await AppAgentWebsocket.connect(new URL(``), 'forum');
     
     this.loading = false;
   }
