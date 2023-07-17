@@ -17,6 +17,9 @@ pub fn flake_nix() -> FileTree {
 
   inputs = {{
     holochain-nix-versions.url  = "github:holochain/holochain?dir=versions/{holochain_nix_version}";
+    # TODO: next line is temporary. Only necessary for pinning this specific version of 0.3.x
+    holochain-nix-versions.inputs.holochain.url = "github:holochain/holochain/holochain-0.3.0-beta-dev.9";
+
     holochain-flake = {{
       url = "github:holochain/holochain";
       inputs.versions.follows = "holochain-nix-versions";

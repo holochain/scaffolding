@@ -41,7 +41,7 @@ export default defineComponent({
   },
   async mounted() {
     // We pass '' as url because it will dynamically be replaced in launcher environments
-    this.client = await AppAgentWebsocket.connect('', 'forum');
+    this.client = await AppAgentWebsocket.connect(new Url(''), 'forum');
     
     this.loading = false;
   },

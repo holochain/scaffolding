@@ -14,6 +14,7 @@ pub fn new_integrity_zome_manifest(
         hash: None,
         location,
         dependencies: None,
+        dylib: None
     };
 
     Ok(zome_manifest)

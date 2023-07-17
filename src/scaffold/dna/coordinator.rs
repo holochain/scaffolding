@@ -24,6 +24,7 @@ pub fn new_coordinator_zome_manifest(
                 .map(|d| ZomeDependency { name: d.into() })
                 .collect()
         }),
+        dylib: None
     };
 
     Ok(zome_manifest)

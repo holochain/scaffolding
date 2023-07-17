@@ -29,7 +29,7 @@
       
       async function connect() {
         // We pass '' as url because it will dynamically be replaced in launcher environments
-        const client = await AppAgentWebsocket.connect('', 'hello-world');
+        const client = await AppAgentWebsocket.connect(new Url(''), 'hello-world');
 
         const result = await client.callZome({
           cap_secret: null,

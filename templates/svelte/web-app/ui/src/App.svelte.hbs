@@ -13,7 +13,7 @@
 
   onMount(async () => {
     // We pass '' as url because it will dynamically be replaced in launcher environments
-    client = await AppAgentWebsocket.connect('', '{{app_name}}');
+    client = await AppAgentWebsocket.connect(new Url(''), '{{app_name}}');
     loading = false;
   });
 
