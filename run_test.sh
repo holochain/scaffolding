@@ -5,6 +5,8 @@ rm -rf /tmp/forum-svelte
 
 cd /tmp
 
+echo $(hc-scaffold --version)
+
 hc-scaffold web-app forum-svelte --setup-nix true --template svelte
 
 cd forum-svelte
