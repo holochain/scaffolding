@@ -1,7 +1,7 @@
 {
   description = "Template for Holochain app development";
 
-  inputs = {
+inputs = {
     nixpkgs.follows = "holochain-flake/nixpkgs";
     versions.url = "github:holochain/holochain?dir=versions/0_2";
 

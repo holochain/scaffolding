@@ -1,7 +1,7 @@
 [package]
 edition = "2021"
 name = "holochain_scaffolding_cli"
-version = "0.1.8"
+version = "0.1.9"
 description = "CLI to easily generate and modify holochain apps"
 license-file = "LICENSE_CAL-1.0"
 homepage = "https://developer.holochain.org"
@@ -18,14 +18,10 @@ name = "holochain_scaffolding_cli"
 path = "src/lib.rs"
 
 [dependencies]
-holochain = "0.2.0-beta-rc.6"
-holochain_types = "0.2.0-beta-rc.6"
-holochain_util = { features = ["backtrace"], version = "0.2.0-beta-rc.0" }
-mr_bundle = "0.2.0-beta-rc.0"
-
-# TODO: We should be able to remove these tx dependencies once they've been moved into holochain itself
-tx5 = "=0.0.1-alpha.11"
-tx5-signal-srv = "=0.0.1-alpha.5"
+holochain = { features=["test_utils"], version = "0.2.1"}
+holochain_types = "0.2.1"
+holochain_util = { features = ["backtrace"], version = "0.2.1" }
+mr_bundle = "0.2.1"
 
 dirs = "4.0.0"
 ignore = "0.4"

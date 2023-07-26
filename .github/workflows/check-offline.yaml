@@ -3,9 +3,9 @@ on:
   # Trigger the workflow on push or pull request,
   # but only for the main branch
   push: 
-    branches: [ main, develop, holochain-0.1 ]
+    branches: [ main, develop, holochain-0.1, holochain-0.2 ]
   pull_request:
-    branches: [ main, develop, holochain-0.1 ]
+    branches: [ main, develop, holochain-0.1, holochain-0.2 ]
 
 jobs:
   check-lockfile:
