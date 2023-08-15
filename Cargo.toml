@@ -1,7 +1,7 @@
 [package]
 edition = "2021"
 name = "holochain_scaffolding_cli"
-version = "0.1.9"
+version = "0.1.10"
 description = "CLI to easily generate and modify holochain apps"
 license-file = "LICENSE_CAL-1.0"
 homepage = "https://developer.holochain.org"
@@ -35,7 +35,9 @@ serde_yaml = "0.8"
 degit = "0.1"
 serde_json = "1"
 structopt = "0.3.11"
+rmpv = "=1.0.0"
 thiserror = "1.0.22"
+time = "=0.3.23"
 tokio = { version = "1.11", features = ["full"] }
 toml = "0.5.9"
 convert_case = "0.6.0"
