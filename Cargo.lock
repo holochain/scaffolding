@@ -2540,6 +2540,7 @@ dependencies = [
  "proc-macro2",
  "quote",
  "regex",
+ "rmpv",
  "semver 1.0.18",
  "serde",
  "serde_json",
@@ -2548,6 +2549,7 @@ dependencies = [
  "syn 1.0.109",
  "temp-dir",
  "thiserror",
+ "time 0.3.23",
  "tokio 1.31.0",
  "toml 0.5.11",
 ]
