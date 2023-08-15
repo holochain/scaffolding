@@ -346,7 +346,7 @@ pub fn add_common_zome_dependencies_to_workspace_cargo(
         &"=0.1.2".to_string(),
     )?;
     let file_tree =
-        add_workspace_external_dependency(file_tree, &"serde".to_string(), &"1".to_string())?;
+        add_workspace_external_dependency(file_tree, &"serde".to_string(), &"=1.0.166".to_string())?;
 
     Ok(file_tree)
 }
