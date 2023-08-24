@@ -2532,6 +2532,7 @@ dependencies = [
  "holochain_util",
  "ignore",
  "include_dir",
+ "itertools 0.10.5",
  "json_value_merge",
  "mr_bundle",
  "path-clean",

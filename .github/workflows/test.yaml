@@ -15,7 +15,6 @@ jobs:
 
       - name: Extend space
         uses: ./.github/actions/extend-space
-
       - name: Install nix
         uses: cachix/install-nix-action@v18
         with:

@@ -1,7 +1,5 @@
 use crate::error::{ScaffoldError, ScaffoldResult};
-use crate::file_tree::{
-    dir_content, file_content, insert_file, load_directory_into_memory, FileTree,
-};
+use crate::file_tree::{dir_content, file_content, load_directory_into_memory, FileTree};
 use crate::scaffold::app::cargo::exec_metadata;
 use crate::scaffold::app::nix::setup_nix_developer_environment;
 use crate::scaffold::app::AppFileTree;
@@ -72,6 +70,9 @@ pub enum HcScaffold {
         /// If "--templates-url" is given, the template must be located at the ".templates/<TEMPLATE NAME>" folder of the repository
         /// If not, the template must be an option from the built-in templates: "vanilla", "vue", "lit", "svelte"
         template: Option<String>,
+
+        #[structopt(long = "holo", hidden = true)]
+        holo_enabled: bool,
     },
     /// Set up the template used in this project
     Template(HcScaffoldTemplate),
@@ -228,6 +229,7 @@ impl HcScaffold {
                 template,
                 templates_url,
                 templates_path,
+                holo_enabled,
             } => {
                 let prompt = String::from("App name (no whitespaces):");
                 let name: String = match name {
@@ -305,6 +307,7 @@ impl HcScaffold {
                     &template_file_tree,
                     template_name,
                     scaffold_template,
+                    holo_enabled,
                 )?;
 
                 let file_tree = MergeableFileSystemTree::<OsString, String>::from(dir! {
@@ -733,69 +736,7 @@ Collection "{}" scaffolded!
                             &template_file_tree,
                             template_name.clone(),
                             false,
-                        )?;
-
-                        // scaffold dna hello_world
-                        let dna_name = String::from("hello_world");
-
-                        let app_file_tree =
-                            AppFileTree::get_or_choose(file_tree, &Some(name.clone()))?;
-                        let ScaffoldedTemplate { file_tree, .. } =
-                            scaffold_dna(app_file_tree, &template_file_tree, &dna_name)?;
-
-                        // scaffold integrity zome hello_world
-                        let dna_file_tree =
-                            DnaFileTree::get_or_choose(file_tree, &Some(dna_name.clone()))?;
-                        let dna_manifest_path = dna_file_tree.dna_manifest_path.clone();
-
-                        let integrity_zome_name = String::from("hello_world_integrity");
-                        let integrity_zome_path = PathBuf::new()
-                            .join("dnas")
-                            .join(&dna_name)
-                            .join("zomes")
-                            .join("integrity");
-                        let ScaffoldedTemplate { file_tree, .. } =
-                            scaffold_integrity_zome_with_path(
-                                dna_file_tree,
-                                &template_file_tree,
-                                &integrity_zome_name,
-                                &integrity_zome_path,
-                            )?;
-
-                        // scaffold integrity zome hello_world
-                        let dna_file_tree =
-                            DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
-
-                        let coordinator_zome_name = String::from("hello_world");
-                        let coordinator_zome_path = PathBuf::new()
-                            .join("dnas")
-                            .join(dna_name)
-                            .join("zomes")
-                            .join("coordinator");
-                        let ScaffoldedTemplate { mut file_tree, .. } =
-                            scaffold_coordinator_zome_in_path(
-                                dna_file_tree,
-                                &template_file_tree,
-                                &coordinator_zome_name,
-                                &Some(vec![integrity_zome_name]),
-                                &coordinator_zome_path,
-                            )?;
-
-                        // Add "hello_world" function to coordinator
-                        let hello_world_zome = format!(
-                            r#"use hdk::prelude::*;
-
-#[hdk_extern]
-pub fn hello_world(_: ()) -> ExternResult<String> {{
-    Ok(String::from("hello world from a Holochain app!"))
-}}
-"#
-                        );
-
-                        insert_file(
-                            &mut file_tree,
-                            &coordinator_zome_path.join("hello_world/src/lib.rs"),
-                            &hello_world_zome,
+                            false,
                         )?;
 
                         file_tree
@@ -808,6 +749,7 @@ pub fn hello_world(_: ()) -> ExternResult<String> {{
                             false,
                             &template_file_tree,
                             template_name.clone(),
+                            false,
                             false,
                         )?;
 
