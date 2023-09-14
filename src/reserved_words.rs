@@ -2,7 +2,7 @@ use convert_case::{Case, Casing};
 
 use crate::error::{ScaffoldError, ScaffoldResult};
 
-const RESERVED_WORDS: [&str; 26] = [
+const RESERVED_WORDS: [&str; 27] = [
     "type",
     "role",
     "enum",
@@ -29,6 +29,7 @@ const RESERVED_WORDS: [&str; 26] = [
     "EntryHash",
     "ActionHash",
     "AgentPubKey",
+    "Call",
 ];
 
 // Returns an error if the given string is invalid due to it being a reserved word

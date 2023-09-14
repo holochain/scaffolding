@@ -26,8 +26,7 @@
           }: {
             devShells.default = pkgs.mkShell {
               inputsFrom = [ inputs.holochain.devShells.${system}.holonix ];
-              # TODO: remove sqlite package once https://github.com/holochain/holochain/pull/2248 is released
-              packages = [ pkgs.nodejs-18_x pkgs.sqlite ]; 
+              packages = [ pkgs.nodejs-18_x ]; 
             };
           };
       };

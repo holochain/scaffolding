@@ -15,7 +15,6 @@ jobs:
 
       - name: Extend space
         uses: ./.github/actions/extend-space
-
       - name: Install nix
         uses: cachix/install-nix-action@v18
         with:
@@ -30,5 +29,5 @@ jobs:
       - name: Install and test
         run: |
           cd $GITHUB_WORKSPACE
-          nix develop --command bash -c "cargo install --path . && sh run_test.sh"
+          nix develop --command bash -c "cargo install --force --locked --path . && sh run_test.sh"
 

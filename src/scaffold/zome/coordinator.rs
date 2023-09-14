@@ -55,7 +55,6 @@ pub fn initial_lib_rs(dependencies: &Option<Vec<String>>) -> String {
             s
         }
     };
-
     format!(
         r#"use hdk::prelude::*;
 {integrity_imports}
