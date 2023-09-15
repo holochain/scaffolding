@@ -12,23 +12,32 @@
     };
   };
 
-  outputs = inputs @ { ... }:
+  outputs = inputs @ {...}:
     inputs.holochain.inputs.flake-parts.lib.mkFlake
-      {
-        inherit inputs;
-      }
-      {
-        systems = builtins.attrNames inputs.holochain.devShells;
-        perSystem =
-          { config
-          , pkgs
-          , system
-          , ...
-          }: {
-            devShells.default = pkgs.mkShell {
-              inputsFrom = [ inputs.holochain.devShells.${system}.holonix ];
-              packages = [ pkgs.nodejs-18_x ];
-            };
-          };
+    {
+      inherit inputs;
+    }
+    {
+      systems = builtins.attrNames inputs.holochain.devShells;
+      perSystem = {
+        self',
+        inputs',
+        config,
+        pkgs,
+        system,
+        ...
+      }: {
+        devShells.default = pkgs.mkShell {
+          inputsFrom = [inputs'.holochain.devShells.rustDev];
+          packages = [pkgs.nodejs-18_x];
+        };
+
+        devShells.ci = pkgs.mkShell {
+          inputsFrom = [self'.devShells.default];
+          packages = [
+            inputs'.holochain.packages.hc-scaffold
+          ];
+        };
       };
+    };
 }
