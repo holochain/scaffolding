@@ -30,7 +30,7 @@ jobs:
 
       - name: Install
         run: |
-          nix develop --command bash -c "cargo build --locked"
+          nix develop --command bash -c "cargo build --locked --release"
 
       - name: Install and test
         run: |
