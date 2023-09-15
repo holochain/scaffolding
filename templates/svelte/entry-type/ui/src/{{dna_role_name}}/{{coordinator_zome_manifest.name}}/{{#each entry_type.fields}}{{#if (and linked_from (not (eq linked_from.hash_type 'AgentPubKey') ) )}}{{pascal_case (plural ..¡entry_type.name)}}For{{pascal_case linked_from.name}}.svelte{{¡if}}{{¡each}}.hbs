@@ -23,13 +23,14 @@ onMount(async () => {
   }
 
   try {
-    hashes = await client.callZome({
+    const records = await client.callZome({
       cap_secret: null,
       role_name: '{{dna_role_name}}',
       zome_name: '{{../coordinator_zome_manifest.name}}',
       fn_name: 'get_{{snake_case (plural ../entry_type.name)}}_for_{{snake_case linked_from.name}}',
       payload: {{camel_case linked_from.singular_arg}}
     });
+    hashes = records.map(r => {{#if (eq referenceable.hash_type "ActionHash")}}r.signed_action.hashed.hash{{else}}(r.signed_action.hashed.content as NewEntryAction).entry_hash{{/if}});
   } catch (e) {
     error = e;
   }
