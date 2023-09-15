@@ -1,4 +1,5 @@
 name: "check-lockfile"
+
 on:
   # Trigger the workflow on push or pull request,
   # but only for the main branch
@@ -27,4 +28,3 @@ jobs:
       - name: Install
         run: |
           nix develop --command bash -c "cargo build --locked"
-
