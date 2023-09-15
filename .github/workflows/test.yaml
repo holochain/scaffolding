@@ -30,4 +30,4 @@ jobs:
       - name: Install and test
         run: |
           cd $GITHUB_WORKSPACE
-          nix develop --command bash -c "cargo install --path . && sh run_test.sh"
+          nix develop --command bash -c "cargo install --locked --path . && sh run_test.sh"
