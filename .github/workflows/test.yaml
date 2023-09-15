@@ -28,11 +28,7 @@ jobs:
         with:
           name: holochain-ci
 
-      - name: Install
-        run: |
-          nix develop --command bash -c "cargo build --locked --release"
-
-      - name: Install and test
+      - name: Build and test
         run: |
           cd $GITHUB_WORKSPACE
-          nix develop --command bash -c "cargo install --locked --path . && sh run_test.sh"
+          nix develop --override-input "versions/scaffolding" . .#ci --command ./run_test.sh
