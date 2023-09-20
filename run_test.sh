@@ -1,6 +1,18 @@
 #!/usr/bin/env bash
 set -e
 
+rm -rf /tmp/hello-world
+cd /tmp
+
+hc-scaffold example hello-world
+cd hello-world
+
+nix develop --command bash -c "
+set -e
+npm i
+npm t
+"
+
 rm -rf /tmp/forum-svelte
 
 cd /tmp

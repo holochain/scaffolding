@@ -18,31 +18,86 @@
         background-color: #ededed;
       }
     </style>
+    <script >
+      
+      
+    </script>
     <title>Example hApp</title>
   </head>
 
-  <body>
-    <div id="content"></div>
+  <body style="padding: 20px">
+    <div id="content">
+      <div>My AgentPubKey: <canvas style="border-radius:50%" id="pubkey" width="1" height="1"></canvas></div>
+      <div>Greeting sent!  Click the button to see all hellos.</div>
+    </div>
+    <button onclick="getHellos()">Look for Hellos</button>
+    <div id="hellos">
+    </div>
 
     <script type="module">
-      import { AppWebsocket, AppAgentWebsocket } from '@holochain/client';
+      import { AppWebsocket, AppAgentWebsocket, encodeHashToBase64 } from '@holochain/client';
+      import renderIcon from '@holo-host/identicon'
+      
+      let client = undefined
+
+      function getRandomInt(max) {
+        return Math.floor(Math.random() * max);
+      }
       
       async function connect() {
         // We pass an unused string as the url because it will dynamically be replaced in launcher environments
         const client = await AppAgentWebsocket.connect(new URL('https://UNUSED'), 'hello-world');
-
+        const canvas = document.getElementById('pubkey')
+        pubkey.title = encodeHashToBase64(client.myPubKey)
+        const opts = {
+          hash: client.myPubKey,
+          size: 32,
+        }
+        renderIcon(opts, canvas)
+        const hellos = ["hello world","hola mundo","bonjur monde","guten Tag Welt","salve mondo","你好世界","مرحبا بالعالم","こんにちは 世界","olá mundo","Привет, мир","Selam Dünya","Witaj świecie"];
+        const message = hellos[getRandomInt(hellos.length)];
         const result = await client.callZome({
           cap_secret: null,
           role_name: 'hello_world',
           zome_name: 'hello_world',
           fn_name: 'hello_world',
-          payload: null,
+          payload: message,
         });
-    
-        document.getElementById('content').innerHTML = `<span>${result}</span>`
+        
       }
-      
-      connect();
+
+      async function getHellos() {
+        const result = await client.callZome({
+          cap_secret: null,
+          role_name: 'hello_world',
+          zome_name: 'hello_world',
+          fn_name: 'get_hellos',
+          payload: undefined,
+        });
+        const hellos = document.getElementById('hellos')
+        let id = 0
+        hellos.innerHTML = ""
+        for (const h of result) {
+          hellos.innerHTML += `<div>${h.message} from <canvas style="border-radius:50%" id="${id}" width="1" height="1"></canvas></div>`
+          id += 1
+        }
+        id = 0
+        for (const h of result) {
+          const b64pubkey = encodeHashToBase64(h.author); 
+          const canvas = document.getElementById(`${id}`)
+          canvas.title = b64pubkey
+          const opts = {
+            hash: h.author,
+            size: 32,
+          }
+          await renderIcon(opts, canvas)
+          id += 1
+        }
+      } 
+      window.getHellos = getHellos;
+
+      await connect();
+
     </script>
   </body>
 </html>

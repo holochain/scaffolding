@@ -5,10 +5,21 @@ import {
   ActionHash,
   AppAgentClient,
 } from '@holochain/client';
+{{#if holo_enabled}}
+import WebSdk from '@holo-host/web-sdk'
+import type { AgentState } from '@holo-host/web-sdk';
+{{/if}}
 import { provide } from '@lit-labs/context';
 import '@material/mwc-circular-progress';
+{{#if holo_enabled}}
+import '@material/mwc-button';
+{{/if}}
 
 import { clientContext } from './contexts';
+
+{{#if holo_enabled}}
+const IS_HOLO = ['true', '1', 't'].includes(import.meta.env.VITE_APP_IS_HOLO?.toLowerCase())
+{{/if}}
 
 @customElement('holochain-app')
 export class HolochainApp extends LitElement {
@@ -19,11 +30,40 @@ export class HolochainApp extends LitElement {
   client!: AppAgentClient;
 
   async firstUpdated() {
+  {{#if holo_enabled}}
+    if (IS_HOLO) {        
+      const client = await WebSdk.connect({
+        chaperoneUrl: import.meta.env.VITE_APP_CHAPERONE_URL,
+        authFormCustomization: {
+          appName: '{{app_name}}',
+        }
+      });
+
+    client.on('agent-state', (agent_state: AgentState) => {
+      this.loading = !agent_state.isAvailable || agent_state.isAnonymous;
+    });
+    
+    client.signUp({ cancellable: false });
+    this.client = client;
+
+    } else {
+      // We pass an unused string as the url because it will dynamically be replaced in launcher environments
+      this.client = await AppAgentWebsocket.connect(new URL('https://UNUSED'), '{{app_name}}');
+      this.loading = false;
+    }
+  {{else}}
     // We pass an unused string as the url because it will dynamically be replaced in launcher environments
     this.client = await AppAgentWebsocket.connect(new URL('https://UNUSED'), '{{app_name}}');
-
     this.loading = false;
+  {{/if}}
   }
+
+{{#if holo_enabled}}
+  async logout() {
+    await (this.client as WebSdk).signOut();
+    await (this.client as WebSdk).signIn({ cancellable: false });
+  }
+{{/if}}
 
   render() {
     if (this.loading)
@@ -53,6 +93,16 @@ import './todos/todos/create-todo';
             <li>Replace this "EDIT ME!" section with <code>&lt;create-todo&gt;&lt;/create-todo&gt;&lt;all-todos&gt;&lt;/all-todos&gt;</code>.</li>
           </ol>
         </div>
+      {{#if holo_enabled}}
+      ${IS_HOLO ? html`
+        <mwc-button
+          style="margin-top: 16px;"
+          raised
+          label="Logout"
+          @click=${() => this.logout()}
+        ></mwc-button>
+        `: ''}
+      {{/if}}
       </main>
     `;
   }

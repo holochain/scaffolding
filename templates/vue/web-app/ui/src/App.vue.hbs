@@ -33,13 +33,27 @@ export default defineComponent({
           <li>Replace this "EDIT ME!" section with <code>&lt;CreateTodo&gt;&lt;/CreateTodo&gt;&lt;AllTodos&gt;&lt;/AllTodos&gt;</code>.</li>
         </ol>
       </div>
+    {{#if holo_enabled}}
+      <mwc-button
+        v-if="IS_HOLO"
+        style="margin-top: 16px"
+        raised
+        label="Logout"
+        @click="logout" 
+      />
+    {{/if}}
     </div>
   </div>
 </template>
 <script lang="ts">
 import { defineComponent, computed } from 'vue';
 import { AppAgentClient, AppAgentWebsocket } from '@holochain/client';
+{{#if holo_enabled}}
+import WebSdk from '@holo-host/web-sdk';
+import type { AgentState } from '@holo-host/web-sdk';
+{{/if}}
 import '@material/mwc-circular-progress';
+import '@material/mwc-button';
 
 export default defineComponent({
   components: {
@@ -48,18 +62,54 @@ export default defineComponent({
   data(): {
     client: AppAgentClient | undefined;
     loading: boolean;
+  {{#if holo_enabled}}
+    IS_HOLO: boolean;
+  {{/if}}
   } {
     return {
       client: undefined,
       loading: true,
+    {{#if holo_enabled}}
+      IS_HOLO: ['true', '1', 't'].includes(import.meta.env.VITE_APP_IS_HOLO?.toLowerCase()),
+    {{/if}}
     };
   },
   async mounted() {
+  {{#if holo_enabled}}
+    if (this.IS_HOLO) {
+      const client: WebSdk = await WebSdk.connect({
+        chaperoneUrl: import.meta.env.VITE_APP_CHAPERONE_URL,
+        authFormCustomization: {
+          appName: '{{app_name}}',
+        }
+      });
+
+      client.on('agent-state', (agent_state: AgentState) => {
+        this.loading = !agent_state.isAvailable || agent_state.isAnonymous
+      });
+
+      client.signUp({ cancellable: false });
+
+      this.client = client
+    } else {
+      // We pass an unused string as the url because it will dynamically be replaced in launcher environments
+      this.client = await AppAgentWebsocket.connect(new URL('https://UNUSED'), '{{app_name}}');
+      this.loading = false;
+    }
+  {{else}}
     // We pass an unused string as the url because it will dynamically be replaced in launcher environments
     this.client = await AppAgentWebsocket.connect(new URL('https://UNUSED'), '{{app_name}}');
-
     this.loading = false;
+  {{/if}}
   },
+{{#if holo_enabled}}
+  methods: {
+    async logout () {
+      await (this.client as WebSdk).signOut();
+      await (this.client as WebSdk).signIn({ cancellable: false });
+    }
+  },
+{{/if}}
   provide() {
     return {
       client: computed(() => this.client),

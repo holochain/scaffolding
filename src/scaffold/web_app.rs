@@ -23,6 +23,7 @@ fn web_app_skeleton(
     template_file_tree: &FileTree,
     template_name: String,
     scaffold_template: bool,
+    holo_enabled: bool,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     check_for_reserved_words(&app_name)?;
 
@@ -53,7 +54,7 @@ fn web_app_skeleton(
     }
 
     let mut scaffold_template_result =
-        scaffold_web_app_template(app_file_tree, &template_file_tree, &app_name)?;
+        scaffold_web_app_template(app_file_tree, &template_file_tree, &app_name, holo_enabled)?;
 
     scaffold_template_result
         .file_tree
@@ -71,6 +72,7 @@ pub fn scaffold_web_app(
     template_file_tree: &FileTree,
     template_name: String,
     scaffold_template: bool,
+    holo_enabled: bool,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     let scaffolded_template = web_app_skeleton(
         app_name.clone(),
@@ -79,6 +81,7 @@ pub fn scaffold_web_app(
         &template_file_tree,
         template_name,
         scaffold_template,
+        holo_enabled,
     )?;
     Ok(ScaffoldedTemplate {
         file_tree: scaffolded_template.file_tree,
