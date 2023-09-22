@@ -298,6 +298,7 @@ impl Referenceable {
 pub struct EntryDefinition {
     pub name: String,
     pub fields: Vec<FieldDefinition>,
+    pub widget_fields: Vec<FieldDefinition>,
     pub reference_entry_hash: bool,
 }
 
