@@ -1,6 +1,5 @@
 # Extends disk space on github hosted runners
 
-
 name: "Extend space"
 description: "Teases out as much free space as possible"
 
