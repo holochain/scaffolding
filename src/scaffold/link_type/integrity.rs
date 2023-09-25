@@ -1,7 +1,7 @@
 use std::{ffi::OsString, path::PathBuf};
 
 use convert_case::{Case, Casing};
-use holochain::test_utils::itertools::Itertools;
+use itertools::Itertools;
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 
@@ -427,15 +427,18 @@ fn signal_link_types_variants() -> ScaffoldResult<Vec<syn::Variant>> {
 
 fn signal_action_match_arms() -> ScaffoldResult<Vec<syn::Arm>> {
     Ok(vec![
-        syn::parse_str::<syn::Arm>("Action::CreateLink(create_link) => {
+        syn::parse_str::<syn::Arm>(
+            "Action::CreateLink(create_link) => {
             if let Ok(Some(link_type)) =
                 LinkTypes::from_type(create_link.zome_index, create_link.link_type)
             {
                 emit_signal(Signal::LinkCreated { action, link_type })?;
             }
             Ok(())
-        }")?,
-        syn::parse_str::<syn::Arm>("Action::DeleteLink(delete_link) => {
+        }",
+        )?,
+        syn::parse_str::<syn::Arm>(
+            "Action::DeleteLink(delete_link) => {
             let record = get(delete_link.link_add_address.clone(), GetOptions::default())?.ok_or(
                 wasm_error!(WasmErrorInner::Guest(
                     \"Failed to fetch CreateLink action\".to_string()
@@ -456,7 +459,8 @@ fn signal_action_match_arms() -> ScaffoldResult<Vec<syn::Arm>> {
                     )));
                 }
             }
-        }")?
+        }",
+        )?,
     ])
 }
 

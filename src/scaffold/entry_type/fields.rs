@@ -220,7 +220,9 @@ pub fn choose_field(
     let maybe_linked_from = match &field_type {
         FieldType::AgentPubKey => {
             let link_from = Confirm::with_theme(&ColorfulTheme::default())
-                .with_prompt("Should a link from this field be created when this entry is created?")
+                .with_prompt(
+                    "Should a link from the AgentPubKey provided in this field also be created when entries of this type are created?"
+                )
                 .interact()?;
 
             match link_from {
@@ -234,55 +236,51 @@ pub fn choose_field(
             }
         }
         FieldType::ActionHash | FieldType::EntryHash => {
-            let all_entry_types = get_all_entry_types(zome_file_tree)?.unwrap_or(vec![]);
-            if all_entry_types.len() == 0 {
-                None
-            } else {
-                let link_from = Confirm::with_theme(&ColorfulTheme::default())
+            let link_from = Confirm::with_theme(&ColorfulTheme::default())
                     .with_prompt(
-                        "Should a link from this field be created when this entry is created?",
+                        format!(
+                            "Should a link from the {} provided in this field also be created when entries of this type are created?", 
+                            field_type.to_string())
                     )
                     .interact()?;
 
-                match link_from {
-                    false => None,
-                    true => {
-                        let mut all_options: Vec<String> = all_entry_types
-                            .clone()
-                            .into_iter()
-                            .map(|r| r.entry_type)
-                            .collect();
+            match link_from {
+                false => None,
+                true => {
+                    let all_entry_types = get_all_entry_types(zome_file_tree)?.unwrap_or(vec![]);
+                    let mut all_options: Vec<String> = all_entry_types
+                        .clone()
+                        .into_iter()
+                        .map(|r| r.entry_type)
+                        .collect();
 
-                        if let Cardinality::Option | Cardinality::Vector = cardinality {
-                            all_options.push(format!(
-                                "{} (itself)",
-                                entry_type_name.to_case(Case::Pascal)
-                            ));
-                        }
+                    if let Cardinality::Option | Cardinality::Vector = cardinality {
+                        all_options.push(format!(
+                            "{} (itself)",
+                            entry_type_name.to_case(Case::Pascal)
+                        ));
+                    }
 
-                        let selection = Select::with_theme(&ColorfulTheme::default())
-                            .with_prompt(String::from(
-                                "Which entry type is this field referring to?",
-                            ))
-                            .default(0)
-                            .items(&all_options[..])
-                            .interact()?;
+                    let selection = Select::with_theme(&ColorfulTheme::default())
+                        .with_prompt(String::from("Which entry type is this field referring to?"))
+                        .default(0)
+                        .items(&all_options[..])
+                        .interact()?;
 
-                        let reference_entry_hash = match field_type {
-                            FieldType::EntryHash => true,
-                            _ => false,
-                        };
+                    let reference_entry_hash = match field_type {
+                        FieldType::EntryHash => true,
+                        _ => false,
+                    };
 
-                        match selection == all_entry_types.len() {
-                            true => Some(Referenceable::EntryType(EntryTypeReference {
-                                entry_type: entry_type_name.clone(),
-                                reference_entry_hash,
-                            })),
-                            false => Some(Referenceable::EntryType(EntryTypeReference {
-                                entry_type: all_entry_types[selection].entry_type.clone(),
-                                reference_entry_hash,
-                            })),
-                        }
+                    match selection == all_entry_types.len() {
+                        true => Some(Referenceable::EntryType(EntryTypeReference {
+                            entry_type: entry_type_name.clone(),
+                            reference_entry_hash,
+                        })),
+                        false => Some(Referenceable::EntryType(EntryTypeReference {
+                            entry_type: all_entry_types[selection].entry_type.clone(),
+                            reference_entry_hash,
+                        })),
                     }
                 }
             }

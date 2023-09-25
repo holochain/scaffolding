@@ -1,0 +1,19 @@
+---
+manifest_version: "1"
+name: hello_world
+integrity:
+  network_seed: ~
+  properties: ~
+  origin_time: 1679601731282690
+  zomes:
+    - name: hello_world_integrity
+      hash: ~
+      bundled: "../../../target/wasm32-unknown-unknown/release/hello_world_integrity.wasm"
+      dependencies: ~
+coordinator:
+  zomes:
+    - name: hello_world
+      hash: ~
+      bundled: "../../../target/wasm32-unknown-unknown/release/hello_world.wasm"
+      dependencies:
+        - name: hello_world_integrity

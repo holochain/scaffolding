@@ -10,6 +10,9 @@
   },
   "dependencies": {
     "@holochain/client": "{{holochain_client_version}}",
+  {{#if holo_enabled}}
+    "@holo-host/web-sdk": "{{web_sdk_version}}",
+  {{/if}}
     "@lit-labs/context": "^0.2.0",
     "@lit-labs/task": "^2.0.0",
     "@material/mwc-circular-progress": "^0.27.0",
