@@ -30,14 +30,16 @@ fn validate_referenceable(
             match entry_type.reference_entry_hash {
                 true => quote! {
                     /// Check the entry type for the given entry hash
-                    let entry_hash = EntryHash::from(#address_ident);
+                    let entry_hash = #address_ident.into_entry_hash().ok_or(wasm_error!(WasmErrorInner::Guest(String::from("No entry hash associated with link"))))?;
                     let entry = must_get_entry(entry_hash)?.content;
 
                     let #entry_type_snake = crate::#entry_type_pascal::try_from(entry)?;
                 },
                 false => quote! {
                     /// Check the entry type for the given action hash
-                    let action_hash = ActionHash::from(#address_ident);
+                    let action_hash = #address_ident.into_action_hash().ok_or(wasm_error!(
+                        WasmErrorInner::Guest(String::from("No action hash associated with link"))
+                    ))?;
                     let record = must_get_valid_record(action_hash)?;
 
                     let #entry_type_snake: crate::#entry_type_pascal = record.entry().to_app_option()
@@ -135,7 +137,7 @@ pub fn add_link_type_to_integrity_zome(
                                 if let syn::Stmt::Expr(syn::Expr::Match(match_expr)) = stmt {
                                     if let syn::Expr::Try(try_expr) = &mut *match_expr.expr {
                                         if let syn::Expr::MethodCall(call) = &mut *try_expr.expr {
-                                            if call.method.to_string().eq(&String::from("to_type"))
+                                            if call.method.to_string().eq(&String::from("flattened"))
                                             {
                                                 if let Some(turbofish) = &mut call.turbofish {
                                                     if let Some(last_arg) =
@@ -493,7 +495,7 @@ fn add_link_type_to_validation_arms(
                 if let syn::Stmt::Expr(syn::Expr::Match(match_expr)) = stmt {
                     if let syn::Expr::Try(try_expr) = &mut *match_expr.expr {
                         if let syn::Expr::MethodCall(call) = &mut *try_expr.expr {
-                            if call.method.to_string().eq(&String::from("to_type")) {
+                            if call.method.to_string().eq(&String::from("flattened")) {
                                 for arm in &mut match_expr.arms {
                                     if let syn::Pat::TupleStruct(tuple_struct) = &mut arm.pat {
                                         if let Some(path_segment) =

@@ -6,10 +6,10 @@
     "tests"
   ],
   "scripts": {
-    "start": "AGENTS=2 npm run network",
+    "start": "AGENTS=2 BOOTSTRAP_PORT=$(port) SIGNAL_PORT=$(port) npm run network",
     "network": "hc s clean && npm run build:happ && UI_PORT=8888 concurrently \"npm start -w ui\" \"npm run launch:happ\" \"holochain-playground\"",
     "test": "npm run build:zomes && hc app pack workdir --recursive && npm t -w tests",
-    "launch:happ": "echo \"pass\" | RUST_LOG=warn hc launch --piped -n $AGENTS workdir/{{app_name}}.happ --ui-port $UI_PORT network mdns",
+    "launch:happ": "concurrently \"hc run-local-services --bootstrap-port $BOOTSTRAP_PORT --signal-port $SIGNAL_PORT\" \"echo pass | RUST_LOG=warn hc launch --piped -n $AGENTS workdir/{{app_name}}.happ --ui-port $UI_PORT network --bootstrap http://127.0.0.1:\"$BOOTSTRAP_PORT\" webrtc ws://127.0.0.1:\"$SIGNAL_PORT\"\"",
   {{#if holo_enabled}}
     "start:holo": "AGENTS=2 npm run network:holo",
     "network:holo": "npm run build:happ && UI_PORT=8888 concurrently \"npm run launch:holo-dev-server\" \"holochain-playground ws://localhost:4444\" \"concurrently-repeat 'VITE_APP_CHAPERONE_URL=http://localhost:24274 VITE_APP_IS_HOLO=true npm start -w ui' $AGENTS\"",
@@ -22,10 +22,11 @@
   "devDependencies": {    
     "@holochain-playground/cli": "^0.1.1",
     "concurrently": "^6.2.1",
+    "rimraf": "^3.0.2",
+    "new-port-cli": "^1.0.0"
   {{#if holo_enabled}}
     "concurrently-repeat": "^0.0.1",
   {{/if}}
-    "rimraf": "^3.0.2"
   },
   "engines": {
     "npm": ">=7.0.0"

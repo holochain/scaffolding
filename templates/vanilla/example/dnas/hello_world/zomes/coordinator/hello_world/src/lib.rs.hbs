@@ -32,11 +32,11 @@ pub fn get_hellos(_: ()) -> ExternResult<Vec<HelloOutput>> {
     let links = get_links(path.path_entry_hash()?, LinkTypes::AllHellos, None)?;
     let get_input: Vec<GetInput> = links
         .into_iter()
-        .map(|link| GetInput::new(
-            ActionHash::from(link.target).into(),
+        .map(|link| Ok(GetInput::new(
+            link.target.into_action_hash().ok_or(wasm_error!(WasmErrorInner::Guest(String::from("No action hash associated with link"))))?.into(),
             GetOptions::default(),
-        ))
-        .collect();
+        )))
+        .collect::<ExternResult<Vec<GetInput>>>()?;
 
     // load the records for all the links
     let records = HDK.with(|hdk| hdk.borrow().get(get_input))?;

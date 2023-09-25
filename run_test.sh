@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
 set -e
 
 rm -rf /tmp/hello-world
@@ -16,6 +16,8 @@ npm t
 rm -rf /tmp/forum-svelte
 
 cd /tmp
+
+echo $(hc-scaffold --version)
 
 hc-scaffold web-app forum-svelte --setup-nix true --template svelte
 

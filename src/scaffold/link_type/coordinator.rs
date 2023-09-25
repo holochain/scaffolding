@@ -148,8 +148,8 @@ pub fn get_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}({fr
     
     let agents: Vec<AgentPubKey> = links
         .into_iter()
-        .map(|link| AgentPubKey::from(EntryHash::from(link.target)))
-        .collect();
+        .map(|link| Ok(AgentPubKey::from(link.target.into_entry_hash().ok_or(wasm_error!(WasmErrorInner::Guest(String::from("No entry hash associated with link"))))?)))
+        .collect::<ExternResult<Vec<AgentPubKey>>>()?;
 
     Ok(agents)
 }}"#,
@@ -162,7 +162,8 @@ fn get_links_handler_to_entry(
 ) -> String {
     let from_hash_type = from_referenceable.hash_type().to_string();
     let from_arg_name = from_referenceable.field_name(&Cardinality::Single);
-    let to_hash_type = to_entry_type.hash_type().to_string();
+    // let to_hash_type = to_entry_type.hash_type().to_string();
+    let snake_to_hash_type = to_entry_type.hash_type().to_string().to_case(Case::Snake);
 
     let pascal_link_type_name = link_type_name(
         from_referenceable,
@@ -182,8 +183,11 @@ pub fn get_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}({fr
     
     let get_input: Vec<GetInput> = links
         .into_iter()
-        .map(|link| GetInput::new({to_hash_type}::from(link.target).into(), GetOptions::default()))
-        .collect();
+        .map(|link| Ok(GetInput::new(
+            link.target.into_{snake_to_hash_type}().ok_or(wasm_error!(WasmErrorInner::Guest(String::from("No action hash associated with link"))))?.into(),
+            GetOptions::default(),
+        )))
+        .collect::<ExternResult<Vec<GetInput>>>()?;
 
     // Get the records to filter out the deleted ones
     let records: Vec<Record> = HDK.with(|hdk| hdk.borrow().get(get_input))?
@@ -197,11 +201,15 @@ pub fn get_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}({fr
 }
 
 fn from_link_hash_type(hash_type: &String) -> String {
+    let snake_hash_type = hash_type.to_case(Case::Snake);
+    let lower_hash_type = hash_type.to_case(Case::Lower);
+
     match hash_type.as_str() {
-        "AgentPubKey" => format!("AgentPubKey::from(EntryHash::from(link.target.clone()))"),
-        _ => format!("{}::from(link.target.clone())", hash_type),
+        "AgentPubKey" => format!("AgentPubKey::from(link.target.clone().into_entry_hash().ok_or(wasm_error!(WasmErrorInner::Guest(String::from(\"No entry_hash associated with link\"))))?)"),
+        _ => format!("link.target.clone().into_{}().ok_or(wasm_error!(WasmErrorInner::Guest(String::from(\"No {} associated with link\"))))?", snake_hash_type, lower_hash_type),
     }
 }
+
 
 // Event to calendar
 fn remove_link_handlers(
