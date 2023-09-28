@@ -4,10 +4,10 @@ use dialoguer::theme::ColorfulTheme;
 use dialoguer::Select;
 use handlebars::{
     handlebars_helper, Context, Handlebars, Helper, HelperDef, HelperResult, Output, RenderContext,
-    RenderError, Renderable, StringOutput,
+    RenderError, Renderable, ScopedJson, StringOutput,
 };
 use regex::Regex;
-use serde_json::Value;
+use serde_json::{json, Value};
 use std::collections::{BTreeMap, HashSet};
 use std::ffi::OsString;
 use std::path::PathBuf;
@@ -60,6 +60,7 @@ pub fn register_helpers<'a>(h: Handlebars<'a>) -> Handlebars<'a> {
     let h = register_pluralize_helpers(h);
     let h = register_merge_scope(h);
     let h = register_uniq_lines(h);
+    let h = register_filter(h);
 
     h
 }
@@ -271,6 +272,83 @@ pub fn register_case_helpers<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
 
     handlebars_helper!(pascal_case: |s: String| s.to_case(Case::Pascal));
     h.register_helper("pascal_case", Box::new(pascal_case));
+
+    h
+}
+
+#[derive(Clone, Copy)]
+pub struct FilterHelper;
+
+/// A Handlebars helper to filter an iterable JSON value.
+/// It receives the value to be filtered and a string containing the condition predicate,
+/// then uses Handlebars' truthy logic to filter the items in the value.
+/// It also supports the `#if` helper's `includeZero` optional parameter.
+impl HelperDef for FilterHelper {
+    fn call_inner<'reg: 'rc, 'rc>(
+        &self,
+        h: &Helper<'reg, 'rc>,
+        r: &'reg Handlebars<'reg>,
+        _ctx: &'rc Context,
+        _rc: &mut RenderContext<'reg, 'rc>,
+    ) -> Result<ScopedJson<'reg, 'rc>, RenderError> {
+        let value_param = h
+            .param(0)
+            .ok_or(RenderError::new("Filter helper: Param not found for index 0; must be value to be filtered"))?;
+
+        let value = value_param.value();
+
+        let condition_param = h
+            .param(1)
+            .ok_or(RenderError::new("Filter helper: Param not found for index 1; must be string containing filter condition predicate"))?;
+
+        let condition = condition_param
+            .value()
+            .as_str()
+            .ok_or(RenderError::new("Filter helper: filter condition predicate must be a string"))?;
+
+        let include_zero = h
+            .hash_get("includeZero")
+            .and_then(|v| v.value().as_bool())
+            .unwrap_or(false);
+
+        let items: Vec<Value> = match value {
+            Value::Array(items) => Ok(
+                items
+                    .iter()
+                    .map(|item| item.clone())
+                    .collect()
+            ),
+            // FIXME: This doesn't preserve object keys.
+            // That's probably unexpected for consumers.
+            Value::Object(items) => Ok(
+                items
+                    .values()
+                    .map(|item| item.clone())
+                    .collect()
+            ),
+            _ => Err(RenderError::new("Filter helper: value to be filtered must be an array or object"))
+        }?;
+
+        // This template allows us to evaluate the condition according to Handlebars'
+        // available helper functions and existing truthiness logic.
+        let template = format!("{}{}{}{}", "{{#if ", match include_zero { true => " includeZero=true", _ => "" }, condition, "}}true{{else}}false{{/if}}");
+        // Try the template with one of the items to see if the template parses.
+        r.render_template(&*template, &items.first().clone())?;
+
+        let filtered_items: Vec<&Value> = items
+            .iter()
+            .filter(|item| match r.render_template(&*template, item) {
+                Ok(s) => s.as_str() == "true",
+                // FIXME: this swallows error messages that don't involve parsing the template.
+                _ => false
+            })
+            .collect();
+        return Ok(ScopedJson::Derived(json!(filtered_items)));
+    }
+}
+
+fn register_filter<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
+    h.register_helper("filter", Box::new(FilterHelper));
 
     h
 }
