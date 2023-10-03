@@ -14,7 +14,7 @@ export class {{pascal_case (plural ../entry_type.name)}}For{{pascal_case linked_
   client!: AppAgentClient;
 
   @property({
-    hasChanged: (newVal: {{linked_from.hash_type}}, oldVal: {{linked_from.hash_type}}) => newVal.toString() !== oldVal.toString()
+    hasChanged: (newVal: {{linked_from.hash_type}}, oldVal: {{linked_from.hash_type}}) => newVal?.toString() !== oldVal?.toString()
   })
   {{camel_case linked_from.singular_arg}}!: {{linked_from.hash_type}};
 
@@ -24,7 +24,17 @@ export class {{pascal_case (plural ../entry_type.name)}}For{{pascal_case linked_
       zome_name: '{{../coordinator_zome_manifest.name}}',
       fn_name: 'get_{{snake_case (plural ../entry_type.name)}}_for_{{snake_case linked_from.name}}',
       payload: {{camel_case linked_from.singular_arg}},
-  }) as Promise<Array<{{#if ../entry_type.reference_entry_hash}}EntryHash{{else}}ActionHash{{/if}}>>, () => [this.{{camel_case linked_from.singular_arg}}]);
+  }).then(v  =>
+    (v as Array<Record>)
+      .map(r =>
+        {{#if ../entry_type.reference_entry_hash}}
+          (r.signed_action.hashed.content as NewEntryAction).entry_hash
+        {{else}}
+          r.signed_action.hashed.hash
+        {{/if}}
+      )
+  ) as Promise<Array<{{#if ../entry_type.reference_entry_hash}}EntryHash{{else}}ActionHash{{/if}}>>,
+  () => [this.{{camel_case linked_from.singular_arg}}]);
 
   firstUpdated() {
     if (this.{{camel_case linked_from.singular_arg}} === undefined) {
@@ -34,7 +44,7 @@ export class {{pascal_case (plural ../entry_type.name)}}For{{pascal_case linked_
 
   renderList(hashes: Array<{{#if ../entry_type.reference_entry_hash}}EntryHash{{else}}ActionHash{{/if}}>) {
     if (hashes.length === 0) return html`<span>No {{lower_case (plural ../entry_type.name)}} found for this {{lower_case linked_from.name}}.</span>`;
-    
+
     return html`
       <div style="display: flex; flex-direction: column">
         ${hashes.map(hash =>
