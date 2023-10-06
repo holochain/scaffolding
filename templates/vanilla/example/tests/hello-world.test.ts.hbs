@@ -1,6 +1,6 @@
 import { assert, test } from "vitest";
 
-import { runScenario, pause } from '@holochain/tryorama';
+import { runScenario, dhtSync } from '@holochain/tryorama';
 
 
 test('send hello and retrieve hellos', async () => {
@@ -38,7 +38,7 @@ test('send hello and retrieve hellos', async () => {
           });
         assert.ok(resultBeto);
 
-        await pause(1000) // wait for DHT to settle
+        await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
         
         // Alice gets all hellos
         const hellosAlice: Array<any> = await aliceCell.callZome({
