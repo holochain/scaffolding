@@ -12,6 +12,7 @@ members = [
   "dnas/*/zomes/coordinator/*",
   "dnas/*/zomes/integrity/*",
 ]
+edition = "2021"
 
 [profile.dev]
 opt-level = "z"
