@@ -1,25 +1,25 @@
 name: "test"
+
 on:
   # Trigger the workflow on push or pull request,
   # but only for the main branch
   push: 
-    branches: [ main, develop, holochain-0.1 ]
+    branches: [ main, develop, holochain-0.1, holochain-0.2 ]
   pull_request:
-    branches: [ main, develop, holochain-0.1 ]
+    branches: [ main, develop, holochain-0.1, holochain-0.2 ]
 
 jobs:
   testbuild:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Extend space
         uses: ./.github/actions/extend-space
-              
       - name: Install nix
-        uses: cachix/install-nix-action@v18
+        uses: cachix/install-nix-action@v23
         with:
-          install_url: https://releases.nixos.org/nix/nix-2.12.0/install
+          install_url: https://releases.nixos.org/nix/nix-2.13.3/install
           extra_nix_config: |
             experimental-features = flakes nix-command
 
@@ -27,8 +27,7 @@ jobs:
         with:
           name: holochain-ci
 
-      - name: Install and test
+      - name: Build and test
         run: |
           cd $GITHUB_WORKSPACE
-          nix develop --command bash -c "cargo install --path . && sh run_test.sh"
-
+          nix develop --override-input "versions/scaffolding" . .#ci --command ./run_test.sh
