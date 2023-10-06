@@ -135,7 +135,7 @@ pub fn add_link_type_to_integrity_zome(
                                 if let syn::Stmt::Expr(syn::Expr::Match(match_expr)) = stmt {
                                     if let syn::Expr::Try(try_expr) = &mut *match_expr.expr {
                                         if let syn::Expr::MethodCall(call) = &mut *try_expr.expr {
-                                            if call.method.to_string().eq(&String::from("flattened"))
+                                            if call.method.to_string().eq(&String::from("to_type"))
                                             {
                                                 if let Some(turbofish) = &mut call.turbofish {
                                                     if let Some(last_arg) =
@@ -493,7 +493,7 @@ fn add_link_type_to_validation_arms(
                 if let syn::Stmt::Expr(syn::Expr::Match(match_expr)) = stmt {
                     if let syn::Expr::Try(try_expr) = &mut *match_expr.expr {
                         if let syn::Expr::MethodCall(call) = &mut *try_expr.expr {
-                            if call.method.to_string().eq(&String::from("flattened")) {
+                            if call.method.to_string().eq(&String::from("to_type")) {
                                 for arm in &mut match_expr.arms {
                                     if let syn::Pat::TupleStruct(tuple_struct) = &mut arm.pat {
                                         if let Some(path_segment) =
