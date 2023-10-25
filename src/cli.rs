@@ -212,6 +212,10 @@ pub enum HcScaffold {
         /// Name of the example to scaffold. One of ['hello-world', 'forum'].
         example: Option<Example>,
 
+        #[structopt(long)]
+        /// Whether to setup the holonix development environment for this web-app
+        setup_nix: Option<bool>,
+
         #[structopt(short, long)]
         /// The template to scaffold the example for
         /// Must be an option from the built-in templates: "vanilla", "vue", "lit", "svelte"
@@ -702,7 +706,7 @@ Collection "{}" scaffolded!
                     println!("{}", i);
                 }
             }
-            HcScaffold::Example { example, template } => {
+            HcScaffold::Example { example, template, setup_nix } => {
                 let example = match example {
                     Some(e) => e,
                     None => choose_example()?,
@@ -914,11 +918,13 @@ Collection "{}" scaffolded!
                 file_tree.build(&app_dir)?;
 
                 // set up nix
-                if let Err(err) = setup_nix_developer_environment(&app_dir) {
-                    fs::remove_dir_all(&app_dir)?;
+                if setup_nix == Some(true) || setup_nix == None  {
+                    if let Err(err) = setup_nix_developer_environment(&app_dir) {
+                       fs::remove_dir_all(&app_dir)?;
 
-                    return Err(err)?;
-                }
+                        return Err(err)?;
+                    }
+                };
 
                 setup_git_environment(&app_dir)?;
 
