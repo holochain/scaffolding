@@ -10,7 +10,7 @@ cd hello-world
 nix develop --command bash -c "
 set -e
 npm i
-npm t
+npm t 
 "
 
 rm -rf /tmp/forum-svelte
