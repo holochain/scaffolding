@@ -440,10 +440,10 @@
     },
     "versions": {
       "inputs": {
-        "holochain": "holochain_3",
-        "lair": "lair_2",
-        "launcher": "launcher_2",
-        "scaffolding": "scaffolding_2"
+        "holochain": "holochain_2",
+        "lair": "lair",
+        "launcher": "launcher",
+        "scaffolding": "scaffolding"
       },
       "locked": {
         "dir": "versions/0_2",
