@@ -1,4 +1,5 @@
 name: "test"
+
 on:
   # Trigger the workflow on push or pull request,
   # but only for the main branch
@@ -15,7 +16,7 @@ jobs:
 
       - name: Extend space
         uses: ./.github/actions/extend-space
-              
+ 
       - name: Install nix
         uses: cachix/install-nix-action@v23
         with:
@@ -31,4 +32,3 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE
           nix develop --override-input "versions/scaffolding" . .#ci --command ./run_test.sh
-
