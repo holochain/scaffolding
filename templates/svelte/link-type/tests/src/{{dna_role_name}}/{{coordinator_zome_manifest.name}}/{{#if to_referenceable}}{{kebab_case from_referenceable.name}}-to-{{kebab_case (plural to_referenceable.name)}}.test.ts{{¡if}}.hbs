@@ -1,6 +1,6 @@
 import { assert, test } from "vitest";
 
-import { runScenario, pause, CallableCell } from '@holochain/tryorama';
+import { runScenario, dhtSync, CallableCell } from '@holochain/tryorama';
 import { NewEntryAction, ActionHash, Record, AppBundleSource,  fakeActionHash, fakeAgentPubKey, fakeEntryHash } from '@holochain/client';
 import { decode } from '@msgpack/msgpack';
 
@@ -67,7 +67,7 @@ test('link a {{pascal_case from_referenceable.name}} to a {{pascal_case to_refer
       }
     });
     
-    await pause(1200);
+    await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
     
     // Bob gets the links again
     linksOutput = await bob.cells[0].callZome({
@@ -104,7 +104,7 @@ test('link a {{pascal_case from_referenceable.name}} to a {{pascal_case to_refer
       }
     });
     
-    await pause(1200);
+    await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
 
     // Bob gets the links again
     linksOutput = await bob.cells[0].callZome({
