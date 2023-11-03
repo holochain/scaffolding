@@ -1,6 +1,6 @@
 import { assert, test } from "vitest";
 
-import { runScenario, pause, CallableCell } from '@holochain/tryorama';
+import { runScenario, dhtSync, CallableCell } from '@holochain/tryorama';
 import { NewEntryAction, ActionHash, Record, AppBundleSource,  fakeActionHash, fakeAgentPubKey, fakeEntryHash } from '@holochain/client';
 import { decode } from '@msgpack/msgpack';
 
@@ -35,7 +35,7 @@ test('create a {{pascal_case referenceable.name}} and get {{lower_case collectio
     const createdRecord: Record = await create{{pascal_case referenceable.name}}(alice.cells[0]);
     assert.ok(createdRecord);
     
-    await pause(1200);
+    await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
     
     // Bob gets {{lower_case collection_name}} again
     collectionOutput = await bob.cells[0].callZome({
