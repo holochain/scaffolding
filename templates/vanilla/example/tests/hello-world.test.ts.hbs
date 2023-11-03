@@ -38,7 +38,7 @@ test('send hello and retrieve hellos', async () => {
           });
         assert.ok(resultBeto);
 
-        await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
+        await dhtSync([alice, beto], alice.cells[0].cell_id[0]);
         
         // Alice gets all hellos
         const hellosAlice: Array<any> = await aliceCell.callZome({
