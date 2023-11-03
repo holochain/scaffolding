@@ -47,6 +47,10 @@ hc scaffold link-type
 
 See the [docs.rs documentation](https://docs.rs/holochain_scaffolding_cli) to learn how to use and create custom templates.
 
+## Contributing
+
+We have a contributing [guide](guides/contributing) to help you get started. If you need anything else to get started please reach out on [Discord](https://discord.gg/k55DS5dmPH)!
+
 ## Manual installation
 
 Install the CLI globally with this command.
