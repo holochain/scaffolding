@@ -82,7 +82,6 @@
 //!
 //! Templates have this directory structure:
 //!
-//! ```
 //! coordinator-zome/
 //! dna/
 //! entry-type/
@@ -92,7 +91,6 @@
 //! integrity-zome/
 //! link-type/
 //! web-app/
-//! ```
 //!
 //! Each folder corresponds to the templates that are going to be created when running a specific command. This is the steps that are executed:
 //!
@@ -123,7 +121,6 @@
 //!
 //! The `field-types` folder is special. It has the following directory structure:
 //!
-//! ```
 //! ActionHash/
 //!   type.hbs
 //! AgentPubKey/
@@ -168,7 +165,6 @@
 //!       imports.hbs
 //!       render.hbs
 //!   type.hbs
-//! ```
 //!
 //! As you can see, the top-level folders are the rust types that are possible to use as the field types for an entry. The `type.hbs` file in each of the folders contains the typescript type for that rust type, so that it can be rendered in the frontend.
 //!
