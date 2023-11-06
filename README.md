@@ -49,7 +49,7 @@ See the [docs.rs documentation](https://docs.rs/holochain_scaffolding_cli) to le
 
 ## Contributing
 
-We have a contributing [guide](guides/contributing) to help you get started. If you need anything else to get started please reach out on [Discord](https://discord.gg/k55DS5dmPH)!
+We have a contributing [guide](guides/contributing.md) to help you get started. If you need anything else to get started please reach out on [Discord](https://discord.gg/k55DS5dmPH)!
 
 ## Manual installation
 
