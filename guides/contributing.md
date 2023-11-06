@@ -43,6 +43,13 @@ To run the tests, run the provided script:
 ./run_tests.sh
 ```
 
+#### Using `nix develop` to run the tests the same way as CI
+
+You can replicate how CI compiles and introduces `hc-scaffold` to its PATH and run the test script via an ad-hoc nix environment with the following command:
+
+```
+nix develop --override-input "versions/scaffolding" . .#ci --command ./run_test.sh`
+```
 This will take some time and downloads a significant amount of data so use with caution if you have limited bandwidth!
 
 ### Contributing your changes
