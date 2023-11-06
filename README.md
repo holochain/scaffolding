@@ -51,6 +51,10 @@ See the [docs.rs documentation](https://docs.rs/holochain_scaffolding_cli) to le
 
 We have a contributing [guide](guides/contributing.md) to help you get started. If you need anything else to get started please reach out on [Discord](https://discord.gg/k55DS5dmPH)!
 
+## Maintenance
+
+We have a maintenance [guide](guides/maintenance.md) which is mainly aimed at maintainers of the project but may be useful for some contributors or users to read.
+
 ## Manual installation
 
 Install the CLI globally with this command.
