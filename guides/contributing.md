@@ -23,6 +23,7 @@ You are now set up, you can start making changes or check the next section to le
 
 ### Running the scaffolding tests
 
+#### Using `cargo install`
 The tests expect to be able to find the scaffolding CLI in your system path. One easy way to make this to happen is to install it directly using `cargo`:
 
 ```bash
