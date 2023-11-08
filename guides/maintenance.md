@@ -39,7 +39,7 @@ Moving a release tag example:
 git checkout develop-0.1
 git pull --tags
 git tag holochain-0.1
-git push --tags origin holochain-0.1
+git push -f --tags origin holochain-0.1
 ```
 
 There is a CI job for Holonix to periodically (every 6 hours at the time of writing) looks for changes. It will automatically update its inputs for Scaffolding and create+merge a PR on the Holochain repository. So after you have pushed the updated tag, Holonix users will have to wait for the next automatic update then do their own `nix flake update` to see the latest Scaffolding.
