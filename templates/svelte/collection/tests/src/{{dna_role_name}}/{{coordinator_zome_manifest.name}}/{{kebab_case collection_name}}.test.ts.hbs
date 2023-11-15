@@ -32,8 +32,8 @@ test('create a {{pascal_case referenceable.name}} and get {{lower_case collectio
     assert.equal(collectionOutput.length, 0);
 
     // Alice creates a {{pascal_case referenceable.name}}
-    const createdRecord: Record = await create{{pascal_case referenceable.name}}(alice.cells[0]);
-    assert.ok(createdRecord);
+    const createRecord: Record = await create{{pascal_case referenceable.name}}(alice.cells[0]);
+    assert.ok(createRecord);
     
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
     
@@ -44,14 +44,14 @@ test('create a {{pascal_case referenceable.name}} and get {{lower_case collectio
       payload: {{#if (eq collection_type.type "Global")}}null{{else}}alice.agentPubKey{{/if}}
     });
     assert.equal(collectionOutput.length, 1);
-    assert.deepEqual({{#if (eq referenceable.hash_type "EntryHash")}}(createRecord.signed_action.hashed.content as NewEntryAction).entry_hash{{else}}createdRecord.signed_action.hashed.hash{{/if}}, collectionOutput[0].target);
+    assert.deepEqual({{#if (eq referenceable.hash_type "EntryHash")}}(createRecord.signed_action.hashed.content as NewEntryAction).entry_hash{{else}}createRecord.signed_action.hashed.hash{{/if}}, collectionOutput[0].target);
 {{#if (and deletable (eq referenceable.hash_type "ActionHash"))}}
 
     // Alice deletes the {{pascal_case referenceable.name}}
     await alice.cells[0].callZome({
       zome_name: "{{coordinator_zome_manifest.name}}",
       fn_name: "delete_{{snake_case referenceable.name}}",
-      payload: record.hashed.hash
+      payload: createRecord.hashed.hash
     });
 
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);

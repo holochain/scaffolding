@@ -210,6 +210,12 @@ fn remove_link_handlers(
     let singular_snake_to_entry_type = to_referenceable
         .to_string(&Cardinality::Single)
         .to_case(Case::Snake);
+    let plural_snake_to_entry_type = to_referenceable
+        .to_string(&Cardinality::Vector)
+        .to_case(Case::Snake);
+    let plural_snake_from_entry_type = from_referenceable
+        .to_string(&Cardinality::Vector)
+        .to_case(Case::Snake);
 
     let from_link = from_link_hash_type(&to_hash_type);
     let from_inverse = from_link_hash_type(&from_hash_type);
@@ -231,7 +237,7 @@ fn remove_link_handlers(
         true => format!(
             r#"
 #[hdk_extern]
-pub fn get_deleted_{singular_snake_from_entry_type}_for_{singular_snake_to_entry_type}(
+pub fn get_deleted_{plural_snake_from_entry_type}_for_{singular_snake_to_entry_type}(
     {to_arg_name}: {to_hash_type},
 ) -> ExternResult<Vec<(SignedActionHashed, Vec<SignedActionHashed>)>> {{
     let details = get_link_details({to_arg_name}, LinkTypes::{pascal_link_type_name}, None)?;
@@ -265,7 +271,7 @@ pub fn remove_{singular_snake_to_entry_type}_for_{singular_snake_from_entry_type
 }}
 
 #[hdk_extern]
-pub fn get_deleted_{singular_snake_to_entry_type}_for_{singular_snake_from_entry_type}(
+pub fn get_deleted_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}(
     {from_arg_name}: {from_hash_type},
 ) -> ExternResult<Vec<(SignedActionHashed, Vec<SignedActionHashed>)>> {{
     let details = get_link_details({from_arg_name}, LinkTypes::{pascal_link_type_name}, None)?;
