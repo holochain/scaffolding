@@ -72,7 +72,7 @@ test('create and read {{pascal_case entry_type.name}}', async () => {
       payload: {{#if (eq cardinality "vector")}}sample.{{field_name}}[0]{{else}}sample.{{field_name}}{{/if}}
     });
     assert.equal(linksTo{{pascal_case (plural linked_from.name)}}.length, 1);
-    assert.deepEqual(linksTo{{pascal_case (plural linked_from.name)}}[0].target, {{#if (eq linked_from.hash_type "ActionHash")}}record.hashed.hash{{else}}(record.hashed.content as NewEntryAction).entry_hash{{/if}});
+    assert.deepEqual(linksTo{{pascal_case (plural linked_from.name)}}[0].target, {{#if (eq linked_from.hash_type "ActionHash")}}record.signed_action.hashed.hash{{else}}(record.signed_action.hashed.content as NewEntryAction).entry_hash{{/if}});
     {{/if}}
   {{/each}}
   });
@@ -179,8 +179,10 @@ test('create and delete {{pascal_case entry_type.name}}', async () => {
     // conductor of the scenario.
     await scenario.shareAllAgents();
 
+    const sample = await sample{{pascal_case entry_type.name}}(alice.cells[0]);
+
     // Alice creates a {{pascal_case entry_type.name}}
-    const record: Record = await create{{pascal_case entry_type.name}}(alice.cells[0]);
+    const record: Record = await create{{pascal_case entry_type.name}}(alice.cells[0], sample);
     assert.ok(record);
 
   {{#each entry_type.fields}}
@@ -192,7 +194,7 @@ test('create and delete {{pascal_case entry_type.name}}', async () => {
       payload: {{#if (eq cardinality "vector")}}sample.{{field_name}}[0]{{else}}sample.{{field_name}}{{/if}}
     });
     assert.equal(linksTo{{pascal_case (plural linked_from.name)}}.length, 1);
-    assert.deepEqual(linksTo{{pascal_case (plural linked_from.name)}}[0].target, {{#if (eq linked_from.hash_type "ActionHash")}}record.hashed.hash{{else}}(record.hashed.content as NewEntryAction).entry_hash{{/if}});
+    assert.deepEqual(linksTo{{pascal_case (plural linked_from.name)}}[0].target, {{#if (eq linked_from.hash_type "ActionHash")}}record.signed_action.hashed.hash{{else}}(record.signed_action.hashed.content as NewEntryAction).entry_hash{{/if}});
     {{/if}}
   {{/each}}
 
@@ -218,7 +220,7 @@ test('create and delete {{pascal_case entry_type.name}}', async () => {
   {{#each entry_type.fields}}
     {{#if (and linked_from (ne (pascal_case linked_from.name) (pascal_case ../entry_type.name)))}}
     // Bob gets the {{pascal_case (plural linked_from.name)}} for the {{pascal_case ../entry_type.name}} again
-    linksTo{{pascal_case (plural linked_from.name)}}: Link[] = await bob.cells[0].callZome({
+    linksTo{{pascal_case (plural linked_from.name)}} = await bob.cells[0].callZome({
       zome_name: "{{../coordinator_zome_manifest.name}}",
       fn_name: "get_{{snake_case (plural ../entry_type.name)}}_for_{{snake_case linked_from.name}}",
       payload: {{#if (eq cardinality "vector")}}sample.{{field_name}}[0]{{else}}sample.{{field_name}}{{/if}}
