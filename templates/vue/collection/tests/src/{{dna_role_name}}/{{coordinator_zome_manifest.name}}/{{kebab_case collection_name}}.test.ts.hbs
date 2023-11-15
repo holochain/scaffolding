@@ -51,7 +51,7 @@ test('create a {{pascal_case referenceable.name}} and get {{lower_case collectio
     await alice.cells[0].callZome({
       zome_name: "{{coordinator_zome_manifest.name}}",
       fn_name: "delete_{{snake_case referenceable.name}}",
-      payload: createRecord.hashed.hash
+      payload: createRecord.signed_action.hashed.hash
     });
 
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);

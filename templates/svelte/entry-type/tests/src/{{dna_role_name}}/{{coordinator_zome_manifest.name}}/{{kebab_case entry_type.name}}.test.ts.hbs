@@ -72,7 +72,7 @@ test('create and read {{pascal_case entry_type.name}}', async () => {
       fn_name: "get_{{snake_case (plural ../entry_type.name)}}_for_{{snake_case linked_from.name}}",
       payload: {{#if (eq cardinality "vector")}}sample.{{field_name}}[0]{{else}}sample.{{field_name}}{{/if}}
     });
-    assert.equal(linksTo{{pascal_case (plural linked_from.name)}}, 1);
+    assert.equal(linksTo{{pascal_case (plural linked_from.name)}}.length, 1);
     assert.deepEqual(linksTo{{pascal_case (plural linked_from.name)}}[0].target, {{#if (eq linked_from.hash_type "ActionHash")}}record.hashed.hash{{else}}(record.hashed.content as NewEntryAction).entry_hash{{/if}});
       {{/if}}
     {{/if}}
@@ -194,7 +194,7 @@ test('create and delete {{pascal_case entry_type.name}}', async () => {
       fn_name: "get_{{snake_case (plural ../entry_type.name)}}_for_{{snake_case linked_from.name}}",
       payload: {{#if (eq cardinality "vector")}}sample.{{field_name}}[0]{{else}}sample.{{field_name}}{{/if}}
     });
-    assert.equal(linksTo{{pascal_case (plural linked_from.name)}}, 1);
+    assert.equal(linksTo{{pascal_case (plural linked_from.name)}}.length, 1);
     assert.deepEqual(linksTo{{pascal_case (plural linked_from.name)}}[0].target, {{#if (eq linked_from.hash_type "ActionHash")}}record.hashed.hash{{else}}(record.hashed.content as NewEntryAction).entry_hash{{/if}});
       {{/if}}
     {{/if}}
@@ -228,7 +228,7 @@ test('create and delete {{pascal_case entry_type.name}}', async () => {
       fn_name: "get_{{snake_case (plural ../entry_type.name)}}_for_{{snake_case linked_from.name}}",
       payload: {{#if (eq cardinality "vector")}}sample.{{field_name}}[0]{{else}}sample.{{field_name}}{{/if}}
     });
-    assert.equal(linksTo{{pascal_case (plural linked_from.name)}}, 0);
+    assert.equal(linksTo{{pascal_case (plural linked_from.name)}}.length, 0);
       {{/if}}
     {{/if}}
   {{/each}}

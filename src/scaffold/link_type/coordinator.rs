@@ -240,7 +240,7 @@ fn remove_link_handlers(
 pub fn get_deleted_{plural_snake_from_entry_type}_for_{singular_snake_to_entry_type}(
     {to_arg_name}: {to_hash_type},
 ) -> ExternResult<Vec<(SignedActionHashed, Vec<SignedActionHashed>)>> {{
-    let details = get_link_details({to_arg_name}, LinkTypes::{pascal_link_type_name}, None)?;
+    let details = get_link_details({to_arg_name}, LinkTypes::{inverse_link_type_name}, None)?;
     Ok(details
         .into_inner()
         .into_iter()
