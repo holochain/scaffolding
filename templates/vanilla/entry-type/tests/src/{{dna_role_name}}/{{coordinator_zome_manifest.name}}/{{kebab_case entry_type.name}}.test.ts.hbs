@@ -62,6 +62,19 @@ test('create and read {{pascal_case entry_type.name}}', async () => {
       payload: {{#if entry_type.reference_entry_hash}}(record.signed_action.hashed.content as NewEntryAction).entry_hash{{else}}record.signed_action.hashed.hash{{/if}},
     });
     assert.deepEqual(sample, decode((createReadOutput.entry as any).Present.entry) as any);
+
+  {{#each entry_type.fields}}
+    {{#if (and linked_from (ne (pascal_case linked_from.name) (pascal_case ../entry_type.name)))}}
+    // Bob gets the {{pascal_case (plural linked_from.name)}} for the new {{pascal_case ../entry_type.name}}
+    let linksTo{{pascal_case (plural linked_from.name)}}: Link[] = await bob.cells[0].callZome({
+      zome_name: "{{../coordinator_zome_manifest.name}}",
+      fn_name: "get_{{snake_case (plural ../entry_type.name)}}_for_{{snake_case linked_from.name}}",
+      payload: {{#if (eq cardinality "vector")}}sample.{{field_name}}[0]{{else}}sample.{{field_name}}{{/if}}
+    });
+    assert.equal(linksTo{{pascal_case (plural linked_from.name)}}, 1);
+    assert.deepEqual(linksTo{{pascal_case (plural linked_from.name)}}[0].target, {{#if (eq linked_from.hash_type "ActionHash")}}record.hashed.hash{{else}}(record.hashed.content as NewEntryAction).entry_hash{{/if}});
+    {{/if}}
+  {{/each}}
   });
 });
 
@@ -169,7 +182,20 @@ test('create and delete {{pascal_case entry_type.name}}', async () => {
     // Alice creates a {{pascal_case entry_type.name}}
     const record: Record = await create{{pascal_case entry_type.name}}(alice.cells[0]);
     assert.ok(record);
-        
+
+  {{#each entry_type.fields}}
+    {{#if (and linked_from (ne (pascal_case linked_from.name) (pascal_case ../entry_type.name)))}}
+    // Bob gets the {{pascal_case (plural linked_from.name)}} for the new {{pascal_case ../entry_type.name}}
+    let linksTo{{pascal_case (plural linked_from.name)}}: Link[] = await bob.cells[0].callZome({
+      zome_name: "{{../coordinator_zome_manifest.name}}",
+      fn_name: "get_{{snake_case (plural ../entry_type.name)}}_for_{{snake_case linked_from.name}}",
+      payload: {{#if (eq cardinality "vector")}}sample.{{field_name}}[0]{{else}}sample.{{field_name}}{{/if}}
+    });
+    assert.equal(linksTo{{pascal_case (plural linked_from.name)}}, 1);
+    assert.deepEqual(linksTo{{pascal_case (plural linked_from.name)}}[0].target, {{#if (eq linked_from.hash_type "ActionHash")}}record.hashed.hash{{else}}(record.hashed.content as NewEntryAction).entry_hash{{/if}});
+    {{/if}}
+  {{/each}}
+
     // Alice deletes the {{pascal_case entry_type.name}}
     const deleteActionHash = await alice.cells[0].callZome({
       zome_name: "{{coordinator_zome_manifest.name}}",
@@ -181,13 +207,26 @@ test('create and delete {{pascal_case entry_type.name}}', async () => {
     // Wait for the entry deletion to be propagated to the other node.
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
         
-    // Bob gets the deletions for the {{pascal_case entry_type.name}}
-    const deletesFor{{pascal_case entry_type.name}} = await bob.cells[0].callZome({
+    // Bob gets the deletions for {{pascal_case entry_type.name}}
+    const deletesFor{{title_case entry_type.name}} = await bob.cells[0].callZome({
       zome_name: "{{coordinator_zome_manifest.name}}",
       fn_name: "get_deletes_for_{{snake_case entry_type.name}}",
       payload: record.signed_action.hashed.hash,
     });
-    assert.equal(deletesFor{{pascal_case entry_type.name}}.length, 1);
+    assert.equal(deletesFor{{title_case entry_type.name}}.length, 1);
+
+  {{#each entry_type.fields}}
+    {{#if (and linked_from (ne (pascal_case linked_from.name) (pascal_case ../entry_type.name)))}}
+    // Bob gets the {{pascal_case (plural linked_from.name)}} for the {{pascal_case ../entry_type.name}} again
+    linksTo{{pascal_case (plural linked_from.name)}}: Link[] = await bob.cells[0].callZome({
+      zome_name: "{{../coordinator_zome_manifest.name}}",
+      fn_name: "get_{{snake_case (plural ../entry_type.name)}}_for_{{snake_case linked_from.name}}",
+      payload: {{#if (eq cardinality "vector")}}sample.{{field_name}}[0]{{else}}sample.{{field_name}}{{/if}}
+    });
+    assert.equal(linksTo{{pascal_case (plural linked_from.name)}}, 0);
+    {{/if}}
+  {{/each}}
+
   });
 });
 {{/if}}

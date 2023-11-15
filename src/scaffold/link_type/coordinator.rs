@@ -143,15 +143,8 @@ fn get_links_handler_to_agent(
 
     format!(
         r#"#[hdk_extern]
-pub fn get_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}({from_arg_name}: {from_hash_type}) -> ExternResult<Vec<AgentPubKey>> {{
-    let links = get_links({from_arg_name}, LinkTypes::{pascal_link_type_name}, None)?;
-    
-    let agents: Vec<AgentPubKey> = links
-        .into_iter()
-        .map(|link| Ok(AgentPubKey::from(link.target.into_entry_hash().ok_or(wasm_error!(WasmErrorInner::Guest(String::from("No entry hash associated with link"))))?)))
-        .collect::<ExternResult<Vec<AgentPubKey>>>()?;
-
-    Ok(agents)
+pub fn get_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}({from_arg_name}: {from_hash_type}) -> ExternResult<Vec<Link>> {{
+    get_links({from_arg_name}, LinkTypes::{pascal_link_type_name}, None)
 }}"#,
     )
 }
@@ -162,8 +155,6 @@ fn get_links_handler_to_entry(
 ) -> String {
     let from_hash_type = from_referenceable.hash_type().to_string();
     let from_arg_name = from_referenceable.field_name(&Cardinality::Single);
-    // let to_hash_type = to_entry_type.hash_type().to_string();
-    let snake_to_hash_type = to_entry_type.hash_type().to_string().to_case(Case::Snake);
 
     let pascal_link_type_name = link_type_name(
         from_referenceable,
@@ -178,24 +169,8 @@ fn get_links_handler_to_entry(
 
     format!(
         r#"#[hdk_extern]
-pub fn get_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}({from_arg_name}: {from_hash_type}) -> ExternResult<Vec<Record>> {{
-    let links = get_links({from_arg_name}, LinkTypes::{pascal_link_type_name}, None)?;
-    
-    let get_input: Vec<GetInput> = links
-        .into_iter()
-        .map(|link| Ok(GetInput::new(
-            link.target.into_{snake_to_hash_type}().ok_or(wasm_error!(WasmErrorInner::Guest(String::from("No action hash associated with link"))))?.into(),
-            GetOptions::default(),
-        )))
-        .collect::<ExternResult<Vec<GetInput>>>()?;
-
-    // Get the records to filter out the deleted ones
-    let records: Vec<Record> = HDK.with(|hdk| hdk.borrow().get(get_input))?
-        .into_iter()
-        .filter_map(|r| r)
-        .collect();
-
-    Ok(records)
+pub fn get_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}({from_arg_name}: {from_hash_type}) -> ExternResult<Vec<Link>> {{
+    get_links({from_arg_name}, LinkTypes::{pascal_link_type_name}, None)
 }}"#,
     )
 }
@@ -209,7 +184,6 @@ fn from_link_hash_type(hash_type: &String) -> String {
         _ => format!("link.target.clone().into_{}().ok_or(wasm_error!(WasmErrorInner::Guest(String::from(\"No {} associated with link\"))))?", snake_hash_type, lower_hash_type),
     }
 }
-
 
 // Event to calendar
 fn remove_link_handlers(
@@ -253,6 +227,23 @@ fn remove_link_handlers(
         ),
         false => format!(""),
     };
+    let bidireccional_get_deleted = match bidireccional {
+        true => format!(
+            r#"
+#[hdk_extern]
+pub fn get_deleted_{singular_snake_from_entry_type}_for_{singular_snake_to_entry_type}(
+    {to_arg_name}: {to_hash_type},
+) -> ExternResult<Vec<(SignedActionHashed, Vec<SignedActionHashed>)>> {{
+    let details = get_link_details({to_arg_name}, LinkTypes::{pascal_link_type_name}, None)?;
+    Ok(details
+        .into_inner()
+        .into_iter()
+        .filter(|(_link, deletes)| deletes.len() > 0)
+        .collect())
+}}"#
+        ),
+        false => format!(""),
+    };
     format!(
         r#"#[derive(Serialize, Deserialize, Debug)]
 pub struct Remove{singular_pascal_to_entry_type}For{singular_pascal_from_entry_type}Input {{
@@ -271,7 +262,20 @@ pub fn remove_{singular_snake_to_entry_type}_for_{singular_snake_from_entry_type
     {bidireccional_remove}
 
     Ok(())        
-}}"#
+}}
+
+#[hdk_extern]
+pub fn get_deleted_{singular_snake_to_entry_type}_for_{singular_snake_from_entry_type}(
+    {from_arg_name}: {from_hash_type},
+) -> ExternResult<Vec<(SignedActionHashed, Vec<SignedActionHashed>)>> {{
+    let details = get_link_details({from_arg_name}, LinkTypes::{pascal_link_type_name}, None)?;
+    Ok(details
+        .into_inner()
+        .into_iter()
+        .filter(|(_link, deletes)| deletes.len() > 0)
+        .collect())
+}}
+{bidireccional_get_deleted}"#
     )
 }
 
@@ -366,6 +370,7 @@ pub fn add_link_type_functions_to_coordinator(
     })?;
 
     let dna_file_tree = DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
+
     let zome_file_tree = ZomeFileTree::from_zome_manifest(dna_file_tree, zome_manifest)?;
 
     Ok(zome_file_tree)

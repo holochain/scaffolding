@@ -487,7 +487,7 @@ pub fn get_all_entry_types(
                 let referenced_by_entry_hash = match find_extern_function_in_zomes(
                     &zome_file_tree.dna_file_tree,
                     &coordinators_for_zome,
-                    &format!("read_{}", v),
+                    &format!("get_{}", v.to_case(Case::Snake)),
                 )? {
                     Some((_z, item_fn)) => {
                         match item_fn
