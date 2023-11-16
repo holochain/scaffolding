@@ -59,6 +59,23 @@ pub fn setup_nix_developer_environment(dir: &PathBuf) -> ScaffoldResult<()> {
         ));
     }
 
+    // This is here to catch the issue from this thread https://discourse.nixos.org/t/nix-flakes-nix-store-source-no-such-file-or-directory/17836
+    // If you run Scaffolding inside a Git repository when the `nix flake update` will fail. At some point Nix should report this so we don't need
+    // to worry about it but for now this helps solve a strange error message.
+    match Command::new("git")
+        .stdout(Stdio::piped())
+        .stderr(Stdio::null())
+        .current_dir(dir)
+        .args(["rev-parse", "--is-inside-work-tree"])
+        .output() {
+            Ok(output) => {
+                if output.status.success() && output.stdout == b"true\n" {
+                    return Err(ScaffoldError::NixSetupError("- detected that Scaffolding is running inside an existing Git repository, please choose a different location to scaffold".to_string()));
+                }
+            },
+            Err(_) => {} // Ignore errors, Git isn't necessarily available.
+        }
+
     println!("Setting up nix development environment...");
 
     add_extra_experimental_features()?;
