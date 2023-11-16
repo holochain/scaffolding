@@ -178,6 +178,7 @@ impl HelperDef for MergeScope {
         Ok(())
     }
 }
+
 pub fn register_merge_scope<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
     h.register_helper("merge_scope", Box::new(MergeScope));
 

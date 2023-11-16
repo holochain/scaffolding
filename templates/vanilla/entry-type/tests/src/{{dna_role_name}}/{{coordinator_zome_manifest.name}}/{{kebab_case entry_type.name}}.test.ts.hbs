@@ -64,7 +64,8 @@ test('create and read {{pascal_case entry_type.name}}', async () => {
     assert.deepEqual(sample, decode((createReadOutput.entry as any).Present.entry) as any);
 
   {{#each entry_type.fields}}
-    {{#if (and linked_from (ne (pascal_case linked_from.name) (pascal_case ../entry_type.name)))}}
+    {{#if linked_from}}
+      {{#if (ne (pascal_case linked_from.name) (pascal_case ../entry_type.name))}}
     // Bob gets the {{pascal_case (plural linked_from.name)}} for the new {{pascal_case ../entry_type.name}}
     let linksTo{{pascal_case (plural linked_from.name)}}: Link[] = await bob.cells[0].callZome({
       zome_name: "{{../coordinator_zome_manifest.name}}",
@@ -73,6 +74,7 @@ test('create and read {{pascal_case entry_type.name}}', async () => {
     });
     assert.equal(linksTo{{pascal_case (plural linked_from.name)}}.length, 1);
     assert.deepEqual(linksTo{{pascal_case (plural linked_from.name)}}[0].target, {{#if ../entry_type.reference_entry_hash}}(record.signed_action.hashed.content as NewEntryAction).entry_hash{{else}}record.signed_action.hashed.hash{{/if}});
+      {{/if}}
     {{/if}}
   {{/each}}
   });
@@ -188,7 +190,8 @@ test('create and delete {{pascal_case entry_type.name}}', async () => {
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
 
   {{#each entry_type.fields}}
-    {{#if (and linked_from (ne (pascal_case linked_from.name) (pascal_case ../entry_type.name)))}}
+    {{#if linked_from}}
+      {{#if (ne (pascal_case linked_from.name) (pascal_case ../entry_type.name))}}
     // Bob gets the {{pascal_case (plural linked_from.name)}} for the new {{pascal_case ../entry_type.name}}
     let linksTo{{pascal_case (plural linked_from.name)}}: Link[] = await bob.cells[0].callZome({
       zome_name: "{{../coordinator_zome_manifest.name}}",
@@ -197,6 +200,7 @@ test('create and delete {{pascal_case entry_type.name}}', async () => {
     });
     assert.equal(linksTo{{pascal_case (plural linked_from.name)}}.length, 1);
     assert.deepEqual(linksTo{{pascal_case (plural linked_from.name)}}[0].target, {{#if ../entry_type.reference_entry_hash}}(record.signed_action.hashed.content as NewEntryAction).entry_hash{{else}}record.signed_action.hashed.hash{{/if}});
+      {{/if}}
     {{/if}}
   {{/each}}
 
@@ -220,7 +224,8 @@ test('create and delete {{pascal_case entry_type.name}}', async () => {
     assert.equal(deletesFor{{title_case entry_type.name}}.length, 1);
 
   {{#each entry_type.fields}}
-    {{#if (and linked_from (ne (pascal_case linked_from.name) (pascal_case ../entry_type.name)))}}
+    {{#if linked_from}}
+      {{#if (ne (pascal_case linked_from.name) (pascal_case ../entry_type.name))}}
     // Bob gets the {{pascal_case (plural linked_from.name)}} for the {{pascal_case ../entry_type.name}} again
     linksTo{{pascal_case (plural linked_from.name)}} = await bob.cells[0].callZome({
       zome_name: "{{../coordinator_zome_manifest.name}}",
@@ -228,6 +233,7 @@ test('create and delete {{pascal_case entry_type.name}}', async () => {
       payload: {{#if (eq cardinality "vector")}}sample.{{field_name}}[0]{{else}}sample.{{field_name}}{{/if}}
     });
     assert.equal(linksTo{{pascal_case (plural linked_from.name)}}.length, 0);
+      {{/if}}
     {{/if}}
   {{/each}}
 
