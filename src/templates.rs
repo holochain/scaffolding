@@ -1,5 +1,4 @@
 use build_fs_tree::serde::Serialize;
-use convert_case::{Case, Casing};
 use dialoguer::theme::ColorfulTheme;
 use dialoguer::Select;
 use handlebars::{
@@ -7,7 +6,6 @@ use handlebars::{
     RenderError, Renderable, StringOutput,
 };
 use regex::Regex;
-use serde_json::Value;
 use std::collections::{BTreeMap, HashSet};
 use std::ffi::OsString;
 use std::path::PathBuf;
@@ -20,6 +18,7 @@ use crate::file_tree::{
 use crate::scaffold::web_app::uis::{guess_or_choose_framework, template_for_ui_framework};
 
 pub mod get;
+pub mod helpers;
 
 pub mod collection;
 pub mod coordinator;
@@ -38,7 +37,7 @@ pub struct ScaffoldedTemplate {
 pub fn build_handlebars<'a>(templates_dir: &FileTree) -> ScaffoldResult<Handlebars<'a>> {
     let h = Handlebars::new();
 
-    let mut h = register_helpers(h);
+    let mut h = helpers::register_helpers(h);
 
     let field_types_path = PathBuf::from("field-types");
     let v: Vec<OsString> = field_types_path.iter().map(|s| s.to_os_string()).collect();
@@ -49,277 +48,6 @@ pub fn build_handlebars<'a>(templates_dir: &FileTree) -> ScaffoldResult<Handleba
     h.register_escape_fn(handlebars::no_escape);
 
     Ok(h)
-}
-
-pub fn register_helpers<'a>(h: Handlebars<'a>) -> Handlebars<'a> {
-    let h = register_concat_helper(h);
-    let h = register_contains_helper(h);
-    let h = register_includes_helper(h);
-    let h = register_case_helpers(h);
-    let h = register_replace_helper(h);
-    let h = register_pluralize_helpers(h);
-    let h = register_merge(h);
-    let h = register_uniq_lines(h);
-
-    h
-}
-
-pub fn register_concat_helper<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
-    h.register_helper(
-        "concat",
-        Box::new(
-            |h: &Helper,
-             _r: &Handlebars,
-             _: &Context,
-             _rc: &mut RenderContext,
-             out: &mut dyn Output|
-             -> HelperResult {
-                let result = h
-                    .params()
-                    .into_iter()
-                    .map(|p| p.render())
-                    .collect::<Vec<String>>()
-                    .join("");
-
-                out.write(result.as_ref())?;
-                Ok(())
-            },
-        ),
-    );
-
-    h
-}
-
-fn get_scope_open_and_close_char_indexes(
-    text: &String,
-    scope_opener: &String,
-) -> Result<(usize, usize), RenderError> {
-    let mut index = text.find(scope_opener.as_str()).ok_or(RenderError::new(
-        "Given scope opener not found in the given parameter",
-    ))?;
-
-    index = index + scope_opener.len() - 1;
-    let scope_opener_index = index.clone();
-    let mut scope_count = 1;
-
-    while scope_count > 0 {
-        index += 1;
-        match text.chars().nth(index) {
-            Some('{') => {
-                scope_count += 1;
-            }
-            Some('}') => {
-                scope_count -= 1;
-            }
-            None => {
-                return Err(RenderError::new("Malformed scopes"));
-            }
-            _ => {}
-        }
-    }
-
-    Ok((scope_opener_index, index))
-}
-
-#[derive(Clone, Copy)]
-pub struct Merge;
-
-impl HelperDef for Merge {
-    fn call<'reg: 'rc, 'rc>(
-        &self,
-        h: &Helper<'reg, 'rc>,
-        r: &'reg Handlebars<'reg>,
-        ctx: &'rc Context,
-        rc: &mut RenderContext<'reg, 'rc>,
-        out: &mut dyn Output,
-    ) -> HelperResult {
-        let t = h
-            .template()
-            .ok_or(RenderError::new("merge helper cannot have empty content"))?;
-
-        let s = h
-            .param(0)
-            .ok_or(RenderError::new("merge helper needs 1 parameter"))?
-            .value()
-            .as_str()
-            .ok_or(RenderError::new("merge first parameter must be a string"))?
-            .to_string();
-
-        let mut data = ctx
-            .data()
-            .as_object()
-            .ok_or(RenderError::new("Context must be an object"))?
-            .clone();
-        data.insert(String::from(SCOPE_CONTENT), Value::String(s));
-        rc.set_context(Context::wraps(data)?);
-
-        let mut inner_output = StringOutput::new();
-        t.render(r, ctx, rc, &mut inner_output)?;
-
-        println!("rendercontext{:?}", rc);
-
-        out.write(&inner_output.into_string().unwrap())?;
-        Ok(())
-    }
-}
-
-const MATCHED_SCOPES: &'static str = "matched_scopes";
-const SCOPE_CONTENT: &'static str = "scope_content";
-
-#[derive(Clone, Copy)]
-pub struct MatchScope;
-
-impl HelperDef for MatchScope {
-    fn call<'reg: 'rc, 'rc>(
-        &self,
-        h: &Helper<'reg, 'rc>,
-        r: &'reg Handlebars<'reg>,
-        ctx: &'rc Context,
-        rc: &mut RenderContext<'reg, 'rc>,
-        out: &mut dyn Output,
-    ) -> HelperResult {
-        let t = h
-            .template()
-            .ok_or(RenderError::new("merge helper cannot have empty content"))?;
-
-        let mut data = ctx
-            .data()
-            .as_object()
-            .ok_or(RenderError::new("Context must be an object"))?
-            .clone();
-
-        let scope_content = data.get(SCOPE_CONTENT).ok_or(RenderError::new(
-            "match_scope needs to be placed directly inside a merge helper",
-        ))?;
-
-        let scope_opener = h
-            .param(0)
-            .ok_or(RenderError::new("merge helper needs 1 parameter"))?
-            .value()
-            .as_str()
-            .ok_or(RenderError::new("merge's first parameter must be a string"))?
-            .to_string();
-
-        let (scope_opener_index, scope_close_index) =
-            get_scope_open_and_close_char_indexes(&scope_content, &scope_opener)?;
-
-        // out.write(&s[0..=scope_opener_index])?;
-        let previous_scope_content = &s[(scope_opener_index + 1)..scope_close_index].to_string();
-
-        data.insert(
-            String::from("previous_scope_content"),
-            Value::String(previous_scope_content.clone().trim().to_string()),
-        );
-        let mut matched_scopes = match data.get(MATCHED_SCOPES) {
-            Some(Value::Array(array)) => array.clone(),
-            _ => vec![],
-        };
-        matched_scoped.push(scope_opener);
-        data.insert(MATCHED_SCOPES.to_string(), Value::Array(matched_scopes));
-        rc.set_context(Context::wraps(data)?);
-        t.render(r, ctx, rc, out)?;
-
-        // out.write(&s[scope_close_index..])?;
-        Ok(())
-    }
-}
-
-pub fn register_merge<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
-    h.register_helper("merge", Box::new(Merge));
-    h.register_helper("match_scope", Box::new(MatchScope));
-
-    h
-}
-
-#[derive(Clone, Copy)]
-pub struct UniqLines;
-
-impl HelperDef for UniqLines {
-    fn call<'reg: 'rc, 'rc>(
-        &self,
-        h: &Helper<'reg, 'rc>,
-        r: &'reg Handlebars<'reg>,
-        ctx: &'rc Context,
-        rc: &mut RenderContext<'reg, 'rc>,
-        out: &mut dyn Output,
-    ) -> HelperResult {
-        let t = h.template().ok_or(RenderError::new(
-            "uniq_lines helper cannot have empty content",
-        ))?;
-
-        let mut string_output = StringOutput::new();
-        t.render(r, ctx, rc, &mut string_output)?;
-
-        let rendered_string = string_output.into_string()?;
-
-        let unique_lines: Vec<String> = rendered_string
-            .split('\n')
-            .into_iter()
-            .map(|s| s.to_string())
-            .collect::<HashSet<String>>()
-            .into_iter()
-            .collect();
-
-        out.write(unique_lines.join("\n").as_str())?;
-        Ok(())
-    }
-}
-pub fn register_uniq_lines<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
-    h.register_helper("uniq_lines", Box::new(UniqLines));
-
-    h
-}
-
-pub fn register_contains_helper<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
-    handlebars_helper!(contains: |list: Option<Vec<Value>>, value: Value| list.is_some() && list.unwrap().contains(&value));
-    h.register_helper("contains", Box::new(contains));
-
-    h
-}
-
-pub fn register_includes_helper<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
-    handlebars_helper!(includes: |string: String, substring: String| string.contains(&substring));
-    h.register_helper("includes", Box::new(includes));
-
-    h
-}
-
-pub fn register_replace_helper<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
-    handlebars_helper!(replace: |s: String, pattern: String, replaced_by: String| s.replace(&pattern, replaced_by.as_str()));
-    h.register_helper("replace", Box::new(replace));
-
-    h
-}
-
-pub fn register_pluralize_helpers<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
-    handlebars_helper!(singular: |s: String| pluralizer::pluralize(s.as_str(), 1, false));
-    h.register_helper("singular", Box::new(singular));
-    handlebars_helper!(plural: |s: String| pluralizer::pluralize(s.as_str(), 2, false));
-    h.register_helper("plural", Box::new(plural));
-
-    h
-}
-
-pub fn register_case_helpers<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
-    handlebars_helper!(title_case: |s: String| s.to_case(Case::Title));
-    h.register_helper("title_case", Box::new(title_case));
-
-    handlebars_helper!(lower_case: |s: String| s.to_case(Case::Lower));
-    h.register_helper("lower_case", Box::new(lower_case));
-
-    handlebars_helper!(snake_case: |s: String| s.to_case(Case::Snake));
-    h.register_helper("snake_case", Box::new(snake_case));
-
-    handlebars_helper!(kebab_case: |s: String| s.to_case(Case::Kebab));
-    h.register_helper("kebab_case", Box::new(kebab_case));
-
-    handlebars_helper!(camel_case: |s: String| s.to_case(Case::Camel));
-    h.register_helper("camel_case", Box::new(camel_case));
-
-    handlebars_helper!(pascal_case: |s: String| s.to_case(Case::Pascal));
-    h.register_helper("pascal_case", Box::new(pascal_case));
-
-    h
 }
 
 pub fn register_all_partials_in_dir<'a>(
