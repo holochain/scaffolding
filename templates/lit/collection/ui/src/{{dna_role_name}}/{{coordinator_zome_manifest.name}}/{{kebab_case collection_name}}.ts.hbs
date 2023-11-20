@@ -1,6 +1,6 @@
 import { LitElement, html } from 'lit';
 import { state, customElement, property } from 'lit/decorators.js';
-import { AppAgentClient, AgentPubKey, EntryHash, ActionHash, Record, NewEntryAction } from '@holochain/client';
+import { AppAgentClient, AgentPubKey, Link, EntryHash, ActionHash, Record, NewEntryAction } from '@holochain/client';
 import { consume } from '@lit-labs/context';
 import { Task } from '@lit-labs/task';
 import '@material/mwc-circular-progress';
@@ -31,7 +31,7 @@ export class {{pascal_case collection_name}} extends LitElement {
       zome_name: '{{coordinator_zome_manifest.name}}',
       fn_name: 'get_{{snake_case collection_name}}',
       payload: {{#if (eq collection_type.type "ByAuthor")}}author{{else}}null{{/if}},
-  }) as Promise<Array<Record>>, () => [{{#if (eq collection_type.type "ByAuthor")}}this.author{{/if}}]);
+  }) as Promise<Array<Link>>, () => [{{#if (eq collection_type.type "ByAuthor")}}this.author{{/if}}]);
 
   firstUpdated() {
   {{#if (eq collection_type.type "ByAuthor")}}
@@ -69,7 +69,7 @@ export class {{pascal_case collection_name}} extends LitElement {
       pending: () => html`<div style="display: flex; flex: 1; align-items: center; justify-content: center">
         <mwc-circular-progress indeterminate></mwc-circular-progress>
       </div>`,
-      complete: (records) => this.renderList([...this.signaledHashes, ...records.map(r => {{#if (eq referenceable.hash_type "ActionHash")}}r.signed_action.hashed.hash{{else}}(r.signed_action.hashed.content as NewEntryAction).entry_hash{{/if}})]),
+      complete: (links) => this.renderList([...this.signaledHashes, ...links.map(l => l.target)]),
       error: (e: any) => html`<span>Error fetching the {{lower_case (plural referenceable.name)}}: ${e.data.data}.</span>`
     });
   }
