@@ -93,7 +93,7 @@ pub fn get_latest_{snake_entry_def_name}(original_{snake_entry_def_name}_hash: A
 }}
 
 #[hdk_extern]
-pub fn get_all_{snake_entry_def_name}_revisions(original_{snake_entry_def_name}_hash: ActionHash) -> ExternResult<Vec<Record>> {{
+pub fn get_all_revisions_for_{snake_entry_def_name}(original_{snake_entry_def_name}_hash: ActionHash) -> ExternResult<Vec<Record>> {{
     let Some(Details::Record(details)) = get_details(original_{snake_entry_def_name}_hash, GetOptions::default())? else {{
         return Ok(vec![]);
     }};
@@ -101,7 +101,7 @@ pub fn get_all_{snake_entry_def_name}_revisions(original_{snake_entry_def_name}_
     let mut records = vec![details.record];
 
     for update in details.updates {{
-        let mut update_records = get_all_{snake_entry_def_name}_revisions(update.action_address().clone())?;
+        let mut update_records = get_all_revisions_for_{snake_entry_def_name}(update.action_address().clone())?;
 
         records.append(&mut update_records);
     }}
@@ -149,7 +149,11 @@ pub fn get_original_{snake_entry_def_name}(original_{snake_entry_def_name}_hash:
 }}
 
 #[hdk_extern]
-pub fn get_all_{snake_entry_def_name}_revisions(original_{snake_entry_def_name}_hash: ActionHash) -> ExternResult<Vec<Record>> {{
+pub fn get_all_revisions_for_{snake_entry_def_name}(original_{snake_entry_def_name}_hash: ActionHash) -> ExternResult<Vec<Record>> {{
+    let Some(original_record) = get_original_{snake_entry_def_name}(original_{snake_entry_def_name}_hash.clone())? else {{
+        return Ok(vec![]);
+    }};
+
     let links = get_links(original_{snake_entry_def_name}_hash.clone(), LinkTypes::{}, None)?;
 
     let get_input: Vec<GetInput> = links
@@ -162,7 +166,8 @@ pub fn get_all_{snake_entry_def_name}_revisions(original_{snake_entry_def_name}_
 
     // load the records for all the links
     let records = HDK.with(|hdk| hdk.borrow().get(get_input))?;
-    let records: Vec<Record> = records.into_iter().filter_map(|r| r).collect();
+    let mut records: Vec<Record> = records.into_iter().filter_map(|r| r).collect();
+    records.insert(0, original_record);
 
     Ok(records)
 }}
@@ -445,7 +450,7 @@ pub fn delete_{snake_entry_def_name}(original_{snake_entry_def_name}_hash: Actio
 }}
 
 #[hdk_extern]
-pub fn get_deletes_for_{snake_entry_def_name}(
+pub fn get_all_deletes_for_{snake_entry_def_name}(
     original_{snake_entry_def_name}_hash: ActionHash,
 ) -> ExternResult<Option<Vec<SignedActionHashed>>> {{
     let Some(details) = get_details(original_{snake_entry_def_name}_hash, GetOptions::default())? else {{
@@ -458,6 +463,19 @@ pub fn get_deletes_for_{snake_entry_def_name}(
         ))),
         Details::Record(record_details) => Ok(Some(record_details.deletes)),
     }}
+}}
+
+#[hdk_extern]
+pub fn get_oldest_delete_for_{snake_entry_def_name}(
+    original_{snake_entry_def_name}_hash: ActionHash,
+) -> ExternResult<Option<SignedActionHashed>> {{
+    let Some(mut deletes) = get_all_deletes_for_{snake_entry_def_name}(original_{snake_entry_def_name}_hash)? else {{
+        return Ok(None);
+    }};
+
+    deletes.sort_by(|delete_a, delete_b| delete_a.action().timestamp().cmp(&delete_b.action().timestamp()));
+
+    Ok(deletes.first().cloned())
 }}
 "#,
     )

@@ -133,7 +133,6 @@ export default defineComponent({
           payload: this.{{camel_case entry_type.name}}Hash,
         });
         this.$emit('{{kebab_case entry_type.name}}-deleted', this.{{camel_case entry_type.name}}Hash);
-        this.fetch{{pascal_case entry_type.name}}();
       } catch (e: any) {
         const errorSnackbar = this.$refs['delete-error'] as Snackbar;
         errorSnackbar.labelText = `Error deleting the {{lower_case entry_type.name}}: ${e.data.data}`;
