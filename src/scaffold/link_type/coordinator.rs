@@ -253,12 +253,6 @@ fn remove_link_handlers(
     let singular_snake_to_entry_type = to_referenceable
         .to_string(&Cardinality::Single)
         .to_case(Case::Snake);
-    let plural_snake_to_entry_type = to_referenceable
-        .to_string(&Cardinality::Vector)
-        .to_case(Case::Snake);
-    let plural_snake_from_entry_type = from_referenceable
-        .to_string(&Cardinality::Vector)
-        .to_case(Case::Snake);
 
     let from_link = from_link_hash_type(&to_hash_type);
     let from_inverse = from_link_hash_type(&from_hash_type);
