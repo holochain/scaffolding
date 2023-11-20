@@ -1,10 +1,6 @@
-use std::collections::{BTreeMap, HashSet};
-use std::ffi::OsString;
-use std::path::PathBuf;
-
 use handlebars::{
-    handlebars_helper, Context, Handlebars, Helper, HelperDef, HelperResult, Output, RenderContext,
-    RenderError, Renderable, StringOutput,
+    Context, Handlebars, Helper, HelperDef, HelperResult, Output, RenderContext, RenderError,
+    Renderable, StringOutput,
 };
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Number, Value};

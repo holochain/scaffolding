@@ -1,8 +1,8 @@
 use std::collections::HashSet;
 
 use handlebars::{
-    handlebars_helper, Context, Handlebars, Helper, HelperDef, HelperResult, Output, RenderContext,
-    RenderError, Renderable, StringOutput,
+    Context, Handlebars, Helper, HelperDef, HelperResult, Output, RenderContext, RenderError,
+    Renderable, StringOutput,
 };
 
 #[derive(Clone, Copy)]

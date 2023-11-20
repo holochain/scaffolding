@@ -1,12 +1,9 @@
 use build_fs_tree::serde::Serialize;
 use dialoguer::theme::ColorfulTheme;
 use dialoguer::Select;
-use handlebars::{
-    handlebars_helper, Context, Handlebars, Helper, HelperDef, HelperResult, Output, RenderContext,
-    RenderError, Renderable, StringOutput,
-};
+use handlebars::Handlebars;
 use regex::Regex;
-use std::collections::{BTreeMap, HashSet};
+use std::collections::BTreeMap;
 use std::ffi::OsString;
 use std::path::PathBuf;
 
