@@ -209,16 +209,26 @@
 //! ...
 //! {{/if}}
 //! ```
-//! - `merge_scope`: takes existing code as its first argument, and the opening of an scope as its second. It then replaces the contents of that scope with the contents of the block:
+//! - `merge` and `match_scope`: takes existing code as its first argument, and the opening of an scope as its second. It then replaces the contents of that scope with the contents of the block:
 //!   - Example usage:
 //! ```hbs
-//! {{#merge_scope previous_file_content "export class ExistingClass {" }}
-//!   {{previous_scope_content}} // This will be replaced with the existing content of the scope
+//! {{#merge previous_file_content}}
+//!   {{#match_scope "export class ExistingClassA {" }}
 //!
-//!   newFunction() {
-//!     // This is a new function that will be added at the end of "ExistingClass"
-//!   }
-//! {{/merge_scope}}
+//!     newFunction() {
+//!       // This is a new function that will be added at the end of "ExistingClassA"
+//!     }
+//!   {{/match_scope}}
+//!   {{#match_scope "export class ExistingClassB {" }}
+//!
+//!     {{#merge previous_scope_content}}
+//!       {{#match_scope "newFunction() {" }}
+//!     // Will add a line at the end of newFunction
+//!       {{/match_scope}}
+//!     {{/merge}}
+//!
+//!   {{/match_scope}}
+//! {{/merge}}
 //! ```
 
 pub mod cli;

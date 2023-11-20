@@ -58,7 +58,7 @@ pub fn register_helpers<'a>(h: Handlebars<'a>) -> Handlebars<'a> {
     let h = register_case_helpers(h);
     let h = register_replace_helper(h);
     let h = register_pluralize_helpers(h);
-    let h = register_merge_scope(h);
+    let h = register_merge(h);
     let h = register_uniq_lines(h);
 
     h
@@ -89,9 +89,6 @@ pub fn register_concat_helper<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
 
     h
 }
-
-#[derive(Clone, Copy)]
-pub struct MergeScope;
 
 fn get_scope_open_and_close_char_indexes(
     text: &String,
@@ -124,7 +121,10 @@ fn get_scope_open_and_close_char_indexes(
     Ok((scope_opener_index, index))
 }
 
-impl HelperDef for MergeScope {
+#[derive(Clone, Copy)]
+pub struct Merge;
+
+impl HelperDef for Merge {
     fn call<'reg: 'rc, 'rc>(
         &self,
         h: &Helper<'reg, 'rc>,
@@ -133,54 +133,100 @@ impl HelperDef for MergeScope {
         rc: &mut RenderContext<'reg, 'rc>,
         out: &mut dyn Output,
     ) -> HelperResult {
-        let t = h.template().ok_or(RenderError::new(
-            "merge_scope helper cannot have empty content",
-        ))?;
+        let t = h
+            .template()
+            .ok_or(RenderError::new("merge helper cannot have empty content"))?;
 
         let s = h
             .param(0)
-            .ok_or(RenderError::new("merge_scope helper needs two parameters"))?
+            .ok_or(RenderError::new("merge helper needs 1 parameter"))?
             .value()
             .as_str()
-            .ok_or(RenderError::new(
-                "merge_scope first parameter must be a string",
-            ))?
+            .ok_or(RenderError::new("merge first parameter must be a string"))?
             .to_string();
-        let scope_opener = h
-            .param(1)
-            .ok_or(RenderError::new("merge_scope helper needs two parameters"))?
-            .value()
-            .as_str()
-            .ok_or(RenderError::new(
-                "merge_scope's second parameter must be a string",
-            ))?
-            .to_string();
-
-        let (scope_opener_index, scope_close_index) =
-            get_scope_open_and_close_char_indexes(&s, &scope_opener)?;
-
-        out.write(&s[0..=scope_opener_index])?;
-        let previous_scope_content = &s[(scope_opener_index + 1)..scope_close_index].to_string();
 
         let mut data = ctx
             .data()
             .as_object()
             .ok_or(RenderError::new("Context must be an object"))?
             .clone();
-        data.insert(
-            String::from("previous_scope_content"),
-            Value::String(previous_scope_content.clone().trim().to_string()),
-        );
+        data.insert(String::from(SCOPE_CONTENT), Value::String(s));
         rc.set_context(Context::wraps(data)?);
-        t.render(r, ctx, rc, out)?;
 
-        out.write(&s[scope_close_index..])?;
+        let mut inner_output = StringOutput::new();
+        t.render(r, ctx, rc, &mut inner_output)?;
+
+        println!("rendercontext{:?}", rc);
+
+        out.write(&inner_output.into_string().unwrap())?;
         Ok(())
     }
 }
 
-pub fn register_merge_scope<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
-    h.register_helper("merge_scope", Box::new(MergeScope));
+const MATCHED_SCOPES: &'static str = "matched_scopes";
+const SCOPE_CONTENT: &'static str = "scope_content";
+
+#[derive(Clone, Copy)]
+pub struct MatchScope;
+
+impl HelperDef for MatchScope {
+    fn call<'reg: 'rc, 'rc>(
+        &self,
+        h: &Helper<'reg, 'rc>,
+        r: &'reg Handlebars<'reg>,
+        ctx: &'rc Context,
+        rc: &mut RenderContext<'reg, 'rc>,
+        out: &mut dyn Output,
+    ) -> HelperResult {
+        let t = h
+            .template()
+            .ok_or(RenderError::new("merge helper cannot have empty content"))?;
+
+        let mut data = ctx
+            .data()
+            .as_object()
+            .ok_or(RenderError::new("Context must be an object"))?
+            .clone();
+
+        let scope_content = data.get(SCOPE_CONTENT).ok_or(RenderError::new(
+            "match_scope needs to be placed directly inside a merge helper",
+        ))?;
+
+        let scope_opener = h
+            .param(0)
+            .ok_or(RenderError::new("merge helper needs 1 parameter"))?
+            .value()
+            .as_str()
+            .ok_or(RenderError::new("merge's first parameter must be a string"))?
+            .to_string();
+
+        let (scope_opener_index, scope_close_index) =
+            get_scope_open_and_close_char_indexes(&scope_content, &scope_opener)?;
+
+        // out.write(&s[0..=scope_opener_index])?;
+        let previous_scope_content = &s[(scope_opener_index + 1)..scope_close_index].to_string();
+
+        data.insert(
+            String::from("previous_scope_content"),
+            Value::String(previous_scope_content.clone().trim().to_string()),
+        );
+        let mut matched_scopes = match data.get(MATCHED_SCOPES) {
+            Some(Value::Array(array)) => array.clone(),
+            _ => vec![],
+        };
+        matched_scoped.push(scope_opener);
+        data.insert(MATCHED_SCOPES.to_string(), Value::Array(matched_scopes));
+        rc.set_context(Context::wraps(data)?);
+        t.render(r, ctx, rc, out)?;
+
+        // out.write(&s[scope_close_index..])?;
+        Ok(())
+    }
+}
+
+pub fn register_merge<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
+    h.register_helper("merge", Box::new(Merge));
+    h.register_helper("match_scope", Box::new(MatchScope));
 
     h
 }
@@ -529,6 +575,8 @@ pub fn choose_or_get_template(
 mod tests {
     // Note this useful idiom: importing names from outer (for mod tests) scope.
     use super::*;
+    use handlebars::Handlebars;
+    use serde_json::{Map, Value};
 
     #[test]
     fn test_get_scope_open_and_close_char_indexes() {
@@ -540,5 +588,71 @@ mod tests {
 
         assert_eq!(scope_opener_index, 10);
         assert_eq!(scope_close_index, 11);
+    }
+
+    #[test]
+    fn test_merge_match_scope() {
+        let h = Handlebars::new();
+
+        let mut h = register_helpers(h);
+
+        let code = String::from(
+            r#"
+export class A {
+    nestedFn1() {
+    
+    }
+}
+export class B {
+    nestedFn() {
+        // First line
+    }
+}
+            "#,
+        );
+        let mut map = Map::new();
+        map.insert(
+            String::from("previous_file_content"),
+            Value::String(String::from(code)),
+        );
+        let context = Context::from(Value::Object(map));
+        let template = r#"
+{{#merge previous_file_content}}
+    {{#match_scope "export class A {"}}
+    nestedFn2() {
+    
+    }
+    {{previous_scope_content}}
+    {{/match_scope}}
+    {{#match_scope "export class B {"}}
+        {{#merge previous_scope_content}}
+            {{#match_scope "nestedFn() {"}}
+        {{previous_scope_content}}
+        // New line
+            {{/match_scope}}
+        {{/merge}}
+    {{/match_scope}}
+{{/merge}}
+            "#;
+
+        assert_eq!(
+            h.render_template_with_context(template, &context).unwrap(),
+            r#"
+export class A {
+    nestedFn2() {
+    
+    }
+    nestedFn1() {
+    
+    }
+}
+export class B {
+    nestedFn() {
+        // First line
+        // New line
+    }
+}
+            "#,
+        );
     }
 }
