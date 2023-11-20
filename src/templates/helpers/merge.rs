@@ -5,13 +5,6 @@ use handlebars::{
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Number, Value};
 
-pub fn register_merge<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
-    h.register_helper("merge", Box::new(Merge));
-    h.register_helper("match_scope", Box::new(MatchScope));
-
-    h
-}
-
 fn get_scope_open_and_close_char_indexes(
     text: &String,
     scope_opener: &String,
@@ -123,6 +116,8 @@ impl HelperDef for Merge {
 
                 data.remove(MATCHED_SCOPES);
                 rc.set_context(Context::wraps(data)?);
+            } else {
+                out.write(&s)?;
             }
         }
 
@@ -230,6 +225,13 @@ impl HelperDef for MatchScope {
     }
 }
 
+pub fn register_merge<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
+    h.register_helper("merge", Box::new(Merge));
+    h.register_helper("match_scope", Box::new(MatchScope));
+
+    h
+}
+
 #[cfg(test)]
 mod tests {
     // Note this useful idiom: importing names from outer (for mod tests) scope.
@@ -247,6 +249,35 @@ mod tests {
 
         assert_eq!(scope_opener_index, 10);
         assert_eq!(scope_close_index, 11);
+    }
+
+    #[test]
+    fn test_merge_match_scope_empty() {
+        let h = Handlebars::new();
+
+        let h = register_merge(h);
+
+        let code = String::from(
+            r#"class A {
+    // Multiline
+    // Comment
+}
+"#,
+        );
+        let mut map = Map::new();
+        map.insert(
+            String::from("previous_file_content"),
+            Value::String(String::from(code.clone())),
+        );
+        let context = Context::from(Value::Object(map));
+        let template = r#"{{#merge previous_file_content}}
+{{/merge}}
+"#;
+
+        assert_eq!(
+            h.render_template_with_context(template, &context).unwrap(),
+            code
+        );
     }
 
     #[test]
@@ -302,7 +333,7 @@ class A {
         let code = String::from(
             r#"export class A {
     nestedFn1() {
-
+        // First line
     }
 }
 export class B {
@@ -355,7 +386,7 @@ export class B {
 
     }
     nestedFn1() {
-
+        // First line
     }
 }
 export class B {
