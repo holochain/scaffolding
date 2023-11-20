@@ -516,7 +516,9 @@ use {}::*;
 
     for f in &entry_def.fields {
         if let Some(linked_from) = &f.linked_from {
-            initial.push_str(get_links_handler(&linked_from, &entry_def.referenceable()).as_str());
+            initial.push_str(
+                get_links_handler(&linked_from, &entry_def.referenceable(), crud.delete).as_str(),
+            );
         }
     }
 
