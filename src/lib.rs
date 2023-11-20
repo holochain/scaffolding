@@ -202,6 +202,13 @@
 //!   - `camel_case`: converts the string to camel case.
 //! - `plural`: converts the given string to its plural.
 //! - `concat`: concatenize strings.
+//! - `contains`: check whether list contains an element.
+//!   - Example usage:
+//! ```hbs
+//! {{#if (contains entry_type_list "Profile")}}
+//! ...
+//! {{/if}}
+//! ```
 //! - `includes`: check whether a string includes a substring.
 //!   - Example usage:
 //! ```hbs
@@ -209,11 +216,14 @@
 //! ...
 //! {{/if}}
 //! ```
-//! - `merge` and `match_scope`: takes existing code as its first argument, and the opening of an scope as its second. It then replaces the contents of that scope with the contents of the block:
+//! - `merge` and `match_scope`: a pair of helpers useful to add some new code to an already existing code structure, respecting their scope (`{` and `}`) structure.
+//!   - `merge`: takes existing code as its only argument.
+//!   - `match_scope`: needs to be placed inside a `merge` helper block, and takes the opening of an scope as only argument. It then searches the argument of the `merge` helper for a scope matching that opening of the scope, and replaces its contents with the contents of the `match_scope` block:
 //!   - Example usage:
 //! ```hbs
 //! {{#merge previous_file_content}}
 //!   {{#match_scope "export class ExistingClassA {" }}
+//!     {{previous_scope_content}} // Variable containing the previous content of the scope
 //!
 //!     newFunction() {
 //!       // This is a new function that will be added at the end of "ExistingClassA"
@@ -223,6 +233,7 @@
 //!
 //!     {{#merge previous_scope_content}}
 //!       {{#match_scope "newFunction() {" }}
+//!     {{previous_scope_content}}
 //!     // Will add a line at the end of newFunction
 //!       {{/match_scope}}
 //!     {{/merge}}
