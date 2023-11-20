@@ -117,18 +117,20 @@ pub fn add_{singular_snake_to_entry_type}_for_{singular_snake_from_entry_type}(i
 pub fn get_links_handler(
     from_referenceable: &Referenceable,
     to_referenceable: &Referenceable,
+    delete: bool,
 ) -> String {
     match to_referenceable {
         Referenceable::Agent { .. } => {
-            get_links_handler_to_agent(from_referenceable, to_referenceable)
+            get_links_handler_to_agent(from_referenceable, to_referenceable, delete)
         }
-        Referenceable::EntryType(e) => get_links_handler_to_entry(from_referenceable, e),
+        Referenceable::EntryType(e) => get_links_handler_to_entry(from_referenceable, e, delete),
     }
 }
 
 fn get_links_handler_to_agent(
     from_referenceable: &Referenceable,
     to_referenceable: &Referenceable,
+    delete: bool,
 ) -> String {
     let from_hash_type = from_referenceable.hash_type().to_string();
     let from_arg_name = from_referenceable.field_name(&Cardinality::Single);
@@ -141,17 +143,38 @@ fn get_links_handler_to_agent(
         .to_string(&Cardinality::Vector)
         .to_case(Case::Snake);
 
+    let get_deleted_links_handler = match delete {
+        true => format!(
+            r#"
+#[hdk_extern]
+pub fn get_deleted_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}(
+    {from_arg_name}: {from_hash_type},
+) -> ExternResult<Vec<(SignedActionHashed, Vec<SignedActionHashed>)>> {{
+    let details = get_link_details({from_arg_name}, LinkTypes::{pascal_link_type_name}, None)?;
+    Ok(details
+        .into_inner()
+        .into_iter()
+        .filter(|(_link, deletes)| deletes.len() > 0)
+        .collect())
+}}"#
+        ),
+        false => format!(""),
+    };
+
     format!(
         r#"#[hdk_extern]
 pub fn get_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}({from_arg_name}: {from_hash_type}) -> ExternResult<Vec<Link>> {{
     get_links({from_arg_name}, LinkTypes::{pascal_link_type_name}, None)
-}}"#,
+}}
+{get_deleted_links_handler}
+"#,
     )
 }
 
 fn get_links_handler_to_entry(
     from_referenceable: &Referenceable,
     to_entry_type: &EntryTypeReference,
+    delete: bool,
 ) -> String {
     let from_hash_type = from_referenceable.hash_type().to_string();
     let from_arg_name = from_referenceable.field_name(&Cardinality::Single);
@@ -167,11 +190,31 @@ fn get_links_handler_to_entry(
         .to_string(&Cardinality::Vector)
         .to_case(Case::Snake);
 
+    let get_deleted_links_handler = match delete {
+        true => format!(
+            r#"
+#[hdk_extern]
+pub fn get_deleted_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}(
+    {from_arg_name}: {from_hash_type},
+) -> ExternResult<Vec<(SignedActionHashed, Vec<SignedActionHashed>)>> {{
+    let details = get_link_details({from_arg_name}, LinkTypes::{pascal_link_type_name}, None)?;
+    Ok(details
+        .into_inner()
+        .into_iter()
+        .filter(|(_link, deletes)| deletes.len() > 0)
+        .collect())
+}}"#
+        ),
+        false => format!(""),
+    };
+
     format!(
         r#"#[hdk_extern]
 pub fn get_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}({from_arg_name}: {from_hash_type}) -> ExternResult<Vec<Link>> {{
     get_links({from_arg_name}, LinkTypes::{pascal_link_type_name}, None)
-}}"#,
+}}
+{get_deleted_links_handler}
+"#,
     )
 }
 
@@ -233,23 +276,7 @@ fn remove_link_handlers(
         ),
         false => format!(""),
     };
-    let bidireccional_get_deleted = match bidireccional {
-        true => format!(
-            r#"
-#[hdk_extern]
-pub fn get_deleted_{plural_snake_from_entry_type}_for_{singular_snake_to_entry_type}(
-    {to_arg_name}: {to_hash_type},
-) -> ExternResult<Vec<(SignedActionHashed, Vec<SignedActionHashed>)>> {{
-    let details = get_link_details({to_arg_name}, LinkTypes::{inverse_link_type_name}, None)?;
-    Ok(details
-        .into_inner()
-        .into_iter()
-        .filter(|(_link, deletes)| deletes.len() > 0)
-        .collect())
-}}"#
-        ),
-        false => format!(""),
-    };
+
     format!(
         r#"#[derive(Serialize, Deserialize, Debug)]
 pub struct Remove{singular_pascal_to_entry_type}For{singular_pascal_from_entry_type}Input {{
@@ -269,19 +296,7 @@ pub fn remove_{singular_snake_to_entry_type}_for_{singular_snake_from_entry_type
 
     Ok(())        
 }}
-
-#[hdk_extern]
-pub fn get_deleted_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}(
-    {from_arg_name}: {from_hash_type},
-) -> ExternResult<Vec<(SignedActionHashed, Vec<SignedActionHashed>)>> {{
-    let details = get_link_details({from_arg_name}, LinkTypes::{pascal_link_type_name}, None)?;
-    Ok(details
-        .into_inner()
-        .into_iter()
-        .filter(|(_link, deletes)| deletes.len() > 0)
-        .collect())
-}}
-{bidireccional_get_deleted}"#
+"#
     )
 }
 
@@ -297,7 +312,7 @@ fn normal_handlers(
             r#"
 
 {}"#,
-            get_links_handler(to_referenceable, from_referenceable)
+            get_links_handler(to_referenceable, from_referenceable, delete)
         ),
         false => format!(""),
     };
@@ -318,7 +333,7 @@ use {integrity_zome_name}::*;
         
 {}"#,
         add_link_handler(from_referenceable, to_referenceable, bidireccional),
-        get_links_handler(from_referenceable, to_referenceable),
+        get_links_handler(from_referenceable, to_referenceable, delete),
         inverse_get,
         delete_link_handler
     )

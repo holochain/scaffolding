@@ -250,6 +250,14 @@ test('create and delete {{pascal_case entry_type.name}}', async () => {
       payload: {{#if (eq cardinality "vector")}}sample.{{field_name}}[0]{{else}}sample.{{field_name}}{{/if}}
     });
     assert.equal(linksTo{{pascal_case (plural linked_from.name)}}.length, 0);
+
+    // Bob gets the deleted {{pascal_case (plural linked_from.name)}} for the {{pascal_case ../entry_type.name}} 
+    const deletedLinksTo{{pascal_case (plural linked_from.name)}} = await bob.cells[0].callZome({
+      zome_name: "{{../coordinator_zome_manifest.name}}",
+      fn_name: "get_deleted_{{snake_case (plural ../entry_type.name)}}_for_{{snake_case linked_from.name}}",
+      payload: {{#if (eq cardinality "vector")}}sample.{{field_name}}[0]{{else}}sample.{{field_name}}{{/if}}
+    });
+    assert.equal(deletedLinksTo{{pascal_case (plural linked_from.name)}}.length, 1);
       {{/if}}
     {{/if}}
   {{/each}}
