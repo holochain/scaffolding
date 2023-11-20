@@ -159,6 +159,15 @@ test('create and update {{pascal_case entry_type.name}}', async () => {
       payload: updatedRecord.signed_action.hashed.hash,
     });
     assert.deepEqual(contentUpdate, decode((readUpdatedOutput1.entry as any).Present.entry) as any);
+
+    // Bob gets all the revisions for {{pascal_case entry_type.name}}
+    const revisions: Record[] = await bob.cells[0].callZome({
+      zome_name: "{{coordinator_zome_manifest.name}}",
+      fn_name: "get_all_revisions_for_{{snake_case entry_type.name}}",
+      payload: originalActionHash,
+    });
+    assert.equal(revisions.length, 3);
+    assert.deepEqual(contentUpdate, decode((revisions[2].entry as any).Present.entry) as any);
   });
 });
 {{/if}}
@@ -214,11 +223,19 @@ test('create and delete {{pascal_case entry_type.name}}', async () => {
 
     // Wait for the entry deletion to be propagated to the other node.
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
+
+    // Bob gets the oldest delete for the {{pascal_case entry_type.name}}
+    const oldestDeleteFor{{pascal_case entry_type.name}} = await bob.cells[0].callZome({
+      zome_name: "{{coordinator_zome_manifest.name}}",
+      fn_name: "get_oldest_delete_for_{{snake_case entry_type.name}}",
+      payload: record.signed_action.hashed.hash,
+    });
+    assert.ok(oldestDeleteFor{{pascal_case entry_type.name}});
         
     // Bob gets the deletions for {{pascal_case entry_type.name}}
     const deletesFor{{title_case entry_type.name}} = await bob.cells[0].callZome({
       zome_name: "{{coordinator_zome_manifest.name}}",
-      fn_name: "get_deletes_for_{{snake_case entry_type.name}}",
+      fn_name: "get_all_deletes_for_{{snake_case entry_type.name}}",
       payload: record.signed_action.hashed.hash,
     });
     assert.equal(deletesFor{{title_case entry_type.name}}.length, 1);
