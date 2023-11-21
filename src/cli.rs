@@ -736,7 +736,7 @@ Collection "{}" scaffolded!
                         let ScaffoldedTemplate { file_tree, .. } = scaffold_web_app(
                             name.clone(),
                             Some(String::from("A simple 'hello world' application.")),
-                            false,
+                            !setup_nix.unwrap_or(true),
                             &template_file_tree,
                             template_name.clone(),
                             false,
@@ -750,7 +750,7 @@ Collection "{}" scaffolded!
                         let ScaffoldedTemplate { file_tree, .. } = scaffold_web_app(
                             name.clone(),
                             Some(String::from("A simple 'forum' application.")),
-                            false,
+                            !setup_nix.unwrap_or(true),
                             &template_file_tree,
                             template_name.clone(),
                             false,
