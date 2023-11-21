@@ -4,7 +4,7 @@
   </div>
 
   <div v-else style="display: flex; flex-direction: column">
-    <span v-if="error">Error fetching the {{lower_case (plural to_referenceable.name)}}: {{{{raw}}}} {{error.data.data}}.{{{{/raw}}}}</span>
+    <span v-if="error">Error fetching the {{lower_case (plural to_referenceable.name)}}: {{{{raw}}}} {{error.data}}.{{{{/raw}}}}</span>
     <div v-else-if="hashes && hashes.length > 0" style="margin-bottom: 8px">
       <{{pascal_case to_referenceable.name}}Detail 
         v-for="hash in hashes" 
