@@ -10,7 +10,7 @@ There need to be some exceptions to this workflow to allow changes on maintenanc
 
 - Bug fixes that are specific to a particular version of Holochain. This should be rare, but if Holochain were to introduce an API change between 0.1.x and 0.1.x+1 but NOT make that change for Holochain 0.2.x then the PR for Scaffolding would target `develop-0.1` directly.
 - Version bumps for `flake.nix`, `flake.lock` and `Cargo.lock` files should target the maintenance branches directly.
-- Version bumps for dependencies of Scaffolding in the `Cargo.toml`. For dependencies that still on the same version on `develop` then it would be valid to target `develop` and back-port but you'll end up with a tricky lock file merge anyway.
+- Version bumps for dependencies of Scaffolding in the `Cargo.toml`. For dependencies that are still on the same version as on `develop` it would be valid to target `develop` and back-port but you'll end up with a tricky lock file merge anyway.
 - Version bumps to Scaffolding itself don't make sense on `develop` so they should be made directly on the maintenance branches.
 
 To keep back-porting as simple as possible please try to keep changes that target `develop` for back-port separate from changes that fit into these exceptions.
