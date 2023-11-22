@@ -136,7 +136,7 @@ export default defineComponent({
         this.fetch{{pascal_case entry_type.name}}();
       } catch (e: any) {
         const errorSnackbar = this.$refs['delete-error'] as Snackbar;
-        errorSnackbar.labelText = `Error deleting the {{lower_case entry_type.name}}: ${e.data.data}`;
+        errorSnackbar.labelText = `Error deleting the {{lower_case entry_type.name}}: ${e.data}`;
         errorSnackbar.show();
       }
     }
