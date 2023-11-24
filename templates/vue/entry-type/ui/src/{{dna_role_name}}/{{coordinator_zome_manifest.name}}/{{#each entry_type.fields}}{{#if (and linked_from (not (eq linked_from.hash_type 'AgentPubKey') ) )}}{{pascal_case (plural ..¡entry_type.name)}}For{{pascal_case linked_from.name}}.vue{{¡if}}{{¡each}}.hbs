@@ -54,7 +54,6 @@ export default defineComponent({
         fn_name: 'get_{{snake_case (plural ../entry_type.name)}}_for_{{snake_case linked_from.name}}',
         payload: this.{{camel_case linked_from.singular_arg}},
       });
-      this.hashes = records.map((r: CallZomeResponse)  => r.signed_action.hashed.hash);
     } catch (e) {
       this.error = e;
     }
