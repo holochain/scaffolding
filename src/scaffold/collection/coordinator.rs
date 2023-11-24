@@ -25,7 +25,10 @@ fn global_collection_getter(
     link_type_name: &String,
     entry_type_reference: &EntryTypeReference,
 ) -> String {
-    let snake_to_hash_type = entry_type_reference.hash_type().to_string().to_case(Case::Snake);
+    let snake_to_hash_type = entry_type_reference
+        .hash_type()
+        .to_string()
+        .to_case(Case::Snake);
     let snake_collection_name = collection_name.to_case(Case::Snake);
 
     format!(
@@ -66,7 +69,10 @@ fn by_author_collection_getter(
     link_type_name: &String,
     entry_type_reference: &EntryTypeReference,
 ) -> String {
-    let snake_to_hash_type = entry_type_reference.hash_type().to_string().to_case(Case::Snake);
+    let snake_to_hash_type = entry_type_reference
+        .hash_type()
+        .to_string()
+        .to_case(Case::Snake);
 
     format!(
         r#"use hdk::prelude::*;
@@ -184,7 +190,7 @@ fn add_create_link_in_create_function(
                         if item_fn
                             .attrs
                             .iter()
-                            .any(|a| a.path.segments.iter().any(|s| s.ident.eq("hdk_extern")))
+                            .any(|a| a.path().segments.iter().any(|s| s.ident.eq("hdk_extern")))
                             && item_fn.sig.ident.eq(&fn_name.sig.ident)
                         {
                             for new_stmt in stmts.clone() {

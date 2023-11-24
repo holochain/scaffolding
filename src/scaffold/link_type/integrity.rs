@@ -75,11 +75,12 @@ pub fn add_link_type_to_integrity_zome(
         &|_path, file| {
             file.items.clone().into_iter().find(|i| {
                 if let syn::Item::Enum(item_enum) = i.clone() {
-                    if item_enum
-                        .attrs
-                        .iter()
-                        .any(|a| a.path.segments.iter().any(|s| s.ident.eq("hdk_link_types")))
-                    {
+                    if item_enum.attrs.iter().any(|a| {
+                        a.path()
+                            .segments
+                            .iter()
+                            .any(|s| s.ident.eq("hdk_link_types"))
+                    }) {
                         return true;
                     }
                 }
@@ -134,21 +135,23 @@ pub fn add_link_type_to_integrity_zome(
                     if let syn::Item::Fn(item_fn) = item {
                         if item_fn.sig.ident.to_string().eq(&String::from("validate")) {
                             for stmt in &mut item_fn.block.stmts {
-                                if let syn::Stmt::Expr(syn::Expr::Match(match_expr)) = stmt {
+                                if let syn::Stmt::Expr(syn::Expr::Match(match_expr), _) = stmt {
                                     if let syn::Expr::Try(try_expr) = &mut *match_expr.expr {
                                         if let syn::Expr::MethodCall(call) = &mut *try_expr.expr {
-                                            if call.method.to_string().eq(&String::from("flattened"))
+                                            if call
+                                                .method
+                                                .to_string()
+                                                .eq(&String::from("flattened"))
                                             {
                                                 if let Some(turbofish) = &mut call.turbofish {
                                                     if let Some(last_arg) =
                                                         turbofish.args.last_mut()
                                                     {
-                                                        *last_arg =
-                                                            syn::GenericMethodArgument::Type(
-                                                                syn::parse_str::<syn::Type>(
-                                                                    "LinkTypes",
-                                                                )?,
-                                                            );
+                                                        *last_arg = syn::GenericArgument::Type(
+                                                            syn::parse_str::<syn::Type>(
+                                                                "LinkTypes",
+                                                            )?,
+                                                        );
                                                     }
                                                 }
                                             }
@@ -161,39 +164,42 @@ pub fn add_link_type_to_integrity_zome(
                 }
             }
 
-            file.items =
-                file.items
-                    .into_iter()
-                    .map(|mut i| {
-                        if let syn::Item::Enum(mut item_enum) = i.clone() {
-                            if item_enum.attrs.iter().any(|a| {
-                                a.path.segments.iter().any(|s| s.ident.eq("hdk_link_types"))
-                            }) {
-                                if item_enum
-                                    .variants
-                                    .iter()
-                                    .any(|v| v.ident.to_string().eq(&pascal_case_link_type_name))
-                                {
-                                    return Err(ScaffoldError::LinkTypeAlreadyExists(
-                                        link_type_name.clone(),
-                                        dna_manifest.name(),
-                                        zome_manifest.name.0.to_string(),
-                                    ));
-                                }
-
-                                let new_variant = syn::parse_str::<syn::Variant>(
-                                    format!("{}", pascal_case_link_type_name).as_str(),
-                                )?;
-                                item_enum.variants.push(new_variant);
-                                return Ok(syn::Item::Enum(item_enum));
+            file.items = file
+                .items
+                .into_iter()
+                .map(|mut i| {
+                    if let syn::Item::Enum(mut item_enum) = i.clone() {
+                        if item_enum.attrs.iter().any(|a| {
+                            a.path()
+                                .segments
+                                .iter()
+                                .any(|s| s.ident.eq("hdk_link_types"))
+                        }) {
+                            if item_enum
+                                .variants
+                                .iter()
+                                .any(|v| v.ident.to_string().eq(&pascal_case_link_type_name))
+                            {
+                                return Err(ScaffoldError::LinkTypeAlreadyExists(
+                                    link_type_name.clone(),
+                                    dna_manifest.name(),
+                                    zome_manifest.name.0.to_string(),
+                                ));
                             }
+
+                            let new_variant = syn::parse_str::<syn::Variant>(
+                                format!("{}", pascal_case_link_type_name).as_str(),
+                            )?;
+                            item_enum.variants.push(new_variant);
+                            return Ok(syn::Item::Enum(item_enum));
                         }
+                    }
 
-                        add_link_type_to_validation_arms(&mut i, &link_type_name)?;
+                    add_link_type_to_validation_arms(&mut i, &link_type_name)?;
 
-                        Ok(i)
-                    })
-                    .collect::<ScaffoldResult<Vec<syn::Item>>>()?;
+                    Ok(i)
+                })
+                .collect::<ScaffoldResult<Vec<syn::Item>>>()?;
 
             Ok(file)
         },
@@ -492,7 +498,7 @@ fn add_link_type_to_validation_arms(
     if let syn::Item::Fn(item_fn) = item {
         if item_fn.sig.ident.to_string().eq(&String::from("validate")) {
             for stmt in &mut item_fn.block.stmts {
-                if let syn::Stmt::Expr(syn::Expr::Match(match_expr)) = stmt {
+                if let syn::Stmt::Expr(syn::Expr::Match(match_expr), _) = stmt {
                     if let syn::Expr::Try(try_expr) = &mut *match_expr.expr {
                         if let syn::Expr::MethodCall(call) = &mut *try_expr.expr {
                             if call.method.to_string().eq(&String::from("flattened")) {

@@ -38,7 +38,7 @@ export class {{pascal_case entry_type.name}}Detail extends LitElement {
       cap_secret: null,
       role_name: '{{dna_role_name}}',
       zome_name: '{{coordinator_zome_manifest.name}}',
-      fn_name: 'get_{{snake_case entry_type.name}}',
+      fn_name: '{{#if crud.update}}get_latest_{{snake_case entry_type.name}}{{else}}get_{{snake_case entry_type.name}}{{/if}}',
       payload: {{camel_case entry_type.name}}Hash,
   }) as Promise<Record | undefined>, () => [this.{{camel_case entry_type.name}}Hash]);
 
