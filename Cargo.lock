@@ -2687,7 +2687,7 @@ dependencies = [
  "serde_json",
  "serde_yaml 0.8.26",
  "structopt",
- "syn 1.0.109",
+ "syn 2.0.39",
  "temp-dir",
  "thiserror",
  "time 0.3.23",
@@ -5140,12 +5140,12 @@ dependencies = [
 
 [[package]]
 name = "prettyplease"
-version = "0.1.25"
+version = "0.2.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6c8646e95016a7a6c4adea95bafa8a16baab64b583356217f2c85db4a39d9a86"
+checksum = "ae005bd773ab59b4725093fd7df83fd7892f7d8eafb48dbd7de6e024e4215f9d"
 dependencies = [
  "proc-macro2",
- "syn 1.0.109",
+ "syn 2.0.39",
 ]
 
 [[package]]

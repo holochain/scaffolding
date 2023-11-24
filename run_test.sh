@@ -47,6 +47,7 @@ set -e
 npm i
 npm run build -w ui
 npm t
+npm run package
 "
 
 rm -rf /tmp/forum-vue
@@ -78,6 +79,7 @@ set -e
 npm i
 npm run build -w ui
 npm t
+npm run package
 "
 
 rm -rf /tmp/forum-lit
@@ -111,6 +113,7 @@ npm run build -w ui
 npm run format -w ui
 npm run lint -w ui
 npm t
+npm run package
 "
 
 

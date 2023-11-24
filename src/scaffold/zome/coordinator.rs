@@ -216,7 +216,7 @@ pub fn find_all_extern_functions(zome_file_tree: &ZomeFileTree) -> ScaffoldResul
                     if item_fn
                         .attrs
                         .iter()
-                        .any(|a| a.path.segments.iter().any(|s| s.ident.eq("hdk_extern")))
+                        .any(|a| a.path().segments.iter().any(|s| s.ident.eq("hdk_extern")))
                     {
                         return Some(item_fn);
                     }
