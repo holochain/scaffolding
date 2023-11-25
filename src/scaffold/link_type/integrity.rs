@@ -425,6 +425,7 @@ fn signal_link_types_variants() -> ScaffoldResult<Vec<syn::Variant>> {
         syn::parse_str::<syn::Variant>(
             "LinkDeleted {
         action: SignedActionHashed,
+        create_link_action: SignedActionHashed,
         link_type: LinkTypes,
     }",
         )?,
@@ -455,7 +456,7 @@ fn signal_action_match_arms() -> ScaffoldResult<Vec<syn::Arm>> {
                     if let Ok(Some(link_type)) =
                         LinkTypes::from_type(create_link.zome_index, create_link.link_type)
                     {
-                        emit_signal(Signal::LinkDeleted { action, link_type })?;
+                        emit_signal(Signal::LinkDeleted { action, link_type, create_link_action: record.signed_action.clone() })?;
                     }
                     Ok(())
                 }

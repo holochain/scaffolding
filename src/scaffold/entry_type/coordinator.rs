@@ -7,6 +7,7 @@ use crate::{
     file_tree::{insert_file, map_file, map_rust_files},
     scaffold::{
         dna::DnaFileTree,
+        entry_type::definitions::FieldDefinition,
         link_type::{coordinator::get_links_handler, link_type_name},
         zome::ZomeFileTree,
     },
@@ -346,11 +347,105 @@ pub fn update_{}(input: Update{}Input) -> ExternResult<Record> {{
     )
 }
 
-pub fn delete_handler(entry_def_name: &String) -> String {
-    let snake_entry_def_name = entry_def_name.to_case(Case::Snake);
+pub fn delete_handler(entry_def: &EntryDefinition) -> String {
+    let pascal_entry_def_name = entry_def.name.to_case(Case::Pascal);
+    let snake_entry_def_name = entry_def.name.to_case(Case::Snake);
+
+    let linked_from_fields: Vec<FieldDefinition> = entry_def
+        .fields
+        .iter()
+        .cloned()
+        .filter(|field| field.linked_from.is_some())
+        .collect();
+
+    let delete_depending_links = match linked_from_fields.is_empty() {
+        true => format!(
+            r#"
+    let details = get_details(original_{snake_entry_def_name}_hash.clone(), GetOptions::default())?
+        .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("{{pascal_entry_def_name}} not found"))))?;
+    let record = match details {{
+        Details::Record(details) => Ok(details.record),
+        _ => Err(wasm_error!(WasmErrorInner::Guest(String::from(
+            "Malformed get details response"
+        )))),
+    }}?;
+            "#
+        ),
+        false => {
+            let mut delete_links = format!(
+                r#"
+    let details = get_details(original_{snake_entry_def_name}_hash.clone(), GetOptions::default())?
+        .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("{{pascal_entry_def_name}} not found"))))?;
+    let record = match details {{
+        Details::Record(details) => Ok(details.record),
+        _ => Err(wasm_error!(WasmErrorInner::Guest(String::from(
+            "Malformed get details response"
+        )))),
+    }}?;
+    let entry = record.entry().as_option().ok_or(wasm_error!(WasmErrorInner::Guest(String::from(
+            "{pascal_entry_def_name} record has no entry"
+        ))))?;
+    let {snake_entry_def_name} = {pascal_entry_def_name}::try_from(entry)?;
+
+        "#
+            );
+            for linked_from_field in linked_from_fields {
+                let linked_from = linked_from_field
+                    .linked_from
+                    .expect("Linked from is none after we filtered for some");
+                let field_name = linked_from_field.field_name;
+                let link_type = link_type_name(&linked_from, &entry_def.referenceable());
+                let delete_this_link = match linked_from_field.cardinality {
+                    Cardinality::Single => format!(
+                        r#"
+    let links = get_links({snake_entry_def_name}.{field_name}.clone(), LinkTypes::{link_type}, None)?;
+    for link in links {{
+        if let Some(action_hash) = link.target.into_action_hash() {{
+            if action_hash.eq(&original_{snake_entry_def_name}_hash) {{
+                delete_link(link.create_link_hash)?;
+            }}
+        }}
+    }}
+                                    "#
+                    ),
+                    Cardinality::Option => format!(
+                        r#"
+    if let Some(base_address) = {snake_entry_def_name}.{field_name}.clone() {{
+        let links = get_links(base_address, LinkTypes::{link_type}, None)?;
+        for link in links {{
+            if let Some(action_hash) = link.target.into_action_hash() {{
+                if action_hash.eq(&original_{snake_entry_def_name}_hash) {{
+                    delete_link(link.create_link_hash)?;
+                }}
+            }}
+        }}
+    }} 
+                                    "#
+                    ),
+                    Cardinality::Vector => format!(
+                        r#"
+    for base_address in {snake_entry_def_name}.{field_name} {{
+        let links = get_links(base_address.clone(), LinkTypes::{link_type}, None)?;
+        for link in links {{
+            if let Some(action_hash) = link.target.into_action_hash() {{
+                if action_hash.eq(&original_{snake_entry_def_name}_hash) {{
+                    delete_link(link.create_link_hash)?;
+                }}
+            }}
+        }}
+    }} 
+                                    "#
+                    ),
+                };
+                delete_links.push_str(delete_this_link.as_str());
+            }
+            delete_links
+        }
+    };
     format!(
         r#"#[hdk_extern]
 pub fn delete_{snake_entry_def_name}(original_{snake_entry_def_name}_hash: ActionHash) -> ExternResult<ActionHash> {{
+  {delete_depending_links}
   delete_entry(original_{snake_entry_def_name}_hash)
 }}
 
@@ -416,12 +511,14 @@ use {}::*;
             .push_str(update_handler(&entry_def.name, link_from_original_to_each_update).as_str());
     }
     if crud.delete {
-        initial.push_str(delete_handler(&entry_def.name).as_str());
+        initial.push_str(delete_handler(&entry_def).as_str());
     }
 
     for f in &entry_def.fields {
         if let Some(linked_from) = &f.linked_from {
-            initial.push_str(get_links_handler(&linked_from, &entry_def.referenceable()).as_str());
+            initial.push_str(
+                get_links_handler(&linked_from, &entry_def.referenceable(), crud.delete).as_str(),
+            );
         }
     }
 
