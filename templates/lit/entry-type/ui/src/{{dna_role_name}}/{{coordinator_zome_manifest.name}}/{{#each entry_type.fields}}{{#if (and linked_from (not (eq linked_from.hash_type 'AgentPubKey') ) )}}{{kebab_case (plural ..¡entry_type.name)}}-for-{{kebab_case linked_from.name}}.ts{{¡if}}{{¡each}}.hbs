@@ -24,7 +24,7 @@ export class {{pascal_case (plural ../entry_type.name)}}For{{pascal_case linked_
       zome_name: '{{../coordinator_zome_manifest.name}}',
       fn_name: 'get_{{snake_case (plural ../entry_type.name)}}_for_{{snake_case linked_from.name}}',
       payload: {{camel_case linked_from.singular_arg}},
-  }) as Promise<Array<{{#if ../entry_type.reference_entry_hash}}EntryHash{{else}}ActionHash{{/if}}>>, () => [this.{{camel_case linked_from.singular_arg}}]);
+  }) as Promise<Array<Link>>, () => [this.{{camel_case linked_from.singular_arg}}]);
 
   firstUpdated() {
     if (this.{{camel_case linked_from.singular_arg}} === undefined) {
