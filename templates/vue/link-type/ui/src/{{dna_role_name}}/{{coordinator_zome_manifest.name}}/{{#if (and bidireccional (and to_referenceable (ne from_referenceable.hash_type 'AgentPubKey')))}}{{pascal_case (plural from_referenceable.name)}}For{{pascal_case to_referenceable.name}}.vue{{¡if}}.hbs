@@ -19,7 +19,7 @@
 <script lang="ts">
 import { defineComponent, toRaw, inject, ComputedRef } from 'vue';
 import { decode } from '@msgpack/msgpack';
-import { AppAgentClient, Record, AgentPubKey, EntryHash, ActionHash, NewEntryAction } from '@holochain/client';
+import { Link, AppAgentClient, Record, AgentPubKey, EntryHash, ActionHash, NewEntryAction } from '@holochain/client';
 import '@material/mwc-circular-progress';
 import {{pascal_case from_referenceable.name}}Detail from './{{pascal_case from_referenceable.name}}Detail.vue';
 import { {{pascal_case coordinator_zome_manifest.name}}Signal } from './types';
@@ -47,14 +47,14 @@ export default defineComponent({
     }
 
     try {
-      const records: Array<Record> = await this.client.callZome({
+      const links: Array<Link> = await this.client.callZome({
         cap_secret: null,
         role_name: '{{dna_role_name}}',
         zome_name: '{{coordinator_zome_manifest.name}}',
         fn_name: 'get_{{snake_case (plural from_referenceable.name)}}_for_{{snake_case to_referenceable.name}}',
         payload: this.{{camel_case to_referenceable.singular_arg}},
       });
-      this.hashes = records.map(r => {{#if (eq from_referenceable.hash_type "ActionHash")}}r.signed_action.hashed.hash{{else}}(r.signed_action.hashed.content as NewEntryAction).entry_hash{{/if}});
+      this.hashes = links.map(l => l.target);
     } catch (e) {
       this.error = e;
     }
