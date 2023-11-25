@@ -143,8 +143,8 @@ fn get_links_handler_to_agent(
         .to_string(&Cardinality::Vector)
         .to_case(Case::Snake);
 
-    let get_deleted_links_handler = match delete {
-        true => format!(
+    let get_deleted_links_handler = if delete {
+        format!(
             r#"
 #[hdk_extern]
 pub fn get_deleted_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}(
@@ -157,8 +157,9 @@ pub fn get_deleted_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_t
         .filter(|(_link, deletes)| deletes.len() > 0)
         .collect())
 }}"#
-        ),
-        false => format!(""),
+        )
+    } else {
+        format!("")
     };
 
     format!(
