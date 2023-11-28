@@ -93,6 +93,37 @@ pub fn register_concat_helper<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
 #[derive(Clone, Copy)]
 pub struct MergeScope;
 
+fn get_scope_open_and_close_char_indexes(
+    text: &String,
+    scope_opener: &String,
+) -> Result<(usize, usize), RenderError> {
+    let mut index = text.find(scope_opener.as_str()).ok_or(RenderError::new(
+        "Given scope opener not found in the given parameter",
+    ))?;
+
+    index = index + scope_opener.len() - 1;
+    let scope_opener_index = index.clone();
+    let mut scope_count = 1;
+
+    while scope_count > 0 {
+        index += 1;
+        match text.chars().nth(index) {
+            Some('{') => {
+                scope_count += 1;
+            }
+            Some('}') => {
+                scope_count -= 1;
+            }
+            None => {
+                return Err(RenderError::new("Malformed scopes"));
+            }
+            _ => {}
+        }
+    }
+
+    Ok((scope_opener_index, index))
+}
+
 impl HelperDef for MergeScope {
     fn call<'reg: 'rc, 'rc>(
         &self,
@@ -125,35 +156,11 @@ impl HelperDef for MergeScope {
             ))?
             .to_string();
 
-        let mut index = s.find(scope_opener.as_str()).ok_or(RenderError::new(
-            "Given scope opener not found in the given parameter",
-        ))?;
-
-        index += scope_opener.len();
-        let scope_opener_index = index.clone();
-        index -= 1;
-        let mut scope_count = 1;
-
-        while scope_count > 0 {
-            index += 1;
-            match s.chars().nth(index) {
-                Some('{') => {
-                    scope_count += 1;
-                }
-                Some('}') => {
-                    scope_count -= 1;
-                }
-                None => {
-                    return Err(RenderError::new("Malformed scopes"));
-                }
-                _ => {}
-            }
-        }
-
-        // Here index is the position of the correct closing '}' for the scope
+        let (scope_opener_index, scope_close_index) =
+            get_scope_open_and_close_char_indexes(&s, &scope_opener)?;
 
         out.write(&s[0..=scope_opener_index])?;
-        let previous_scope_content = &s[scope_opener_index..index].to_string();
+        let previous_scope_content = &s[(scope_opener_index + 1)..scope_close_index].to_string();
 
         let mut data = ctx
             .data()
@@ -167,7 +174,7 @@ impl HelperDef for MergeScope {
         rc.set_context(Context::wraps(data)?);
         t.render(r, ctx, rc, out)?;
 
-        out.write(&s[index..])?;
+        out.write(&s[scope_close_index..])?;
         Ok(())
     }
 }
@@ -515,4 +522,22 @@ pub fn choose_or_get_template(
     }?;
 
     Ok(chosen_template_name)
+}
+
+#[cfg(test)]
+mod tests {
+    // Note this useful idiom: importing names from outer (for mod tests) scope.
+    use super::*;
+
+    #[test]
+    fn test_get_scope_open_and_close_char_indexes() {
+        let text = String::from("const s = {};");
+        let scope_opener = String::from("const s = {");
+
+        let (scope_opener_index, scope_close_index) =
+            get_scope_open_and_close_char_indexes(&text, &scope_opener).unwrap();
+
+        assert_eq!(scope_opener_index, 10);
+        assert_eq!(scope_close_index, 11);
+    }
 }
