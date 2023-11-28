@@ -5,7 +5,7 @@
     "start": "vite --clearScreen false --port $UI_PORT",
     "build": "npm run check && vite build",
     "check": "svelte-check --tsconfig ./tsconfig.json",
-    "package": "npm run build && cd public && bestzip ../dist.zip *"
+    "package": "npm run build && cd dist && bestzip ../dist.zip *"
   },
   "dependencies": {
     "@holochain/client": "{{holochain_client_version}}",
@@ -17,7 +17,7 @@
     "@material/mwc-textfield": "^0.27.0",
     "@material/mwc-textarea": "^0.27.0",
     "@material/mwc-icon-button": "^0.27.0",
-    "@material/mwc-checkbox": "^0.27.0",    
+    "@material/mwc-checkbox": "^0.27.0",
     "@material/mwc-snackbar": "^0.27.0",
     "@material/mwc-slider": "^0.27.0",
     "@material/mwc-select": "^0.27.0",
