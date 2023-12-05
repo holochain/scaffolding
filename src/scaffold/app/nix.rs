@@ -9,47 +9,83 @@ use crate::error::{ScaffoldError, ScaffoldResult};
 use crate::file_tree::*;
 use crate::versions::holochain_nix_version;
 
-pub fn flake_nix() -> FileTree {
+pub fn flake_nix(holo_enabled: bool) -> FileTree {
     let holochain_nix_version = holochain_nix_version();
-    file!(format!(
-        r#"{{
-  description = "Template for Holochain app development";
 
-  inputs = {{
-    versions.url  = "github:holochain/holochain?dir=versions/{holochain_nix_version}";
+    // Define the holo-specific parts
+    let holo_specific = if holo_enabled {
+        "holoDevServerChannel = \"alpha\";"
+    } else {
+        ""
+    };
+
+    let additional_packages = if holo_enabled {
+        "pkgs.curl\n                    # more packages go here"
+    } else {
+        "# more packages go here"
+    };
+
+    let extra_content = if holo_enabled {
+        r#"extraSubstitutors = [ "https://cache.holo.host" ];
+                trustedPublicKeys = [
+                    "cache.holo.host-2:ZJCkX3AUYZ8soxTLfTb60g+F3MkWD7hkH9y8CgqwhDQ="
+                ];
+
+                shellHook = ''
+                    nix-env -f "https://hydra.holo.host/channel/custom/holo-nixpkgs/${{inputs.holoDevServerChannel}}/holo-nixpkgs/nixexprs.tar.xz" -iA holo-dev-server
+                '';"#
+    } else {
+        ""
+    };
+
+    // Format the final file content with the conditional parts
+    let file_content = file!(format!(
+        r#"
+description = "Template for Holochain app development";
+
+inputs = {{
+    versions.url  = "github:holochain/holochain?dir=versions/{}";
 
     holochain-flake.url = "github:holochain/holochain";
     holochain-flake.inputs.versions.follows = "versions";
 
     nixpkgs.follows = "holochain-flake/nixpkgs";
     flake-parts.follows = "holochain-flake/flake-parts";
-  }};
+    {}
+}};
 
-  outputs = inputs:
+outputs = inputs:
     inputs.flake-parts.lib.mkFlake
-      {{
+    {{
         inherit inputs;
-      }}
-      {{
+    }}
+    {{
         systems = builtins.attrNames inputs.holochain-flake.devShells;
         perSystem =
-          {{ inputs'
-          , config
-          , pkgs
-          , system
-          , ...
-          }}: {{
+        {{ inputs'
+        , config
+        , pkgs
+        , system
+        , ...
+        }}: {{
             devShells.default = pkgs.mkShell {{
-              inputsFrom = [ inputs'.holochain-flake.devShells.holonix ];
-              packages = [
+            inputsFrom = [ inputs'.holochain-flake.devShells.holonix ];
+            packages = [
                 pkgs.nodejs-18_x
-                # more packages go here
-              ];
+                {}
+            ];
+            {}
             }};
-          }};
-      }};
-}}"#
-    ))
+        }};
+    }};
+"#,
+        holochain_nix_version,
+        holo_specific,
+        additional_packages,
+        extra_content
+    ));
+
+    file_content
 }
 
 pub fn setup_nix_developer_environment(dir: &PathBuf) -> ScaffoldResult<()> {
