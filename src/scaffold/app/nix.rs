@@ -13,12 +13,6 @@ pub fn flake_nix(holo_enabled: bool) -> FileTree {
     let holochain_nix_version = holochain_nix_version();
 
     // Define the holo-specific parts
-    let holo_specific = if holo_enabled {
-        "holoDevServerChannel = \"alpha\";"
-    } else {
-        ""
-    };
-
     let additional_packages = if holo_enabled {
         "pkgs.curl\n                    # more packages go here"
     } else {
@@ -32,7 +26,7 @@ pub fn flake_nix(holo_enabled: bool) -> FileTree {
                 ];
 
                 shellHook = ''
-                    nix-env -f "https://hydra.holo.host/channel/custom/holo-nixpkgs/${{inputs.holoDevServerChannel}}/holo-nixpkgs/nixexprs.tar.xz" -iA holo-dev-server
+                    nix-env -f "https://hydra.holo.host/channel/custom/holo-nixpkgs/alpha/holo-nixpkgs/nixexprs.tar.xz" -iA holo-dev-server
                 '';"#
     } else {
         ""
@@ -40,7 +34,7 @@ pub fn flake_nix(holo_enabled: bool) -> FileTree {
 
     // Format the final file content with the conditional parts
     let file_content = file!(format!(
-        r#"
+        r#"{{
 description = "Template for Holochain app development";
 
 inputs = {{
@@ -51,7 +45,6 @@ inputs = {{
 
     nixpkgs.follows = "holochain-flake/nixpkgs";
     flake-parts.follows = "holochain-flake/flake-parts";
-    {}
 }};
 
 outputs = inputs:
@@ -60,6 +53,7 @@ outputs = inputs:
         inherit inputs;
     }}
     {{
+        
         systems = builtins.attrNames inputs.holochain-flake.devShells;
         perSystem =
         {{ inputs'
@@ -78,9 +72,8 @@ outputs = inputs:
             }};
         }};
     }};
-"#,
+}}"#,
         holochain_nix_version,
-        holo_specific,
         additional_packages,
         extra_content
     ));
