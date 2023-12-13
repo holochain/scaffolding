@@ -12,22 +12,27 @@ use crate::versions::holochain_nix_version;
 pub fn flake_nix(holo_enabled: bool) -> FileTree {
     let holochain_nix_version = holochain_nix_version();
 
+    let holo_nixpkgs_inputs = if holo_enabled {
+        r#"holo-nixpkgs.url = "https://hydra.holo.host/channel/custom/holo-nixpkgs/alpha/holo-nixpkgs/nixexprs.tar.xz";
+    holo-nixpkgs.flake = false;"#
+    } else {
+        ""
+    };
+
     // Define the holo-specific parts
     let additional_packages = if holo_enabled {
-        "pkgs.curl\n                    # more packages go here"
+        "(import inputs.holo-nixpkgs { inherit system; }).holo-dev-server"
     } else {
-        "# more packages go here"
+        ""
     };
 
     let extra_content = if holo_enabled {
-        r#"extraSubstitutors = [ "https://cache.holo.host" ];
+        r#"# TODO: Fix this to use Holo cache
+                # In the meantime, feel free to use these details to set up your nix environment to use the cache 
+                extraSubstitutors = [ "https://cache.holo.host" ];
                 trustedPublicKeys = [
                     "cache.holo.host-2:ZJCkX3AUYZ8soxTLfTb60g+F3MkWD7hkH9y8CgqwhDQ="
-                ];
-
-                shellHook = ''
-                    nix-env -f "https://hydra.holo.host/channel/custom/holo-nixpkgs/alpha/holo-nixpkgs/nixexprs.tar.xz" -iA holo-dev-server
-                '';"#
+                ];"#
     } else {
         ""
     };
@@ -45,6 +50,8 @@ inputs = {{
 
     nixpkgs.follows = "holochain-flake/nixpkgs";
     flake-parts.follows = "holochain-flake/flake-parts";
+
+    {}
 }};
 
 outputs = inputs:
@@ -63,17 +70,18 @@ outputs = inputs:
         , ...
         }}: {{
             devShells.default = pkgs.mkShell {{
-            inputsFrom = [ inputs'.holochain-flake.devShells.holonix ];
-            packages = [
-                pkgs.nodejs-18_x
+                inputsFrom = [ inputs'.holochain-flake.devShells.holonix ];
+                packages = [
+                    pkgs.nodejs-18_x
+                    {}
+                ];
                 {}
-            ];
-            {}
             }};
         }};
     }};
 }}"#,
         holochain_nix_version,
+        holo_nixpkgs_inputs,
         additional_packages,
         extra_content
     ));
