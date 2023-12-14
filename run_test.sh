@@ -155,7 +155,7 @@ cd /tmp
 hc-scaffold web-app holo-flake --setup-nix true --template vue --holo
 cd holo-flake
 
-nix develop --command bash -c "
+nix develop --impure --command bash -c "
 set -e
 
 # Check if holo-dev-server is in the path
