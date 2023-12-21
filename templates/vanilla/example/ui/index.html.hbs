@@ -45,8 +45,8 @@
       }
       
       async function connect() {
-        // We pass '' as url because it will dynamically be replaced in launcher environments
-        client = await AppAgentWebsocket.connect('', 'hello-world');
+        // We pass an unused string as the url because it will dynamically be replaced in launcher environments
+        client = await AppAgentWebsocket.connect(new URL('https://UNUSED'), 'hello-world');
         const canvas = document.getElementById('pubkey')
         pubkey.title = encodeHashToBase64(client.myPubKey)
         const opts = {
@@ -63,7 +63,6 @@
           fn_name: 'hello_world',
           payload: message,
         });
-        
       }
 
       async function getHellos() {
