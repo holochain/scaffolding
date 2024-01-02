@@ -298,10 +298,11 @@ pub fn choose_or_get_template(
 
 #[cfg(test)]
 mod tests {
+    use crate::templates::helpers::{register_helpers, merge::get_scope_open_and_close_char_indexes};
+
     // Note this useful idiom: importing names from outer (for mod tests) scope.
-    use super::*;
-    use handlebars::Handlebars;
-    use serde_json::{Map, Value};
+    use handlebars::{Handlebars, Context};
+    use serde_json::json;
 
     #[test]
     fn test_get_scope_open_and_close_char_indexes() {
@@ -318,12 +319,9 @@ mod tests {
     #[test]
     fn test_merge_match_scope() {
         let h = Handlebars::new();
+        let h = register_helpers(h);
 
-        let mut h = register_helpers(h);
-
-        let code = String::from(
-            r#"
-export class A {
+        let code = r#"export class A {
     nestedFn1() {
     
     }
@@ -333,16 +331,10 @@ export class B {
         // First line
     }
 }
-            "#,
-        );
-        let mut map = Map::new();
-        map.insert(
-            String::from("previous_file_content"),
-            Value::String(String::from(code)),
-        );
-        let context = Context::from(Value::Object(map));
-        let template = r#"
-{{#merge previous_file_content}}
+"#;
+        let value = json!({"previous_file_content": code});
+        let context = Context::from(value);
+        let template = r#"{{#merge previous_file_content}}
     {{#match_scope "export class A {"}}
     nestedFn2() {
     
@@ -350,7 +342,7 @@ export class B {
     {{previous_scope_content}}
     {{/match_scope}}
     {{#match_scope "export class B {"}}
-        {{#merge previous_scope_content}}
+        {{#merge untrimmed_previous_scope_content}}
             {{#match_scope "nestedFn() {"}}
         {{previous_scope_content}}
         // New line
@@ -358,12 +350,11 @@ export class B {
         {{/merge}}
     {{/match_scope}}
 {{/merge}}
-            "#;
+"#;
 
         assert_eq!(
             h.render_template_with_context(template, &context).unwrap(),
-            r#"
-export class A {
+            r#"export class A {
     nestedFn2() {
     
     }
@@ -377,7 +368,7 @@ export class B {
         // New line
     }
 }
-            "#,
+"#,
         );
     }
 }
