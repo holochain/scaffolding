@@ -5,7 +5,7 @@ use dialoguer::{theme::ColorfulTheme, Confirm, Select};
 use regex::Regex;
 
 use crate::{
-    error::ScaffoldResult,
+    error::{ScaffoldError, ScaffoldResult},
     file_tree::{dir_content, FileTree},
     scaffold::zome::ZomeFileTree,
     utils::{check_case, input_with_case, input_with_case_and_initial_text},
@@ -247,7 +247,22 @@ pub fn choose_field(
             match link_from {
                 false => None,
                 true => {
-                    let all_entry_types = get_all_entry_types(zome_file_tree)?.unwrap_or(vec![]);
+                    let all_entry_types = get_all_entry_types(zome_file_tree)?
+                        .ok_or(ScaffoldError::NoEntryTypesDefFoundForIntegrityZome(
+                            zome_file_tree.dna_file_tree.dna_manifest.name(),
+                            zome_file_tree.zome_manifest.name.to_string(),
+                        ))
+                        .and_then(|v| {
+                            if v.is_empty() {
+                                Err(ScaffoldError::NoEntryTypesDefFoundForIntegrityZome(
+                                    zome_file_tree.dna_file_tree.dna_manifest.name(),
+                                    zome_file_tree.zome_manifest.name.to_string(),
+                                ))
+                            } else {
+                                Ok(v)
+                            }
+                        })?;
+                    
                     let mut all_options: Vec<String> = all_entry_types
                         .clone()
                         .into_iter()
