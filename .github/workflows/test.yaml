@@ -12,18 +12,11 @@ jobs:
   cargotest:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
+      - uses: dtolnay/rust-toolchain@stable
 
-      - uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --no-fail-fast
+      - run: cargo test --no-fail-fast
 
   testbuild:
     runs-on: ubuntu-latest
