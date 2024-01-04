@@ -248,7 +248,6 @@ pub fn choose_field(
                 false => None,
                 true => {
                     let all_entry_types = get_all_entry_types(zome_file_tree)?.unwrap_or(vec![]);
-                    
                     let mut all_options: Vec<String> = all_entry_types
                         .clone()
                         .into_iter()
