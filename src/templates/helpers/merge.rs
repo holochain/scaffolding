@@ -5,7 +5,7 @@ use handlebars::{
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Number, Value};
 
-fn get_scope_open_and_close_char_indexes(
+pub fn get_scope_open_and_close_char_indexes(
     text: &String,
     scope_opener: &String,
 ) -> Result<(usize, usize), RenderError> {
@@ -237,7 +237,7 @@ mod tests {
     // Note this useful idiom: importing names from outer (for mod tests) scope.
     use super::*;
     use handlebars::Handlebars;
-    use serde_json::{Map, Value};
+    use serde_json::json;
 
     #[test]
     fn test_get_scope_open_and_close_char_indexes() {
@@ -257,19 +257,14 @@ mod tests {
 
         let h = register_merge(h);
 
-        let code = String::from(
-            r#"class A {
+        let code = r#"
+        class A {
     // Multiline
     // Comment
 }
-"#,
-        );
-        let mut map = Map::new();
-        map.insert(
-            String::from("previous_file_content"),
-            Value::String(String::from(code.clone())),
-        );
-        let context = Context::from(Value::Object(map));
+"#;
+        let value = json!({"previous_file_content": code});
+        let context = Context::from(value);
         let template = r#"{{#merge previous_file_content}}
 {{/merge}}
 "#;
@@ -286,19 +281,13 @@ mod tests {
 
         let h = register_merge(h);
 
-        let code = String::from(
-            r#"class A {
+        let code = r#"class A {
     // Multiline
     // Comment
 }
-"#,
-        );
-        let mut map = Map::new();
-        map.insert(
-            String::from("previous_file_content"),
-            Value::String(String::from(code)),
-        );
-        let context = Context::from(Value::Object(map));
+"#;
+        let value = json!({"previous_file_content": code});
+        let context = Context::from(value);
         let template = r#"
 {{#merge previous_file_content}}
     {{#match_scope "class A {"}}
@@ -330,8 +319,7 @@ class A {
 
         let h = register_merge(h);
 
-        let code = String::from(
-            r#"export class A {
+        let code = r#"export class A {
     nestedFn1() {
         // First line
     }
@@ -341,21 +329,13 @@ export class B {
         // First line
     }
 }
-"#,
-        );
-        let mut map = Map::new();
-        map.insert(
-            String::from("previous_file_content"),
-            Value::String(String::from(code)),
-        );
-        map.insert(
-            String::from("class_functions"),
-            Value::Array(vec![
-                Value::String(String::from("nestedFn2")),
-                Value::String(String::from("nestedFn3")),
-            ]),
-        );
-        let context = Context::from(Value::Object(map));
+"#;
+        let value = json!({
+            "previous_file_content": code,
+            "class_functions": ["nestedFn2", "nestedFn3"]
+        });
+
+        let context = Context::from(value);
         let template = r#"{{#merge previous_file_content}}
     {{#match_scope "export class B {"}}
         {{#merge untrimmed_previous_scope_content}}
