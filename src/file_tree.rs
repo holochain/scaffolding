@@ -119,7 +119,7 @@ pub fn insert_file_tree_in_dir(
 }
 
 pub fn find_files_by_name(file_tree: &FileTree, file_name: &PathBuf) -> BTreeMap<PathBuf, String> {
-    find_files(file_tree, &|file_path, _file_contents| {
+    find_files(file_tree, &|file_path, _| {
         file_name.file_name().eq(&file_path.file_name())
     })
 }
