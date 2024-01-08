@@ -559,7 +559,7 @@ Add new entry definitions to your zome with:
                 let file_tree = load_directory_into_memory(&current_dir)?;
                 let template_file_tree = choose_or_get_template_file_tree(&file_tree, &template)?;
 
-                let name: String = match name {
+                let name = match name {
                     Some(n) => {
                         check_case(&n, "entry type name", Case::Snake)?;
                         n
