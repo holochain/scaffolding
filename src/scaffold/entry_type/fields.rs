@@ -5,7 +5,7 @@ use dialoguer::{theme::ColorfulTheme, Confirm, Select};
 use regex::Regex;
 
 use crate::{
-    error::ScaffoldResult,
+    error::{ScaffoldError, ScaffoldResult},
     file_tree::{dir_content, FileTree},
     scaffold::zome::ZomeFileTree,
     utils::{check_case, input_with_case, input_with_case_and_initial_text},
@@ -259,6 +259,13 @@ pub fn choose_field(
                             "{} (itself)",
                             entry_type_name.to_case(Case::Pascal)
                         ));
+                    }
+
+                    if all_options.is_empty() {
+                        return Err(ScaffoldError::NoEntryTypesDefFoundForIntegrityZome(
+                            zome_file_tree.dna_file_tree.dna_manifest.name(),
+                            zome_file_tree.zome_manifest.name.to_string(),
+                        ))
                     }
 
                     let selection = Select::with_theme(&ColorfulTheme::default())
