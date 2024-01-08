@@ -34,7 +34,6 @@ name = "{}"
 
 [dependencies]
 hdk = {{ workspace = true }}
-holochain_integrity_types = {{ workspace = true }}
 
 serde = {{ workspace = true }}
 
