@@ -9,6 +9,15 @@ on:
     branches: [ develop, develop-0.1, develop-0.2 ]
 
 jobs:
+  cargotest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - run: cargo test --no-fail-fast
+
   testbuild:
     runs-on: ubuntu-latest
     steps:
@@ -16,6 +25,7 @@ jobs:
 
       - name: Extend space
         uses: ./.github/actions/extend-space
+ 
       - name: Install nix
         uses: cachix/install-nix-action@v23
         with:

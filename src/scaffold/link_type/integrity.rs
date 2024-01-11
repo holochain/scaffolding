@@ -30,14 +30,16 @@ fn validate_referenceable(
             match entry_type.reference_entry_hash {
                 true => quote! {
                     /// Check the entry type for the given entry hash
-                    let entry_hash = EntryHash::from(#address_ident);
+                    let entry_hash = #address_ident.into_entry_hash().ok_or(wasm_error!(WasmErrorInner::Guest(String::from("No entry hash associated with link"))))?;
                     let entry = must_get_entry(entry_hash)?.content;
 
                     let #entry_type_snake = crate::#entry_type_pascal::try_from(entry)?;
                 },
                 false => quote! {
                     /// Check the entry type for the given action hash
-                    let action_hash = ActionHash::from(#address_ident);
+                    let action_hash = #address_ident.into_action_hash().ok_or(wasm_error!(
+                        WasmErrorInner::Guest(String::from("No action hash associated with link"))
+                    ))?;
                     let record = must_get_valid_record(action_hash)?;
 
                     let #entry_type_snake: crate::#entry_type_pascal = record.entry().to_app_option()
@@ -73,11 +75,12 @@ pub fn add_link_type_to_integrity_zome(
         &|_path, file| {
             file.items.clone().into_iter().find(|i| {
                 if let syn::Item::Enum(item_enum) = i.clone() {
-                    if item_enum
-                        .attrs
-                        .iter()
-                        .any(|a| a.path.segments.iter().any(|s| s.ident.eq("hdk_link_types")))
-                    {
+                    if item_enum.attrs.iter().any(|a| {
+                        a.path()
+                            .segments
+                            .iter()
+                            .any(|s| s.ident.eq("hdk_link_types"))
+                    }) {
                         return true;
                     }
                 }
@@ -132,21 +135,23 @@ pub fn add_link_type_to_integrity_zome(
                     if let syn::Item::Fn(item_fn) = item {
                         if item_fn.sig.ident.to_string().eq(&String::from("validate")) {
                             for stmt in &mut item_fn.block.stmts {
-                                if let syn::Stmt::Expr(syn::Expr::Match(match_expr)) = stmt {
+                                if let syn::Stmt::Expr(syn::Expr::Match(match_expr), _) = stmt {
                                     if let syn::Expr::Try(try_expr) = &mut *match_expr.expr {
                                         if let syn::Expr::MethodCall(call) = &mut *try_expr.expr {
-                                            if call.method.to_string().eq(&String::from("flattened"))
+                                            if call
+                                                .method
+                                                .to_string()
+                                                .eq(&String::from("flattened"))
                                             {
                                                 if let Some(turbofish) = &mut call.turbofish {
                                                     if let Some(last_arg) =
                                                         turbofish.args.last_mut()
                                                     {
-                                                        *last_arg =
-                                                            syn::GenericMethodArgument::Type(
-                                                                syn::parse_str::<syn::Type>(
-                                                                    "LinkTypes",
-                                                                )?,
-                                                            );
+                                                        *last_arg = syn::GenericArgument::Type(
+                                                            syn::parse_str::<syn::Type>(
+                                                                "LinkTypes",
+                                                            )?,
+                                                        );
                                                     }
                                                 }
                                             }
@@ -159,39 +164,42 @@ pub fn add_link_type_to_integrity_zome(
                 }
             }
 
-            file.items =
-                file.items
-                    .into_iter()
-                    .map(|mut i| {
-                        if let syn::Item::Enum(mut item_enum) = i.clone() {
-                            if item_enum.attrs.iter().any(|a| {
-                                a.path.segments.iter().any(|s| s.ident.eq("hdk_link_types"))
-                            }) {
-                                if item_enum
-                                    .variants
-                                    .iter()
-                                    .any(|v| v.ident.to_string().eq(&pascal_case_link_type_name))
-                                {
-                                    return Err(ScaffoldError::LinkTypeAlreadyExists(
-                                        link_type_name.clone(),
-                                        dna_manifest.name(),
-                                        zome_manifest.name.0.to_string(),
-                                    ));
-                                }
-
-                                let new_variant = syn::parse_str::<syn::Variant>(
-                                    format!("{}", pascal_case_link_type_name).as_str(),
-                                )?;
-                                item_enum.variants.push(new_variant);
-                                return Ok(syn::Item::Enum(item_enum));
+            file.items = file
+                .items
+                .into_iter()
+                .map(|mut i| {
+                    if let syn::Item::Enum(mut item_enum) = i.clone() {
+                        if item_enum.attrs.iter().any(|a| {
+                            a.path()
+                                .segments
+                                .iter()
+                                .any(|s| s.ident.eq("hdk_link_types"))
+                        }) {
+                            if item_enum
+                                .variants
+                                .iter()
+                                .any(|v| v.ident.to_string().eq(&pascal_case_link_type_name))
+                            {
+                                return Err(ScaffoldError::LinkTypeAlreadyExists(
+                                    link_type_name.clone(),
+                                    dna_manifest.name(),
+                                    zome_manifest.name.0.to_string(),
+                                ));
                             }
+
+                            let new_variant = syn::parse_str::<syn::Variant>(
+                                format!("{}", pascal_case_link_type_name).as_str(),
+                            )?;
+                            item_enum.variants.push(new_variant);
+                            return Ok(syn::Item::Enum(item_enum));
                         }
+                    }
 
-                        add_link_type_to_validation_arms(&mut i, &link_type_name)?;
+                    add_link_type_to_validation_arms(&mut i, &link_type_name)?;
 
-                        Ok(i)
-                    })
-                    .collect::<ScaffoldResult<Vec<syn::Item>>>()?;
+                    Ok(i)
+                })
+                .collect::<ScaffoldResult<Vec<syn::Item>>>()?;
 
             Ok(file)
         },
@@ -417,6 +425,7 @@ fn signal_link_types_variants() -> ScaffoldResult<Vec<syn::Variant>> {
         syn::parse_str::<syn::Variant>(
             "LinkDeleted {
         action: SignedActionHashed,
+        create_link_action: SignedActionHashed,
         link_type: LinkTypes,
     }",
         )?,
@@ -447,7 +456,7 @@ fn signal_action_match_arms() -> ScaffoldResult<Vec<syn::Arm>> {
                     if let Ok(Some(link_type)) =
                         LinkTypes::from_type(create_link.zome_index, create_link.link_type)
                     {
-                        emit_signal(Signal::LinkDeleted { action, link_type })?;
+                        emit_signal(Signal::LinkDeleted { action, link_type, create_link_action: record.signed_action.clone() })?;
                     }
                     Ok(())
                 }
@@ -490,7 +499,7 @@ fn add_link_type_to_validation_arms(
     if let syn::Item::Fn(item_fn) = item {
         if item_fn.sig.ident.to_string().eq(&String::from("validate")) {
             for stmt in &mut item_fn.block.stmts {
-                if let syn::Stmt::Expr(syn::Expr::Match(match_expr)) = stmt {
+                if let syn::Stmt::Expr(syn::Expr::Match(match_expr), _) = stmt {
                     if let syn::Expr::Try(try_expr) = &mut *match_expr.expr {
                         if let syn::Expr::MethodCall(call) = &mut *try_expr.expr {
                             if call.method.to_string().eq(&String::from("flattened")) {

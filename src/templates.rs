@@ -20,6 +20,7 @@ use crate::file_tree::{
 use crate::scaffold::web_app::uis::{guess_or_choose_framework, template_for_ui_framework};
 
 pub mod get;
+pub mod helpers;
 
 pub mod collection;
 pub mod coordinator;
@@ -38,7 +39,7 @@ pub struct ScaffoldedTemplate {
 pub fn build_handlebars<'a>(templates_dir: &FileTree) -> ScaffoldResult<Handlebars<'a>> {
     let h = Handlebars::new();
 
-    let mut h = register_helpers(h);
+    let mut h = helpers::register_helpers(h);
 
     let field_types_path = PathBuf::from("field-types");
     let v: Vec<OsString> = field_types_path.iter().map(|s| s.to_os_string()).collect();
@@ -97,9 +98,9 @@ fn get_scope_open_and_close_char_indexes(
     text: &String,
     scope_opener: &String,
 ) -> Result<(usize, usize), RenderError> {
-    let mut index = text.find(scope_opener.as_str()).ok_or(RenderError::new(
-        "Given scope opener not found in the given parameter",
-    ))?;
+    let mut index = text
+        .find(scope_opener.as_str())
+        .ok_or(RenderError::new("Given scope opener not found in the given parameter"))?;
 
     index = index + scope_opener.len() - 1;
     let scope_opener_index = index.clone();
@@ -133,27 +134,23 @@ impl HelperDef for MergeScope {
         rc: &mut RenderContext<'reg, 'rc>,
         out: &mut dyn Output,
     ) -> HelperResult {
-        let t = h.template().ok_or(RenderError::new(
-            "merge_scope helper cannot have empty content",
-        ))?;
+        let t = h
+            .template()
+            .ok_or(RenderError::new("merge_scope helper cannot have empty content"))?;
 
         let s = h
             .param(0)
             .ok_or(RenderError::new("merge_scope helper needs two parameters"))?
             .value()
             .as_str()
-            .ok_or(RenderError::new(
-                "merge_scope first parameter must be a string",
-            ))?
+            .ok_or(RenderError::new("merge_scope first parameter must be a string"))?
             .to_string();
         let scope_opener = h
             .param(1)
             .ok_or(RenderError::new("merge_scope helper needs two parameters"))?
             .value()
             .as_str()
-            .ok_or(RenderError::new(
-                "merge_scope's second parameter must be a string",
-            ))?
+            .ok_or(RenderError::new("merge_scope's second parameter must be a string"))?
             .to_string();
 
         let (scope_opener_index, scope_close_index) =
@@ -196,22 +193,23 @@ impl HelperDef for UniqLines {
         rc: &mut RenderContext<'reg, 'rc>,
         out: &mut dyn Output,
     ) -> HelperResult {
-        let t = h.template().ok_or(RenderError::new(
-            "uniq_lines helper cannot have empty content",
-        ))?;
+        let t = h
+            .template()
+            .ok_or(RenderError::new("uniq_lines helper cannot have empty content"))?;
 
         let mut string_output = StringOutput::new();
         t.render(r, ctx, rc, &mut string_output)?;
 
         let rendered_string = string_output.into_string()?;
 
-        let unique_lines: Vec<String> = rendered_string
-            .split('\n')
-            .into_iter()
-            .map(|s| s.to_string())
-            .collect::<HashSet<String>>()
-            .into_iter()
-            .collect();
+        let unique_lines: Vec<String> =
+            rendered_string
+                .split('\n')
+                .into_iter()
+                .map(|s| s.to_string())
+                .collect::<HashSet<String>>()
+                .into_iter()
+                .collect();
 
         out.write(unique_lines.join("\n").as_str())?;
         Ok(())
@@ -478,10 +476,7 @@ pub fn choose_or_get_template_file_tree(
     if dir_exists(file_tree, &templates_path()) {
         let template_name = choose_or_get_template(file_tree, template)?;
 
-        Ok(FileTree::Directory(dir_content(
-            &file_tree,
-            &templates_path().join(template_name),
-        )?))
+        Ok(FileTree::Directory(dir_content(&file_tree, &templates_path().join(template_name))?))
     } else {
         let ui_framework = guess_or_choose_framework(file_tree)?;
 

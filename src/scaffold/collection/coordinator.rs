@@ -11,8 +11,9 @@ use crate::{
         dna::DnaFileTree,
         entry_type::definitions::EntryTypeReference,
         zome::{
-            coordinator::find_extern_function_or_choose,
-            utils::get_coordinator_zomes_for_integrity, ZomeFileTree,
+            coordinator::{find_extern_function_in_zomes, find_extern_function_or_choose},
+            utils::get_coordinator_zomes_for_integrity,
+            ZomeFileTree,
         },
     },
 };
@@ -23,9 +24,7 @@ fn global_collection_getter(
     integrity_zome_name: &String,
     collection_name: &String,
     link_type_name: &String,
-    entry_type_reference: &EntryTypeReference,
 ) -> String {
-    let to_hash_type = entry_type_reference.hash_type().to_string();
     let snake_collection_name = collection_name.to_case(Case::Snake);
 
     format!(
@@ -33,25 +32,10 @@ fn global_collection_getter(
 use {integrity_zome_name}::*;
 
 #[hdk_extern]
-pub fn get_{snake_collection_name}(_: ()) -> ExternResult<Vec<Record>> {{
+pub fn get_{snake_collection_name}(_: ()) -> ExternResult<Vec<Link>> {{
     let path = Path::from("{snake_collection_name}");
 
-    let links = get_links(path.path_entry_hash()?, LinkTypes::{link_type_name}, None)?;
-    
-    let get_input: Vec<GetInput> = links
-        .into_iter()
-        .map(|link| GetInput::new({to_hash_type}::from(link.target).into(), GetOptions::default()))
-        .collect();
-
-    // Get the records to filter out the deleted ones
-    let records = HDK.with(|hdk| hdk.borrow().get(get_input))?;
-
-    let records: Vec<Record> = records
-        .into_iter()
-        .filter_map(|r| r)
-        .collect();
-
-    Ok(records)
+    get_links(path.path_entry_hash()?, LinkTypes::{link_type_name}, None)
 }}
 "#,
     )
@@ -61,32 +45,14 @@ fn by_author_collection_getter(
     integrity_zome_name: &String,
     collection_name: &String,
     link_type_name: &String,
-    entry_type_reference: &EntryTypeReference,
 ) -> String {
-    let to_hash_type = entry_type_reference.hash_type().to_string();
-
     format!(
         r#"use hdk::prelude::*;
 use {integrity_zome_name}::*;
 
 #[hdk_extern]
-pub fn get_{collection_name}(author: AgentPubKey) -> ExternResult<Vec<Record>> {{
-    let links = get_links(author, LinkTypes::{link_type_name}, None)?;
-    
-    let get_input: Vec<GetInput> = links
-        .into_iter()
-        .map(|link| GetInput::new({to_hash_type}::from(link.target).into(), GetOptions::default()))
-        .collect();
-
-    // Get the records to filter out the deleted ones
-    let records = HDK.with(|hdk| hdk.borrow().get(get_input))?;
-
-    let records: Vec<Record> = records
-        .into_iter()
-        .filter_map(|r| r)
-        .collect();
-
-    Ok(records)
+pub fn get_{collection_name}(author: AgentPubKey) -> ExternResult<Vec<Link>> {{
+    get_links(author, LinkTypes::{link_type_name}, None)
 }}
 "#,
     )
@@ -178,7 +144,7 @@ fn add_create_link_in_create_function(
                         if item_fn
                             .attrs
                             .iter()
-                            .any(|a| a.path.segments.iter().any(|s| s.ident.eq("hdk_extern")))
+                            .any(|a| a.path().segments.iter().any(|s| s.ident.eq("hdk_extern")))
                             && item_fn.sig.ident.eq(&fn_name.sig.ident)
                         {
                             for new_stmt in stmts.clone() {
@@ -210,13 +176,141 @@ fn add_create_link_in_create_function(
     Ok(dna_file_tree)
 }
 
+fn add_delete_link_in_delete_function(
+    dna_file_tree: DnaFileTree,
+    coordinator_zomes_for_integrity: &Vec<ZomeManifest>,
+    collection_name: &String,
+    link_type_name: &String,
+    collection_type: &CollectionType,
+    entry_type_reference: &EntryTypeReference,
+) -> ScaffoldResult<(DnaFileTree, bool)> {
+    let dna_manifest_path = dna_file_tree.dna_manifest_path.clone();
+
+    let Some((chosen_coordinator_zome, fn_name)) = find_extern_function_in_zomes(
+        &dna_file_tree,
+        coordinator_zomes_for_integrity,
+        &format!(
+            "delete_{}",
+            entry_type_reference.entry_type.to_case(Case::Snake)
+        ),
+    )? else {
+        return Ok((dna_file_tree, false));
+    };
+
+    let zome_file_tree = ZomeFileTree::from_zome_manifest(dna_file_tree, chosen_coordinator_zome)?;
+
+    let snake_case_entry_type = entry_type_reference.entry_type.to_case(Case::Snake);
+
+    let target_hash_variable = match entry_type_reference.reference_entry_hash {
+        true => format!(
+            r#"record.action().entry_hash().ok_or(wasm_error!(WasmErrorInner::Guest("Record does not have an entry".to_string())))?"#
+        ),
+        false => format!("&original_{snake_case_entry_type}_hash"),
+    };
+    let into_hash_fn = match entry_type_reference.reference_entry_hash {
+        true => format!(r#"into_entry_hash()"#),
+        false => format!("into_action_hash()"),
+    };
+
+    let mut delete_link_stmts: Vec<String> = vec![];
+    match collection_type {
+        CollectionType::Global => {
+            delete_link_stmts.push(format!(r#"let path = Path::from("{}");"#, collection_name));
+            delete_link_stmts.push(format!(
+                r#"let links = get_links(path.path_entry_hash()?, LinkTypes::{link_type_name}, None)?;"#,
+            ));
+            delete_link_stmts.push(format!(
+                r#"for link in links {{
+                    if let Some(hash) = link.target.{into_hash_fn} {{
+                       if hash.eq({target_hash_variable}) {{
+                            delete_link(link.create_link_hash)?;
+                        }}
+                    }}
+                }}"#,
+            ));
+        }
+        CollectionType::ByAuthor => {
+            delete_link_stmts.push(format!(
+                r#"let links = get_links(record.action().author().clone(), LinkTypes::{link_type_name}, None)?;"#,
+            ));
+            delete_link_stmts.push(format!(
+                r#"for link in links {{
+                    if let Some(hash) = link.target.{into_hash_fn} {{
+                       if hash.eq({target_hash_variable}) {{
+                            delete_link(link.create_link_hash)?;
+                        }}
+                    }}
+                }}"#,
+            ));
+        }
+    };
+
+    let stmts = delete_link_stmts
+        .into_iter()
+        .map(|s| syn::parse_str::<syn::Stmt>(s.as_str()))
+        .collect::<Result<Vec<syn::Stmt>, syn::Error>>()?;
+
+    let crate_src_path = zome_file_tree.zome_crate_path.join("src");
+
+    let mut file_tree = zome_file_tree.dna_file_tree.file_tree();
+
+    let v: Vec<OsString> = crate_src_path
+        .clone()
+        .iter()
+        .map(|s| s.to_os_string())
+        .collect();
+    map_rust_files(
+        file_tree
+            .path_mut(&mut v.iter())
+            .ok_or(ScaffoldError::PathNotFound(crate_src_path.clone()))?,
+        |_file_path, mut file| {
+            file.items = file
+                .items
+                .into_iter()
+                .map(|i| {
+                    if let syn::Item::Fn(mut item_fn) = i.clone() {
+                        if item_fn
+                            .attrs
+                            .iter()
+                            .any(|a| a.path().segments.iter().any(|s| s.ident.eq("hdk_extern")))
+                            && item_fn.sig.ident.eq(&fn_name.sig.ident)
+                        {
+                            for new_stmt in stmts.clone() {
+                                item_fn
+                                    .block
+                                    .stmts
+                                    .insert(item_fn.block.stmts.len() - 1, new_stmt);
+                            }
+                            return syn::Item::Fn(item_fn);
+                        }
+                    }
+
+                    i
+                })
+                .collect();
+
+            Ok(file)
+        },
+    )
+    .map_err(|e| match e {
+        ScaffoldError::MalformedFile(path, error) => {
+            ScaffoldError::MalformedFile(crate_src_path.join(&path), error)
+        }
+        _ => e,
+    })?;
+
+    let dna_file_tree = DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
+
+    Ok((dna_file_tree, true))
+}
+
 pub fn add_collection_to_coordinators(
     integrity_zome_file_tree: ZomeFileTree,
     collection_name: &String,
     link_type_name: &String,
     collection_type: &CollectionType,
     entry_type: &EntryTypeReference,
-) -> ScaffoldResult<(DnaFileTree, ZomeManifest)> {
+) -> ScaffoldResult<(DnaFileTree, ZomeManifest, bool)> {
     let integrity_zome_name = integrity_zome_file_tree.zome_manifest.name.0.to_string();
     let dna_manifest_path = integrity_zome_file_tree
         .dna_file_tree
@@ -261,18 +355,12 @@ pub fn add_collection_to_coordinators(
     let snake_link_type_name = collection_name.to_case(Case::Snake);
 
     let getter = match collection_type {
-        CollectionType::Global => global_collection_getter(
-            &integrity_zome_name,
-            collection_name,
-            link_type_name,
-            entry_type,
-        ),
-        CollectionType::ByAuthor => by_author_collection_getter(
-            &integrity_zome_name,
-            collection_name,
-            link_type_name,
-            entry_type,
-        ),
+        CollectionType::Global => {
+            global_collection_getter(&integrity_zome_name, collection_name, link_type_name)
+        }
+        CollectionType::ByAuthor => {
+            by_author_collection_getter(&integrity_zome_name, collection_name, link_type_name)
+        }
     };
 
     let mut file_tree = zome_file_tree.dna_file_tree.file_tree();
@@ -305,5 +393,14 @@ pub fn add_collection_to_coordinators(
         entry_type,
     )?;
 
-    Ok((dna_file_tree, coordinator_zome))
+    let (dna_file_tree, deletable) = add_delete_link_in_delete_function(
+        dna_file_tree,
+        &coordinator_zomes_for_integrity,
+        collection_name,
+        link_type_name,
+        collection_type,
+        entry_type,
+    )?;
+
+    Ok((dna_file_tree, coordinator_zome, deletable))
 }
