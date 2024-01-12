@@ -38,7 +38,7 @@ Moving a release tag example:
 ```bash
 git checkout develop-0.1
 git pull --tags
-git tag holochain-0.1
+git tag holochain-0.1 --force
 git push --force origin holochain-0.1
 ```
 
