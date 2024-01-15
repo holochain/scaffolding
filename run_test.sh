@@ -83,8 +83,56 @@ setup_and_build_hello_world() {
   cd ..
 }
 
-if [[ -n "$SCOPE" && "$SCOPE" == "hello_world" ]]; then
-  setup_and_build_hello_world
+if [[ -n "$SCOPE" ]]; then
+
+  case "$SCOPE" in
+  "hello_world")
+    setup_and_build_hello_world
+    ;;
+  "holo_integration")
+    rm -rf /tmp/holo-flake
+    cd /tmp
+
+    hc-scaffold --template vue web-app holo-flake --setup-nix true
+    cd holo-flake
+
+    nix develop --command bash -c "
+      set -e
+      # Check if holo-dev-server is in the path
+      if command -v holo-dev-server >/dev/null 2>&1; then
+        echo 'holo-dev-server is available in the PATH while it should not'
+        exit 1
+      else
+        echo 'holo-dev-server is NOT available in the PATH'
+      fi
+    "
+
+    rm -rf /tmp/holo-flake
+    cd /tmp
+
+    hc-scaffold --template vue web-app holo-flake --setup-nix true --holo
+    cd holo-flake
+
+    nix develop --command bash -c "
+      set -e
+      # Check if holo-dev-server is in the path
+      if command -v holo-dev-server >/dev/null 2>&1; then
+        echo 'holo-dev-server is available in the PATH'
+      else
+        echo 'holo-dev-server is NOT available in the PATH'
+        exit 1
+      fi
+    "
+
+    rm -rf /tmp/holo-flake
+    cd /tmp
+    ;;
+  *)
+    echo "Error: SCOPE must be one of 'hello_world', 'holo_integration', but got $SCOPE."
+    exit 1
+    ;;
+  esac
+
   exit 0 # Exit early
 fi
 

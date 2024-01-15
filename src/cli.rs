@@ -195,6 +195,9 @@ pub enum HcScaffoldCommand {
     Example {
         /// Name of the example to scaffold. One of ['hello-world', 'forum'].
         example: Option<Example>,
+
+        #[structopt(long = "holo", hidden = true)]
+        holo_enabled: bool,
     },
 }
 
@@ -674,7 +677,10 @@ Collection "{}" scaffolded!
                     println!("{}", i);
                 }
             }
-            HcScaffoldCommand::Example { example } => {
+            HcScaffoldCommand::Example {
+                example,
+                holo_enabled,
+            } => {
                 let example = match example {
                     Some(e) => e,
                     None => choose_example()?,
@@ -695,7 +701,7 @@ Collection "{}" scaffolded!
                             Some(String::from("A simple 'hello world' application.")),
                             false,
                             &template_file_tree,
-                            false,
+                            holo_enabled,
                         )?;
 
                         file_tree
@@ -707,7 +713,7 @@ Collection "{}" scaffolded!
                             Some(String::from("A simple 'forum' application.")),
                             false,
                             &template_file_tree,
-                            false,
+                            holo_enabled,
                         )?;
 
                         // scaffold dna hello_world

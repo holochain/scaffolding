@@ -9,8 +9,21 @@ use crate::error::{ScaffoldError, ScaffoldResult};
 use crate::file_tree::*;
 use crate::versions::holochain_nix_version;
 
-pub fn flake_nix() -> FileTree {
+pub fn flake_nix(holo_enabled: bool) -> FileTree {
     let holochain_nix_version = holochain_nix_version();
+
+    let holo_inputs = holo_enabled
+        .then_some(
+            r#"
+    hds-releases.url = "github:holo-host/hds-releases";
+    "#,
+        )
+        .unwrap_or("");
+
+    let holo_packages = holo_enabled
+        .then_some("inputs'.hds-releases.packages.holo-dev-server-bin")
+        .unwrap_or("");
+
     file!(format!(
         r#"{{
   description = "Template for Holochain app development";
@@ -23,6 +36,7 @@ pub fn flake_nix() -> FileTree {
 
     nixpkgs.follows = "holochain-flake/nixpkgs";
     flake-parts.follows = "holochain-flake/flake-parts";
+    {holo_inputs}
   }};
 
   outputs = inputs:
@@ -43,6 +57,7 @@ pub fn flake_nix() -> FileTree {
               inputsFrom = [ inputs'.holochain-flake.devShells.holonix ];
               packages = [
                 pkgs.nodejs_20
+                {holo_packages}
                 # more packages go here
               ];
             }};
