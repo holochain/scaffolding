@@ -4,7 +4,7 @@ This is a guide for maintainers of the Holochain Scaffolding. It may also be use
 
 ### Branching strategy
 
-New development and bug fixes should target the `develop` branch. From there, changes are back-ported to maintanance branches which are named after the version of Holochain they work with. So maintance for the versions of Scaffolding that work with Holochain 0.1.x are done on `develop-0.1` and those that work with Holochain 0.2.x are on `develop-0.2` and so on.
+New development and bug fixes should target the `develop` branch. From there, changes are back-ported to maintenance branches which are named after the version of Holochain they work with. So maintenance for the versions of Scaffolding that work with Holochain 0.1.x are done on `develop-0.1` and those that work with Holochain 0.2.x are on `develop-0.2` and so on.
 
 There need to be some exceptions to this workflow to allow changes on maintenance branches that don't make sense to make on `develop`:
 
@@ -25,11 +25,11 @@ This applies to anybody reviewing PRs on the Scaffolding repository whether thos
 
 ### Back-porting and releasing
 
-For changes that get merged to `develop` with the back-port labels it is then the maintainers responsibility to to the back-porting. This can be done as a batch to each relevant maintance branch. Please mention the #xxx PR number of each original PR in the back-port PR description. Once the back-port PR has merged for a given PR, the corresponding label should be removed. This denotes the completion of the back-port so that it's easy to keep track of outstanding work to be done.
+For changes that get merged to `develop` with the back-port labels it is then the maintainers responsibility to to the back-porting. This can be done as a batch to each relevant maintenance branch. Please mention the #xxx PR number of each original PR in the back-port PR description. Once the back-port PR has merged for a given PR, the corresponding label should be removed. This denotes the completion of the back-port so that it's easy to keep track of outstanding work to be done.
 
 Releases can be done as needed. This may be a single PR back-port, a batch of changes, or something as small as pinning a version in the `Cargo.toml`. The release process should follow these steps:
 
-1. Submit a PR which bumps the Scaffolding version in the `Cargo.toml` on the relevant maintence branch. This should be merged before the release.
+1. Submit a PR which bumps the Scaffolding version in the `Cargo.toml` on the relevant maintenance branch. This should be merged before the release.
 2. Perform any testing which needs to be done before releasing the new changes.
 2. Changes on a maintenance branch such as `develop-0.1` are not yet visible to Holonix because there is a tag on the branch with the same version number such as `holochain-0.1`. This is the marker that Holonix will use to fetch the current version of Scaffolding corresponding to its Holochain version. Move this label to the tip of the maintenance branch. Sample commands are given for this below.
 
@@ -38,7 +38,7 @@ Moving a release tag example:
 ```bash
 git checkout develop-0.1
 git pull --tags
-git tag holochain-0.1 --force
+git tag --force holochain-0.1
 git push --force origin holochain-0.1
 ```
 
