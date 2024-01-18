@@ -15,7 +15,7 @@ let hashes: Array<ActionHash> | undefined;
 let loading = true;
 let error: any = undefined;
 
-$: links, loading, error;
+$: hashes, loading, error;
 
 onMount(async () => {
   if ({{camel_case linked_from.singular_arg}} === undefined) {
