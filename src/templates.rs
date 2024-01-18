@@ -250,7 +250,10 @@ pub fn choose_or_get_template_file_tree(
     if dir_exists(file_tree, &templates_path()) {
         let template_name = choose_or_get_template(file_tree, template)?;
 
-        Ok(FileTree::Directory(dir_content(&file_tree, &templates_path().join(template_name))?))
+        Ok(FileTree::Directory(dir_content(
+            &file_tree,
+            &templates_path().join(template_name),
+        )?))
     } else {
         let ui_framework = guess_or_choose_framework(file_tree)?;
 
