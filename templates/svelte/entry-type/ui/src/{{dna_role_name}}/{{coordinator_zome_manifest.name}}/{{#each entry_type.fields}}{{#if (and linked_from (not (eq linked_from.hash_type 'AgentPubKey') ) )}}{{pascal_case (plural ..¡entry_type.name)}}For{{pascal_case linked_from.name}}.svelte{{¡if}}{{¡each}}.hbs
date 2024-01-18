@@ -3,14 +3,14 @@ import { onMount, getContext } from 'svelte';
 import '@material/mwc-circular-progress';
 import type { Link, ActionHash, EntryHash, AppAgentClient, Record, AgentPubKey, NewEntryAction } from '@holochain/client';
 import { clientContext } from '../../contexts';
-import type { {{pascal_case ../entry_type.name}} } from './types';
+import type { {{pascal_case ../entry_type.name}}, {{pascal_case ../coordinator_zome_manifest.name}}Signal } from './types';
 import {{pascal_case ../entry_type.name}}Detail from './{{pascal_case ../entry_type.name}}Detail.svelte';
 
 export let {{camel_case linked_from.singular_arg}}: {{linked_from.hash_type}};
 
 let client: AppAgentClient = (getContext(clientContext) as any).getClient();
 
-let links: Array<Link> | undefined;
+let hashes: Array<ActionHash> | undefined;
 
 let loading = true;
 let error: any = undefined;
@@ -22,14 +22,23 @@ onMount(async () => {
     throw new Error(`The {{camel_case linked_from.singular_arg}} input is required for the {{pascal_case (plural ../entry_type.name)}}For{{pascal_case linked_from.name}} element`);
   }
 
+  client.on('signal', signal => {
+    if (signal.zome_name !== '{{../coordinator_zome_manifest.name}}') return;
+    const payload = signal.payload as {{pascal_case ../coordinator_zome_manifest.name}}Signal;
+    if (payload.type !== 'EntryCreated') return;
+    if (payload.app_entry.type !== '{{pascal_case ../entry_type.name}}') return;
+    hashes = [...hashes, payload.action.hashed.hash];
+  });
+
   try {
-    links = await client.callZome({
+    const links = await client.callZome({
       cap_secret: null,
       role_name: '{{../dna_role_name}}',
       zome_name: '{{../coordinator_zome_manifest.name}}',
       fn_name: 'get_{{snake_case (plural ../entry_type.name)}}_for_{{snake_case linked_from.name}}',
       payload: {{camel_case linked_from.singular_arg}}
     });
+    hashes = links.map((l: Link) => l.target);
   } catch (e) {
     error = e;
   }
@@ -44,13 +53,13 @@ onMount(async () => {
 </div>
 {:else if error}
 <span>Error fetching {{lower_case (plural ../entry_type.name)}}: ${error.data.data}.</span>
-{:else if links.length === 0}
+{:else if hashes.length === 0}
 <span>No {{lower_case (plural ../entry_type.name)}} found for this {{lower_case linked_from.name}}.</span>
 {:else}
 <div style="display: flex; flex-direction: column">
-  {#each links as link}
+  {#each hashes as hash}
     <div style="margin-bottom: 8px;">
-      <{{pascal_case ../entry_type.name}}Detail {{camel_case ../entry_type.name}}Hash={link.target}></{{pascal_case ../entry_type.name}}Detail>
+      <{{pascal_case ../entry_type.name}}Detail {{camel_case ../entry_type.name}}Hash={hash}></{{pascal_case ../entry_type.name}}Detail>
     </div>
   {/each}
 </div>
