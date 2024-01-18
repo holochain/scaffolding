@@ -250,10 +250,7 @@ pub fn choose_or_get_template_file_tree(
     if dir_exists(file_tree, &templates_path()) {
         let template_name = choose_or_get_template(file_tree, template)?;
 
-        Ok(FileTree::Directory(dir_content(
-            &file_tree,
-            &templates_path().join(template_name),
-        )?))
+        Ok(FileTree::Directory(dir_content(&file_tree, &templates_path().join(template_name))?))
     } else {
         let ui_framework = guess_or_choose_framework(file_tree)?;
 
@@ -270,10 +267,15 @@ pub fn choose_or_get_template(
     let templates_dir_content =
         dir_content(file_tree, &templates_path).map_err(|_e| ScaffoldError::NoTemplatesFound)?;
 
-    let templates: Vec<String> = templates_dir_content
-        .into_keys()
-        .map(|k| k.to_str().unwrap().to_string())
-        .collect();
+    let templates = templates_dir_content
+        .iter()
+        .filter_map(|(k, v)| {
+            if v.file_content().is_some() {
+                return None;
+            }
+            k.to_str().map(|s| s.to_string())
+        })
+        .collect::<Vec<String>>();
 
     let chosen_template_name = match (template, templates.len()) {
         (_, 0) => Err(ScaffoldError::NoTemplatesFound),
