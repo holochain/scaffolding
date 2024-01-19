@@ -114,7 +114,7 @@ pub fn render_template_file_tree<T: Serialize>(
         // Normalize the file path by replacing special characters:
         let path = PathBuf::from(
             path.to_str()
-                .context("Failed to convert PathBug to str")?
+                .context("Failed to convert PathBuf to str")?
                 .replace('¡', "/")
                 .replace('\'', "\""),
         );
