@@ -151,7 +151,7 @@ pub enum ScaffoldError {
     InvalidArguments(String),
 
     /// anything else
-    #[error("Unknown error: {0}")]
+    #[error("Unexpected error: {0}")]
     MiscError(#[from] anyhow::Error),
 }
 
