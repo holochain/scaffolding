@@ -69,7 +69,7 @@ pub fn get_{plural_snake_link_type_name}_for_{snake_from}({snake_from_arg}: {fro
 pub fn add_link_handler(
     from_referenceable: &Referenceable,
     to_referenceable: &Referenceable,
-    bidireccional: bool,
+    bidirectional: bool,
 ) -> String {
     let from_hash_type = from_referenceable.hash_type().to_string();
     let from_arg_name = from_referenceable.field_name(&Cardinality::Single);
@@ -91,7 +91,7 @@ pub fn add_link_handler(
         .to_string(&Cardinality::Single)
         .to_case(Case::Pascal);
 
-    let bidireccional_create = match bidireccional {
+    let bidirectional_create = match bidirectional {
         true => format!(
             r#"create_link(input.target_{to_arg_name}, input.base_{from_arg_name}, LinkTypes::{inverse_link_type_name}, ())?;"#
         ),
@@ -107,7 +107,7 @@ pub struct Add{singular_pascal_to_entry_type}For{singular_pascal_from_entry_type
 #[hdk_extern]
 pub fn add_{singular_snake_to_entry_type}_for_{singular_snake_from_entry_type}(input: Add{singular_pascal_to_entry_type}For{singular_pascal_from_entry_type}Input) -> ExternResult<()> {{
     create_link(input.base_{from_arg_name}.clone(), input.target_{to_arg_name}.clone(), LinkTypes::{normal_link_type_name}, ())?;
-    {bidireccional_create}
+    {bidirectional_create}
 
     Ok(())    
 }}"#
@@ -207,7 +207,7 @@ fn from_link_hash_type(hash_type: &String) -> String {
 fn remove_link_handlers(
     from_referenceable: &Referenceable,
     to_referenceable: &Referenceable,
-    bidireccional: bool,
+    bidirectional: bool,
 ) -> String {
     let from_hash_type = from_referenceable.hash_type().to_string();
     let from_arg_name = from_referenceable.field_name(&Cardinality::Single);
@@ -232,7 +232,7 @@ fn remove_link_handlers(
     let from_link = from_link_hash_type(&to_hash_type);
     let from_inverse = from_link_hash_type(&from_hash_type);
 
-    let bidireccional_remove = match bidireccional {
+    let bidirectional_remove = match bidirectional {
         true => format!(
             r#"
     let links = get_links(input.target_{to_arg_name}.clone(), LinkTypes::{inverse_link_type_name}, None)?;
@@ -260,7 +260,7 @@ pub fn remove_{singular_snake_to_entry_type}_for_{singular_snake_from_entry_type
             delete_link(link.create_link_hash)?;
         }}
     }}
-    {bidireccional_remove}
+    {bidirectional_remove}
 
     Ok(())        
 }}"#
@@ -272,9 +272,9 @@ fn normal_handlers(
     from_referenceable: &Referenceable,
     to_referenceable: &Referenceable,
     delete: bool,
-    bidireccional: bool,
+    bidirectional: bool,
 ) -> String {
-    let inverse_get = match bidireccional {
+    let inverse_get = match bidirectional {
         true => format!(
             r#"
 
@@ -285,7 +285,7 @@ fn normal_handlers(
     };
 
     let delete_link_handler = match delete {
-        true => remove_link_handlers(from_referenceable, to_referenceable, bidireccional),
+        true => remove_link_handlers(from_referenceable, to_referenceable, bidirectional),
         false => String::from(""),
     };
 
@@ -299,7 +299,7 @@ use {integrity_zome_name}::*;
 {}
         
 {}"#,
-        add_link_handler(from_referenceable, to_referenceable, bidireccional),
+        add_link_handler(from_referenceable, to_referenceable, bidirectional),
         get_links_handler(from_referenceable, to_referenceable),
         inverse_get,
         delete_link_handler
@@ -313,7 +313,7 @@ pub fn add_link_type_functions_to_coordinator(
     from_referenceable: &Referenceable,
     to_referenceable: &Option<Referenceable>,
     delete: bool,
-    bidireccional: bool,
+    bidirectional: bool,
 ) -> ScaffoldResult<ZomeFileTree> {
     let dna_manifest_path = coordinator_zome_file_tree
         .dna_file_tree
@@ -340,7 +340,7 @@ pub fn add_link_type_functions_to_coordinator(
             from_referenceable,
             r,
             delete,
-            bidireccional,
+            bidirectional,
         ),
     };
 
