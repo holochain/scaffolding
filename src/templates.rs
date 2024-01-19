@@ -165,7 +165,7 @@ pub fn render_template_file_tree<'a, T: Serialize>(
             }
         } else {
             let new_path = h.render_template(
-                path.as_os_str().try_into().context("Failed to convert OsStr to str")?,
+                path.as_os_str().to_str().context("Failed to convert OsStr to str")?,
                 data
             )?;
             transformed_templates.insert(PathBuf::from(new_path), None);
