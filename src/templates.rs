@@ -7,7 +7,7 @@ use handlebars::{
     RenderError, Renderable, ScopedJson, StringOutput,
 };
 use regex::Regex;
-use serde_json::{json, Value};
+use serde_json::{json, Value, Map};
 use std::collections::{BTreeMap, HashSet};
 use std::ffi::OsString;
 use std::path::PathBuf;
@@ -279,6 +279,11 @@ pub fn register_case_helpers<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
 #[derive(Clone, Copy)]
 pub struct FilterHelper;
 
+pub enum FilterableValues {
+    Array(Vec<Value>),
+    Object(Map<String, Value>), // imported from serde_json
+}
+
 /// A Handlebars helper to filter an iterable JSON value.
 /// It receives the value to be filtered and a string containing the condition predicate,
 /// then uses Handlebars' truthy logic to filter the items in the value.
@@ -311,20 +316,16 @@ impl HelperDef for FilterHelper {
             .and_then(|v| v.value().as_bool())
             .unwrap_or(false);
 
-        let items: Vec<Value> = match value {
+        let items: FilterableValues = match value {
             Value::Array(items) => Ok(
-                items
+                FilterableValues::Array(items
                     .iter()
-                    .map(|item| item.clone())
+                    .cloned()
                     .collect()
+                )
             ),
-            // FIXME: This doesn't preserve object keys.
-            // That's probably unexpected for consumers.
             Value::Object(items) => Ok(
-                items
-                    .values()
-                    .map(|item| item.clone())
-                    .collect()
+                FilterableValues::Object(items.clone())
             ),
             _ => Err(RenderError::new("Filter helper: value to be filtered must be an array or object"))
         }?;
@@ -339,20 +340,42 @@ impl HelperDef for FilterHelper {
             "}}true{{else}}false{{/if}}"
         );
 
-        let mut filtered_items = vec![];
-        for item in items.iter() {
-            match r.render_template(&template, item) {
-                Ok(s) => {
-                    if s.as_str() == "true" {
-                        filtered_items.push(item);
+        match items {
+            FilterableValues::Array(items) => {
+                let mut filtered_array = vec![];
+                for item in items.iter() {
+                    match r.render_template(&template, item) {
+                        Ok(s) => {
+                            if s.as_str() == "true" {
+                                filtered_array.push(item);
+                            }
+                        },
+                        Err(e) => {
+                            return Err(e);
+                        }
                     }
-                },
-                Err(e) => {
-                    return Err(e);
                 }
+                Ok(ScopedJson::Derived(json!(filtered_array)))
+            },
+            FilterableValues::Object(object) => {
+                let mut filtered_object = Map::new();
+                for key in object.keys() {
+                    if let Some(v) = object.get(key) {
+                        match r.render_template(&template, v) {
+                            Ok(s) => {
+                                if s.as_str() == "true" {
+                                    filtered_object.insert(key.into(), v.clone());
+                                }
+                            },
+                            Err(e) => {
+                                return Err(e);
+                            }
+                        }
+                    }
+                }
+                Ok(ScopedJson::Derived(json!(filtered_object)))
             }
         }
-        return Ok(ScopedJson::Derived(json!(filtered_items)));
     }
 }
 
