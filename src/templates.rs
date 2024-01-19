@@ -291,17 +291,17 @@ impl HelperDef for FilterHelper {
         _ctx: &'rc Context,
         _rc: &mut RenderContext<'reg, 'rc>,
     ) -> Result<ScopedJson<'reg, 'rc>, RenderError> {
-        let value_param = h
-            .param(0)
-            .ok_or(RenderError::new("Filter helper: Param not found for index 0; must be value to be filtered"))?;
+        let mut params = h.params().iter();
+        let value = params
+            .next()
+            .ok_or(RenderError::new(
+                "Filter helper: Param not found for index 0; must be value to be filtered",
+            ))?
+            .value();
 
-        let value = value_param.value();
-
-        let condition_param = h
-            .param(1)
-            .ok_or(RenderError::new("Filter helper: Param not found for index 1; must be string containing filter condition predicate"))?;
-
-        let condition = condition_param
+        let condition = params
+            .next()
+            .ok_or(RenderError::new("Filter helper: Param not found for index 1; must be string containing filter condition predicate"))?
             .value()
             .as_str()
             .ok_or(RenderError::new("Filter helper: filter condition predicate must be a string"))?;
@@ -331,18 +331,27 @@ impl HelperDef for FilterHelper {
 
         // This template allows us to evaluate the condition according to Handlebars'
         // available helper functions and existing truthiness logic.
-        let template = format!("{}{}{}{}", "{{#if ", match include_zero { true => " includeZero=true", _ => "" }, condition, "}}true{{else}}false{{/if}}");
-        // Try the template with one of the items to see if the template parses.
-        r.render_template(&*template, &items.first().clone())?;
+        let template = format!(
+            "{}{}{}{}",
+            "{{#if ",
+            include_zero.then_some("includeZero=true").unwrap_or(""),
+            condition,
+            "}}true{{else}}false{{/if}}"
+        );
 
-        let filtered_items: Vec<&Value> = items
-            .iter()
-            .filter(|item| match r.render_template(&*template, item) {
-                Ok(s) => s.as_str() == "true",
-                // FIXME: this swallows error messages that don't involve parsing the template.
-                _ => false
-            })
-            .collect();
+        let mut filtered_items = vec![];
+        for item in items.iter() {
+            match r.render_template(&template, item) {
+                Ok(s) => {
+                    if s.as_str() == "true" {
+                        filtered_items.push(item);
+                    }
+                },
+                Err(e) => {
+                    return Err(e);
+                }
+            }
+        }
         return Ok(ScopedJson::Derived(json!(filtered_items)));
     }
 }
