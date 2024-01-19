@@ -171,7 +171,7 @@ pub fn render_template_file_tree<T: Serialize>(
         } else {
             let new_path = h.render_template(
                 path.as_os_str()
-                    .try_into()
+                    .to_str()
                     .context("Failed to convert OsStr to str")?,
                 data,
             )?;
