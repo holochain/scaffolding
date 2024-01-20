@@ -39,7 +39,7 @@ export class {{pascal_case (plural from_referenceable.name)}}For{{pascal_case to
       if (signal.zome_name !== '{{coordinator_zome_manifest.name}}') return;
       const payload = signal.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;
       if (payload.type !== 'LinkCreated') return;
-      if (payload.link_type !== '{{pascal_case bidireccional}}') return;
+      if (payload.link_type !== '{{pascal_case bidirectional}}') return;
 
       this.signaledHashes = [payload.action.hashed.content.target_address, ...this.signaledHashes];
     });
