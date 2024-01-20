@@ -80,7 +80,7 @@ test('link a {{pascal_case from_referenceable.name}} to a {{pascal_case to_refer
     assert.deepEqual(targetRecord, linksOutput[0]);
 {{/if}}
 
-{{#if bidireccional}}
+{{#if bidirectional}}
 
     // Bob gets the links in the inverse direction
     linksOutput = await bob.cells[0].callZome({
@@ -114,7 +114,15 @@ test('link a {{pascal_case from_referenceable.name}} to a {{pascal_case to_refer
     });
     assert.equal(linksOutput.length, 0);
 
-  {{#if bidireccional}}
+    // Bob gets the deleted links
+    let deletedLinksOutput: Array<[SignedActionHashed<CreateLink>, SignedActionHashed<DeleteLink>[]]> = await bob.cells[0].callZome({
+      zome_name: "{{coordinator_zome_manifest.name}}",
+      fn_name: "get_deleted_{{plural (snake_case to_referenceable.name)}}_for_{{snake_case from_referenceable.name}}",
+      payload: baseAddress
+    });
+    assert.equal(deletedLinksOutput.length, 1);
+
+  {{#if bidirectional}}
     // Bob gets the links in the inverse direction
     linksOutput = await bob.cells[0].callZome({
       zome_name: "{{coordinator_zome_manifest.name}}",
