@@ -1,6 +1,6 @@
 import { LitElement, html } from 'lit';
 import { state, property, customElement } from 'lit/decorators.js';
-import { AgentPubKey, EntryHash, ActionHash, Record, AppAgentClient, NewEntryAction } from '@holochain/client';
+import { AgentPubKey, Link, EntryHash, ActionHash, Record, AppAgentClient, NewEntryAction } from '@holochain/client';
 import { consume } from '@lit-labs/context';
 import { Task } from '@lit-labs/task';
 import '@material/mwc-circular-progress';
@@ -28,7 +28,7 @@ export class {{pascal_case (plural to_referenceable.name)}}For{{pascal_case from
       zome_name: '{{coordinator_zome_manifest.name}}',
       fn_name: 'get_{{snake_case (plural to_referenceable.name)}}_for_{{snake_case from_referenceable.name}}',
       payload: {{camel_case from_referenceable.singular_arg}},
-  }) as Promise<Array<Record>>, () => [this.{{camel_case from_referenceable.singular_arg}}]);
+  }) as Promise<Array<Link>>, () => [this.{{camel_case from_referenceable.singular_arg}}]);
 
   firstUpdated() {
     if (this.{{camel_case from_referenceable.singular_arg}} === undefined) {
@@ -62,7 +62,7 @@ export class {{pascal_case (plural to_referenceable.name)}}For{{pascal_case from
       pending: () => html`<div style="display: flex; flex: 1; align-items: center; justify-content: center">
         <mwc-circular-progress indeterminate></mwc-circular-progress>
       </div>`,
-      complete: (records) => this.renderList([...this.signaledHashes, ...records.map(r => {{#if (eq to_referenceable.hash_type "ActionHash")}}r.signed_action.hashed.hash{{else}}(r.signed_action.hashed.content as NewEntryAction).entry_hash{{/if}})]),
+      complete: (links) => this.renderList([...this.signaledHashes, ...links.map(l => l.target)]),
       error: (e: any) => html`<span>Error fetching the {{lower_case (plural to_referenceable.name)}}: ${e.data.data}.</span>`
     });
   }

@@ -1,6 +1,6 @@
 import { LitElement, html } from 'lit';
 import { state, property, customElement } from 'lit/decorators.js';
-import { AgentPubKey, EntryHash, ActionHash, Record, AppAgentClient, NewEntryAction } from '@holochain/client';
+import { AgentPubKey, Link, EntryHash, ActionHash, Record, AppAgentClient, NewEntryAction } from '@holochain/client';
 import { consume } from '@lit-labs/context';
 import { Task } from '@lit-labs/task';
 import { clientContext } from '../../contexts';
@@ -25,7 +25,7 @@ export class {{pascal_case (plural from_referenceable.name)}}For{{pascal_case to
       zome_name: '{{coordinator_zome_manifest.name}}',
       fn_name: 'get_{{snake_case (plural from_referenceable.name)}}_for_{{snake_case to_referenceable.name}}',
       payload: {{camel_case to_referenceable.singular_arg}},
-  }) as Promise<Array<Record>>, () => [this.{{camel_case to_referenceable.singular_arg}}]);
+  }) as Promise<Array<Link>>, () => [this.{{camel_case to_referenceable.singular_arg}}]);
 
   @state()
   signaledHashes: Array<{{from_referenceable.hash_type}}> = [];
@@ -39,7 +39,7 @@ export class {{pascal_case (plural from_referenceable.name)}}For{{pascal_case to
       if (signal.zome_name !== '{{coordinator_zome_manifest.name}}') return;
       const payload = signal.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;
       if (payload.type !== 'LinkCreated') return;
-      if (payload.link_type !== '{{pascal_case bidireccional}}') return;
+      if (payload.link_type !== '{{pascal_case bidirectional}}') return;
 
       this.signaledHashes = [payload.action.hashed.content.target_address, ...this.signaledHashes];
     });
@@ -62,7 +62,7 @@ export class {{pascal_case (plural from_referenceable.name)}}For{{pascal_case to
       pending: () => html`<div style="display: flex; flex: 1; align-items: center; justify-content: center">
         <mwc-circular-progress indeterminate></mwc-circular-progress>
       </div>`,
-      complete: (records) => this.renderList([...this.signaledHashes, ...records.map(r => {{#if (eq from_referenceable.hash_type "ActionHash")}}r.signed_action.hashed.hash{{else}}(r.signed_action.hashed.content as NewEntryAction).entry_hash{{/if}})]),
+      complete: (links) => this.renderList([...this.signaledHashes, ...links.map(l => l.target)]),
       error: (e: any) => html`<span>Error fetching the {{lower_case (plural from_referenceable.name)}}: ${e.data.data}.</span>`
     });
   }

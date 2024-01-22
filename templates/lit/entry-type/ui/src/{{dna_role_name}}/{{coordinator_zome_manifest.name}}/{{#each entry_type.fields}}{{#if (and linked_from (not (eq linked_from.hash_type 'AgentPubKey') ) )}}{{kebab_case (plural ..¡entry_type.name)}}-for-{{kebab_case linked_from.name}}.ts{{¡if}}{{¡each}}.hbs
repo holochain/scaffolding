@@ -1,6 +1,6 @@
 import { LitElement, html } from 'lit';
 import { state, customElement, property } from 'lit/decorators.js';
-import { InstalledCell, Record, AppAgentClient, EntryHash, ActionHash, AgentPubKey } from '@holochain/client';
+import { InstalledCell, Record, Link, AppAgentClient, EntryHash, ActionHash, AgentPubKey } from '@holochain/client';
 import { consume } from '@lit-labs/context';
 import '@material/mwc-circular-progress';
 import { Task } from '@lit-labs/task';
@@ -24,7 +24,7 @@ export class {{pascal_case (plural ../entry_type.name)}}For{{pascal_case linked_
       zome_name: '{{../coordinator_zome_manifest.name}}',
       fn_name: 'get_{{snake_case (plural ../entry_type.name)}}_for_{{snake_case linked_from.name}}',
       payload: {{camel_case linked_from.singular_arg}},
-  }) as Promise<Array<{{#if ../entry_type.reference_entry_hash}}EntryHash{{else}}ActionHash{{/if}}>>, () => [this.{{camel_case linked_from.singular_arg}}]);
+  }) as Promise<Array<Link>>, () => [this.{{camel_case linked_from.singular_arg}}]);
 
   firstUpdated() {
     if (this.{{camel_case linked_from.singular_arg}} === undefined) {
@@ -32,13 +32,13 @@ export class {{pascal_case (plural ../entry_type.name)}}For{{pascal_case linked_
     }
   }
 
-  renderList(hashes: Array<{{#if ../entry_type.reference_entry_hash}}EntryHash{{else}}ActionHash{{/if}}>) {
-    if (hashes.length === 0) return html`<span>No {{lower_case (plural ../entry_type.name)}} found for this {{lower_case linked_from.name}}.</span>`;
+  renderList(links: Array<Link>) {
+    if (links.length === 0) return html`<span>No {{lower_case (plural ../entry_type.name)}} found for this {{lower_case linked_from.name}}.</span>`;
     
     return html`
       <div style="display: flex; flex-direction: column">
-        ${hashes.map(hash =>
-          html`<{{kebab_case ../entry_type.name}}-detail .{{camel_case ../entry_type.name}}Hash=${hash}></{{kebab_case ../entry_type.name}}-detail>`
+        ${links.map(link =>
+          html`<{{kebab_case ../entry_type.name}}-detail .{{camel_case ../entry_type.name}}Hash=${link.target}></{{kebab_case ../entry_type.name}}-detail>`
         )}
       </div>
     `;
@@ -49,7 +49,7 @@ export class {{pascal_case (plural ../entry_type.name)}}For{{pascal_case linked_
       pending: () => html`<div style="display: flex; flex: 1; align-items: center; justify-content: center">
         <mwc-circular-progress indeterminate></mwc-circular-progress>
       </div>`,
-      complete: (hashes) => this.renderList(hashes),
+      complete: (links) => this.renderList(links),
       error: (e: any) => html`<span>Error fetching {{lower_case (plural ../entry_type.name)}}: ${e.data.data}.</span>`
     });
   }
