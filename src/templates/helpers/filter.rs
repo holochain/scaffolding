@@ -9,7 +9,7 @@ pub struct FilterHelper;
 
 pub enum FilterableValues {
     Array(Vec<Value>),
-    Object(Map<String, Value>), // imported from serde_json
+    Object(Map<String, Value>),
 }
 
 /// A Handlebars helper to filter an iterable JSON value.
