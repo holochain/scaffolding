@@ -34,8 +34,7 @@ use {integrity_zome_name}::*;
 #[hdk_extern]
 pub fn get_{snake_collection_name}(_: ()) -> ExternResult<Vec<Link>> {{
     let path = Path::from("{snake_collection_name}");
-
-    get_links(path.path_entry_hash()?, LinkTypes::{link_type_name}, None)
+    get_links(GetLinksInputBuilder::try_new(path.path_entry_hash()?, LinkTypes::{link_type_name})?.build())
 }}
 "#,
     )
@@ -52,7 +51,7 @@ use {integrity_zome_name}::*;
 
 #[hdk_extern]
 pub fn get_{collection_name}(author: AgentPubKey) -> ExternResult<Vec<Link>> {{
-    get_links(author, LinkTypes::{link_type_name}, None)
+    get_links(GetLinksInputBuilder::try_new(author, LinkTypes::{link_type_name})?.build())
 }}
 "#,
     )
@@ -217,7 +216,9 @@ fn add_delete_link_in_delete_function(
         CollectionType::Global => {
             delete_link_stmts.push(format!(r#"let path = Path::from("{}");"#, collection_name));
             delete_link_stmts.push(format!(
-                r#"let links = get_links(path.path_entry_hash()?, LinkTypes::{link_type_name}, None)?;"#,
+                r#"let links = get_links(
+                    GetLinksInputBuilder::try_new(path.path_entry_hash()?, LinkTypes::{link_type_name})?.build(),
+                )?;"#,
             ));
             delete_link_stmts.push(format!(
                 r#"for link in links {{
@@ -231,7 +232,8 @@ fn add_delete_link_in_delete_function(
         }
         CollectionType::ByAuthor => {
             delete_link_stmts.push(format!(
-                r#"let links = get_links(record.action().author().clone(), LinkTypes::{link_type_name}, None)?;"#,
+                r#"let links = get_links(
+                    GetLinksInputBuilder::try_new(record.action().author().clone(), LinkTypes::{link_type_name})?.build(),
             ));
             delete_link_stmts.push(format!(
                 r#"for link in links {{
