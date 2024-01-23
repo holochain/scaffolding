@@ -23,5 +23,5 @@ pub fn holochain_version() -> String {
 }
 
 pub fn holochain_nix_version() -> String {
-    String::from("0_2")
+    String::from("weekly")
 }
