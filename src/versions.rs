@@ -1,11 +1,12 @@
 pub fn tryorama_version() -> String {
-    String::from("^0.15.2")
+    String::from("^0.16.0-dev.0")
 }
 
 pub fn holochain_client_version() -> String {
-    String::from("^0.16.5")
+    String::from("^0.17.0-dev.3")
 }
 
+// TODO: update version
 pub fn web_sdk_version() -> String {
     String::from("^0.6.10-prerelease")
 }
