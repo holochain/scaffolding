@@ -233,7 +233,8 @@ fn add_delete_link_in_delete_function(
         CollectionType::ByAuthor => {
             delete_link_stmts.push(format!(
                 r#"let links = get_links(
-                    GetLinksInputBuilder::try_new(record.action().author().clone(), LinkTypes::{link_type_name})?.build(),
+                    GetLinksInputBuilder::try_new(record.action().author().clone(), LinkTypes::{link_type_name})?.build()
+                )?;"#,
             ));
             delete_link_stmts.push(format!(
                 r#"for link in links {{
