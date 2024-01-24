@@ -2,8 +2,7 @@ use std::collections::BTreeMap;
 use std::{ffi::OsString, path::PathBuf};
 
 use convert_case::{Case, Casing};
-use dialoguer::Validator;
-use dialoguer::{theme::ColorfulTheme, Input, Select};
+use dialoguer::{theme::ColorfulTheme, Input, Select, Validator};
 
 use crate::error::{ScaffoldError, ScaffoldResult};
 use crate::file_tree::{dir_content, FileTree};
