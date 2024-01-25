@@ -95,7 +95,7 @@
       } 
       window.getHellos = getHellos;
 
-      await connect();
+      connect().catch(console.error);
 
     </script>
   </body>
