@@ -95,3 +95,63 @@ pub fn register_filter<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
 
     h
 }
+
+#[cfg(test)]
+mod tests {
+    use handlebars::Handlebars;
+    use serde_json::json;
+    use crate::templates::helpers::register_filter;
+
+    fn setup_handlebars<'a>() -> Handlebars<'a> {
+        let hbs = Handlebars::new();
+        let hbs = register_filter(hbs);
+        hbs
+    }
+
+    #[test]
+    fn respects_include_zero() {
+        let hbs = setup_handlebars();
+        let value = json!([0, 1, 0, 2, 0, 3, 0, 4, 0, 5]);
+        // The predicate filters out zeroes.
+        let template = "{{#each (filter this \"this\")}}{{this}}{{/each}}";
+        match hbs.render_template(&template, &value) {
+            Ok(s) => assert_eq!(s, "12345", "`filter` helper did not filter out falsy zero"),
+            Err(e) => panic!("{}", e)
+        }
+        // This predicate, however, does not.
+        let template = "{{#each (filter this \"this\" includeZero=true)}}{{this}}{{/each}}";
+        match hbs.render_template(&template, &value) {
+            Ok(s) => assert_eq!(s, "0102030405", "`filter` helper did not treat zero as truthy"),
+            Err(e) => panic!("{}", e)
+        }
+    }
+
+    #[test]
+    fn can_filter_object_by_value() {
+        let hbs = setup_handlebars();
+        let value = json!({"name": "Alice", "age": 24, "wild": false, "species": "iguana"});
+        // The predicate filters out the 'wild' property.
+        let template = "{{#each (filter this \"this\")}}{{@key}}: {{this}}, {{/each}}";
+        match hbs.render_template(&template, &value) {
+            Ok(s) => assert_eq!(s, "name: Alice, age: 24, species: iguana, ", "`filter` helper did not filter object key/value pairs by value"),
+            Err(e) => panic!("{}", e)
+        }
+    }
+
+
+    #[test]
+    fn can_filter_complex_value() {
+        let hbs = setup_handlebars();
+        let value = json!([
+            {"name": "Alice", "age": 24, "wild": true, "species": "iguana"},
+            {"name": "Bob", "age": 3, "wild": false, "species": "hamster"},
+            {"name": "Carol", "age": 1, "wild": true, "species": "octopus"}
+        ]);
+        // The predicate filters out domestic animals.
+        let template = "{{#each (filter this \"wild\")}}{{name}} the {{species}} is {{age}}. {{/each}}";
+        match hbs.render_template(&template, &value) {
+            Ok(s) => assert_eq!(s, "Alice the iguana is 24. Carol the octopus is 1. ", "`filter` helper did not operate on a list full of complex values"),
+            Err(e) => panic!("{}", e)
+        }
+    }
+}
