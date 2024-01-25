@@ -44,8 +44,8 @@ impl HelperDef for FilterHelper {
         let template = format!(
             "{}{}{}{}",
             "{{#if ",
-            include_zero.then_some("includeZero=true").unwrap_or(""),
             condition,
+            include_zero.then_some(" includeZero=true").unwrap_or(""),
             "}}true{{else}}false{{/if}}"
         );
 
