@@ -39,8 +39,9 @@ impl HelperDef for FilterHelper {
             .and_then(|v| v.value().as_bool())
             .unwrap_or(false);
 
-        // This template allows us to evaluate the condition according to Handlebars'
-        // available helper functions and existing truthiness logic.
+        // This template allows us to evaluate the condition according to
+        // Handlebars' available context/property logic, helper functions, and
+        // truthiness logic.
         let template = format!(
             "{}{}{}{}",
             "{{#if ",
