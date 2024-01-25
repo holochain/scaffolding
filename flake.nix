@@ -28,7 +28,7 @@
       }: {
         devShells.default = pkgs.mkShell {
           inputsFrom = [inputs'.holochain.devShells.rustDev];
-          packages = [pkgs.nodejs-20_x];
+          packages = [pkgs.nodejs_20];
         };
 
         devShells.ci = pkgs.mkShell {
