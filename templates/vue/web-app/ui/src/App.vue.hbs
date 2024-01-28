@@ -93,12 +93,12 @@ export default defineComponent({
       this.client = client
     } else {
       // We pass '' as url because it will dynamically be replaced in launcher environments
-      this.client = await AppAgentWebsocket.connect('', 'vue-default');
+      this.client = await AppAgentWebsocket.connect(new URL('https://UNUSED'), 'vue-default');
       this.loading = false;
     }
   {{else}}
     // We pass '' as url because it will dynamically be replaced in launcher environments
-    this.client = await AppAgentWebsocket.connect('', '{{app_name}}');
+    this.client = await AppAgentWebsocket.connect(new URL('https://UNUSED'), '{{app_name}}');
 
     this.loading = false;
   {{/if}}
