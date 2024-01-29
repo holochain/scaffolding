@@ -24,6 +24,7 @@ pub struct ScaffoldCollectionData {
     pub collection_type: CollectionType,
     pub collection_name: String,
     pub referenceable: Referenceable,
+    pub deletable: bool,
 }
 pub fn scaffold_collection_templates(
     mut app_file_tree: FileTree,
@@ -34,6 +35,7 @@ pub fn scaffold_collection_templates(
     collection_type: &CollectionType,
     collection_name: &String,
     entry_type_reference: &EntryTypeReference,
+    deletable: bool,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     let data = ScaffoldCollectionData {
         app_name: app_name.clone(),
@@ -42,6 +44,7 @@ pub fn scaffold_collection_templates(
         collection_name: collection_name.clone(),
         collection_type: collection_type.clone(),
         referenceable: Referenceable::EntryType(entry_type_reference.clone()),
+        deletable,
     };
 
     let h = build_handlebars(&template_file_tree)?;

@@ -15,7 +15,7 @@
     <div v-{{#if crud.update}}else-{{/if}}if="record" style="display: flex; flex-direction: column">
       <div style="display: flex; flex-direction: row">
         <span style="flex: 1"></span>
-      
+
 {{#if crud.update}}
         <mwc-icon-button style="margin-left: 8px" icon="edit" @click="editing = true"></mwc-icon-button>
 {{/if}}
@@ -25,7 +25,7 @@
       </div>
 
 {{#each entry_type.fields}}
-  {{#if widget}}	  
+  {{#if widget}}
     {{#if (not (eq cardinality "vector") )}}
       <div style="display: flex; flex-direction: row; margin-bottom: 16px;">
 	<span style="margin-right: 4px"><strong>{{title_case field_name}}: </strong></span>
@@ -38,7 +38,7 @@
   {{/if}}
 {{/each}}
     </div>
-    
+
     <span v-else>The requested {{lower_case entry_type.name}} was not found.</span>
   </div>
 
@@ -116,13 +116,13 @@ export default defineComponent({
         cap_secret: null,
         role_name: '{{dna_role_name}}',
         zome_name: '{{coordinator_zome_manifest.name}}',
-        fn_name: 'get_{{snake_case entry_type.name}}',
+        fn_name: '{{#if crud.update}}get_latest_{{snake_case entry_type.name}}{{else}}get_{{snake_case entry_type.name}}{{/if}}',
         payload: this.{{camel_case entry_type.name}}Hash,
       });
 
       this.loading = false;
     },
-{{#if crud.delete}}    
+{{#if crud.delete}}
     async delete{{pascal_case entry_type.name}}() {
       try {
         await this.client.callZome({
@@ -133,10 +133,9 @@ export default defineComponent({
           payload: this.{{camel_case entry_type.name}}Hash,
         });
         this.$emit('{{kebab_case entry_type.name}}-deleted', this.{{camel_case entry_type.name}}Hash);
-        this.fetch{{pascal_case entry_type.name}}();
       } catch (e: any) {
         const errorSnackbar = this.$refs['delete-error'] as Snackbar;
-        errorSnackbar.labelText = `Error deleting the {{lower_case entry_type.name}}: ${e.data.data}`;
+        errorSnackbar.labelText = `Error deleting the {{lower_case entry_type.name}}: ${e.data}`;
         errorSnackbar.show();
       }
     }

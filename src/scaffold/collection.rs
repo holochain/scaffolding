@@ -112,11 +112,11 @@ pub fn scaffold_collection(
         &link_type_name,
         &None,
         &Some(Referenceable::EntryType(entry_type.clone())),
-        false,
+        true,
         &PathBuf::from(format!("{}.rs", entry_type.entry_type.to_case(Case::Snake))),
     )?;
 
-    let (dna_file_tree, coordinator_zome) = add_collection_to_coordinators(
+    let (dna_file_tree, coordinator_zome, deletable) = add_collection_to_coordinators(
         zome_file_tree,
         collection_name,
         &link_type_name,
@@ -139,5 +139,6 @@ pub fn scaffold_collection(
         &collection_type,
         collection_name,
         &entry_type,
+        deletable,
     )
 }

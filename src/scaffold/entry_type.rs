@@ -176,7 +176,7 @@ pub fn scaffold_entry_type(
             &link_type_name(&l, &entry_def.referenceable()),
             &Some(l),
             &Some(entry_def.referenceable()),
-            false,
+            crud.delete,
             &PathBuf::from(format!("{}.rs", entry_def.name.to_case(Case::Snake))),
         )?;
     }

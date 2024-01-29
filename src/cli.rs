@@ -171,7 +171,7 @@ pub enum HcScaffold {
 
         #[structopt(long)]
         /// Whether to create the inverse link, from the "--to-referenceable" entry type to the "--from-referenceable" entry type
-        bidireccional: Option<bool>,
+        bidirectional: Option<bool>,
 
         #[structopt(long)]
         /// Whether this link type can be deleted
@@ -559,7 +559,7 @@ Add new entry definitions to your zome with:
                 let file_tree = load_directory_into_memory(&current_dir)?;
                 let template_file_tree = choose_or_get_template_file_tree(&file_tree, &template)?;
 
-                let name: String = match name {
+                let name = match name {
                     Some(n) => {
                         check_case(&n, "entry type name", Case::Snake)?;
                         n
@@ -615,7 +615,7 @@ Add new collections for that entry type with:
                 from_referenceable,
                 to_referenceable,
                 delete,
-                bidireccional,
+                bidirectional,
                 template,
             } => {
                 let current_dir = std::env::current_dir()?;
@@ -635,7 +635,7 @@ Add new collections for that entry type with:
                     &from_referenceable,
                     &to_referenceable,
                     &delete,
-                    &bidireccional,
+                    &bidirectional,
                 )?;
 
                 let file_tree = MergeableFileSystemTree::<OsString, String>::from(file_tree);
