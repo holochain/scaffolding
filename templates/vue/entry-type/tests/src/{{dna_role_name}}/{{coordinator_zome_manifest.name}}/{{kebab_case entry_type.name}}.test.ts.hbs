@@ -1,6 +1,6 @@
 import { assert, test } from "vitest";
 
-import { runScenario, pause, CallableCell } from '@holochain/tryorama';
+import { runScenario, dhtSync, CallableCell } from '@holochain/tryorama';
 import { NewEntryAction, ActionHash, Record, AppBundleSource, fakeDnaHash, fakeActionHash, fakeAgentPubKey, fakeEntryHash } from '@holochain/client';
 import { decode } from '@msgpack/msgpack';
 
@@ -53,7 +53,7 @@ test('create and read {{pascal_case entry_type.name}}', async () => {
     assert.ok(record);
 
     // Wait for the created entry to be propagated to the other node.
-    await pause(1200);
+    await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
 
     // Bob gets the created {{pascal_case entry_type.name}}
     const createReadOutput: Record = await bob.cells[0].callZome({
@@ -107,7 +107,7 @@ test('create and update {{pascal_case entry_type.name}}', async () => {
     assert.ok(updatedRecord);
 
     // Wait for the updated entry to be propagated to the other node.
-    await pause(1200);
+    await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
         
     // Bob gets the updated {{pascal_case entry_type.name}}
     const readUpdatedOutput0: Record = await bob.cells[0].callZome({
@@ -135,7 +135,7 @@ test('create and update {{pascal_case entry_type.name}}', async () => {
     assert.ok(updatedRecord);
 
     // Wait for the updated entry to be propagated to the other node.
-    await pause(1200);
+    await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
         
     // Bob gets the updated {{pascal_case entry_type.name}}
     const readUpdatedOutput1: Record = await bob.cells[0].callZome({
@@ -179,7 +179,7 @@ test('create and delete {{pascal_case entry_type.name}}', async () => {
     assert.ok(deleteActionHash);
 
     // Wait for the entry deletion to be propagated to the other node.
-    await pause(1200);
+    await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
         
     // Bob tries to get the deleted {{pascal_case entry_type.name}}
     const readDeletedOutput = await bob.cells[0].callZome({

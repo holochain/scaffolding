@@ -25,7 +25,7 @@ fn global_collection_getter(
     link_type_name: &String,
     entry_type_reference: &EntryTypeReference,
 ) -> String {
-    let to_hash_type = entry_type_reference.hash_type().to_string();
+    let snake_to_hash_type = entry_type_reference.hash_type().to_string().to_case(Case::Snake);
     let snake_collection_name = collection_name.to_case(Case::Snake);
 
     format!(
@@ -40,8 +40,11 @@ pub fn get_{snake_collection_name}(_: ()) -> ExternResult<Vec<Record>> {{
     
     let get_input: Vec<GetInput> = links
         .into_iter()
-        .map(|link| GetInput::new({to_hash_type}::from(link.target).into(), GetOptions::default()))
-        .collect();
+        .map(|link| Ok(GetInput::new(
+            link.target.into_{snake_to_hash_type}().ok_or(wasm_error!(WasmErrorInner::Guest(String::from("No action hash associated with link"))))?.into(),
+            GetOptions::default(),
+        )))
+        .collect::<ExternResult<Vec<GetInput>>>()?;
 
     // Get the records to filter out the deleted ones
     let records = HDK.with(|hdk| hdk.borrow().get(get_input))?;
@@ -63,7 +66,7 @@ fn by_author_collection_getter(
     link_type_name: &String,
     entry_type_reference: &EntryTypeReference,
 ) -> String {
-    let to_hash_type = entry_type_reference.hash_type().to_string();
+    let snake_to_hash_type = entry_type_reference.hash_type().to_string().to_case(Case::Snake);
 
     format!(
         r#"use hdk::prelude::*;
@@ -75,8 +78,11 @@ pub fn get_{collection_name}(author: AgentPubKey) -> ExternResult<Vec<Record>> {
     
     let get_input: Vec<GetInput> = links
         .into_iter()
-        .map(|link| GetInput::new({to_hash_type}::from(link.target).into(), GetOptions::default()))
-        .collect();
+        .map(|link| Ok(GetInput::new(
+            link.target.into_{snake_to_hash_type}().ok_or(wasm_error!(WasmErrorInner::Guest(String::from("No action hash associated with link"))))?.into(),
+            GetOptions::default(),
+        )))
+        .collect::<ExternResult<Vec<GetInput>>>()?;
 
     // Get the records to filter out the deleted ones
     let records = HDK.with(|hdk| hdk.borrow().get(get_input))?;
