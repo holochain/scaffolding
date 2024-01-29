@@ -7,7 +7,7 @@ pub fn holochain_client_version() -> String {
 }
 
 pub fn hc_spin_version() -> String {
-    String::from("^0.100.1")
+    String::from("^0.100.3")
 }
 
 pub fn web_sdk_version() -> String {
