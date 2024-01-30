@@ -61,7 +61,7 @@ pub enum HcScaffold {
         /// The git repository URL from which to download the template, incompatible with --templates-path
         templates_url: Option<String>,
 
-        #[structopt(short = "p", long)]
+        #[structopt(short = "p", long, parse(from_os_str))]
         /// The local folder path in which to look for the given template, incompatible with --templates-url
         templates_path: Option<PathBuf>,
 
@@ -99,11 +99,11 @@ pub enum HcScaffold {
         /// Name of the zome being scaffolded
         name: Option<String>,
 
-        #[structopt(long)]
+        #[structopt(long, parse(from_os_str))]
         /// Scaffold an integrity zome at the given path
         integrity: Option<PathBuf>,
 
-        #[structopt(long)]
+        #[structopt(long, parse(from_os_str))]
         /// Scaffold a coordinator zome at the given path
         coordinator: Option<PathBuf>,
 
