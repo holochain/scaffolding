@@ -153,7 +153,7 @@ pub enum HcScaffold {
 
         #[structopt(long, hidden = true)]
         /// Optional flag to skip ui generation
-        skip_ui: bool,
+        no_ui: bool,
     },
     /// Scaffold a link type and its appropriate zome functions into an existing zome
     LinkType {
@@ -188,7 +188,7 @@ pub enum HcScaffold {
 
         #[structopt(long, hidden = true)]
         /// Optional flag to skip ui generation
-        skip_ui: bool,
+        no_ui: bool,
     },
     /// Scaffold a collection of entries in an existing zome
     Collection {
@@ -217,7 +217,7 @@ pub enum HcScaffold {
 
         #[structopt(long, hidden = true)]
         /// Optional flag to skip ui generation
-        skip_ui: bool,
+        no_ui: bool,
     },
 
     Example {
@@ -566,7 +566,7 @@ Add new entry definitions to your zome with:
                 link_from_original_to_each_update,
                 fields,
                 template,
-                skip_ui
+                no_ui
             } => {
                 let current_dir = std::env::current_dir()?;
                 let file_tree = load_directory_into_memory(&current_dir)?;
@@ -630,7 +630,7 @@ Add new collections for that entry type with:
                 delete,
                 bidirectional,
                 template,
-                skip_ui,
+                no_ui,
             } => {
                 let current_dir = std::env::current_dir()?;
                 let file_tree = load_directory_into_memory(&current_dir)?;
@@ -672,7 +672,7 @@ Link type scaffolded!
                 collection_type,
                 entry_type,
                 template,
-                skip_ui,
+                no_ui,
             } => {
                 let current_dir = std::env::current_dir()?;
                 let file_tree = load_directory_into_memory(&current_dir)?;
@@ -700,7 +700,7 @@ Link type scaffolded!
                     &name,
                     &collection_type,
                     &entry_type,
-                    skip_ui,
+                    no_ui,
                 )?;
 
                 let file_tree = MergeableFileSystemTree::<OsString, String>::from(file_tree);

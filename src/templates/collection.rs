@@ -36,7 +36,7 @@ pub fn scaffold_collection_templates(
     collection_name: &String,
     entry_type_reference: &EntryTypeReference,
     deletable: bool,
-    skip_ui: bool,
+    no_ui: bool,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     let data = ScaffoldCollectionData {
         app_name: app_name.clone(),
@@ -56,11 +56,9 @@ pub fn scaffold_collection_templates(
     if let Some(web_app_template) = template_file_tree.path(&mut v.iter()) {
         // TODO: avoid cloning
         let mut web_app_template = web_app_template.clone();
-        if skip_ui {
+        if no_ui {
             web_app_template.dir_content_mut().and_then(|v| {
-                v.retain(|k, _| {
-                    return k.ne(&OsString::from("ui"));
-                });
+                v.retain(|k, _| k.ne(&OsString::from("ui")));
                 Some(v)
             });
         }
