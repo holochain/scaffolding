@@ -152,7 +152,7 @@ pub enum HcScaffold {
         template: Option<String>,
 
         #[structopt(long, hidden = true)]
-        /// Optional flag to skip ui generation
+        /// Skip ui generation
         no_ui: bool,
     },
     /// Scaffold a link type and its appropriate zome functions into an existing zome
@@ -186,8 +186,8 @@ pub enum HcScaffold {
         /// The template must be located at the ".templates/<TEMPLATE NAME>" folder of the repository
         template: Option<String>,
 
-        #[structopt(long, hidden = true)]
-        /// Optional flag to skip ui generation
+        #[structopt(long)]
+        /// Skip ui generation
         no_ui: bool,
     },
     /// Scaffold a collection of entries in an existing zome
@@ -215,8 +215,8 @@ pub enum HcScaffold {
         /// The template must be located at the ".templates/<TEMPLATE NAME>" folder of the repository
         template: Option<String>,
 
-        #[structopt(long, hidden = true)]
-        /// Optional flag to skip ui generation
+        #[structopt(long)]
+        /// Skip ui generation
         no_ui: bool,
     },
 
