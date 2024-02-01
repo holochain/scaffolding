@@ -151,7 +151,7 @@ pub enum HcScaffold {
         /// The template must be located at the ".templates/<TEMPLATE NAME>" folder of the repository
         template: Option<String>,
 
-        #[structopt(long, hidden = true)]
+        #[structopt(long)]
         /// Skip ui generation, overriding any widgets specified with the --fields option
         no_ui: bool,
     },
