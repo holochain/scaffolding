@@ -598,6 +598,7 @@ Add new entry definitions to your zome with:
                     &reference_entry_hash,
                     &link_from_original_to_each_update,
                     &fields,
+                    no_ui,
                 )?;
 
                 let file_tree = MergeableFileSystemTree::<OsString, String>::from(file_tree);
@@ -650,6 +651,7 @@ Add new collections for that entry type with:
                     &to_referenceable,
                     &delete,
                     &bidirectional,
+                    no_ui,
                 )?;
 
                 let file_tree = MergeableFileSystemTree::<OsString, String>::from(file_tree);
@@ -854,6 +856,7 @@ Collection "{}" scaffolded!
                                     linked_from: None,
                                 },
                             ]),
+                            false,
                         )?;
 
                         let dna_file_tree =
@@ -895,6 +898,7 @@ Collection "{}" scaffolded!
                                     )),
                                 },
                             ]),
+                            false
                         )?;
 
                         let dna_file_tree =
