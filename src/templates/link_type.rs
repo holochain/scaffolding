@@ -54,7 +54,6 @@ pub fn scaffold_link_type_templates(
     let v: Vec<OsString> = link_type_path.iter().map(|s| s.to_os_string()).collect();
 
     if let Some(link_type_template) = template_file_tree.path(&mut v.iter()) {
-        // TODO: avoid cloning
         let mut link_type_template = link_type_template.clone();
         if no_ui {
             link_type_template.dir_content_mut().and_then(|v| {

@@ -47,7 +47,6 @@ pub fn scaffold_entry_type_templates(
     let v: Vec<OsString> = field_types_path.iter().map(|s| s.to_os_string()).collect();
 
     if let Some(web_app_template) = template_file_tree.path(&mut v.iter()) {
-        // TODO: avoid cloning
         let mut web_app_template = web_app_template.clone();
         if no_ui {
             web_app_template.dir_content_mut().and_then(|v| {
