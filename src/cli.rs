@@ -152,7 +152,7 @@ pub enum HcScaffold {
         template: Option<String>,
 
         #[structopt(long, hidden = true)]
-        /// Skip ui generation
+        /// Skip ui generation, overriding any widgets specified with the --fields option
         no_ui: bool,
     },
     /// Scaffold a link type and its appropriate zome functions into an existing zome
