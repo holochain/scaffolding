@@ -57,8 +57,11 @@ pub fn scaffold_collection_templates(
         // TODO: avoid cloning
         let mut web_app_template = web_app_template.clone();
         if skip_ui {
-            web_app_template.dir_content_mut().unwrap().retain(|k, _| {
-                return k.ne(&OsString::from("ui"));
+            web_app_template.dir_content_mut().and_then(|v| {
+                v.retain(|k, _| {
+                    return k.ne(&OsString::from("ui"));
+                });
+                Some(v)
             });
         }
         app_file_tree = render_template_file_tree_and_merge_with_existing(
