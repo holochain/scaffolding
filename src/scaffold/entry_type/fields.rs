@@ -8,7 +8,9 @@ use crate::{
     error::{ScaffoldError, ScaffoldResult},
     file_tree::{dir_content, FileTree},
     scaffold::zome::ZomeFileTree,
-    utils::{check_case, input_with_case, input_with_case_and_initial_text},
+    utils::{
+        check_case, input_with_case, input_with_case_and_initial_text, input_with_custom_validation,
+    },
 };
 
 use super::{
@@ -196,16 +198,35 @@ pub fn choose_field(
     };
 
     if let FieldType::Enum { .. } = field_type {
-        let label = input_with_case(&String::from("Enter the name of the enum:"), Case::Pascal)?;
+        let label =
+            input_with_custom_validation("Enter the name of the enum:", |input: &String| {
+                if !input.is_case(Case::Pascal) {
+                    return Err(format!("Input must be {:?} case.", Case::Pascal));
+                }
+                if &input.to_ascii_lowercase() == entry_type_name {
+                    return Err(format!(
+                        "Enum name: {input} conflicts with entry-type name: {entry_type_name}"
+                    ));
+                }
+                Ok(())
+            })?;
 
         let mut variants: Vec<String> = Vec::new();
 
         let mut another_field = true;
 
         while another_field {
-            let variant = input_with_case(
-                &String::from("Enter the name of the next variant:"),
-                Case::Pascal,
+            let variant = input_with_custom_validation(
+                "Enter the name of the next variant:",
+                |input: &String| {
+                    if !input.is_case(Case::Pascal) {
+                        return Err(format!("Input must be {:?} case.", Case::Pascal));
+                    }
+                    if variants.contains(input) {
+                        return Err(format!("{input} is already a variant of the enum"));
+                    }
+                    Ok(())
+                },
             )?;
             variants.push(variant);
             another_field = Confirm::with_theme(&ColorfulTheme::default())
@@ -265,7 +286,7 @@ pub fn choose_field(
                         return Err(ScaffoldError::NoEntryTypesDefFoundForIntegrityZome(
                             zome_file_tree.dna_file_tree.dna_manifest.name(),
                             zome_file_tree.zome_manifest.name.to_string(),
-                        ))
+                        ));
                     }
 
                     let selection = Select::with_theme(&ColorfulTheme::default())

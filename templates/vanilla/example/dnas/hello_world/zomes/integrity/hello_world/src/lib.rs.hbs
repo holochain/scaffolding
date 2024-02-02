@@ -10,7 +10,7 @@ pub struct Hello {
 /// Definition of the Hello entry type itself using the entry-helper struct as its content
 #[derive(Serialize, Deserialize)]
 #[serde(tag = "type")]
-#[hdk_entry_defs]
+#[hdk_entry_types]
 #[unit_enum(UnitEntryTypes)]
 pub enum EntryTypes {
     Hello(Hello), 

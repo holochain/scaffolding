@@ -305,7 +305,7 @@ pub use {}::*;
         .iter()
         .map(|s| s.to_os_string())
         .collect();
-    // 3. Find the #[hdk_entry_defs] macro
+    // 3. Find the #[hdk_entry_types] macro
     // 3.1 Import the new struct
     // 3.2 Add a variant for the new entry def with the struct as its payload
     map_rust_files(
@@ -320,7 +320,7 @@ pub use {}::*;
                 let entry_types_item = syn::parse_str::<syn::Item>(
                     "#[derive(Serialize, Deserialize)]
                      #[serde(tag = \"type\")]
-                     #[hdk_entry_defs]
+                     #[hdk_entry_types]
                      #[unit_enum(UnitEntryTypes)]
                      pub enum EntryTypes {}",
                 )?;
@@ -380,7 +380,7 @@ pub use {}::*;
                     .map(|mut i| {
                         if let syn::Item::Enum(mut item_enum) = i.clone() {
                             if item_enum.attrs.iter().any(|a| {
-                                a.path().segments.iter().any(|s| s.ident.eq("hdk_entry_defs"))
+                                a.path().segments.iter().any(|s| s.ident.eq("hdk_entry_types"))
                             }) {
                                 if item_enum
                                     .variants
@@ -451,7 +451,7 @@ pub fn get_all_entry_types(
                     if item_enum
                         .attrs
                         .iter()
-                        .any(|a| a.path().segments.iter().any(|s| s.ident.eq("hdk_entry_defs")))
+                        .any(|a| a.path().segments.iter().any(|s| s.ident.eq("hdk_entry_types")))
                     {
                         return Some(item_enum.clone());
                     }

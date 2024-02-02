@@ -7,7 +7,7 @@ With the Scaffolding repository checked out, switch to the Git revision you want
 Start the Nix development environment for the Scaffolding tool using:
 
 ```
-nix develop --override-input "versions/scaffolding" .
+nix develop --override-input "versions/scaffolding" "path://$PWD"
 ```
 
 This will give you a shell which includes the Scaffolding built from your local repository.

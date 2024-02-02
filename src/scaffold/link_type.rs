@@ -54,7 +54,7 @@ pub fn scaffold_link_type(
     from_referenceable: &Option<Referenceable>,
     to_referenceable: &Option<Referenceable>,
     delete: &Option<bool>,
-    bidireccional: &Option<bool>,
+    bidirectional: &Option<bool>,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     let dna_manifest_path = zome_file_tree.dna_file_tree.dna_manifest_path.clone();
     let zome_manifest = zome_file_tree.zome_manifest.clone();
@@ -76,11 +76,11 @@ pub fn scaffold_link_type(
         None => input_with_case(&String::from("Enter link type name:"), Case::Pascal)?,
     };
 
-    let bidireccional = match (&to_referenceable, bidireccional) {
+    let bidirectional = match (&to_referenceable, bidirectional) {
         (None, _) => false,
         (_, Some(b)) => b.clone(),
         (_, None) => Confirm::with_theme(&ColorfulTheme::default())
-            .with_prompt("Should the link be bidireccional?")
+            .with_prompt("Should the link be bidirectional?")
             .interact()?,
     };
     let delete = match delete {
@@ -135,7 +135,7 @@ pub use {}::*;
         &link_type_file_name,
     )?;
 
-    let inverse_link_type = if bidireccional {
+    let inverse_link_type = if bidirectional {
         if let Some(to) = &to_referenceable {
             let inverse_link_type = link_type_name(&to, &from_referenceable);
             zome_file_tree = add_link_type_to_integrity_zome(
@@ -196,7 +196,7 @@ pub use {}::*;
         &from_referenceable,
         &to_referenceable,
         delete,
-        bidireccional,
+        bidirectional,
     )?;
 
     let app_file_tree =

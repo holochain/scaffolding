@@ -39,7 +39,7 @@ let {{camel_case field_name}}: Array<{{> (concat field_type.type "/type")}} | un
 
 let errorSnackbar: Snackbar;
 
-$: {{#each entry_type.fields}}{{#if widget}}{{camel_case field_name}}{{#unless @last}}, {{/unless}}{{/if}}{{/each}};
+$: {{#each (filter entry_type.fields "widget")}}{{camel_case field_name}}{{#unless @last}}, {{/unless}}{{/each}};
 $: is{{pascal_case entry_type.name}}Valid = true{{#each entry_type.fields}}{{#if widget}}{{#if (eq cardinality "single")}} && {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate=(camel_case field_name) }}{{/if}}{{#if (eq cardinality "vector")}} && {{camel_case field_name}}.every(e => {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate="e" }}){{/if}}{{/if}}{{/each}};
 
 onMount(() => {
@@ -55,7 +55,7 @@ onMount(() => {
 
 async function update{{pascal_case entry_type.name}}() {
 
-  const {{camel_case entry_type.name}}: {{pascal_case entry_type.name}} = { 
+  const {{camel_case entry_type.name}}: {{pascal_case entry_type.name}} = {
   {{#each entry_type.fields}}
     {{#if widget}}
       {{#if (eq cardinality "single") }}
@@ -86,7 +86,7 @@ async function update{{pascal_case entry_type.name}}() {
         updated_{{snake_case entry_type.name}}: {{camel_case entry_type.name}}
       }
     });
-  
+
     dispatch('{{kebab_case entry_type.name}}-updated', { actionHash: updateRecord.signed_action.hashed.hash });
   } catch (e) {
     errorSnackbar.labelText = `Error updating the {{lower_case entry_type.name}}: ${e.data.data}`;
@@ -99,7 +99,7 @@ async function update{{pascal_case entry_type.name}}() {
 </mwc-snackbar>
 <div style="display: flex; flex-direction: column">
   <span style="font-size: 18px">Edit {{pascal_case entry_type.name}}</span>
-  
+
 {{#each entry_type.fields}}
   {{#if widget}}
   <div style="margin-bottom: 16px">
@@ -108,7 +108,7 @@ async function update{{pascal_case entry_type.name}}() {
     {{else}}
     {{> Vec/edit/render field_name=field_name field_type=field_type widget=widget }}
     {{/if}}
-    
+
   </div>
 
   {{/if}}
@@ -121,7 +121,7 @@ async function update{{pascal_case entry_type.name}}() {
       on:click={() => dispatch('edit-canceled')}
       style="flex: 1; margin-right: 16px"
     ></mwc-button>
-    <mwc-button 
+    <mwc-button
       raised
       label="Save"
       disabled={!is{{pascal_case entry_type.name}}Valid}

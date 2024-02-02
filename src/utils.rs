@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 use std::{ffi::OsString, path::PathBuf};
 
 use convert_case::{Case, Casing};
-use dialoguer::{theme::ColorfulTheme, Input, Select};
+use dialoguer::{theme::ColorfulTheme, Input, Select, Validator};
 
 use crate::error::{ScaffoldError, ScaffoldResult};
 use crate::file_tree::{dir_content, FileTree};
@@ -87,6 +87,19 @@ pub fn input_yes_or_no(prompt: &String, recommended: Option<bool>) -> ScaffoldRe
         1 => Ok(false),
         _ => Ok(true),
     }
+}
+
+pub fn input_with_custom_validation<'a, V>(prompt: &str, validator: V) -> ScaffoldResult<String> 
+    where
+        V: Validator<String> + 'a,
+        V::Err: ToString,
+{
+    let input: String = Input::with_theme(&ColorfulTheme::default())
+        .with_prompt(prompt)
+        .validate_with(validator)
+        .interact_text()?;
+
+    Ok(input)
 }
 
 pub fn input_with_case(prompt: &String, case: Case) -> ScaffoldResult<String> {
