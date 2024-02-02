@@ -132,13 +132,13 @@ pub enum ScaffoldError {
     #[error("Invalid example type: \"{0}\". Allowed example types: \"{1}\"")]
     InvalidExampleType(String, String),
 
-    #[error("No entry type definitions (#[hdk_entry_defs]) were found in dna \"{0}\" for the integrity zome \"{1}\"")]
+    #[error("No entry type definitions (#[hdk_entry_types]) were found in dna \"{0}\" for the integrity zome \"{1}\"")]
     NoEntryTypesDefFoundForIntegrityZome(String, String),
 
     #[error("Entry type \"{0}\" already exists in dna \"{1}\" for the integrity zome \"{2}\"")]
     EntryTypeAlreadyExists(String, String, String),
 
-    #[error("Multiple entry type definitions (#[hdk_entry_defs]) were found in dna \"{0}\" for the integrity zome \"{1}\"")]
+    #[error("Multiple entry type definitions (#[hdk_entry_types]) were found in dna \"{0}\" for the integrity zome \"{1}\"")]
     MultipleEntryTypesDefsFoundForIntegrityZome(String, String),
 
     #[error("Entry type \"{0}\" was not found in dna \"{1}\" for the integrity zome \"{2}\"")]
