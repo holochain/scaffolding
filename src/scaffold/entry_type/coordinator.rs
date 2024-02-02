@@ -121,7 +121,9 @@ pub fn read_handler_with_linking_to_updates(entry_def_name: &String) -> String {
     format!(
         r#"#[hdk_extern]
 pub fn get_latest_{snake_entry_def_name}(original_{snake_entry_def_name}_hash: ActionHash) -> ExternResult<Option<Record>> {{
-    let links = get_links(original_{snake_entry_def_name}_hash.clone(), LinkTypes::{}, None)?;
+    let links = get_links(
+        GetLinksInputBuilder::try_new(original_{snake_entry_def_name}_hash.clone(), LinkTypes::{})?.build(),
+    )?;
 
     let latest_link = links.into_iter().max_by(|link_a, link_b| link_a.timestamp.cmp(&link_b.timestamp));
 
@@ -154,7 +156,9 @@ pub fn get_all_revisions_for_{snake_entry_def_name}(original_{snake_entry_def_na
         return Ok(vec![]);
     }};
 
-    let links = get_links(original_{snake_entry_def_name}_hash.clone(), LinkTypes::{}, None)?;
+    let links = get_links(
+        GetLinksInputBuilder::try_new(original_{snake_entry_def_name}_hash.clone(), LinkTypes::{})?.build(),
+    )?;
 
     let get_input: Vec<GetInput> = links
         .into_iter()
@@ -398,7 +402,9 @@ pub fn delete_handler(entry_def: &EntryDefinition) -> String {
                 let delete_this_link = match linked_from_field.cardinality {
                     Cardinality::Single => format!(
                         r#"
-    let links = get_links({snake_entry_def_name}.{field_name}.clone(), LinkTypes::{link_type}, None)?;
+    let links = get_links(
+        GetLinksInputBuilder::try_new({snake_entry_def_name}.{field_name}.clone(), LinkTypes::{link_type})?.build(),
+    )?;
     for link in links {{
         if let Some(action_hash) = link.target.into_action_hash() {{
             if action_hash.eq(&original_{snake_entry_def_name}_hash) {{
@@ -411,7 +417,9 @@ pub fn delete_handler(entry_def: &EntryDefinition) -> String {
                     Cardinality::Option => format!(
                         r#"
     if let Some(base_address) = {snake_entry_def_name}.{field_name}.clone() {{
-        let links = get_links(base_address, LinkTypes::{link_type}, None)?;
+        let links = get_links(
+            GetLinksInputBuilder::try_new(base_address, LinkTypes::{link_type})?.build(),
+        )?;
         for link in links {{
             if let Some(action_hash) = link.target.into_action_hash() {{
                 if action_hash.eq(&original_{snake_entry_def_name}_hash) {{
@@ -425,7 +433,9 @@ pub fn delete_handler(entry_def: &EntryDefinition) -> String {
                     Cardinality::Vector => format!(
                         r#"
     for base_address in {snake_entry_def_name}.{field_name} {{
-        let links = get_links(base_address.clone(), LinkTypes::{link_type}, None)?;
+        let links = get_links(
+            GetLinksInputBuilder::try_new(base_address.clone(), LinkTypes::{link_type})?.build(),
+        )?;
         for link in links {{
             if let Some(action_hash) = link.target.into_action_hash() {{
                 if action_hash.eq(&original_{snake_entry_def_name}_hash) {{
