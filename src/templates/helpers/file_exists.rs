@@ -81,7 +81,6 @@ mod tests {
     use build_fs_tree::{dir, file, Build, MergeableFileSystemTree};
     use handlebars::Handlebars;
     use serde_json::json;
-    use temp_dir::TempDir;
 
     fn setup_handlebars<'a>() -> Handlebars<'a> {
         let hbs = Handlebars::new();
@@ -91,12 +90,12 @@ mod tests {
 
 		#[test]
     fn file_exists_with_existing_file() {
-        let tempdir = TempDir::new().unwrap();
-				std::env::set_current_dir(tempdir.path()).unwrap();
+        let tempdir = std::env::temp_dir();
+				std::env::set_current_dir(&tempdir).unwrap();
         let hbs = setup_handlebars();
         let tree: MergeableFileSystemTree<OsString, String> = dir! {
 						"ui" => dir! {
-							"bar.txt" => file!("{{#if (file_exists './foo.txt')}}file exists{{/if}}"),
+							"bar.txt" => file!("{{#if (file_exists './foo.txt')}}file exists{{else}}does not exist{{/if}}"),
 							"foo.txt" => file!("")
 						}
         }.into();
@@ -111,19 +110,19 @@ mod tests {
             .file_content()
             .unwrap()
             .to_owned();
-        tree.build(&tempdir.path().to_owned()).unwrap();
+        tree.build(&tempdir).unwrap();
 				let value  = hbs.render_template(&template, &json!({})).unwrap();
 				assert_eq!(&value, "file exists");
     }
 
 		#[test]
     fn file_exists_with_non_existing_file() {
-        let tempdir = TempDir::new().unwrap();
-				std::env::set_current_dir(tempdir.path()).unwrap();
+        let tempdir = std::env::temp_dir();
+				std::env::set_current_dir(&tempdir).unwrap();
         let hbs = setup_handlebars();
         let tree: MergeableFileSystemTree<OsString, String> = dir! {
 						"ui" => dir! {
-							"bar.txt" => file!("{{#if (file_exists './foo.txt')}}file exists{{else}}does not exist{{/if}}"),
+							"bar.txt" => file!("{{#if (file_exists './baz.txt')}}file exists{{else}}does not exist{{/if}}"),
 						}
         }.into();
 				let v = PathBuf::from("ui")
@@ -137,7 +136,7 @@ mod tests {
             .file_content()
             .unwrap()
             .to_owned();
-        tree.build(&tempdir.path().to_owned()).unwrap();
+        tree.build(&tempdir).unwrap();
 				let value  = hbs.render_template(&template, &json!({})).unwrap();
 				assert_eq!(&value, "does not exist");
     }
