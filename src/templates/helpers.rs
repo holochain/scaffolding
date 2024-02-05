@@ -7,10 +7,12 @@ use serde_json::Value;
 pub mod merge;
 pub mod uniq_lines;
 pub mod filter;
+pub mod file_exists;
 
 use merge::register_merge;
 use uniq_lines::register_uniq_lines;
 use filter::register_filter;
+use file_exists::register_file_exists;
 
 pub fn register_helpers<'a>(h: Handlebars<'a>) -> Handlebars<'a> {
     let h = register_concat_helper(h);
@@ -22,6 +24,7 @@ pub fn register_helpers<'a>(h: Handlebars<'a>) -> Handlebars<'a> {
     let h = register_merge(h);
     let h = register_uniq_lines(h);
     let h = register_filter(h);
+    let h = register_file_exists(h);
 
     h
 }
