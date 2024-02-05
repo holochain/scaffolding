@@ -88,7 +88,7 @@ mod tests {
         hbs
     }
 
-		#[test]
+    #[test]
     fn file_exists_with_existing_file() {
         let tempdir = std::env::temp_dir();
 				std::env::set_current_dir(&tempdir).unwrap();
@@ -115,7 +115,7 @@ mod tests {
 				assert_eq!(&value, "file exists");
     }
 
-		#[test]
+    #[test]
     fn file_exists_with_non_existing_file() {
         let tempdir = std::env::temp_dir();
 				std::env::set_current_dir(&tempdir).unwrap();
