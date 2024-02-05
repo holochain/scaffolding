@@ -36,7 +36,6 @@ impl HelperDef for FileExistsHelper {
         let needle = PathBuf::from(search_path_str);
         let needle = normalize_path(needle.as_path());
         let exists = file_exists(&ui_file_tree, &needle);
-				println!("needle: {needle:?}, exists: {exists:?}");
         Ok(ScopedJson::Derived(serde_json::Value::Bool(exists)))
     }
 }
@@ -92,19 +91,19 @@ mod tests {
     #[test]
     fn file_exists_with_existing_file() {
         let tempdir = std::env::temp_dir();
-				std::env::set_current_dir(&tempdir).unwrap();
+        std::env::set_current_dir(&tempdir).unwrap();
         let hbs = setup_handlebars();
         let tree: MergeableFileSystemTree<OsString, String> = dir! {
-						"ui" => dir! {
-							"bar.txt" => file!("{{#if (file_exists './foo.txt')}}file exists{{else}}does not exist{{/if}}"),
-							"foo.txt" => file!("")
-						}
+            "ui" => dir! {
+                "bar.txt" => file!("{{#if (file_exists './foo.txt')}}file exists{{else}}does not exist{{/if}}"),
+                "foo.txt" => file!("")
+            }
         }.into();
-				let v = PathBuf::from("ui")
-						.join("bar.txt")
-						.iter()
-						.map(|s| s.to_os_string())
-						.collect::<Vec<OsString>>();
+        let v = PathBuf::from("ui")
+            .join("bar.txt")
+            .iter()
+            .map(|s| s.to_os_string())
+            .collect::<Vec<OsString>>();
         let template = tree
             .path(&mut v.iter())
             .unwrap()
@@ -112,25 +111,25 @@ mod tests {
             .unwrap()
             .to_owned();
         tree.build(&tempdir).unwrap();
-				let value  = hbs.render_template(&template, &json!({})).unwrap();
-				assert_eq!(&value, "file exists");
+        let value = hbs.render_template(&template, &json!({})).unwrap();
+        assert_eq!(&value, "file exists");
     }
 
     #[test]
     fn file_exists_with_non_existing_file() {
         let tempdir = std::env::temp_dir();
-				std::env::set_current_dir(&tempdir).unwrap();
+        std::env::set_current_dir(&tempdir).unwrap();
         let hbs = setup_handlebars();
         let tree: MergeableFileSystemTree<OsString, String> = dir! {
-						"ui" => dir! {
-							"bar.txt" => file!("{{#if (file_exists './baz.txt')}}file exists{{else}}does not exist{{/if}}"),
-						}
+            "ui" => dir! {
+                "bar.txt" => file!("{{#if (file_exists './baz.txt')}}file exists{{else}}does not exist{{/if}}"),
+            }
         }.into();
-				let v = PathBuf::from("ui")
-						.join("bar.txt")
-						.iter()
-						.map(|s| s.to_os_string())
-						.collect::<Vec<OsString>>();
+        let v = PathBuf::from("ui")
+            .join("bar.txt")
+            .iter()
+            .map(|s| s.to_os_string())
+            .collect::<Vec<OsString>>();
         let template = tree
             .path(&mut v.iter())
             .unwrap()
@@ -138,7 +137,7 @@ mod tests {
             .unwrap()
             .to_owned();
         tree.build(&tempdir).unwrap();
-				let value  = hbs.render_template(&template, &json!({})).unwrap();
-				assert_eq!(&value, "does not exist");
+        let value = hbs.render_template(&template, &json!({})).unwrap();
+        assert_eq!(&value, "does not exist");
     }
 }
