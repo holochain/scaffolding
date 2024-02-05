@@ -8,20 +8,22 @@ import '@material/mwc-circular-progress';
 import { clientContext } from '../../contexts';
 import { {{pascal_case coordinator_zome_manifest.name}}Signal } from './types';
 
+{{#if (file_exists 'src/{{dna_role_name}}/{{coordinator_zome_manifest.name}}/{{kebab_case referenceable.name}}-detail.ts')}}
 import './{{kebab_case referenceable.name}}-detail';
+{{/if}}
 
 @customElement('{{kebab_case collection_name}}')
 export class {{pascal_case collection_name}} extends LitElement {
   @consume({ context: clientContext })
   client!: AppAgentClient;
   
-  {{#if (eq collection_type.type "ByAuthor")}}
+{{#if (eq collection_type.type "ByAuthor")}}
   @property({
     hasChanged: (newVal: AgentPubKey, oldVal: AgentPubKey) => newVal?.toString() !== oldVal?.toString()
   })
   author!: AgentPubKey;
+{{/if}}
 
-  {{/if}}
   @state()
   signaledHashes: Array<{{referenceable.hash_type}}> = [];
   
@@ -34,12 +36,12 @@ export class {{pascal_case collection_name}} extends LitElement {
   }) as Promise<Array<Link>>, () => [{{#if (eq collection_type.type "ByAuthor")}}this.author{{/if}}]);
 
   firstUpdated() {
-  {{#if (eq collection_type.type "ByAuthor")}}
+{{#if (eq collection_type.type "ByAuthor")}}
     if (this.author === undefined) {
       throw new Error(`The author property is required for the {{kebab_case collection_name}} element`);
     }
+{{/if}}
 
-  {{/if}}
     this.client.on('signal', signal => {
       if (signal.zome_name !== '{{coordinator_zome_manifest.name}}') return; 
       const payload = signal.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;
@@ -56,10 +58,15 @@ export class {{pascal_case collection_name}} extends LitElement {
     if (hashes.length === 0) return html`<span>No {{lower_case (plural referenceable.name)}} found{{#if (eq collection_type.type "ByAuthor")}} for this author{{/if}}.</span>`;
     
     return html`
+
       <div style="display: flex; flex-direction: column">
+{{#if (file_exists 'src/{{dna_role_name}}/{{coordinator_zome_manifest.name}}/{{kebab_case referenceable.name}}-detail.ts')}}
         ${hashes.map(hash => 
           html`<{{kebab_case referenceable.name}}-detail .{{camel_case referenceable.name}}Hash=${hash} style="margin-bottom: 16px;" @{{kebab_case referenceable.name}}-deleted=${() => { this._fetch{{pascal_case (plural referenceable.name)}}.run(); this.signaledHashes = []; } }></{{kebab_case referenceable.name}}-detail>`
         )}
+{{else}}
+        <div style="margin-bottom: 16px">{{kebab_case to_referenceable.name}}-detail component generation was skipped</div>
+{{/if}}
       </div>
     `;
   }

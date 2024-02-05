@@ -36,6 +36,7 @@ impl HelperDef for FileExistsHelper {
         let needle = PathBuf::from(search_path_str);
         let needle = normalize_path(needle.as_path());
         let exists = file_exists(&ui_file_tree, &needle);
+				println!("needle: {needle:?}, exists: {exists:?}");
         Ok(ScopedJson::Derived(serde_json::Value::Bool(exists)))
     }
 }

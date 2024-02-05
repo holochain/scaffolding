@@ -7,7 +7,9 @@ import { clientContext } from '../../contexts';
 import { {{pascal_case coordinator_zome_manifest.name}}Signal } from './types';
 
 import '@material/mwc-circular-progress';
+{{#if (file_exists 'src/{{dna_role_name}}/{{coordinator_zome_manifest.name}}/{{pascal_case from_referenceable.name}}-detail.ts')}}
 import './{{kebab_case from_referenceable.name}}-detail';
+{{/if}}
 
 @customElement('{{kebab_case (plural from_referenceable.name)}}-for-{{kebab_case to_referenceable.name}}')
 export class {{pascal_case (plural from_referenceable.name)}}For{{pascal_case to_referenceable.name}} extends LitElement {
@@ -50,9 +52,13 @@ export class {{pascal_case (plural from_referenceable.name)}}For{{pascal_case to
     
     return html`
       <div style="display: flex; flex-direction: column">
+{{#if (file_exists 'src/{{dna_role_name}}/{{coordinator_zome_manifest.name}}/{{pascal_case from_referenceable.name}}-detail.ts')}}
         ${hashes.map(hash => 
           html`<{{kebab_case from_referenceable.name}}-detail .{{camel_case from_referenceable.name}}Hash=${hash} style="margin-bottom: 16px;"></{{kebab_case from_referenceable.name}}-detail>`
         )}
+{{else}}
+      <div style="margin-bottom: 16px;">{{pascal_case to_referenceable.name}}-detail component generation was skipped</div>
+{{/if}}
       </div>
     `;
   }
