@@ -46,7 +46,9 @@ export class {{pascal_case collection_name}} extends LitElement {
       if (signal.zome_name !== '{{coordinator_zome_manifest.name}}') return; 
       const payload = signal.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;
       if (payload.type !== 'EntryCreated') return;
+{{#if (file_exists 'src/{{dna_role_name}}/{{coordinator_zome_manifest.name}}/{{kebab_case referenceable.name}}-detail.ts')}}
       if (payload.app_entry.type !== '{{pascal_case referenceable.name}}') return;
+{{/if}}
 {{#if (eq collection_type.type "ByAuthor")}}
       if (this.author.toString() !== this.client.myPubKey.toString()) return;
 {{/if}}
@@ -65,7 +67,7 @@ export class {{pascal_case collection_name}} extends LitElement {
           html`<{{kebab_case referenceable.name}}-detail .{{camel_case referenceable.name}}Hash=${hash} style="margin-bottom: 16px;" @{{kebab_case referenceable.name}}-deleted=${() => { this._fetch{{pascal_case (plural referenceable.name)}}.run(); this.signaledHashes = []; } }></{{kebab_case referenceable.name}}-detail>`
         )}
 {{else}}
-        <div style="margin-bottom: 16px">{{kebab_case to_referenceable.name}}-detail component generation was skipped</div>
+        <div style="margin-bottom: 16px">{{kebab_case referenceable.name}}-detail component generation was skipped</div>
 {{/if}}
       </div>
     `;
