@@ -43,9 +43,9 @@ jobs:
       - name: Build and test
         run: |
           cd $GITHUB_WORKSPACE
-          nix develop --override-input "versions/scaffolding" . .#ci --command "APP_NAME=forum TEMPLATE_NAME=${{ matrix.template }} ./run_test.sh"
+          nix develop --override-input "versions/scaffolding" . .#ci --command "export APP_NAME=forum && export TEMPLATE_NAME=${{ matrix.template }} && ./run_test.sh"
 
-  testbuild_hello:
+  testbuild_hello_world:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -67,4 +67,4 @@ jobs:
       - name: Build and test
         run: |
           cd $GITHUB_WORKSPACE
-          nix develop --override-input "versions/scaffolding" . .#ci --command "SCOPE=hello_world ./run_test.sh"
+          nix develop --override-input "versions/scaffolding" . .#ci --command "export SCOPE=hello_world && ./run_test.sh"
