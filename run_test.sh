@@ -12,6 +12,7 @@ print_version() {
 }
 
 setup_and_build() {
+	print_version
 	cleanup_tmp $1
 
 	cd $TEMPLATE_PATH
@@ -47,6 +48,7 @@ setup_and_build() {
 }
 
 setup_hello_world() {
+	print_version
 	cleanup_tmp hello-world
 	hc-scaffold example hello-world
 	cd hello-world
