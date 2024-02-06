@@ -9,7 +9,7 @@ on:
     branches: [ develop, develop-0.1, develop-0.2 ]
 
 jobs:
-  cargotest:
+  unittests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -18,10 +18,10 @@ jobs:
 
       - run: cargo test --no-fail-fast
 
-  testbuild:
+  testbuild_svelte:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Extend space
         uses: ./.github/actions/extend-space
@@ -40,4 +40,102 @@ jobs:
       - name: Build and test
         run: |
           cd $GITHUB_WORKSPACE
-          nix develop --override-input "versions/scaffolding" . .#ci --command ./run_test.sh
+          nix develop --override-input "versions/scaffolding" . .#ci --command APP_NAME="forum" TEMPLATE_NAME="svelte" ./run_test.sh
+
+
+  testbuild_vue:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extend space
+        uses: ./.github/actions/extend-space
+ 
+      - name: Install nix
+        uses: cachix/install-nix-action@v23
+        with:
+          install_url: https://releases.nixos.org/nix/nix-2.13.3/install
+          extra_nix_config: |
+            experimental-features = flakes nix-command
+
+      - uses: cachix/cachix-action@v12
+        with:
+          name: holochain-ci
+
+      - name: Build and test
+        run: |
+          cd $GITHUB_WORKSPACE
+          nix develop --override-input "versions/scaffolding" . .#ci --command APP_NAME="forum" TEMPLATE_NAME="vue" ./run_test.sh
+
+
+  testbuild_lit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extend space
+        uses: ./.github/actions/extend-space
+ 
+      - name: Install nix
+        uses: cachix/install-nix-action@v23
+        with:
+          install_url: https://releases.nixos.org/nix/nix-2.13.3/install
+          extra_nix_config: |
+            experimental-features = flakes nix-command
+
+      - uses: cachix/cachix-action@v12
+        with:
+          name: holochain-ci
+
+      - name: Build and test
+        run: |
+          cd $GITHUB_WORKSPACE
+          nix develop --override-input "versions/scaffolding" . .#ci --command APP_NAME="forum" TEMPLATE_NAME="lit" ./run_test.sh
+
+  testbuild_vanilla:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extend space
+        uses: ./.github/actions/extend-space
+  
+      - name: Install nix
+        uses: cachix/install-nix-action@v23
+        with:
+          install_url: https://releases.nixos.org/nix/nix-2.13.3/install
+          extra_nix_config: |
+            experimental-features = flakes nix-command
+
+      - uses: cachix/cachix-action@v12
+        with:
+          name: holochain-ci
+
+      - name: Build and test
+        run: |
+          cd $GITHUB_WORKSPACE
+          nix develop --override-input "versions/scaffolding" . .#ci --command APP_NAME="forum" TEMPLATE_NAME="vanilla" ./run_test.sh
+
+  testbuild_hello_world_example:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extend space
+        uses: ./.github/actions/extend-space
+  
+      - name: Install nix
+        uses: cachix/install-nix-action@v23
+        with:
+          install_url: https://releases.nixos.org/nix/nix-2.13.3/install
+          extra_nix_config: |
+            experimental-features = flakes nix-command
+
+      - uses: cachix/cachix-action@v12
+        with:
+          name: holochain-ci
+
+      - name: Build and test
+        run: |
+          cd $GITHUB_WORKSPACE
+          nix develop --override-input "versions/scaffolding" . .#ci --command SCOPE="hello_world" ./run_test.sh
