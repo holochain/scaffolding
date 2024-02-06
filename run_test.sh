@@ -3,6 +3,23 @@ set -e
 
 TEMPLATE_PATH="/tmp"
 
+APP_NAME=
+TEMPLATE_NAME=
+SCOPE=
+
+# parse args
+while getopts ":a:t:s:" opt; do
+  case $opt in
+    a) APP_NAME="$OPTARG";;
+    t) TEMPLATE_NAME="$OPTARG";;
+    s) SCOPE="$OPTARG";;
+    \?) echo "Invalid option: -$OPTARG" >&2
+        exit 1;;
+    :)  echo "Option -$OPTARG requires an argument." >&2
+        exit 1;;
+  esac
+done
+
 cleanup_tmp() {
 	rm -rf $TEMPLATE_PATH/$1
 }
@@ -11,7 +28,7 @@ print_version() {
 	echo $(hc-scaffold --version)
 }
 
-setup_and_build() {
+setup_and_build_happ() {
 	print_version
 	cleanup_tmp $1
 
@@ -47,11 +64,13 @@ setup_and_build() {
 	cd ..
 }
 
-setup_hello_world() {
+setup_and_build_hello_world() {
 	print_version
-	cleanup_tmp hello-world
-	hc-scaffold example hello-world
-	cd hello-world
+	cleanup_tmp hello_world
+
+	cd $TEMPLATE_PATH
+	hc-scaffold example hello_world
+	cd hello_world
 
 	nix develop --command bash -c "
     set -e
@@ -62,7 +81,7 @@ setup_hello_world() {
 }
 
 if [[ -n "$SCOPE" && "$SCOPE" == "hello_world" ]]; then
-	setup_hello_world
+	setup_and_build_hello_world
 	exit 0 # Exit early
 fi
 
@@ -82,4 +101,4 @@ case "$TEMPLATE_NAME" in
 esac
 
 cleanup_tmp "$APP_NAME"
-setup_and_build "$APP_NAME" "$TEMPLATE_NAME"
+setup_and_build_happ "$APP_NAME" "$TEMPLATE_NAME"

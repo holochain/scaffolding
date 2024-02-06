@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        template: [svelte, vue, lit, vanilla]
+        template: [ svelte, vue, lit, vanilla ]
     steps:
       - uses: actions/checkout@v4
 
@@ -43,10 +43,13 @@ jobs:
       - name: Build and test
         run: |
           cd $GITHUB_WORKSPACE
-          nix develop --override-input "versions/scaffolding" . .#ci --command "export APP_NAME=forum && export TEMPLATE_NAME=${{ matrix.template }} && ./run_test.sh"
+          nix develop --override-input "versions/scaffolding" . .#ci --command ./run_test.sh -a forum -t ${{ matrix.template }}
 
-  testbuild_hello_world:
+  testbuild_by_scope:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        scope: [ hello_world ]
     steps:
       - uses: actions/checkout@v4
 
@@ -67,4 +70,4 @@ jobs:
       - name: Build and test
         run: |
           cd $GITHUB_WORKSPACE
-          nix develop --override-input "versions/scaffolding" . .#ci --command "export SCOPE=hello_world && ./run_test.sh"
+          nix develop --override-input "versions/scaffolding" . .#ci --command ./run_test.sh -s ${{ matrix.scope }}
