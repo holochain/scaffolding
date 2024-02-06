@@ -3,7 +3,7 @@ pub fn tryorama_version() -> String {
 }
 
 pub fn holochain_client_version() -> String {
-    String::from("^0.17.0-dev.3")
+    String::from("^0.17.0-dev.5")
 }
 
 // TODO: update to 0.3 compatible version
