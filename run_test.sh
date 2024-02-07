@@ -66,11 +66,11 @@ setup_and_build_happ() {
 
 setup_and_build_hello_world() {
 	print_version
-	cleanup_tmp hello_world
+	cleanup_tmp hello-world
 
 	cd $TEMPLATE_PATH
-	hc-scaffold example hello_world
-	cd hello_world
+	hc-scaffold example hello-world
+	cd hello-world
 
 	nix develop --command bash -c "
     set -e
