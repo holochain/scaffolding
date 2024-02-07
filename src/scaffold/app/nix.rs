@@ -41,8 +41,11 @@ pub fn flake_nix() -> FileTree {
           , ...
           }}: {{
             devShells.default = pkgs.mkShell {{
-              inputsFrom = [ holochain-flake.devShells.${{system}}.holonix ];
-              packages = [ pkgs.nodejs-18_x ];
+              inputsFrom = [ inputs'.holochain-flake.devShells.holonix ];
+              packages = [
+                pkgs.nodejs_20
+                # more packages go here
+              ];
             }};
           }};
       }};
