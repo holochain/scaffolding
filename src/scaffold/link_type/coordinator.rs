@@ -51,7 +51,9 @@ pub fn add_{snake_link_type_name}_for_{snake_from}(input: Add{pascal_link_type_n
 
 #[hdk_extern]
 pub fn get_{plural_snake_link_type_name}_for_{snake_from}({snake_from_arg}: {from_arg_type}) -> ExternResult<Vec<String>> {{
-    let links = get_links({snake_from_arg}, LinkTypes::{pascal_link_type_name}, None)?;
+    let links = get_links(
+        GetLinksInputBuilder::try_new({snake_from_arg}, LinkTypes::{pascal_link_type_name})?.build(),
+    )?;
     
     let {snake_link_type_name}: Vec<String> = links
         .into_iter()
@@ -165,7 +167,9 @@ pub fn get_deleted_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_t
     format!(
         r#"#[hdk_extern]
 pub fn get_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}({from_arg_name}: {from_hash_type}) -> ExternResult<Vec<Link>> {{
-    get_links({from_arg_name}, LinkTypes::{pascal_link_type_name}, None)
+    get_links(
+        GetLinksInputBuilder::try_new({from_arg_name}, LinkTypes::{pascal_link_type_name})?.build(),
+    )
 }}
 {get_deleted_links_handler}
 "#,
@@ -212,7 +216,9 @@ pub fn get_deleted_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_t
     format!(
         r#"#[hdk_extern]
 pub fn get_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}({from_arg_name}: {from_hash_type}) -> ExternResult<Vec<Link>> {{
-    get_links({from_arg_name}, LinkTypes::{pascal_link_type_name}, None)
+    get_links(
+        GetLinksInputBuilder::try_new({from_arg_name}, LinkTypes::{pascal_link_type_name})?.build(),
+    )
 }}
 {get_deleted_links_handler}
 "#,
@@ -261,7 +267,9 @@ fn remove_link_handlers(
     let bidirectional_remove = match bidirectional {
         true => format!(
             r#"
-    let links = get_links(input.target_{to_arg_name}.clone(), LinkTypes::{inverse_link_type_name}, None)?;
+    let links = get_links(
+        GetLinksInputBuilder::try_new(input.target_{to_arg_name}.clone(), LinkTypes::{inverse_link_type_name})?.build(),
+    )?;
 
     for link in links {{
         if {from_inverse}.eq(&input.base_{from_arg_name}) {{
@@ -280,7 +288,9 @@ pub struct Remove{singular_pascal_to_entry_type}For{singular_pascal_from_entry_t
 }}
 #[hdk_extern]
 pub fn remove_{singular_snake_to_entry_type}_for_{singular_snake_from_entry_type}(input: Remove{singular_pascal_to_entry_type}For{singular_pascal_from_entry_type}Input ) -> ExternResult<()> {{
-    let links = get_links(input.base_{from_arg_name}.clone(), LinkTypes::{pascal_link_type_name}, None)?;
+    let links = get_links(
+        GetLinksInputBuilder::try_new(input.base_{from_arg_name}.clone(), LinkTypes::{pascal_link_type_name})?.build(),
+    )?;
     
     for link in links {{
         if {from_link}.eq(&input.target_{to_arg_name}) {{
