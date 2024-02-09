@@ -10,7 +10,6 @@ pub fn hc_spin_version() -> String {
     String::from("^0.200.8")
 }
 
-// TODO: update to 0.3 compatible version
 pub fn web_sdk_version() -> String {
     String::from("^0.6.10-prerelease")
 }
