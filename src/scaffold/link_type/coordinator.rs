@@ -300,7 +300,7 @@ use {integrity_zome_name}::*;
         
 {}"#,
         add_link_handler(from_referenceable, to_referenceable, bidirectional),
-        get_links_handler(from_referenceable, to_referenceable, delete),
+        get_links_handler(from_referenceable, to_referenceable),
         inverse_get,
         delete_link_handler
     )
