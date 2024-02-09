@@ -6,9 +6,11 @@ use serde_json::Value;
 
 pub mod merge;
 pub mod uniq_lines;
+pub mod filter;
 
 use merge::register_merge;
 use uniq_lines::register_uniq_lines;
+use filter::register_filter;
 
 pub fn register_helpers<'a>(h: Handlebars<'a>) -> Handlebars<'a> {
     let h = register_concat_helper(h);
@@ -19,6 +21,7 @@ pub fn register_helpers<'a>(h: Handlebars<'a>) -> Handlebars<'a> {
     let h = register_pluralize_helpers(h);
     let h = register_merge(h);
     let h = register_uniq_lines(h);
+    let h = register_filter(h);
 
     h
 }
