@@ -22,7 +22,7 @@ pub struct ScaffoldLinkTypeData {
     pub from_referenceable: Referenceable,
     pub to_referenceable: Option<Referenceable>,
     pub delete: bool,
-    pub bidireccional: Option<String>,
+    pub bidirectional: Option<String>,
 }
 pub fn scaffold_link_type_templates(
     mut app_file_tree: FileTree,
@@ -34,7 +34,7 @@ pub fn scaffold_link_type_templates(
     from_referenceable: &Referenceable,
     to_referenceable: &Option<Referenceable>,
     delete: bool,
-    bidireccional: &Option<String>,
+    bidirectional: &Option<String>,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     let data = ScaffoldLinkTypeData {
         app_name: app_name.clone(),
@@ -44,7 +44,7 @@ pub fn scaffold_link_type_templates(
         link_type_name: link_type_name.clone(),
         to_referenceable: to_referenceable.clone(),
         delete,
-        bidireccional: bidireccional.clone(),
+        bidirectional: bidirectional.clone(),
     };
 
     let h = build_handlebars(&template_file_tree)?;
