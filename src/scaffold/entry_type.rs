@@ -101,6 +101,15 @@ pub fn scaffold_entry_type(
         }
     };
 
+    let widget_fields = fields
+        .iter()
+        .map(|f| f.clone())
+        .filter(|f| match f.widget {
+            Some(_) => true,
+            None => false
+        })
+        .collect();
+
     let reference_entry_hash = match maybe_reference_entry_hash {
         Some(r) => r.clone(),
         None => {
@@ -147,6 +156,7 @@ pub fn scaffold_entry_type(
     let entry_def = EntryDefinition {
         name: name.clone(),
         fields,
+        widget_fields,
         reference_entry_hash,
     };
 
