@@ -6,6 +6,10 @@ pub fn holochain_client_version() -> String {
     String::from("^0.17.0-dev.5")
 }
 
+pub fn hc_spin_version() -> String {
+    String::from("^0.300.1")
+}
+
 // TODO: update to 0.3 compatible version
 pub fn web_sdk_version() -> String {
     String::from("^0.6.10-prerelease")
