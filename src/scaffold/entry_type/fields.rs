@@ -160,6 +160,7 @@ pub fn choose_field(
     entry_type_name: &String,
     zome_file_tree: &ZomeFileTree,
     field_types_templates: &FileTree,
+    no_ui: bool,
 ) -> ScaffoldResult<FieldDefinition> {
     let field_types = FieldType::list();
     let field_type_names: Vec<String> = field_types
@@ -324,7 +325,11 @@ pub fn choose_field(
     let field_name: String =
         input_with_case_and_initial_text(&String::from("Field name:"), Case::Snake, &initial_text)?;
 
-    let widget = choose_widget(&field_type, field_types_templates)?;
+    let widget = if no_ui {
+        None
+    } else {
+        choose_widget(&field_type, field_types_templates)?
+    };
 
     Ok(FieldDefinition {
         widget,
@@ -339,13 +344,19 @@ pub fn choose_fields(
     entry_type_name: &String,
     zome_file_tree: &ZomeFileTree,
     field_types_templates: &FileTree,
+    no_ui: bool,
 ) -> ScaffoldResult<Vec<FieldDefinition>> {
     let mut finished = false;
     let mut fields: Vec<FieldDefinition> = Vec::new();
     println!("\nWhich fields should the entry contain?\n");
 
     while !finished {
-        let field_def = choose_field(entry_type_name, zome_file_tree, field_types_templates)?;
+        let field_def = choose_field(
+            entry_type_name,
+            zome_file_tree,
+            field_types_templates,
+            no_ui,
+        )?;
         println!("");
 
         fields.push(field_def);
