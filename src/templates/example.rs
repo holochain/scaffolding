@@ -4,7 +4,7 @@ use std::{ffi::OsString, path::PathBuf};
 use crate::{
     error::ScaffoldResult,
     file_tree::{file_content, FileTree},
-    scaffold::example::Example,
+    scaffold::example::Example, versions::{hdi_version, hdk_version, holochain_client_version},
 };
 
 use super::{
@@ -14,6 +14,9 @@ use super::{
 #[derive(Serialize)]
 pub struct ScaffoldExampleData {
     pub example: String,
+    pub holochain_client_version: String,
+    pub hdk_version: String,
+    pub hdi_version: String,
 }
 
 pub fn scaffold_example(
@@ -23,6 +26,9 @@ pub fn scaffold_example(
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     let data = ScaffoldExampleData {
         example: example.to_string(),
+        holochain_client_version: holochain_client_version(),
+        hdk_version: hdk_version(),
+        hdi_version: hdi_version(),
     };
     let h = build_handlebars(&template_file_tree)?;
 
