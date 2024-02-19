@@ -35,6 +35,7 @@ pub fn scaffold_link_type_templates(
     to_referenceable: &Option<Referenceable>,
     delete: bool,
     bidirectional: &Option<String>,
+    no_ui: bool,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     let data = ScaffoldLinkTypeData {
         app_name: app_name.clone(),
@@ -53,10 +54,17 @@ pub fn scaffold_link_type_templates(
     let v: Vec<OsString> = link_type_path.iter().map(|s| s.to_os_string()).collect();
 
     if let Some(link_type_template) = template_file_tree.path(&mut v.iter()) {
+        let mut link_type_template = link_type_template.clone();
+        if no_ui {
+            link_type_template.dir_content_mut().and_then(|v| {
+                v.retain(|k, _| k.ne(&OsString::from("ui")));
+                Some(v)
+            });
+        }
         app_file_tree = render_template_file_tree_and_merge_with_existing(
             app_file_tree,
             &h,
-            link_type_template,
+            &link_type_template,
             &data,
         )?;
     }
