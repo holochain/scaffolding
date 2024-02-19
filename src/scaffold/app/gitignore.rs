@@ -1,7 +1,7 @@
 pub fn gitignore() -> String {
     format!(
         r#"
-/node_modules/
+/**/node_modules/
 /dist/
 /target/
 /.cargo/
