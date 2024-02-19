@@ -1,20 +1,30 @@
 pub fn gitignore() -> String {
     format!(
-        r#"
-.DS_Store
+        r#"# editors
 /.idea
 /.vscode
-/**/node_modules/
+
+# system files
+.DS_Store
+
+# build
 /dist/
 /target/
 /.cargo/
+
+# npm 
+/**/node_modules/
+
+# generated and compiled files
 *.happ
 *.webhapp
 *.zip
 *.dna
+
+# temporary files
 .hc*
-.hc
 .running
+.hc
 "#
     )
 }
