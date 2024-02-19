@@ -1,6 +1,9 @@
 pub fn gitignore() -> String {
     format!(
         r#"
+.DS_Store
+/.idea
+/.vscode
 /**/node_modules/
 /dist/
 /target/
