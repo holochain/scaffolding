@@ -70,6 +70,7 @@ pub fn scaffold_collection(
     collection_name: &String,
     maybe_collection_type: &Option<CollectionType>,
     maybe_entry_type: &Option<EntryTypeReference>,
+    no_ui: bool,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     check_for_reserved_words(collection_name)?;
 
@@ -132,7 +133,7 @@ pub fn scaffold_collection(
 
     scaffold_collection_templates(
         app_file_tree.file_tree(),
-        &template_file_tree,
+        template_file_tree,
         &app_name,
         &dna_name,
         &coordinator_zome,
@@ -140,5 +141,6 @@ pub fn scaffold_collection(
         collection_name,
         &entry_type,
         deletable,
+        no_ui,
     )
 }

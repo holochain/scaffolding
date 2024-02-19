@@ -6,7 +6,9 @@ import { Task } from '@lit-labs/task';
 import '@material/mwc-circular-progress';
 
 import { clientContext } from '../../contexts';
+{{#if (file_exists 'src/{{dna_role_name}}/{{coordinator_zome_manifest.name}}/{{pascal_case to_referenceable.name}}-detail.ts')}}
 import './{{kebab_case to_referenceable.name}}-detail';
+{{/if}}
 import { {{pascal_case coordinator_zome_manifest.name}}Signal } from './types';
 
 @customElement('{{kebab_case (plural to_referenceable.name)}}-for-{{kebab_case from_referenceable.name}}')
@@ -50,9 +52,13 @@ export class {{pascal_case (plural to_referenceable.name)}}For{{pascal_case from
     
     return html`
       <div style="display: flex; flex-direction: column">
+{{#if (file_exists 'src/{{dna_role_name}}/{{coordinator_zome_manifest.name}}/{{pascal_case to_referenceable.name}}-detail.ts')}}
         ${hashes.map(hash => 
           html`<{{kebab_case to_referenceable.name}}-detail .{{camel_case to_referenceable.name}}Hash=${hash} style="margin-bottom: 16px;"></{{kebab_case to_referenceable.name}}-detail>`
         )}
+{{else}}
+      <div style="margin-bottom: 16px;">{{pascal_case to_referenceable.name}}-detail component generation was skipped</div>
+{{/if}}
       </div>
     `;
   }
