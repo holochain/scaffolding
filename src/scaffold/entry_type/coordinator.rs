@@ -367,7 +367,7 @@ pub fn delete_handler(entry_def: &EntryDefinition) -> String {
             r#"
     let details = get_details(original_{snake_entry_def_name}_hash.clone(), GetOptions::default())?
         .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("{{pascal_entry_def_name}} not found"))))?;
-    let record = match details {{
+    let _ = match details {{
         Details::Record(details) => Ok(details.record),
         _ => Err(wasm_error!(WasmErrorInner::Guest(String::from(
             "Malformed get details response"
