@@ -4,11 +4,11 @@
   </div>
   
   <div v-else style="display: flex; flex-direction: column">
-    <span v-if="error">Error fetching the {{lower_case (plural ../entry_type.name)}}: {{{{raw}}}} {{error.data}}.{{{{/raw}}}}</span>
-    <div v-else-if="hashes && hashes.length > 0" style="margin-bottom: 8px">
+    <span v-if="error">Error fetching the {{lower_case (plural ../entry_type.name)}}: {{{{raw}}}} {{error}}.{{{{/raw}}}}</span>
+    <div v-else-if="links && links.length > 0" style="margin-bottom: 8px">
       <{{pascal_case ../entry_type.name}}Detail 
-        v-for="hash in hashes" 
-        :{{kebab_case ../entry_type.name}}-hash="hash" 
+        v-for="link in links" 
+        :{{kebab_case ../entry_type.name}}-hash="link.target" 
       >
       </{{pascal_case ../entry_type.name}}Detail>
     </div>
@@ -20,7 +20,7 @@
 <script lang="ts">
 import { defineComponent, inject, ComputedRef } from 'vue';
 import { decode } from '@msgpack/msgpack';
-import { AppAgentClient, Record, AgentPubKey, EntryHash, ActionHash, CallZomeResponse } from '@holochain/client';
+import { AppAgentClient, Record, Link, AgentPubKey } from '@holochain/client';
 import '@material/mwc-circular-progress';
 import {{pascal_case ../entry_type.name}}Detail from './{{pascal_case ../entry_type.name}}Detail.vue';
 
@@ -34,9 +34,9 @@ export default defineComponent({
       required: true
     }
   },
-  data(): { hashes: Array<{{#if ../entry_type.reference_entry_hash}}EntryHash{{else}}ActionHash{{/if}}> | undefined; loading: boolean; error: any } {
+  data(): { links: Array<Link> | undefined; loading: boolean; error: any } {
     return {
-      hashes: undefined,
+      links: undefined,
       loading: true,
       error: undefined
     }
@@ -47,14 +47,13 @@ export default defineComponent({
     }
 
     try {
-      const records = await this.client.callZome({
+      this.links = await this.client.callZome({
         cap_secret: null,
         role_name: '{{../dna_role_name}}',
         zome_name: '{{../coordinator_zome_manifest.name}}',
         fn_name: 'get_{{snake_case (plural ../entry_type.name)}}_for_{{snake_case linked_from.name}}',
         payload: this.{{camel_case linked_from.singular_arg}},
       });
-      this.hashes = records.map((r: CallZomeResponse)  => r.signed_action.hashed.hash);
     } catch (e) {
       this.error = e;
     }

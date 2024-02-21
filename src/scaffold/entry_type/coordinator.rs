@@ -7,6 +7,7 @@ use crate::{
     file_tree::{insert_file, map_file, map_rust_files},
     scaffold::{
         dna::DnaFileTree,
+        entry_type::definitions::FieldDefinition,
         link_type::{coordinator::get_links_handler, link_type_name},
         zome::ZomeFileTree,
     },
@@ -14,62 +15,100 @@ use crate::{
 
 use super::{
     crud::Crud,
-    definitions::{Cardinality, EntryDefinition},
+    definitions::{Cardinality, EntryDefinition, FieldType},
     integrity::find_ending_match_expr_in_block,
 };
 
 pub fn no_update_read_handler(entry_def: &EntryDefinition) -> String {
     let hash_type = entry_def.referenceable().hash_type().to_string();
-    let snake_entry_def = entry_def.name.to_case(Case::Snake);
+    let snake_entry_def_name = entry_def.name.to_case(Case::Snake);
 
-    format!(
-        r#"#[hdk_extern]
-pub fn get_{snake_entry_def}({snake_entry_def}_hash: {hash_type}) -> ExternResult<Option<Record>> {{
-  get({snake_entry_def}_hash, GetOptions::default())
+    match entry_def.referenceable().hash_type() {
+        FieldType::ActionHash => format!(
+            r#"#[hdk_extern]
+pub fn get_{snake_entry_def_name}({snake_entry_def_name}_hash: {hash_type}) -> ExternResult<Option<Record>> {{
+    let Some(details) = get_details({snake_entry_def_name}_hash, GetOptions::default())? else {{
+        return Ok(None);
+    }};
+    match details {{
+        Details::Record(details) => Ok(Some(details.record)),
+        _ => Err(wasm_error!(WasmErrorInner::Guest(String::from(
+            "Malformed get details response"
+        )))),
+    }}
 }}"#,
-    )
+        ),
+        FieldType::EntryHash => format!(
+            r#"#[hdk_extern]
+pub fn get_{snake_entry_def_name}({snake_entry_def_name}_hash: {hash_type}) -> ExternResult<Option<Record>> {{
+    let Some(details) = get_details({snake_entry_def_name}_hash, GetOptions::default())? else {{
+        return Ok(None);
+    }};
+    match details {{
+        Details::Entry(details) => Ok(Some(Record::new(details.actions[0].clone(), Some(details.entry)))),
+        _ => Err(wasm_error!(WasmErrorInner::Guest(String::from(
+            "Malformed get details response"
+        )))),
+    }}
+}}"#,
+        ),
+        _ => format!(""),
+    }
 }
 
 pub fn read_handler_without_linking_to_updates(entry_def: &EntryDefinition) -> String {
-    let entry_def_name = entry_def.name.clone();
+    let snake_entry_def_name = entry_def.name.clone();
 
     format!(
         r#"#[hdk_extern]
-pub fn get_{}(original_{}_hash: ActionHash) -> ExternResult<Option<Record>> {{
-  get_latest_{}(original_{}_hash)
+pub fn get_original_{snake_entry_def_name}(original_{snake_entry_def_name}_hash: ActionHash) -> ExternResult<Option<Record>> {{
+    let Some(details) = get_details(original_{snake_entry_def_name}_hash, GetOptions::default())? else {{
+        return Ok(None);
+    }};
+    match details {{
+        Details::Record(details) => Ok(Some(details.record)),
+        _ => Err(wasm_error!(WasmErrorInner::Guest(String::from(
+            "Malformed get details response"
+        )))),
+    }}
 }}
 
-fn get_latest_{}({}_hash: ActionHash) -> ExternResult<Option<Record>> {{
-  let details = get_details({}_hash, GetOptions::default())?
-      .ok_or(wasm_error!(WasmErrorInner::Guest("{} not found".into())))?;
+#[hdk_extern]
+pub fn get_latest_{snake_entry_def_name}(original_{snake_entry_def_name}_hash: ActionHash) -> ExternResult<Option<Record>> {{
+    let Some(details) = get_details(original_{snake_entry_def_name}_hash, GetOptions::default())? else {{
+        return Ok(None);
+    }};
 
-  let record_details = match details {{
-    Details::Entry(_) => Err(wasm_error!(WasmErrorInner::Guest(
-      "Malformed details".into()
-    ))),
-    Details::Record(record_details) => Ok(record_details)
-  }}?;
+    let record_details = match details {{
+        Details::Entry(_) => Err(wasm_error!(WasmErrorInner::Guest(
+          "Malformed details".into()
+        ))),
+        Details::Record(record_details) => Ok(record_details)
+    }}?;
 
-  // If there is some delete action, it means that the whole entry is deleted
-  if record_details.deletes.len() > 0 {{
-    return Ok(None);
-  }}
-    
-  match record_details.updates.last() {{
-    Some(update) => get_latest_{}(update.action_address().clone()),
-    None => Ok(Some(record_details.record)),
-  }}
+    match record_details.updates.last() {{
+        Some(update) => get_latest_{snake_entry_def_name}(update.action_address().clone()),
+        None => Ok(Some(record_details.record)),
+    }}
+}}
+
+#[hdk_extern]
+pub fn get_all_revisions_for_{snake_entry_def_name}(original_{snake_entry_def_name}_hash: ActionHash) -> ExternResult<Vec<Record>> {{
+    let Some(Details::Record(details)) = get_details(original_{snake_entry_def_name}_hash, GetOptions::default())? else {{
+        return Ok(vec![]);
+    }};
+
+    let mut records = vec![details.record];
+
+    for update in details.updates {{
+        let mut update_records = get_all_revisions_for_{snake_entry_def_name}(update.action_address().clone())?;
+
+        records.append(&mut update_records);
+    }}
+
+    Ok(records)
 }}
 "#,
-        entry_def_name.to_case(Case::Snake),
-        entry_def_name.to_case(Case::Snake),
-        entry_def_name.to_case(Case::Snake),
-        entry_def_name.to_case(Case::Snake),
-        entry_def_name.to_case(Case::Snake),
-        entry_def_name.to_case(Case::Snake),
-        entry_def_name.to_case(Case::Snake),
-        entry_def_name.to_case(Case::Pascal),
-        entry_def_name.to_case(Case::Snake)
     )
 }
 
@@ -78,30 +117,67 @@ pub fn updates_link_name(entry_def_name: &String) -> String {
 }
 
 pub fn read_handler_with_linking_to_updates(entry_def_name: &String) -> String {
+    let snake_entry_def_name = entry_def_name.to_case(Case::Snake);
     format!(
         r#"#[hdk_extern]
-pub fn get_{}(original_{}_hash: ActionHash) -> ExternResult<Option<Record>> {{
-  let links = get_links(original_{}_hash.clone(), LinkTypes::{}, None)?;
+pub fn get_latest_{snake_entry_def_name}(original_{snake_entry_def_name}_hash: ActionHash) -> ExternResult<Option<Record>> {{
+    let links = get_links(
+        GetLinksInputBuilder::try_new(original_{snake_entry_def_name}_hash.clone(), LinkTypes::{})?.build(),
+    )?;
 
-  let latest_link = links.into_iter().max_by(|link_a, link_b| link_a.timestamp.cmp(&link_b.timestamp));
-  
-  let latest_{}_hash = match latest_link {{
-    Some(link) => link.target.clone().into_action_hash().ok_or(wasm_error!(
-      WasmErrorInner::Guest(String::from("No action hash associated with link"))
-    ))?,
-    None => original_{}_hash.clone()   
-  }};
- 
-  get(latest_{}_hash, GetOptions::default())
+    let latest_link = links.into_iter().max_by(|link_a, link_b| link_a.timestamp.cmp(&link_b.timestamp));
+
+    let latest_{snake_entry_def_name}_hash = match latest_link {{
+        Some(link) => link.target.clone().into_action_hash().ok_or(wasm_error!(
+            WasmErrorInner::Guest(String::from("No action hash associated with link"))
+        ))?,
+        None => original_{snake_entry_def_name}_hash.clone()   
+    }};
+
+    get(latest_{snake_entry_def_name}_hash, GetOptions::default())
+}}
+
+#[hdk_extern]
+pub fn get_original_{snake_entry_def_name}(original_{snake_entry_def_name}_hash: ActionHash) -> ExternResult<Option<Record>> {{
+    let Some(details) = get_details(original_{snake_entry_def_name}_hash, GetOptions::default())? else {{
+        return Ok(None);
+    }};
+    match details {{
+        Details::Record(details) => Ok(Some(details.record)),
+        _ => Err(wasm_error!(WasmErrorInner::Guest(String::from(
+            "Malformed get details response"
+        )))),
+    }}
+}}
+
+#[hdk_extern]
+pub fn get_all_revisions_for_{snake_entry_def_name}(original_{snake_entry_def_name}_hash: ActionHash) -> ExternResult<Vec<Record>> {{
+    let Some(original_record) = get_original_{snake_entry_def_name}(original_{snake_entry_def_name}_hash.clone())? else {{
+        return Ok(vec![]);
+    }};
+
+    let links = get_links(
+        GetLinksInputBuilder::try_new(original_{snake_entry_def_name}_hash.clone(), LinkTypes::{})?.build(),
+    )?;
+
+    let get_input: Vec<GetInput> = links
+        .into_iter()
+        .map(|link| Ok(GetInput::new(
+            link.target.into_action_hash().ok_or(wasm_error!(WasmErrorInner::Guest(String::from("No action hash associated with link"))))?.into(),
+            GetOptions::default(),
+        )))
+        .collect::<ExternResult<Vec<GetInput>>>()?;
+
+    // load the records for all the links
+    let records = HDK.with(|hdk| hdk.borrow().get(get_input))?;
+    let mut records: Vec<Record> = records.into_iter().filter_map(|r| r).collect();
+    records.insert(0, original_record);
+
+    Ok(records)
 }}
 "#,
-        entry_def_name.to_case(Case::Snake),
-        entry_def_name.to_case(Case::Snake),
-        entry_def_name.to_case(Case::Snake),
         updates_link_name(entry_def_name),
-        entry_def_name.to_case(Case::Snake),
-        entry_def_name.to_case(Case::Snake),
-        entry_def_name.to_case(Case::Snake),
+        updates_link_name(entry_def_name),
     )
 }
 
@@ -275,16 +351,143 @@ pub fn update_{}(input: Update{}Input) -> ExternResult<Record> {{
     )
 }
 
-pub fn delete_handler(entry_def_name: &String) -> String {
+pub fn delete_handler(entry_def: &EntryDefinition) -> String {
+    let pascal_entry_def_name = entry_def.name.to_case(Case::Pascal);
+    let snake_entry_def_name = entry_def.name.to_case(Case::Snake);
+
+    let linked_from_fields: Vec<FieldDefinition> = entry_def
+        .fields
+        .iter()
+        .cloned()
+        .filter(|field| field.linked_from.is_some())
+        .collect();
+
+    let delete_depending_links = match linked_from_fields.is_empty() {
+        true => format!(
+            r#"
+    let details = get_details(original_{snake_entry_def_name}_hash.clone(), GetOptions::default())?
+        .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("{{pascal_entry_def_name}} not found"))))?;
+    let record = match details {{
+        Details::Record(details) => Ok(details.record),
+        _ => Err(wasm_error!(WasmErrorInner::Guest(String::from(
+            "Malformed get details response"
+        )))),
+    }}?;
+            "#
+        ),
+        false => {
+            let mut delete_links = format!(
+                r#"
+    let details = get_details(original_{snake_entry_def_name}_hash.clone(), GetOptions::default())?
+        .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("{{pascal_entry_def_name}} not found"))))?;
+    let record = match details {{
+        Details::Record(details) => Ok(details.record),
+        _ => Err(wasm_error!(WasmErrorInner::Guest(String::from(
+            "Malformed get details response"
+        )))),
+    }}?;
+    let entry = record.entry().as_option().ok_or(wasm_error!(WasmErrorInner::Guest(String::from(
+            "{pascal_entry_def_name} record has no entry"
+        ))))?;
+    let {snake_entry_def_name} = {pascal_entry_def_name}::try_from(entry)?;
+
+        "#
+            );
+            for linked_from_field in linked_from_fields {
+                let linked_from = linked_from_field
+                    .linked_from
+                    .expect("Linked from is none after we filtered for some");
+                let field_name = linked_from_field.field_name;
+                let link_type = link_type_name(&linked_from, &entry_def.referenceable());
+                let delete_this_link = match linked_from_field.cardinality {
+                    Cardinality::Single => format!(
+                        r#"
+    let links = get_links(
+        GetLinksInputBuilder::try_new({snake_entry_def_name}.{field_name}.clone(), LinkTypes::{link_type})?.build(),
+    )?;
+    for link in links {{
+        if let Some(action_hash) = link.target.into_action_hash() {{
+            if action_hash.eq(&original_{snake_entry_def_name}_hash) {{
+                delete_link(link.create_link_hash)?;
+            }}
+        }}
+    }}
+                                    "#
+                    ),
+                    Cardinality::Option => format!(
+                        r#"
+    if let Some(base_address) = {snake_entry_def_name}.{field_name}.clone() {{
+        let links = get_links(
+            GetLinksInputBuilder::try_new(base_address, LinkTypes::{link_type})?.build(),
+        )?;
+        for link in links {{
+            if let Some(action_hash) = link.target.into_action_hash() {{
+                if action_hash.eq(&original_{snake_entry_def_name}_hash) {{
+                    delete_link(link.create_link_hash)?;
+                }}
+            }}
+        }}
+    }} 
+                                    "#
+                    ),
+                    Cardinality::Vector => format!(
+                        r#"
+    for base_address in {snake_entry_def_name}.{field_name} {{
+        let links = get_links(
+            GetLinksInputBuilder::try_new(base_address.clone(), LinkTypes::{link_type})?.build(),
+        )?;
+        for link in links {{
+            if let Some(action_hash) = link.target.into_action_hash() {{
+                if action_hash.eq(&original_{snake_entry_def_name}_hash) {{
+                    delete_link(link.create_link_hash)?;
+                }}
+            }}
+        }}
+    }} 
+                                    "#
+                    ),
+                };
+                delete_links.push_str(delete_this_link.as_str());
+            }
+            delete_links
+        }
+    };
     format!(
         r#"#[hdk_extern]
-pub fn delete_{}(original_{}_hash: ActionHash) -> ExternResult<ActionHash> {{
-  delete_entry(original_{}_hash)
+pub fn delete_{snake_entry_def_name}(original_{snake_entry_def_name}_hash: ActionHash) -> ExternResult<ActionHash> {{
+  {delete_depending_links}
+  delete_entry(original_{snake_entry_def_name}_hash)
+}}
+
+#[hdk_extern]
+pub fn get_all_deletes_for_{snake_entry_def_name}(
+    original_{snake_entry_def_name}_hash: ActionHash,
+) -> ExternResult<Option<Vec<SignedActionHashed>>> {{
+    let Some(details) = get_details(original_{snake_entry_def_name}_hash, GetOptions::default())? else {{
+        return Ok(None);
+    }};
+
+    match details {{
+        Details::Entry(_) => Err(wasm_error!(WasmErrorInner::Guest(
+            "Malformed details".into()
+        ))),
+        Details::Record(record_details) => Ok(Some(record_details.deletes)),
+    }}
+}}
+
+#[hdk_extern]
+pub fn get_oldest_delete_for_{snake_entry_def_name}(
+    original_{snake_entry_def_name}_hash: ActionHash,
+) -> ExternResult<Option<SignedActionHashed>> {{
+    let Some(mut deletes) = get_all_deletes_for_{snake_entry_def_name}(original_{snake_entry_def_name}_hash)? else {{
+        return Ok(None);
+    }};
+
+    deletes.sort_by(|delete_a, delete_b| delete_a.action().timestamp().cmp(&delete_b.action().timestamp()));
+
+    Ok(deletes.first().cloned())
 }}
 "#,
-        entry_def_name.to_case(Case::Snake),
-        entry_def_name.to_case(Case::Snake),
-        entry_def_name.to_case(Case::Snake)
     )
 }
 
@@ -318,12 +521,14 @@ use {}::*;
             .push_str(update_handler(&entry_def.name, link_from_original_to_each_update).as_str());
     }
     if crud.delete {
-        initial.push_str(delete_handler(&entry_def.name).as_str());
+        initial.push_str(delete_handler(&entry_def).as_str());
     }
 
     for f in &entry_def.fields {
         if let Some(linked_from) = &f.linked_from {
-            initial.push_str(get_links_handler(&linked_from, &entry_def.referenceable()).as_str());
+            initial.push_str(
+                get_links_handler(&linked_from, &entry_def.referenceable(), crud.delete).as_str(),
+            );
         }
     }
 

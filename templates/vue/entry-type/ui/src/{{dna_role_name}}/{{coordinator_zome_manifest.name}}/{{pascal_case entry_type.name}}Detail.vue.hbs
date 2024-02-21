@@ -116,7 +116,7 @@ export default defineComponent({
         cap_secret: null,
         role_name: '{{dna_role_name}}',
         zome_name: '{{coordinator_zome_manifest.name}}',
-        fn_name: 'get_{{snake_case entry_type.name}}',
+        fn_name: '{{#if crud.update}}get_latest_{{snake_case entry_type.name}}{{else}}get_{{snake_case entry_type.name}}{{/if}}',
         payload: this.{{camel_case entry_type.name}}Hash,
       });
 
@@ -133,7 +133,6 @@ export default defineComponent({
           payload: this.{{camel_case entry_type.name}}Hash,
         });
         this.$emit('{{kebab_case entry_type.name}}-deleted', this.{{camel_case entry_type.name}}Hash);
-        this.fetch{{pascal_case entry_type.name}}();
       } catch (e: any) {
         const errorSnackbar = this.$refs['delete-error'] as Snackbar;
         errorSnackbar.labelText = `Error deleting the {{lower_case entry_type.name}}: ${e.data}`;

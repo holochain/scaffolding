@@ -6,12 +6,16 @@
   <div v-else style="display: flex; flex-direction: column">
     <span v-if="error">Error fetching the {{lower_case (plural referenceable.name)}}: {{{{raw}}}} {{error.data}}.{{{{/raw}}}}</span>
     <div v-else-if="hashes && hashes.length > 0" style="margin-bottom: 8px">
+{{#if (file_exists 'src/{{dna_role_name}}/{{coordinator_zome_manifest.name}}/{{pascal_case referenceable.name}}Detail.vue')}}
       <{{pascal_case referenceable.name}}Detail 
         v-for="hash in hashes" 
         :{{kebab_case referenceable.name}}-hash="hash"
         @{{kebab_case referenceable.name}}-deleted="fetch{{pascal_case referenceable.name}}()"
       >
       </{{pascal_case referenceable.name}}Detail>
+{{else}}
+      <div>{{pascal_case referenceable.name}}Detail component generation was skipped</div>
+{{/if}}
     </div>
     <span v-else>No {{lower_case (plural referenceable.name)}} found{{#if (eq collection_type.type "ByAuthor")}} for this author{{/if}}.</span>
   </div>
@@ -21,14 +25,18 @@
 <script lang="ts">
 import { defineComponent, inject, toRaw, ComputedRef } from 'vue';
 import { decode } from '@msgpack/msgpack';
-import { AppAgentClient, NewEntryAction, Record, AgentPubKey, EntryHash, ActionHash } from '@holochain/client';
+import { AppAgentClient, NewEntryAction, Link, Record, AgentPubKey, EntryHash, ActionHash } from '@holochain/client';
 import '@material/mwc-circular-progress';
+{{#if (file_exists 'src/{{dna_role_name}}/{{coordinator_zome_manifest.name}}/{{pascal_case referenceable.name}}Detail.vue')}}
 import {{pascal_case referenceable.name}}Detail from './{{pascal_case referenceable.name}}Detail.vue';
+{{/if}}
 import { {{pascal_case coordinator_zome_manifest.name}}Signal } from './types';
 
 export default defineComponent({
   components: {
+{{#if (file_exists 'src/{{dna_role_name}}/{{coordinator_zome_manifest.name}}/{{pascal_case referenceable.name}}Detail.vue')}}
     {{pascal_case referenceable.name}}Detail
+{{/if}}
   },
 {{#if (eq collection_type.type "ByAuthor")}}
   props: {
@@ -57,24 +65,26 @@ export default defineComponent({
       if (signal.zome_name !== '{{coordinator_zome_manifest.name}}') return; 
       const payload = signal.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;
       if (payload.type !== 'EntryCreated') return;
+    {{#if (file_exists 'src/{{dna_role_name}}/{{coordinator_zome_manifest.name}}/{{pascal_case referenceable.name}}Detail.vue')}}
       if (payload.app_entry.type !== '{{pascal_case referenceable.name}}') return;
-{{#if (eq collection_type.type "ByAuthor")}}
+    {{/if}}
+    {{#if (eq collection_type.type "ByAuthor")}}
       if (this.author.toString() !== this.client.myPubKey.toString()) return;
-{{/if}}
+    {{/if}}
       if (this.hashes) this.hashes.push({{#if (eq referenceable.hash_type "ActionHash")}}payload.action.hashed.hash{{else}}(payload.action.hashed.content as NewEntryAction).entry_hash{{/if}});
     });
   },
   methods: {
     async fetch{{pascal_case referenceable.name}}() {
       try {
-        const records: Array<Record> = await this.client.callZome({
+        const links: Array<Link> = await this.client.callZome({
           cap_secret: null,
           role_name: '{{dna_role_name}}',
           zome_name: '{{snake_case coordinator_zome_manifest.name}}',
           fn_name: 'get_{{snake_case collection_name}}',
           payload: {{#if (eq collection_type.type "ByAuthor")}}this.author{{else}}null{{/if}},
         });
-        this.hashes = records.map(r => {{#if (eq referenceable.hash_type "ActionHash")}}r.signed_action.hashed.hash{{else}}(r.signed_action.hashed.content as NewEntryAction).entry_hash{{/if}});
+        this.hashes = links.map(l => l.target);
       } catch (e) {
         this.error = e;
       }

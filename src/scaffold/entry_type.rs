@@ -79,6 +79,7 @@ pub fn scaffold_entry_type(
     maybe_reference_entry_hash: &Option<bool>,
     maybe_link_from_original_to_each_update: &Option<bool>,
     maybe_fields: &Option<Vec<FieldDefinition>>,
+    no_ui: bool,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     check_for_reserved_words(name)?;
 
@@ -97,6 +98,7 @@ pub fn scaffold_entry_type(
                 name,
                 &zome_file_tree,
                 template_file_tree.path(&mut v.iter()).unwrap_or(&empty_dir),
+                no_ui,
             )?
         }
     };
@@ -166,7 +168,7 @@ pub fn scaffold_entry_type(
             &link_type_name(&l, &entry_def.referenceable()),
             &Some(l),
             &Some(entry_def.referenceable()),
-            false,
+            crud.delete,
             &PathBuf::from(format!("{}.rs", entry_def.name.to_case(Case::Snake))),
         )?;
     }
@@ -235,6 +237,7 @@ pub fn scaffold_entry_type(
         &entry_def,
         &crud,
         link_from_original_to_each_update,
+        no_ui,
     )
 }
 

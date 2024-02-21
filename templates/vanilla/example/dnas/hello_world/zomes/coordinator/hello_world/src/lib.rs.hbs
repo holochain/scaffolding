@@ -2,7 +2,7 @@ use hdk::prelude::*;
 use hello_world_integrity::*;
 
 #[hdk_extern]
-pub fn hello_world(message:String) -> ExternResult<ActionHash> {
+pub fn hello_world(message: String) -> ExternResult<ActionHash> {
 
     // commit the Hello message
     let action_hash = create_entry(&EntryTypes::Hello(Hello{message}))?;
@@ -27,9 +27,11 @@ pub struct HelloOutput {
 #[hdk_extern]
 pub fn get_hellos(_: ()) -> ExternResult<Vec<HelloOutput>> {
 
-    // get all of the hellos linked to the anachor
+    // get all of the hellos linked to the anchor
     let path = Path::from("hellos");
-    let links = get_links(path.path_entry_hash()?, LinkTypes::AllHellos, None)?;
+    let links = get_links(
+        GetLinksInputBuilder::try_new(path.path_entry_hash()?, LinkTypes::AllHellos)?.build(),
+    )?;
     let get_input: Vec<GetInput> = links
         .into_iter()
         .map(|link| Ok(GetInput::new(

@@ -246,7 +246,7 @@ pub fn find_ending_match_expr_in_block<'a>(
 ) -> Option<&'a mut syn::ExprMatch> {
     if let Some(e) = block.stmts.last_mut() {
         match e {
-            syn::Stmt::Expr(syn::Expr::Match(e_m)) => Some(e_m),
+            syn::Stmt::Expr(syn::Expr::Match(e_m), _) => Some(e_m),
             _ => None,
         }
     } else {
@@ -305,7 +305,7 @@ pub use {}::*;
         .iter()
         .map(|s| s.to_os_string())
         .collect();
-    // 3. Find the #[hdk_entry_defs] macro
+    // 3. Find the #[hdk_entry_types] macro
     // 3.1 Import the new struct
     // 3.2 Add a variant for the new entry def with the struct as its payload
     map_rust_files(
@@ -320,7 +320,7 @@ pub use {}::*;
                 let entry_types_item = syn::parse_str::<syn::Item>(
                     "#[derive(Serialize, Deserialize)]
                      #[serde(tag = \"type\")]
-                     #[hdk_entry_defs]
+                     #[hdk_entry_types]
                      #[unit_enum(UnitEntryTypes)]
                      pub enum EntryTypes {}",
                 )?;
@@ -347,7 +347,7 @@ pub use {}::*;
                     if let syn::Item::Fn(item_fn) = item {
                         if item_fn.sig.ident.to_string().eq(&String::from("validate")) {
                             for stmt in &mut item_fn.block.stmts {
-                                if let syn::Stmt::Expr(syn::Expr::Match(match_expr)) = stmt {
+                                if let syn::Stmt::Expr(syn::Expr::Match(match_expr),_) = stmt {
                                     if let syn::Expr::Try(try_expr) = &mut *match_expr.expr {
                                         if let syn::Expr::MethodCall(call) = &mut *try_expr.expr {
                                             if call.method.to_string().eq(&String::from("flattened"))
@@ -357,7 +357,7 @@ pub use {}::*;
                                                         turbofish.args.first_mut()
                                                     {
                                                         *first_arg =
-                                                            syn::GenericMethodArgument::Type(
+                                                            syn::GenericArgument::Type(
                                                                 syn::parse_str::<syn::Type>(
                                                                     "EntryTypes",
                                                                 )?,
@@ -380,7 +380,7 @@ pub use {}::*;
                     .map(|mut i| {
                         if let syn::Item::Enum(mut item_enum) = i.clone() {
                             if item_enum.attrs.iter().any(|a| {
-                                a.path.segments.iter().any(|s| s.ident.eq("hdk_entry_defs"))
+                                a.path().segments.iter().any(|s| s.ident.eq("hdk_entry_types"))
                             }) {
                                 if item_enum
                                     .variants
@@ -451,7 +451,7 @@ pub fn get_all_entry_types(
                     if item_enum
                         .attrs
                         .iter()
-                        .any(|a| a.path.segments.iter().any(|s| s.ident.eq("hdk_entry_defs")))
+                        .any(|a| a.path().segments.iter().any(|s| s.ident.eq("hdk_entry_types")))
                     {
                         return Some(item_enum.clone());
                     }
@@ -487,7 +487,7 @@ pub fn get_all_entry_types(
                 let referenced_by_entry_hash = match find_extern_function_in_zomes(
                     &zome_file_tree.dna_file_tree,
                     &coordinators_for_zome,
-                    &format!("read_{}", v),
+                    &format!("get_{}", v.to_case(Case::Snake)),
                 )? {
                     Some((_z, item_fn)) => {
                         match item_fn
@@ -526,7 +526,7 @@ fn add_entry_type_to_validation_arms(
     if let syn::Item::Fn(item_fn) = item {
         if item_fn.sig.ident.to_string().eq(&String::from("validate")) {
             for stmt in &mut item_fn.block.stmts {
-                if let syn::Stmt::Expr(syn::Expr::Match(match_expr)) = stmt {
+                if let syn::Stmt::Expr(syn::Expr::Match(match_expr),_) = stmt {
                     if let syn::Expr::Try(try_expr) = &mut *match_expr.expr {
                         if let syn::Expr::MethodCall(call) = &mut *try_expr.expr {
                             if call.method.to_string().eq(&String::from("flattened")) {

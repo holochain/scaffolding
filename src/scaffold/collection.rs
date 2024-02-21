@@ -70,6 +70,7 @@ pub fn scaffold_collection(
     collection_name: &String,
     maybe_collection_type: &Option<CollectionType>,
     maybe_entry_type: &Option<EntryTypeReference>,
+    no_ui: bool,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     check_for_reserved_words(collection_name)?;
 
@@ -112,11 +113,11 @@ pub fn scaffold_collection(
         &link_type_name,
         &None,
         &Some(Referenceable::EntryType(entry_type.clone())),
-        false,
+        true,
         &PathBuf::from(format!("{}.rs", entry_type.entry_type.to_case(Case::Snake))),
     )?;
 
-    let (dna_file_tree, coordinator_zome) = add_collection_to_coordinators(
+    let (dna_file_tree, coordinator_zome, deletable) = add_collection_to_coordinators(
         zome_file_tree,
         collection_name,
         &link_type_name,
@@ -132,12 +133,14 @@ pub fn scaffold_collection(
 
     scaffold_collection_templates(
         app_file_tree.file_tree(),
-        &template_file_tree,
+        template_file_tree,
         &app_name,
         &dna_name,
         &coordinator_zome,
         &collection_type,
         collection_name,
         &entry_type,
+        deletable,
+        no_ui,
     )
 }

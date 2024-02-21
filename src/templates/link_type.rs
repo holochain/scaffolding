@@ -22,7 +22,7 @@ pub struct ScaffoldLinkTypeData {
     pub from_referenceable: Referenceable,
     pub to_referenceable: Option<Referenceable>,
     pub delete: bool,
-    pub bidireccional: Option<String>,
+    pub bidirectional: Option<String>,
 }
 pub fn scaffold_link_type_templates(
     mut app_file_tree: FileTree,
@@ -34,7 +34,8 @@ pub fn scaffold_link_type_templates(
     from_referenceable: &Referenceable,
     to_referenceable: &Option<Referenceable>,
     delete: bool,
-    bidireccional: &Option<String>,
+    bidirectional: &Option<String>,
+    no_ui: bool,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     let data = ScaffoldLinkTypeData {
         app_name: app_name.clone(),
@@ -44,7 +45,7 @@ pub fn scaffold_link_type_templates(
         link_type_name: link_type_name.clone(),
         to_referenceable: to_referenceable.clone(),
         delete,
-        bidireccional: bidireccional.clone(),
+        bidirectional: bidirectional.clone(),
     };
 
     let h = build_handlebars(&template_file_tree)?;
@@ -53,10 +54,17 @@ pub fn scaffold_link_type_templates(
     let v: Vec<OsString> = link_type_path.iter().map(|s| s.to_os_string()).collect();
 
     if let Some(link_type_template) = template_file_tree.path(&mut v.iter()) {
+        let mut link_type_template = link_type_template.clone();
+        if no_ui {
+            link_type_template.dir_content_mut().and_then(|v| {
+                v.retain(|k, _| k.ne(&OsString::from("ui")));
+                Some(v)
+            });
+        }
         app_file_tree = render_template_file_tree_and_merge_with_existing(
             app_file_tree,
             &h,
-            link_type_template,
+            &link_type_template,
             &data,
         )?;
     }

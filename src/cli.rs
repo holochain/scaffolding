@@ -61,7 +61,7 @@ pub enum HcScaffold {
         /// The git repository URL from which to download the template, incompatible with --templates-path
         templates_url: Option<String>,
 
-        #[structopt(short = "p", long)]
+        #[structopt(short = "p", long, parse(from_os_str))]
         /// The local folder path in which to look for the given template, incompatible with --templates-url
         templates_path: Option<PathBuf>,
 
@@ -99,11 +99,11 @@ pub enum HcScaffold {
         /// Name of the zome being scaffolded
         name: Option<String>,
 
-        #[structopt(long)]
+        #[structopt(long, parse(from_os_str))]
         /// Scaffold an integrity zome at the given path
         integrity: Option<PathBuf>,
 
-        #[structopt(long)]
+        #[structopt(long, parse(from_os_str))]
         /// Scaffold a coordinator zome at the given path
         coordinator: Option<PathBuf>,
 
@@ -150,6 +150,10 @@ pub enum HcScaffold {
         /// The template to scaffold the dna from
         /// The template must be located at the ".templates/<TEMPLATE NAME>" folder of the repository
         template: Option<String>,
+
+        #[structopt(long)]
+        /// Skip ui generation, overriding any widgets specified with the --fields option
+        no_ui: bool,
     },
     /// Scaffold a link type and its appropriate zome functions into an existing zome
     LinkType {
@@ -171,7 +175,7 @@ pub enum HcScaffold {
 
         #[structopt(long)]
         /// Whether to create the inverse link, from the "--to-referenceable" entry type to the "--from-referenceable" entry type
-        bidireccional: Option<bool>,
+        bidirectional: Option<bool>,
 
         #[structopt(long)]
         /// Whether this link type can be deleted
@@ -181,6 +185,10 @@ pub enum HcScaffold {
         /// The template to scaffold the dna from
         /// The template must be located at the ".templates/<TEMPLATE NAME>" folder of the repository
         template: Option<String>,
+
+        #[structopt(long)]
+        /// Skip ui generation
+        no_ui: bool,
     },
     /// Scaffold a collection of entries in an existing zome
     Collection {
@@ -206,6 +214,10 @@ pub enum HcScaffold {
         /// The template to scaffold the dna from
         /// The template must be located at the ".templates/<TEMPLATE NAME>" folder of the repository
         template: Option<String>,
+
+        #[structopt(long)]
+        /// Skip ui generation
+        no_ui: bool,
     },
 
     Example {
@@ -558,12 +570,13 @@ Add new entry definitions to your zome with:
                 link_from_original_to_each_update,
                 fields,
                 template,
+                no_ui
             } => {
                 let current_dir = std::env::current_dir()?;
                 let file_tree = load_directory_into_memory(&current_dir)?;
                 let template_file_tree = choose_or_get_template_file_tree(&file_tree, &template)?;
 
-                let name: String = match name {
+                let name = match name {
                     Some(n) => {
                         check_case(&n, "entry type name", Case::Snake)?;
                         n
@@ -589,6 +602,7 @@ Add new entry definitions to your zome with:
                     &reference_entry_hash,
                     &link_from_original_to_each_update,
                     &fields,
+                    no_ui,
                 )?;
 
                 let file_tree = MergeableFileSystemTree::<OsString, String>::from(file_tree);
@@ -619,8 +633,9 @@ Add new collections for that entry type with:
                 from_referenceable,
                 to_referenceable,
                 delete,
-                bidireccional,
+                bidirectional,
                 template,
+                no_ui,
             } => {
                 let current_dir = std::env::current_dir()?;
                 let file_tree = load_directory_into_memory(&current_dir)?;
@@ -639,7 +654,8 @@ Add new collections for that entry type with:
                     &from_referenceable,
                     &to_referenceable,
                     &delete,
-                    &bidireccional,
+                    &bidirectional,
+                    no_ui,
                 )?;
 
                 let file_tree = MergeableFileSystemTree::<OsString, String>::from(file_tree);
@@ -662,6 +678,7 @@ Link type scaffolded!
                 collection_type,
                 entry_type,
                 template,
+                no_ui,
             } => {
                 let current_dir = std::env::current_dir()?;
                 let file_tree = load_directory_into_memory(&current_dir)?;
@@ -689,6 +706,7 @@ Link type scaffolded!
                     &name,
                     &collection_type,
                     &entry_type,
+                    no_ui,
                 )?;
 
                 let file_tree = MergeableFileSystemTree::<OsString, String>::from(file_tree);
@@ -842,6 +860,7 @@ Collection "{}" scaffolded!
                                     linked_from: None,
                                 },
                             ]),
+                            false,
                         )?;
 
                         let dna_file_tree =
@@ -883,6 +902,7 @@ Collection "{}" scaffolded!
                                     )),
                                 },
                             ]),
+                            false
                         )?;
 
                         let dna_file_tree =
@@ -902,6 +922,7 @@ Collection "{}" scaffolded!
                                 entry_type: String::from("post"),
                                 reference_entry_hash: false,
                             }),
+                            false
                         )?;
 
                         file_tree

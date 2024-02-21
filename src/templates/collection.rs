@@ -24,6 +24,7 @@ pub struct ScaffoldCollectionData {
     pub collection_type: CollectionType,
     pub collection_name: String,
     pub referenceable: Referenceable,
+    pub deletable: bool,
 }
 pub fn scaffold_collection_templates(
     mut app_file_tree: FileTree,
@@ -34,6 +35,8 @@ pub fn scaffold_collection_templates(
     collection_type: &CollectionType,
     collection_name: &String,
     entry_type_reference: &EntryTypeReference,
+    deletable: bool,
+    no_ui: bool,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     let data = ScaffoldCollectionData {
         app_name: app_name.clone(),
@@ -42,6 +45,7 @@ pub fn scaffold_collection_templates(
         collection_name: collection_name.clone(),
         collection_type: collection_type.clone(),
         referenceable: Referenceable::EntryType(entry_type_reference.clone()),
+        deletable,
     };
 
     let h = build_handlebars(&template_file_tree)?;
@@ -50,10 +54,17 @@ pub fn scaffold_collection_templates(
     let v: Vec<OsString> = field_types_path.iter().map(|s| s.to_os_string()).collect();
 
     if let Some(web_app_template) = template_file_tree.path(&mut v.iter()) {
+        let mut web_app_template = web_app_template.clone();
+        if no_ui {
+            web_app_template.dir_content_mut().and_then(|v| {
+                v.retain(|k, _| k.ne(&OsString::from("ui")));
+                Some(v)
+            });
+        }
         app_file_tree = render_template_file_tree_and_merge_with_existing(
             app_file_tree,
             &h,
-            web_app_template,
+            &web_app_template,
             &data,
         )?;
     }

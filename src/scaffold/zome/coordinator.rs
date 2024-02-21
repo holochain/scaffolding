@@ -210,21 +210,25 @@ pub fn find_all_extern_functions(zome_file_tree: &ZomeFileTree) -> ScaffoldResul
             .path(&mut v.iter())
             .ok_or(ScaffoldError::PathNotFound(crate_src_path.clone()))?,
         &|_file_path, rust_file| {
-            rust_file.items.iter().find_map(|i| {
-                if let syn::Item::Fn(item_fn) = i.clone() {
-                    if item_fn
-                        .attrs
-                        .iter()
-                        .any(|a| a.path.segments.iter().any(|s| s.ident.eq("hdk_extern")))
-                    {
-                        return Some(item_fn);
+            let extern_functions: Vec<ItemFn> = rust_file
+                .items
+                .iter()
+                .filter_map(|i| {
+                    if let syn::Item::Fn(item_fn) = i.clone() {
+                        if item_fn
+                            .attrs
+                            .iter()
+                            .any(|a| a.path().segments.iter().any(|s| s.ident.eq("hdk_extern")))
+                        {
+                            return Some(item_fn);
+                        }
                     }
-                }
-
-                None
-            })
+                    None
+                })
+                .collect();
+            Some(extern_functions)
         },
     );
 
-    Ok(hdk_extern_instances.values().cloned().collect())
+    Ok(hdk_extern_instances.values().cloned().flatten().collect())
 }

@@ -1,9 +1,11 @@
 <script lang="ts">
 import { onMount, getContext } from 'svelte';
 import '@material/mwc-circular-progress';
-import type { Record, ActionHash, EntryHash, AgentPubKey, AppAgentClient, NewEntryAction } from '@holochain/client';
+import type { Link, Record, ActionHash, EntryHash, AgentPubKey, AppAgentClient, NewEntryAction } from '@holochain/client';
 import { clientContext } from '../../contexts';
+{{#if (file_exists 'src/{{dna_role_name}}/{{coordinator_zome_manifest.name}}/{{pascal_case from_referenceable.name}}Detail.svelte')}}
 import {{pascal_case from_referenceable.name}}Detail from './{{pascal_case from_referenceable.name}}Detail.svelte';
+{{/if}}
 import type { {{pascal_case coordinator_zome_manifest.name}}Signal } from './types';
 
 export let {{camel_case to_referenceable.singular_arg}}: {{to_referenceable.hash_type}};
@@ -23,14 +25,14 @@ onMount(async () => {
   }
 
   try {
-    const records = await client.callZome({
+    const links: Array<Link> = await client.callZome({
       cap_secret: null,
       role_name: '{{dna_role_name}}',
       zome_name: '{{snake_case coordinator_zome_manifest.name}}',
       fn_name: 'get_{{snake_case (plural from_referenceable.name)}}_for_{{snake_case to_referenceable.name}}',
       payload: {{camel_case to_referenceable.singular_arg}},
     });
-    hashes = records.map(r => {{#if (eq from_referenceable.hash_type "ActionHash")}}r.signed_action.hashed.hash{{else}}(r.signed_action.hashed.content as NewEntryAction).entry_hash{{/if}});
+    hashes = links.map(l => l.target);
   } catch (e) {
     error = e;
   }
@@ -40,7 +42,7 @@ onMount(async () => {
     if (signal.zome_name !== '{{coordinator_zome_manifest.name}}') return;
     const payload = signal.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;
     if (payload.type !== 'LinkCreated') return;
-    if (payload.link_type !== '{{pascal_case bidireccional}}') return;
+    if (payload.link_type !== '{{pascal_case bidirectional}}') return;
 
     hashes = [...hashes, payload.action.hashed.content.target_address];
   });
@@ -58,10 +60,14 @@ onMount(async () => {
 <span>No {{lower_case (plural from_referenceable.name)}} found for this {{lower_case to_referenceable.name}}.</span>
 {:else}
 <div style="display: flex; flex-direction: column">
+{{#if (file_exists 'src/{{dna_role_name}}/{{coordinator_zome_manifest.name}}/{{pascal_case from_referenceable.name}}Detail.svelte')}}
   {#each hashes as hash}
     <div style="margin-bottom: 8px;">
       <{{pascal_case from_referenceable.name}}Detail {{camel_case from_referenceable.name}}Hash={hash}></{{pascal_case from_referenceable.name}}Detail>
     </div>
   {/each}
+{{else}}
+  <div style="margin-bottom: 8px;">{{pascal_case from_referenceable.name}}Detail component generation was skipped</div>
+{{/if}}
 </div>
 {/if}
