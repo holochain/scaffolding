@@ -6,7 +6,8 @@ use crate::{
     error::ScaffoldResult,
     file_tree::{file_content, FileTree},
     versions::{
-        hdi_version, hdk_version, holochain_client_version, holochain_version, tryorama_version,
+        hc_spin_version, hdi_version, hdk_version, holochain_client_version, holochain_version,
+        tryorama_version,
     },
 };
 
@@ -21,6 +22,7 @@ pub struct ScaffoldWebAppData {
     pub hdk_version: String,
     pub hdi_version: String,
     pub holochain_client_version: String,
+    pub hc_spin_version: String,
     pub tryorama_version: String,
     pub holo_enabled: bool,
 }
@@ -37,6 +39,7 @@ pub fn scaffold_web_app_template(
         hdk_version: hdk_version(),
         hdi_version: hdi_version(),
         holochain_client_version: holochain_client_version(),
+        hc_spin_version: hc_spin_version(),
         tryorama_version: tryorama_version(),
         holo_enabled,
     };

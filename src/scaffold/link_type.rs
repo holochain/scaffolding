@@ -55,6 +55,7 @@ pub fn scaffold_link_type(
     to_referenceable: &Option<Referenceable>,
     delete: &Option<bool>,
     bidirectional: &Option<bool>,
+    no_ui: bool,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     let dna_manifest_path = zome_file_tree.dna_file_tree.dna_manifest_path.clone();
     let zome_manifest = zome_file_tree.zome_manifest.clone();
@@ -215,5 +216,6 @@ pub use {}::*;
         &to_referenceable,
         delete,
         &inverse_link_type,
+        no_ui,
     )
 }
