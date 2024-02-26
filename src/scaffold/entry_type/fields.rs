@@ -331,13 +331,13 @@ pub fn choose_field(
         choose_widget(&field_type, field_types_templates)?
     };
 
-    Ok(FieldDefinition {
-        widget,
+    FieldDefinition::new(
         field_name,
-        cardinality,
         field_type,
-        linked_from: maybe_linked_from,
-    })
+        widget,
+        cardinality,
+        maybe_linked_from,
+    )
 }
 
 pub fn choose_fields(
