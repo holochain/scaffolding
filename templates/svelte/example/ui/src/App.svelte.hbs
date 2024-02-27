@@ -15,7 +15,7 @@
 
   onMount(async () => {
     // We pass an unused string as the url because it will dynamically be replaced in launcher environments
-    client = await AppAgentWebsocket.connect(new URL('https://UNUSED'), 'forum');
+    client = await AppAgentWebsocket.connect('forum');
     loading = false;
   });
 
