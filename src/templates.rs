@@ -1,20 +1,15 @@
 use build_fs_tree::serde::Serialize;
-use dialoguer::theme::ColorfulTheme;
-use dialoguer::Select;
 use handlebars::Handlebars;
 use regex::Regex;
 use std::collections::BTreeMap;
 use std::ffi::OsString;
 use std::path::PathBuf;
 
-use crate::error::{ScaffoldError, ScaffoldResult};
+use crate::error::ScaffoldResult;
 use crate::file_tree::{
-    dir_content, dir_exists, file_content, find_files, flatten_file_tree, unflatten_file_tree,
-    FileTree,
+    file_content, find_files, flatten_file_tree, unflatten_file_tree, FileTree,
 };
-use crate::scaffold::web_app::uis::{guess_or_choose_framework, template_for_ui_framework};
 
-pub mod get;
 pub mod helpers;
 
 pub mod collection;
@@ -239,64 +234,6 @@ pub fn render_template_file_tree_and_merge_with_existing<'a, T: Serialize>(
     unflatten_file_tree(&flattened_app_file_tree)
 }
 
-pub fn templates_path() -> PathBuf {
+pub fn default_templates_path() -> PathBuf {
     PathBuf::from(".templates")
-}
-
-pub fn choose_or_get_template_file_tree(
-    file_tree: &FileTree,
-    template: &Option<String>,
-) -> ScaffoldResult<FileTree> {
-    if dir_exists(file_tree, &templates_path()) {
-        let template_name = choose_or_get_template(file_tree, template)?;
-
-        Ok(FileTree::Directory(dir_content(
-            &file_tree,
-            &templates_path().join(template_name),
-        )?))
-    } else {
-        let ui_framework = guess_or_choose_framework(file_tree)?;
-
-        template_for_ui_framework(&ui_framework)
-    }
-}
-
-pub fn choose_or_get_template(
-    file_tree: &FileTree,
-    template: &Option<String>,
-) -> ScaffoldResult<String> {
-    let templates_path = PathBuf::new().join(templates_path());
-
-    let templates_dir_content =
-        dir_content(file_tree, &templates_path).map_err(|_e| ScaffoldError::NoTemplatesFound)?;
-
-    let templates = templates_dir_content
-        .iter()
-        .filter_map(|(k, v)| {
-            if v.file_content().is_some() {
-                return None;
-            }
-            k.to_str().map(|s| s.to_string())
-        })
-        .collect::<Vec<String>>();
-
-    let chosen_template_name = match (template, templates.len()) {
-        (_, 0) => Err(ScaffoldError::NoTemplatesFound),
-        (None, 1) => Ok(templates[0].clone()),
-        (None, _) => {
-            let option = Select::with_theme(&ColorfulTheme::default())
-                .with_prompt("Which template should we use?")
-                .default(0)
-                .items(&templates[..])
-                .interact()?;
-
-            Ok(templates[option].clone())
-        }
-        (Some(t), _) => match templates.contains(&t) {
-            true => Ok(t.clone()),
-            false => Err(ScaffoldError::TemplateNotFound(t.clone())),
-        },
-    }?;
-
-    Ok(chosen_template_name)
 }

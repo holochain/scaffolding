@@ -37,6 +37,8 @@
             inputs'.holochain.packages.hc-scaffold
           ];
         };
+
+        # packages.default = 
       };
     };
 }

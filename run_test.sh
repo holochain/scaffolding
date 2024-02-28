@@ -33,7 +33,7 @@ setup_and_build_happ() {
 	cleanup_tmp $1
 
 	cd $TEMPLATE_PATH
-	hc-scaffold web-app $1 --setup-nix true --template $2
+	hc-scaffold --template $2 web-app $1 --setup-nix true 
 	cd $1
 
 	hc-scaffold dna forum
