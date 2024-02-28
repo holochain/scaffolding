@@ -41,7 +41,7 @@ use structopt::StructOpt;
 #[derive(Debug, StructOpt)]
 pub struct HcScaffold {
     #[structopt(short, long)]
-    /// The template to scaffold the web-app from
+    /// The template to use for the scaffold command
     /// Can either be an option from the built-in templates: "vanilla", "vue", "lit", "svelte"
     /// Or a path to a custom template
     template: Option<String>,
@@ -881,7 +881,7 @@ Example "{}" scaffolded!
 #[derive(Debug, StructOpt)]
 #[structopt(setting = structopt::clap::AppSettings::InferSubcommands)]
 pub enum HcScaffoldTemplate {
-    /// Initialize a new custom template from a built-in one
+    /// Clone the template in use into a new custom template
     Clone {
         #[structopt(long)]
         /// The folder to initialize the template into, will end up at ".templates/<TO TEMPLATE>"
