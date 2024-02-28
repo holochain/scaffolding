@@ -74,6 +74,7 @@ setup_and_build_hello_world() {
 
 	nix develop --command bash -c "
     set -e
+		cat ui/package.json
     npm i
     npm t 
     "
