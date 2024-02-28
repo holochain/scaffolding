@@ -92,12 +92,10 @@ export default defineComponent({
 
       this.client = client
     } else {
-      // We pass an unused string as the url because it will dynamically be replaced in launcher environments
       this.client = await AppAgentWebsocket.connect('{{app_name}}');
       this.loading = false;
     }
   {{else}}
-    // We pass an unused string as the url because it will dynamically be replaced in launcher environments
     this.client = await AppAgentWebsocket.connect('{{app_name}}');
     this.loading = false;
   {{/if}}
