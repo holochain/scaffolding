@@ -5,6 +5,7 @@ use serde::{ser::SerializeStruct, Deserialize, Serialize, Serializer};
 
 use crate::{
     error::{ScaffoldError, ScaffoldResult},
+    reserved_words::check_for_reserved_words,
     utils::check_case,
 };
 
@@ -158,6 +159,25 @@ pub struct FieldDefinition {
     pub widget: Option<String>,
     pub cardinality: Cardinality,
     pub linked_from: Option<Referenceable>,
+}
+
+impl FieldDefinition {
+    pub fn new(
+        field_name: String,
+        field_type: FieldType,
+        widget: Option<String>,
+        cardinality: Cardinality,
+        linked_from: Option<Referenceable>,
+    ) -> Result<Self, ScaffoldError> {
+        check_for_reserved_words(&field_name)?;
+        Ok(FieldDefinition {
+            field_name,
+            field_type,
+            widget,
+            cardinality,
+            linked_from,
+        })
+    }
 }
 
 impl FieldDefinition {
