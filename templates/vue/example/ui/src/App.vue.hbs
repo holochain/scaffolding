@@ -40,7 +40,6 @@ export default defineComponent({
     };
   },
   async mounted() {
-    // We pass an unused string as the url because it will dynamically be replaced in launcher environments
     this.client = await AppAgentWebsocket.connect('forum');
     
     this.loading = false;

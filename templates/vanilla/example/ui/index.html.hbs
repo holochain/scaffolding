@@ -45,7 +45,6 @@
       }
       
       async function connect() {
-        // We pass an unused string as the url because it will dynamically be replaced in launcher environments
         client = await AppAgentWebsocket.connect('hello-world');
         const canvas = document.getElementById('pubkey')
         pubkey.title = encodeHashToBase64(client.myPubKey)
