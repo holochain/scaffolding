@@ -29,7 +29,7 @@
       
       async function connect() {
         // We pass an unused string as the url because it will dynamically be replaced in launcher environments
-        const appAgentWebsocket = await AppAgentWebsocket.connect(new URL('https://UNUSED'), '{{app_name}}');
+        const appAgentWebsocket = await AppAgentWebsocket.connect('{{app_name}}');
         
         alert("Connected to holochain!");
       }

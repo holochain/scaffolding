@@ -39,14 +39,12 @@
     (client as WebSdk).signUp({ cancellable: false });
 
     } else {
-      // We pass an unused string as the url because it will dynamically be replaced in launcher environments
-      client = await AppAgentWebsocket.connect(new URL('https://UNUSED'), '{{app_name}}');
+      client = await AppAgentWebsocket.connect('{{app_name}}');
 
       loading = false;
     }
   {{else}}
-    // We pass an unused string as the url because it will dynamically be replaced in launcher environments
-    client = await AppAgentWebsocket.connect(new URL('https://UNUSED'), '{{app_name}}');
+    client = await AppAgentWebsocket.connect('{{app_name}}');
 
     loading = false;
   {{/if}}
