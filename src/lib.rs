@@ -50,23 +50,22 @@
 //!
 //! ## Using custom templates
 //!
-//! If you know of some already existing template that you want to use, simply scaffold a new web-app pointing to its git repository with:
+//! All `hc scaffold` commands accept an optional `--template` argument. This argument can be:
+//! - Either one of the built-in templates:
+//!   - "vue"
+//!   - "svelte"
+//!   - "lit"
+//!   - "vanilla"
+//! - Or a path to a custom template.
+//!   - E.g `--template ./path/to/custom/template/folder`
 //!
-//! `hc scaffold web-app forum --templates-url https://github.com/holochain-open-dev/templates`
+//! If you know of some already existing custom template, look first in the documentation of that template for instructions on how to use it, in case the template offers a nix wrapper command, which is much easier to use. 
+//! 
+//! Otherwise, you can just clone it and use it like this:  
 //!
-//! If instead, you want to use that template within an already existing repository, you can use this command instead:
+//! `hc scaffold --template ./path/to/custom/template web-app forum`
 //!
-//! `hc scaffold template get https://github.com/holochain-open-dev/templates`
-//!
-//! Both of the previous commands will create a `.templates` folder in the root folder of your repository, with a copy of the template.
-//!
-//! From this point on, any command that you execute with the scaffolding tool is going to use that custom template instead of the built-in ones.
-//!
-//! If later on the template adds some new features and you want to include them in your repository, you can just run this command again:
-//!
-//! `hc scaffold template get https://github.com/holochain-open-dev/templates`
-//!
-//! And select "Merge with existing template", to overwrite the old one.
+//! Notice that you will need to pass the `--template` argument in every command. 
 //!
 //! ## How to create a custom template
 //!
@@ -76,7 +75,7 @@
 //!
 //! To create a custom template, run this command and select the built-in template that you want to go from, and also give a name to your template.
 //!
-//! `hc scaffold template init`
+//! `hc scaffold --template lit template clone`
 //!
 //! At this point, you'll have a `.templates/<TEMPLATE NAME>` folder. That's where your custom template lives.
 //!
