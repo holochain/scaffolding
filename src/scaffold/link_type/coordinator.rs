@@ -152,7 +152,12 @@ fn get_links_handler_to_agent(
 pub fn get_deleted_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}(
     {from_arg_name}: {from_hash_type},
 ) -> ExternResult<Vec<(SignedActionHashed, Vec<SignedActionHashed>)>> {{
-    let details = get_link_details({from_arg_name}, LinkTypes::{pascal_link_type_name}, None)?;
+    let details = get_link_details(
+        {from_arg_name},
+        LinkTypes::{pascal_link_type_name},
+        None,
+        GetOptions::default(),
+    )?;
     Ok(details
         .into_inner()
         .into_iter()
@@ -202,7 +207,12 @@ fn get_links_handler_to_entry(
 pub fn get_deleted_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}(
     {from_arg_name}: {from_hash_type},
 ) -> ExternResult<Vec<(SignedActionHashed, Vec<SignedActionHashed>)>> {{
-    let details = get_link_details({from_arg_name}, LinkTypes::{pascal_link_type_name}, None)?;
+    let details = get_link_details(
+        {from_arg_name},
+        LinkTypes::{pascal_link_type_name},
+        None,
+        GetOptions::default(),
+    )?;
     Ok(details
         .into_inner()
         .into_iter()
