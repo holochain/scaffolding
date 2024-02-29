@@ -27,7 +27,7 @@
         	in 
         		pkgs.runCommand "hc-scaffold" {
         	    buildInputs = [ pkgs.makeWrapper ];
-        	    src = ./.;
+        	    src = customTemplatePath;
         	  } ''
         	    mkdir $out
         	    mkdir $out/bin
@@ -35,10 +35,10 @@
         	    ln -s ${scaffolding}/bin/* $out/bin
         	    # Except the hello binary
         	    rm $out/bin/hc-scaffold
-        	    cp $src/.templates/app -R $out/.template
+        	    cp $src -R $out/template
         	    # Because we create this ourself, by creating a wrapper
         	    makeWrapper ${scaffolding}/bin/hc-scaffold $out/bin/hc-scaffold \
-        	      --add-flags "--template $out/.template"
+        	      --add-flags "--template $out/template"
         	  '';
       };
     
