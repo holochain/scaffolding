@@ -19,7 +19,29 @@
     {
       inherit inputs;
     }
-    {
+    ({ withSystem, flake-parts-lib, ...}: {
+      flake = {
+        lib.wrapCustomTemplate = { system, pkgs, customTemplatePath }: 
+          let 
+        	  scaffolding = withSystem system ({config, ...}: config.packages.default);
+        	in 
+        		pkgs.runCommand "hc-scaffold" {
+        	    buildInputs = [ pkgs.makeWrapper ];
+        	    src = ./.;
+        	  } ''
+        	    mkdir $out
+        	    mkdir $out/bin
+        	    # We create the bin folder ourselves and link every binary in it
+        	    ln -s ${scaffolding}/bin/* $out/bin
+        	    # Except the hello binary
+        	    rm $out/bin/hc-scaffold
+        	    cp $src/.templates/app -R $out/.template
+        	    # Because we create this ourself, by creating a wrapper
+        	    makeWrapper ${scaffolding}/bin/hc-scaffold $out/bin/hc-scaffold \
+        	      --add-flags "--template $out/.template"
+        	  '';
+      };
+    
       systems = builtins.attrNames inputs.holochain.devShells;
       perSystem = {
         self',
@@ -44,5 +66,5 @@
         # Expose the scaffolding tool CLI as the main package for this crate
         packages.default = inputs'.holochain.packages.hc-scaffold;
       };
-    };
+    });
 }
