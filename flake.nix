@@ -25,7 +25,7 @@
       
         lib.wrapCustomTemplate = { system, pkgs, customTemplatePath }: 
           let 
-        	  scaffolding = withSystem system ({config, ...}: inputs.holochain.outputs.${system}.packages.hc-scaffold);
+        	  scaffolding = withSystem system ({config, ...}: inputs.holochain.packages.${system}.hc-scaffold);
         	in 
         		pkgs.runCommand "hc-scaffold" {
         	    buildInputs = [ pkgs.makeWrapper ];
