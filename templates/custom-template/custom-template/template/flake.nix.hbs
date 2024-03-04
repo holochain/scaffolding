@@ -2,7 +2,7 @@
   {{#match_scope "inputs = {"}}
       {{previous_scope_content}}
 
-      scaffolding.url = "github:holochain-open-dev/templates";
+      scaffolding.url = "github:<TODO:REPLACE_ME_WITH_THE_APPROPRIATE_GIT_URL>";
   {{/match_scope}}
   {{#match_scope "devShells.default = pkgs.mkShell {"}}
 
@@ -12,7 +12,7 @@
                 nodejs_20
                 cargo-nextest
               ] ++ [
-                inputs'.scaffolding.packages.hc-scaffold-app-template
+                inputs'.scaffolding.packages.hc-scaffold-custom-template
               ];
   {{/match_scope}}
 {{/merge}}
