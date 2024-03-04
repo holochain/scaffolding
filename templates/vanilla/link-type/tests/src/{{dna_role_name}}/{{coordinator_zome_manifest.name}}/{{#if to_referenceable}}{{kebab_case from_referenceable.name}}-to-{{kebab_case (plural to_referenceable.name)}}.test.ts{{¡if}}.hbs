@@ -1,7 +1,19 @@
 import { assert, test } from "vitest";
 
 import { runScenario, dhtSync, CallableCell } from '@holochain/tryorama';
-import { NewEntryAction, ActionHash, Record, Link, AppBundleSource,  fakeActionHash, fakeAgentPubKey, fakeEntryHash } from '@holochain/client';
+import {
+  NewEntryAction,
+  ActionHash,
+  Record,
+  Link,
+  CreateLink,
+  DeleteLink,
+  SignedActionHashed,
+  AppBundleSource,
+  fakeActionHash,
+  fakeAgentPubKey,
+  fakeEntryHash
+} from '@holochain/client';
 import { decode } from '@msgpack/msgpack';
 
 {{#if (ne from_referenceable.hash_type "AgentPubKey")}}
