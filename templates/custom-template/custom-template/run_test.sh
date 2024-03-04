@@ -35,10 +35,7 @@ hc-scaffold link-type certificate like --delete false --bidirectional false
 hc-scaffold link-type agent:creator post --delete false --bidirectional false
 
 npm i
-
-npm run format -w ui
-npm run lint -w ui
 npm run build -w ui
-
 npm t
+npm run package
 "
