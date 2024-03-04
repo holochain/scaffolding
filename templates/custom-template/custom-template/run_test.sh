@@ -1,18 +1,17 @@
 #!/usr/bin/bash
-# Run this inside `nix develop`
 set -e
 
 DIR=$(pwd)
 
-nix shell .#hc-scaffold-app-template --command bash -c "
+nix shell .#hc-scaffold-custom-template --command bash -c "
 
 cd /tmp
-rm -rf forum-lit-open-dev
+rm -rf custom-template-app
 
-hc-scaffold web-app forum-lit-open-dev --setup-nix true 
+hc-scaffold web-app custom-template-app --setup-nix true 
 "
 
-cd /tmp/forum-lit-open-dev
+cd custom-template-app
 
 nix develop --override-input scaffolding "path:$DIR" --command bash -c "
 
@@ -36,8 +35,6 @@ hc-scaffold link-type certificate like --delete false --bidirectional false
 hc-scaffold link-type agent:creator post --delete false --bidirectional false
 
 npm i
-
-npm i -w ui @holochain-open-dev/file-storage
 
 npm run format -w ui
 npm run lint -w ui

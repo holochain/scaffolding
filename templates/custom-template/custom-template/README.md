@@ -65,3 +65,11 @@ hc scaffold zome
 ```
 
 And all the `hc scaffold` commands will already be using this custom template.
+
+## Running the tests
+
+To run the tests for this custom template, simply run the `run_test.sh` script:
+
+```bash
+sh run_test.sh
+``` 

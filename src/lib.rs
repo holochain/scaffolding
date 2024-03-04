@@ -73,11 +73,14 @@
 //!
 //! The best way to start creating a custom template is to go from one of the built-in ones, and modify it.
 //!
-//! To create a custom template, run this command.
+//! To create a custom template, execute these steps:
 //!
+//! 1. Run this command:
 //! `nix flake init -t github:holochain/scaffolding`
+//! 2. Check this new folder in a version control system like git.
+//! 3. Replace all instances of `<TODO:REPLACE_ME_WITH_THE_APPROPRIATE_GIT_URL>` in its `README.md`.
 //!
-//! This will create a new skeleton repository structure, with a `template` folder. That's where your custom template lives.
+//! That's it! At this point you will have a correctly functioning custom template repository with tests, a `README.md` documenting how to use it, and a `template` folder. That's where your custom template lives.
 //!
 //! Templates have this directory structure:
 //!
