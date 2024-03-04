@@ -223,7 +223,7 @@ test('create and delete {{pascal_case entry_type.name}}', async () => {
 
     // Wait for the entry deletion to be propagated to the other node.
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
-        
+
     // Bob gets the oldest delete for the {{pascal_case entry_type.name}}
     const oldestDeleteFor{{pascal_case entry_type.name}} = await bob.cells[0].callZome({
       zome_name: "{{coordinator_zome_manifest.name}}",
@@ -232,8 +232,8 @@ test('create and delete {{pascal_case entry_type.name}}', async () => {
     });
     assert.ok(oldestDeleteFor{{pascal_case entry_type.name}});
         
-    // Bob gets the deletions for the {{pascal_case entry_type.name}}
-    const deletesFor{{pascal_case entry_type.name}} = await bob.cells[0].callZome({
+    // Bob gets the deletions for {{pascal_case entry_type.name}}
+    const deletesFor{{title_case entry_type.name}} = await bob.cells[0].callZome({
       zome_name: "{{coordinator_zome_manifest.name}}",
       fn_name: "get_all_deletes_for_{{snake_case entry_type.name}}",
       payload: record.signed_action.hashed.hash,

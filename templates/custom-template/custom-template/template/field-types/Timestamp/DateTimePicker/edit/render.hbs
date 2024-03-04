@@ -1,2 +1,2 @@
-<vaadin-date-time-picker label="{{label}}" {{#if variable_to_read}}value={new Date({{variable_to_read}} / 1000).toISOString()}{{/if}} on:change={e => { {{variable_to_change}} = new Date(e.target.value).valueOf() * 1000;} } {{#if required}}required{{/if}}></vaadin-date-time-picker>
+<vaadin-date-time-picker label="{{label}}" {{#if variable_to_read}}.value=${new Date({{variable_to_read}} / 1000).toISOString()}{{/if}} @change=${(e: CustomEvent) => { {{variable_to_change}} = new Date((e.target as any).value).valueOf() * 1000;} } {{#if required}}required{{/if}}></vaadin-date-time-picker>
 

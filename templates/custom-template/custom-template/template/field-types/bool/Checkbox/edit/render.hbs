@@ -1,3 +1,3 @@
 <mwc-formfield label="{{label}}">
-  <mwc-checkbox {{#if variable_to_read}}checked={ {{variable_to_read}} }{{/if}} on:change={e => { {{variable_to_change}} = e.target.checked;} }></mwc-checkbox>
+  <mwc-checkbox .checked=${ {{variable_to_read}} } @change=${(e: CustomEvent) => { {{variable_to_change}} = (e.target as any).checked;} }></mwc-checkbox>
 </mwc-formfield>
