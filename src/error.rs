@@ -151,8 +151,8 @@ pub enum ScaffoldError {
     InvalidArguments(String),
 
     /// anything else
-    #[error("Unknown error: {0}")]
-    MiscError(#[from] Box<dyn std::error::Error + Send + Sync>),
+    #[error("Unexpected error: {0}")]
+    MiscError(#[from] anyhow::Error),
 }
 
 /// HcBundle Result type.
