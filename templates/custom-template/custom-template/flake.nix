@@ -11,7 +11,7 @@
 
     nixpkgs.follows = "holochain-flake/nixpkgs";
     flake-parts.follows = "holochain-flake/flake-parts";
-    scaffolding.url = "github:holochain/scaffolding/nixify";
+    scaffolding.url = "github:holochain/scaffolding";
   };
 
   outputs = inputs @ { flake-parts, holochain-flake, ... }:
