@@ -4,9 +4,6 @@
   inputs = {
     nixpkgs.follows = "holochain/nixpkgs";
     versions.url = "github:holochain/holochain?dir=versions/weekly";
-    # Override https://github.com/holochain/holochain/blob/cee25ff75590b73366cba588e54912e40f86bdb5/versions/weekly/flake.nix#L21 to point to the actual path from this repository
-    # TODO: potentially move all of [this file](https://github.com/holochain/holochain/blob/develop/nix/modules/scaffolding.nix) here, requires the holochain crate to re-export the rust toolchain it uses to compile holochain itself
-    versions.inputs.scaffolding.url = "path:.";
 
     holochain = {
       url = "github:holochain/holochain";
@@ -23,7 +20,7 @@
       flake = {
         lib.wrapCustomTemplate = { system, pkgs, customTemplatePath }: 
           let 
-        	  scaffolding = withSystem system ({config, ...}: config.packages.default);
+        	  scaffolding = withSystem system ({config, ...}: inputs.holochain.${system}.packages.hc-scaffold);
         	in 
         		pkgs.runCommand "hc-scaffold" {
         	    buildInputs = [ pkgs.makeWrapper ];
@@ -63,8 +60,13 @@
           ];
         };
 
-        # Expose the scaffolding tool CLI as the main package for this crate
-        packages.default = inputs'.holochain.packages.hc-scaffold;
+        # TODO: Expose the scaffolding tool CLI as the main package for this crate
+        # packages.default = inputs'.holochain.packages.hc-scaffold;
+
+        templates.default = {
+          path = ./templates/custom-template;
+          description  = "Custom template for the scaffolding tool";
+        };
       };
     });
 }

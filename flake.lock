@@ -349,7 +349,7 @@
       "flake": false,
       "locked": {
         "lastModified": 0,
-        "narHash": "sha256-/vBbc89jnPqZa2htAbNoJR6qAURx8FT61WsMj5telfE=",
+        "narHash": "sha256-VZvcESfdHPlP9t5mkGudilN2SO6i6CJm95Q/NMe/oYg=",
         "path": ".",
         "type": "path"
       },
