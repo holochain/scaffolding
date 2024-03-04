@@ -13,7 +13,7 @@ hc-scaffold web-app custom-template-app --setup-nix true
 
 cd /tmp/custom-template-app
 
-nix develop --override-input scaffolding $DIR --command bash -c "
+nix develop --override-input scaffolding "path:$DIR" --command bash -c "
 
 set -e
 hc-scaffold dna forum
