@@ -1,0 +1,18 @@
+{{#merge previous_file_content}}
+  {{#match_scope "inputs = {"}}
+      {{previous_scope_content}}
+
+      scaffolding.url = "github:holochain-open-dev/templates";
+  {{/match_scope}}
+  {{#match_scope "devShells.default = pkgs.mkShell {"}}
+
+              inputsFrom = [ inputs'.holochain-flake.devShells.holonix ];
+
+              packages = with pkgs; [
+                nodejs_20
+                cargo-nextest
+              ] ++ [
+                inputs'.scaffolding.packages.hc-scaffold-app-template
+              ];
+  {{/match_scope}}
+{{/merge}}

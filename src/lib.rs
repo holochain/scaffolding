@@ -78,7 +78,8 @@
 //! 1. Run this command:
 //! `nix flake init -t github:holochain/scaffolding`
 //! 2. Check this new folder in a version control system like git.
-//! 3. Replace all instances of `<TODO:REPLACE_ME_WITH_THE_APPROPRIATE_GIT_URL>` in its `README.md`.
+//! 3. Replace all instances of `<TODO:REPLACE_ME_WITH_THE_APPROPRIATE_GIT_URL>` in its `README.md` file with the appropriate git URL (eg. "github:holochain-open-dev/templates").
+//! 4. Replace all instances of `<TODO:REPLACE_ME_WITH_THE_APPROPRIATE_GIT_URL>` in its `template/web-app/flake.nix.hbs` file with the appropriate git URL (eg. "github:holochain-open-dev/templates").
 //!
 //! That's it! At this point you will have a correctly functioning custom template repository with tests, a `README.md` documenting how to use it, and a `template` folder. That's where your custom template lives.
 //!
