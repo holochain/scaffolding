@@ -11,7 +11,7 @@ rm -rf custom-template-app
 hc-scaffold web-app custom-template-app --setup-nix true 
 "
 
-cd custom-template-app
+cd /tmp/custom-template-app
 
 nix develop --override-input scaffolding "path:$DIR" --command bash -c "
 
