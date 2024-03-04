@@ -1,7 +1,20 @@
 import { assert, test } from "vitest";
 
 import { runScenario, dhtSync, CallableCell } from '@holochain/tryorama';
-import { NewEntryAction, ActionHash, Record, AppBundleSource, fakeDnaHash, fakeActionHash, fakeAgentPubKey, fakeEntryHash } from '@holochain/client';
+import {
+  NewEntryAction,
+  ActionHash,
+  Record,
+  Link,
+  SignedActionHashed,
+  CreateLink,
+  DeleteLink,
+  AppBundleSource,
+  fakeDnaHash,
+  fakeActionHash,
+  fakeAgentPubKey,
+  fakeEntryHash
+} from '@holochain/client';
 import { decode } from '@msgpack/msgpack';
 
 import { create{{pascal_case entry_type.name}}, sample{{pascal_case entry_type.name}} } from './common.js';
@@ -252,7 +265,7 @@ test('create and delete {{pascal_case entry_type.name}}', async () => {
     assert.equal(linksTo{{pascal_case (plural linked_from.name)}}.length, 0);
     
     // Bob gets the deleted {{pascal_case (plural linked_from.name)}} for the {{pascal_case ../entry_type.name}} 
-    const deletedLinksTo{{pascal_case (plural linked_from.name)}} = await bob.cells[0].callZome({
+    const deletedLinksTo{{pascal_case (plural linked_from.name)}}: Array<[SignedActionHashed<CreateLink>, SignedActionHashed<DeleteLink>[]]> = await bob.cells[0].callZome({
       zome_name: "{{../coordinator_zome_manifest.name}}",
       fn_name: "get_deleted_{{snake_case (plural ../entry_type.name)}}_for_{{snake_case linked_from.name}}",
       payload: {{#if (eq cardinality "vector")}}sample.{{field_name}}[0]{{else}}sample.{{field_name}}{{/if}}
