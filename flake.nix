@@ -18,6 +18,11 @@
     }
     ({ withSystem, flake-parts-lib, ...}: {
       flake = {
+        templates.default = {
+          path = ./templates/custom-template;
+          description  = "Custom template for the scaffolding tool";
+        };
+      
         lib.wrapCustomTemplate = { system, pkgs, customTemplatePath }: 
           let 
         	  scaffolding = withSystem system ({config, ...}: inputs.holochain.${system}.packages.hc-scaffold);
@@ -62,11 +67,6 @@
 
         # TODO: Expose the scaffolding tool CLI as the main package for this crate
         # packages.default = inputs'.holochain.packages.hc-scaffold;
-
-        templates.default = {
-          path = ./templates/custom-template;
-          description  = "Custom template for the scaffolding tool";
-        };
       };
     });
 }
