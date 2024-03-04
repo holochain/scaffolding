@@ -23,7 +23,7 @@ use crate::scaffold::zome::{
     scaffold_integrity_zome, scaffold_integrity_zome_with_path, ZomeFileTree,
 };
 use crate::templates::example::scaffold_example;
-use crate::templates::{default_templates_path, ScaffoldedTemplate};
+use crate::templates::ScaffoldedTemplate;
 use crate::utils::{
     check_case, check_no_whitespace, input_no_whitespace, input_with_case, input_yes_or_no,
 };
@@ -203,13 +203,11 @@ impl HcScaffold {
             Some(template) => match template.as_str() {
                 "lit" | "svelte" | "vanilla" | "vue" => {
                     let ui_framework = UiFramework::from_str(template.as_str())?;
-
                     template_for_ui_framework(&ui_framework)?
                 }
                 custom_template_path => {
                     let templates_dir = current_dir.join(PathBuf::from(custom_template_path));
-                    let templates_file_tree = load_directory_into_memory(&templates_dir)?;
-                    templates_file_tree
+                    load_directory_into_memory(&templates_dir)?
                 }
             },
             None => {
@@ -884,7 +882,7 @@ pub enum HcScaffoldTemplate {
     /// Clone the template in use into a new custom template
     Clone {
         #[structopt(long)]
-        /// The folder to initialize the template into, will end up at ".templates/<TO TEMPLATE>"
+        /// The folder to initialize the template into, will end up at "<TO TEMPLATE>"
         to_template: Option<String>,
     },
 }
@@ -903,7 +901,7 @@ impl HcScaffoldTemplate {
         };
 
         let template_file_tree = dir! {
-            default_templates_path().join(&target_template) => template_file_tree
+            target_template.clone() => template_file_tree
         };
 
         let file_tree = MergeableFileSystemTree::<OsString, String>::from(template_file_tree);
@@ -915,7 +913,7 @@ impl HcScaffoldTemplate {
                 println!(
                     r#"Template initialized to folder {:?}
 "#,
-                    default_templates_path().join(target_template)
+                    target_template
                 );
             }
         }

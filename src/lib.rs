@@ -59,13 +59,13 @@
 //! - Or a path to a custom template.
 //!   - E.g `--template ./path/to/custom/template/folder`
 //!
-//! If you know of some already existing custom template, look first in the documentation of that template for instructions on how to use it, in case the template offers a nix wrapper command, which is much easier to use. 
-//! 
+//! If you know of some already existing custom template, look first in the documentation of that template for instructions on how to use it, in case the template offers a nix wrapper command, which is much easier to use.
+//!
 //! Otherwise, you can just clone it and use it like this:  
 //!
 //! `hc scaffold --template ./path/to/custom/template web-app forum`
 //!
-//! Notice that you will need to pass the `--template` argument in every command. 
+//! Notice that you will need to pass the `--template` argument in every command.
 //!
 //! ## How to create a custom template
 //!
@@ -73,11 +73,11 @@
 //!
 //! The best way to start creating a custom template is to go from one of the built-in ones, and modify it.
 //!
-//! To create a custom template, run this command and select the built-in template that you want to go from, and also give a name to your template.
+//! To create a custom template, run this command.
 //!
-//! `hc scaffold --template lit template clone`
+//! `nix flake init -t github:holochain/scaffolding`
 //!
-//! At this point, you'll have a `.templates/<TEMPLATE NAME>` folder. That's where your custom template lives.
+//! This will create a new skeleton repository structure, with a `template` folder. That's where your custom template lives.
 //!
 //! Templates have this directory structure:
 //!
@@ -94,10 +94,13 @@
 //! Each folder corresponds to the templates that are going to be created when running a specific command. This is the steps that are executed:
 //!
 //! 1. The user executes a scaffolding command, like `hc scaffold web-app`.
-//! 2. The scaffolding tool asks the user to input all the necessary information.
-//! 3. The apropriate **backend** and **testing** code is created automatically, the custom template can't influence it.
-//! 4. The scaffolding tool looks for a custom template in the `.templates` folder.
-//! 5. If there is one, it will look for a folder inside that custom template that corresponds to the command being run.
+//!   - They may optionally pass in a `--template` argument, which specifies the template that they want to use for this command.
+//! 2. The scaffolding tool asks the user to input all the necessary information specific to the command.
+//! 3. The apropriate **backend** code is created automatically, the custom template can't influence it.
+//! 4. If given a `--template` argument:
+//!   4.1. If the value of the `--template` argument is one of the built-in templates, it will use that built-in template.
+//!   4.2. If not, it will interpret the value of the `--template` argument as a path to a custom template directory and will try to read it from that path.
+//! 5. If a custom template is found, it will look for a folder inside that custom template that corresponds to the command being run.
 //!   - Eg. `hc scaffold web-app` will look for a folder named `web-app`.
 //! 6. If there is one, it will copy the directory structure inside that folder and select the files with the `.hbs` extension.
 //! 7. It will render the contents of each of the files using as context the appropriate data from the command.

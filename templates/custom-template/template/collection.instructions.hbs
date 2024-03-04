@@ -1,0 +1,9 @@
+{{#if (eq collection_type.type "Global")}}
+At first, the UI for this application is empty. If you want the newly scaffolded collection to be the entry point for its UI, import the element in `ui/src/App.svelte`:
+
+  import {{pascal_case collection_name}} from './{{dna_role_name}}/{{coordinator_zome_manifest.name}}/{{pascal_case collection_name}}.svelte';
+  
+And insert it in the `<div id="content" />` like this:
+
+  <div id="content"><{{pascal_case collection_name}}></{{pascal_case collection_name}}></div>
+{{/if}}

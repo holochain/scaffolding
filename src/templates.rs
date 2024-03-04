@@ -233,7 +233,3 @@ pub fn render_template_file_tree_and_merge_with_existing<'a, T: Serialize>(
 
     unflatten_file_tree(&flattened_app_file_tree)
 }
-
-pub fn default_templates_path() -> PathBuf {
-    PathBuf::from(".templates")
-}
