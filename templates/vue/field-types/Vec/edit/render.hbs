@@ -1,7 +1,7 @@
 <div style="display: flex; flex-direction: column">
   <span>{{title_case field_name}}</span>
   
-  <div v-for="(el, i) in {{camel_case field_name}}">
+  <div v-for="(el, i) in {{camel_case field_name}}" :key="i">
     {{> (concat field_type.type "/" widget "/edit/render") label="" variable_to_read="el" variable_to_change=(concat (camel_case field_name) "[i]" ) }} }
   </div>
 
