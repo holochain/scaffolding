@@ -15,7 +15,7 @@
     <div v-{{#if crud.update}}else-{{/if}}if="record" style="display: flex; flex-direction: column">
       <div style="display: flex; flex-direction: row">
         <span style="flex: 1"></span>
-      
+
 {{#if crud.update}}
         <mwc-icon-button style="margin-left: 8px" icon="edit" @click="editing = true"></mwc-icon-button>
 {{/if}}
@@ -25,7 +25,7 @@
       </div>
 
 {{#each entry_type.fields}}
-  {{#if widget}}	  
+  {{#if widget}}
     {{#if (not (eq cardinality "vector") )}}
       <div style="display: flex; flex-direction: row; margin-bottom: 16px;">
 	<span style="margin-right: 4px"><strong>{{title_case field_name}}: </strong></span>
@@ -38,7 +38,7 @@
   {{/if}}
 {{/each}}
     </div>
-    
+
     <span v-else>The requested {{lower_case entry_type.name}} was not found.</span>
   </div>
 
@@ -122,7 +122,7 @@ export default defineComponent({
 
       this.loading = false;
     },
-{{#if crud.delete}}    
+{{#if crud.delete}}
     async delete{{pascal_case entry_type.name}}() {
       try {
         await this.client.callZome({

@@ -2,13 +2,13 @@
   <div v-if="loading" style="display: flex; flex: 1; align-items: center; justify-content: center">
     <mwc-circular-progress indeterminate></mwc-circular-progress>
   </div>
-  
+
   <div v-else style="display: flex; flex-direction: column">
     <span v-if="error">Error fetching the {{lower_case (plural ../entry_type.name)}}: {{{{raw}}}} {{error}}.{{{{/raw}}}}</span>
     <div v-else-if="links && links.length > 0" style="margin-bottom: 8px">
-      <{{pascal_case ../entry_type.name}}Detail 
-        v-for="link in links" 
-        :{{kebab_case ../entry_type.name}}-hash="link.target" 
+      <{{pascal_case ../entry_type.name}}Detail
+        v-for="link in links"
+        :{{kebab_case ../entry_type.name}}-hash="link.target"
       >
       </{{pascal_case ../entry_type.name}}Detail>
     </div>
