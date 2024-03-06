@@ -18,6 +18,9 @@ export class {{pascal_case (plural ../entry_type.name)}}For{{pascal_case linked_
   })
   {{camel_case linked_from.singular_arg}}!: {{linked_from.hash_type}};
 
+  @state()
+  hashes: Array<ActionHash> = [];
+
   _fetch{{pascal_case (plural ../entry_type.name)}} = new Task(this, ([{{camel_case linked_from.singular_arg}}]) => this.client.callZome({
       cap_secret: null,
       role_name: '{{../dna_role_name}}',
@@ -30,15 +33,23 @@ export class {{pascal_case (plural ../entry_type.name)}}For{{pascal_case linked_
     if (this.{{camel_case linked_from.singular_arg}} === undefined) {
       throw new Error(`The {{camel_case linked_from.singular_arg}} property is required for the {{kebab_case (plural ../entry_type.name)}}-for-{{kebab_case linked_from.name}} element`);
     }
+
+    this.client.on('signal', signal => {
+      if (signal.zome_name !== '{{../coordinator_zome_manifest.name}}') return; 
+      const payload = signal.payload as {{pascal_case ../coordinator_zome_manifest.name}}Signal;
+      if (payload.type !== 'EntryCreated') return;
+      if (payload.app_entry.type !== '{{pascal_case ../entry_type.name}}') return;
+      this.hashes = [...this.hashes, payload.action.hashed.hash];
+    });
   }
 
-  renderList(links: Array<Link>) {
-    if (links.length === 0) return html`<span>No {{lower_case (plural ../entry_type.name)}} found for this {{lower_case linked_from.name}}.</span>`;
+  renderList(hashes: Array<ActionHash>) {
+    if (hashes.length === 0) return html`<span>No {{lower_case (plural ../entry_type.name)}} found for this {{lower_case linked_from.name}}.</span>`;
     
     return html`
       <div style="display: flex; flex-direction: column">
-        ${links.map(link =>
-          html`<{{kebab_case ../entry_type.name}}-detail .{{camel_case ../entry_type.name}}Hash=${link.target}></{{kebab_case ../entry_type.name}}-detail>`
+        ${hashes.map(hash =>
+          html`<{{kebab_case ../entry_type.name}}-detail .{{camel_case ../entry_type.name}}Hash=${hash} @{{kebab_case referenceable.name}}-deleted=${() => { this._fetch.run(); this.hashes = []; } }></{{kebab_case ../entry_type.name}}-detail>`
         )}
       </div>
     `;
@@ -46,10 +57,12 @@ export class {{pascal_case (plural ../entry_type.name)}}For{{pascal_case linked_
 
   render() {
     return this._fetch{{pascal_case (plural ../entry_type.name)}}.render({
-      pending: () => html`<div style="display: flex; flex: 1; align-items: center; justify-content: center">
-        <mwc-circular-progress indeterminate></mwc-circular-progress>
-      </div>`,
-      complete: (links) => this.renderList(links),
+      pending: () => html`
+        <div style="display: flex; flex: 1; align-items: center; justify-content: center">
+          <mwc-circular-progress indeterminate></mwc-circular-progress>
+        </div>
+      `,
+      complete: (links) => this.renderList([...this.hashes, ...links.map(l => l.target)]),
       error: (e: any) => html`<span>Error fetching {{lower_case (plural ../entry_type.name)}}: ${e.data.data}.</span>`
     });
   }
