@@ -3,7 +3,7 @@ import { onMount, getContext } from 'svelte';
 import '@material/mwc-circular-progress';
 import type { Link, ActionHash, EntryHash, AppAgentClient, Record, AgentPubKey, NewEntryAction } from '@holochain/client';
 import { clientContext } from '../../contexts';
-import type { {{pascal_case ../entry_type.name}} } from './types';
+import type { {{pascal_case ../entry_type.name}}, {{pascal_case ../coordinator_zome_manifest.name}}Signal } from './types';
 import {{pascal_case ../entry_type.name}}Detail from './{{pascal_case ../entry_type.name}}Detail.svelte';
 
 export let {{camel_case linked_from.singular_arg}}: {{linked_from.hash_type}};
@@ -23,6 +23,14 @@ onMount(async () => {
   }
 
   await fetch{{pascal_case (plural ../entry_type.name)}}();
+
+  client.on('signal', signal => {
+    if (signal.zome_name !== '{{../coordinator_zome_manifest.name}}') return;
+    const payload = signal.payload as {{pascal_case ../coordinator_zome_manifest.name}}Signal;
+    if (payload.type !== 'EntryCreated') return;
+    if (payload.app_entry.type !== '{{pascal_case ../entry_type.name}}') return;
+    hashes = [...hashes, payload.action.hashed.hash];
+  });
 });
 
 async function fetch{{pascal_case (plural ../entry_type.name)}}() {
