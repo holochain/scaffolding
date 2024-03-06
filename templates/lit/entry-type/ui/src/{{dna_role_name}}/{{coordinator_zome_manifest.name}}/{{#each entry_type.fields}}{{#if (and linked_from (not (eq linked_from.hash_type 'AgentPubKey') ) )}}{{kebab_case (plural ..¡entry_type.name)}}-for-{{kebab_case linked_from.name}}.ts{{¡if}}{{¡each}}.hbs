@@ -4,6 +4,7 @@ import { InstalledCell, Record, Link, AppAgentClient, EntryHash, ActionHash, Age
 import { consume } from '@lit-labs/context';
 import '@material/mwc-circular-progress';
 import { Task } from '@lit-labs/task';
+import { {{pascal_case ../coordinator_zome_manifest.name}}Signal } from './types';
 
 import { clientContext } from '../../contexts';
 import './{{kebab_case ../entry_type.name}}-detail';
@@ -49,7 +50,7 @@ export class {{pascal_case (plural ../entry_type.name)}}For{{pascal_case linked_
     return html`
       <div style="display: flex; flex-direction: column">
         ${hashes.map(hash =>
-          html`<{{kebab_case ../entry_type.name}}-detail .{{camel_case ../entry_type.name}}Hash=${hash} @{{kebab_case entry_type.name}}-deleted=${() => { this._fetch.run(); this.hashes = []; } }></{{kebab_case ../entry_type.name}}-detail>`
+          html`<{{kebab_case ../entry_type.name}}-detail .{{camel_case ../entry_type.name}}Hash=${hash} @{{kebab_case ../entry_type.name}}-deleted=${() => { this._fetch{{pascal_case (plural ../entry_type.name)}}.run(); this.hashes = []; } }></{{kebab_case ../entry_type.name}}-detail>`
         )}
       </div>
     `;
