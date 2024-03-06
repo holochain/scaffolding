@@ -5,10 +5,11 @@
   
   <div v-else style="display: flex; flex-direction: column">
     <span v-if="error">Error fetching the {{lower_case (plural ../entry_type.name)}}: {{{{raw}}}} {{error}}.{{{{/raw}}}}</span>
-    <div v-else-if="links && links.length > 0" style="margin-bottom: 8px">
+    <div v-else-if="hashes && hashes.length > 0" style="margin-bottom: 8px">
       <{{pascal_case ../entry_type.name}}Detail 
-        v-for="link in links" 
-        :{{kebab_case ../entry_type.name}}-hash="link.target" 
+        v-for="hash in hashes" 
+        :{{kebab_case ../entry_type.name}}-hash="hash" 
+        @{{kebab_case ../entry_type.name}}-deleted="fetch{{pascal_case (plural ../entry_type.name)}}()"
       >
       </{{pascal_case ../entry_type.name}}Detail>
     </div>
@@ -18,9 +19,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, inject, ComputedRef } from 'vue';
+import { defineComponent, inject, ComputedRef, toRaw } from 'vue';
 import { decode } from '@msgpack/msgpack';
-import { AppAgentClient, Record, Link, AgentPubKey } from '@holochain/client';
+import { AppAgentClient, Link, Record, ActionHash, AgentPubKey } from '@holochain/client';
 import '@material/mwc-circular-progress';
 import {{pascal_case ../entry_type.name}}Detail from './{{pascal_case ../entry_type.name}}Detail.vue';
 
@@ -34,10 +35,10 @@ export default defineComponent({
       required: true
     }
   },
-  data(): { links: Array<Link> | undefined; loading: boolean; error: any } {
+  data(): { hashes: Array<ActionHash> | undefined; loading: boolean; error: any } {
     return {
-      links: undefined,
-      loading: true,
+      hashes: [],
+      loading: false,
       error: undefined
     }
   },
@@ -46,19 +47,34 @@ export default defineComponent({
       throw new Error(`The {{camel_case linked_from.singular_arg}}Hash input is required for the {{pascal_case (plural ../entry_type.name)}}For{{pascal_case linked_from.name}} element`);
     }
 
-    try {
-      this.links = await this.client.callZome({
-        cap_secret: null,
-        role_name: '{{../dna_role_name}}',
-        zome_name: '{{../coordinator_zome_manifest.name}}',
-        fn_name: 'get_{{snake_case (plural ../entry_type.name)}}_for_{{snake_case linked_from.name}}',
-        payload: this.{{camel_case linked_from.singular_arg}},
-      });
-    } catch (e) {
-      this.error = e;
-    }
-    this.loading = false;
+    await this.fetch{{pascal_case (plural ../entry_type.name)}}();
+
+    toRaw(this.client).on('signal', signal => {
+      if (signal.zome_name !== '{{../coordinator_zome_manifest.name}}') return;
+      const payload = signal.payload as {{pascal_case ../coordinator_zome_manifest.name}}Signal;
+      if (payload.type !== 'EntryCreated') return;
+      if (payload.app_entry.type !== '{{pascal_case ../entry_type.name}}') return;
+      if (this.hashes) this.hashes.push(payload.action.hashed.hash);
+    });
   },
+  methods: {
+    async fetch{{pascal_case (plural ../entry_type.name)}}() {
+      this.loading = true;
+      try {
+        const links: Link[] = await this.client.callZome({
+          cap_secret: null,
+          role_name: '{{../dna_role_name}}',
+          zome_name: '{{../coordinator_zome_manifest.name}}',
+          fn_name: 'get_{{snake_case (plural ../entry_type.name)}}_for_{{snake_case linked_from.name}}',
+          payload: this.{{camel_case linked_from.singular_arg}},
+        });
+        this.hashes = links.map(l => l.target);
+      } catch (e) {
+        this.error = e;
+      }
+      this.loading = false;
+    }
+  }
   setup() {
     const client = (inject('client') as ComputedRef<AppAgentClient>).value;
     return {
