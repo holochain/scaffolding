@@ -27,7 +27,7 @@ export let {{camel_case entry_type.name}}Hash: {{#if entry_type.reference_entry_
 
 let client: AppAgentClient = (getContext(clientContext) as any).getClient();
 
-let loading = true;
+let loading: boolean;
 let error: any = undefined;
 
 let record: Record | undefined;
@@ -52,9 +52,6 @@ onMount(async () => {
 
 async function fetch{{pascal_case entry_type.name}}() {
   loading = true;
-  error = undefined;
-  record = undefined;
-  {{camel_case entry_type.name}} = undefined;
   
   try {
     record = await client.callZome({
