@@ -24,6 +24,7 @@ import { decode } from '@msgpack/msgpack';
 import { AppAgentClient, Link, Record, ActionHash, AgentPubKey } from '@holochain/client';
 import '@material/mwc-circular-progress';
 import {{pascal_case ../entry_type.name}}Detail from './{{pascal_case ../entry_type.name}}Detail.vue';
+import { {{pascal_case ../coordinator_zome_manifest.name}}Signal } from './types';
 
 export default defineComponent({
   components: {
