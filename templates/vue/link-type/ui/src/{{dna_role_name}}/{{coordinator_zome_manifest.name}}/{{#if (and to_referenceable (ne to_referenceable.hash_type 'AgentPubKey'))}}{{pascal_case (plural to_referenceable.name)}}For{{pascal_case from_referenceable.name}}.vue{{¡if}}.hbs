@@ -8,7 +8,8 @@
     <div v-else-if="hashes && hashes.length > 0" style="margin-bottom: 8px">
 {{#if (file_exists 'src/{{dna_role_name}}/{{coordinator_zome_manifest.name}}/{{pascal_case to_referenceable.name}}Detail.vue')}}
       <{{pascal_case to_referenceable.name}}Detail 
-        v-for="hash in hashes" 
+        v-for="(hash, i) in hashes" 
+        :key="i"
         :{{kebab_case to_referenceable.name}}-hash="hash" 
       ></{{pascal_case to_referenceable.name}}Detail>
 {{else}}
