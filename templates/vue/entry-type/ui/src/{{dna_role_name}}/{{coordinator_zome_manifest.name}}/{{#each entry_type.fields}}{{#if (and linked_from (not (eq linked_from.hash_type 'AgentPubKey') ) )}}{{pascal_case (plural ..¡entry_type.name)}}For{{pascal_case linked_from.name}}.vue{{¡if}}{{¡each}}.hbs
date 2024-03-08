@@ -56,6 +56,7 @@ export default defineComponent({
       const payload = signal.payload as {{pascal_case ../coordinator_zome_manifest.name}}Signal;
       if (payload.type !== 'EntryCreated') return;
       if (payload.app_entry.type !== '{{pascal_case ../entry_type.name}}') return;
+      if (JSON.stringify(payload.app_entry.{{snake_case linked_from.singular_arg}}) !== JSON.stringify({{camel_case linked_from.singular_arg}})) return;
       if (this.hashes) this.hashes.push(payload.action.hashed.hash);
     });
   },
