@@ -24,7 +24,7 @@ onMount(async () => {
 
   await fetch{{pascal_case (plural ../entry_type.name)}}();
 
-  client.on('signal', signal => {
+  client.on('signal', async signal => {
     if (signal.zome_name !== '{{../coordinator_zome_manifest.name}}') return;
     const payload = signal.payload as {{pascal_case ../coordinator_zome_manifest.name}}Signal;
     if (payload.type !== 'EntryCreated') return;
