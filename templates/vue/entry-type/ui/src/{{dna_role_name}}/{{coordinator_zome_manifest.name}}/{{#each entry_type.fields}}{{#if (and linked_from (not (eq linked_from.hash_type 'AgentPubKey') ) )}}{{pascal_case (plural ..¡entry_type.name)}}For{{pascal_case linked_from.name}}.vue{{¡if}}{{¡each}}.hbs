@@ -64,7 +64,7 @@ export default defineComponent({
     async fetch{{pascal_case (plural ../entry_type.name)}}() {
       this.loading = true;
       try {
-        const links: Link[] = await this.client.callZome({
+        const links: Array<Link> = await this.client.callZome({
           cap_secret: null,
           role_name: '{{../dna_role_name}}',
           zome_name: '{{../coordinator_zome_manifest.name}}',
