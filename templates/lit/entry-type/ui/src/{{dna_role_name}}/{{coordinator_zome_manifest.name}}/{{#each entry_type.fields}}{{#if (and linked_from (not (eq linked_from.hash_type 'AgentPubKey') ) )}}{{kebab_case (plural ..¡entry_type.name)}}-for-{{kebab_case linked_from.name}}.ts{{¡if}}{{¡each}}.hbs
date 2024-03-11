@@ -40,8 +40,8 @@ export class {{pascal_case (plural ../entry_type.name)}}For{{pascal_case linked_
       const payload = signal.payload as {{pascal_case ../coordinator_zome_manifest.name}}Signal;
       if (payload.type !== 'EntryCreated') return;
       if (payload.app_entry.type !== '{{pascal_case ../entry_type.name}}') return;
-      this.hashes = [...this.hashes, payload.action.hashed.hash];
-    });
+      this._fetch{{pascal_case (plural ../entry_type.name)}}.run();
+    })
   }
 
   renderList(hashes: Array<ActionHash>) {
