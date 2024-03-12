@@ -38,18 +38,30 @@ hc-scaffold --version
 
 and see a version number like `holochain_scaffolding_cli 0.1.11`.
 
-To run the tests, run the provided script:
+To run the tests, run the provided script for a either a given template by passing a `-t` option, specifying one of the supported templates (`lit`, `svelte`, `vue`, or `vanilla`).
 
 ```bash
-./run_tests.sh
+./run_tests.sh -t "lit"
+```
+
+or employ the `-s` option with a designated scope, such as `hello_world`, to execute tests specifically for the hello world example
+
+```bash
+./run_tests.sh -s "hello_world"
+```
+
+To run unit tests in Rust using Cargo, use the following command:
+
+```bash
+cargo test
 ```
 
 #### Using `nix develop` to run the tests the same way as CI
 
 You can replicate how CI compiles and introduces `hc-scaffold` to its PATH and run the test script via an ad-hoc nix environment with the following command:
 
-```
-nix develop --override-input "versions/scaffolding" . .#ci --command ./run_test.sh`
+```bash
+nix develop --override-input "versions/scaffolding" . .#ci --command ./run_test.sh -t "lit" # or "svelte", "vue", "vanilla"`
 ```
 This will take some time and downloads a significant amount of data so use with caution if you have limited bandwidth!
 

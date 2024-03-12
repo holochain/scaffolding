@@ -43,7 +43,7 @@ jobs:
       - name: Build and test
         run: |
           cd $GITHUB_WORKSPACE
-          nix develop --override-input "versions/scaffolding" . .#ci --command ./run_test.sh -a forum -t ${{ matrix.template }}
+          nix develop --override-input "versions/scaffolding" . .#ci --command ./run_test.sh -t ${{ matrix.template }}
 
   testbuild_by_scope:
     runs-on: ubuntu-latest

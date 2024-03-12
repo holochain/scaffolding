@@ -3,14 +3,13 @@ set -e
 
 TEMPLATE_PATH="/tmp"
 
-APP_NAME=
+APP_NAME="forum"
 TEMPLATE_NAME=
 SCOPE=
 
 # parse args
-while getopts ":a:t:s:" opt; do
+while getopts ":t:s:" opt; do
   case $opt in
-    a) APP_NAME="$OPTARG";;
     t) TEMPLATE_NAME="$OPTARG";;
     s) SCOPE="$OPTARG";;
     \?) echo "Invalid option: -$OPTARG" >&2
