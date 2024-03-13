@@ -7,7 +7,8 @@
     <span v-if="error">Error fetching the {{lower_case (plural ../entry_type.name)}}: {{{{raw}}}} {{error.data}}.{{{{/raw}}}}</span>
     <div v-else-if="hashes && hashes.length > 0" style="margin-bottom: 8px">
       <{{pascal_case ../entry_type.name}}Detail 
-        v-for="hash in hashes" 
+        v-for="(hash, i) in hashes" 
+        :key="i"
         :{{kebab_case ../entry_type.name}}-hash="hash" 
       >
       </{{pascal_case ../entry_type.name}}Detail>
