@@ -7,7 +7,8 @@
     <span v-if="error">Error fetching the {{lower_case (plural referenceable.name)}}: {{{{raw}}}} {{error.data}}.{{{{/raw}}}}</span>
     <div v-else-if="hashes && hashes.length > 0" style="margin-bottom: 8px">
       <{{pascal_case referenceable.name}}Detail 
-        v-for="hash in hashes" 
+        v-for="(hash, i) in hashes" 
+        :key="i"
         :{{kebab_case referenceable.name}}-hash="hash"
         @{{kebab_case referenceable.name}}-deleted="fetch{{pascal_case referenceable.name}}()"
       >

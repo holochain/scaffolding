@@ -8,9 +8,9 @@ opt-level = "z"
 members = ["dnas/*/zomes/coordinator/*", "dnas/*/zomes/integrity/*"]
 
 [workspace.dependencies]
-hdi = "=0.3.6"
-hdk = "=0.2.6"
-serde = "=1.0.166"
+hdi = "={{hdi_version}}"
+hdk = "={{hdk_version}}"
+serde = "1.0"
 
 [workspace.dependencies.hello_world]
 path = "dnas/hello_world/zomes/coordinator/hello_world"
