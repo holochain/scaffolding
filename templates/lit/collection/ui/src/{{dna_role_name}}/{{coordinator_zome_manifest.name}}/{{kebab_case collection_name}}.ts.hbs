@@ -66,9 +66,11 @@ export class {{pascal_case collection_name}} extends LitElement {
 
   render() {
     return this._fetch{{pascal_case (plural referenceable.name)}}.render({
-      pending: () => html`<div style="display: flex; flex: 1; align-items: center; justify-content: center">
-        <mwc-circular-progress indeterminate></mwc-circular-progress>
-      </div>`,
+      pending: () => html`
+        <div style="display: flex; flex: 1; align-items: center; justify-content: center">
+          <mwc-circular-progress indeterminate></mwc-circular-progress>
+        </div>
+      `,
       complete: (links) => this.renderList([...this.signaledHashes, ...links.map(l => l.target)]),
       error: (e: any) => html`<span>Error fetching the {{lower_case (plural referenceable.name)}}: ${e.data.data}.</span>`
     });
