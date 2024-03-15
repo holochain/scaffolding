@@ -1,5 +1,5 @@
 use crate::error::{ScaffoldError, ScaffoldResult};
-use crate::file_tree::{file_content, load_directory_into_memory, FileTree};
+use crate::file_tree::{file_content, load_directory_into_memory, map_file, FileTree};
 use crate::scaffold::app::cargo::exec_metadata;
 use crate::scaffold::app::nix::setup_nix_developer_environment;
 use crate::scaffold::app::AppFileTree;
@@ -32,6 +32,8 @@ use build_fs_tree::{dir, Build, MergeableFileSystemTree};
 use convert_case::Case;
 use dialoguer::Input;
 use dialoguer::{theme::ColorfulTheme, Select};
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use std::fs;
 use std::process::{Command, Stdio};
 use std::str::FromStr;
@@ -199,17 +201,33 @@ pub enum HcScaffoldCommand {
 impl HcScaffold {
     pub async fn run(self) -> anyhow::Result<()> {
         let current_dir = std::env::current_dir()?;
-        let template_file_tree = match self.template {
-            Some(template) => match template.as_str() {
-                "lit" | "svelte" | "vanilla" | "vue" => {
-                    let ui_framework = UiFramework::from_str(template.as_str())?;
-                    template_for_ui_framework(&ui_framework)?
-                }
-                custom_template_path => {
-                    let templates_dir = current_dir.join(PathBuf::from(custom_template_path));
-                    load_directory_into_memory(&templates_dir)?
-                }
-            },
+        let config = get_template_config(&current_dir)?;
+
+        let template = match (&config, &self.template) {
+            (Some(c), Some(t)) if &c.template != t => {
+                return Err(anyhow::anyhow!("unmatching template"))
+            }
+            (Some(c), _) => Some(&c.template),
+            (_, t) => t.as_ref(),
+        };
+
+        let (template, template_file_tree) = match template {
+            Some(template) => {
+                let template_name_or_path;
+                let file_tree = match template.as_str() {
+                    "lit" | "svelte" | "vanilla" | "vue" => {
+                        let ui_framework = UiFramework::from_str(template)?;
+                        template_name_or_path = ui_framework.to_string();
+                        template_for_ui_framework(&ui_framework)?
+                    }
+                    custom_template_path => {
+                        template_name_or_path = custom_template_path.to_string();
+                        let templates_dir = current_dir.join(PathBuf::from(custom_template_path));
+                        load_directory_into_memory(&templates_dir)?
+                    }
+                };
+                (template_name_or_path.to_owned(), file_tree)
+            }
             None => {
                 let ui_framework = match self.command {
                     HcScaffoldCommand::WebApp { .. } => choose_ui_framework()?,
@@ -218,8 +236,10 @@ impl HcScaffold {
                         guess_or_choose_framework(&file_tree)?
                     }
                 };
-
-                template_for_ui_framework(&ui_framework)?
+                (
+                    ui_framework.to_string(),
+                    template_for_ui_framework(&ui_framework)?,
+                )
             }
         };
 
@@ -271,6 +291,9 @@ impl HcScaffold {
                     &template_file_tree,
                     holo_enabled,
                 )?;
+
+                let mut file_tree = file_tree;
+                write_scaffold_config(&mut file_tree, &TemplateConfig { template })?;
 
                 let file_tree = MergeableFileSystemTree::<OsString, String>::from(dir! {
                     name.clone() => file_tree
@@ -966,4 +989,51 @@ fn setup_git_environment(path: &PathBuf) -> ScaffoldResult<()> {
         println!("Warning: error running \"git add .\"");
     }
     Ok(())
+}
+
+/// Write hcScaffold config to the hApp's root `package.json` file
+fn write_scaffold_config(
+    web_app_file_tree: &mut FileTree,
+    config: &TemplateConfig,
+) -> ScaffoldResult<()> {
+    let package_json_path = PathBuf::from("package.json");
+    map_file(web_app_file_tree, &package_json_path, |c| {
+        let original_content = c.clone();
+        let json = serde_json::from_str::<Value>(&c)?;
+        let json = match json {
+            Value::Object(mut o) => {
+                o.insert(
+                    "hcScaffold".to_owned(),
+                    serde_json::to_value(config).unwrap(),
+                );
+                o
+            }
+            _ => return Ok(original_content),
+        };
+        let json = serde_json::to_value(json)?;
+        let json = serde_json::to_string(&json)?;
+        Ok(json)
+    })?;
+    Ok(())
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct TemplateConfig {
+    template: String,
+}
+
+/// Gets template config written to the root `package.json` file when the hApp was
+/// originally scaffolded
+fn get_template_config(current_dir: &PathBuf) -> ScaffoldResult<Option<TemplateConfig>> {
+    let package_json_path = current_dir.join("package.json");
+    let Ok(file) = fs::read_to_string(package_json_path) else {
+        return Ok(None);
+    };
+    let file = serde_json::from_str::<Value>(&file)?;
+    if let Some(config) = file.get("hcScaffold") {
+        let config = serde_json::from_value(config.to_owned())?;
+        Ok(Some(config))
+    } else {
+        Ok(None)
+    }
 }

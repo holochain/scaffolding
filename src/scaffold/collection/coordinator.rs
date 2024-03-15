@@ -377,12 +377,12 @@ pub fn add_collection_to_coordinators(
     let lib_rs_path = crate_src_path.join("lib.rs");
 
     map_file(&mut file_tree, &lib_rs_path, |s| {
-        format!(
+        Ok(format!(
             r#"pub mod {};
 
 {}"#,
             snake_link_type_name, s
-        )
+        ))
     })?;
 
     let mut dna_file_tree = DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;

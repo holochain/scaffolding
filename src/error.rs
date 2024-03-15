@@ -140,7 +140,7 @@ pub enum ScaffoldError {
 
     /// anything else
     #[error("Unknown error: {0}")]
-    MiscError(#[from] Box<dyn std::error::Error + Send + Sync>),
+    MiscError(#[from] anyhow::Error),
 }
 
 /// HcBundle Result type.

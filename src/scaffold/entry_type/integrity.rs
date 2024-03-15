@@ -289,13 +289,13 @@ pub fn add_entry_type_to_integrity_zome(
     let lib_rs_path = crate_src_path.join("lib.rs");
 
     map_file(&mut file_tree, &lib_rs_path, |s| {
-        format!(
+        Ok(format!(
             r#"pub mod {};
 pub use {}::*;
 
 {}"#,
             snake_entry_def_name, snake_entry_def_name, s
-        )
+        ))
     })?;
 
     let pascal_entry_def_name = entry_def.name.to_case(Case::Pascal);
