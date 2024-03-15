@@ -1011,7 +1011,7 @@ fn write_scaffold_config(
             _ => return Ok(original_content),
         };
         let json = serde_json::to_value(json)?;
-        let json = serde_json::to_string(&json)?;
+        let json = serde_json::to_string_pretty(&json)?;
         Ok(json)
     })?;
     Ok(())
