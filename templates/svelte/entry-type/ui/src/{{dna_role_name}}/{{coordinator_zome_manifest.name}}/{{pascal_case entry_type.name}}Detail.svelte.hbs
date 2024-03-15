@@ -27,7 +27,7 @@ export let {{camel_case entry_type.name}}Hash: {{#if entry_type.reference_entry_
 
 let client: AppAgentClient = (getContext(clientContext) as any).getClient();
 
-let loading = true;
+let loading: boolean;
 let error: any = undefined;
 
 let record: Record | undefined;
@@ -52,9 +52,6 @@ onMount(async () => {
 
 async function fetch{{pascal_case entry_type.name}}() {
   loading = true;
-  error = undefined;
-  record = undefined;
-  {{camel_case entry_type.name}} = undefined;
   
   try {
     record = await client.callZome({
@@ -136,10 +133,10 @@ async function delete{{pascal_case entry_type.name}}() {
     {{#if (not (eq cardinality "vector") )}}
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
     <span style="margin-right: 4px"><strong>{{title_case field_name}}:</strong></span>
-    <span style="white-space: pre-line">{{> (concat field_type.type "/" widget "/detail/render") variable_to_read=(concat (camel_case ../entry_type.name) "." (snake_case field_name) ) }}</span>
+    <span style="white-space: pre-line">{{> (concat field_type.type "/" widget "/detail/render") variable_to_read=(concat (camel_case ../entry_type.name) "?." (snake_case field_name) ) }}</span>
   </div>
     {{else}}
-  {{> Vec/detail/render variable_to_read=(concat (camel_case ../entry_type.name) "." (snake_case field_name) ) field_name=field_name field_type=field_type widget=widget }}
+  {{> Vec/detail/render variable_to_read=(concat (camel_case ../entry_type.name) "?." (snake_case field_name) ) field_name=field_name field_type=field_type widget=widget }}
     {{/if}}
 
   {{/if}}
