@@ -38,9 +38,10 @@
 //!
 //! The scaffolding tool comes with 4 built-in templates:
 //!
-//! - Vue
-//! - Svelte
-//! - Lit
+//! - Vue (with TypeScript)
+//! - Svelte (with TypeScript)
+//! - Lit (with TypeScript)
+//! - Vanilla
 //!
 //! These templates provide most of the skeleton you need to start your own holochain app.
 //!
@@ -57,7 +58,7 @@
 //!   - "lit"
 //!   - "vanilla"
 //! - Or a path to a custom template.
-//!   - E.g `--template ./path/to/custom/template/folder`
+//!   - E.g `hc-scaffold --template ./path/to/custom/template/folder web-app`
 //!
 //! If you know of some already existing custom template, look first in the documentation of that template for instructions on how to use it, in case the template offers a nix wrapper command, which is much easier to use.
 //!
@@ -77,7 +78,7 @@
 //!
 //! 1. Run this command:
 //! `nix flake init -t github:holochain/scaffolding`
-//! 2. Check this new folder in a version control system like git.
+//! 2. A new dir `custom-template` will be created in the current directory. Check this new folder in a version control system like git.
 //! 3. Replace all instances of `<TODO:REPLACE_ME_WITH_THE_APPROPRIATE_GIT_URL>` in its `README.md` file with the appropriate git URL (eg. "github:holochain-open-dev/templates").
 //! 4. Replace all instances of `<TODO:REPLACE_ME_WITH_THE_APPROPRIATE_GIT_URL>` in its `template/web-app/flake.nix.hbs` file with the appropriate git URL (eg. "github:holochain-open-dev/templates").
 //!
@@ -95,22 +96,21 @@
 //! link-type/
 //! web-app/
 //!
-//! Each folder corresponds to the templates that are going to be created when running a specific command. This is the steps that are executed:
-//!
+//! Each folder corresponds to the templates that are created when running a specific command. Here are the steps executed:
+//! 
 //! 1. The user executes a scaffolding command, like `hc scaffold web-app`.
-//!   - They may optionally pass in a `--template` argument, which specifies the template that they want to use for this command.
-//! 2. The scaffolding tool asks the user to input all the necessary information specific to the command.
-//! 3. The apropriate **backend** code is created automatically, the custom template can't influence it.
-//! 4. If given a `--template` argument:
-//!   4.1. If the value of the `--template` argument is one of the built-in templates, it will use that built-in template.
-//!   4.2. If not, it will interpret the value of the `--template` argument as a path to a custom template directory and will try to read it from that path.
-//! 5. If a custom template is found, it will look for a folder inside that custom template that corresponds to the command being run.
-//!   - Eg. `hc scaffold web-app` will look for a folder named `web-app`.
-//! 6. If there is one, it will copy the directory structure inside that folder and select the files with the `.hbs` extension.
-//! 7. It will render the contents of each of the files using as context the appropriate data from the command.
-//!   - Eg. in `hc scaffold web-app`, one of the fields of the context is `app_name`, which is the name of the app that the user input.
-//! 8. Lastly, it will merge the resulting directory structure with the existing repository structure. If a file already existed, it will overwrite its contents.
-//!
+//!   	- Optionally, they may pass a `--template` argument, specifying the template name or local path to use.
+//! 		- The `--template` value is saved in the root `package.json` file's `hcScaffold` key for future reference and to prevent the use of different templates in the same project.
+//! 2. The scaffolding tool prompts the user to input all necessary information for the command.
+//! 3. **Backend** code is automatically generated, independent of custom templates.
+//! 4. If a `--template` argument is provided:
+//! 		- A check is performed to ensure alignment with the originally scaffolded hApp. If successful, it uses the provided template.
+//! 5. For the selected template, the tool searches for a corresponding folder inside it based on the command.
+//!   	- For example, `hc scaffold web-app` searches for a folder named `web-app`.
+//! 6. If found, it copies the directory structure within that folder, selecting files with the `.hbs` extension.
+//! 7. It renders the contents of each file using appropriate data from the command.
+//!   	- For instance, in `hc scaffold web-app`, one context field is `app_name`, representing the user-input app name.
+//! 8. Finally, it merges the resulting directory structure with the existing repository. If a file already exists, its contents are overwritten.
 //! You can take a look at [Writing templates](#writing-templates) to learn how to write your own templates.
 //!
 //! This is the list of commands and the templates they use:
