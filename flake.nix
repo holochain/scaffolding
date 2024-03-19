@@ -16,7 +16,7 @@
     {
       inherit inputs;
     }
-    ({ withSystem, flake-parts-lib, ...}: {
+    rec {
       flake = {
         templates.default = {
           path = ./templates/custom-template;
@@ -25,7 +25,7 @@
       
         lib.wrapCustomTemplate = { system, pkgs, customTemplatePath }: 
           let 
-        	  scaffolding = withSystem system ({config, ...}: inputs.holochain.packages.${system}.hc-scaffold);
+        	  scaffolding = inputs.holochain.packages.${system}.hc-scaffold;
         	in 
         		pkgs.runCommand "hc-scaffold" {
         	    buildInputs = [ pkgs.makeWrapper ];
@@ -66,7 +66,12 @@
         };
 
         # TODO: Expose the scaffolding tool CLI as the main package for this crate
-        # packages.default = inputs'.holochain.packages.hc-scaffold;
+
+        checks.custom-template = flake.lib.wrapCustomTemplate {
+          inherit pkgs system;
+          customTemplatePath = ./templates/custom-template/custom-template;
+        };
+
       };
-    });
+    };
 }
