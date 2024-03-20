@@ -7,15 +7,15 @@
   ],
   "scripts": {
     "start": "AGENTS=${AGENTS:-2} BOOTSTRAP_PORT=$(port) SIGNAL_PORT=$(port) npm run network",
-    "network": "hc s clean && npm run build:happ && UI_PORT=8888 concurrently \"npm start -w ui\" \"npm run launch:happ\" \"holochain-playground\"",
+    "network": "hc s clean && npm run build:happ && UI_PORT=$(port) concurrently \"npm start -w ui\" \"npm run launch:happ\" \"holochain-playground\"",
     "test": "npm run build:zomes && hc app pack workdir --recursive && npm t -w tests",
     "launch:happ": "hc-spin -n $AGENTS --ui-port $UI_PORT workdir/{{app_name}}.happ",
     "start:tauri": "AGENTS=${AGENTS:-2} BOOTSTRAP_PORT=$(port) SIGNAL_PORT=$(port) npm run network:tauri",
-    "network:tauri": "hc s clean && npm run build:happ && UI_PORT=8888 concurrently \"npm start -w ui\" \"npm run launch:tauri\" \"holochain-playground\"",
+    "network:tauri": "hc s clean && npm run build:happ && UI_PORT=$(port) concurrently \"npm start -w ui\" \"npm run launch:tauri\" \"holochain-playground\"",
     "launch:tauri": "concurrently \"hc run-local-services --bootstrap-port $BOOTSTRAP_PORT --signal-port $SIGNAL_PORT\" \"echo pass | RUST_LOG=warn hc launch --piped -n $AGENTS workdir/{{app_name}}.happ --ui-port $UI_PORT network --bootstrap http://127.0.0.1:\"$BOOTSTRAP_PORT\" webrtc ws://127.0.0.1:\"$SIGNAL_PORT\"\"",
   {{#if holo_enabled}}
     "start:holo": "AGENTS=${AGENTS:-2} npm run network:holo",
-    "network:holo": "npm run build:happ && UI_PORT=8888 concurrently \"npm run launch:holo-dev-server\" \"holochain-playground ws://localhost:4444\" \"concurrently-repeat 'VITE_APP_CHAPERONE_URL=http://localhost:24274 VITE_APP_IS_HOLO=true npm start -w ui' $AGENTS\"",
+    "network:holo": "npm run build:happ && UI_PORT=$(port) concurrently \"npm run launch:holo-dev-server\" \"holochain-playground ws://localhost:4444\" \"concurrently-repeat 'VITE_APP_CHAPERONE_URL=http://localhost:24274 VITE_APP_IS_HOLO=true npm start -w ui' $AGENTS\"",
     "launch:holo-dev-server": "holo-dev-server workdir/{{app_name}}.happ",
   {{/if}}
     "package": "npm run build:happ && npm run package -w ui && hc web-app pack workdir --recursive",
