@@ -16,7 +16,9 @@ use crate::{
 };
 
 use super::crud::Crud;
-use super::definitions::{Cardinality, EntryDefinition, EntryTypeReference, FieldDefinition, Referenceable};
+use super::definitions::{
+    Cardinality, EntryDefinition, EntryTypeReference, FieldDefinition, Referenceable,
+};
 
 pub fn render_entry_definition_struct(entry_def: &EntryDefinition) -> ScaffoldResult<TokenStream> {
     let name: syn::Expr = syn::parse_str(entry_def.name.to_case(Case::Pascal).as_str())?;
@@ -73,9 +75,9 @@ pub fn render_entry_definition_file(
     };
     let validate_update: TokenStream = quote! {
         pub fn #validate_update_fn(
-            _action: Update, 
-            #new_entry_arg: #name_pascal, 
-            _original_action: EntryCreationAction, 
+            _action: Update,
+            #new_entry_arg: #name_pascal,
+            _original_action: EntryCreationAction,
             #original_entry_arg: #name_pascal
         ) -> ExternResult<ValidateCallbackResult> {
             #validate_update_result
@@ -99,8 +101,8 @@ pub fn render_entry_definition_file(
     };
     let validate_delete: TokenStream = quote! {
         pub fn #validate_delete_fn(
-            _action: Delete, 
-            _original_action: EntryCreationAction, 
+            _action: Delete,
+            _original_action: EntryCreationAction,
             #deleted_post_arg: #name_pascal
         ) -> ExternResult<ValidateCallbackResult> {
             #validate_delete_result
@@ -114,8 +116,10 @@ pub fn render_entry_definition_file(
         .fields
         .iter()
         .filter_map(|f| match &f.linked_from {
-            Some(Referenceable::EntryType(entry_type_reference)) => Some((f.clone(), entry_type_reference.clone())),
-          _ => None  
+            Some(Referenceable::EntryType(entry_type_reference)) => {
+                Some((f.clone(), entry_type_reference.clone()))
+            }
+            _ => None,
         })
         .collect();
 
@@ -125,9 +129,9 @@ pub fn render_entry_definition_file(
     };
     let deps_validation: Vec<TokenStream> = deps
         .into_iter()
-        .map(|(field_def, reference)| { 
+        .map(|(field_def, reference)| {
             let field_name = format_ident!("{}",field_def.field_name);
-            
+
             let dependant_entry_type_snake = format_ident!("_{}", reference.entry_type.to_case(Case::Snake));
             let dependant_entry_type_pascal = format_ident!("{}", reference.entry_type.to_case(Case::Pascal));
             match (field_def.cardinality, reference.reference_entry_hash) {
@@ -189,7 +193,7 @@ pub fn render_entry_definition_file(
       #entry_def_token_stream
 
       pub fn #validate_create_fn(
-          _action: EntryCreationAction, 
+          _action: EntryCreationAction,
           #create_new_entry_arg: #name_pascal
       ) -> ExternResult<ValidateCallbackResult> {
           #(#deps_validation)*
@@ -347,21 +351,23 @@ pub use {}::*;
                     if let syn::Item::Fn(item_fn) = item {
                         if item_fn.sig.ident.to_string().eq(&String::from("validate")) {
                             for stmt in &mut item_fn.block.stmts {
-                                if let syn::Stmt::Expr(syn::Expr::Match(match_expr),_) = stmt {
+                                if let syn::Stmt::Expr(syn::Expr::Match(match_expr), _) = stmt {
                                     if let syn::Expr::Try(try_expr) = &mut *match_expr.expr {
                                         if let syn::Expr::MethodCall(call) = &mut *try_expr.expr {
-                                            if call.method.to_string().eq(&String::from("flattened"))
+                                            if call
+                                                .method
+                                                .to_string()
+                                                .eq(&String::from("flattened"))
                                             {
                                                 if let Some(turbofish) = &mut call.turbofish {
                                                     if let Some(first_arg) =
                                                         turbofish.args.first_mut()
                                                     {
-                                                        *first_arg =
-                                                            syn::GenericArgument::Type(
-                                                                syn::parse_str::<syn::Type>(
-                                                                    "EntryTypes",
-                                                                )?,
-                                                            );
+                                                        *first_arg = syn::GenericArgument::Type(
+                                                            syn::parse_str::<syn::Type>(
+                                                                "EntryTypes",
+                                                            )?,
+                                                        );
                                                     }
                                                 }
                                             }
@@ -374,42 +380,45 @@ pub use {}::*;
                 }
             }
 
-            file.items =
-                file.items
-                    .into_iter()
-                    .map(|mut i| {
-                        if let syn::Item::Enum(mut item_enum) = i.clone() {
-                            if item_enum.attrs.iter().any(|a| {
-                                a.path().segments.iter().any(|s| s.ident.eq("hdk_entry_types"))
-                            }) {
-                                if item_enum
-                                    .variants
-                                    .iter()
-                                    .any(|v| v.ident.to_string().eq(&pascal_entry_def_name))
-                                {
-                                    return Err(ScaffoldError::EntryTypeAlreadyExists(
-                                        pascal_entry_def_name.clone(),
-                                        dna_manifest.name(),
-                                        zome_file_tree.zome_manifest.name.0.to_string(),
-                                    ));
-                                }
-
-                                found = true;
-                                let new_variant = syn::parse_str::<syn::Variant>(
-                                    format!("{}({})", pascal_entry_def_name, pascal_entry_def_name)
-                                        .as_str(),
-                                )
-                                .unwrap();
-                                item_enum.variants.push(new_variant);
-                                return Ok(syn::Item::Enum(item_enum));
+            file.items = file
+                .items
+                .into_iter()
+                .map(|mut i| {
+                    if let syn::Item::Enum(mut item_enum) = i.clone() {
+                        if item_enum.attrs.iter().any(|a| {
+                            a.path()
+                                .segments
+                                .iter()
+                                .any(|s| s.ident.eq("hdk_entry_types"))
+                        }) {
+                            if item_enum
+                                .variants
+                                .iter()
+                                .any(|v| v.ident.to_string().eq(&pascal_entry_def_name))
+                            {
+                                return Err(ScaffoldError::EntryTypeAlreadyExists(
+                                    pascal_entry_def_name.clone(),
+                                    dna_manifest.name(),
+                                    zome_file_tree.zome_manifest.name.0.to_string(),
+                                ));
                             }
+
+                            found = true;
+                            let new_variant = syn::parse_str::<syn::Variant>(
+                                format!("{}({})", pascal_entry_def_name, pascal_entry_def_name)
+                                    .as_str(),
+                            )
+                            .unwrap();
+                            item_enum.variants.push(new_variant);
+                            return Ok(syn::Item::Enum(item_enum));
                         }
+                    }
 
-                        add_entry_type_to_validation_arms(&mut i, &entry_def)?;
+                    add_entry_type_to_validation_arms(&mut i, &entry_def)?;
 
-                        Ok(i)
-                    })
-                    .collect::<ScaffoldResult<Vec<syn::Item>>>()?;
+                    Ok(i)
+                })
+                .collect::<ScaffoldResult<Vec<syn::Item>>>()?;
 
             // If the file is lib.rs, we already have the entry struct imported so no need to import it again
             if found && file_path.file_name() != Some(OsString::from("lib.rs").as_os_str()) {
@@ -448,11 +457,12 @@ pub fn get_all_entry_types(
         &|_file_path, rust_file| {
             rust_file.items.iter().find_map(|i| {
                 if let syn::Item::Enum(item_enum) = i.clone() {
-                    if item_enum
-                        .attrs
-                        .iter()
-                        .any(|a| a.path().segments.iter().any(|s| s.ident.eq("hdk_entry_types")))
-                    {
+                    if item_enum.attrs.iter().any(|a| {
+                        a.path()
+                            .segments
+                            .iter()
+                            .any(|s| s.ident.eq("hdk_entry_types"))
+                    }) {
                         return Some(item_enum.clone());
                     }
                 }
@@ -526,7 +536,7 @@ fn add_entry_type_to_validation_arms(
     if let syn::Item::Fn(item_fn) = item {
         if item_fn.sig.ident.to_string().eq(&String::from("validate")) {
             for stmt in &mut item_fn.block.stmts {
-                if let syn::Stmt::Expr(syn::Expr::Match(match_expr),_) = stmt {
+                if let syn::Stmt::Expr(syn::Expr::Match(match_expr), _) = stmt {
                     if let syn::Expr::Try(try_expr) = &mut *match_expr.expr {
                         if let syn::Expr::MethodCall(call) = &mut *try_expr.expr {
                             if call.method.to_string().eq(&String::from("flattened")) {

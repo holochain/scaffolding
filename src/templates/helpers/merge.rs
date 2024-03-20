@@ -164,7 +164,7 @@ impl HelperDef for MatchScope {
 
         let Some(Value::String(scope_content)) = data.get(SCOPE_CONTENT) else {
             return Err(RenderError::new(
-            "match_scope needs to be placed inside a merge helper",
+                "match_scope needs to be placed inside a merge helper",
             ));
         };
 
