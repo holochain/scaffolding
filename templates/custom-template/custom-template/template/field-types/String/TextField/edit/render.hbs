@@ -1,0 +1,1 @@
+<mwc-textfield outlined label="{{label}}" {{#if variable_to_read}}.value=${ {{variable_to_read}}{{#if (not required)}} || ''{{/if}} }{{/if}} @input=${(e: CustomEvent) => { {{variable_to_change}} = (e.target as any).value; } } {{#if required}}required{{/if}}></mwc-textfield>

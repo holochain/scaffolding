@@ -69,16 +69,13 @@ pub fn file_content(file_tree: &FileTree, file_path: &PathBuf) -> ScaffoldResult
         .cloned()
 }
 
-pub fn map_file<F: Fn(String) -> String>(
+pub fn map_file<F: Fn(String) -> Result<String, ScaffoldError>>(
     file_tree: &mut FileTree,
     file_path: &PathBuf,
     map_fn: F,
 ) -> ScaffoldResult<()> {
     let contents = file_content(&file_tree, file_path)?;
-
-    let new_contents = map_fn(contents);
-
-    insert_file(file_tree, file_path, &new_contents)
+    insert_file(file_tree, file_path, &map_fn(contents)?)
 }
 
 pub fn insert_file(

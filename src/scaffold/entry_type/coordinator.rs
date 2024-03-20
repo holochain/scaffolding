@@ -654,13 +654,13 @@ pub fn add_crud_functions_to_coordinator(
     let lib_rs_path = crate_src_path.join("lib.rs");
 
     map_file(&mut file_tree, &lib_rs_path, |s| {
-        format!(
+        Ok(format!(
             r#"pub mod {};
 
 {}"#,
             entry_def.name.to_case(Case::Snake),
             s
-        )
+        ))
     })?;
 
     let v: Vec<OsString> = crate_src_path

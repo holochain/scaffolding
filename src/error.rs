@@ -75,18 +75,6 @@ pub enum ScaffoldError {
     #[error("No apps were found that have the DNA \"{0}\"")]
     NoAppsFoundForDna(String),
 
-    #[error("Template \"{0}\" not found, should be in a folder named \"{0}\" inside the \".templates\" folder")]
-    TemplateNotFound(String),
-
-    #[error("No templates found in the given git repository (a template is a folder located inside the \".templates\" folder")]
-    NoTemplatesFoundInGitRepo,
-
-    #[error("No \".templates\" folder found for this project. \n\nInitialize a built-in template with \"hc scaffold template init\", \n\nor\n\nPull an existing one from your favourite git repository with \"hc scaffold template get <GIT_REPO_URL>\"\n")]
-    NoTemplatesFound,
-
-    #[error("Could not download git repostiory: \"{0}\"")]
-    DegitError(String),
-
     #[error("No DNAs were found")]
     NoDnasFound,
 
@@ -152,7 +140,7 @@ pub enum ScaffoldError {
 
     /// anything else
     #[error("Unknown error: {0}")]
-    MiscError(#[from] Box<dyn std::error::Error + Send + Sync>),
+    MiscError(#[from] anyhow::Error),
 }
 
 /// HcBundle Result type.

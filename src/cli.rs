@@ -1,5 +1,5 @@
 use crate::error::{ScaffoldError, ScaffoldResult};
-use crate::file_tree::{dir_content, file_content, load_directory_into_memory, FileTree};
+use crate::file_tree::{file_content, load_directory_into_memory, map_file, FileTree};
 use crate::scaffold::app::cargo::exec_metadata;
 use crate::scaffold::app::nix::setup_nix_developer_environment;
 use crate::scaffold::app::AppFileTree;
@@ -15,7 +15,7 @@ use crate::scaffold::example::{choose_example, Example};
 use crate::scaffold::link_type::scaffold_link_type;
 use crate::scaffold::web_app::scaffold_web_app;
 use crate::scaffold::web_app::uis::{
-    choose_non_vanilla_ui_framework, choose_ui_framework, template_for_ui_framework, UiFramework,
+    choose_ui_framework, guess_or_choose_framework, template_for_ui_framework, UiFramework,
 };
 use crate::scaffold::zome::utils::select_integrity_zomes;
 use crate::scaffold::zome::{
@@ -23,10 +23,7 @@ use crate::scaffold::zome::{
     scaffold_integrity_zome, scaffold_integrity_zome_with_path, ZomeFileTree,
 };
 use crate::templates::example::scaffold_example;
-use crate::templates::get::get_template;
-use crate::templates::{
-    choose_or_get_template, choose_or_get_template_file_tree, templates_path, ScaffoldedTemplate,
-};
+use crate::templates::ScaffoldedTemplate;
 use crate::utils::{
     check_case, check_no_whitespace, input_no_whitespace, input_with_case, input_yes_or_no,
 };
@@ -35,16 +32,30 @@ use build_fs_tree::{dir, Build, MergeableFileSystemTree};
 use convert_case::Case;
 use dialoguer::Input;
 use dialoguer::{theme::ColorfulTheme, Select};
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use std::fs;
 use std::process::{Command, Stdio};
 use std::str::FromStr;
 use std::{ffi::OsString, path::PathBuf};
 use structopt::StructOpt;
 
+#[derive(Debug, StructOpt)]
+pub struct HcScaffold {
+    #[structopt(short, long)]
+    /// The template to use for the scaffold command
+    /// Can either be an option from the built-in templates: "vanilla", "vue", "lit", "svelte"
+    /// Or a path to a custom template
+    template: Option<String>,
+
+    #[structopt(subcommand)]
+    command: HcScaffoldCommand,
+}
+
 /// The list of subcommands for `hc scaffold`
 #[derive(Debug, StructOpt)]
 #[structopt(setting = structopt::clap::AppSettings::InferSubcommands)]
-pub enum HcScaffold {
+pub enum HcScaffoldCommand {
     /// Scaffold a new, empty web app
     WebApp {
         /// Name of the app to scaffold
@@ -57,24 +68,10 @@ pub enum HcScaffold {
         /// Whether to setup the holonix development environment for this web-app
         setup_nix: Option<bool>,
 
-        #[structopt(short = "u", long)]
-        /// The git repository URL from which to download the template, incompatible with --templates-path
-        templates_url: Option<String>,
-
-        #[structopt(short = "p", long, parse(from_os_str))]
-        /// The local folder path in which to look for the given template, incompatible with --templates-url
-        templates_path: Option<PathBuf>,
-
-        #[structopt(short, long)]
-        /// The template to scaffold the web-app from
-        /// If "--templates-url" is given, the template must be located at the ".templates/<TEMPLATE NAME>" folder of the repository
-        /// If not, the template must be an option from the built-in templates: "vanilla", "vue", "lit", "svelte"
-        template: Option<String>,
-
         #[structopt(long = "holo", hidden = true)]
         holo_enabled: bool,
     },
-    /// Set up the template used in this project
+    /// Manage custom templates
     Template(HcScaffoldTemplate),
     /// Scaffold a DNA into an existing app
     Dna {
@@ -84,11 +81,6 @@ pub enum HcScaffold {
 
         /// Name of the DNA being scaffolded
         name: Option<String>,
-
-        #[structopt(short, long)]
-        /// The template to scaffold the dna from
-        /// The template must be located at the ".templates/<TEMPLATE NAME>" folder of the repository
-        template: Option<String>,
     },
     /// Scaffold one or multiple zomes into an existing DNA
     Zome {
@@ -106,11 +98,6 @@ pub enum HcScaffold {
         #[structopt(long, parse(from_os_str))]
         /// Scaffold a coordinator zome at the given path
         coordinator: Option<PathBuf>,
-
-        #[structopt(short, long)]
-        /// The template to scaffold the dna from
-        /// The template must be located at the ".templates/<TEMPLATE NAME>" folder of the repository
-        template: Option<String>,
     },
     /// Scaffold an entry type and CRUD functions into an existing zome
     EntryType {
@@ -146,11 +133,6 @@ pub enum HcScaffold {
         /// Eg. "title:String:TextField" , "posts_hashes:Vec\<ActionHash\>::Post"
         fields: Option<Vec<FieldDefinition>>,
 
-        #[structopt(short, long)]
-        /// The template to scaffold the dna from
-        /// The template must be located at the ".templates/<TEMPLATE NAME>" folder of the repository
-        template: Option<String>,
-
         #[structopt(long)]
         /// Skip ui generation, overriding any widgets specified with the --fields option
         no_ui: bool,
@@ -181,11 +163,6 @@ pub enum HcScaffold {
         /// Whether this link type can be deleted
         delete: Option<bool>,
 
-        #[structopt(short, long)]
-        /// The template to scaffold the dna from
-        /// The template must be located at the ".templates/<TEMPLATE NAME>" folder of the repository
-        template: Option<String>,
-
         #[structopt(long)]
         /// Skip ui generation
         no_ui: bool,
@@ -210,11 +187,6 @@ pub enum HcScaffold {
         /// Entry type that is going to be added to the collection
         entry_type: Option<EntryTypeReference>,
 
-        #[structopt(short, long)]
-        /// The template to scaffold the dna from
-        /// The template must be located at the ".templates/<TEMPLATE NAME>" folder of the repository
-        template: Option<String>,
-
         #[structopt(long)]
         /// Skip ui generation
         no_ui: bool,
@@ -223,24 +195,59 @@ pub enum HcScaffold {
     Example {
         /// Name of the example to scaffold. One of ['hello-world', 'forum'].
         example: Option<Example>,
-
-        #[structopt(short, long)]
-        /// The template to scaffold the example for
-        /// Must be an option from the built-in templates: "vanilla", "vue", "lit", "svelte"
-        template: Option<String>,
     },
 }
 
 impl HcScaffold {
     pub async fn run(self) -> anyhow::Result<()> {
-        match self {
-            HcScaffold::WebApp {
+        let current_dir = std::env::current_dir()?;
+        let config = get_template_config(&current_dir)?;
+
+        let template = match (&config, &self.template) {
+            (Some(c), Some(t)) if &c.template != t => {
+                return Err(anyhow::anyhow!("unmatching template"))
+            }
+            (Some(c), _) => Some(&c.template),
+            (_, t) => t.as_ref(),
+        };
+
+        let (template, template_file_tree) = match template {
+            Some(template) => {
+                let template_name_or_path;
+                let file_tree = match template.as_str() {
+                    "lit" | "svelte" | "vanilla" | "vue" => {
+                        let ui_framework = UiFramework::from_str(template)?;
+                        template_name_or_path = ui_framework.to_string();
+                        template_for_ui_framework(&ui_framework)?
+                    }
+                    custom_template_path => {
+                        template_name_or_path = custom_template_path.to_string();
+                        let templates_dir = current_dir.join(PathBuf::from(custom_template_path));
+                        load_directory_into_memory(&templates_dir)?
+                    }
+                };
+                (template_name_or_path.to_owned(), file_tree)
+            }
+            None => {
+                let ui_framework = match self.command {
+                    HcScaffoldCommand::WebApp { .. } => choose_ui_framework()?,
+                    _ => {
+                        let file_tree = load_directory_into_memory(&current_dir)?;
+                        guess_or_choose_framework(&file_tree)?
+                    }
+                };
+                (
+                    ui_framework.to_string(),
+                    template_for_ui_framework(&ui_framework)?,
+                )
+            }
+        };
+
+        match self.command {
+            HcScaffoldCommand::WebApp {
                 name,
                 description,
                 setup_nix,
-                template,
-                templates_url,
-                templates_path,
                 holo_enabled,
             } => {
                 let prompt = String::from("App name (no whitespaces):");
@@ -252,45 +259,10 @@ impl HcScaffold {
                     None => input_no_whitespace(&prompt)?,
                 };
 
-                let current_dir = std::env::current_dir()?;
                 let app_folder = current_dir.join(&name);
                 if app_folder.as_path().exists() {
                     return Err(ScaffoldError::FolderAlreadyExists(app_folder.clone()))?;
                 }
-
-                let (template_name, template_file_tree, scaffold_template) =
-                    match (templates_url, templates_path) {
-                        (Some(_), Some(_)) => Err(ScaffoldError::InvalidArguments(String::from(
-                            "cannot use --templates-path and --templates-url together",
-                        )))?,
-                        (Some(u), None) => {
-                            let (name, file_tree) = get_template(&u, &template)?;
-                            (name, file_tree, true)
-                        }
-                        (None, Some(p)) => {
-                            let templates_dir = current_dir.join(p);
-                            let templates_file_tree = load_directory_into_memory(&templates_dir)?;
-                            let name = choose_or_get_template(
-                                &dir! {".templates"=>templates_file_tree},
-                                &template,
-                            )?;
-                            let template_file_tree =
-                                load_directory_into_memory(&templates_dir.join(&name))?;
-                            (name, template_file_tree, true)
-                        }
-                        (None, None) => {
-                            let ui_framework = match template {
-                                Some(t) => UiFramework::from_str(t.as_str())?,
-                                None => choose_ui_framework()?,
-                            };
-
-                            (
-                                format!("{:?}", ui_framework),
-                                template_for_ui_framework(&ui_framework)?,
-                                false,
-                            )
-                        }
-                    };
 
                 if file_content(&template_file_tree, &PathBuf::from("web-app/README.md.hbs"))
                     .is_err()
@@ -317,10 +289,11 @@ impl HcScaffold {
                     description,
                     !setup_nix,
                     &template_file_tree,
-                    template_name,
-                    scaffold_template,
                     holo_enabled,
                 )?;
+
+                let mut file_tree = file_tree;
+                write_scaffold_config(&mut file_tree, &TemplateConfig { template })?;
 
                 let file_tree = MergeableFileSystemTree::<OsString, String>::from(dir! {
                     name.clone() => file_tree
@@ -377,12 +350,8 @@ Then, at any point in time you can start your application with:
                     );
                 }
             }
-            HcScaffold::Template(template) => template.run()?,
-            HcScaffold::Dna {
-                app,
-                name,
-                template,
-            } => {
+            HcScaffoldCommand::Template(template) => template.run(template_file_tree)?,
+            HcScaffoldCommand::Dna { app, name } => {
                 let prompt = String::from("DNA name (snake_case):");
                 let name: String = match name {
                     Some(n) => {
@@ -392,10 +361,7 @@ Then, at any point in time you can start your application with:
                     None => input_with_case(&prompt, Case::Snake)?,
                 };
 
-                let current_dir = std::env::current_dir()?;
-
                 let file_tree = load_directory_into_memory(&current_dir)?;
-                let template_file_tree = choose_or_get_template_file_tree(&file_tree, &template)?;
 
                 let app_file_tree = AppFileTree::get_or_choose(file_tree, &app)?;
 
@@ -426,16 +392,13 @@ Add new zomes to your DNA with:
                     );
                 }
             }
-            HcScaffold::Zome {
+            HcScaffoldCommand::Zome {
                 dna,
                 name,
                 integrity,
                 coordinator,
-                template,
             } => {
-                let current_dir = std::env::current_dir()?;
                 let file_tree = load_directory_into_memory(&current_dir)?;
-                let template_file_tree = choose_or_get_template_file_tree(&file_tree, &template)?;
 
                 if let Some(n) = name.clone() {
                     check_case(&n, "zome name", Case::Snake)?;
@@ -557,7 +520,7 @@ Add new entry definitions to your zome with:
                     ),
                 }
             }
-            HcScaffold::EntryType {
+            HcScaffoldCommand::EntryType {
                 dna,
                 zome,
                 name,
@@ -565,12 +528,9 @@ Add new entry definitions to your zome with:
                 reference_entry_hash,
                 link_from_original_to_each_update,
                 fields,
-                template,
-                no_ui
+                no_ui,
             } => {
-                let current_dir = std::env::current_dir()?;
                 let file_tree = load_directory_into_memory(&current_dir)?;
-                let template_file_tree = choose_or_get_template_file_tree(&file_tree, &template)?;
 
                 let name = match name {
                     Some(n) => {
@@ -623,19 +583,16 @@ Add new collections for that entry type with:
                     );
                 }
             }
-            HcScaffold::LinkType {
+            HcScaffoldCommand::LinkType {
                 dna,
                 zome,
                 from_referenceable,
                 to_referenceable,
                 delete,
                 bidirectional,
-                template,
                 no_ui,
             } => {
-                let current_dir = std::env::current_dir()?;
                 let file_tree = load_directory_into_memory(&current_dir)?;
-                let template_file_tree = choose_or_get_template_file_tree(&file_tree, &template)?;
 
                 let dna_file_tree = DnaFileTree::get_or_choose(file_tree, &dna)?;
 
@@ -667,18 +624,15 @@ Link type scaffolded!
                     println!("{}", i);
                 }
             }
-            HcScaffold::Collection {
+            HcScaffoldCommand::Collection {
                 dna,
                 zome,
                 collection_name,
                 collection_type,
                 entry_type,
-                template,
                 no_ui,
             } => {
-                let current_dir = std::env::current_dir()?;
                 let file_tree = load_directory_into_memory(&current_dir)?;
-                let template_file_tree = choose_or_get_template_file_tree(&file_tree, &template)?;
 
                 let dna_file_tree = DnaFileTree::get_or_choose(file_tree, &dna)?;
 
@@ -720,7 +674,7 @@ Collection "{}" scaffolded!
                     println!("{}", i);
                 }
             }
-            HcScaffold::Example { example, template } => {
+            HcScaffoldCommand::Example { example } => {
                 let example = match example {
                     Some(e) => e,
                     None => choose_example()?,
@@ -732,17 +686,6 @@ Collection "{}" scaffolded!
                     return Err(ScaffoldError::FolderAlreadyExists(app_dir.clone()))?;
                 }
 
-                let ui_framework = match example {
-                    Example::HelloWorld => UiFramework::Vanilla,
-                    Example::Forum => match template {
-                        Some(t) => UiFramework::from_str(t.as_str())?,
-                        None => choose_non_vanilla_ui_framework()?,
-                    },
-                };
-
-                let template_file_tree = template_for_ui_framework(&ui_framework)?;
-                let template_name = format!("{:?}", ui_framework);
-
                 // Match on example types
                 let file_tree = match example {
                     Example::HelloWorld => {
@@ -752,8 +695,6 @@ Collection "{}" scaffolded!
                             Some(String::from("A simple 'hello world' application.")),
                             false,
                             &template_file_tree,
-                            template_name.clone(),
-                            false,
                             false,
                         )?;
 
@@ -766,8 +707,6 @@ Collection "{}" scaffolded!
                             Some(String::from("A simple 'forum' application.")),
                             false,
                             &template_file_tree,
-                            template_name.clone(),
-                            false,
                             false,
                         )?;
 
@@ -898,7 +837,7 @@ Collection "{}" scaffolded!
                                     )),
                                 },
                             ]),
-                            false
+                            false,
                         )?;
 
                         let dna_file_tree =
@@ -918,7 +857,7 @@ Collection "{}" scaffolded!
                                 entry_type: String::from("post"),
                                 reference_entry_hash: false,
                             }),
-                            false
+                            false,
                         )?;
 
                         file_tree
@@ -963,106 +902,29 @@ Example "{}" scaffolded!
 #[derive(Debug, StructOpt)]
 #[structopt(setting = structopt::clap::AppSettings::InferSubcommands)]
 pub enum HcScaffoldTemplate {
-    /// Download a custom template from a remote repository to this folder
-    Get {
-        /// The git repository URL from which to download the template
-        template_url: String,
-
+    /// Clone the template in use into a new custom template
+    Clone {
         #[structopt(long)]
-        /// The template to get from the given repository (located at ".templates/<FROM TEMPLATE>")
-        from_template: Option<String>,
-
-        #[structopt(long)]
-        /// The folder to download the template to, will end up at ".templates/<TO TEMPLATE>"
+        /// The folder to initialize the template into, will end up at "<TO TEMPLATE>"
         to_template: Option<String>,
     },
-    /// Initialize a new custom template from a built-in one
-    Init {
-        /// The UI framework to use as the template for this web-app
-        template: Option<UiFramework>,
-
-        #[structopt(long)]
-        /// The folder to download the template to, will end up at ".templates/<TO TEMPLATE>"
-        to_template: Option<String>,
-    },
-}
-
-fn existing_templates_names(file_tree: &FileTree) -> ScaffoldResult<Vec<String>> {
-    let templates_path = PathBuf::new().join(templates_path());
-
-    match dir_content(file_tree, &templates_path) {
-        Ok(templates_dir_content) => {
-            let templates: Vec<String> = templates_dir_content
-                .into_keys()
-                .map(|k| k.to_str().unwrap().to_string())
-                .collect();
-            Ok(templates)
-        }
-        _ => Ok(vec![]),
-    }
-}
-
-fn choose_existing_template(file_tree: &FileTree) -> ScaffoldResult<String> {
-    let templates = existing_templates_names(file_tree)?;
-    match templates.len() {
-        0 => Err(ScaffoldError::NoTemplatesFound),
-        1 => Ok(templates[0].clone()),
-        _ => {
-            let option = Select::with_theme(&ColorfulTheme::default())
-                .with_prompt("Which existing template should the new template be merged into?")
-                .default(0)
-                .items(&templates[..])
-                .interact()?;
-
-            Ok(templates[option].clone())
-        }
-    }
 }
 
 impl HcScaffoldTemplate {
-    pub fn run(self) -> anyhow::Result<()> {
-        let (template_name, template_file_tree) = self.get_template_file_tree()?;
-
+    pub fn run(self, template_file_tree: FileTree) -> anyhow::Result<()> {
         let target_template = match self.target_template() {
             Some(t) => t,
             None => {
-                let current_dir = std::env::current_dir()?;
-
-                let file_tree = load_directory_into_memory(&current_dir)?;
-
-                let mut create = true;
-                // If existing templates
-                if existing_templates_names(&file_tree)?.len() != 0 {
-                    // Merge or create?
-
-                    let selection = Select::with_theme(&ColorfulTheme::default())
-                        .with_prompt("Do you want to create a new template in this repository?")
-                        .default(0)
-                        .item("Merge with an existing template")
-                        .item("Create a new template")
-                        .interact()?;
-
-                    if selection == 0 {
-                        create = false;
-                    }
-                }
-
-                if create {
-                    // Enter template name
-                    let template_name = Input::with_theme(&ColorfulTheme::default())
-                        .with_prompt("Enter new template name:")
-                        .with_initial_text(template_name)
-                        .interact()?;
-                    template_name
-                } else {
-                    let existing_template = choose_existing_template(&file_tree)?;
-                    existing_template
-                }
+                // Enter template name
+                let template_name = Input::with_theme(&ColorfulTheme::default())
+                    .with_prompt("Enter new template name:")
+                    .interact()?;
+                template_name
             }
         };
 
         let template_file_tree = dir! {
-            templates_path().join(&target_template) => template_file_tree
+            target_template.clone() => template_file_tree
         };
 
         let file_tree = MergeableFileSystemTree::<OsString, String>::from(template_file_tree);
@@ -1070,18 +932,11 @@ impl HcScaffoldTemplate {
         file_tree.build(&".".into())?;
 
         match self {
-            HcScaffoldTemplate::Get { .. } => {
-                println!(
-                    r#"Template downloaded to folder {:?}
-"#,
-                    templates_path().join(target_template)
-                );
-            }
-            HcScaffoldTemplate::Init { .. } => {
+            HcScaffoldTemplate::Clone { .. } => {
                 println!(
                     r#"Template initialized to folder {:?}
 "#,
-                    templates_path().join(target_template)
+                    target_template
                 );
             }
         }
@@ -1090,35 +945,10 @@ impl HcScaffoldTemplate {
 
     pub fn target_template(&self) -> Option<String> {
         match self {
-            HcScaffoldTemplate::Get {
+            HcScaffoldTemplate::Clone {
                 to_template: target_template,
                 ..
             } => target_template.clone(),
-            HcScaffoldTemplate::Init {
-                to_template: target_template,
-                ..
-            } => target_template.clone(),
-        }
-    }
-
-    pub fn get_template_file_tree(&self) -> ScaffoldResult<(String, FileTree)> {
-        match self {
-            HcScaffoldTemplate::Get {
-                template_url,
-                from_template: template,
-                ..
-            } => get_template(template_url, template),
-
-            HcScaffoldTemplate::Init { template, .. } => {
-                let ui_framework = match template {
-                    Some(t) => t.clone(),
-                    None => choose_ui_framework()?,
-                };
-                Ok((
-                    format!("{}", ui_framework.to_string()),
-                    template_for_ui_framework(&ui_framework)?,
-                ))
-            }
         }
     }
 }
@@ -1159,4 +989,51 @@ fn setup_git_environment(path: &PathBuf) -> ScaffoldResult<()> {
         println!("Warning: error running \"git add .\"");
     }
     Ok(())
+}
+
+/// Write hcScaffold config to the hApp's root `package.json` file
+fn write_scaffold_config(
+    web_app_file_tree: &mut FileTree,
+    config: &TemplateConfig,
+) -> ScaffoldResult<()> {
+    let package_json_path = PathBuf::from("package.json");
+    map_file(web_app_file_tree, &package_json_path, |c| {
+        let original_content = c.clone();
+        let json = serde_json::from_str::<Value>(&c)?;
+        let json = match json {
+            Value::Object(mut o) => {
+                o.insert(
+                    "hcScaffold".to_owned(),
+                    serde_json::to_value(config).unwrap(),
+                );
+                o
+            }
+            _ => return Ok(original_content),
+        };
+        let json = serde_json::to_value(json)?;
+        let json = serde_json::to_string_pretty(&json)?;
+        Ok(json)
+    })?;
+    Ok(())
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct TemplateConfig {
+    template: String,
+}
+
+/// Gets template config written to the root `package.json` file when the hApp was
+/// originally scaffolded
+fn get_template_config(current_dir: &PathBuf) -> ScaffoldResult<Option<TemplateConfig>> {
+    let package_json_path = current_dir.join("package.json");
+    let Ok(file) = fs::read_to_string(package_json_path) else {
+        return Ok(None);
+    };
+    let file = serde_json::from_str::<Value>(&file)?;
+    if let Some(config) = file.get("hcScaffold") {
+        let config = serde_json::from_value(config.to_owned())?;
+        Ok(Some(config))
+    } else {
+        Ok(None)
+    }
 }

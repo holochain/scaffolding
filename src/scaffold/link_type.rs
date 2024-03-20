@@ -113,7 +113,7 @@ pub fn scaffold_link_type(
     let lib_rs_path = crate_src_path.join("lib.rs");
 
     map_file(&mut file_tree, &lib_rs_path, |s| {
-        format!(
+        Ok(format!(
             r#"pub mod {};
 pub use {}::*;
 
@@ -121,7 +121,7 @@ pub use {}::*;
             link_type.to_case(Case::Snake),
             link_type.to_case(Case::Snake),
             s
-        )
+        ))
     })?;
 
     let dna_file_tree = DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;

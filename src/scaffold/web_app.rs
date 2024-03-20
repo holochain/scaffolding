@@ -4,7 +4,7 @@ use std::{ffi::OsString, path::PathBuf};
 use crate::error::ScaffoldResult;
 use crate::reserved_words::check_for_reserved_words;
 use crate::templates::web_app::scaffold_web_app_template;
-use crate::templates::{templates_path, ScaffoldedTemplate};
+use crate::templates::ScaffoldedTemplate;
 use crate::{error::ScaffoldError, file_tree::FileTree};
 
 use super::app::{
@@ -21,8 +21,6 @@ fn web_app_skeleton(
     description: Option<String>,
     skip_nix: bool,
     template_file_tree: &FileTree,
-    template_name: String,
-    scaffold_template: bool,
     holo_enabled: bool,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     check_for_reserved_words(&app_name)?;
@@ -43,15 +41,6 @@ fn web_app_skeleton(
             .ok_or(ScaffoldError::PathNotFound(PathBuf::new()))?
             .insert(OsString::from("flake.nix"), flake_nix());
     }
-    if scaffold_template {
-        app_file_tree
-            .dir_content_mut()
-            .ok_or(ScaffoldError::PathNotFound(PathBuf::new()))?
-            .insert(
-                OsString::from(templates_path().join(template_name)),
-                template_file_tree.clone(),
-            );
-    }
 
     let mut scaffold_template_result =
         scaffold_web_app_template(app_file_tree, &template_file_tree, &app_name, holo_enabled)?;
@@ -70,8 +59,6 @@ pub fn scaffold_web_app(
     description: Option<String>,
     skip_nix: bool,
     template_file_tree: &FileTree,
-    template_name: String,
-    scaffold_template: bool,
     holo_enabled: bool,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     let scaffolded_template = web_app_skeleton(
@@ -79,8 +66,6 @@ pub fn scaffold_web_app(
         description,
         skip_nix,
         &template_file_tree,
-        template_name,
-        scaffold_template,
         holo_enabled,
     )?;
     Ok(ScaffoldedTemplate {

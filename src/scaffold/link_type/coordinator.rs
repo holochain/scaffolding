@@ -397,12 +397,12 @@ pub fn add_link_type_functions_to_coordinator(
     // 2. Add this file as a module in the entry point for the crate
 
     map_file(&mut file_tree, &lib_rs_path, |file| {
-        format!(
+        Ok(format!(
             r#"pub mod {};
 
 {}"#,
             snake_link_type_name, file
-        )
+        ))
     })?;
 
     let dna_file_tree = DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
