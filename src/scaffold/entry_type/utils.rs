@@ -45,14 +45,13 @@ pub fn choose_reference_entry_hash(prompt: &str, recommended: bool) -> ScaffoldR
 }
 
 fn inner_choose_referenceable(
-    all_entries: &Vec<EntryTypeReference>,
+    all_entries: &[EntryTypeReference],
     prompt: &str,
     optional: bool,
 ) -> ScaffoldResult<Option<Referenceable>> {
     let mut all_options: Vec<String> = all_entries
-        .clone()
         .into_iter()
-        .map(|r| r.entry_type)
+        .map(|r| r.entry_type.to_owned())
         .collect();
 
     all_options.push("Agent".to_string());

@@ -24,7 +24,6 @@ fn parse_enum(fields_str: &str) -> ScaffoldResult<FieldType> {
     let label = sp[3].to_string().to_case(Case::Pascal);
 
     let variants = sp[4]
-        .to_string()
         .split('.')
         .map(|v| v.to_case(Case::Pascal))
         .collect();
