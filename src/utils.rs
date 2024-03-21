@@ -89,10 +89,10 @@ pub fn input_yes_or_no(prompt: &String, recommended: Option<bool>) -> ScaffoldRe
     }
 }
 
-pub fn input_with_custom_validation<'a, V>(prompt: &str, validator: V) -> ScaffoldResult<String> 
-    where
-        V: Validator<String> + 'a,
-        V::Err: ToString,
+pub fn input_with_custom_validation<'a, V>(prompt: &str, validator: V) -> ScaffoldResult<String>
+where
+    V: Validator<String> + 'a,
+    V::Err: ToString,
 {
     let input: String = Input::with_theme(&ColorfulTheme::default())
         .with_prompt(prompt)

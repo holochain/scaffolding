@@ -4,7 +4,8 @@ use std::{ffi::OsString, path::PathBuf};
 use crate::{
     error::ScaffoldResult,
     file_tree::{file_content, FileTree},
-    scaffold::example::Example, versions::{hdi_version, hdk_version, holochain_client_version},
+    scaffold::example::Example,
+    versions::{hdi_version, hdk_version, holochain_client_version},
 };
 
 use super::{

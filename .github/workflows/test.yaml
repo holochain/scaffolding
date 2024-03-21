@@ -48,7 +48,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        scope: [ hello_world ]
+        scope:
+          - hello_world
+          - holo_integration
     steps:
       - uses: actions/checkout@v4
 
