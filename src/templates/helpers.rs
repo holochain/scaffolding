@@ -4,15 +4,15 @@ use handlebars::{
 };
 use serde_json::Value;
 
+pub mod file_exists;
+pub mod filter;
 pub mod merge;
 pub mod uniq_lines;
-pub mod filter;
-pub mod file_exists;
 
+use file_exists::register_file_exists;
+use filter::register_filter;
 use merge::register_merge;
 use uniq_lines::register_uniq_lines;
-use filter::register_filter;
-use file_exists::register_file_exists;
 
 pub fn register_helpers<'a>(h: Handlebars<'a>) -> Handlebars<'a> {
     let h = register_concat_helper(h);

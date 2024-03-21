@@ -67,14 +67,15 @@ pub fn setup_nix_developer_environment(dir: &PathBuf) -> ScaffoldResult<()> {
         .stderr(Stdio::null())
         .current_dir(dir)
         .args(["rev-parse", "--is-inside-work-tree"])
-        .output() {
-            Ok(output) => {
-                if output.status.success() && output.stdout == b"true\n" {
-                    return Err(ScaffoldError::NixSetupError("- detected that Scaffolding is running inside an existing Git repository, please choose a different location to scaffold".to_string()));
-                }
-            },
-            Err(_) => {} // Ignore errors, Git isn't necessarily available.
+        .output()
+    {
+        Ok(output) => {
+            if output.status.success() && output.stdout == b"true\n" {
+                return Err(ScaffoldError::NixSetupError("- detected that Scaffolding is running inside an existing Git repository, please choose a different location to scaffold".to_string()));
+            }
         }
+        Err(_) => {} // Ignore errors, Git isn't necessarily available.
+    }
 
     println!("Setting up nix development environment...");
 
