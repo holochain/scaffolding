@@ -50,7 +50,7 @@ fn inner_choose_referenceable(
     optional: bool,
 ) -> ScaffoldResult<Option<Referenceable>> {
     let mut all_options: Vec<String> = all_entries
-        .into_iter()
+        .iter()
         .map(|r| r.entry_type.to_owned())
         .collect();
 
@@ -86,7 +86,7 @@ fn inner_choose_referenceable(
 }
 
 pub fn choose_referenceable(
-    all_entries: &Vec<EntryTypeReference>,
+    all_entries: &[EntryTypeReference],
     prompt: &str,
 ) -> ScaffoldResult<Referenceable> {
     let maybe_reference_type = inner_choose_referenceable(all_entries, prompt, false)?;
@@ -95,7 +95,7 @@ pub fn choose_referenceable(
 }
 
 pub fn choose_optional_referenceable(
-    all_entries: &Vec<EntryTypeReference>,
+    all_entries: &[EntryTypeReference],
     prompt: &str,
 ) -> ScaffoldResult<Option<Referenceable>> {
     inner_choose_referenceable(all_entries, prompt, true)
