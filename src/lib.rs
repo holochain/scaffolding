@@ -97,7 +97,7 @@
 //! web-app/
 //!
 //! Each folder corresponds to the templates that are created when running a specific command. Here are the steps executed:
-//! 
+//!
 //! 1. The user executes a scaffolding command, like `hc scaffold web-app`.
 //!   	- Optionally, they may pass a `--template` argument, specifying the template name or local path to use.
 //! 		- The `--template` value is saved in the root `package.json` file's `hcScaffold` key for future reference and to prevent the use of different templates in the same project.

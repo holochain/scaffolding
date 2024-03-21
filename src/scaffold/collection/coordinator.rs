@@ -192,7 +192,8 @@ fn add_delete_link_in_delete_function(
             "delete_{}",
             entry_type_reference.entry_type.to_case(Case::Snake)
         ),
-    )? else {
+    )?
+    else {
         return Ok((dna_file_tree, false));
     };
 
