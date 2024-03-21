@@ -36,10 +36,7 @@ pub fn dir_content(
     file_tree: &FileTree,
     folder_path: &Path,
 ) -> ScaffoldResult<BTreeMap<OsString, FileTree>> {
-    let v: Vec<OsString> = folder_path
-        .iter()
-        .map(|s| s.to_os_string())
-        .collect();
+    let v: Vec<OsString> = folder_path.iter().map(|s| s.to_os_string()).collect();
     file_tree
         .path(&mut v.iter())
         .ok_or(ScaffoldError::PathNotFound(folder_path.to_path_buf()))?
@@ -98,10 +95,7 @@ pub fn insert_file_tree_in_dir(
     folder_path: &Path,
     file_tree_to_insert: (OsString, FileTree),
 ) -> ScaffoldResult<()> {
-    let v: Vec<OsString> = folder_path
-        .iter()
-        .map(|s| s.to_os_string())
-        .collect();
+    let v: Vec<OsString> = folder_path.iter().map(|s| s.to_os_string()).collect();
     file_tree
         .path_mut(&mut v.iter())
         .ok_or(ScaffoldError::PathNotFound(folder_path.to_path_buf()))?

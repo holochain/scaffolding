@@ -1,7 +1,10 @@
 use dialoguer::{theme::ColorfulTheme, Confirm, Select};
 use mr_bundle::Location;
 use regex::Regex;
-use std::{ffi::OsString, path::{Path, PathBuf}};
+use std::{
+    ffi::OsString,
+    path::{Path, PathBuf},
+};
 
 use crate::{
     file_tree::{file_exists, insert_file_tree_in_dir, FileTree},

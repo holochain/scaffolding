@@ -541,19 +541,16 @@ fn signal_has_entry_types(signal_enum: &syn::ItemEnum) -> bool {
 }
 
 fn signal_action_has_entry_types(expr_match: &syn::ExprMatch) -> bool {
-    expr_match
-        .arms
-        .iter()
-        .any(|arm| {
-            if let syn::Pat::TupleStruct(tuple_struct_pat) = &arm.pat {
-                if let Some(first_segment) = tuple_struct_pat.path.segments.last() {
-                    if first_segment.ident.to_string().eq(&String::from("Create")) {
-                        return true;
-                    }
+    expr_match.arms.iter().any(|arm| {
+        if let syn::Pat::TupleStruct(tuple_struct_pat) = &arm.pat {
+            if let Some(first_segment) = tuple_struct_pat.path.segments.last() {
+                if first_segment.ident.to_string().eq(&String::from("Create")) {
+                    return true;
                 }
             }
-            false
-        })
+        }
+        false
+    })
 }
 
 fn signal_entry_types_variants() -> ScaffoldResult<Vec<syn::Variant>> {

@@ -5,8 +5,8 @@ use crate::{
 use holochain_types::prelude::AppManifest;
 use mr_bundle::Location;
 use path_clean::PathClean;
-use std::path::{Path, PathBuf};
 use std::collections::BTreeMap;
+use std::path::{Path, PathBuf};
 
 use crate::error::{ScaffoldError, ScaffoldResult};
 

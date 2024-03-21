@@ -100,10 +100,7 @@ pub fn scaffold_collection(
                 integrity_zome_file_tree.zome_manifest.name.0.to_string(),
             )),
         },
-        None => choose_entry_type_reference(
-            &all_entries,
-            "Which entry type should be collected?",
-        ),
+        None => choose_entry_type_reference(&all_entries, "Which entry type should be collected?"),
     }?;
 
     let link_type_name = collection_name.to_case(Case::Pascal);
