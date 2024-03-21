@@ -26,4 +26,3 @@ jobs:
      - uses: dtolnay/rust-toolchain@stable
 
      - run: cargo clippy --all-targets -- -D warnings
-			
