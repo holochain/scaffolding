@@ -52,7 +52,7 @@ pub fn get_{snake_entry_def_name}({snake_entry_def_name}_hash: {hash_type}) -> E
     }}
 }}"#,
         ),
-        _ => format!(""),
+        _ => String::new(),
     }
 }
 
@@ -241,7 +241,7 @@ pub fn create_handler(entry_def: &EntryDefinition) -> String {
             create_links_str.push(create_link_for_cardinality(
                 entry_def,
                 &f.field_name,
-                &link_type_name(&linked_from, &entry_def.referenceable()),
+                &link_type_name(linked_from, &entry_def.referenceable()),
                 &f.cardinality,
             ));
         }
@@ -358,8 +358,8 @@ pub fn delete_handler(entry_def: &EntryDefinition) -> String {
     let linked_from_fields: Vec<FieldDefinition> = entry_def
         .fields
         .iter()
-        .cloned()
         .filter(|field| field.linked_from.is_some())
+        .cloned()
         .collect();
 
     let delete_depending_links = match linked_from_fields.is_empty() {
@@ -509,25 +509,23 @@ use {}::*;
 
     if !crud.update {
         initial.push_str(no_update_read_handler(entry_def).as_str());
+    } else if link_from_original_to_each_update {
+        initial.push_str(read_handler_with_linking_to_updates(&entry_def.name).as_str());
     } else {
-        if link_from_original_to_each_update {
-            initial.push_str(read_handler_with_linking_to_updates(&entry_def.name).as_str());
-        } else {
-            initial.push_str(read_handler_without_linking_to_updates(&entry_def).as_str());
-        }
+        initial.push_str(read_handler_without_linking_to_updates(entry_def).as_str());
     }
     if crud.update {
         initial
             .push_str(update_handler(&entry_def.name, link_from_original_to_each_update).as_str());
     }
     if crud.delete {
-        initial.push_str(delete_handler(&entry_def).as_str());
+        initial.push_str(delete_handler(entry_def).as_str());
     }
 
     for f in &entry_def.fields {
         if let Some(linked_from) = &f.linked_from {
             initial.push_str(
-                get_links_handler(&linked_from, &entry_def.referenceable(), crud.delete).as_str(),
+                get_links_handler(linked_from, &entry_def.referenceable(), crud.delete).as_str(),
             );
         }
     }
@@ -539,15 +537,14 @@ fn signal_has_entry_types(signal_enum: &syn::ItemEnum) -> bool {
     signal_enum
         .variants
         .iter()
-        .find(|v| v.ident.to_string().eq(&String::from("EntryCreated")))
-        .is_some()
+        .any(|v| v.ident.to_string().eq(&String::from("EntryCreated")))
 }
 
 fn signal_action_has_entry_types(expr_match: &syn::ExprMatch) -> bool {
     expr_match
         .arms
         .iter()
-        .find(|arm| {
+        .any(|arm| {
             if let syn::Pat::TupleStruct(tuple_struct_pat) = &arm.pat {
                 if let Some(first_segment) = tuple_struct_pat.path.segments.last() {
                     if first_segment.ident.to_string().eq(&String::from("Create")) {
@@ -557,7 +554,6 @@ fn signal_action_has_entry_types(expr_match: &syn::ExprMatch) -> bool {
             }
             false
         })
-        .is_some()
 }
 
 fn signal_entry_types_variants() -> ScaffoldResult<Vec<syn::Variant>> {
@@ -643,7 +639,7 @@ pub fn add_crud_functions_to_coordinator(
         &crate_src_path.join(format!("{}.rs", entry_def.name.to_case(Case::Snake))),
         &initial_crud_handlers(
             integrity_zome_name,
-            &entry_def,
+            entry_def,
             crud,
             link_from_original_to_each_update,
         ),
@@ -678,12 +674,12 @@ pub fn add_crud_functions_to_coordinator(
 
                 for item in &mut file.items {
                     if let syn::Item::Enum(item_enum) = item {
-                        if item_enum.ident.to_string().eq(&String::from("Signal")) {
-                            if !signal_has_entry_types(item_enum) {
-                                first_entry_type_scaffolded = true;
-                                for v in signal_entry_types_variants()? {
-                                    item_enum.variants.push(v);
-                                }
+                        if item_enum.ident.to_string().eq(&String::from("Signal"))
+                            && !signal_has_entry_types(item_enum)
+                        {
+                            first_entry_type_scaffolded = true;
+                            for v in signal_entry_types_variants()? {
+                                item_enum.variants.push(v);
                             }
                         }
                     }
@@ -695,7 +691,7 @@ pub fn add_crud_functions_to_coordinator(
                             .to_string()
                             .eq(&String::from("signal_action"))
                         {
-                            if let None = find_ending_match_expr_in_block(&mut item_fn.block) {
+                            if find_ending_match_expr_in_block(&mut item_fn.block).is_none() {
                                 item_fn.block = Box::new(syn::parse_str::<syn::Block>(
                                     "{ match action.hashed.content.clone() { _ => Ok(()) } }",
                                 )?);

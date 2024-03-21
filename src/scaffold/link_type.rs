@@ -79,13 +79,13 @@ pub fn scaffold_link_type(
 
     let bidirectional = match (&to_referenceable, bidirectional) {
         (None, _) => false,
-        (_, Some(b)) => b.clone(),
+        (_, Some(b)) => *b,
         (_, None) => Confirm::with_theme(&ColorfulTheme::default())
             .with_prompt("Should the link be bidirectional?")
             .interact()?,
     };
     let delete = match delete {
-        Some(d) => d.clone(),
+        Some(d) => *d,
         None => Confirm::with_theme(&ColorfulTheme::default())
             .with_prompt("Can the link be deleted?")
             .interact()?,
@@ -101,11 +101,7 @@ pub fn scaffold_link_type(
     insert_file(
         &mut file_tree,
         &crate_src_path.join(&link_type_file_name),
-        &format!(
-            "use hdi::prelude::*;
-
-"
-        ),
+        "use hdi::prelude::*;",
     )?;
 
     // 2. Add this file as a module in the entry point for the crate
@@ -138,7 +134,7 @@ pub use {}::*;
 
     let inverse_link_type = if bidirectional {
         if let Some(to) = &to_referenceable {
-            let inverse_link_type = link_type_name(&to, &from_referenceable);
+            let inverse_link_type = link_type_name(to, &from_referenceable);
             zome_file_tree = add_link_type_to_integrity_zome(
                 zome_file_tree,
                 &inverse_link_type,
@@ -207,7 +203,7 @@ pub use {}::*;
 
     scaffold_link_type_templates(
         app_file_tree.file_tree(),
-        &template_file_tree,
+        template_file_tree,
         &app_name,
         &dna_manifest.name(),
         &coordinator_zome,

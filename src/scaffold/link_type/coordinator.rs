@@ -97,7 +97,7 @@ pub fn add_link_handler(
         true => format!(
             r#"create_link(input.target_{to_arg_name}, input.base_{from_arg_name}, LinkTypes::{inverse_link_type_name}, ())?;"#
         ),
-        false => format!(""),
+        false => String::new(),
     };
 
     format!(
@@ -166,7 +166,7 @@ pub fn get_deleted_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_t
 }}"#
         )
     } else {
-        format!("")
+        String::new()
     };
 
     format!(
@@ -220,7 +220,7 @@ pub fn get_deleted_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_t
         .collect())
 }}"#
         ),
-        false => format!(""),
+        false => String::new(),
     };
 
     format!(
@@ -240,7 +240,7 @@ fn from_link_hash_type(hash_type: &String) -> String {
     let lower_hash_type = hash_type.to_case(Case::Lower);
 
     match hash_type.as_str() {
-        "AgentPubKey" => format!("AgentPubKey::from(link.target.clone().into_entry_hash().ok_or(wasm_error!(WasmErrorInner::Guest(String::from(\"No entry_hash associated with link\"))))?)"),
+        "AgentPubKey" => "AgentPubKey::from(link.target.clone().into_entry_hash().ok_or(wasm_error!(WasmErrorInner::Guest(String::from(\"No entry_hash associated with link\"))))?)".to_string(),
         _ => format!("link.target.clone().into_{}().ok_or(wasm_error!(WasmErrorInner::Guest(String::from(\"No {} associated with link\"))))?", snake_hash_type, lower_hash_type),
     }
 }
@@ -287,7 +287,7 @@ fn remove_link_handlers(
         }}
     }}"#
         ),
-        false => format!(""),
+        false => String::new(),
     };
 
     format!(
@@ -329,12 +329,12 @@ fn normal_handlers(
 {}"#,
             get_links_handler(to_referenceable, from_referenceable, delete)
         ),
-        false => format!(""),
+        false => String::new(),
     };
 
     let delete_link_handler = match delete {
         true => remove_link_handlers(from_referenceable, to_referenceable, bidirectional),
-        false => String::from(""),
+        false => String::new(),
     };
 
     format!(

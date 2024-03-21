@@ -46,7 +46,7 @@ pub fn choose_reference_entry_hash(prompt: &String, recommended: bool) -> Scaffo
 
 fn inner_choose_referenceable(
     all_entries: &Vec<EntryTypeReference>,
-    prompt: &String,
+    prompt: &str,
     optional: bool,
 ) -> ScaffoldResult<Option<Referenceable>> {
     let mut all_options: Vec<String> = all_entries
@@ -62,7 +62,7 @@ fn inner_choose_referenceable(
     }
 
     let selection = Select::with_theme(&ColorfulTheme::default())
-        .with_prompt(prompt.clone())
+        .with_prompt(prompt)
         .default(0)
         .items(&all_options[..])
         .interact()?;
@@ -72,9 +72,9 @@ fn inner_choose_referenceable(
             "Which role does this agent play in the relationship ? (eg. \"creator\", \"invitee\")",
         ), Case::Snake)?;
         check_for_reserved_words(&role)?;
-        return Ok(Some(Referenceable::Agent { role }));
+        Ok(Some(Referenceable::Agent { role }))
     } else if selection == all_entries.len() + 1 {
-        return Ok(None);
+        Ok(None)
     } else {
         Ok(Some(Referenceable::EntryType(EntryTypeReference {
             entry_type: all_options[selection].clone(),
@@ -88,7 +88,7 @@ fn inner_choose_referenceable(
 
 pub fn choose_referenceable(
     all_entries: &Vec<EntryTypeReference>,
-    prompt: &String,
+    prompt: &str,
 ) -> ScaffoldResult<Referenceable> {
     let maybe_reference_type = inner_choose_referenceable(all_entries, prompt, false)?;
 
@@ -97,23 +97,19 @@ pub fn choose_referenceable(
 
 pub fn choose_optional_referenceable(
     all_entries: &Vec<EntryTypeReference>,
-    prompt: &String,
+    prompt: &str,
 ) -> ScaffoldResult<Option<Referenceable>> {
     inner_choose_referenceable(all_entries, prompt, true)
 }
 
 pub fn choose_entry_type_reference(
-    all_entries: &Vec<EntryTypeReference>,
-    prompt: &String,
+    all_entries: &[EntryTypeReference],
+    prompt: &str,
 ) -> ScaffoldResult<EntryTypeReference> {
-    let all_options: Vec<String> = all_entries
-        .clone()
-        .into_iter()
-        .map(|r| r.entry_type)
-        .collect();
+    let all_options: Vec<String> = all_entries.iter().cloned().map(|r| r.entry_type).collect();
 
     let selection = Select::with_theme(&ColorfulTheme::default())
-        .with_prompt(prompt.clone())
+        .with_prompt(prompt)
         .default(0)
         .items(&all_options[..])
         .interact()?;
@@ -124,14 +120,14 @@ pub fn choose_entry_type_reference(
 pub fn get_or_choose_referenceable(
     zome_file_tree: &ZomeFileTree,
     entry_type: &Option<Referenceable>,
-    prompt: &String,
+    prompt: &str,
 ) -> ScaffoldResult<Referenceable> {
-    let all_entries = get_all_entry_types(&zome_file_tree)?.unwrap_or_else(|| vec![]);
+    let all_entries = get_all_entry_types(zome_file_tree)?.unwrap_or_else(Vec::new);
 
     match &entry_type {
         None => choose_referenceable(&all_entries, prompt),
         Some(Referenceable::Agent { role }) => {
-            check_for_reserved_words(&role)?;
+            check_for_reserved_words(role)?;
             Ok(Referenceable::Agent { role: role.clone() })
         }
         Some(Referenceable::EntryType(app_entry_reference)) => {
@@ -154,9 +150,9 @@ pub fn get_or_choose_referenceable(
 pub fn get_or_choose_optional_reference_type(
     zome_file_tree: &ZomeFileTree,
     entry_type: &Option<Referenceable>,
-    prompt: &String,
+    prompt: &str,
 ) -> ScaffoldResult<Option<Referenceable>> {
-    let all_entries = get_all_entry_types(&zome_file_tree)?.unwrap_or_else(|| vec![]);
+    let all_entries = get_all_entry_types(zome_file_tree)?.unwrap_or_else(Vec::new);
 
     match entry_type {
         None => choose_optional_referenceable(&all_entries, prompt),

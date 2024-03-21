@@ -33,7 +33,7 @@ const RESERVED_WORDS: [&str; 27] = [
 ];
 
 // Returns an error if the given string is invalid due to it being a reserved word
-pub fn check_for_reserved_words(string_to_check: &String) -> ScaffoldResult<()> {
+pub fn check_for_reserved_words(string_to_check: &str) -> ScaffoldResult<()> {
     for w in RESERVED_WORDS {
         if string_to_check
             .to_case(Case::Lower)

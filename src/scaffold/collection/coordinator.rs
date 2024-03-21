@@ -106,9 +106,8 @@ fn add_create_link_in_create_function(
             ));
         }
         CollectionType::ByAuthor => {
-            create_link_stmts.push(format!(
-                r#"let my_agent_pub_key = agent_info()?.agent_latest_pubkey;"#,
-            ));
+            create_link_stmts
+                .push("let my_agent_pub_key = agent_info()?.agent_latest_pubkey;".to_string());
             create_link_stmts.push(format!(
                 r#"create_link(my_agent_pub_key, {}.clone(), LinkTypes::{}, ())?;"#,
                 link_to_variable, link_type_name
@@ -165,7 +164,7 @@ fn add_create_link_in_create_function(
     )
     .map_err(|e| match e {
         ScaffoldError::MalformedFile(path, error) => {
-            ScaffoldError::MalformedFile(crate_src_path.join(&path), error)
+            ScaffoldError::MalformedFile(crate_src_path.join(path), error)
         }
         _ => e,
     })?;
@@ -202,14 +201,14 @@ fn add_delete_link_in_delete_function(
     let snake_case_entry_type = entry_type_reference.entry_type.to_case(Case::Snake);
 
     let target_hash_variable = match entry_type_reference.reference_entry_hash {
-        true => format!(
-            r#"record.action().entry_hash().ok_or(wasm_error!(WasmErrorInner::Guest("Record does not have an entry".to_string())))?"#
-        ),
+        true =>
+            r#"record.action().entry_hash().ok_or(wasm_error!(WasmErrorInner::Guest("Record does not have an entry".to_string())))?"#.to_string()
+        ,
         false => format!("&original_{snake_case_entry_type}_hash"),
     };
     let into_hash_fn = match entry_type_reference.reference_entry_hash {
-        true => format!(r#"into_entry_hash()"#),
-        false => format!("into_action_hash()"),
+        true => "into_entry_hash()".to_string(),
+        false => "into_action_hash()".to_string(),
     };
 
     let mut delete_link_stmts: Vec<String> = vec![];
@@ -298,7 +297,7 @@ fn add_delete_link_in_delete_function(
     )
     .map_err(|e| match e {
         ScaffoldError::MalformedFile(path, error) => {
-            ScaffoldError::MalformedFile(crate_src_path.join(&path), error)
+            ScaffoldError::MalformedFile(crate_src_path.join(path), error)
         }
         _ => e,
     })?;

@@ -19,8 +19,7 @@ serde = {{ workspace = true }}
 }
 
 pub fn initial_lib_rs() -> String {
-    format!(
-        r#"use hdi::prelude::*;
+    r#"use hdi::prelude::*;
 
 /// Validation you perform during the genesis process. Nobody else on the network performs it, only you.
 /// There *is no* access to network calls in this callback
@@ -184,6 +183,5 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {{
         }},
     }}
 }}
-"#
-    )
+"#.to_string()
 }

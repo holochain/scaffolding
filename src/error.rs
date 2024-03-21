@@ -46,7 +46,7 @@ pub enum ScaffoldError {
     HandlebarsRenderError(#[from] handlebars::RenderError),
 
     #[error(transparent)]
-    HandlebarsTemplateError(#[from] handlebars::TemplateError),
+    HandlebarsTemplateError(#[from] Box<handlebars::TemplateError>), // Boxed to address TemplateError being too large
 
     #[error("Path was not found: {0}")]
     PathNotFound(PathBuf),

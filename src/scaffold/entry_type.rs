@@ -36,9 +36,9 @@ pub mod utils;
 fn check_field_definitions(
     entry_type_name: &String,
     zome_file_tree: &ZomeFileTree,
-    fields: &Vec<FieldDefinition>,
+    fields: &[FieldDefinition],
 ) -> ScaffoldResult<()> {
-    let entry_types = get_all_entry_types(zome_file_tree)?.unwrap_or_else(|| vec![]);
+    let entry_types = get_all_entry_types(zome_file_tree)?.unwrap_or_else(Vec::new);
 
     let entry_types_names: Vec<String> = entry_types
         .clone()
@@ -71,6 +71,7 @@ fn check_field_definitions(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn scaffold_entry_type(
     zome_file_tree: ZomeFileTree,
     template_file_tree: &FileTree,
@@ -104,7 +105,7 @@ pub fn scaffold_entry_type(
     };
 
     let reference_entry_hash = match maybe_reference_entry_hash {
-        Some(r) => r.clone(),
+        Some(r) => *r,
         None => {
             // TODO: understand if this question is necessary, or if we can assume ActionHash
             // let selection = Select::with_theme(&ColorfulTheme::default())
@@ -131,7 +132,7 @@ pub fn scaffold_entry_type(
 
     let link_from_original_to_each_update = match crud.update {
         true => match maybe_link_from_original_to_each_update {
-            Some(l) => l.clone(),
+            Some(l) => *l,
             None => {
                 let selection = Select::with_theme(&ColorfulTheme::default())
                 .with_prompt("Should a link from the original entry be created when this entry is updated?")

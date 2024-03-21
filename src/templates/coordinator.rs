@@ -21,15 +21,15 @@ pub struct ScaffoldCoordinatorZomeData {
 pub fn scaffold_coordinator_zome_templates(
     mut app_file_tree: FileTree,
     template_file_tree: &FileTree,
-    dna_role_name: &String,
+    dna_role_name: &str,
     zome_manifest: &ZomeManifest,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     let data = ScaffoldCoordinatorZomeData {
-        dna_role_name: dna_role_name.clone(),
+        dna_role_name: dna_role_name.to_owned(),
         zome_manifest: zome_manifest.clone(),
     };
 
-    let h = build_handlebars(&template_file_tree)?;
+    let h = build_handlebars(template_file_tree)?;
 
     let coordinator_zome_path = PathBuf::from("coordinator-zome");
     let v: Vec<OsString> = coordinator_zome_path
@@ -47,7 +47,7 @@ pub fn scaffold_coordinator_zome_templates(
     }
 
     let next_instructions = match file_content(
-        &template_file_tree,
+        template_file_tree,
         &PathBuf::from("coordinator-zome.instructions.hbs"),
     ) {
         Ok(content) => Some(h.render_template(content.as_str(), &data)?),

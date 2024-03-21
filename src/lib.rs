@@ -99,17 +99,17 @@
 //! Each folder corresponds to the templates that are created when running a specific command. Here are the steps executed:
 //!
 //! 1. The user executes a scaffolding command, like `hc scaffold web-app`.
-//!   	- Optionally, they may pass a `--template` argument, specifying the template name or local path to use.
-//! 		- The `--template` value is saved in the root `package.json` file's `hcScaffold` key for future reference and to prevent the use of different templates in the same project.
+//!    - Optionally, they may pass a `--template` argument, specifying the template name or local path to use.
+//!    - The `--template` value is saved in the root `package.json` file's `hcScaffold` key for future reference and to prevent the use of different templates in the same project.
 //! 2. The scaffolding tool prompts the user to input all necessary information for the command.
 //! 3. **Backend** code is automatically generated, independent of custom templates.
 //! 4. If a `--template` argument is provided:
-//! 		- A check is performed to ensure alignment with the originally scaffolded hApp. If successful, it uses the provided template.
+//!    - A check is performed to ensure alignment with the originally scaffolded hApp. If successful, it uses the provided template.
 //! 5. For the selected template, the tool searches for a corresponding folder inside it based on the command.
-//!   	- For example, `hc scaffold web-app` searches for a folder named `web-app`.
+//!    - For example, `hc scaffold web-app` searches for a folder named `web-app`.
 //! 6. If found, it copies the directory structure within that folder, selecting files with the `.hbs` extension.
 //! 7. It renders the contents of each file using appropriate data from the command.
-//!   	- For instance, in `hc scaffold web-app`, one context field is `app_name`, representing the user-input app name.
+//!    - For instance, in `hc scaffold web-app`, one context field is `app_name`, representing the user-input app name.
 //! 8. Finally, it merges the resulting directory structure with the existing repository. If a file already exists, its contents are overwritten.
 //! You can take a look at [Writing templates](#writing-templates) to learn how to write your own templates.
 //!

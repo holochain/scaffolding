@@ -20,7 +20,7 @@ pub fn select_integrity_zomes(
             .collect(),
     };
 
-    if integrity_zomes.len() == 0 {
+    if integrity_zomes.is_empty() {
         return Ok(vec![]);
     }
 

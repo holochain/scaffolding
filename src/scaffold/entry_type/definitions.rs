@@ -228,7 +228,7 @@ impl EntryTypeReference {
 }
 
 pub fn parse_entry_type_reference(s: &str) -> ScaffoldResult<EntryTypeReference> {
-    let sp: Vec<&str> = s.split(":").collect();
+    let sp: Vec<&str> = s.split(':').collect();
     check_case(&sp[0].to_string(), "entry type reference", Case::Snake)?;
 
     let reference_entry_hash = match sp.len() {
@@ -267,7 +267,7 @@ impl Serialize for Referenceable {
 }
 
 pub fn parse_referenceable(s: &str) -> ScaffoldResult<Referenceable> {
-    let sp: Vec<&str> = s.split(":").collect();
+    let sp: Vec<&str> = s.split(':').collect();
 
     check_case(&sp[0].to_string(), "referenceable", Case::Snake)?;
 

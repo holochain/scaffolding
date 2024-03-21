@@ -3,7 +3,7 @@ use handlebars::Handlebars;
 use regex::Regex;
 use std::collections::BTreeMap;
 use std::ffi::OsString;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use crate::error::ScaffoldResult;
 use crate::file_tree::{
@@ -52,29 +52,30 @@ pub fn register_all_partials_in_dir<'a>(
                 return true;
             }
         }
-        return false;
+        false
     });
 
     for (path, content) in partials {
         h.register_partial(
             path.with_extension("").as_os_str().to_str().unwrap(),
             content.trim(),
-        )?;
+        )
+        .map_err(Box::new)?;
     }
 
     Ok(h)
 }
 
-pub fn render_template_file<'a>(
-    h: &Handlebars<'a>,
+pub fn render_template_file(
+    h: &Handlebars,
     existing_app_file_tree: &FileTree,
-    target_path: &PathBuf,
+    target_path: &Path,
     template_str: &String,
     value: &serde_json::Value,
 ) -> ScaffoldResult<String> {
     let mut value = value.clone();
 
-    if let Ok(previous_content) = file_content(existing_app_file_tree, &target_path) {
+    if let Ok(previous_content) = file_content(existing_app_file_tree, target_path) {
         value
             .as_object_mut()
             .unwrap()
@@ -82,15 +83,16 @@ pub fn render_template_file<'a>(
     }
 
     let mut h = h.clone();
-    h.register_template_string(target_path.to_str().unwrap(), template_str)?;
+    h.register_template_string(target_path.to_str().unwrap(), template_str)
+        .map_err(Box::new)?;
     let new_contents = h.render(target_path.to_str().unwrap(), &value)?;
 
     Ok(new_contents)
 }
 
-pub fn render_template_file_tree<'a, T: Serialize>(
+pub fn render_template_file_tree<T: Serialize>(
     existing_app_file_tree: &FileTree,
-    h: &Handlebars<'a>,
+    h: &Handlebars,
     templates_file_tree: &FileTree,
     data: &T,
 ) -> ScaffoldResult<FileTree> {
@@ -129,7 +131,7 @@ pub fn render_template_file_tree<'a, T: Serialize>(
                     .filter(|s| !s.is_empty())
                     .collect();
 
-                if files_to_create.len() > 0 {
+                if files_to_create.is_empty() {
                     let delimiter = "\n----END_OF_FILE_DELIMITER----\n";
 
                     let each_if_re = Regex::new(
@@ -152,7 +154,7 @@ pub fn render_template_file_tree<'a, T: Serialize>(
                         ),
                     };
                     let new_contents = render_template_file(
-                        &h,
+                        h,
                         existing_app_file_tree,
                         &path,
                         &new_all_contents,
@@ -160,7 +162,6 @@ pub fn render_template_file_tree<'a, T: Serialize>(
                     )?;
                     let new_contents_split: Vec<String> = new_contents
                         .split(delimiter)
-                        .into_iter()
                         .map(|s| s.to_string())
                         .collect();
 
@@ -184,7 +185,7 @@ pub fn render_template_file_tree<'a, T: Serialize>(
                     let target_path = PathBuf::from(path_prefix.clone()).join(file_name);
 
                     let new_contents = render_template_file(
-                        &h,
+                        h,
                         existing_app_file_tree,
                         &target_path,
                         &contents,
@@ -198,7 +199,7 @@ pub fn render_template_file_tree<'a, T: Serialize>(
                     let target_path = PathBuf::from(new_path).with_extension("");
 
                     let new_contents = render_template_file(
-                        &h,
+                        h,
                         existing_app_file_tree,
                         &target_path,
                         &contents,
@@ -217,9 +218,9 @@ pub fn render_template_file_tree<'a, T: Serialize>(
     unflatten_file_tree(&transformed_templates)
 }
 
-pub fn render_template_file_tree_and_merge_with_existing<'a, T: Serialize>(
+pub fn render_template_file_tree_and_merge_with_existing<T: Serialize>(
     app_file_tree: FileTree,
-    h: &Handlebars<'a>,
+    h: &Handlebars,
     template_file_tree: &FileTree,
     data: &T,
 ) -> ScaffoldResult<FileTree> {

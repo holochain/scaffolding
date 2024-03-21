@@ -219,7 +219,7 @@ fn is_create_entry(pat: &syn::Pat) -> bool {
             }
         }
     }
-    return false;
+    false
 }
 
 fn is_update_entry(pat: &syn::Pat) -> bool {
@@ -230,7 +230,7 @@ fn is_update_entry(pat: &syn::Pat) -> bool {
             }
         }
     }
-    return false;
+    false
 }
 
 fn is_delete_entry(pat: &syn::Pat) -> bool {
@@ -241,12 +241,10 @@ fn is_delete_entry(pat: &syn::Pat) -> bool {
             }
         }
     }
-    return false;
+    false
 }
 
-pub fn find_ending_match_expr_in_block<'a>(
-    block: &'a mut syn::Block,
-) -> Option<&'a mut syn::ExprMatch> {
+pub fn find_ending_match_expr_in_block(block: &mut syn::Block) -> Option<&mut syn::ExprMatch> {
     if let Some(e) = block.stmts.last_mut() {
         match e {
             syn::Stmt::Expr(syn::Expr::Match(e_m), _) => Some(e_m),
@@ -256,7 +254,7 @@ pub fn find_ending_match_expr_in_block<'a>(
         None
     }
 }
-pub fn find_ending_match_expr<'a>(e: &'a mut syn::Expr) -> Option<&'a mut syn::ExprMatch> {
+pub fn find_ending_match_expr(e: &mut syn::Expr) -> Option<&mut syn::ExprMatch> {
     match e {
         syn::Expr::Match(expr_match) => Some(expr_match),
         syn::Expr::Block(expr_block) => find_ending_match_expr_in_block(&mut expr_block.block),
@@ -413,7 +411,7 @@ pub use {}::*;
                         }
                     }
 
-                    add_entry_type_to_validation_arms(&mut i, &entry_def)?;
+                    add_entry_type_to_validation_arms(&mut i, entry_def)?;
 
                     Ok(i)
                 })
@@ -430,7 +428,7 @@ pub use {}::*;
     )
     .map_err(|e| match e {
         ScaffoldError::MalformedFile(path, error) => {
-            ScaffoldError::MalformedFile(crate_src_path.join(&path), error)
+            ScaffoldError::MalformedFile(crate_src_path.join(path), error)
         }
         _ => e,
     })?;
@@ -548,17 +546,18 @@ fn add_entry_type_to_validation_arms(
 
                                             if path_segment_str.eq(&String::from("StoreRecord")) {
                                                 if let Some(op_entry_match_expr) =
-                                                    find_ending_match_expr(&mut *arm.body)
+                                                    find_ending_match_expr(&mut arm.body)
                                                 {
                                                     for op_record_arm in
                                                         &mut op_entry_match_expr.arms
                                                     {
                                                         if is_create_entry(&op_record_arm.pat) {
                                                             // Add new entry type to match arm
-                                                            if let Some(_) = find_ending_match_expr(
-                                                                &mut *op_record_arm.body,
-                                                            ) {
-                                                            } else {
+                                                            if find_ending_match_expr(
+                                                                &mut op_record_arm.body,
+                                                            )
+                                                            .is_none()
+                                                            {
                                                                 // Change empty invalid to match on entry_type
                                                                 *op_record_arm.body =
                                                                     syn::parse_str::<syn::Expr>(
@@ -569,7 +568,7 @@ fn add_entry_type_to_validation_arms(
                                                             // Add new entry type to match arm
                                                             if let Some(entry_type_match) =
                                                                 find_ending_match_expr(
-                                                                    &mut *op_record_arm.body,
+                                                                    &mut op_record_arm.body,
                                                                 )
                                                             {
                                                                 let new_arm: syn::Arm =
@@ -586,10 +585,11 @@ fn add_entry_type_to_validation_arms(
                                                             &op_record_arm.pat,
                                                         ) {
                                                             // Add new entry type to match arm
-                                                            if let Some(_) = find_ending_match_expr(
-                                                                &mut *op_record_arm.body,
-                                                            ) {
-                                                            } else {
+                                                            if find_ending_match_expr(
+                                                                &mut op_record_arm.body,
+                                                            )
+                                                            .is_none()
+                                                            {
                                                                 // Change empty invalid to match on entry_type
                                                                 *op_record_arm.body =
                                                                     syn::parse_str::<syn::Expr>(
@@ -611,7 +611,7 @@ fn add_entry_type_to_validation_arms(
                                                             // Add new entry type to match arm
                                                             if let Some(entry_type_match) =
                                                                 find_ending_match_expr(
-                                                                    &mut *op_record_arm.body,
+                                                                    &mut op_record_arm.body,
                                                                 )
                                                             {
                                                                 let new_arm: syn::Arm =
@@ -640,10 +640,11 @@ fn add_entry_type_to_validation_arms(
                                                             &op_record_arm.pat,
                                                         ) {
                                                             // Add new entry type to match arm
-                                                            if let Some(_) = find_ending_match_expr(
-                                                                &mut *op_record_arm.body,
-                                                            ) {
-                                                            } else {
+                                                            if find_ending_match_expr(
+                                                                &mut op_record_arm.body,
+                                                            )
+                                                            .is_none()
+                                                            {
                                                                 // Change empty invalid to match on entry_type
                                                                 *op_record_arm.body =
                                                                     syn::parse_str::<syn::Expr>(
@@ -697,7 +698,7 @@ fn add_entry_type_to_validation_arms(
                                                             // Add new entry type to match arm
                                                             if let Some(entry_type_match) =
                                                                 find_ending_match_expr(
-                                                                    &mut *op_record_arm.body,
+                                                                    &mut op_record_arm.body,
                                                                 )
                                                             {
                                                                 let new_arm: syn::Arm =
@@ -717,17 +718,18 @@ fn add_entry_type_to_validation_arms(
                                                 .eq(&String::from("StoreEntry"))
                                             {
                                                 if let Some(op_entry_match_expr) =
-                                                    find_ending_match_expr(&mut *arm.body)
+                                                    find_ending_match_expr(&mut arm.body)
                                                 {
                                                     for op_entry_arm in
                                                         &mut op_entry_match_expr.arms
                                                     {
                                                         if is_create_entry(&op_entry_arm.pat) {
                                                             // Add new entry type to match arm
-                                                            if let Some(_) = find_ending_match_expr(
-                                                                &mut *op_entry_arm.body,
-                                                            ) {
-                                                            } else {
+                                                            if find_ending_match_expr(
+                                                                &mut op_entry_arm.body,
+                                                            )
+                                                            .is_none()
+                                                            {
                                                                 // Change empty invalid to match on entry_type
                                                                 *op_entry_arm.body =
                                                                     syn::parse_str::<syn::Expr>(
@@ -738,7 +740,7 @@ fn add_entry_type_to_validation_arms(
                                                             // Add new entry type to match arm
                                                             if let Some(entry_type_match) =
                                                                 find_ending_match_expr(
-                                                                    &mut *op_entry_arm.body,
+                                                                    &mut op_entry_arm.body,
                                                                 )
                                                             {
                                                                 let new_arm: syn::Arm = syn::parse_str(
@@ -753,10 +755,11 @@ fn add_entry_type_to_validation_arms(
                                                         } else if is_update_entry(&op_entry_arm.pat)
                                                         {
                                                             // Add new entry type to match arm
-                                                            if let Some(_) = find_ending_match_expr(
-                                                                &mut *op_entry_arm.body,
-                                                            ) {
-                                                            } else {
+                                                            if find_ending_match_expr(
+                                                                &mut op_entry_arm.body,
+                                                            )
+                                                            .is_none()
+                                                            {
                                                                 // Change empty invalid to match on entry_type
                                                                 *op_entry_arm.body =
                                                                     syn::parse_str::<syn::Expr>(
@@ -767,7 +770,7 @@ fn add_entry_type_to_validation_arms(
                                                             // Add new entry type to match arm
                                                             if let Some(entry_type_match) =
                                                                 find_ending_match_expr(
-                                                                    &mut *op_entry_arm.body,
+                                                                    &mut op_entry_arm.body,
                                                                 )
                                                             {
                                                                 let new_arm: syn::Arm = syn::parse_str(
@@ -786,7 +789,7 @@ fn add_entry_type_to_validation_arms(
                                                 .eq(&String::from("RegisterUpdate"))
                                             {
                                                 if let Some(op_entry_match_expr) =
-                                                    find_ending_match_expr(&mut *arm.body)
+                                                    find_ending_match_expr(&mut arm.body)
                                                 {
                                                     for op_entry_arm in
                                                         &mut op_entry_match_expr.arms
@@ -803,12 +806,11 @@ fn add_entry_type_to_validation_arms(
                                                                     .eq(&String::from("Entry"))
                                                                 {
                                                                     // Add new entry type to match arm
-                                                                    if let Some(_) =
-                                                                        find_ending_match_expr(
-                                                                            &mut *op_entry_arm.body,
-                                                                        )
+                                                                    if find_ending_match_expr(
+                                                                        &mut op_entry_arm.body,
+                                                                    )
+                                                                    .is_none()
                                                                     {
-                                                                    } else {
                                                                         // Change empty invalid to match on entry_type
                                                                         *op_entry_arm.body =
                                                                             syn::parse_str::<
@@ -823,7 +825,7 @@ fn add_entry_type_to_validation_arms(
                                                                     // Add new entry type to match arm
                                                                     if let Some(entry_type_match) =
                                                                         find_ending_match_expr(
-                                                                            &mut *op_entry_arm.body,
+                                                                            &mut op_entry_arm.body,
                                                                         )
                                                                     {
                                                                         let new_arm: syn::Arm = syn::parse_str(
@@ -845,7 +847,7 @@ fn add_entry_type_to_validation_arms(
                                                 .eq(&String::from("RegisterDelete"))
                                             {
                                                 if let Some(op_entry_match_expr) =
-                                                    find_ending_match_expr(&mut *arm.body)
+                                                    find_ending_match_expr(&mut arm.body)
                                                 {
                                                     for op_entry_arm in
                                                         &mut op_entry_match_expr.arms
@@ -862,19 +864,18 @@ fn add_entry_type_to_validation_arms(
                                                                     .eq(&String::from("Entry"))
                                                                 {
                                                                     // Add new entry type to match arm
-                                                                    if let Some(_) =
-                                                                        find_ending_match_expr(
-                                                                            &mut *op_entry_arm.body,
-                                                                        )
+                                                                    if find_ending_match_expr(
+                                                                        &mut op_entry_arm.body,
+                                                                    )
+                                                                    .is_none()
                                                                     {
-                                                                    } else {
                                                                         // Change empty invalid to match on entry_type
                                                                         *op_entry_arm.body = syn::parse_str::<syn::Expr>("match original_app_entry {}")?;
                                                                     }
                                                                     // Add new entry type to match arm
                                                                     if let Some(entry_type_match) =
                                                                         find_ending_match_expr(
-                                                                            &mut *op_entry_arm.body,
+                                                                            &mut op_entry_arm.body,
                                                                         )
                                                                     {
                                                                         let new_arm: syn::Arm = syn::parse_str(

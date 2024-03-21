@@ -1,4 +1,8 @@
-use std::{path::PathBuf, process::Stdio, str::from_utf8};
+use std::{
+    path::{Path, PathBuf},
+    process::Stdio,
+    str::from_utf8,
+};
 
 use crate::file_tree::{file_content, insert_file, FileTree};
 use cargo_metadata::{Metadata, MetadataCommand};
@@ -6,8 +10,7 @@ use cargo_metadata::{Metadata, MetadataCommand};
 use crate::error::{ScaffoldError, ScaffoldResult};
 
 pub fn workspace_cargo_toml() -> String {
-    format!(
-        r#"[workspace]
+    r#"[workspace]
 members = [
   "dnas/*/zomes/coordinator/*",
   "dnas/*/zomes/integrity/*",
@@ -20,25 +23,25 @@ opt-level = "z"
 [profile.release]
 opt-level = "z"
 "#
-    )
+    .to_string()
 }
 
 pub fn add_workspace_external_dependency(
     app_file_tree: FileTree,
-    crate_name: &String,
-    crate_version: &String,
+    crate_name: &str,
+    crate_version: &str,
 ) -> ScaffoldResult<FileTree> {
     add_workspace_dependency(
         app_file_tree,
         crate_name,
-        &toml::Value::String(crate_version.clone()),
+        &toml::Value::String(crate_version.to_owned()),
     )
 }
 
 pub fn add_workspace_path_dependency(
     app_file_tree: FileTree,
-    crate_name: &String,
-    path_from_workspace_root: &PathBuf,
+    crate_name: &str,
+    path_from_workspace_root: &Path,
 ) -> ScaffoldResult<FileTree> {
     let mut table = toml::map::Map::new();
     table.insert(
@@ -57,7 +60,7 @@ pub fn add_workspace_path_dependency(
 
 fn add_workspace_dependency(
     mut app_file_tree: FileTree,
-    crate_name: &String,
+    crate_name: &str,
     crate_location: &toml::Value,
 ) -> ScaffoldResult<FileTree> {
     let mut workspace_cargo_toml = get_workspace_cargo_toml(&app_file_tree)?;
@@ -89,7 +92,7 @@ fn add_workspace_dependency(
         None => toml::map::Map::new(),
     };
 
-    dependencies.insert(crate_name.clone(), crate_location.clone());
+    dependencies.insert(crate_name.to_owned(), crate_location.clone());
     workspace_table.insert(
         String::from("dependencies"),
         toml::Value::Table(dependencies),
@@ -114,7 +117,7 @@ pub fn get_workspace_packages_locations(
     let current_dir = std::env::current_dir()?;
 
     let path = current_dir
-        .join(workspace_cargo_toml_path(&app_file_tree))
+        .join(workspace_cargo_toml_path(app_file_tree))
         .canonicalize()?;
     let command_result = MetadataCommand::new().manifest_path(path).exec();
 
@@ -125,7 +128,7 @@ pub fn get_workspace_packages_locations(
                 .into_iter()
                 .map(|p| {
                     PathBuf::from(p.manifest_path.as_std_path())
-                        .into_iter()
+                        .iter()
                         .skip(current_dir.components().count())
                         .collect()
                 })
@@ -143,7 +146,7 @@ pub fn workspace_package_path(
     let current_dir = std::env::current_dir()?;
 
     let path = current_dir
-        .join(workspace_cargo_toml_path(&app_file_tree))
+        .join(workspace_cargo_toml_path(app_file_tree))
         .canonicalize()?;
     let metadata = MetadataCommand::new().manifest_path(path).exec()?;
 
@@ -153,7 +156,7 @@ pub fn workspace_package_path(
         .find(|p| p.name.eq(crate_name))
         .map(|p| {
             PathBuf::from(p.manifest_path.as_std_path())
-                .into_iter()
+                .iter()
                 .skip(current_dir.components().count())
                 .collect()
         });
@@ -161,35 +164,35 @@ pub fn workspace_package_path(
 }
 
 pub fn get_workspace_members(app_file_tree: &FileTree) -> ScaffoldResult<Vec<String>> {
-    let cargo_toml = get_workspace_cargo_toml(&app_file_tree)?;
+    let cargo_toml = get_workspace_cargo_toml(app_file_tree)?;
 
     let members: Vec<String> = cargo_toml
         .as_table()
         .ok_or(ScaffoldError::MalformedFile(
-            workspace_cargo_toml_path(&app_file_tree),
+            workspace_cargo_toml_path(app_file_tree),
             String::from("file does not conform to toml"),
         ))?
         .get("workspace")
         .ok_or(ScaffoldError::MalformedFile(
-            workspace_cargo_toml_path(&app_file_tree),
+            workspace_cargo_toml_path(app_file_tree),
             String::from("should have a workspace table"),
         ))?
         .as_table()
         .ok_or(ScaffoldError::MalformedFile(
-            workspace_cargo_toml_path(&app_file_tree),
+            workspace_cargo_toml_path(app_file_tree),
             String::from("should have a workspace table"),
         ))?
         .get("members")
         .ok_or(ScaffoldError::MalformedFile(
-            workspace_cargo_toml_path(&app_file_tree),
+            workspace_cargo_toml_path(app_file_tree),
             String::from("should have a members field in the workspace table"),
         ))?
         .as_array()
         .ok_or(ScaffoldError::MalformedFile(
-            workspace_cargo_toml_path(&app_file_tree),
+            workspace_cargo_toml_path(app_file_tree),
             String::from("the members field in the workspace table should be an array"),
         ))?
-        .into_iter()
+        .iter()
         .filter_map(|s| s.as_str())
         .map(|s| s.to_string())
         .collect();
@@ -209,7 +212,7 @@ pub fn get_workspace_cargo_toml(app_file_tree: &FileTree) -> ScaffoldResult<toml
 pub fn exec_metadata(app_file_tree: &FileTree) -> Result<Metadata, cargo_metadata::Error> {
     let current_dir = std::env::current_dir()?;
     let path = current_dir
-        .join(workspace_cargo_toml_path(&app_file_tree))
+        .join(workspace_cargo_toml_path(app_file_tree))
         .canonicalize()?;
     let output = MetadataCommand::new()
         .manifest_path(path)

@@ -19,13 +19,13 @@ use super::{
 };
 
 fn parse_enum(fields_str: &str) -> ScaffoldResult<FieldType> {
-    let sp: Vec<&str> = fields_str.split(":").collect();
+    let sp: Vec<&str> = fields_str.split(':').collect();
 
     let label = sp[3].to_string().to_case(Case::Pascal);
 
     let variants = sp[4]
         .to_string()
-        .split(".")
+        .split('.')
         .map(|v| v.to_case(Case::Pascal))
         .collect();
 
@@ -33,7 +33,7 @@ fn parse_enum(fields_str: &str) -> ScaffoldResult<FieldType> {
 }
 
 pub fn parse_fields(fields_str: &str) -> ScaffoldResult<FieldDefinition> {
-    let sp: Vec<&str> = fields_str.split(":").collect();
+    let sp: Vec<&str> = fields_str.split(':').collect();
 
     let field_name = sp[0].to_string();
 
@@ -66,15 +66,13 @@ pub fn parse_fields(fields_str: &str) -> ScaffoldResult<FieldDefinition> {
                 Cardinality::Option,
             )
         }
+    } else if field_type_str == "Enum" {
+        (parse_enum(fields_str)?, Cardinality::Single)
     } else {
-        if field_type_str == "Enum" {
-            (parse_enum(fields_str)?, Cardinality::Single)
-        } else {
-            (
-                FieldType::try_from(field_type_str.to_string())?,
-                Cardinality::Single,
-            )
-        }
+        (
+            FieldType::try_from(field_type_str.to_string())?,
+            Cardinality::Single,
+        )
     };
 
     let widget = if sp.len() > 2 {
@@ -96,10 +94,7 @@ pub fn parse_fields(fields_str: &str) -> ScaffoldResult<FieldDefinition> {
         FieldType::EntryHash | FieldType::ActionHash => match sp.len() {
             4 => Some(Referenceable::EntryType(EntryTypeReference {
                 entry_type: sp[3].to_string(),
-                reference_entry_hash: match field_type {
-                    FieldType::EntryHash => true,
-                    _ => false,
-                },
+                reference_entry_hash: matches!(field_type, FieldType::EntryHash),
             })),
             _ => None,
         },
@@ -131,7 +126,7 @@ pub fn choose_widget(
                 .map(|s| s.to_str().unwrap().to_string())
                 .collect();
 
-            if widgets_that_can_render_this_type.len() == 0 {
+            if widgets_that_can_render_this_type.is_empty() {
                 return Ok(None);
             }
 
@@ -296,10 +291,7 @@ pub fn choose_field(
                         .items(&all_options[..])
                         .interact()?;
 
-                    let reference_entry_hash = match field_type {
-                        FieldType::EntryHash => true,
-                        _ => false,
-                    };
+                    let reference_entry_hash = matches!(field_type, FieldType::EntryHash);
 
                     match selection == all_entry_types.len() {
                         true => Some(Referenceable::EntryType(EntryTypeReference {
@@ -357,7 +349,7 @@ pub fn choose_fields(
             field_types_templates,
             no_ui,
         )?;
-        println!("");
+        println!();
 
         fields.push(field_def);
         finished = !Confirm::with_theme(&ColorfulTheme::default())

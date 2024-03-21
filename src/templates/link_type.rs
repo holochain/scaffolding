@@ -24,13 +24,15 @@ pub struct ScaffoldLinkTypeData {
     pub delete: bool,
     pub bidirectional: Option<String>,
 }
+
+#[allow(clippy::too_many_arguments)]
 pub fn scaffold_link_type_templates(
     mut app_file_tree: FileTree,
     template_file_tree: &FileTree,
-    app_name: &String,
-    dna_role_name: &String,
+    app_name: &str,
+    dna_role_name: &str,
     coordinator_zome_manifest: &ZomeManifest,
-    link_type_name: &String,
+    link_type_name: &str,
     from_referenceable: &Referenceable,
     to_referenceable: &Option<Referenceable>,
     delete: bool,
@@ -38,17 +40,17 @@ pub fn scaffold_link_type_templates(
     no_ui: bool,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     let data = ScaffoldLinkTypeData {
-        app_name: app_name.clone(),
-        dna_role_name: dna_role_name.clone(),
+        app_name: app_name.to_owned(),
+        dna_role_name: dna_role_name.to_owned(),
         coordinator_zome_manifest: coordinator_zome_manifest.clone(),
         from_referenceable: from_referenceable.clone(),
-        link_type_name: link_type_name.clone(),
+        link_type_name: link_type_name.to_owned(),
         to_referenceable: to_referenceable.clone(),
         delete,
         bidirectional: bidirectional.clone(),
     };
 
-    let h = build_handlebars(&template_file_tree)?;
+    let h = build_handlebars(template_file_tree)?;
 
     let link_type_path = PathBuf::from("link-type");
     let v: Vec<OsString> = link_type_path.iter().map(|s| s.to_os_string()).collect();
@@ -56,9 +58,9 @@ pub fn scaffold_link_type_templates(
     if let Some(link_type_template) = template_file_tree.path(&mut v.iter()) {
         let mut link_type_template = link_type_template.clone();
         if no_ui {
-            link_type_template.dir_content_mut().and_then(|v| {
+            link_type_template.dir_content_mut().map(|v| {
                 v.retain(|k, _| k.ne(&OsString::from("ui")));
-                Some(v)
+                v
             });
         }
         app_file_tree = render_template_file_tree_and_merge_with_existing(
@@ -70,7 +72,7 @@ pub fn scaffold_link_type_templates(
     }
 
     let next_instructions = match file_content(
-        &template_file_tree,
+        template_file_tree,
         &PathBuf::from("link-type.instructions.hbs"),
     ) {
         Ok(content) => Some(h.render_template(content.as_str(), &data)?),

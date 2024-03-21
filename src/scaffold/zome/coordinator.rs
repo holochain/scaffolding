@@ -12,10 +12,10 @@ use crate::{
 
 use super::ZomeFileTree;
 
-pub fn initial_cargo_toml(zome_name: &String, dependencies: &Option<Vec<String>>) -> String {
+pub fn initial_cargo_toml(zome_name: &str, dependencies: &Option<Vec<String>>) -> String {
     let deps = match dependencies {
         Some(d) => d
-            .into_iter()
+            .iter()
             .map(|d| format!(r#"{} = {{ workspace = true }}"#, d))
             .collect::<Vec<String>>()
             .join("\n"),
@@ -93,25 +93,24 @@ fn signal_action(action: SignedActionHashed) -> ExternResult<()> {{
 
 fn choose_extern_function(
     functions_by_zome: &BTreeMap<String, Vec<ItemFn>>,
-    prompt: &String,
+    prompt: &str,
 ) -> ScaffoldResult<(String, ItemFn)> {
     let all_functions: Vec<(String, ItemFn)> = functions_by_zome
         .iter()
-        .map(|(z, fns)| {
+        .flat_map(|(z, fns)| {
             fns.iter()
                 .map(|f| (z.clone(), f.clone()))
                 .collect::<Vec<(String, ItemFn)>>()
         })
-        .flatten()
         .collect();
 
     let all_fns_str: Vec<String> = all_functions
         .iter()
-        .map(|(z, f)| format!(r#""{}", in zome "{}""#, f.sig.ident.to_string(), z))
+        .map(|(z, f)| format!(r#""{}", in zome "{}""#, f.sig.ident, z))
         .collect();
 
     let selection = Select::with_theme(&ColorfulTheme::default())
-        .with_prompt(prompt.as_str())
+        .with_prompt(prompt)
         .default(0)
         .items(&all_fns_str[..])
         .interact()?;
@@ -122,8 +121,8 @@ fn choose_extern_function(
 pub fn find_extern_function_or_choose(
     dna_file_tree: &DnaFileTree,
     coordinator_zomes: &Vec<ZomeManifest>,
-    fn_name_to_find: &String,
-    prompt: &String,
+    fn_name_to_find: &str,
+    prompt: &str,
 ) -> ScaffoldResult<(ZomeManifest, ItemFn)> {
     let mut functions_by_zome: BTreeMap<String, Vec<ItemFn>> = BTreeMap::new();
 
@@ -146,7 +145,7 @@ pub fn find_extern_function_or_choose(
         functions_by_zome.insert(coordinator_zome.name.to_string(), all_extern_functions);
     }
 
-    let (zome_name, fn_name) = choose_extern_function(&functions_by_zome, &prompt)?;
+    let (zome_name, fn_name) = choose_extern_function(&functions_by_zome, prompt)?;
 
     let chosen_zome = coordinator_zomes
         .iter()
@@ -165,7 +164,7 @@ pub fn find_extern_function_in_zome(
     zome_file_tree: &ZomeFileTree,
     fn_name: &String,
 ) -> ScaffoldResult<Option<ItemFn>> {
-    let all_extern_functions = find_all_extern_functions(&zome_file_tree)?;
+    let all_extern_functions = find_all_extern_functions(zome_file_tree)?;
     Ok(all_extern_functions
         .into_iter()
         .find(|f| f.sig.ident.eq(fn_name)))
@@ -230,5 +229,5 @@ pub fn find_all_extern_functions(zome_file_tree: &ZomeFileTree) -> ScaffoldResul
         },
     );
 
-    Ok(hdk_extern_instances.values().cloned().flatten().collect())
+    Ok(hdk_extern_instances.values().flatten().cloned().collect())
 }

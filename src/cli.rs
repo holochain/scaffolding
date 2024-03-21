@@ -35,6 +35,7 @@ use dialoguer::{theme::ColorfulTheme, Select};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::fs;
+use std::path::Path;
 use std::process::{Command, Stdio};
 use std::str::FromStr;
 use std::{ffi::OsString, path::PathBuf};
@@ -916,10 +917,9 @@ impl HcScaffoldTemplate {
             Some(t) => t,
             None => {
                 // Enter template name
-                let template_name = Input::with_theme(&ColorfulTheme::default())
+                Input::with_theme(&ColorfulTheme::default())
                     .with_prompt("Enter new template name:")
-                    .interact()?;
-                template_name
+                    .interact()?
             }
         };
 
@@ -981,7 +981,7 @@ fn setup_git_environment(path: &PathBuf) -> ScaffoldResult<()> {
     let output = Command::new("git")
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
-        .current_dir(&path)
+        .current_dir(path)
         .args(["add", "."])
         .output()?;
 
@@ -1024,7 +1024,7 @@ pub struct TemplateConfig {
 
 /// Gets template config written to the root `package.json` file when the hApp was
 /// originally scaffolded
-fn get_template_config(current_dir: &PathBuf) -> ScaffoldResult<Option<TemplateConfig>> {
+fn get_template_config(current_dir: &Path) -> ScaffoldResult<Option<TemplateConfig>> {
     let package_json_path = current_dir.join("package.json");
     let Ok(file) = fs::read_to_string(package_json_path) else {
         return Ok(None);

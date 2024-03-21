@@ -31,7 +31,7 @@ pub fn scaffold_example(
         hdk_version: hdk_version(),
         hdi_version: hdi_version(),
     };
-    let h = build_handlebars(&template_file_tree)?;
+    let h = build_handlebars(template_file_tree)?;
 
     let example_path = PathBuf::from("example");
     let v: Vec<OsString> = example_path.iter().map(|s| s.to_os_string()).collect();
@@ -46,7 +46,7 @@ pub fn scaffold_example(
     }
 
     let next_instructions = match file_content(
-        &template_file_tree,
+        template_file_tree,
         &PathBuf::from("example.instructions.hbs"),
     ) {
         Ok(content) => Some(h.render_template(content.as_str(), &data)?),

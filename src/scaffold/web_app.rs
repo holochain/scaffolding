@@ -43,7 +43,7 @@ fn web_app_skeleton(
     }
 
     let mut scaffold_template_result =
-        scaffold_web_app_template(app_file_tree, &template_file_tree, &app_name, holo_enabled)?;
+        scaffold_web_app_template(app_file_tree, template_file_tree, &app_name, holo_enabled)?;
 
     scaffold_template_result
         .file_tree
@@ -65,7 +65,7 @@ pub fn scaffold_web_app(
         app_name.clone(),
         description,
         skip_nix,
-        &template_file_tree,
+        template_file_tree,
         holo_enabled,
     )?;
     Ok(ScaffoldedTemplate {
