@@ -162,7 +162,7 @@ pub fn find_extern_function_or_choose(
 
 pub fn find_extern_function_in_zome(
     zome_file_tree: &ZomeFileTree,
-    fn_name: &String,
+    fn_name: &str,
 ) -> ScaffoldResult<Option<ItemFn>> {
     let all_extern_functions = find_all_extern_functions(zome_file_tree)?;
     Ok(all_extern_functions
@@ -173,7 +173,7 @@ pub fn find_extern_function_in_zome(
 pub fn find_extern_function_in_zomes(
     dna_file_tree: &DnaFileTree,
     zomes: &Vec<ZomeManifest>,
-    fn_name_to_find: &String,
+    fn_name_to_find: &str,
 ) -> ScaffoldResult<Option<(ZomeManifest, ItemFn)>> {
     for coordinator_zome in zomes {
         let dna_file_tree = DnaFileTree::from_dna_manifest_path(

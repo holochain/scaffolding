@@ -152,7 +152,7 @@ pub fn choose_widget(
 }
 
 pub fn choose_field(
-    entry_type_name: &String,
+    entry_type_name: &str,
     zome_file_tree: &ZomeFileTree,
     field_types_templates: &FileTree,
     no_ui: bool,
@@ -295,7 +295,7 @@ pub fn choose_field(
 
                     match selection == all_entry_types.len() {
                         true => Some(Referenceable::EntryType(EntryTypeReference {
-                            entry_type: entry_type_name.clone(),
+                            entry_type: entry_type_name.to_owned(),
                             reference_entry_hash,
                         })),
                         false => Some(Referenceable::EntryType(EntryTypeReference {
@@ -333,7 +333,7 @@ pub fn choose_field(
 }
 
 pub fn choose_fields(
-    entry_type_name: &String,
+    entry_type_name: &str,
     zome_file_tree: &ZomeFileTree,
     field_types_templates: &FileTree,
     no_ui: bool,

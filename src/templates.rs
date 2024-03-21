@@ -70,7 +70,7 @@ pub fn render_template_file(
     h: &Handlebars,
     existing_app_file_tree: &FileTree,
     target_path: &Path,
-    template_str: &String,
+    template_str: &str,
     value: &serde_json::Value,
 ) -> ScaffoldResult<String> {
     let mut value = value.clone();

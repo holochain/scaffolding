@@ -141,7 +141,7 @@ pub fn get_workspace_packages_locations(
 
 pub fn workspace_package_path(
     app_file_tree: &FileTree,
-    crate_name: &String,
+    crate_name: &str,
 ) -> ScaffoldResult<Option<PathBuf>> {
     let current_dir = std::env::current_dir()?;
 

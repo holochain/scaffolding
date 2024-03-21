@@ -7,7 +7,7 @@ use dialoguer::{theme::ColorfulTheme, Input, Select, Validator};
 use crate::error::{ScaffoldError, ScaffoldResult};
 use crate::file_tree::{dir_content, FileTree};
 
-pub fn choose_directory_path(prompt: &String, app_file_tree: &FileTree) -> ScaffoldResult<PathBuf> {
+pub fn choose_directory_path(prompt: &str, app_file_tree: &FileTree) -> ScaffoldResult<PathBuf> {
     let mut chosen_directory: Option<PathBuf> = None;
 
     let mut current_path = PathBuf::new();
@@ -65,7 +65,7 @@ fn get_folders_names(folder: &BTreeMap<OsString, FileTree>) -> Vec<String> {
 }
 
 /// "yes" or "no" input dialog, with the option to specify a recommended answer (yes = true, no = false)
-pub fn input_yes_or_no(prompt: &String, recommended: Option<bool>) -> ScaffoldResult<bool> {
+pub fn input_yes_or_no(prompt: &str, recommended: Option<bool>) -> ScaffoldResult<bool> {
     let mut yes_recommended = "";
     let mut no_recommended = "";
 
@@ -102,7 +102,7 @@ where
     Ok(input)
 }
 
-pub fn input_with_case(prompt: &String, case: Case) -> ScaffoldResult<String> {
+pub fn input_with_case(prompt: &str, case: Case) -> ScaffoldResult<String> {
     let input: String = Input::with_theme(&ColorfulTheme::default())
         .with_prompt(prompt)
         .validate_with(|input: &String| -> Result<(), String> {
@@ -117,9 +117,9 @@ pub fn input_with_case(prompt: &String, case: Case) -> ScaffoldResult<String> {
 }
 
 pub fn input_with_case_and_initial_text(
-    prompt: &String,
+    prompt: &str,
     case: Case,
-    initial_text: &String,
+    initial_text: &str,
 ) -> ScaffoldResult<String> {
     let input: String = Input::with_theme(&ColorfulTheme::default())
         .with_prompt(prompt)
@@ -135,7 +135,7 @@ pub fn input_with_case_and_initial_text(
     Ok(input)
 }
 
-pub fn input_no_whitespace(prompt: &String) -> ScaffoldResult<String> {
+pub fn input_no_whitespace(prompt: &str) -> ScaffoldResult<String> {
     let input = Input::with_theme(&ColorfulTheme::default())
         .with_prompt(prompt)
         .validate_with(|input: &String| -> Result<(), &str> {
@@ -150,7 +150,7 @@ pub fn input_no_whitespace(prompt: &String) -> ScaffoldResult<String> {
 }
 
 /// Raises an error if input is not of the appropriate_case
-pub fn check_case(input: &String, identifier: &str, case: Case) -> ScaffoldResult<()> {
+pub fn check_case(input: &str, identifier: &str, case: Case) -> ScaffoldResult<()> {
     match input.is_case(case) {
         true => Ok(()),
         false => Err(ScaffoldError::InvalidStringFormat(format!(

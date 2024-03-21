@@ -13,8 +13,8 @@ use crate::{
 use super::link_type_name;
 
 fn metadata_handlers(
-    integrity_zome_name: &String,
-    link_type_name: &String,
+    integrity_zome_name: &str,
+    link_type_name: &str,
     from_referenceable: &Referenceable,
 ) -> String {
     let snake_from_arg = from_referenceable
@@ -235,11 +235,11 @@ pub fn get_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}({fr
     )
 }
 
-fn from_link_hash_type(hash_type: &String) -> String {
+fn from_link_hash_type(hash_type: &str) -> String {
     let snake_hash_type = hash_type.to_case(Case::Snake);
     let lower_hash_type = hash_type.to_case(Case::Lower);
 
-    match hash_type.as_str() {
+    match hash_type {
         "AgentPubKey" => "AgentPubKey::from(link.target.clone().into_entry_hash().ok_or(wasm_error!(WasmErrorInner::Guest(String::from(\"No entry_hash associated with link\"))))?)".to_string(),
         _ => format!("link.target.clone().into_{}().ok_or(wasm_error!(WasmErrorInner::Guest(String::from(\"No {} associated with link\"))))?", snake_hash_type, lower_hash_type),
     }
@@ -316,7 +316,7 @@ pub fn remove_{singular_snake_to_entry_type}_for_{singular_snake_from_entry_type
 }
 
 fn normal_handlers(
-    integrity_zome_name: &String,
+    integrity_zome_name: &str,
     from_referenceable: &Referenceable,
     to_referenceable: &Referenceable,
     delete: bool,
@@ -356,8 +356,8 @@ use {integrity_zome_name}::*;
 
 pub fn add_link_type_functions_to_coordinator(
     coordinator_zome_file_tree: ZomeFileTree,
-    integrity_zome_name: &String,
-    link_type_name: &String,
+    integrity_zome_name: &str,
+    link_type_name: &str,
     from_referenceable: &Referenceable,
     to_referenceable: &Option<Referenceable>,
     delete: bool,

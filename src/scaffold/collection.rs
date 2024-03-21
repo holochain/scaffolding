@@ -67,7 +67,7 @@ pub fn choose_collection_type() -> ScaffoldResult<CollectionType> {
 pub fn scaffold_collection(
     integrity_zome_file_tree: ZomeFileTree,
     template_file_tree: &FileTree,
-    collection_name: &String,
+    collection_name: &str,
     maybe_collection_type: &Option<CollectionType>,
     maybe_entry_type: &Option<EntryTypeReference>,
     no_ui: bool,

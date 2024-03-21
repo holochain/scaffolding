@@ -21,9 +21,9 @@ use crate::{
 use super::CollectionType;
 
 fn global_collection_getter(
-    integrity_zome_name: &String,
-    collection_name: &String,
-    link_type_name: &String,
+    integrity_zome_name: &str,
+    collection_name: &str,
+    link_type_name: &str,
 ) -> String {
     let snake_collection_name = collection_name.to_case(Case::Snake);
 
@@ -41,9 +41,9 @@ pub fn get_{snake_collection_name}(_: ()) -> ExternResult<Vec<Link>> {{
 }
 
 fn by_author_collection_getter(
-    integrity_zome_name: &String,
-    collection_name: &String,
-    link_type_name: &String,
+    integrity_zome_name: &str,
+    collection_name: &str,
+    link_type_name: &str,
 ) -> String {
     format!(
         r#"use hdk::prelude::*;
@@ -60,8 +60,8 @@ pub fn get_{collection_name}(author: AgentPubKey) -> ExternResult<Vec<Link>> {{
 fn add_create_link_in_create_function(
     dna_file_tree: DnaFileTree,
     coordinator_zomes_for_integrity: &Vec<ZomeManifest>,
-    collection_name: &String,
-    link_type_name: &String,
+    collection_name: &str,
+    link_type_name: &str,
     collection_type: &CollectionType,
     entry_type_reference: &EntryTypeReference,
 ) -> ScaffoldResult<DnaFileTree> {
@@ -177,8 +177,8 @@ fn add_create_link_in_create_function(
 fn add_delete_link_in_delete_function(
     dna_file_tree: DnaFileTree,
     coordinator_zomes_for_integrity: &Vec<ZomeManifest>,
-    collection_name: &String,
-    link_type_name: &String,
+    collection_name: &str,
+    link_type_name: &str,
     collection_type: &CollectionType,
     entry_type_reference: &EntryTypeReference,
 ) -> ScaffoldResult<(DnaFileTree, bool)> {
@@ -309,8 +309,8 @@ fn add_delete_link_in_delete_function(
 
 pub fn add_collection_to_coordinators(
     integrity_zome_file_tree: ZomeFileTree,
-    collection_name: &String,
-    link_type_name: &String,
+    collection_name: &str,
+    link_type_name: &str,
     collection_type: &CollectionType,
     entry_type: &EntryTypeReference,
 ) -> ScaffoldResult<(DnaFileTree, ZomeManifest, bool)> {

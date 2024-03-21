@@ -5,9 +5,9 @@ use holochain_types::prelude::{
 
 use crate::error::{ScaffoldError, ScaffoldResult};
 
-pub fn empty_dna_manifest(dna_name: String) -> ScaffoldResult<String> {
+pub fn empty_dna_manifest(dna_name: &str) -> ScaffoldResult<String> {
     let manifest: DnaManifest = DnaManifestCurrentBuilder::default()
-        .name(dna_name.clone())
+        .name(dna_name.to_owned())
         .integrity(IntegrityManifest {
             network_seed: None,
             origin_time: HumanTimestamp::Micros(Timestamp::now()),

@@ -8,7 +8,7 @@ use crate::error::ScaffoldResult;
 /// Returns empty array if no integrity zomes are present.
 pub fn select_integrity_zomes(
     dna_manifest: &DnaManifest,
-    prompt: Option<&String>,
+    prompt: Option<&str>,
 ) -> ScaffoldResult<Vec<String>> {
     let integrity_zomes: Vec<String> = match dna_manifest {
         DnaManifest::V1(v1) => v1
@@ -44,7 +44,7 @@ pub fn select_integrity_zomes(
 
 pub fn get_coordinator_zomes_for_integrity(
     dna_manifest: &DnaManifest,
-    integrity_zome_name: &String,
+    integrity_zome_name: &str,
 ) -> Vec<ZomeManifest> {
     match dna_manifest {
         DnaManifest::V1(v1) => v1

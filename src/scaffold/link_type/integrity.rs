@@ -56,7 +56,7 @@ fn validate_referenceable(
 
 pub fn add_link_type_to_integrity_zome(
     zome_file_tree: ZomeFileTree,
-    link_type_name: &String,
+    link_type_name: &str,
     from_referenceable: &Option<Referenceable>,
     to_referenceable: &Option<Referenceable>,
     delete: bool,
@@ -182,7 +182,7 @@ pub fn add_link_type_to_integrity_zome(
                                 .any(|v| v.ident.to_string().eq(&pascal_case_link_type_name))
                             {
                                 return Err(ScaffoldError::LinkTypeAlreadyExists(
-                                    link_type_name.clone(),
+                                    link_type_name.to_owned(),
                                     dna_manifest.name(),
                                     zome_manifest.name.0.to_string(),
                                 ));
@@ -489,7 +489,7 @@ fn is_delete_link(pat: &syn::Pat) -> bool {
 
 fn add_link_type_to_validation_arms(
     item: &mut syn::Item,
-    link_type_name: &String,
+    link_type_name: &str,
 ) -> ScaffoldResult<()> {
     if let syn::Item::Fn(item_fn) = item {
         if item_fn.sig.ident.to_string().eq(&String::from("validate")) {

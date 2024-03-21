@@ -112,11 +112,11 @@ pub fn get_all_revisions_for_{snake_entry_def_name}(original_{snake_entry_def_na
     )
 }
 
-pub fn updates_link_name(entry_def_name: &String) -> String {
+pub fn updates_link_name(entry_def_name: &str) -> String {
     format!("{}Updates", entry_def_name.to_case(Case::Pascal))
 }
 
-pub fn read_handler_with_linking_to_updates(entry_def_name: &String) -> String {
+pub fn read_handler_with_linking_to_updates(entry_def_name: &str) -> String {
     let snake_entry_def_name = entry_def_name.to_case(Case::Snake);
     format!(
         r#"#[hdk_extern]
@@ -183,8 +183,8 @@ pub fn get_all_revisions_for_{snake_entry_def_name}(original_{snake_entry_def_na
 
 pub fn create_link_for_cardinality(
     entry_def: &EntryDefinition,
-    field_name: &String,
-    link_type_name: &String,
+    field_name: &str,
+    link_type_name: &str,
     cardinality: &Cardinality,
 ) -> String {
     let link_target = match entry_def.reference_entry_hash {
@@ -273,14 +273,14 @@ pub fn create_{}({}: {}) -> ExternResult<Record> {{
     )
 }
 
-pub fn update_handler(entry_def_name: &String, link_from_original_to_each_update: bool) -> String {
+pub fn update_handler(entry_def_name: &str, link_from_original_to_each_update: bool) -> String {
     match link_from_original_to_each_update {
         true => update_handler_linking_on_each_update(entry_def_name),
         false => update_handler_without_linking_on_each_update(entry_def_name),
     }
 }
 
-pub fn update_handler_without_linking_on_each_update(entry_def_name: &String) -> String {
+pub fn update_handler_without_linking_on_each_update(entry_def_name: &str) -> String {
     format!(
         r#"#[derive(Serialize, Deserialize, Debug)]
 pub struct Update{}Input {{
@@ -312,7 +312,7 @@ pub fn update_{}(input: Update{}Input) -> ExternResult<Record> {{
     )
 }
 
-pub fn update_handler_linking_on_each_update(entry_def_name: &String) -> String {
+pub fn update_handler_linking_on_each_update(entry_def_name: &str) -> String {
     format!(
         r#"#[derive(Serialize, Deserialize, Debug)]
 pub struct Update{}Input {{
@@ -492,7 +492,7 @@ pub fn get_oldest_delete_for_{snake_entry_def_name}(
 }
 
 fn initial_crud_handlers(
-    integrity_zome_name: &String,
+    integrity_zome_name: &str,
     entry_def: &EntryDefinition,
     crud: &Crud,
     link_from_original_to_each_update: bool,
@@ -622,7 +622,7 @@ fn signal_action_match_arms() -> ScaffoldResult<Vec<syn::Arm>> {
 
 pub fn add_crud_functions_to_coordinator(
     zome_file_tree: ZomeFileTree,
-    integrity_zome_name: &String,
+    integrity_zome_name: &str,
     entry_def: &EntryDefinition,
     crud: &Crud,
     link_from_original_to_each_update: bool,

@@ -13,7 +13,7 @@ use super::{
     integrity::get_all_entry_types,
 };
 
-pub fn choose_reference_entry_hash(prompt: &String, recommended: bool) -> ScaffoldResult<bool> {
+pub fn choose_reference_entry_hash(prompt: &str, recommended: bool) -> ScaffoldResult<bool> {
     match recommended {
         true => {
             let selection = Select::with_theme(&ColorfulTheme::default())

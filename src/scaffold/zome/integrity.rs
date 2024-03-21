@@ -1,4 +1,4 @@
-pub fn initial_cargo_toml(zome_name: &String) -> String {
+pub fn initial_cargo_toml(zome_name: &str) -> String {
     format!(
         r#"[package]
 name = "{}"

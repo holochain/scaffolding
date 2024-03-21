@@ -165,7 +165,7 @@ pub fn get_or_choose_dnas_dir_path(app_file_tree: &FileTree) -> ScaffoldResult<P
 pub fn scaffold_dna(
     app_file_tree: AppFileTree,
     template_file_tree: &FileTree,
-    dna_name: &String,
+    dna_name: &str,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     check_for_reserved_words(dna_name)?;
 
@@ -175,7 +175,7 @@ pub fn scaffold_dna(
             "integrity" => dir! {},
         },
         "workdir" => dir! {
-            "dna.yaml" => file!(empty_dna_manifest(dna_name.clone())?)
+            "dna.yaml" => file!(empty_dna_manifest(dna_name)?)
         }
     };
 
@@ -183,7 +183,7 @@ pub fn scaffold_dna(
 
     let dna_workdir_path = PathBuf::new()
         .join(&dnas_path)
-        .join(dna_name.clone())
+        .join(dna_name)
         .join("workdir");
     let mut dna_workdir_relative_to_app_manifest = PathBuf::new();
 
@@ -203,11 +203,11 @@ pub fn scaffold_dna(
     let mut roles = app_file_tree.app_manifest.app_roles();
 
     if roles.iter().any(|r| r.name.eq(dna_name)) {
-        return Err(ScaffoldError::DnaAlreadyExists(dna_name.clone()));
+        return Err(ScaffoldError::DnaAlreadyExists(dna_name.to_owned()));
     }
 
     roles.push(AppRoleManifest {
-        name: dna_name.clone(),
+        name: dna_name.to_owned(),
         dna: AppRoleDnaManifest {
             location: Some(Location::Bundled(dna_bundle_path)),
             modifiers: DnaModifiersOpt {
