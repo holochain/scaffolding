@@ -483,7 +483,7 @@ pub fn get_all_entry_types(
 
             let coordinators_for_zome = get_coordinator_zomes_for_integrity(
                 &zome_file_tree.dna_file_tree.dna_manifest,
-                &zome_file_tree.zome_manifest.name.0.to_string(),
+                zome_file_tree.zome_manifest.name.0.as_ref(),
             );
 
             let mut entry_types: Vec<EntryTypeReference> = Vec::new();

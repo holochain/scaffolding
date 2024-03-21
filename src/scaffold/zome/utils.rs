@@ -24,10 +24,7 @@ pub fn select_integrity_zomes(
         return Ok(vec![]);
     }
 
-    let prompt = match prompt {
-        Some(p) => p,
-        None => "Select integrity zome (SPACE to select/unselect):",
-    };
+    let prompt = prompt.unwrap_or("Select integrity zome (SPACE to select/unselect):");
 
     let selected_options = MultiSelect::with_theme(&ColorfulTheme::default())
         .with_prompt(prompt)

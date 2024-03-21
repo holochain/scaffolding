@@ -307,7 +307,7 @@ pub fn add_link_type_to_integrity_zome(
 
     let coordinator_zomes_for_integrity = get_coordinator_zomes_for_integrity(
         &dna_manifest,
-        &zome_file_tree.zome_manifest.name.0.to_string(),
+        zome_file_tree.zome_manifest.name.0.as_ref(),
     );
 
     for coordinator_zome in coordinator_zomes_for_integrity {

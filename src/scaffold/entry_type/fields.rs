@@ -199,7 +199,7 @@ pub fn choose_field(
                 if !input.is_case(Case::Pascal) {
                     return Err(format!("Input must be {:?} case.", Case::Pascal));
                 }
-                if &input.to_ascii_lowercase() == entry_type_name {
+                if input.to_ascii_lowercase() == entry_type_name {
                     return Err(format!(
                         "Enum name: {input} conflicts with entry-type name: {entry_type_name}"
                     ));

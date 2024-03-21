@@ -155,7 +155,7 @@ pub use {}::*;
 
     let coordinator_zomes_for_integrity = get_coordinator_zomes_for_integrity(
         &zome_file_tree.dna_file_tree.dna_manifest,
-        &zome_file_tree.zome_manifest.name.0.to_string(),
+        zome_file_tree.zome_manifest.name.0.as_ref(),
     );
 
     let coordinator_zome = match coordinator_zomes_for_integrity.len() {
