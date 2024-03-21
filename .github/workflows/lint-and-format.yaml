@@ -1,0 +1,29 @@
+name: "lint-and-format"
+
+on:
+  # Trigger the workflow on push or pull request,
+  # but only for the main branch
+  push: 
+    branches: [ develop, develop-0.1, develop-0.2 ]
+  pull_request:
+    branches: [ develop, develop-0.1, develop-0.2 ]
+
+jobs:
+  fmt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+      
+      - run: cargo fmt --all --check
+
+  clippy:
+    runs-on: ubuntu-latest
+    steps:
+     - uses: actions/checkout@v4
+
+     - uses: dtolnay/rust-toolchain@stable
+
+     - run: cargo clippy --all-targets -- -D warnings
+			
