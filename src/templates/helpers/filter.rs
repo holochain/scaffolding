@@ -43,7 +43,9 @@ impl HelperDef for FilterHelper {
             "{}{}{}{}",
             "{{#if ",
             condition,
-            include_zero.then_some(" includeZero=true").unwrap_or_default(),
+            include_zero
+                .then_some(" includeZero=true")
+                .unwrap_or_default(),
             "}}true{{else}}false{{/if}}"
         );
 
