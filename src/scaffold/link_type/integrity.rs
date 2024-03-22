@@ -455,9 +455,9 @@ fn signal_action_match_arms() -> ScaffoldResult<Vec<syn::Arm>> {
                     Ok(())
                 }
                 _ => {
-                    return Err(wasm_error!(WasmErrorInner::Guest(
+                    Err(wasm_error!(WasmErrorInner::Guest(
                         \"Create Link should exist\".to_string()
-                    )));
+                    )))
                 }
             }
         }",
@@ -559,7 +559,7 @@ fn add_link_type_to_validation_arms(
                 return Ok(ValidateCallbackResult::Invalid("The action that a DeleteLink deletes must be a CreateLink".to_string()));
             }
         };
-        let link_type = match LinkTypes::from_type(create_link.zome_index.clone(), create_link.link_type.clone())? {
+        let link_type = match LinkTypes::from_type(create_link.zome_index, create_link.link_type.clone)? {
             Some(lt) => lt,
             None => {
                 return Ok(ValidateCallbackResult::Valid);

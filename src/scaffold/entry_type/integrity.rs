@@ -678,9 +678,9 @@ fn add_entry_type_to_validation_arms(
                         }
                     };
                     let original_app_entry = match EntryTypes::deserialize_from_type(
-                        app_entry_type.zome_index.clone(),
-                        app_entry_type.entry_index.clone(),
-                        &entry,
+                        app_entry_type.zome_index,
+                        app_entry_type.entry_index,
+                        entry,
                     )? {
                         Some(app_entry) => app_entry,
                         None => {

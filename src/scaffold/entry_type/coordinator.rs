@@ -170,7 +170,7 @@ pub fn get_all_revisions_for_{snake_entry_def_name}(original_{snake_entry_def_na
 
     // load the records for all the links
     let records = HDK.with(|hdk| hdk.borrow().get(get_input))?;
-    let mut records: Vec<Record> = records.into_iter().filter_map(|r| r).collect();
+    let mut records: Vec<Record> = records.into_iter().flatten().collect();
     records.insert(0, original_record);
 
     Ok(records)
@@ -727,7 +727,7 @@ pub fn add_crud_functions_to_coordinator(
         _ => { return Ok(None); }
     };
 
-    Ok(EntryTypes::deserialize_from_type(zome_index.clone(), entry_index.clone(), entry)?)
+    EntryTypes::deserialize_from_type(*zome_index, *entry_index, entry)
 }")?);
                 }
             }
