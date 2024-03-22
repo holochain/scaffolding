@@ -9,7 +9,6 @@ pub struct FilterHelper;
 /// then uses Handlebars' truthy logic to filter the items in the value.
 /// It also supports the `#if` helper's `includeZero` optional parameter.
 impl HelperDef for FilterHelper {
-    #[allow(clippy::obfuscated_if_else)]
     fn call_inner<'reg: 'rc, 'rc>(
         &self,
         h: &Helper<'reg, 'rc>,
@@ -44,7 +43,7 @@ impl HelperDef for FilterHelper {
             "{}{}{}{}",
             "{{#if ",
             condition,
-            include_zero.then_some(" includeZero=true").unwrap_or(""),
+            include_zero.then_some(" includeZero=true").unwrap_or_default(),
             "}}true{{else}}false{{/if}}"
         );
 

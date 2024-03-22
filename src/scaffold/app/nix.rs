@@ -9,7 +9,6 @@ use crate::error::{ScaffoldError, ScaffoldResult};
 use crate::file_tree::*;
 use crate::versions::holochain_nix_version;
 
-#[allow(clippy::obfuscated_if_else)]
 pub fn flake_nix(holo_enabled: bool) -> FileTree {
     let holochain_nix_version = holochain_nix_version();
 
@@ -19,11 +18,11 @@ pub fn flake_nix(holo_enabled: bool) -> FileTree {
     hds-releases.url = "github:holo-host/hds-releases";
     "#,
         )
-        .unwrap_or("");
+        .unwrap_or_default();
 
     let holo_packages = holo_enabled
         .then_some("inputs'.hds-releases.packages.holo-dev-server-bin")
-        .unwrap_or("");
+        .unwrap_or_default();
 
     file!(format!(
         r#"{{
