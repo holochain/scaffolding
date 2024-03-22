@@ -60,7 +60,7 @@ pub fn add_link_type_to_integrity_zome(
     from_referenceable: &Option<Referenceable>,
     to_referenceable: &Option<Referenceable>,
     delete: bool,
-    file_to_add_validation_to: &PathBuf,
+    file_to_add_validation_to: &Path,
 ) -> ScaffoldResult<ZomeFileTree> {
     let crate_src_path = zome_file_tree.zome_crate_path.join("src");
 

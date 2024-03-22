@@ -34,11 +34,11 @@ use dialoguer::Input;
 use dialoguer::{theme::ColorfulTheme, Select};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use std::ffi::OsString;
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::str::FromStr;
-use std::{ffi::OsString, path::PathBuf};
 use structopt::StructOpt;
 
 #[derive(Debug, StructOpt)]
@@ -959,7 +959,7 @@ impl HcScaffoldTemplate {
     }
 }
 
-fn setup_git_environment(path: &PathBuf) -> ScaffoldResult<()> {
+fn setup_git_environment(path: &Path) -> ScaffoldResult<()> {
     let output = Command::new("git")
         .stdout(Stdio::inherit())
         .current_dir(path)

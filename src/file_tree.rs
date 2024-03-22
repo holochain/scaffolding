@@ -3,8 +3,8 @@ use ignore::WalkBuilder;
 use include_dir::Dir;
 use std::collections::BTreeMap;
 use std::ffi::OsString;
-use std::path::Path;
-use std::{fs, path::PathBuf};
+use std::fs;
+use std::path::{Path, PathBuf};
 
 use crate::error::{ScaffoldError, ScaffoldResult};
 use crate::utils::unparse;
@@ -12,7 +12,7 @@ use crate::utils::unparse;
 pub type FileTree = FileSystemTree<OsString, String>;
 
 // Loads the directory tree in the given path into memory recursively
-pub fn load_directory_into_memory(path: &PathBuf) -> ScaffoldResult<FileTree> {
+pub fn load_directory_into_memory(path: &Path) -> ScaffoldResult<FileTree> {
     let mut file_tree: FileTree = dir! {};
 
     for result in WalkBuilder::new(path).hidden(false).build() {

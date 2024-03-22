@@ -2,7 +2,7 @@ use build_fs_tree::file;
 use dirs::home_dir;
 use std::fs::{self, OpenOptions};
 use std::io::Write;
-use std::path::PathBuf;
+use std::path::Path;
 use std::process::{Command, Stdio};
 
 use crate::error::{ScaffoldError, ScaffoldResult};
@@ -67,7 +67,7 @@ pub fn flake_nix(holo_enabled: bool) -> FileTree {
     ))
 }
 
-pub fn setup_nix_developer_environment(dir: &PathBuf) -> ScaffoldResult<()> {
+pub fn setup_nix_developer_environment(dir: &Path) -> ScaffoldResult<()> {
     if cfg!(target_os = "windows") {
         return Err(ScaffoldError::NixSetupError(
             "Windows doesn't support nix".to_string(),
