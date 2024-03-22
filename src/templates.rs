@@ -131,7 +131,7 @@ pub fn render_template_file_tree<T: Serialize>(
                     .filter(|s| !s.is_empty())
                     .collect();
 
-                if files_to_create.is_empty() {
+                if !files_to_create.is_empty() {
                     let delimiter = "\n----END_OF_FILE_DELIMITER----\n";
 
                     let each_if_re = Regex::new(

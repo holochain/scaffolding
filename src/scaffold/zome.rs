@@ -229,7 +229,7 @@ fn try_to_guess_integrity_zomes_location(
     let maybe_packages_paths = get_workspace_packages_locations(dna_file_tree.file_tree_ref())?;
 
     match maybe_packages_paths {
-        Some(mut packages_paths) if packages_paths.is_empty() => {
+        Some(mut packages_paths) if !packages_paths.is_empty() => {
             for p in packages_paths.iter_mut() {
                 // Pop the "Cargo.toml" component
                 p.pop();
@@ -311,7 +311,7 @@ fn try_to_guess_coordinator_zomes_location(
     let maybe_packages_paths = get_workspace_packages_locations(dna_file_tree.file_tree_ref())?;
 
     match maybe_packages_paths {
-        Some(mut packages_paths) if packages_paths.is_empty() => {
+        Some(mut packages_paths) if !packages_paths.is_empty() => {
             for p in packages_paths.iter_mut() {
                 // Pop the "Cargo.toml" component
                 p.pop();
