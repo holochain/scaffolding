@@ -32,9 +32,7 @@ pub fn get_{snake_entry_def_name}({snake_entry_def_name}_hash: {hash_type}) -> E
     }};
     match details {{
         Details::Record(details) => Ok(Some(details.record)),
-        _ => Err(wasm_error!(WasmErrorInner::Guest(String::from(
-            "Malformed get details response"
-        )))),
+        _ => Err(wasm_error!(WasmErrorInner::Guest("Malformed get details response".to_string()))),
     }}
 }}"#,
         ),
@@ -46,9 +44,7 @@ pub fn get_{snake_entry_def_name}({snake_entry_def_name}_hash: {hash_type}) -> E
     }};
     match details {{
         Details::Entry(details) => Ok(Some(Record::new(details.actions[0].clone(), Some(details.entry)))),
-        _ => Err(wasm_error!(WasmErrorInner::Guest(String::from(
-            "Malformed get details response"
-        )))),
+        _ => Err(wasm_error!(WasmErrorInner::Guest("Malformed get details response".to_string()))),
     }}
 }}"#,
         ),
@@ -67,9 +63,7 @@ pub fn get_original_{snake_entry_def_name}(original_{snake_entry_def_name}_hash:
     }};
     match details {{
         Details::Record(details) => Ok(Some(details.record)),
-        _ => Err(wasm_error!(WasmErrorInner::Guest(String::from(
-            "Malformed get details response"
-        )))),
+        _ => Err(wasm_error!(WasmErrorInner::Guest("Malformed get details response".to_string()))),
     }}
 }}
 
@@ -129,7 +123,7 @@ pub fn get_latest_{snake_entry_def_name}(original_{snake_entry_def_name}_hash: A
 
     let latest_{snake_entry_def_name}_hash = match latest_link {{
         Some(link) => link.target.clone().into_action_hash().ok_or(wasm_error!(
-            WasmErrorInner::Guest(String::from("No action hash associated with link"))
+            WasmErrorInner::Guest("No action hash associated with link".to_string())
         ))?,
         None => original_{snake_entry_def_name}_hash.clone()   
     }};
@@ -144,9 +138,7 @@ pub fn get_original_{snake_entry_def_name}(original_{snake_entry_def_name}_hash:
     }};
     match details {{
         Details::Record(details) => Ok(Some(details.record)),
-        _ => Err(wasm_error!(WasmErrorInner::Guest(String::from(
-            "Malformed get details response"
-        )))),
+        _ => Err(wasm_error!(WasmErrorInner::Guest("Malformed get details response".to_string()))),
     }}
 }}
 
@@ -163,7 +155,7 @@ pub fn get_all_revisions_for_{snake_entry_def_name}(original_{snake_entry_def_na
     let get_input: Vec<GetInput> = links
         .into_iter()
         .map(|link| Ok(GetInput::new(
-            link.target.into_action_hash().ok_or(wasm_error!(WasmErrorInner::Guest(String::from("No action hash associated with link"))))?.into(),
+            link.target.into_action_hash().ok_or(wasm_error!(WasmErrorInner::Guest("No action hash associated with link".to_string())))?.into(),
             GetOptions::default(),
         )))
         .collect::<ExternResult<Vec<GetInput>>>()?;
@@ -256,7 +248,7 @@ pub fn create_{}({}: {}) -> ExternResult<Record> {{
 {}
     
   let record = get({}_hash.clone(), GetOptions::default())?
-        .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("Could not find the newly created {}"))))?;
+        .ok_or(wasm_error!(WasmErrorInner::Guest("Could not find the newly created {}".to_string())))?;
 
   Ok(record)
 }}
@@ -293,7 +285,7 @@ pub fn update_{}(input: Update{}Input) -> ExternResult<Record> {{
   let updated_{}_hash = update_entry(input.previous_{}_hash, &input.updated_{})?;
 
   let record = get(updated_{}_hash.clone(), GetOptions::default())?
-        .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("Could not find the newly updated {}"))))?;
+        .ok_or(wasm_error!(WasmErrorInner::Guest("Could not find the newly updated {}".to_string())))?;
     
   Ok(record)
 }}
@@ -328,7 +320,7 @@ pub fn update_{}(input: Update{}Input) -> ExternResult<Record> {{
   create_link(input.original_{}_hash.clone(), updated_{}_hash.clone(), LinkTypes::{}, ())?;
 
   let record = get(updated_{}_hash.clone(), GetOptions::default())?
-        .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("Could not find the newly updated {}"))))?;
+        .ok_or(wasm_error!(WasmErrorInner::Guest("Could not find the newly updated {}".to_string())))?;
     
   Ok(record)
 }}
@@ -366,12 +358,10 @@ pub fn delete_handler(entry_def: &EntryDefinition) -> String {
         true => format!(
             r#"
     let details = get_details(original_{snake_entry_def_name}_hash.clone(), GetOptions::default())?
-        .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("{{pascal_entry_def_name}} not found"))))?;
+        .ok_or(wasm_error!(WasmErrorInner::Guest("{{pascal_entry_def_name}} not found".to_string())))?;
     let record = match details {{
         Details::Record(details) => Ok(details.record),
-        _ => Err(wasm_error!(WasmErrorInner::Guest(String::from(
-            "Malformed get details response"
-        )))),
+        _ => Err(wasm_error!(WasmErrorInner::Guest("Malformed get details response".to_string()))),
     }}?;
             "#
         ),
@@ -386,9 +376,7 @@ pub fn delete_handler(entry_def: &EntryDefinition) -> String {
             "Malformed get details response"
         )))),
     }}?;
-    let entry = record.entry().as_option().ok_or(wasm_error!(WasmErrorInner::Guest(String::from(
-            "{pascal_entry_def_name} record has no entry"
-        ))))?;
+    let entry = record.entry().as_option().ok_or(wasm_error!(WasmErrorInner::Guest("{pascal_entry_def_name} record has no entry".to_string())))?;
     let {snake_entry_def_name} = {pascal_entry_def_name}::try_from(entry)?;
 
         "#

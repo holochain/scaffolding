@@ -240,8 +240,8 @@ fn from_link_hash_type(hash_type: &str) -> String {
     let lower_hash_type = hash_type.to_case(Case::Lower);
 
     match hash_type {
-        "AgentPubKey" => "AgentPubKey::from(link.target.clone().into_entry_hash().ok_or(wasm_error!(WasmErrorInner::Guest(String::from(\"No entry_hash associated with link\"))))?)".to_string(),
-        _ => format!("link.target.clone().into_{}().ok_or(wasm_error!(WasmErrorInner::Guest(String::from(\"No {} associated with link\"))))?", snake_hash_type, lower_hash_type),
+        "AgentPubKey" => "AgentPubKey::from(link.target.clone().into_entry_hash().ok_or(wasm_error!(WasmErrorInner::Guest(\"No entry_hash associated with link\".to_string())))?)".to_string(),
+        _ => format!("link.target.clone().into_{}().ok_or(wasm_error!(WasmErrorInner::Guest(\"No {} associated with link\".to_string())))?", snake_hash_type, lower_hash_type),
     }
 }
 
