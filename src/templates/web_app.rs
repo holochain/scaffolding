@@ -30,11 +30,11 @@ pub struct ScaffoldWebAppData {
 pub fn scaffold_web_app_template(
     mut app_file_tree: FileTree,
     template_file_tree: &FileTree,
-    app_name: &String,
+    app_name: &str,
     holo_enabled: bool,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     let data = ScaffoldWebAppData {
-        app_name: app_name.clone(),
+        app_name: app_name.to_owned(),
         holochain_version: holochain_version(),
         hdk_version: hdk_version(),
         hdi_version: hdi_version(),
@@ -59,7 +59,7 @@ pub fn scaffold_web_app_template(
     }
 
     let next_instructions = match file_content(
-        &template_file_tree,
+        template_file_tree,
         &PathBuf::from("web-app.instructions.hbs"),
     ) {
         Ok(content) => Some(h.render_template(content.as_str(), &data)?),

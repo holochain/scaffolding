@@ -24,7 +24,7 @@ impl HelperDef for FileExistsHelper {
             .value()
             .to_string();
         let data = ctx.data();
-        let search_path_str = r.render_template(&search_path_str, data)?.replace("\"", "");
+        let search_path_str = r.render_template(&search_path_str, data)?.replace('\"', "");
 
         let current_ui_dir = std::env::current_dir()
             .map_err(|_| RenderError::new("current working dir is invalid"))?
@@ -40,7 +40,7 @@ impl HelperDef for FileExistsHelper {
     }
 }
 
-pub fn register_file_exists<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
+pub fn register_file_exists(mut h: Handlebars) -> Handlebars {
     h.register_helper("file_exists", Box::new(FileExistsHelper));
 
     h

@@ -1,4 +1,5 @@
-use std::{collections::BTreeMap, path::PathBuf};
+use std::collections::BTreeMap;
+use std::path::{Path, PathBuf};
 
 use crate::{
     file_tree::{
@@ -62,13 +63,13 @@ impl DnaFileTree {
 
     pub fn from_dna_manifest_path(
         file_tree: FileTree,
-        dna_manifest_path: &PathBuf,
+        dna_manifest_path: &Path,
     ) -> ScaffoldResult<DnaFileTree> {
         let dna_manifest = read_dna_manifest(&file_tree, dna_manifest_path)?;
 
         Ok(DnaFileTree {
             file_tree,
-            dna_manifest_path: dna_manifest_path.clone(),
+            dna_manifest_path: dna_manifest_path.to_path_buf(),
             dna_manifest,
         })
     }
@@ -76,7 +77,8 @@ impl DnaFileTree {
     pub fn file_tree(self) -> FileTree {
         self.file_tree
     }
-    pub fn file_tree_ref<'a>(&'a self) -> &'a FileTree {
+
+    pub fn file_tree_ref(&self) -> &FileTree {
         &self.file_tree
     }
 }
@@ -85,7 +87,7 @@ fn default_dnas_dir_path() -> PathBuf {
     PathBuf::new().join("dnas")
 }
 
-fn zome_wasm_location(dna_file_tree: &DnaFileTree, zome_name: &String) -> Location {
+fn zome_wasm_location(dna_file_tree: &DnaFileTree, zome_name: &str) -> Location {
     let mut zome_wasm_location = PathBuf::new();
 
     let mut dna_workdir_path = dna_file_tree.dna_manifest_path.clone();
@@ -141,23 +143,21 @@ fn choose_dna(
 
 pub fn read_dna_manifest(
     app_file_tree: &FileTree,
-    dna_manifest_path: &PathBuf,
+    dna_manifest_path: &Path,
 ) -> ScaffoldResult<DnaManifest> {
     let contents = file_content(app_file_tree, dna_manifest_path)?;
-
     let manifest: DnaManifest = serde_yaml::from_str(contents.as_str())?;
-
     Ok(manifest)
 }
 
 pub fn get_or_choose_dnas_dir_path(app_file_tree: &FileTree) -> ScaffoldResult<PathBuf> {
     let default_path = default_dnas_dir_path();
     if dir_exists(app_file_tree, &default_path) {
-        return Ok(default_path.clone());
+        Ok(default_path.clone())
     } else {
         choose_directory_path(
             &String::from("Which directory should the DNA be scaffolded in?"),
-            &app_file_tree,
+            app_file_tree,
         )
     }
 }
@@ -165,7 +165,7 @@ pub fn get_or_choose_dnas_dir_path(app_file_tree: &FileTree) -> ScaffoldResult<P
 pub fn scaffold_dna(
     app_file_tree: AppFileTree,
     template_file_tree: &FileTree,
-    dna_name: &String,
+    dna_name: &str,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     check_for_reserved_words(dna_name)?;
 
@@ -175,7 +175,7 @@ pub fn scaffold_dna(
             "integrity" => dir! {},
         },
         "workdir" => dir! {
-            "dna.yaml" => file!(empty_dna_manifest(dna_name.clone())?)
+            "dna.yaml" => file!(empty_dna_manifest(dna_name)?)
         }
     };
 
@@ -183,7 +183,7 @@ pub fn scaffold_dna(
 
     let dna_workdir_path = PathBuf::new()
         .join(&dnas_path)
-        .join(dna_name.clone())
+        .join(dna_name)
         .join("workdir");
     let mut dna_workdir_relative_to_app_manifest = PathBuf::new();
 
@@ -196,18 +196,18 @@ pub fn scaffold_dna(
     }
 
     dna_workdir_relative_to_app_manifest =
-        dna_workdir_relative_to_app_manifest.join(&dna_workdir_path);
+        dna_workdir_relative_to_app_manifest.join(dna_workdir_path);
 
     let dna_bundle_path = dna_workdir_relative_to_app_manifest.join(format!("{}.dna", dna_name));
 
     let mut roles = app_file_tree.app_manifest.app_roles();
 
-    if let Some(_) = roles.iter().find(|r| r.name.eq(dna_name)) {
-        return Err(ScaffoldError::DnaAlreadyExists(dna_name.clone()));
+    if roles.iter().any(|r| r.name.eq(dna_name)) {
+        return Err(ScaffoldError::DnaAlreadyExists(dna_name.to_owned()));
     }
 
     roles.push(AppRoleManifest {
-        name: dna_name.clone(),
+        name: dna_name.to_owned(),
         dna: AppRoleDnaManifest {
             location: Some(Location::Bundled(dna_bundle_path)),
             modifiers: DnaModifiersOpt {
@@ -252,6 +252,6 @@ pub fn scaffold_dna(
         file_tree,
         template_file_tree,
         &app_name.to_string(),
-        &dna_name,
+        dna_name,
     )
 }

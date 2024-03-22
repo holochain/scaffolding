@@ -32,9 +32,7 @@ pub fn get_{snake_entry_def_name}({snake_entry_def_name}_hash: {hash_type}) -> E
     }};
     match details {{
         Details::Record(details) => Ok(Some(details.record)),
-        _ => Err(wasm_error!(WasmErrorInner::Guest(String::from(
-            "Malformed get details response"
-        )))),
+        _ => Err(wasm_error!(WasmErrorInner::Guest("Malformed get details response".to_string()))),
     }}
 }}"#,
         ),
@@ -46,13 +44,11 @@ pub fn get_{snake_entry_def_name}({snake_entry_def_name}_hash: {hash_type}) -> E
     }};
     match details {{
         Details::Entry(details) => Ok(Some(Record::new(details.actions[0].clone(), Some(details.entry)))),
-        _ => Err(wasm_error!(WasmErrorInner::Guest(String::from(
-            "Malformed get details response"
-        )))),
+        _ => Err(wasm_error!(WasmErrorInner::Guest("Malformed get details response".to_string()))),
     }}
 }}"#,
         ),
-        _ => format!(""),
+        _ => String::new(),
     }
 }
 
@@ -67,9 +63,7 @@ pub fn get_original_{snake_entry_def_name}(original_{snake_entry_def_name}_hash:
     }};
     match details {{
         Details::Record(details) => Ok(Some(details.record)),
-        _ => Err(wasm_error!(WasmErrorInner::Guest(String::from(
-            "Malformed get details response"
-        )))),
+        _ => Err(wasm_error!(WasmErrorInner::Guest("Malformed get details response".to_string()))),
     }}
 }}
 
@@ -112,11 +106,11 @@ pub fn get_all_revisions_for_{snake_entry_def_name}(original_{snake_entry_def_na
     )
 }
 
-pub fn updates_link_name(entry_def_name: &String) -> String {
+pub fn updates_link_name(entry_def_name: &str) -> String {
     format!("{}Updates", entry_def_name.to_case(Case::Pascal))
 }
 
-pub fn read_handler_with_linking_to_updates(entry_def_name: &String) -> String {
+pub fn read_handler_with_linking_to_updates(entry_def_name: &str) -> String {
     let snake_entry_def_name = entry_def_name.to_case(Case::Snake);
     format!(
         r#"#[hdk_extern]
@@ -129,7 +123,7 @@ pub fn get_latest_{snake_entry_def_name}(original_{snake_entry_def_name}_hash: A
 
     let latest_{snake_entry_def_name}_hash = match latest_link {{
         Some(link) => link.target.clone().into_action_hash().ok_or(wasm_error!(
-            WasmErrorInner::Guest(String::from("No action hash associated with link"))
+            WasmErrorInner::Guest("No action hash associated with link".to_string())
         ))?,
         None => original_{snake_entry_def_name}_hash.clone()   
     }};
@@ -144,9 +138,7 @@ pub fn get_original_{snake_entry_def_name}(original_{snake_entry_def_name}_hash:
     }};
     match details {{
         Details::Record(details) => Ok(Some(details.record)),
-        _ => Err(wasm_error!(WasmErrorInner::Guest(String::from(
-            "Malformed get details response"
-        )))),
+        _ => Err(wasm_error!(WasmErrorInner::Guest("Malformed get details response".to_string()))),
     }}
 }}
 
@@ -163,14 +155,14 @@ pub fn get_all_revisions_for_{snake_entry_def_name}(original_{snake_entry_def_na
     let get_input: Vec<GetInput> = links
         .into_iter()
         .map(|link| Ok(GetInput::new(
-            link.target.into_action_hash().ok_or(wasm_error!(WasmErrorInner::Guest(String::from("No action hash associated with link"))))?.into(),
+            link.target.into_action_hash().ok_or(wasm_error!(WasmErrorInner::Guest("No action hash associated with link".to_string())))?.into(),
             GetOptions::default(),
         )))
         .collect::<ExternResult<Vec<GetInput>>>()?;
 
     // load the records for all the links
     let records = HDK.with(|hdk| hdk.borrow().get(get_input))?;
-    let mut records: Vec<Record> = records.into_iter().filter_map(|r| r).collect();
+    let mut records: Vec<Record> = records.into_iter().flatten().collect();
     records.insert(0, original_record);
 
     Ok(records)
@@ -183,8 +175,8 @@ pub fn get_all_revisions_for_{snake_entry_def_name}(original_{snake_entry_def_na
 
 pub fn create_link_for_cardinality(
     entry_def: &EntryDefinition,
-    field_name: &String,
-    link_type_name: &String,
+    field_name: &str,
+    link_type_name: &str,
     cardinality: &Cardinality,
 ) -> String {
     let link_target = match entry_def.reference_entry_hash {
@@ -241,7 +233,7 @@ pub fn create_handler(entry_def: &EntryDefinition) -> String {
             create_links_str.push(create_link_for_cardinality(
                 entry_def,
                 &f.field_name,
-                &link_type_name(&linked_from, &entry_def.referenceable()),
+                &link_type_name(linked_from, &entry_def.referenceable()),
                 &f.cardinality,
             ));
         }
@@ -256,7 +248,7 @@ pub fn create_{}({}: {}) -> ExternResult<Record> {{
 {}
     
   let record = get({}_hash.clone(), GetOptions::default())?
-        .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("Could not find the newly created {}"))))?;
+        .ok_or(wasm_error!(WasmErrorInner::Guest("Could not find the newly created {}".to_string())))?;
 
   Ok(record)
 }}
@@ -273,14 +265,14 @@ pub fn create_{}({}: {}) -> ExternResult<Record> {{
     )
 }
 
-pub fn update_handler(entry_def_name: &String, link_from_original_to_each_update: bool) -> String {
+pub fn update_handler(entry_def_name: &str, link_from_original_to_each_update: bool) -> String {
     match link_from_original_to_each_update {
         true => update_handler_linking_on_each_update(entry_def_name),
         false => update_handler_without_linking_on_each_update(entry_def_name),
     }
 }
 
-pub fn update_handler_without_linking_on_each_update(entry_def_name: &String) -> String {
+pub fn update_handler_without_linking_on_each_update(entry_def_name: &str) -> String {
     format!(
         r#"#[derive(Serialize, Deserialize, Debug)]
 pub struct Update{}Input {{
@@ -293,7 +285,7 @@ pub fn update_{}(input: Update{}Input) -> ExternResult<Record> {{
   let updated_{}_hash = update_entry(input.previous_{}_hash, &input.updated_{})?;
 
   let record = get(updated_{}_hash.clone(), GetOptions::default())?
-        .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("Could not find the newly updated {}"))))?;
+        .ok_or(wasm_error!(WasmErrorInner::Guest("Could not find the newly updated {}".to_string())))?;
     
   Ok(record)
 }}
@@ -312,7 +304,7 @@ pub fn update_{}(input: Update{}Input) -> ExternResult<Record> {{
     )
 }
 
-pub fn update_handler_linking_on_each_update(entry_def_name: &String) -> String {
+pub fn update_handler_linking_on_each_update(entry_def_name: &str) -> String {
     format!(
         r#"#[derive(Serialize, Deserialize, Debug)]
 pub struct Update{}Input {{
@@ -328,7 +320,7 @@ pub fn update_{}(input: Update{}Input) -> ExternResult<Record> {{
   create_link(input.original_{}_hash.clone(), updated_{}_hash.clone(), LinkTypes::{}, ())?;
 
   let record = get(updated_{}_hash.clone(), GetOptions::default())?
-        .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("Could not find the newly updated {}"))))?;
+        .ok_or(wasm_error!(WasmErrorInner::Guest("Could not find the newly updated {}".to_string())))?;
     
   Ok(record)
 }}
@@ -358,20 +350,18 @@ pub fn delete_handler(entry_def: &EntryDefinition) -> String {
     let linked_from_fields: Vec<FieldDefinition> = entry_def
         .fields
         .iter()
-        .cloned()
         .filter(|field| field.linked_from.is_some())
+        .cloned()
         .collect();
 
     let delete_depending_links = match linked_from_fields.is_empty() {
         true => format!(
             r#"
     let details = get_details(original_{snake_entry_def_name}_hash.clone(), GetOptions::default())?
-        .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("{{pascal_entry_def_name}} not found"))))?;
+        .ok_or(wasm_error!(WasmErrorInner::Guest("{{pascal_entry_def_name}} not found".to_string())))?;
     let record = match details {{
         Details::Record(details) => Ok(details.record),
-        _ => Err(wasm_error!(WasmErrorInner::Guest(String::from(
-            "Malformed get details response"
-        )))),
+        _ => Err(wasm_error!(WasmErrorInner::Guest("Malformed get details response".to_string()))),
     }}?;
             "#
         ),
@@ -386,9 +376,7 @@ pub fn delete_handler(entry_def: &EntryDefinition) -> String {
             "Malformed get details response"
         )))),
     }}?;
-    let entry = record.entry().as_option().ok_or(wasm_error!(WasmErrorInner::Guest(String::from(
-            "{pascal_entry_def_name} record has no entry"
-        ))))?;
+    let entry = record.entry().as_option().ok_or(wasm_error!(WasmErrorInner::Guest("{pascal_entry_def_name} record has no entry".to_string())))?;
     let {snake_entry_def_name} = {pascal_entry_def_name}::try_from(entry)?;
 
         "#
@@ -492,7 +480,7 @@ pub fn get_oldest_delete_for_{snake_entry_def_name}(
 }
 
 fn initial_crud_handlers(
-    integrity_zome_name: &String,
+    integrity_zome_name: &str,
     entry_def: &EntryDefinition,
     crud: &Crud,
     link_from_original_to_each_update: bool,
@@ -509,25 +497,23 @@ use {}::*;
 
     if !crud.update {
         initial.push_str(no_update_read_handler(entry_def).as_str());
+    } else if link_from_original_to_each_update {
+        initial.push_str(read_handler_with_linking_to_updates(&entry_def.name).as_str());
     } else {
-        if link_from_original_to_each_update {
-            initial.push_str(read_handler_with_linking_to_updates(&entry_def.name).as_str());
-        } else {
-            initial.push_str(read_handler_without_linking_to_updates(&entry_def).as_str());
-        }
+        initial.push_str(read_handler_without_linking_to_updates(entry_def).as_str());
     }
     if crud.update {
         initial
             .push_str(update_handler(&entry_def.name, link_from_original_to_each_update).as_str());
     }
     if crud.delete {
-        initial.push_str(delete_handler(&entry_def).as_str());
+        initial.push_str(delete_handler(entry_def).as_str());
     }
 
     for f in &entry_def.fields {
         if let Some(linked_from) = &f.linked_from {
             initial.push_str(
-                get_links_handler(&linked_from, &entry_def.referenceable(), crud.delete).as_str(),
+                get_links_handler(linked_from, &entry_def.referenceable(), crud.delete).as_str(),
             );
         }
     }
@@ -539,25 +525,20 @@ fn signal_has_entry_types(signal_enum: &syn::ItemEnum) -> bool {
     signal_enum
         .variants
         .iter()
-        .find(|v| v.ident.to_string().eq(&String::from("EntryCreated")))
-        .is_some()
+        .any(|v| v.ident.to_string().eq(&String::from("EntryCreated")))
 }
 
 fn signal_action_has_entry_types(expr_match: &syn::ExprMatch) -> bool {
-    expr_match
-        .arms
-        .iter()
-        .find(|arm| {
-            if let syn::Pat::TupleStruct(tuple_struct_pat) = &arm.pat {
-                if let Some(first_segment) = tuple_struct_pat.path.segments.last() {
-                    if first_segment.ident.to_string().eq(&String::from("Create")) {
-                        return true;
-                    }
+    expr_match.arms.iter().any(|arm| {
+        if let syn::Pat::TupleStruct(tuple_struct_pat) = &arm.pat {
+            if let Some(first_segment) = tuple_struct_pat.path.segments.last() {
+                if first_segment.ident.to_string().eq(&String::from("Create")) {
+                    return true;
                 }
             }
-            false
-        })
-        .is_some()
+        }
+        false
+    })
 }
 
 fn signal_entry_types_variants() -> ScaffoldResult<Vec<syn::Variant>> {
@@ -626,7 +607,7 @@ fn signal_action_match_arms() -> ScaffoldResult<Vec<syn::Arm>> {
 
 pub fn add_crud_functions_to_coordinator(
     zome_file_tree: ZomeFileTree,
-    integrity_zome_name: &String,
+    integrity_zome_name: &str,
     entry_def: &EntryDefinition,
     crud: &Crud,
     link_from_original_to_each_update: bool,
@@ -643,7 +624,7 @@ pub fn add_crud_functions_to_coordinator(
         &crate_src_path.join(format!("{}.rs", entry_def.name.to_case(Case::Snake))),
         &initial_crud_handlers(
             integrity_zome_name,
-            &entry_def,
+            entry_def,
             crud,
             link_from_original_to_each_update,
         ),
@@ -678,12 +659,12 @@ pub fn add_crud_functions_to_coordinator(
 
                 for item in &mut file.items {
                     if let syn::Item::Enum(item_enum) = item {
-                        if item_enum.ident.to_string().eq(&String::from("Signal")) {
-                            if !signal_has_entry_types(item_enum) {
-                                first_entry_type_scaffolded = true;
-                                for v in signal_entry_types_variants()? {
-                                    item_enum.variants.push(v);
-                                }
+                        if item_enum.ident.to_string().eq(&String::from("Signal"))
+                            && !signal_has_entry_types(item_enum)
+                        {
+                            first_entry_type_scaffolded = true;
+                            for v in signal_entry_types_variants()? {
+                                item_enum.variants.push(v);
                             }
                         }
                     }
@@ -695,7 +676,7 @@ pub fn add_crud_functions_to_coordinator(
                             .to_string()
                             .eq(&String::from("signal_action"))
                         {
-                            if let None = find_ending_match_expr_in_block(&mut item_fn.block) {
+                            if find_ending_match_expr_in_block(&mut item_fn.block).is_none() {
                                 item_fn.block = Box::new(syn::parse_str::<syn::Block>(
                                     "{ match action.hashed.content.clone() { _ => Ok(()) } }",
                                 )?);
@@ -734,7 +715,7 @@ pub fn add_crud_functions_to_coordinator(
         _ => { return Ok(None); }
     };
 
-    Ok(EntryTypes::deserialize_from_type(zome_index.clone(), entry_index.clone(), entry)?)
+    EntryTypes::deserialize_from_type(*zome_index, *entry_index, entry)
 }")?);
                 }
             }

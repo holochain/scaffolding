@@ -6,11 +6,11 @@ use super::{manifest::check_zome_doesnt_exist, zome_wasm_location, DnaFileTree};
 
 pub fn new_integrity_zome_manifest(
     dna_file_tree: &DnaFileTree,
-    name: &String,
+    name: &str,
 ) -> ScaffoldResult<ZomeManifest> {
-    let location = zome_wasm_location(&dna_file_tree, &name);
+    let location = zome_wasm_location(dna_file_tree, name);
     let zome_manifest = ZomeManifest {
-        name: name.clone().into(),
+        name: name.into(),
         hash: None,
         location,
         dependencies: None,

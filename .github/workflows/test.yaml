@@ -9,14 +9,21 @@ on:
     branches: [ develop, develop-0.1, develop-0.2 ]
 
 jobs:
-  unittests:
+  test_fmt_lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
       - uses: dtolnay/rust-toolchain@stable
 
-      - run: cargo test --no-fail-fast
+      - name: Unittests
+        run: cargo test --no-fail-fast
+
+      - name: Format Rust
+        run: cargo fmt --all --check
+
+      - name : Lint Rust
+        run: cargo clippy --all-targets -- -D warnings
   
   testbuild:
     runs-on: ubuntu-latest

@@ -11,12 +11,12 @@ use super::{manifest::check_zome_doesnt_exist, zome_wasm_location, DnaFileTree};
 
 pub fn new_coordinator_zome_manifest(
     dna_file_tree: &DnaFileTree,
-    name: &String,
+    name: &str,
     maybe_dependencies: &Option<Vec<String>>,
 ) -> ScaffoldResult<ZomeManifest> {
-    let location = zome_wasm_location(&dna_file_tree, &name);
+    let location = zome_wasm_location(dna_file_tree, name);
     let zome_manifest = ZomeManifest {
-        name: name.clone().into(),
+        name: name.into(),
         hash: None,
         location,
         dependencies: maybe_dependencies.clone().map(|dz| {

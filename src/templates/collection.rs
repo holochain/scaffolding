@@ -26,29 +26,32 @@ pub struct ScaffoldCollectionData {
     pub referenceable: Referenceable,
     pub deletable: bool,
 }
+
+// TODO: group some params into a new-type or prefer builder pattern
+#[allow(clippy::too_many_arguments)]
 pub fn scaffold_collection_templates(
     mut app_file_tree: FileTree,
     template_file_tree: &FileTree,
-    app_name: &String,
-    dna_role_name: &String,
+    app_name: &str,
+    dna_role_name: &str,
     coordinator_zome_manifest: &ZomeManifest,
     collection_type: &CollectionType,
-    collection_name: &String,
+    collection_name: &str,
     entry_type_reference: &EntryTypeReference,
     deletable: bool,
     no_ui: bool,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     let data = ScaffoldCollectionData {
-        app_name: app_name.clone(),
-        dna_role_name: dna_role_name.clone(),
+        app_name: app_name.to_owned(),
+        dna_role_name: dna_role_name.to_owned(),
         coordinator_zome_manifest: coordinator_zome_manifest.clone(),
-        collection_name: collection_name.clone(),
+        collection_name: collection_name.to_owned(),
         collection_type: collection_type.clone(),
         referenceable: Referenceable::EntryType(entry_type_reference.clone()),
         deletable,
     };
 
-    let h = build_handlebars(&template_file_tree)?;
+    let h = build_handlebars(template_file_tree)?;
 
     let field_types_path = PathBuf::from("collection");
     let v: Vec<OsString> = field_types_path.iter().map(|s| s.to_os_string()).collect();
@@ -56,9 +59,9 @@ pub fn scaffold_collection_templates(
     if let Some(web_app_template) = template_file_tree.path(&mut v.iter()) {
         let mut web_app_template = web_app_template.clone();
         if no_ui {
-            web_app_template.dir_content_mut().and_then(|v| {
+            web_app_template.dir_content_mut().map(|v| {
                 v.retain(|k, _| k.ne(&OsString::from("ui")));
-                Some(v)
+                v
             });
         }
         app_file_tree = render_template_file_tree_and_merge_with_existing(
@@ -70,7 +73,7 @@ pub fn scaffold_collection_templates(
     }
 
     let next_instructions = match file_content(
-        &template_file_tree,
+        template_file_tree,
         &PathBuf::from("collection.instructions.hbs"),
     ) {
         Ok(content) => Some(h.render_template(content.as_str(), &data)?),

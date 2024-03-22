@@ -7,13 +7,13 @@ use dialoguer::{theme::ColorfulTheme, Input, Select, Validator};
 use crate::error::{ScaffoldError, ScaffoldResult};
 use crate::file_tree::{dir_content, FileTree};
 
-pub fn choose_directory_path(prompt: &String, app_file_tree: &FileTree) -> ScaffoldResult<PathBuf> {
+pub fn choose_directory_path(prompt: &str, app_file_tree: &FileTree) -> ScaffoldResult<PathBuf> {
     let mut chosen_directory: Option<PathBuf> = None;
 
     let mut current_path = PathBuf::new();
 
-    while let None = chosen_directory {
-        let mut folders = get_folders_names(&dir_content(&app_file_tree, &current_path)?);
+    while chosen_directory.is_none() {
+        let mut folders = get_folders_names(&dir_content(app_file_tree, &current_path)?);
 
         folders = folders
             .clone()
@@ -58,14 +58,14 @@ pub fn choose_directory_path(prompt: &String, app_file_tree: &FileTree) -> Scaff
 
 fn get_folders_names(folder: &BTreeMap<OsString, FileTree>) -> Vec<String> {
     folder
-        .into_iter()
+        .iter()
         .filter(|d| d.1.dir_content().is_some())
         .map(|(n, _)| n.to_str().unwrap().to_string())
         .collect()
 }
 
 /// "yes" or "no" input dialog, with the option to specify a recommended answer (yes = true, no = false)
-pub fn input_yes_or_no(prompt: &String, recommended: Option<bool>) -> ScaffoldResult<bool> {
+pub fn input_yes_or_no(prompt: &str, recommended: Option<bool>) -> ScaffoldResult<bool> {
     let mut yes_recommended = "";
     let mut no_recommended = "";
 
@@ -102,11 +102,11 @@ where
     Ok(input)
 }
 
-pub fn input_with_case(prompt: &String, case: Case) -> ScaffoldResult<String> {
+pub fn input_with_case(prompt: &str, case: Case) -> ScaffoldResult<String> {
     let input: String = Input::with_theme(&ColorfulTheme::default())
         .with_prompt(prompt)
         .validate_with(|input: &String| -> Result<(), String> {
-            match input.is_case(case.clone()) {
+            match input.is_case(case) {
                 false => Err(format!("Input must be {:?} case.", case)),
                 true => Ok(()),
             }
@@ -117,15 +117,15 @@ pub fn input_with_case(prompt: &String, case: Case) -> ScaffoldResult<String> {
 }
 
 pub fn input_with_case_and_initial_text(
-    prompt: &String,
+    prompt: &str,
     case: Case,
-    initial_text: &String,
+    initial_text: &str,
 ) -> ScaffoldResult<String> {
     let input: String = Input::with_theme(&ColorfulTheme::default())
         .with_prompt(prompt)
         .with_initial_text(initial_text)
         .validate_with(|input: &String| -> Result<(), String> {
-            match input.is_case(case.clone()) {
+            match input.is_case(case) {
                 false => Err(format!("Input must be {:?} case.", case)),
                 true => Ok(()),
             }
@@ -135,7 +135,7 @@ pub fn input_with_case_and_initial_text(
     Ok(input)
 }
 
-pub fn input_no_whitespace(prompt: &String) -> ScaffoldResult<String> {
+pub fn input_no_whitespace(prompt: &str) -> ScaffoldResult<String> {
     let input = Input::with_theme(&ColorfulTheme::default())
         .with_prompt(prompt)
         .validate_with(|input: &String| -> Result<(), &str> {
@@ -150,7 +150,7 @@ pub fn input_no_whitespace(prompt: &String) -> ScaffoldResult<String> {
 }
 
 /// Raises an error if input is not of the appropriate_case
-pub fn check_case(input: &String, identifier: &str, case: Case) -> ScaffoldResult<()> {
+pub fn check_case(input: &str, identifier: &str, case: Case) -> ScaffoldResult<()> {
     match input.is_case(case) {
         true => Ok(()),
         false => Err(ScaffoldError::InvalidStringFormat(format!(
@@ -161,8 +161,8 @@ pub fn check_case(input: &String, identifier: &str, case: Case) -> ScaffoldResul
 }
 
 /// Raises an error if input is contains white spaces
-pub fn check_no_whitespace(input: &String, identifier: &str) -> ScaffoldResult<()> {
-    match input.as_str().contains(char::is_whitespace) {
+pub fn check_no_whitespace(input: &str, identifier: &str) -> ScaffoldResult<()> {
+    match input.contains(char::is_whitespace) {
         true => Err(ScaffoldError::InvalidStringFormat(format!(
             "{} must *not* contain whitespaces.",
             identifier

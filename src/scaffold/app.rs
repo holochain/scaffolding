@@ -26,7 +26,7 @@ impl AppFileTree {
         self.file_tree
     }
 
-    pub fn file_tree_ref<'a>(&'a self) -> &'a FileTree {
+    pub fn file_tree_ref(&self) -> &FileTree {
         &self.file_tree
     }
 

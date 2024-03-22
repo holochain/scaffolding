@@ -35,7 +35,7 @@ pub fn get_hellos(_: ()) -> ExternResult<Vec<HelloOutput>> {
     let get_input: Vec<GetInput> = links
         .into_iter()
         .map(|link| Ok(GetInput::new(
-            link.target.into_action_hash().ok_or(wasm_error!(WasmErrorInner::Guest(String::from("No action hash associated with link"))))?.into(),
+            link.target.into_action_hash().ok_or(wasm_error!(WasmErrorInner::Guest("No action hash associated with link".to_string())))?.into(),
             GetOptions::default(),
         )))
         .collect::<ExternResult<Vec<GetInput>>>()?;
