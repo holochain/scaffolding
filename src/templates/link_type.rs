@@ -25,6 +25,7 @@ pub struct ScaffoldLinkTypeData {
     pub bidirectional: Option<String>,
 }
 
+// TODO: group some params into a new-type or prefer builder pattern
 #[allow(clippy::too_many_arguments)]
 pub fn scaffold_link_type_templates(
     mut app_file_tree: FileTree,

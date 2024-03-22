@@ -71,6 +71,7 @@ fn check_field_definitions(
     }
 }
 
+// TODO: group some params into a new-type or prefer builder pattern
 #[allow(clippy::too_many_arguments)]
 pub fn scaffold_entry_type(
     zome_file_tree: ZomeFileTree,

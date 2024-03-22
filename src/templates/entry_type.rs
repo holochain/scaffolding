@@ -23,6 +23,7 @@ pub struct ScaffoldEntryTypeData {
     pub link_from_original_to_each_update: bool,
 }
 
+// TODO: group some params into a new-type or prefer builder pattern
 #[allow(clippy::too_many_arguments)]
 pub fn scaffold_entry_type_templates(
     mut app_file_tree: FileTree,
