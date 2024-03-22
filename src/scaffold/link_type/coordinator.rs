@@ -161,7 +161,7 @@ pub fn get_deleted_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_t
     Ok(details
         .into_inner()
         .into_iter()
-        .filter(|(_link, deletes)| deletes.is_empty())
+        .filter(|(_link, deletes)| !deletes.is_empty())
         .collect())
 }}"#
         )
@@ -216,7 +216,7 @@ pub fn get_deleted_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_t
     Ok(details
         .into_inner()
         .into_iter()
-        .filter(|(_link, deletes)| deletes.is_empty())
+        .filter(|(_link, deletes)| !deletes.is_empty())
         .collect())
 }}"#
         ),
