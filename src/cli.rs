@@ -205,13 +205,24 @@ pub enum HcScaffoldCommand {
 impl HcScaffold {
     pub async fn run(self) -> anyhow::Result<()> {
         let current_dir = std::env::current_dir()?;
-        let config = get_template_config(&current_dir)?;
-
-        let template = match (&config, &self.template) {
-            (Some(c), Some(t)) if &c.template != t => {
-                return Err(anyhow::anyhow!("unmatching template"))
+        let template_config = if let Some(t) = &self.template {
+            // Only read from config if the template is inbuilt and not a path
+            if Path::new(t).exists() {
+                None
+            } else {
+                get_template_config(&current_dir)?
             }
-            (Some(c), _) => Some(&c.template),
+        } else {
+            None
+        };
+        let template = match (&template_config, &self.template) {
+            (Some(config), Some(template)) if &config.template != template => {
+                return Err(anyhow::anyhow!(format!(
+                "The value {} passed with `--template` does not match the template the web-app was scaffolded with: {}",
+                template, config.template
+            )))
+            }
+            (Some(config), _) => Some(&config.template),
             (_, t) => t.as_ref(),
         };
 
@@ -296,8 +307,7 @@ impl HcScaffold {
                     holo_enabled,
                 )?;
 
-                let mut file_tree = file_tree;
-                write_scaffold_config(&mut file_tree, &TemplateConfig { template })?;
+                let file_tree = write_scaffold_config(file_tree, &TemplateConfig { template })?;
 
                 let file_tree = MergeableFileSystemTree::<OsString, String>::from(dir! {
                     name.clone() => file_tree
@@ -999,11 +1009,14 @@ fn setup_git_environment(path: &Path) -> ScaffoldResult<()> {
 
 /// Write hcScaffold config to the hApp's root `package.json` file
 fn write_scaffold_config(
-    web_app_file_tree: &mut FileTree,
+    mut web_app_file_tree: FileTree,
     config: &TemplateConfig,
-) -> ScaffoldResult<()> {
+) -> ScaffoldResult<FileTree> {
+    if Path::new(&config.template).exists() {
+        return Ok(web_app_file_tree);
+    }
     let package_json_path = PathBuf::from("package.json");
-    map_file(web_app_file_tree, &package_json_path, |c| {
+    map_file(&mut web_app_file_tree, &package_json_path, |c| {
         let original_content = c.clone();
         let json = serde_json::from_str::<Value>(&c)?;
         let json = match json {
@@ -1020,7 +1033,7 @@ fn write_scaffold_config(
         let json = serde_json::to_string_pretty(&json)?;
         Ok(json)
     })?;
-    Ok(())
+    Ok(web_app_file_tree)
 }
 
 #[derive(Debug, Deserialize, Serialize)]
