@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "scripts": {
     "start": "vite --port $UI_PORT --clearScreen false",
-    "build": "vite build",
+    "build": "VITE_APP_IS_HOLO={{holo_enabled}} vite build",
     "lint": "eslint --ext .ts,.html . --ignore-path .gitignore && prettier \"**/*.ts\" --check --ignore-path .gitignore",
     "format": "eslint --ext .ts,.html . --fix --ignore-path .gitignore && prettier \"**/*.ts\" --write --ignore-path .gitignore",
     "package": "npm run build && cd dist && bestzip ../dist.zip *"

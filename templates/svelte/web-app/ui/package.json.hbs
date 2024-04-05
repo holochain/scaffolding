@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "scripts": {
     "start": "vite --clearScreen false --port $UI_PORT",
-    "build": "npm run check && vite build",
+    "build": "npm run check && npm run build:vite",
+    "build:vite": "VITE_APP_IS_HOLO={{holo_enabled}} vite build",
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "package": "npm run build && cd dist && bestzip ../dist.zip *"
   },

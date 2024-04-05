@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "scripts": {
     "start": "vite --port $UI_PORT --clearScreen false",
-    "build": "vue-tsc --noEmit && vite build",
+    "build"": "npm run check && npm run build:vite",
+    "build:vite": "VITE_APP_IS_HOLO={{holo_enabled}} vite build",
+    "check": "vue-tsc --noEmit",
     "preview": "vite preview",
     "package": "npm run build && cd dist && bestzip ../dist.zip *"
   },
