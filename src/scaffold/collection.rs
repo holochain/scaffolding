@@ -124,7 +124,7 @@ pub fn scaffold_collection(
 
     let dna_name = dna_file_tree.dna_manifest.name();
 
-    let app_file_tree = AppFileTree::get_or_choose(dna_file_tree.file_tree(), &None)?;
+    let app_file_tree = AppFileTree::get_or_choose(dna_file_tree.file_tree(), None)?;
 
     let app_name = app_file_tree.app_manifest.app_name().to_string();
 
