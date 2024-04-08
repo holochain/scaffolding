@@ -29,6 +29,7 @@ use crate::utils::{
 };
 
 use build_fs_tree::{dir, Build, MergeableFileSystemTree};
+use colored::Colorize;
 use convert_case::Case;
 use dialoguer::Input;
 use dialoguer::{theme::ColorfulTheme, Select};
@@ -138,7 +139,7 @@ pub enum HcScaffoldCommand {
         /// Skips UI generation for this entry, overriding any specified widgets in the --fields option.
         ///
         /// **WARNING**: Opting out of UI generation for one entry type but not for others that are linked
-        /// may result in UI inconsistencies. Specifically, UI elements intended for the linked entry types
+        /// may result in potential UI inconsistencies. Specifically, UI elements intended for the linked entry types
         /// could inadvertently reference or expect elements from the skipped entry type, leading to potential integration issues.
         ///
         /// If you choose to use this flag, consider applying it consistently across all entry-type scaffolds
@@ -567,6 +568,16 @@ Add new entry definitions to your zome with:
                 let dna_file_tree = DnaFileTree::get_or_choose(file_tree, &dna)?;
 
                 let zome_file_tree = ZomeFileTree::get_or_choose_integrity(dna_file_tree, &zome)?;
+
+                if no_ui {
+                    let warning_text = r#"
+WARNING: Opting out of UI generation for one entry type but not for others that are linked may result in potential UI inconsistencies.
+Specifically, UI elements intended for the linked entry types could inadvertently reference or expect elements from the skipped entry type,
+leading to potential integration issues.
+                    "#
+                    .yellow();
+                    println!("{warning_text}");
+                }
 
                 let ScaffoldedTemplate {
                     file_tree,

@@ -53,6 +53,7 @@ json_value_merge = "1.1.2"
 temp-dir = "0.1"
 semver = "1.0"
 itertools = "0.10"
+colored = "2.1.0"
 
 [dev-dependencies]
 assert_cmd = "1.0"

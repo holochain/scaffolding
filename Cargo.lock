@@ -2980,6 +2980,7 @@ dependencies = [
  "assert_cmd",
  "build-fs-tree",
  "cargo_metadata",
+ "colored 2.1.0",
  "convert_case 0.6.0",
  "degit",
  "dialoguer",
