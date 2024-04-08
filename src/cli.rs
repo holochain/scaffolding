@@ -136,13 +136,13 @@ pub enum HcScaffoldCommand {
         fields: Option<Vec<FieldDefinition>>,
 
         #[structopt(long)]
-        /// Skips UI generation for this entry, overriding any specified widgets in the --fields option.
+        /// Skips UI generation for this entry-type, overriding any specified widgets in the --fields option.
         ///
-        /// **WARNING**: Opting out of UI generation for one entry type but not for others that are linked
-        /// may result in potential UI inconsistencies. Specifically, UI elements intended for the linked entry types
-        /// could inadvertently reference or expect elements from the skipped entry type, leading to potential integration issues.
+        /// **WARNING**: Opting out of UI generation for an entry type but not for other entry-types, link-types or collections associated with it
+        /// may result in potential UI inconsistencies. Specifically, UI elements intended for associated entry-types, link-types or collections could inadvertently reference or expect
+        /// elements from the skipped entry type.
         ///
-        /// If you choose to use this flag, consider applying it consistently across all entry-type scaffolds
+        /// If you choose to use this flag, consider applying it consistently across all entry-type, link-type and collection scaffolds
         /// within your project to ensure UI consistency and avoid the outlined integration complications.
         no_ui: bool,
     },
@@ -173,7 +173,7 @@ pub enum HcScaffoldCommand {
         delete: Option<bool>,
 
         #[structopt(long)]
-        /// Skip ui generation
+        /// Skips UI generation for this link-type.
         no_ui: bool,
     },
     /// Scaffold a collection of entries in an existing zome
@@ -197,7 +197,7 @@ pub enum HcScaffoldCommand {
         entry_type: Option<EntryTypeReference>,
 
         #[structopt(long)]
-        /// Skip ui generation
+        /// Skips UI generation for this collection.
         no_ui: bool,
     },
 
@@ -571,9 +571,9 @@ Add new entry definitions to your zome with:
 
                 if no_ui {
                     let warning_text = r#"
-WARNING: Opting out of UI generation for one entry type but not for others that are linked may result in potential UI inconsistencies.
-Specifically, UI elements intended for the linked entry types could inadvertently reference or expect elements from the skipped entry type,
-leading to potential integration issues.
+WARNING: Opting out of UI generation for an this entry-type but not for other entry-types, link-types or collections associated with it
+may result in potential UI inconsistencies. Specifically, UI elements intended for associated entry-types, link-types or collections could 
+inadvertently reference or expect elements from the skipped entry type.
                     "#
                     .yellow();
                     println!("{warning_text}");
