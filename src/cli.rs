@@ -135,7 +135,14 @@ pub enum HcScaffoldCommand {
         fields: Option<Vec<FieldDefinition>>,
 
         #[structopt(long)]
-        /// Skip ui generation, overriding any widgets specified with the --fields option
+        /// Skips UI generation for this entry, overriding any specified widgets in the --fields option.
+        ///
+        /// **WARNING**: Opting out of UI generation for one entry type but not for others that are linked
+        /// may result in UI inconsistencies. Specifically, UI elements intended for the linked entry types
+        /// could inadvertently reference or expect elements from the skipped entry type, leading to potential integration issues.
+        ///
+        /// If you choose to use this flag, consider applying it consistently across all entry-type scaffolds
+        /// within your project to ensure UI consistency and avoid the outlined integration complications.
         no_ui: bool,
     },
     /// Scaffold a link type and its appropriate zome functions into an existing zome
