@@ -4,12 +4,10 @@ use handlebars::{
 };
 use serde_json::Value;
 
-pub mod file_exists;
 pub mod filter;
 pub mod merge;
 pub mod uniq_lines;
 
-use file_exists::register_file_exists;
 use filter::register_filter;
 use merge::register_merge;
 use uniq_lines::register_uniq_lines;
@@ -24,7 +22,6 @@ pub fn register_helpers(h: Handlebars) -> Handlebars {
     let h = register_merge(h);
     let h = register_uniq_lines(h);
     let h = register_filter(h);
-    let h = register_file_exists(h);
 
     h
 }
