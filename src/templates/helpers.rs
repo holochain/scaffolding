@@ -4,12 +4,10 @@ use handlebars::{
 };
 use serde_json::Value;
 
-pub mod file_exists;
 pub mod filter;
 pub mod merge;
 pub mod uniq_lines;
 
-use file_exists::register_file_exists;
 use filter::register_filter;
 use merge::register_merge;
 use uniq_lines::register_uniq_lines;

@@ -389,7 +389,7 @@ pub use {}::*;
                             a.path()
                                 .segments
                                 .iter()
-                                .any(|s| s.ident.eq("hdk_entry_types"))
+                                .any(|s| s.ident.eq("hdk_entry_defs"))
                         }) {
                             if item_enum
                                 .variants
@@ -461,7 +461,7 @@ pub fn get_all_entry_types(
                         a.path()
                             .segments
                             .iter()
-                            .any(|s| s.ident.eq("hdk_entry_types"))
+                            .any(|s| s.ident.eq("hdk_entry_defs"))
                     }) {
                         return Some(item_enum.clone());
                     }

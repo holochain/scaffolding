@@ -705,7 +705,7 @@ Collection "{}" scaffolded!
                     println!("{}", i);
                 }
             }
-            HcScaffoldCommand::Example {
+            HcScaffold::Example {
                 example,
                 template,
                 holo_enabled,

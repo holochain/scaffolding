@@ -49,7 +49,8 @@ pub fn flake_nix(holo_enabled: bool) -> FileTree {
       {{
         systems = builtins.attrNames holochain-flake.devShells;
         perSystem =
-          {{ config
+          {{ inputs' 
+          , config
           , pkgs
           , system
           , ...
@@ -59,7 +60,6 @@ pub fn flake_nix(holo_enabled: bool) -> FileTree {
               packages = [
                 pkgs.nodejs_20
                 {holo_packages}
-                # more packages go here
               ];
             }};
           }};
