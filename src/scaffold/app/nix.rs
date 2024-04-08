@@ -18,38 +18,36 @@ pub fn flake_nix(holo_enabled: bool) -> FileTree {
     hds-releases.url = "github:holo-host/hds-releases";
     "#,
         )
-        .unwrap_or("");
+        .unwrap_or_default();
 
     let holo_packages = holo_enabled
         .then_some("inputs'.hds-releases.packages.holo-dev-server-bin")
-        .unwrap_or("");
+        .unwrap_or_default();
 
     file!(format!(
         r#"{{
   description = "Template for Holochain app development";
 
   inputs = {{
-    holochain-nix-versions.url  = "github:holochain/holochain?dir=versions/{holochain_nix_version}";
+    versions.url  = "github:holochain/holochain?dir=versions/{holochain_nix_version}";
 
-    holochain-flake = {{
-      url = "github:holochain/holochain";
-      inputs.versions.follows = "holochain-nix-versions";
-    }};
+    holochain-flake.url = "github:holochain/holochain";
+    holochain-flake.inputs.versions.follows = "versions";
 
     nixpkgs.follows = "holochain-flake/nixpkgs";
     flake-parts.follows = "holochain-flake/flake-parts";
     {holo_inputs}
   }};
 
-  outputs = inputs @ {{ flake-parts, holochain-flake, ... }}:
-    flake-parts.lib.mkFlake
+  outputs = inputs:
+    inputs.flake-parts.lib.mkFlake
       {{
         inherit inputs;
       }}
       {{
-        systems = builtins.attrNames holochain-flake.devShells;
+        systems = builtins.attrNames inputs.holochain-flake.devShells;
         perSystem =
-          {{ inputs' 
+          {{ inputs'
           , config
           , pkgs
           , system
@@ -60,6 +58,7 @@ pub fn flake_nix(holo_enabled: bool) -> FileTree {
               packages = [
                 pkgs.nodejs_20
                 {holo_packages}
+                # more packages go here
               ];
             }};
           }};
