@@ -3,9 +3,7 @@ import { onMount, getContext } from 'svelte';
 import '@material/mwc-circular-progress';
 import type { Link, Record, ActionHash, EntryHash, AgentPubKey, AppAgentClient, NewEntryAction } from '@holochain/client';
 import { clientContext } from '../../contexts';
-{{#if (file_exists 'src/{{dna_role_name}}/{{coordinator_zome_manifest.name}}/{{pascal_case from_referenceable.name}}Detail.svelte')}}
 import {{pascal_case from_referenceable.name}}Detail from './{{pascal_case from_referenceable.name}}Detail.svelte';
-{{/if}}
 import type { {{pascal_case coordinator_zome_manifest.name}}Signal } from './types';
 
 export let {{camel_case to_referenceable.singular_arg}}: {{to_referenceable.hash_type}};
@@ -60,14 +58,10 @@ onMount(async () => {
 <span>No {{lower_case (plural from_referenceable.name)}} found for this {{lower_case to_referenceable.name}}.</span>
 {:else}
 <div style="display: flex; flex-direction: column">
-{{#if (file_exists 'src/{{dna_role_name}}/{{coordinator_zome_manifest.name}}/{{pascal_case from_referenceable.name}}Detail.svelte')}}
   {#each hashes as hash}
     <div style="margin-bottom: 8px;">
       <{{pascal_case from_referenceable.name}}Detail {{camel_case from_referenceable.name}}Hash={hash}></{{pascal_case from_referenceable.name}}Detail>
     </div>
   {/each}
-{{else}}
-  <div style="margin-bottom: 8px;">{{pascal_case from_referenceable.name}}Detail component generation was skipped</div>
-{{/if}}
 </div>
 {/if}
