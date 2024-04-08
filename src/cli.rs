@@ -329,7 +329,7 @@ impl HcScaffold {
                         fs::remove_dir_all(&app_dir)?;
                         return Err(err)?;
                     }
-                    nix_instructions = "nix develop\n";
+                    nix_instructions = "\n  nix develop";
                 }
 
                 if fast_forward {
@@ -360,6 +360,7 @@ impl HcScaffold {
                             &integrity_zome_name,
                             &None,
                         )?;
+                        let file_tree = MergeableFileSystemTree::from(file_tree);
                         file_tree.build(&PathBuf::from("."))?;
                         println!("Integrity zome scaffolded");
                     }
@@ -372,6 +373,7 @@ impl HcScaffold {
                             &None,
                             &None,
                         )?;
+                        let file_tree = MergeableFileSystemTree::from(file_tree);
                         file_tree.build(&PathBuf::from("."))?;
                         println!("Coordinator zome scaffolded");
                     }
@@ -379,18 +381,14 @@ impl HcScaffold {
 
                 setup_git_environment(&app_dir)?;
 
-                println!(
-                    r#"
-Web hApp "{}" scaffolded!
-"#,
-                    name
-                );
+                println!("\nWeb hApp \"{name}\" scaffolded!");
 
                 if let Some(i) = next_instructions {
                     println!("{}", i);
                 } else {
                     let dna_instructions = if !fast_forward {
                         r#"
+
 - The project won't compile until you add a DNA to it, and then add a zome to that DNA.
 
 To continue scaffolding your application, add new DNAs to your app with:
@@ -408,10 +406,8 @@ Notice that this is an empty skeleton for a Holochain web-app, so:
 
 Set up your development environment with:
 
-  cd {name} {nix_instructions}
-  npm install
-
-{dna_instructions}
+  cd {name}{nix_instructions}
+  npm install {dna_instructions}
 
 Then, at any point in time you can start your application with:
 
