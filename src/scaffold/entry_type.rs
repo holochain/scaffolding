@@ -206,7 +206,8 @@ pub fn scaffold_entry_type(
 
     let dna_manifest = zome_file_tree.dna_file_tree.dna_manifest.clone();
 
-    let app_file_tree = AppFileTree::get_or_choose(zome_file_tree.dna_file_tree.file_tree(), None)?;
+    let app_file_tree =
+        AppFileTree::get_or_choose(zome_file_tree.dna_file_tree.file_tree(), &None)?;
 
     let app_name = app_file_tree.app_manifest.app_name().to_string();
 

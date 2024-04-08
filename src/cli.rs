@@ -337,7 +337,7 @@ impl HcScaffold {
                     // prompt to scaffold DNA
                     let dna_name = input_with_case("Initial DNA name (snake_case):", Case::Snake)?;
                     let file_tree = load_directory_into_memory(&current_dir.join(&name))?;
-                    let app_file_tree = AppFileTree::get_or_choose(file_tree, Some(&name))?;
+                    let app_file_tree = AppFileTree::get_or_choose(file_tree, &Some(name.clone()))?;
                     let ScaffoldedTemplate { file_tree, .. } =
                         scaffold_dna(app_file_tree, &template_file_tree, &dna_name)?;
 
@@ -432,7 +432,7 @@ Then, at any point in time you can start your application with:
 
                 let file_tree = load_directory_into_memory(&current_dir)?;
 
-                let app_file_tree = AppFileTree::get_or_choose(file_tree, app.as_ref())?;
+                let app_file_tree = AppFileTree::get_or_choose(file_tree, &app)?;
 
                 let ScaffoldedTemplate {
                     file_tree,
@@ -758,7 +758,7 @@ Collection "{}" scaffolded!
                         // scaffold dna hello_world
                         let dna_name = "forum";
 
-                        let app_file_tree = AppFileTree::get_or_choose(file_tree, Some(&name))?;
+                        let app_file_tree = AppFileTree::get_or_choose(file_tree, &Some(name))?;
                         let ScaffoldedTemplate { file_tree, .. } =
                             scaffold_dna(app_file_tree, &template_file_tree, dna_name)?;
 
