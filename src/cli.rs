@@ -3,8 +3,8 @@ use crate::file_tree::{file_content, load_directory_into_memory, map_file, FileT
 use crate::scaffold::app::cargo::exec_metadata;
 use crate::scaffold::app::nix::setup_nix_developer_environment;
 use crate::scaffold::app::AppFileTree;
-use crate::scaffold::collection::{coordinator, scaffold_collection, CollectionType};
-use crate::scaffold::dna::{integrity, scaffold_dna, DnaFileTree};
+use crate::scaffold::collection::{scaffold_collection, CollectionType};
+use crate::scaffold::dna::{scaffold_dna, DnaFileTree};
 use crate::scaffold::entry_type::crud::{parse_crud, Crud};
 use crate::scaffold::entry_type::definitions::{
     parse_entry_type_reference, parse_referenceable, Cardinality, EntryTypeReference,
