@@ -216,6 +216,9 @@ pub enum HcScaffold {
         /// The template to scaffold the example for
         /// Must be an option from the built-in templates: "vanilla", "vue", "lit", "svelte"
         template: Option<String>,
+
+        #[structopt(long = "holo", hidden = true)]
+        holo_enabled: bool,
     },
 }
 
@@ -702,7 +705,11 @@ Collection "{}" scaffolded!
                     println!("{}", i);
                 }
             }
-            HcScaffold::Example { example, template } => {
+            HcScaffold::Example {
+                example,
+                template,
+                holo_enabled,
+            } => {
                 let example = match example {
                     Some(e) => e,
                     None => choose_example()?,
@@ -736,7 +743,7 @@ Collection "{}" scaffolded!
                             &template_file_tree,
                             template_name.clone(),
                             false,
-                            false,
+                            holo_enabled,
                         )?;
 
                         file_tree
@@ -750,7 +757,7 @@ Collection "{}" scaffolded!
                             &template_file_tree,
                             template_name.clone(),
                             false,
-                            false,
+                            holo_enabled,
                         )?;
 
                         // scaffold dna hello_world

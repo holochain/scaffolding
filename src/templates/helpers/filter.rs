@@ -1,8 +1,5 @@
-use handlebars::{
-    Context, Handlebars, Helper, HelperDef, RenderContext, RenderError,
-    ScopedJson,
-};
-use serde_json::{json, Value, Map};
+use handlebars::{Context, Handlebars, Helper, HelperDef, RenderContext, RenderError, ScopedJson};
+use serde_json::{json, Map, Value};
 
 #[derive(Clone, Copy)]
 pub struct FilterHelper;
@@ -59,14 +56,14 @@ impl HelperDef for FilterHelper {
                             if s.as_str() == "true" {
                                 filtered_array.push(item);
                             }
-                        },
+                        }
                         Err(e) => {
                             return Err(e);
                         }
                     }
                 }
                 Ok(ScopedJson::Derived(json!(filtered_array)))
-            },
+            }
             Value::Object(object) => {
                 let mut filtered_object = Map::new();
                 for key in object.clone().keys() {
@@ -76,7 +73,7 @@ impl HelperDef for FilterHelper {
                                 if s.as_str() == "true" {
                                     filtered_object.insert(key.into(), v.clone());
                                 }
-                            },
+                            }
                             Err(e) => {
                                 return Err(e);
                             }
@@ -84,8 +81,10 @@ impl HelperDef for FilterHelper {
                     }
                 }
                 Ok(ScopedJson::Derived(json!(filtered_object)))
-            },
-            _ => Err(RenderError::new("Filter helper: value to be filtered must be an array or object"))
+            }
+            _ => Err(RenderError::new(
+                "Filter helper: value to be filtered must be an array or object",
+            )),
         }
     }
 }
@@ -98,9 +97,9 @@ pub fn register_filter<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
 
 #[cfg(test)]
 mod tests {
+    use crate::templates::helpers::register_filter;
     use handlebars::Handlebars;
     use serde_json::json;
-    use crate::templates::helpers::register_filter;
 
     fn setup_handlebars<'a>() -> Handlebars<'a> {
         let hbs = Handlebars::new();
@@ -116,13 +115,16 @@ mod tests {
         let template = "{{#each (filter this \"this\")}}{{this}}{{/each}}";
         match hbs.render_template(&template, &value) {
             Ok(s) => assert_eq!(s, "12345", "`filter` helper did not filter out falsy zero"),
-            Err(e) => panic!("{}", e)
+            Err(e) => panic!("{}", e),
         }
         // This predicate, however, does not.
         let template = "{{#each (filter this \"this\" includeZero=true)}}{{this}}{{/each}}";
         match hbs.render_template(&template, &value) {
-            Ok(s) => assert_eq!(s, "0102030405", "`filter` helper did not treat zero as truthy"),
-            Err(e) => panic!("{}", e)
+            Ok(s) => assert_eq!(
+                s, "0102030405",
+                "`filter` helper did not treat zero as truthy"
+            ),
+            Err(e) => panic!("{}", e),
         }
     }
 
@@ -133,11 +135,13 @@ mod tests {
         // The predicate filters out the 'wild' property.
         let template = "{{#each (filter this \"this\")}}{{@key}}: {{this}}, {{/each}}";
         match hbs.render_template(&template, &value) {
-            Ok(s) => assert_eq!(s, "name: Alice, age: 24, species: iguana, ", "`filter` helper did not filter object key/value pairs by value"),
-            Err(e) => panic!("{}", e)
+            Ok(s) => assert_eq!(
+                s, "name: Alice, age: 24, species: iguana, ",
+                "`filter` helper did not filter object key/value pairs by value"
+            ),
+            Err(e) => panic!("{}", e),
         }
     }
-
 
     #[test]
     fn can_filter_complex_value() {
@@ -148,10 +152,14 @@ mod tests {
             {"name": "Carol", "age": 1, "wild": true, "species": "octopus"}
         ]);
         // The predicate filters out domestic animals.
-        let template = "{{#each (filter this \"wild\")}}{{name}} the {{species}} is {{age}}. {{/each}}";
+        let template =
+            "{{#each (filter this \"wild\")}}{{name}} the {{species}} is {{age}}. {{/each}}";
         match hbs.render_template(&template, &value) {
-            Ok(s) => assert_eq!(s, "Alice the iguana is 24. Carol the octopus is 1. ", "`filter` helper did not operate on a list full of complex values"),
-            Err(e) => panic!("{}", e)
+            Ok(s) => assert_eq!(
+                s, "Alice the iguana is 24. Carol the octopus is 1. ",
+                "`filter` helper did not operate on a list full of complex values"
+            ),
+            Err(e) => panic!("{}", e),
         }
     }
 }

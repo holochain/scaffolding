@@ -9,40 +9,57 @@ use crate::error::{ScaffoldError, ScaffoldResult};
 use crate::file_tree::*;
 use crate::versions::holochain_nix_version;
 
-pub fn flake_nix() -> FileTree {
+pub fn flake_nix(holo_enabled: bool) -> FileTree {
     let holochain_nix_version = holochain_nix_version();
+
+    let holo_inputs = holo_enabled
+        .then_some(
+            r#"
+    hds-releases.url = "github:holo-host/hds-releases";
+    "#,
+        )
+        .unwrap_or_default();
+
+    let holo_packages = holo_enabled
+        .then_some("inputs'.hds-releases.packages.holo-dev-server-bin")
+        .unwrap_or_default();
+
     file!(format!(
         r#"{{
   description = "Template for Holochain app development";
 
   inputs = {{
-    holochain-nix-versions.url  = "github:holochain/holochain?dir=versions/{holochain_nix_version}";
+    versions.url  = "github:holochain/holochain?dir=versions/{holochain_nix_version}";
 
-    holochain-flake = {{
-      url = "github:holochain/holochain";
-      inputs.versions.follows = "holochain-nix-versions";
-    }};
+    holochain-flake.url = "github:holochain/holochain";
+    holochain-flake.inputs.versions.follows = "versions";
 
     nixpkgs.follows = "holochain-flake/nixpkgs";
     flake-parts.follows = "holochain-flake/flake-parts";
+    {holo_inputs}
   }};
 
-  outputs = inputs @ {{ flake-parts, holochain-flake, ... }}:
-    flake-parts.lib.mkFlake
+  outputs = inputs:
+    inputs.flake-parts.lib.mkFlake
       {{
         inherit inputs;
       }}
       {{
-        systems = builtins.attrNames holochain-flake.devShells;
+        systems = builtins.attrNames inputs.holochain-flake.devShells;
         perSystem =
-          {{ config
+          {{ inputs'
+          , config
           , pkgs
           , system
           , ...
           }}: {{
             devShells.default = pkgs.mkShell {{
-              inputsFrom = [ holochain-flake.devShells.${{system}}.holonix ];
-              packages = [ pkgs.nodejs_20 ];
+              inputsFrom = [ inputs'.holochain-flake.devShells.holonix ];
+              packages = [
+                pkgs.nodejs_20
+                {holo_packages}
+                # more packages go here
+              ];
             }};
           }};
       }};
@@ -65,14 +82,15 @@ pub fn setup_nix_developer_environment(dir: &PathBuf) -> ScaffoldResult<()> {
         .stderr(Stdio::null())
         .current_dir(dir)
         .args(["rev-parse", "--is-inside-work-tree"])
-        .output() {
-            Ok(output) => {
-                if output.status.success() && output.stdout == b"true\n" {
-                    return Err(ScaffoldError::NixSetupError("- detected that Scaffolding is running inside an existing Git repository, please choose a different location to scaffold".to_string()));
-                }
-            },
-            Err(_) => {} // Ignore errors, Git isn't necessarily available.
+        .output()
+    {
+        Ok(output) => {
+            if output.status.success() && output.stdout == b"true\n" {
+                return Err(ScaffoldError::NixSetupError("- detected that Scaffolding is running inside an existing Git repository, please choose a different location to scaffold".to_string()));
+            }
         }
+        Err(_) => {} // Ignore errors, Git isn't necessarily available.
+    }
 
     println!("Setting up nix development environment...");
 
