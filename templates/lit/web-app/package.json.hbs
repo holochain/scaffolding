@@ -17,6 +17,7 @@
     "start:holo": "AGENTS=${AGENTS:-2} npm run network:holo",
     "network:holo": "npm run build:happ && UI_PORT=$(port) concurrently \"npm run launch:holo-dev-server\" \"holochain-playground ws://localhost:4444\" \"concurrently-repeat 'VITE_APP_CHAPERONE_URL=http://localhost:24274 VITE_APP_IS_HOLO=true npm start -w ui' $AGENTS\"",
     "launch:holo-dev-server": "holo-dev-server workdir/{{app_name}}.happ",
+    "package:holo": "npm run build:happ && npm run package:holo -w ui && hc web-app pack workdirk --recursive",
   {{/if}}
     "package": "npm run build:happ && npm run package -w ui && hc web-app pack workdir --recursive",
     "build:happ": "npm run build:zomes && hc app pack workdir --recursive",
