@@ -4,7 +4,7 @@
   "scripts": {
     "start": "vite --port $UI_PORT --clearScreen false",
     "build"": "npm run check && npm run build:vite",
-    "build:vite": "VITE_APP_IS_HOLO={{holo_enabled}} vite build",
+    "build:vite": "{{#if holo_enabled}}VITE_APP_IS_HOLO=true {{/if}}vite build",
     "check": "vue-tsc --noEmit",
     "preview": "vite preview",
     "package": "npm run build && cd dist && bestzip ../dist.zip *"
