@@ -1,7 +1,11 @@
+use colored::Colorize;
 use holochain_scaffolding_cli::cli::HcScaffold;
 use structopt::StructOpt;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    HcScaffold::from_args().run().await
+    if let Err(e) = HcScaffold::from_args().run().await {
+        eprintln!("{}", e.to_string().red());
+    }
+    Ok(())
 }
