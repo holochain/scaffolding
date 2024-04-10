@@ -61,7 +61,7 @@ pub fn initial_lib_rs(dependencies: &Option<Vec<String>>) -> String {
 
 /// Called the first time a zome call is made to the cell containing this zome
 #[hdk_extern]
-pub fn init(_: ()) -> ExternResult<InitCallbackResult> {{
+pub fn init() -> ExternResult<InitCallbackResult> {{
   Ok(InitCallbackResult::Pass)
 }}
 
