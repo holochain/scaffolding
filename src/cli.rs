@@ -911,7 +911,7 @@ Collection "{}" scaffolded!
                         let ScaffoldedTemplate { file_tree, .. } = scaffold_collection(
                             zome_file_tree,
                             &template_file_tree,
-                            &String::from("all_posts".to_string()),
+                            "all_posts",
                             &Some(CollectionType::Global),
                             &Some(EntryTypeReference {
                                 entry_type: post_entry_type_name.to_string(),
