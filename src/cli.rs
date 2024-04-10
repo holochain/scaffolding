@@ -349,47 +349,46 @@ impl HcScaffold {
                     let ScaffoldedTemplate { file_tree, .. } =
                         scaffold_dna(app_file_tree, &template_file_tree, &dna_name)?;
 
-                    // prompt to scaffold zome(s)
                     let dna_file_tree = DnaFileTree::get_or_choose(file_tree, &Some(dna_name))?;
-                    let (scaffold_integrity, scaffold_coordinator) =
-                        select_scaffold_zome_options()?;
-                    let name_prompt = match (scaffold_integrity, scaffold_coordinator) {
-                        (true, true) => "Enter coordinator zome name (snake_case):\n (The integrity zome will automatically be named '{name of coordinator zome}_integrity')\n",
-                        _ => "Enter zome name (snake_case):",
-                    };
-                    let zome_name = input_with_case(&name_prompt, Case::Snake)?;
+                    let zome_name = input_with_case(
+                        "Enter coordinator zome name (snake_case):\n (The integrity zome will automatically be named '{name of coordinator zome}_integrity')\n",
+                        Case::Snake
+                    )?;
 
-                    if scaffold_integrity {
-                        let integrity_zome_name = integrity_zome_name(&zome_name);
-                        let ScaffoldedTemplate { file_tree, .. } = scaffold_integrity_zome(
-                            // FIXME: avoid cloning the dna file tree here
-                            dna_file_tree.clone(),
-                            &template_file_tree,
-                            &integrity_zome_name,
-                            &None,
-                        )?;
-                        let file_tree = MergeableFileSystemTree::from(file_tree);
-                        file_tree.build(&PathBuf::from("."))?;
-                        println!("Integrity zome scaffolded");
-                    }
+                    // scaffold integrity
+                    let integrity_zome_name = integrity_zome_name(&zome_name);
+                    let ScaffoldedTemplate { file_tree, .. } = scaffold_integrity_zome(
+                        // FIXME: avoid cloning the dna file tree here
+                        dna_file_tree.clone(),
+                        &template_file_tree,
+                        &integrity_zome_name,
+                        &None,
+                    )?;
+                    let file_tree = MergeableFileSystemTree::from(file_tree);
+                    file_tree.build(&PathBuf::from("."))?;
+                    println!("Integrity zome scaffolded");
 
-                    if scaffold_coordinator {
-                        let ScaffoldedTemplate { file_tree, .. } = scaffold_coordinator_zome(
-                            dna_file_tree,
-                            &template_file_tree,
-                            &zome_name,
-                            &None,
-                            &None,
-                        )?;
-                        let file_tree = MergeableFileSystemTree::from(file_tree);
-                        file_tree.build(&PathBuf::from("."))?;
-                        println!("Coordinator zome scaffolded");
-                    }
+                    // scaffold coordinator
+                    let ScaffoldedTemplate { file_tree, .. } = scaffold_coordinator_zome(
+                        dna_file_tree,
+                        &template_file_tree,
+                        &zome_name,
+                        &None,
+                        &None,
+                    )?;
+                    let file_tree = MergeableFileSystemTree::from(file_tree);
+                    file_tree.build(&PathBuf::from("."))?;
+                    println!("Coordinator zome scaffolded");
                 }
 
                 setup_git_environment(&app_dir)?;
 
-                println!("\nWeb hApp \"{name}\" scaffolded!");
+                println!(
+                    "\n{} {} {}",
+                    "Your Web hApp".green(),
+                    name.italic().green(),
+                    "has been scaffolded!".green()
+                );
 
                 if let Some(i) = next_instructions {
                     println!("{}", i);
@@ -397,30 +396,29 @@ impl HcScaffold {
                     let dna_instructions = if !fast_forward {
                         r#"
 
-- The project won't compile until you add a DNA to it, and then add a zome to that DNA.
+- Get your project to compile by adding a DNA and then following the next insturctions to add a zome to that DNA:
 
-To continue scaffolding your application, add new DNAs to your app with:
-
-  hc scaffold dna
-"#
+  hc scaffold dna"#
                     } else {
                         ""
                     };
                     println!(
                         r#"
-Notice that this is an empty skeleton for a Holochain web-app, so:
+This skeleton provides the basic structure for your Holochain web application.
+The UI is currently empty; you will need to import necessary components into the top-level app component to populate it. 
 
-- The UI is empty, you'll need to import the appropriate components to the top level app component.
+Here's how you can get started with developing your application:
 
-Set up your development environment with:
+- Set up your development environment:
 
   cd {name}{nix_instructions}
   npm install {dna_instructions}
 
-Then, at any point in time you can start your application with:
+- Enhance your app by executing further hc scaffold commands to add more features.
 
-  npm start
-"#
+- Then, at any point in time you can start your application with:
+
+  npm start"#,
                     );
                 }
             }
