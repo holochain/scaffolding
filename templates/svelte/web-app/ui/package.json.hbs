@@ -4,6 +4,10 @@
   "scripts": {
     "start": "vite --clearScreen false --port $UI_PORT",
     "build": "npm run check && vite build",
+  {{#if holo_enabled}}
+    "build:holo": "VITE_APP_IS_HOLO=true vite build",
+    "package:holo": "npm run build:holo && cd dist && bestzip ../dist.zip *",
+  {{/if}}
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "package": "npm run build && cd dist && bestzip ../dist.zip *"
   },
