@@ -476,7 +476,7 @@ Add new zomes to your DNA with:
 
                 let name = match name {
                     Some(n) => n,
-                    None => input_with_case(&name_prompt, Case::Snake)?,
+                    None => input_with_case(name_prompt, Case::Snake)?,
                 };
 
                 let mut dna_file_tree = DnaFileTree::get_or_choose(file_tree, &dna)?;
