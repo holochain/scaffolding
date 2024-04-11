@@ -358,7 +358,6 @@ impl HcScaffold {
                     // scaffold integrity
                     let integrity_zome_name = integrity_zome_name(&zome_name);
                     let ScaffoldedTemplate { file_tree, .. } = scaffold_integrity_zome(
-                        // FIXME: avoid cloning the dna file tree here
                         dna_file_tree.clone(),
                         &template_file_tree,
                         &integrity_zome_name,
@@ -383,15 +382,10 @@ impl HcScaffold {
 
                 setup_git_environment(&app_dir)?;
 
-                println!(
-                    "\n{} {} {}",
-                    "Your Web hApp".green(),
-                    name.italic().green(),
-                    "has been scaffolded!".green()
-                );
+                println!("\nYour Web hApp {} has been scaffolded!", name.italic());
 
                 if let Some(i) = next_instructions {
-                    println!("{}", i);
+                    println!("\n{}", i);
                 } else {
                     let dna_instructions = if !fast_forward {
                         r#"
@@ -444,14 +438,10 @@ Here's how you can get started with developing your application:
                 let file_tree = MergeableFileSystemTree::<OsString, String>::from(file_tree);
                 file_tree.build(&PathBuf::from("."))?;
 
-                println!(
-                    r#"
-DNA "{}" scaffolded!"#,
-                    name
-                );
+                println!("\nDNA {} scaffolded!", name.italic());
 
                 if let Some(i) = next_instructions {
-                    println!("{}", i);
+                    println!("\n{}", i);
                 } else {
                     println!(
                         r#"
@@ -480,8 +470,8 @@ Add new zomes to your DNA with:
                 };
 
                 let name_prompt = match (scaffold_integrity, scaffold_coordinator) {
-                    (true, true) => String::from("Enter coordinator zome name (snake_case):\n (The integrity zome will automatically be named '{name of coordinator zome}_integrity')\n"),
-                    _ => String::from("Enter zome name (snake_case):"),
+                    (true, true) => "Enter coordinator zome name (snake_case):\n (The integrity zome will automatically be named '{name of coordinator zome}_integrity')\n",
+                    _ => "Enter zome name (snake_case):",
                 };
 
                 let name = match name {
@@ -511,7 +501,10 @@ Add new zomes to your DNA with:
 
                     zome_next_instructions.0 = next_instructions;
 
-                    println!(r#"Integrity zome "{}" scaffolded!"#, integrity_zome_name);
+                    println!(
+                        "\nIntegrity zome {} scaffolded!",
+                        integrity_zome_name.italic(),
+                    );
 
                     dna_file_tree =
                         DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
@@ -539,7 +532,7 @@ Add new zomes to your DNA with:
                     )?;
                     zome_next_instructions.1 = next_instructions;
 
-                    println!(r#"Coordinator zome "{}" scaffolded!"#, name);
+                    println!("\nCoordinator zome {} scaffolded!", name.italic());
 
                     dna_file_tree =
                         DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
@@ -558,11 +551,11 @@ Add new zomes to your DNA with:
 
                 match zome_next_instructions {
                     (Some(integrity), Some(coordinator)) => {
-                        println!("{integrity}");
-                        println!("{coordinator}");
+                        println!("\n{integrity}");
+                        println!("\n{coordinator}");
                     }
-                    (None, Some(coordinator)) => println!("{coordinator}"),
-                    (Some(integrity), None) => println!("{integrity}"),
+                    (None, Some(coordinator)) => println!("\n{coordinator}"),
+                    (Some(integrity), None) => println!("\n{integrity}"),
                     _ => println!(
                         r#"
 Add new entry definitions to your zome with:
@@ -621,14 +614,10 @@ inadvertently reference or expect elements from the skipped entry type.
                 let file_tree = MergeableFileSystemTree::<OsString, String>::from(file_tree);
                 file_tree.build(&PathBuf::from("."))?;
 
-                println!(
-                    r#"
-Entry type "{}" scaffolded!"#,
-                    name
-                );
+                println!("\nEntry type {} scaffolded!", name.italic(),);
 
                 if let Some(i) = next_instructions {
-                    println!("{}", i);
+                    println!("\n{}", i);
                 } else {
                     println!(
                         r#"
@@ -669,13 +658,9 @@ Add new collections for that entry type with:
                 let file_tree = MergeableFileSystemTree::<OsString, String>::from(file_tree);
                 file_tree.build(&PathBuf::from("."))?;
 
-                println!(
-                    r#"
-Link type scaffolded!
-"#,
-                );
+                println!("\nLink type scaffolded!");
                 if let Some(i) = next_instructions {
-                    println!("{}", i);
+                    println!("\n{}", i);
                 }
             }
             HcScaffoldCommand::Collection {
@@ -717,15 +702,10 @@ Link type scaffolded!
                 let file_tree = MergeableFileSystemTree::<OsString, String>::from(file_tree);
                 file_tree.build(&PathBuf::from("."))?;
 
-                println!(
-                    r#"
-Collection "{}" scaffolded!
-"#,
-                    name
-                );
+                println!("\nCollection {} scaffolded!", name.italic());
 
                 if let Some(i) = next_instructions {
-                    println!("{i}");
+                    println!("\n{i}");
                 }
             }
             HcScaffoldCommand::Example {
@@ -940,15 +920,10 @@ Collection "{}" scaffolded!
 
                 setup_git_environment(&app_dir)?;
 
-                println!(
-                    r#"
-Example "{}" scaffolded!
-"#,
-                    example.to_string()
-                );
+                println!("\nExample {} scaffolded!", example.to_string().italic());
 
                 if let Some(i) = next_instructions {
-                    println!("{}", i);
+                    println!("\n{}", i);
                 }
             }
         }
