@@ -1,13 +1,13 @@
 pub fn tryorama_version() -> String {
-    String::from("^v0.16.0-dev.1")
+    String::from("^v0.16.0-dev.2")
 }
 
 pub fn holochain_client_version() -> String {
-    String::from("^0.17.0-dev.6")
+    String::from("^0.17.0-dev.8")
 }
 
 pub fn hc_spin_version() -> String {
-    String::from("^0.300.2")
+    String::from("^0.300.2-dev.0")
 }
 
 // TODO: update to 0.3 compatible version
