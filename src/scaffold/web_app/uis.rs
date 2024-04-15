@@ -78,7 +78,7 @@ pub fn guess_or_choose_framework(app_file_tree: &FileTree) -> ScaffoldResult<UiF
 }
 
 pub fn choose_ui_framework() -> ScaffoldResult<UiFramework> {
-    let frameworks = ["Vue", "Svelte", "Lit"];
+    let frameworks = ["Vue", "Svelte", "Lit", "Vanilla"];
     let selection = Select::with_theme(&ColorfulTheme::default())
         .with_prompt("Choose UI framework:")
         .default(0)

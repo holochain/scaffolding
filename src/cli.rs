@@ -225,10 +225,10 @@ impl HcScaffold {
         };
         let template = match (&template_config, &self.template) {
             (Some(config), Some(template)) if &config.template != template => {
-                return Err(anyhow::anyhow!(format!(
-                "The value {} passed with `--template` does not match the template the web-app was scaffolded with: {}",
-                template, config.template
-            )))
+                return Err(ScaffoldError::InvalidArguments(format!(
+                "The value {template} passed with `--template` does not match the template the web-app was scaffolded with: {}",
+                config.template
+            )).into())
             }
             (Some(config), _) => Some(&config.template),
             (_, t) => t.as_ref(),
@@ -714,11 +714,23 @@ Collection "{}" scaffolded!
                     Some(e) => e,
                     None => choose_example()?,
                 };
-                let name = example.to_string();
+                let example_name = example.to_string();
 
-                let app_dir = std::env::current_dir()?.join(&name);
+                let app_dir = std::env::current_dir()?.join(&example_name);
                 if app_dir.as_path().exists() {
                     return Err(ScaffoldError::FolderAlreadyExists(app_dir.clone()))?;
+                }
+
+                // Ensure the correct tempalte is used for each example
+                if matches!(example, Example::HelloWorld) && template != "vanilla"
+                    || matches!(example, Example::Forum) && template == "vanilla"
+                {
+                    return Err(ScaffoldError::InvalidArguments(format!(
+                        "{} example cannot be used with the {} template.",
+                        example.to_string().italic(),
+                        template.italic(),
+                    ))
+                    .into());
                 }
 
                 // Match on example types
@@ -726,8 +738,8 @@ Collection "{}" scaffolded!
                     Example::HelloWorld => {
                         // scaffold web-app
                         let ScaffoldedTemplate { file_tree, .. } = scaffold_web_app(
-                            name.clone(),
-                            Some(String::from("A simple 'hello world' application.")),
+                            example_name.clone(),
+                            Some("A simple 'hello world' application.".to_string()),
                             false,
                             &template_file_tree,
                             holo_enabled,
@@ -738,27 +750,27 @@ Collection "{}" scaffolded!
                     Example::Forum => {
                         // scaffold web-app
                         let ScaffoldedTemplate { file_tree, .. } = scaffold_web_app(
-                            name.clone(),
-                            Some(String::from("A simple 'forum' application.")),
+                            example_name.clone(),
+                            Some("A simple 'forum' application.".to_string()),
                             false,
                             &template_file_tree,
                             holo_enabled,
                         )?;
 
                         // scaffold dna hello_world
-                        let dna_name = String::from("forum");
+                        let dna_name = "forum";
 
                         let app_file_tree =
-                            AppFileTree::get_or_choose(file_tree, &Some(name.clone()))?;
+                            AppFileTree::get_or_choose(file_tree, &Some(example_name.clone()))?;
                         let ScaffoldedTemplate { file_tree, .. } =
                             scaffold_dna(app_file_tree, &template_file_tree, &dna_name)?;
 
                         // scaffold integrity zome posts
                         let dna_file_tree =
-                            DnaFileTree::get_or_choose(file_tree, &Some(dna_name.clone()))?;
+                            DnaFileTree::get_or_choose(file_tree, &Some(dna_name.to_owned()))?;
                         let dna_manifest_path = dna_file_tree.dna_manifest_path.clone();
 
-                        let integrity_zome_name = String::from("posts_integrity");
+                        let integrity_zome_name = "posts_integrity";
                         let integrity_zome_path = PathBuf::new()
                             .join("dnas")
                             .join(&dna_name)
@@ -775,7 +787,7 @@ Collection "{}" scaffolded!
                         let dna_file_tree =
                             DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
 
-                        let coordinator_zome_name = String::from("posts");
+                        let coordinator_zome_name = "posts";
                         let coordinator_zome_path = PathBuf::new()
                             .join("dnas")
                             .join(dna_name)
@@ -786,7 +798,7 @@ Collection "{}" scaffolded!
                                 dna_file_tree,
                                 &template_file_tree,
                                 &coordinator_zome_name,
-                                &Some(vec![integrity_zome_name.clone()]),
+                                &Some(vec![integrity_zome_name.to_owned()]),
                                 &coordinator_zome_path,
                             )?;
 
@@ -801,13 +813,13 @@ Collection "{}" scaffolded!
 
                         let zome_file_tree = ZomeFileTree::get_or_choose_integrity(
                             dna_file_tree,
-                            &Some(integrity_zome_name.clone()),
+                            &Some(integrity_zome_name.to_owned()),
                         )?;
 
                         let ScaffoldedTemplate { file_tree, .. } = scaffold_entry_type(
                             zome_file_tree,
                             &template_file_tree,
-                            &String::from("post"),
+                            "post",
                             &Some(Crud {
                                 update: true,
                                 delete: true,
@@ -816,16 +828,16 @@ Collection "{}" scaffolded!
                             &Some(true),
                             &Some(vec![
                                 FieldDefinition {
-                                    field_name: String::from("title"),
+                                    field_name: "title".to_string(),
                                     field_type: FieldType::String,
-                                    widget: Some(String::from("TextField")),
+                                    widget: Some("TextField".to_string()),
                                     cardinality: Cardinality::Single,
                                     linked_from: None,
                                 },
                                 FieldDefinition {
-                                    field_name: String::from("content"),
+                                    field_name: "content".to_string(),
                                     field_type: FieldType::String,
-                                    widget: Some(String::from("TextArea")),
+                                    widget: Some("TextArea".to_string()),
                                     cardinality: Cardinality::Single,
                                     linked_from: None,
                                 },
@@ -838,13 +850,13 @@ Collection "{}" scaffolded!
 
                         let zome_file_tree = ZomeFileTree::get_or_choose_integrity(
                             dna_file_tree,
-                            &Some(String::from("posts_integrity")),
+                            &Some("posts_integrity".to_string()),
                         )?;
 
                         let ScaffoldedTemplate { file_tree, .. } = scaffold_entry_type(
                             zome_file_tree,
                             &template_file_tree,
-                            &String::from("comment"),
+                            "comment",
                             &Some(Crud {
                                 update: false,
                                 delete: true,
@@ -886,10 +898,10 @@ Collection "{}" scaffolded!
                         let ScaffoldedTemplate { file_tree, .. } = scaffold_collection(
                             zome_file_tree,
                             &template_file_tree,
-                            &String::from("all_posts"),
+                            "all_posts",
                             &Some(CollectionType::Global),
                             &Some(EntryTypeReference {
-                                entry_type: String::from("post"),
+                                entry_type: "post".to_string(),
                                 reference_entry_hash: false,
                             }),
                             false,
