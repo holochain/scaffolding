@@ -254,6 +254,10 @@ impl HcScaffold {
             None => {
                 let ui_framework = match self.command {
                     HcScaffoldCommand::WebApp { .. } => choose_ui_framework()?,
+                    HcScaffoldCommand::Example { ref example, .. } => match example {
+                        Some(Example::HelloWorld) => UiFramework::Vanilla,
+                        _ => choose_ui_framework()?,
+                    },
                     _ => {
                         let file_tree = load_directory_into_memory(&current_dir)?;
                         guess_or_choose_framework(&file_tree)?
