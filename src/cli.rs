@@ -767,7 +767,7 @@ Collection "{}" scaffolded!
                         let app_file_tree =
                             AppFileTree::get_or_choose(file_tree, &Some(example_name.clone()))?;
                         let ScaffoldedTemplate { file_tree, .. } =
-                            scaffold_dna(app_file_tree, &template_file_tree, &dna_name)?;
+                            scaffold_dna(app_file_tree, &template_file_tree, dna_name)?;
 
                         // scaffold integrity zome posts
                         let dna_file_tree =
@@ -777,14 +777,14 @@ Collection "{}" scaffolded!
                         let integrity_zome_name = "posts_integrity";
                         let integrity_zome_path = PathBuf::new()
                             .join("dnas")
-                            .join(&dna_name)
+                            .join(dna_name)
                             .join("zomes")
                             .join("integrity");
                         let ScaffoldedTemplate { file_tree, .. } =
                             scaffold_integrity_zome_with_path(
                                 dna_file_tree,
                                 &template_file_tree,
-                                &integrity_zome_name,
+                                integrity_zome_name,
                                 &integrity_zome_path,
                             )?;
 
@@ -801,7 +801,7 @@ Collection "{}" scaffolded!
                             scaffold_coordinator_zome_in_path(
                                 dna_file_tree,
                                 &template_file_tree,
-                                &coordinator_zome_name,
+                                coordinator_zome_name,
                                 &Some(vec![integrity_zome_name.to_owned()]),
                                 &coordinator_zome_path,
                             )?;
