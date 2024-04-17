@@ -74,8 +74,8 @@ pub enum HcScaffoldCommand {
         holo_enabled: bool,
 
         /// Whether to setup an initial DNA and it's zome(s) after the web app is scaffolded
-        #[structopt(long = "fast-forward")]
-        fast_forward: bool,
+        #[structopt(long = "fast-track")]
+        fast_track: bool,
     },
     /// Manage custom templates
     Template(HcScaffoldTemplate),
@@ -280,7 +280,7 @@ impl HcScaffold {
                 description,
                 setup_nix,
                 holo_enabled,
-                fast_forward,
+                fast_track,
             } => {
                 let name = match name {
                     Some(n) => {
@@ -344,7 +344,7 @@ impl HcScaffold {
                     nix_instructions = "\n  nix develop";
                 }
 
-                if fast_forward {
+                if fast_track {
                     env::set_current_dir(PathBuf::from(&name))?;
                     // prompt to scaffold DNA
                     let dna_name = input_with_case("Initial DNA name (snake_case):", Case::Snake)?;
@@ -391,7 +391,7 @@ impl HcScaffold {
                 if let Some(i) = next_instructions {
                     println!("\n{}", i);
                 } else {
-                    let dna_instructions = if !fast_forward {
+                    let dna_instructions = if !fast_track {
                         r#"
 
 - Get your project to compile by adding a DNA and then following the next insturctions to add a zome to that DNA:
