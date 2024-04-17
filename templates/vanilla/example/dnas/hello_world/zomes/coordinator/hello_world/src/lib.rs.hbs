@@ -25,8 +25,7 @@ pub struct HelloOutput {
 }
 
 #[hdk_extern]
-pub fn get_hellos(_: ()) -> ExternResult<Vec<HelloOutput>> {
-
+pub fn get_hellos() -> ExternResult<Vec<HelloOutput>> {
     // get all of the hellos linked to the anchor
     let path = Path::from("hellos");
     let links = get_links(

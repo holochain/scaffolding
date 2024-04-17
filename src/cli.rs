@@ -229,10 +229,10 @@ impl HcScaffold {
         };
         let template = match (&template_config, &self.template) {
             (Some(config), Some(template)) if &config.template != template => {
-                return Err(anyhow::anyhow!(format!(
-                "The value {} passed with `--template` does not match the template the web-app was scaffolded with: {}",
-                template, config.template
-            )))
+                return Err(ScaffoldError::InvalidArguments(format!(
+                "The value {template} passed with `--template` does not match the template the web-app was scaffolded with: {}",
+                config.template
+            )).into())
             }
             (Some(config), _) => Some(&config.template),
             (_, t) => t.as_ref(),
@@ -258,6 +258,10 @@ impl HcScaffold {
             None => {
                 let ui_framework = match self.command {
                     HcScaffoldCommand::WebApp { .. } => choose_ui_framework()?,
+                    HcScaffoldCommand::Example { ref example, .. } => match example {
+                        Some(Example::HelloWorld) => UiFramework::Vanilla,
+                        _ => choose_ui_framework()?,
+                    },
                     _ => {
                         let file_tree = load_directory_into_memory(&current_dir)?;
                         guess_or_choose_framework(&file_tree)?
@@ -716,11 +720,23 @@ Add new collections for that entry type with:
                     Some(e) => e,
                     None => choose_example()?,
                 };
-                let name = example.to_string();
+                let example_name = example.to_string();
 
-                let app_dir = std::env::current_dir()?.join(&name);
+                let app_dir = std::env::current_dir()?.join(&example_name);
                 if app_dir.as_path().exists() {
                     return Err(ScaffoldError::FolderAlreadyExists(app_dir.clone()))?;
+                }
+
+                // Ensure the correct tempalte is used for each example
+                if matches!(example, Example::HelloWorld) && template != "vanilla"
+                    || matches!(example, Example::Forum) && template == "vanilla"
+                {
+                    return Err(ScaffoldError::InvalidArguments(format!(
+                        "{} example cannot be used with the {} template.",
+                        example.to_string().italic(),
+                        template.italic(),
+                    ))
+                    .into());
                 }
 
                 // Match on example types
@@ -728,7 +744,7 @@ Add new collections for that entry type with:
                     Example::HelloWorld => {
                         // scaffold web-app
                         let ScaffoldedTemplate { file_tree, .. } = scaffold_web_app(
-                            name.clone(),
+                            example_name.clone(),
                             Some("A simple 'hello world' application.".to_string()),
                             false,
                             &template_file_tree,
@@ -740,7 +756,7 @@ Add new collections for that entry type with:
                     Example::Forum => {
                         // scaffold web-app
                         let ScaffoldedTemplate { file_tree, .. } = scaffold_web_app(
-                            name.clone(),
+                            example_name.clone(),
                             Some("A simple 'forum' application.".to_string()),
                             false,
                             &template_file_tree,
@@ -750,13 +766,14 @@ Add new collections for that entry type with:
                         // scaffold dna hello_world
                         let dna_name = "forum";
 
-                        let app_file_tree = AppFileTree::get_or_choose(file_tree, &Some(name))?;
+                        let app_file_tree =
+                            AppFileTree::get_or_choose(file_tree, &Some(example_name.clone()))?;
                         let ScaffoldedTemplate { file_tree, .. } =
                             scaffold_dna(app_file_tree, &template_file_tree, dna_name)?;
 
                         // scaffold integrity zome posts
                         let dna_file_tree =
-                            DnaFileTree::get_or_choose(file_tree, &Some(dna_name.to_string()))?;
+                            DnaFileTree::get_or_choose(file_tree, &Some(dna_name.to_owned()))?;
                         let dna_manifest_path = dna_file_tree.dna_manifest_path.clone();
 
                         let integrity_zome_name = "posts_integrity";
@@ -787,7 +804,7 @@ Add new collections for that entry type with:
                                 dna_file_tree,
                                 &template_file_tree,
                                 coordinator_zome_name,
-                                &Some(vec![integrity_zome_name.to_string()]),
+                                &Some(vec![integrity_zome_name.to_owned()]),
                                 &coordinator_zome_path,
                             )?;
 
@@ -802,7 +819,7 @@ Add new collections for that entry type with:
 
                         let zome_file_tree = ZomeFileTree::get_or_choose_integrity(
                             dna_file_tree,
-                            &Some(integrity_zome_name.to_string()),
+                            &Some(integrity_zome_name.to_owned()),
                         )?;
 
                         let post_entry_type_name = "post";
@@ -810,7 +827,7 @@ Add new collections for that entry type with:
                         let ScaffoldedTemplate { file_tree, .. } = scaffold_entry_type(
                             zome_file_tree,
                             &template_file_tree,
-                            post_entry_type_name,
+                            "post",
                             &Some(Crud {
                                 update: true,
                                 delete: true,
@@ -819,16 +836,16 @@ Add new collections for that entry type with:
                             Some(true),
                             Some(&vec![
                                 FieldDefinition {
-                                    field_name: String::from("title"),
+                                    field_name: "title".to_string(),
                                     field_type: FieldType::String,
-                                    widget: Some(String::from("TextField")),
+                                    widget: Some("TextField".to_string()),
                                     cardinality: Cardinality::Single,
                                     linked_from: None,
                                 },
                                 FieldDefinition {
-                                    field_name: String::from("content"),
+                                    field_name: "content".to_string(),
                                     field_type: FieldType::String,
-                                    widget: Some(String::from("TextArea")),
+                                    widget: Some("TextArea".to_string()),
                                     cardinality: Cardinality::Single,
                                     linked_from: None,
                                 },
@@ -841,7 +858,7 @@ Add new collections for that entry type with:
 
                         let zome_file_tree = ZomeFileTree::get_or_choose_integrity(
                             dna_file_tree,
-                            &Some(integrity_zome_name.to_string()),
+                            &Some("posts_integrity".to_string()),
                         )?;
 
                         let comment_entry_type_name = "comment";
@@ -849,7 +866,7 @@ Add new collections for that entry type with:
                         let ScaffoldedTemplate { file_tree, .. } = scaffold_entry_type(
                             zome_file_tree,
                             &template_file_tree,
-                            comment_entry_type_name,
+                            "comment",
                             &Some(Crud {
                                 update: false,
                                 delete: true,
@@ -894,7 +911,7 @@ Add new collections for that entry type with:
                             "all_posts",
                             &Some(CollectionType::Global),
                             &Some(EntryTypeReference {
-                                entry_type: post_entry_type_name.to_string(),
+                                entry_type: "post".to_string(),
                                 reference_entry_hash: false,
                             }),
                             false,

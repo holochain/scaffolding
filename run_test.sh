@@ -72,7 +72,7 @@ setup_and_build_hello_world() {
   cleanup_tmp hello-world
 
   cd $TEMPLATE_PATH
-  hc-scaffold --template vanilla example hello-world
+  hc-scaffold example hello-world
   cd hello-world
 
   nix develop --command bash -c "

@@ -32,7 +32,7 @@ fn global_collection_getter(
 use {integrity_zome_name}::*;
 
 #[hdk_extern]
-pub fn get_{snake_collection_name}(_: ()) -> ExternResult<Vec<Link>> {{
+pub fn get_{snake_collection_name}() -> ExternResult<Vec<Link>> {{
     let path = Path::from("{snake_collection_name}");
     get_links(GetLinksInputBuilder::try_new(path.path_entry_hash()?, LinkTypes::{link_type_name})?.build())
 }}
