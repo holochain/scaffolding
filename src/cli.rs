@@ -861,8 +861,6 @@ Add new collections for that entry type with:
                             &Some("posts_integrity".to_string()),
                         )?;
 
-                        let comment_entry_type_name = "comment";
-
                         let ScaffoldedTemplate { file_tree, .. } = scaffold_entry_type(
                             zome_file_tree,
                             &template_file_tree,
