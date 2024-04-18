@@ -47,7 +47,7 @@ impl FromStr for UiFramework {
             "headless" => Ok(UiFramework::Headless),
             _ => Err(ScaffoldError::InvalidUiFramework(
                 s.to_string(),
-                "vanilla, lit, svelte, vue".to_string(),
+                "vanilla, lit, svelte, vue, vanilla".to_string(),
             )),
         }
     }
