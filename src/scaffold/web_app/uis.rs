@@ -18,6 +18,7 @@ pub enum UiFramework {
     Lit,
     Svelte,
     Vue,
+    Headless,
 }
 
 impl ToString for UiFramework {
@@ -27,6 +28,7 @@ impl ToString for UiFramework {
             UiFramework::Lit => "lit",
             UiFramework::Svelte => "svelte",
             UiFramework::Vue => "vue",
+            UiFramework::Headless => "headless"
         }
         .into()
     }
@@ -41,6 +43,7 @@ impl FromStr for UiFramework {
             "svelte" => Ok(UiFramework::Svelte),
             "vue" => Ok(UiFramework::Vue),
             "lit" => Ok(UiFramework::Lit),
+            "headless" => Ok(UiFramework::Headless),
             _ => Err(ScaffoldError::InvalidUiFramework(
                 s.to_string(),
                 "vanilla, lit, svelte, vue".to_string(),
@@ -105,6 +108,7 @@ pub fn template_for_ui_framework(framework: &UiFramework) -> ScaffoldResult<File
         UiFramework::Vanilla => &VANILLA_TEMPLATES,
         UiFramework::Svelte => &SVELTE_TEMPLATES,
         UiFramework::Vue => &VUE_TEMPLATES,
+        _ => todo!(),
     };
 
     dir_to_file_tree(dir)

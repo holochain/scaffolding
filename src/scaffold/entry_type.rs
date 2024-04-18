@@ -77,15 +77,15 @@ pub fn scaffold_entry_type(
     zome_file_tree: ZomeFileTree,
     template_file_tree: &FileTree,
     name: &str,
-    maybe_crud: &Option<Crud>,
-    maybe_reference_entry_hash: &Option<bool>,
-    maybe_link_from_original_to_each_update: &Option<bool>,
-    maybe_fields: &Option<Vec<FieldDefinition>>,
+    crud: &Option<Crud>,
+    reference_entry_hash: &Option<bool>,
+    link_from_original_to_each_update: &Option<bool>,
+    fields: &Option<Vec<FieldDefinition>>,
     no_ui: bool,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     check_for_reserved_words(name)?;
 
-    let fields = match maybe_fields {
+    let fields = match fields {
         Some(f) => {
             check_field_definitions(name, &zome_file_tree, f)?;
             f.clone()
@@ -95,17 +95,16 @@ pub fn scaffold_entry_type(
                 .iter()
                 .map(|s| s.to_os_string())
                 .collect();
-            let empty_dir = dir! {};
             choose_fields(
                 name,
                 &zome_file_tree,
-                template_file_tree.path(&mut v.iter()).unwrap_or(&empty_dir),
+                template_file_tree.path(&mut v.iter()).unwrap_or(&dir! {}),
                 no_ui,
             )?
         }
     };
 
-    let reference_entry_hash = match maybe_reference_entry_hash {
+    let reference_entry_hash = match reference_entry_hash {
         Some(r) => *r,
         None => {
             // TODO: understand if this question is necessary, or if we can assume ActionHash
@@ -126,13 +125,13 @@ pub fn scaffold_entry_type(
         }
     };
 
-    let crud = match maybe_crud {
+    let crud = match crud {
         Some(c) => c.clone(),
         None => choose_crud(),
     };
 
     let link_from_original_to_each_update = match crud.update {
-        true => match maybe_link_from_original_to_each_update {
+        true => match link_from_original_to_each_update {
             Some(l) => *l,
             None => {
                 let selection = Select::with_theme(&ColorfulTheme::default())
@@ -164,7 +163,7 @@ pub fn scaffold_entry_type(
         .filter_map(|f| f.linked_from.clone())
         .collect();
 
-    for l in linked_from.clone() {
+    for l in linked_from {
         zome_file_tree = add_link_type_to_integrity_zome(
             zome_file_tree,
             &link_type_name(&l, &entry_def.referenceable()),
