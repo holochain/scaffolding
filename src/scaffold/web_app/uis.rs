@@ -11,6 +11,7 @@ static LIT_TEMPLATES: Dir<'static> = include_dir!("$CARGO_MANIFEST_DIR/templates
 static SVELTE_TEMPLATES: Dir<'static> = include_dir!("$CARGO_MANIFEST_DIR/templates/svelte");
 static VUE_TEMPLATES: Dir<'static> = include_dir!("$CARGO_MANIFEST_DIR/templates/vue");
 static VANILLA_TEMPLATES: Dir<'static> = include_dir!("$CARGO_MANIFEST_DIR/templates/vanilla");
+static HEADLESS_TEMPLATE: Dir<'static> = include_dir!("$CARGO_MANIFEST_DIR/templates/headless");
 
 #[derive(Debug, Clone)]
 pub enum UiFramework {
@@ -28,7 +29,7 @@ impl ToString for UiFramework {
             UiFramework::Lit => "lit",
             UiFramework::Svelte => "svelte",
             UiFramework::Vue => "vue",
-            UiFramework::Headless => "headless"
+            UiFramework::Headless => "headless",
         }
         .into()
     }
@@ -81,7 +82,7 @@ pub fn guess_or_choose_framework(app_file_tree: &FileTree) -> ScaffoldResult<UiF
 }
 
 pub fn choose_ui_framework() -> ScaffoldResult<UiFramework> {
-    let frameworks = ["Vue", "Svelte", "Lit", "Vanilla"];
+    let frameworks = ["Vue", "Svelte", "Lit", "Vanilla", "Headless"];
     let selection = Select::with_theme(&ColorfulTheme::default())
         .with_prompt("Choose UI framework:")
         .default(0)
@@ -108,7 +109,7 @@ pub fn template_for_ui_framework(framework: &UiFramework) -> ScaffoldResult<File
         UiFramework::Vanilla => &VANILLA_TEMPLATES,
         UiFramework::Svelte => &SVELTE_TEMPLATES,
         UiFramework::Vue => &VUE_TEMPLATES,
-        _ => todo!(),
+        UiFramework::Headless => &HEADLESS_TEMPLATE,
     };
 
     dir_to_file_tree(dir)
