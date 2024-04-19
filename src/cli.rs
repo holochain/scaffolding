@@ -212,10 +212,7 @@ pub enum HcScaffoldCommand {
 impl HcScaffold {
     pub async fn run(self) -> anyhow::Result<()> {
         let current_dir = std::env::current_dir()?;
-        let template_config = match &self.template {
-            Some(t) if !Path::new(t).exists() => get_template_config(&current_dir)?,
-            _ => None,
-        };
+        let template_config = get_template_config(&current_dir)?;
         let template = match (&template_config, &self.template) {
             (Some(config), Some(template)) if &config.template != template => {
                 return Err(ScaffoldError::InvalidArguments(format!(
@@ -224,7 +221,8 @@ impl HcScaffold {
                 config.template.italic(),
             )).into())
             }
-            (Some(config), _) => Some(&config.template),
+            // Only read from config if the template is inbuilt and not a path
+            (Some(config), _)  if !Path::new(&config.template).exists() => Some(&config.template),
             (_, t) => t.as_ref(),
         };
 
