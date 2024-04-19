@@ -1,6 +1,6 @@
 use dialoguer::{theme::ColorfulTheme, Select};
 use include_dir::{include_dir, Dir};
-use std::{ffi::OsString, path::PathBuf, str::FromStr};
+use std::{ffi::OsString, io, path::PathBuf, str::FromStr};
 
 use crate::{
     error::{ScaffoldError, ScaffoldResult},
@@ -19,7 +19,7 @@ pub enum UiFramework {
     Lit,
     Svelte,
     Vue,
-    Headless,
+    Other(String),
 }
 
 impl ToString for UiFramework {
@@ -29,7 +29,7 @@ impl ToString for UiFramework {
             UiFramework::Lit => "lit",
             UiFramework::Svelte => "svelte",
             UiFramework::Vue => "vue",
-            UiFramework::Headless => "headless",
+            UiFramework::Other(name) => name,
         }
         .into()
     }
@@ -44,11 +44,7 @@ impl FromStr for UiFramework {
             "svelte" => Ok(UiFramework::Svelte),
             "vue" => Ok(UiFramework::Vue),
             "lit" => Ok(UiFramework::Lit),
-            "headless" => Ok(UiFramework::Headless),
-            _ => Err(ScaffoldError::InvalidUiFramework(
-                s.to_string(),
-                "vanilla, lit, svelte, vue, vanilla".to_string(),
-            )),
+            other => Ok(UiFramework::Other(other.to_owned())),
         }
     }
 }
@@ -82,25 +78,34 @@ pub fn guess_or_choose_framework(app_file_tree: &FileTree) -> ScaffoldResult<UiF
 }
 
 pub fn choose_ui_framework() -> ScaffoldResult<UiFramework> {
-    let frameworks = ["Vue", "Svelte", "Lit", "Vanilla", "Headless"];
-    let selection = Select::with_theme(&ColorfulTheme::default())
-        .with_prompt("Choose UI framework:")
-        .default(0)
-        .items(&frameworks[..])
-        .interact()?;
+    let frameworks = ["Vue", "Svelte", "Lit", "Vanilla", "Others"];
+    let selection = prompt_selection("Choose UI framework:", &frameworks)?;
+
+    if frameworks[selection] == "Others" {
+        return choose_variant_ui_framework();
+    }
 
     UiFramework::from_str(frameworks[selection].to_lowercase().as_str())
 }
 
 pub fn choose_non_vanilla_ui_framework() -> ScaffoldResult<UiFramework> {
     let frameworks = ["Vue", "Svelte", "Lit"];
-    let selection = Select::with_theme(&ColorfulTheme::default())
-        .with_prompt("Choose UI framework:")
-        .default(0)
-        .items(&frameworks[..])
-        .interact()?;
-
+    let selection = prompt_selection("Chooose UI framework:", &frameworks)?;
     UiFramework::from_str(frameworks[selection].to_lowercase().as_str())
+}
+
+fn choose_variant_ui_framework() -> ScaffoldResult<UiFramework> {
+    let variants = ["Headless"];
+    let selection = prompt_selection("Select a variant:", &variants)?;
+    UiFramework::from_str(variants[selection].to_lowercase().as_str())
+}
+
+fn prompt_selection(prompt: &str, choices: &[&str]) -> io::Result<usize> {
+    Select::with_theme(&ColorfulTheme::default())
+        .with_prompt(prompt)
+        .default(0)
+        .items(choices)
+        .interact()
 }
 
 pub fn template_for_ui_framework(framework: &UiFramework) -> ScaffoldResult<FileTree> {
@@ -109,7 +114,12 @@ pub fn template_for_ui_framework(framework: &UiFramework) -> ScaffoldResult<File
         UiFramework::Vanilla => &VANILLA_TEMPLATES,
         UiFramework::Svelte => &SVELTE_TEMPLATES,
         UiFramework::Vue => &VUE_TEMPLATES,
-        UiFramework::Headless => &HEADLESS_TEMPLATE,
+        UiFramework::Other(other) if other == "headless" => &HEADLESS_TEMPLATE,
+        UiFramework::Other(t) => {
+            return Err(ScaffoldError::MalformedTemplate(format!(
+                "Inbuilt template {t} not found."
+            )));
+        }
     };
 
     dir_to_file_tree(dir)
