@@ -176,7 +176,7 @@ pub fn scaffold_entry_type(
 
     let coordinator_zomes_for_integrity = get_coordinator_zomes_for_integrity(
         &zome_file_tree.dna_file_tree.dna_manifest,
-        &zome_file_tree.zome_manifest.name.0,
+        zome_file_tree.zome_manifest.name.0.as_ref(),
     );
 
     let coordinator_zome = match coordinator_zomes_for_integrity.len() {
