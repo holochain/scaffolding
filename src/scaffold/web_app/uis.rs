@@ -94,7 +94,7 @@ pub fn choose_non_vanilla_ui_framework() -> ScaffoldResult<UiFramework> {
     UiFramework::from_str(frameworks[selection].to_lowercase().as_str())
 }
 
-fn choose_variant_ui_framework() -> ScaffoldResult<UiFramework> {
+pub fn choose_variant_ui_framework() -> ScaffoldResult<UiFramework> {
     let variants = ["Headless"];
     let selection = prompt_selection("Select a variant:", &variants)?;
     UiFramework::from_str(variants[selection].to_lowercase().as_str())
