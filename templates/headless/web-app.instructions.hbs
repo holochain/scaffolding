@@ -1,27 +1,14 @@
-This is a headless skeleton for a holochain app. 
+This is a headless skeleton for a hApp. 
 
-The `ui` directory is empty; you are expected to add your frontend there if you still intend to build a web app.
+The `ui` directory is empty; you are expected to add your frontend there if you still intend to include one.
 
 Note that the scaffolding cli does not generate UI components for this template.
 
-- For setting up a frontend, you might use a build tool such as vite (subsequent instructions assume vite usage). Here’s how:
+- For setting up a frontend, you can use a build tool such as vite:
 
   cd {{app_name}}
   npm create vite@latest ./ui
 
 - Ensure your UI's local dev server port is set using the UI_PORT environment variable from the root package.json.
-	
- {{#if holo_enabled}}
-- Update the "network" and "network:holo" scripts in the root package.json to include your ui's start script like so:
-
-  "network": "hc sandbox clean && npm run build:happ && UI_PORT=$(port) concurrently \"npm start -w ui\"  \"npm run launch:happ\"  \"holochain-playground\""
-  "network:holo": "npm run build:happ && UI_PORT=$(port) concurrently \"npm run launch:holo-dev-server\" \"holochain-playground ws://localhost:4444\" \"concurrently-repeat 'VITE_APP_CHAPERONE_URL=http://localhost:24274 VITE_APP_IS_HOLO=true npm start -w ui' $AGENTS\"",
- {{else}}
-- Update the "network" script in the root package.json to include your ui's start script like so:
-	
-  "network": "hc sandbox clean && npm run build:happ && UI_PORT=$(port) concurrently \"npm start -w ui\"  \"npm run launch:happ\"  \"holochain-playground\""
-{{/if}}
-
-- Add a "package" script in your ui/package.json that builds and creates a zip archive of all files in the directory in ui. Update the root package.json "package"  script to include it:
-	
-  "package": "npm run build:happ && npm run package -w ui && hc web-app pack workdir --recursive"
+- Update the "network"{{#if holo_enabled}} and "network:holo"{{/if}} script in the root package.json to include your ui's start script.
+- Add a "package" script in your ui/package.json that builds and creates a zip archive of all files in the directory in ui. Update the root package.json "package"  script to include it.
