@@ -78,12 +78,8 @@ pub fn guess_or_choose_framework(app_file_tree: &FileTree) -> ScaffoldResult<UiF
 }
 
 pub fn choose_ui_framework() -> ScaffoldResult<UiFramework> {
-    let frameworks = ["Vue", "Svelte", "Lit", "Vanilla", "Others"];
+    let frameworks = ["Vue", "Svelte", "Lit", "Vanilla", "headless"];
     let selection = prompt_selection("Choose UI framework:", &frameworks)?;
-
-    if frameworks[selection] == "Others" {
-        return choose_variant_ui_framework();
-    }
 
     UiFramework::from_str(frameworks[selection].to_lowercase().as_str())
 }
@@ -92,12 +88,6 @@ pub fn choose_non_vanilla_ui_framework() -> ScaffoldResult<UiFramework> {
     let frameworks = ["Vue", "Svelte", "Lit"];
     let selection = prompt_selection("Chooose UI framework:", &frameworks)?;
     UiFramework::from_str(frameworks[selection].to_lowercase().as_str())
-}
-
-pub fn choose_variant_ui_framework() -> ScaffoldResult<UiFramework> {
-    let variants = ["Headless"];
-    let selection = prompt_selection("Select a variant:", &variants)?;
-    UiFramework::from_str(variants[selection].to_lowercase().as_str())
 }
 
 fn prompt_selection(prompt: &str, choices: &[&str]) -> io::Result<usize> {
