@@ -503,25 +503,25 @@ pub fn scaffold_zome_pair(
     template_file_tree: FileTree,
     dna_name: &str,
 ) -> Result<(), ScaffoldError> {
-    let dna_file_tree = DnaFileTree::get_or_choose(app_file_tree, &Some(dna_name.to_string()))?;
+    let mut dna_file_tree = DnaFileTree::get_or_choose(app_file_tree, &Some(dna_name.to_string()))?;
+    let dna_manifest_path = dna_file_tree.dna_manifest_path.clone();
+
     let zome_name = input_with_case(
             "Enter coordinator zome name (snake_case):\n(The integrity zome will automatically be named '{name of coordinator zome}_integrity')\n",
             Case::Snake,
         )?;
 
     let integrity_zome_name = integrity_zome_name(&zome_name);
-    let file_tree = scaffold_integrity_zome(
-        dna_file_tree.clone(),
+    let ScaffoldedTemplate { file_tree, .. } = scaffold_integrity_zome(
+        dna_file_tree,
         &template_file_tree,
         &integrity_zome_name,
         &None,
-    )?
-    .file_tree;
-    build_file_tree(file_tree, ".")?;
+    )?;
+    dna_file_tree = DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
 
-    let file_tree =
-        scaffold_coordinator_zome(dna_file_tree, &template_file_tree, &zome_name, &None, &None)?
-            .file_tree;
+    let ScaffoldedTemplate { file_tree, .. } =
+        scaffold_coordinator_zome(dna_file_tree, &template_file_tree, &zome_name, &None, &None)?;
     build_file_tree(file_tree, ".")?;
     Ok(())
 }
