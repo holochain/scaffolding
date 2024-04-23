@@ -1,4 +1,4 @@
-use build_fs_tree::{dir, file, Build, BuildError, FileSystemTree, MergeableFileSystemTree};
+use build_fs_tree::{dir, file, Build, FileSystemTree, MergeableFileSystemTree};
 use ignore::WalkBuilder;
 use include_dir::Dir;
 use std::collections::BTreeMap;
