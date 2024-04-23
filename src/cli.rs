@@ -327,7 +327,7 @@ impl HcScaffold {
                     holo_enabled,
                 )?;
 
-                let file_tree = write_scaffold_config(file_tree, &TemplateConfig { template })?;
+                let file_tree = write_scaffold_config(file_tree, &template)?;
 
                 build_file_tree(dir! {&name => file_tree}, ".")?;
 
@@ -1015,11 +1015,14 @@ fn setup_git_environment(path: &Path) -> ScaffoldResult<()> {
 /// Write hcScaffold config to the hApp's root `package.json` file
 fn write_scaffold_config(
     mut web_app_file_tree: FileTree,
-    config: &TemplateConfig,
+    template: &str,
 ) -> ScaffoldResult<FileTree> {
-    if Path::new(&config.template).exists() {
+    if Path::new(template).exists() {
         return Ok(web_app_file_tree);
     }
+    let config = TemplateConfig {
+        template: template.to_owned(),
+    };
     let package_json_path = PathBuf::from("package.json");
     map_file(&mut web_app_file_tree, &package_json_path, |c| {
         let original_content = c.clone();
@@ -1028,7 +1031,7 @@ fn write_scaffold_config(
             Value::Object(mut o) => {
                 o.insert(
                     "hcScaffold".to_owned(),
-                    serde_json::to_value(config).unwrap(),
+                    serde_json::to_value(&config).unwrap(),
                 );
                 o
             }
