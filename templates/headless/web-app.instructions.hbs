@@ -11,4 +11,4 @@ Note that the scaffolding cli does not generate UI components for this template.
 
 - Ensure your UI's local dev server port is set using the UI_PORT environment variable from the root package.json.
 - Update the "network"{{#if holo_enabled}} and "network:holo"{{/if}} script in the root package.json to include your ui's start script.
-- Add a "package" script in your ui/package.json that builds and creates a zip archive of all files in the directory in ui. Update the root package.json "package"  script to include it.
+- Add a "package" script in your package.json that builds the ui and creates a zip archive of all files in the ui directory.
