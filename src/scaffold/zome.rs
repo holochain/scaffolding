@@ -1,3 +1,4 @@
+use convert_case::Case;
 use dialoguer::{theme::ColorfulTheme, Confirm, Select};
 use mr_bundle::Location;
 use regex::Regex;
@@ -7,12 +8,13 @@ use std::{
 };
 
 use crate::{
-    file_tree::{file_exists, insert_file_tree_in_dir, FileTree},
+    file_tree::{build_file_tree, file_exists, insert_file_tree_in_dir, FileTree},
     reserved_words::check_for_reserved_words,
     templates::{
         coordinator::scaffold_coordinator_zome_templates,
         integrity::scaffold_integrity_zome_templates, ScaffoldedTemplate,
     },
+    utils::input_with_case,
     versions::{hdi_version, hdk_version},
 };
 use build_fs_tree::{dir, file};
@@ -494,4 +496,32 @@ pub fn scaffold_coordinator_zome(
         dependencies,
         &path_to_scaffold_in,
     )
+}
+
+pub fn scaffold_zome_pair(
+    app_file_tree: FileTree,
+    template_file_tree: FileTree,
+    dna_name: &str,
+) -> Result<(), ScaffoldError> {
+    let dna_file_tree = DnaFileTree::get_or_choose(app_file_tree, &Some(dna_name.to_string()))?;
+    let zome_name = input_with_case(
+            "Enter coordinator zome name (snake_case):\n(The integrity zome will automatically be named '{name of coordinator zome}_integrity')\n",
+            Case::Snake,
+        )?;
+
+    let integrity_zome_name = integrity_zome_name(&zome_name);
+    let file_tree = scaffold_integrity_zome(
+        dna_file_tree.clone(),
+        &template_file_tree,
+        &integrity_zome_name,
+        &None,
+    )?
+    .file_tree;
+    build_file_tree(file_tree, ".")?;
+
+    let file_tree =
+        scaffold_coordinator_zome(dna_file_tree, &template_file_tree, &zome_name, &None, &None)?
+            .file_tree;
+    build_file_tree(file_tree, ".")?;
+    Ok(())
 }

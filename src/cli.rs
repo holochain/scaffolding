@@ -1,5 +1,7 @@
 use crate::error::{ScaffoldError, ScaffoldResult};
-use crate::file_tree::{file_content, load_directory_into_memory, map_file, FileTree};
+use crate::file_tree::{
+    build_file_tree, file_content, load_directory_into_memory, map_file, FileTree,
+};
 use crate::scaffold::app::cargo::exec_metadata;
 use crate::scaffold::app::nix::setup_nix_developer_environment;
 use crate::scaffold::app::AppFileTree;
@@ -20,7 +22,7 @@ use crate::scaffold::web_app::uis::{
 use crate::scaffold::zome::utils::{select_integrity_zomes, select_scaffold_zome_options};
 use crate::scaffold::zome::{
     integrity_zome_name, scaffold_coordinator_zome, scaffold_coordinator_zome_in_path,
-    scaffold_integrity_zome, scaffold_integrity_zome_with_path, ZomeFileTree,
+    scaffold_integrity_zome, scaffold_integrity_zome_with_path, scaffold_zome_pair, ZomeFileTree,
 };
 use crate::templates::example::scaffold_example;
 use crate::templates::ScaffoldedTemplate;
@@ -73,9 +75,9 @@ pub enum HcScaffoldCommand {
         #[structopt(long = "holo", hidden = true)]
         holo_enabled: bool,
 
-        /// Whether to setup an initial DNA and it's zome(s) after the web app is scaffolded
-        #[structopt(long = "fast-track")]
-        fast_track: bool,
+        /// Whether to skip setting up an initial DNA and it's zome(s) after the web app is scaffolded
+        #[structopt(short = "F")]
+        disable_fast_track: bool,
     },
     /// Manage custom templates
     Template(HcScaffoldTemplate),
@@ -280,7 +282,7 @@ impl HcScaffold {
                 description,
                 setup_nix,
                 holo_enabled,
-                fast_track,
+                disable_fast_track,
             } => {
                 let name = match name {
                     Some(n) => {
@@ -327,11 +329,7 @@ impl HcScaffold {
 
                 let file_tree = write_scaffold_config(file_tree, &TemplateConfig { template })?;
 
-                let file_tree = MergeableFileSystemTree::<OsString, String>::from(dir! {
-                    &name => file_tree
-                });
-
-                file_tree.build(&PathBuf::from("."))?;
+                build_file_tree(dir! {&name => file_tree}, ".")?;
 
                 let mut nix_instructions = "";
 
@@ -344,44 +342,26 @@ impl HcScaffold {
                     nix_instructions = "\n  nix develop";
                 }
 
-                if fast_track {
-                    env::set_current_dir(PathBuf::from(&name))?;
-                    // prompt to scaffold DNA
-                    let dna_name = input_with_case("Initial DNA name (snake_case):", Case::Snake)?;
-                    let file_tree = load_directory_into_memory(&current_dir.join(&name))?;
-                    let app_file_tree = AppFileTree::get_or_choose(file_tree, &Some(name.clone()))?;
-                    let ScaffoldedTemplate { file_tree, .. } =
-                        scaffold_dna(app_file_tree, &template_file_tree, &dna_name)?;
+                if !disable_fast_track {
+                    if input_yes_or_no("Do you want to scaffold an initial DNA? (y/n)", None)? {
+                        env::set_current_dir(PathBuf::from(&name))?;
+                        // prompt to scaffold DNA
+                        let dna_name =
+                            input_with_case("Initial DNA name (snake_case):", Case::Snake)?;
+                        let file_tree = load_directory_into_memory(&current_dir.join(&name))?;
+                        let app_file_tree =
+                            AppFileTree::get_or_choose(file_tree, &Some(name.clone()))?;
+                        let ScaffoldedTemplate { file_tree, .. } =
+                            scaffold_dna(app_file_tree, &template_file_tree, &dna_name)?;
 
-                    let dna_file_tree = DnaFileTree::get_or_choose(file_tree, &Some(dna_name))?;
-                    let zome_name = input_with_case(
-                        "Enter coordinator zome name (snake_case):\n (The integrity zome will automatically be named '{name of coordinator zome}_integrity')\n",
-                        Case::Snake
-                    )?;
-
-                    // scaffold integrity
-                    let integrity_zome_name = integrity_zome_name(&zome_name);
-                    let ScaffoldedTemplate { file_tree, .. } = scaffold_integrity_zome(
-                        dna_file_tree.clone(),
-                        &template_file_tree,
-                        &integrity_zome_name,
-                        &None,
-                    )?;
-                    let file_tree = MergeableFileSystemTree::from(file_tree);
-                    file_tree.build(&PathBuf::from("."))?;
-                    println!("Integrity zome scaffolded");
-
-                    // scaffold coordinator
-                    let ScaffoldedTemplate { file_tree, .. } = scaffold_coordinator_zome(
-                        dna_file_tree,
-                        &template_file_tree,
-                        &zome_name,
-                        &None,
-                        &None,
-                    )?;
-                    let file_tree = MergeableFileSystemTree::from(file_tree);
-                    file_tree.build(&PathBuf::from("."))?;
-                    println!("Coordinator zome scaffolded");
+                        if input_yes_or_no("Do you want to scaffold an initial coordinator/integrity zome pair for your DNA? (y/n)", None)? {
+                            scaffold_zome_pair(file_tree, template_file_tree, &dna_name)?;
+                            println!("Coordinator/integrity zome pair scaffolded.")
+                        } else {
+                            build_file_tree(file_tree, ".")?;
+                            println!("DNA scaffolded.");
+                        }
+                    }
                 }
 
                 setup_git_environment(&app_dir)?;
@@ -391,7 +371,7 @@ impl HcScaffold {
                 if let Some(i) = next_instructions {
                     println!("\n{}", i);
                 } else {
-                    let dna_instructions = if !fast_track {
+                    let dna_instructions = if disable_fast_track {
                         r#"
 
 - Get your project to compile by adding a DNA and then following the next insturctions to add a zome to that DNA:
@@ -439,8 +419,7 @@ Here's how you can get started with developing your application:
                     next_instructions,
                 } = scaffold_dna(app_file_tree, &template_file_tree, &name)?;
 
-                let file_tree = MergeableFileSystemTree::<OsString, String>::from(file_tree);
-                file_tree.build(&PathBuf::from("."))?;
+                build_file_tree(file_tree, ".")?;
 
                 println!("\nDNA {} scaffolded!", name.italic());
 
@@ -615,8 +594,7 @@ inadvertently reference or expect elements from the skipped entry type.
                     no_ui,
                 )?;
 
-                let file_tree = MergeableFileSystemTree::<OsString, String>::from(file_tree);
-                file_tree.build(&PathBuf::from("."))?;
+                build_file_tree(file_tree, ".")?;
 
                 println!("\nEntry type {} scaffolded!", name.italic(),);
 
@@ -659,8 +637,7 @@ Add new collections for that entry type with:
                     no_ui,
                 )?;
 
-                let file_tree = MergeableFileSystemTree::<OsString, String>::from(file_tree);
-                file_tree.build(&PathBuf::from("."))?;
+                build_file_tree(file_tree, ".")?;
 
                 println!("\nLink type scaffolded!");
                 if let Some(i) = next_instructions {
@@ -703,8 +680,7 @@ Add new collections for that entry type with:
                     no_ui,
                 )?;
 
-                let file_tree = MergeableFileSystemTree::<OsString, String>::from(file_tree);
-                file_tree.build(&PathBuf::from("."))?;
+                build_file_tree(file_tree, ".")?;
 
                 println!("\nCollection {} scaffolded!", name.italic());
 
@@ -924,8 +900,7 @@ Add new collections for that entry type with:
                     next_instructions,
                 } = scaffold_example(file_tree, &template_file_tree, &example)?;
 
-                let file_tree = MergeableFileSystemTree::<OsString, String>::from(file_tree);
-                file_tree.build(&app_dir)?;
+                build_file_tree(file_tree, ".")?;
 
                 // set up nix
                 if let Err(err) = setup_nix_developer_environment(&app_dir) {
