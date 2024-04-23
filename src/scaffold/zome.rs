@@ -520,8 +520,14 @@ pub fn scaffold_zome_pair(
     )?;
     dna_file_tree = DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
 
-    let ScaffoldedTemplate { file_tree, .. } =
-        scaffold_coordinator_zome(dna_file_tree, &template_file_tree, &zome_name, &None, &None)?;
+    let ScaffoldedTemplate { file_tree, .. } = scaffold_coordinator_zome(
+        dna_file_tree,
+        &template_file_tree,
+        &zome_name,
+        &Some(vec![integrity_zome_name]),
+        &None,
+    )?;
+
     build_file_tree(file_tree, ".")?;
     Ok(())
 }
