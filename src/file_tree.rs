@@ -1,4 +1,4 @@
-use build_fs_tree::{dir, file, Build, FileSystemTree, MergeableFileSystemTree};
+use build_fs_tree::{dir, file, Build, BuildError, FileSystemTree, MergeableFileSystemTree};
 use ignore::WalkBuilder;
 use include_dir::Dir;
 use std::collections::BTreeMap;
@@ -353,8 +353,6 @@ fn walk_file_tree_rec(
 
 pub fn build_file_tree(file_tree: FileTree, path: impl Into<PathBuf>) -> Result<(), ScaffoldError> {
     let mergeable_tree = MergeableFileSystemTree::from(file_tree);
-    mergeable_tree
-        .build(&path.into())
-        .map_err(|e| ScaffoldError::MiscError(e.into()))?;
+    mergeable_tree.build(&path.into())?;
     Ok(())
 }
