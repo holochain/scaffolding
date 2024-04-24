@@ -847,7 +847,7 @@ EntryTypes::{pascal_entry_def_name}({snake_entry_def_name}) => {{
                                                                         )?;
                                                                         entry_type_match
                                                                             .arms
-                                                                            .push(new_arm);
+                                                                            .insert(0, new_arm);
                                                                     }
                                                                 }
                                                             }
