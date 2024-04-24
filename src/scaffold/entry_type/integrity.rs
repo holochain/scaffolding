@@ -690,7 +690,7 @@ fn add_entry_type_to_validation_arms(
                             ));
                         }
                     };
-                    match original_app_entry { }
+                    match original_app_entry {}
                 }"#,
                                                                     )?;
                                                             }
@@ -847,7 +847,7 @@ EntryTypes::{pascal_entry_def_name}({snake_entry_def_name}) => {{
                                                                         )?;
                                                                         entry_type_match
                                                                             .arms
-                                                                            .insert(0, new_arm);
+                                                                            .push(new_arm);
                                                                     }
                                                                 }
                                                             }
@@ -857,54 +857,63 @@ EntryTypes::{pascal_entry_def_name}({snake_entry_def_name}) => {{
                                             } else if path_segment_str
                                                 .eq(&String::from("RegisterDelete"))
                                             {
-                                                if let Some(op_entry_match_expr) =
+                                                *arm.body = syn::parse_str::<syn::Expr>(
+                                                    r#"
+{
+    let original_action_hash = delete_entry.clone().action.deletes_address;
+    let original_record = must_get_valid_record(original_action_hash)?;
+    let original_action = original_record.action().clone();
+    let original_action = EntryCreationAction::try_from(original_action)
+        .map_err(|e| wasm_error!(e.to_string()))?;
+    let app_entry_type = match original_action.entry_type() {
+        EntryType::App(app_entry_type) => app_entry_type,
+        _ => {
+            return Ok(ValidateCallbackResult::Valid);
+        }
+    };
+    let entry = match original_record.entry().as_option() {
+        Some(entry) => entry,
+        None => {
+            if original_action.entry_type().visibility().is_public() {
+                return Ok(ValidateCallbackResult::Invalid(
+                    "Original record for a delete of a public entry must contain an entry"
+                        .to_string(),
+                ));
+            } else {
+                return Ok(ValidateCallbackResult::Valid);
+            }
+        }
+    };
+    let original_app_entry = match EntryTypes::deserialize_from_type(
+        app_entry_type.zome_index,
+        app_entry_type.entry_index,
+        entry,
+    )? {
+        Some(app_entry) => app_entry,
+        None => {
+            return Ok(ValidateCallbackResult::Invalid(
+                "Original app entry must be one of the defined entry types for this zome"
+                    .to_string(),
+            ));
+        }
+    };
+    match original_app_entry {}
+}
+                                                                    "#,
+                                                )?;
+
+                                                // Add new entry type to match arm
+                                                if let Some(match_expr) =
                                                     find_ending_match_expr(&mut arm.body)
                                                 {
-                                                    for op_entry_arm in
-                                                        &mut op_entry_match_expr.arms
-                                                    {
-                                                        if let syn::Pat::Struct(pat_struct) =
-                                                            &mut op_entry_arm.pat
-                                                        {
-                                                            if let Some(ps) =
-                                                                pat_struct.path.segments.last()
-                                                            {
-                                                                if ps
-                                                                    .ident
-                                                                    .to_string()
-                                                                    .eq(&String::from("Entry"))
-                                                                {
-                                                                    // Add new entry type to match arm
-                                                                    if find_ending_match_expr(
-                                                                        &mut op_entry_arm.body,
-                                                                    )
-                                                                    .is_none()
-                                                                    {
-                                                                        // Change empty invalid to match on entry_type
-                                                                        *op_entry_arm.body = syn::parse_str::<syn::Expr>("match original_app_entry {}")?;
-                                                                    }
-                                                                    // Add new entry type to match arm
-                                                                    if let Some(entry_type_match) =
-                                                                        find_ending_match_expr(
-                                                                            &mut op_entry_arm.body,
-                                                                        )
-                                                                    {
-                                                                        let new_arm: syn::Arm = syn::parse_str(
-                                                                            format!("EntryTypes::{}({}) => validate_delete_{}(action, original_action, {}),", 
-                                                                                entry_def.name.to_case(Case::Pascal),
-                                                                                entry_def.name.to_case(Case::Snake),
-                                                                                entry_def.name.to_case(Case::Snake),
-                                                                                entry_def.name.to_case(Case::Snake)
-                                                                            ).as_str()
-                                                                        )?;
-                                                                        entry_type_match
-                                                                            .arms
-                                                                            .push(new_arm);
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
-                                                    }
+                                                    let new_arm: syn::Arm = syn::parse_str(
+                                                  format!(r#"
+EntryTypes::{pascal_entry_def_name}(original_{snake_entry_def_name}) => {{
+    validate_delete_{snake_entry_def_name}(delete_entry.clone().action, original_action, original_{snake_entry_def_name})
+}}"#, 
+                                                 ).as_str()
+                                             )?;
+                                                    match_expr.arms.insert(0, new_arm);
                                                 }
                                             }
                                         }
