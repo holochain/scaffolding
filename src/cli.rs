@@ -342,26 +342,24 @@ impl HcScaffold {
                     nix_instructions = "\n  nix develop";
                 }
 
-                if !disable_fast_track {
-                    if input_yes_or_no("Do you want to scaffold an initial DNA? (y/n)", None)? {
-                        env::set_current_dir(PathBuf::from(&name))?;
-                        // prompt to scaffold DNA
-                        let dna_name =
-                            input_with_case("Initial DNA name (snake_case):", Case::Snake)?;
-                        let file_tree = load_directory_into_memory(&current_dir.join(&name))?;
-                        let app_file_tree =
-                            AppFileTree::get_or_choose(file_tree, &Some(name.clone()))?;
-                        let ScaffoldedTemplate { file_tree, .. } =
-                            scaffold_dna(app_file_tree, &template_file_tree, &dna_name)?;
+                if !disable_fast_track
+                    && input_yes_or_no("Do you want to scaffold an initial DNA? (y/n)", None)?
+                {
+                    env::set_current_dir(PathBuf::from(&name))?;
+                    // prompt to scaffold DNA
+                    let dna_name = input_with_case("Initial DNA name (snake_case):", Case::Snake)?;
+                    let file_tree = load_directory_into_memory(&current_dir.join(&name))?;
+                    let app_file_tree = AppFileTree::get_or_choose(file_tree, &Some(name.clone()))?;
+                    let ScaffoldedTemplate { file_tree, .. } =
+                        scaffold_dna(app_file_tree, &template_file_tree, &dna_name)?;
 
-                        if input_yes_or_no("Do you want to scaffold an initial coordinator/integrity zome pair for your DNA? (y/n)", None)? {
+                    if input_yes_or_no("Do you want to scaffold an initial coordinator/integrity zome pair for your DNA? (y/n)", None)? {
                             scaffold_zome_pair(file_tree, template_file_tree, &dna_name)?;
                             println!("Coordinator/integrity zome pair scaffolded.")
                         } else {
                             build_file_tree(file_tree, ".")?;
                             println!("DNA scaffolded.");
                         }
-                    }
                 }
 
                 setup_git_environment(&app_dir)?;
