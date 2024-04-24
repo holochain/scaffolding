@@ -816,9 +816,17 @@ fn add_entry_type_to_validation_arms(
                                                                             syn::parse_str::<
                                                                                 syn::Expr,
                                                                             >(
-                                                                                r#"match (app_entry, original_app_entry) {
+                                                                                r#"
+{
+    let original_action = must_get_action(action.clone().original_action_address)?
+        .action()
+        .to_owned();
+    let original_action = EntryCreationAction::try_from(original_action)
+        .map_err(|e| wasm_error!(e.to_string()))?;
+    match app_entry {
      _ => Ok(ValidateCallbackResult::Invalid("Original and updated entry types must be the same".to_string()))
- }"#,
+    }
+}"#,
                                                                             )?;
                                                                     }
 
@@ -829,9 +837,12 @@ fn add_entry_type_to_validation_arms(
                                                                         )
                                                                     {
                                                                         let new_arm: syn::Arm = syn::parse_str(
-                                                                             format!(
-"(EntryTypes::{pascal_entry_def_name}({snake_entry_def_name}), EntryTypes::{pascal_entry_def_name}(original_{snake_entry_def_name})) => 
-    validate_update_{snake_entry_def_name}(action, {snake_entry_def_name}, original_action, original_{snake_entry_def_name}),", 
+                                                                             format!(r#"
+EntryTypes::{pascal_entry_def_name}({snake_entry_def_name}) => {{
+    let original_app_entry = must_get_valid_record(action.clone().original_action_address)?;
+    let original_{snake_entry_def_name} = {pascal_entry_def_name}::try_from(original_app_entry)?;
+    validate_update_{snake_entry_def_name}(action, {snake_entry_def_name}, original_action, original_{snake_entry_def_name})
+}}"#, 
                                                                             ).as_str()
                                                                         )?;
                                                                         entry_type_match
