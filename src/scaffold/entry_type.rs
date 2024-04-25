@@ -78,9 +78,9 @@ pub fn scaffold_entry_type(
     template_file_tree: &FileTree,
     name: &str,
     maybe_crud: &Option<Crud>,
-    maybe_reference_entry_hash: &Option<bool>,
-    maybe_link_from_original_to_each_update: &Option<bool>,
-    maybe_fields: &Option<Vec<FieldDefinition>>,
+    maybe_reference_entry_hash: Option<bool>,
+    maybe_link_from_original_to_each_update: Option<bool>,
+    maybe_fields: Option<&Vec<FieldDefinition>>,
     no_ui: bool,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     check_for_reserved_words(name)?;
@@ -105,26 +105,7 @@ pub fn scaffold_entry_type(
         }
     };
 
-    let reference_entry_hash = match maybe_reference_entry_hash {
-        Some(r) => *r,
-        None => {
-            // TODO: understand if this question is necessary, or if we can assume ActionHash
-            // let selection = Select::with_theme(&ColorfulTheme::default())
-            //     .with_prompt(String::from(
-            //         "Choose hash type to refererence this entry type:",
-            //     ))
-            //     .default(0)
-            //     .item("ActionHash (recommended)")
-            //     .item("EntryHash")
-            //     .interact()?;
-
-            // match selection {
-            //     0 => false,
-            //     _ => true,
-            // }
-            false
-        }
-    };
+    let reference_entry_hash = maybe_reference_entry_hash.unwrap_or(false);
 
     let crud = match maybe_crud {
         Some(c) => c.clone(),
@@ -133,7 +114,7 @@ pub fn scaffold_entry_type(
 
     let link_from_original_to_each_update = match crud.update {
         true => match maybe_link_from_original_to_each_update {
-            Some(l) => *l,
+            Some(l) => l,
             None => {
                 let selection = Select::with_theme(&ColorfulTheme::default())
                 .with_prompt("Should a link from the original entry be created when this entry is updated?")
