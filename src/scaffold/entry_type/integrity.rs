@@ -2,7 +2,6 @@ use convert_case::{Case, Casing};
 use itertools::Itertools;
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote, ToTokens};
-use std::borrow::{Borrow, BorrowMut};
 use std::{ffi::OsString, path::PathBuf};
 
 use crate::error::{ScaffoldError, ScaffoldResult};
