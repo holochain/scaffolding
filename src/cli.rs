@@ -897,7 +897,7 @@ Add new collections for that entry type with:
                     next_instructions,
                 } = scaffold_example(file_tree, &template_file_tree, &example)?;
 
-                build_file_tree(file_tree, ".")?;
+                build_file_tree(file_tree, &app_dir)?;
 
                 // set up nix
                 if let Err(err) = setup_nix_developer_environment(&app_dir) {
