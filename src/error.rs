@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::{io, path::PathBuf};
 
 use holochain_util::ffs;
 use thiserror;
@@ -137,6 +137,9 @@ pub enum ScaffoldError {
 
     #[error("Invalid arguments: \"{0}\"")]
     InvalidArguments(String),
+
+    #[error("Failed to build file tree: {0}")]
+    FsBuildError(#[from] build_fs_tree::BuildError<PathBuf, io::Error>),
 
     /// anything else
     #[error("Unknown error: {0}")]

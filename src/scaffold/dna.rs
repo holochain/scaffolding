@@ -28,6 +28,7 @@ use manifest::empty_dna_manifest;
 
 use super::app::AppFileTree;
 
+#[derive(Clone)]
 pub struct DnaFileTree {
     file_tree: FileTree,
     pub dna_manifest_path: PathBuf,
