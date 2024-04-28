@@ -1,6 +1,6 @@
 import { LitElement, html } from 'lit';
 import { state, customElement, property } from 'lit/decorators.js';
-import { ActionHash, EntryHash, AgentPubKey, Record, AppAgentClient, DnaHash } from '@holochain/client';
+import { ActionHash, EntryHash, AgentPubKey, Record, AppClient, DnaHash } from '@holochain/client';
 import { consume } from '@lit-labs/context';
 import { decode } from '@msgpack/msgpack';
 import '@material/mwc-button';
@@ -22,7 +22,7 @@ import { {{pascal_case entry_type.name}}{{#each entry_type.fields}}{{#if (eq fie
 export class Edit{{pascal_case entry_type.name}} extends LitElement {
 
   @consume({ context: clientContext })
-  client!: AppAgentClient;
+  client!: AppClient;
   
   {{#if link_from_original_to_each_update}}
   @property({

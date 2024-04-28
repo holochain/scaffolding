@@ -47,7 +47,7 @@ export default defineComponent({
 </template>
 <script lang="ts">
 import { defineComponent, computed } from 'vue';
-import { AppAgentClient, AppAgentWebsocket } from '@holochain/client';
+import { AppClient, AppWebsocket } from '@holochain/client';
 {{#if holo_enabled}}
 import WebSdk from '@holo-host/web-sdk';
 import type { AgentState } from '@holo-host/web-sdk';
@@ -60,7 +60,7 @@ export default defineComponent({
     // Add your subcomponents here
   },
   data(): {
-    client: AppAgentClient | undefined;
+    client: AppClient | undefined;
     loading: boolean;
   {{#if holo_enabled}}
     IS_HOLO: boolean;
@@ -92,11 +92,11 @@ export default defineComponent({
 
       this.client = client
     } else {
-      this.client = await AppAgentWebsocket.connect('{{app_name}}');
+      this.client = await AppWebsocket.connect();
       this.loading = false;
     }
   {{else}}
-    this.client = await AppAgentWebsocket.connect('{{app_name}}');
+    this.client = await AppWebsocket.connect();
     this.loading = false;
   {{/if}}
   },

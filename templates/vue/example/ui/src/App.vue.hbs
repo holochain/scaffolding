@@ -19,7 +19,7 @@
 </template>
 <script lang="ts">
 import { defineComponent, computed } from 'vue';
-import { AppAgentWebsocket, AppAgentClient } from '@holochain/client';
+import { AppWebsocket, AppClient } from '@holochain/client';
 import '@material/mwc-circular-progress';
 import AllPosts from './forum/posts/AllPosts.vue';
 import CreatePost from './forum/posts/CreatePost.vue';
@@ -31,7 +31,7 @@ export default defineComponent({
     CreatePost
   },
   data(): {
-    client: AppAgentClient | undefined;
+    client: AppClient | undefined;
     loading: boolean;
   } {
     return {
@@ -40,7 +40,7 @@ export default defineComponent({
     };
   },
   async mounted() {
-    this.client = await AppAgentWebsocket.connect('forum');
+    this.client = await AppWebsocket.connect();
     
     this.loading = false;
   },

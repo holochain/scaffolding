@@ -1,6 +1,6 @@
 import { LitElement, html } from 'lit';
 import { state, customElement, property } from 'lit/decorators.js';
-import { InstalledCell, Record, Link, AppAgentClient, EntryHash, ActionHash, AgentPubKey } from '@holochain/client';
+import { InstalledCell, Record, Link, AppClient, EntryHash, ActionHash, AgentPubKey } from '@holochain/client';
 import { consume } from '@lit-labs/context';
 import '@material/mwc-circular-progress';
 import { Task } from '@lit-labs/task';
@@ -11,7 +11,7 @@ import './{{kebab_case ../entry_type.name}}-detail';
 @customElement('{{kebab_case (plural ../entry_type.name)}}-for-{{kebab_case linked_from.name}}')
 export class {{pascal_case (plural ../entry_type.name)}}For{{pascal_case linked_from.name }} extends LitElement {
   @consume({ context: clientContext })
-  client!: AppAgentClient;
+  client!: AppClient;
 
   @property({
     hasChanged: (newVal: {{linked_from.hash_type}}, oldVal: {{linked_from.hash_type}}) => newVal.toString() !== oldVal.toString()
