@@ -823,9 +823,7 @@ fn add_entry_type_to_validation_arms(
         .to_owned();
     let original_action = EntryCreationAction::try_from(original_action)
         .map_err(|e| wasm_error!(e.to_string()))?;
-    match app_entry {
-     _ => Ok(ValidateCallbackResult::Invalid("Original and updated entry types must be the same".to_string()))
-    }
+    match app_entry {}
 }"#,
                                                                             )?;
                                                                     }

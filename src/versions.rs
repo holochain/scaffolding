@@ -7,7 +7,7 @@ pub fn holochain_client_version() -> String {
 }
 
 pub fn hc_spin_version() -> String {
-    String::from("0.300.2-dev.4")
+    String::from("0.300.2-dev.5")
 }
 
 // TODO: update to 0.3 compatible version
