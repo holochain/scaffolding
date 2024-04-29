@@ -93,7 +93,7 @@ if [[ -n "$SCOPE" ]]; then
     rm -rf /tmp/holo-flake
     cd /tmp
 
-    hc-scaffold --template vue web-app holo-flake --setup-nix true
+    hc-scaffold --template vue web-app holo-flake --setup-nix true -F
     cd holo-flake
 
     nix develop --command bash -c "
