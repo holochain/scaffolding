@@ -5,10 +5,7 @@ use serde::Serialize;
 use crate::{
     error::ScaffoldResult,
     file_tree::{file_content, FileTree},
-    versions::{
-        hc_spin_version, hdi_version, hdk_version, holochain_client_version, holochain_version,
-        tryorama_version,
-    },
+    versions,
 };
 
 use super::{
@@ -35,12 +32,12 @@ pub fn scaffold_web_app_template(
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     let data = ScaffoldWebAppData {
         app_name: app_name.to_owned(),
-        holochain_version: holochain_version(),
-        hdk_version: hdk_version(),
-        hdi_version: hdi_version(),
-        holochain_client_version: holochain_client_version(),
-        hc_spin_version: hc_spin_version(),
-        tryorama_version: tryorama_version(),
+        holochain_version: versions::HOLOCHAIN_VERSION.to_owned(),
+        hdk_version: versions::HDK_VERSION.to_owned(),
+        hdi_version: versions::HDI_VERSION.to_owned(),
+        holochain_client_version: versions::HOLOCHAIN_CLIENT_VERSION.to_owned(),
+        hc_spin_version: versions::HC_SPIN_VERSION.to_owned(),
+        tryorama_version: versions::TRYORAMA_VERSION.to_owned(),
         holo_enabled,
     };
 

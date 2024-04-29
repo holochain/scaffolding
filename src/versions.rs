@@ -1,32 +1,16 @@
-pub fn tryorama_version() -> String {
-    String::from("^v0.16.0-dev.5")
-}
+pub const TRYORAMA_VERSION: &str = "^v0.16.0-dev.5";
 
-pub fn holochain_client_version() -> String {
-    String::from("^0.17.0-dev.12")
-}
+pub const HOLOCHAIN_CLIENT_VERSION: &str = "^0.17.0-dev.12";
 
-pub fn hc_spin_version() -> String {
-    String::from("0.300.2-dev.5")
-}
+pub const HC_SPIN_VERSION: &str = "0.300.2-dev.5";
 
 // TODO: update to 0.3 compatible version
-pub fn web_sdk_version() -> String {
-    String::from("^0.6.10-prerelease")
-}
+pub const WEB_SDK_VERSION: &str = "^0.6.10-prerelease";
 
-pub fn hdi_version() -> String {
-    holochain::HDI_VERSION.to_string()
-}
+pub const HDI_VERSION: &str = holochain::HDI_VERSION;
 
-pub fn hdk_version() -> String {
-    holochain::HDK_VERSION.to_string()
-}
+pub const HDK_VERSION: &str = holochain::HDK_VERSION;
 
-pub fn holochain_version() -> String {
-    holochain::HOLOCHAIN_VERSION.to_string()
-}
+pub const HOLOCHAIN_VERSION: &str = holochain::HOLOCHAIN_VERSION;
 
-pub fn holochain_nix_version() -> String {
-    String::from("weekly")
-}
+pub const HOLOCHAIN_NIX_VERSION: &str = "weekly";
