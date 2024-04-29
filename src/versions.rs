@@ -16,4 +16,4 @@ pub const HOLOCHAIN_VERSION: &str = holochain::HOLOCHAIN_VERSION;
 pub const HOLOCHAIN_NIX_VERSION: &str = "weekly";
 
 /// https://github.com/darksoil-studio/holochain-playground
-pub const HOLOCHAIN_PLAYGROUND_CLI_VERSION: &str = "0.2.0";
+pub const HOLOCHAIN_PLAYGROUND_CLI_VERSION: &str = "^0.2.0";
