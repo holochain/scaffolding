@@ -13,14 +13,15 @@ use super::{
 };
 
 #[derive(Serialize)]
-pub struct ScaffoldWebAppData {
-    pub app_name: String,
-    pub holochain_version: String,
-    pub hdk_version: String,
-    pub hdi_version: String,
-    pub holochain_client_version: String,
-    pub hc_spin_version: String,
-    pub tryorama_version: String,
+pub struct ScaffoldWebAppData<'a> {
+    pub app_name: &'a str,
+    pub holochain_version: &'a str,
+    pub hdk_version: &'a str,
+    pub hdi_version: &'a str,
+    pub holochain_client_version: &'a str,
+    pub holochain_playground_cli_version: &'a str,
+    pub hc_spin_version: &'a str,
+    pub tryorama_version: &'a str,
     pub holo_enabled: bool,
 }
 
@@ -31,13 +32,14 @@ pub fn scaffold_web_app_template(
     holo_enabled: bool,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     let data = ScaffoldWebAppData {
-        app_name: app_name.to_owned(),
-        holochain_version: versions::HOLOCHAIN_VERSION.to_owned(),
-        hdk_version: versions::HDK_VERSION.to_owned(),
-        hdi_version: versions::HDI_VERSION.to_owned(),
-        holochain_client_version: versions::HOLOCHAIN_CLIENT_VERSION.to_owned(),
-        hc_spin_version: versions::HC_SPIN_VERSION.to_owned(),
-        tryorama_version: versions::TRYORAMA_VERSION.to_owned(),
+        app_name,
+        holochain_version: versions::HOLOCHAIN_VERSION,
+        hdk_version: versions::HDK_VERSION,
+        hdi_version: versions::HDI_VERSION,
+        holochain_client_version: versions::HOLOCHAIN_CLIENT_VERSION,
+        holochain_playground_cli_version: versions::HOLOCHAIN_PLAYGROUND_CLI_VERSION,
+        hc_spin_version: versions::HC_SPIN_VERSION,
+        tryorama_version: versions::TRYORAMA_VERSION,
         holo_enabled,
     };
 

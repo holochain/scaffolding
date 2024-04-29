@@ -13,11 +13,11 @@ use super::{
 };
 
 #[derive(Serialize)]
-pub struct ScaffoldExampleData {
-    pub example: String,
-    pub holochain_client_version: String,
-    pub hdk_version: String,
-    pub hdi_version: String,
+pub struct ScaffoldExampleData<'a> {
+    pub example: &'a str,
+    pub holochain_client_version: &'a str,
+    pub hdk_version: &'a str,
+    pub hdi_version: &'a str,
 }
 
 pub fn scaffold_example(
@@ -26,10 +26,10 @@ pub fn scaffold_example(
     example: &Example,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     let data = ScaffoldExampleData {
-        example: example.to_string(),
-        holochain_client_version: versions::HOLOCHAIN_CLIENT_VERSION.to_owned(),
-        hdk_version: versions::HDK_VERSION.to_owned(),
-        hdi_version: versions::HDI_VERSION.to_owned(),
+        example: &example.to_string(),
+        holochain_client_version: versions::HOLOCHAIN_CLIENT_VERSION,
+        hdk_version: versions::HDK_VERSION,
+        hdi_version: versions::HDI_VERSION,
     };
     let h = build_handlebars(template_file_tree)?;
 
