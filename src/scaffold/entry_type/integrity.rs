@@ -134,7 +134,7 @@ pub fn render_entry_definition_file(
             let dependant_entry_type_snake = format_ident!("_{}", reference.entry_type.to_case(Case::Snake));
             let dependant_entry_type_pascal = format_ident!("{}", reference.entry_type.to_case(Case::Pascal));
             match (field_def.cardinality, reference.reference_entry_hash) {
-                (Cardinality::Single,false) => quote! {
+                (Cardinality::Single, false) => quote! {
                     let record = must_get_valid_record(#create_new_entry_arg.#field_name.clone())?;
 
                     let #dependant_entry_type_snake: crate::#dependant_entry_type_pascal = record.entry().to_app_option()
@@ -209,51 +209,6 @@ pub fn render_entry_definition_file(
     let file = syn::parse_file(token_stream.to_string().as_str())?;
 
     Ok(file)
-}
-
-fn is_create_entry(pat: &syn::Pat) -> bool {
-    if let syn::Pat::Struct(pat_struct) = pat {
-        if let Some(ps) = pat_struct.path.segments.last() {
-            return ps.ident == "CreateEntry";
-        }
-    }
-    false
-}
-
-fn is_update_entry(pat: &syn::Pat) -> bool {
-    if let syn::Pat::Struct(pat_struct) = pat {
-        if let Some(ps) = pat_struct.path.segments.last() {
-            return ps.ident == "UpdateEntry";
-        }
-    }
-    false
-}
-
-fn is_delete_entry(pat: &syn::Pat) -> bool {
-    if let syn::Pat::Struct(pat_struct) = pat {
-        if let Some(ps) = pat_struct.path.segments.last() {
-            return ps.ident == "DeleteEntry";
-        }
-    }
-    false
-}
-
-pub fn find_ending_match_expr_in_block(block: &mut syn::Block) -> Option<&mut syn::ExprMatch> {
-    if let Some(e) = block.stmts.last_mut() {
-        match e {
-            syn::Stmt::Expr(syn::Expr::Match(e_m), _) => Some(e_m),
-            _ => None,
-        }
-    } else {
-        None
-    }
-}
-pub fn find_ending_match_expr(e: &mut syn::Expr) -> Option<&mut syn::ExprMatch> {
-    match e {
-        syn::Expr::Match(expr_match) => Some(expr_match),
-        syn::Expr::Block(expr_block) => find_ending_match_expr_in_block(&mut expr_block.block),
-        _ => None,
-    }
 }
 
 pub fn add_entry_type_to_integrity_zome(
@@ -338,6 +293,7 @@ pub use {}::*;
                     None => file.items.push(entry_types_item),
                 }
 
+                // update generic parameters
                 for item in &mut file.items {
                     if let syn::Item::Fn(item_fn) = item {
                         if item_fn.sig.ident == "validate" {
@@ -533,364 +489,30 @@ fn add_entry_type_to_validation_arms(
                                             pat_tuple_struct.path.segments.last()
                                         {
                                             let path_segment_str = path_segment.ident.to_string();
-
                                             if path_segment_str == "StoreRecord" {
-                                                if let Some(op_entry_match_expr) =
-                                                    find_ending_match_expr(&mut arm.body)
-                                                {
-                                                    for op_record_arm in
-                                                        &mut op_entry_match_expr.arms
-                                                    {
-                                                        if is_create_entry(&op_record_arm.pat) {
-                                                            // Add new entry type to match arm
-                                                            if find_ending_match_expr(
-                                                                &mut op_record_arm.body,
-                                                            )
-                                                            .is_none()
-                                                            {
-                                                                // Change empty invalid to match on entry_type
-                                                                *op_record_arm.body =
-                                                                    syn::parse_str::<syn::Expr>(
-                                                                        "match app_entry {}",
-                                                                    )?;
-                                                            }
-
-                                                            // Add new entry type to match arm
-                                                            if let Some(entry_type_match) =
-                                                                find_ending_match_expr(
-                                                                    &mut op_record_arm.body,
-                                                                )
-                                                            {
-                                                                let new_arm: syn::Arm =
-                                                                        syn::parse_str(
-                                                                    format!("EntryTypes::{}({}) => validate_create_{}(EntryCreationAction::Create(action), {}),", 
-                                                                        entry_def.name.to_case(Case::Pascal),
-                                                                        entry_def.name.to_case(Case::Snake),
-                                                                        entry_def.name.to_case(Case::Snake),
-                                                                        entry_def.name.to_case(Case::Snake)).as_str()
-                                                                )?;
-                                                                entry_type_match.arms.push(new_arm);
-                                                            }
-                                                        } else if is_update_entry(
-                                                            &op_record_arm.pat,
-                                                        ) {
-                                                            // Add new entry type to match arm
-                                                            if find_ending_match_expr(
-                                                                &mut op_record_arm.body,
-                                                            )
-                                                            .is_none()
-                                                            {
-                                                                // Change empty invalid to match on entry_type
-                                                                *op_record_arm.body =
-                                                                    syn::parse_str::<syn::Expr>(
-                                                                        r#"{
-                    let original_record = must_get_valid_record(original_action_hash)?;
-                    let original_action = original_record.action().clone();
-                    let original_action = match original_action {
-                        Action::Create(create) => EntryCreationAction::Create(create),
-                        Action::Update(update) => EntryCreationAction::Update(update),
-                        _ => {
-                            return Ok(ValidateCallbackResult::Invalid("Original action for an update must be a Create or Update action".to_string()));
-                        }
-                    };
-                    match app_entry { }
-                }"#,
-                                                                    )?;
-                                                            }
-
-                                                            // Add new entry type to match arm
-                                                            if let Some(entry_type_match) =
-                                                                find_ending_match_expr(
-                                                                    &mut op_record_arm.body,
-                                                                )
-                                                            {
-                                                                let new_arm: syn::Arm =
-                                                                        syn::parse_str(
-                                                                    format!(
-        r#"EntryTypes::{pascal_entry_def_name}({snake_entry_def_name}) => {{
-            let result = validate_create_{snake_entry_def_name}(EntryCreationAction::Update(action.clone()), {snake_entry_def_name}.clone())?;
-            if let ValidateCallbackResult::Valid = result {{
-                let original_{snake_entry_def_name}: Option<{pascal_entry_def_name}> = original_record.entry().to_app_option().map_err(|e| wasm_error!(e))?;
-                let original_{snake_entry_def_name} = match original_{snake_entry_def_name} {{
-                    Some({snake_entry_def_name}) => {snake_entry_def_name},
-                    None => {{
-                        return Ok(ValidateCallbackResult::Invalid("The updated entry type must be the same as the original entry type".to_string()));
-                    }}
-                }};
-                validate_update_{snake_entry_def_name}(action, {snake_entry_def_name}, original_action, original_{snake_entry_def_name})
-            }} else {{
-                Ok(result)
-            }}
-        }},"#, 
-                                                                    ).as_str()
-                                                                )?;
-                                                                entry_type_match.arms.push(new_arm);
-                                                            }
-                                                        } else if is_delete_entry(
-                                                            &op_record_arm.pat,
-                                                        ) {
-                                                            // Add new entry type to match arm
-                                                            if find_ending_match_expr(
-                                                                &mut op_record_arm.body,
-                                                            )
-                                                            .is_none()
-                                                            {
-                                                                // Change empty invalid to match on entry_type
-                                                                *op_record_arm.body =
-                                                                    syn::parse_str::<syn::Expr>(
-                                                                        r#"{
-                    let original_record = must_get_valid_record(original_action_hash)?;
-                    let original_action = original_record.action().clone();
-                    let original_action = match original_action {
-                        Action::Create(create) => EntryCreationAction::Create(create),
-                        Action::Update(update) => EntryCreationAction::Update(update),
-                        _ => {
-                            return Ok(ValidateCallbackResult::Invalid("Original action for a delete must be a Create or Update action".to_string()));
-                        }
-                    };
-                    let app_entry_type = match original_action.entry_type() {
-                        EntryType::App(app_entry_type) => app_entry_type,
-                        _ => {
-                            return Ok(ValidateCallbackResult::Valid);
-                        }
-                    };
-                    let entry = match original_record.entry().as_option() {
-                        Some(entry) => entry,
-                        None => {
-                            if original_action.entry_type().visibility().is_public() {
-                                return Ok(ValidateCallbackResult::Invalid(
-                                "Original record for a delete of a public entry must contain an entry"
-                                    .to_string(),
-                            ));
-                            } else {
-                                return Ok(ValidateCallbackResult::Valid);
-                            }
-                        }
-                    };
-                    let original_app_entry = match EntryTypes::deserialize_from_type(
-                        app_entry_type.zome_index,
-                        app_entry_type.entry_index,
-                        entry,
-                    )? {
-                        Some(app_entry) => app_entry,
-                        None => {
-                            return Ok(ValidateCallbackResult::Invalid(
-                                "Original app entry must be one of the defined entry types for this zome"
-                                    .to_string(),
-                            ));
-                        }
-                    };
-                    match original_app_entry {}
-                }"#,
-                                                                    )?;
-                                                            }
-
-                                                            // Add new entry type to match arm
-                                                            if let Some(entry_type_match) =
-                                                                find_ending_match_expr(
-                                                                    &mut op_record_arm.body,
-                                                                )
-                                                            {
-                                                                let new_arm: syn::Arm =
-                                                                        syn::parse_str(
-                                                                    format!("EntryTypes::{}(original_{}) => validate_delete_{}(action, original_action, original_{}),", 
-                                                                        entry_def.name.to_case(Case::Pascal),
-                                                                        entry_def.name.to_case(Case::Snake),
-                                                                        entry_def.name.to_case(Case::Snake),
-                                                                        entry_def.name.to_case(Case::Snake)).as_str()
-                                                                )?;
-                                                                entry_type_match.arms.push(new_arm);
-                                                            }
-                                                        }
-                                                    }
-                                                }
+                                                handle_store_record_arm(
+                                                    arm,
+                                                    &pascal_entry_def_name,
+                                                    &snake_entry_def_name,
+                                                )?;
                                             } else if path_segment_str == "StoreEntry" {
-                                                if let Some(op_entry_match_expr) =
-                                                    find_ending_match_expr(&mut arm.body)
-                                                {
-                                                    for op_entry_arm in
-                                                        &mut op_entry_match_expr.arms
-                                                    {
-                                                        if is_create_entry(&op_entry_arm.pat) {
-                                                            // Add new entry type to match arm
-                                                            if find_ending_match_expr(
-                                                                &mut op_entry_arm.body,
-                                                            )
-                                                            .is_none()
-                                                            {
-                                                                // Change empty invalid to match on entry_type
-                                                                *op_entry_arm.body =
-                                                                    syn::parse_str::<syn::Expr>(
-                                                                        "match app_entry {}",
-                                                                    )?;
-                                                            }
-
-                                                            // Add new entry type to match arm
-                                                            if let Some(entry_type_match) =
-                                                                find_ending_match_expr(
-                                                                    &mut op_entry_arm.body,
-                                                                )
-                                                            {
-                                                                let new_arm: syn::Arm = syn::parse_str(
-                                                                    format!("EntryTypes::{}({}) => validate_create_{}(EntryCreationAction::Create(action), {}),", 
-                                                                        entry_def.name.to_case(Case::Pascal),
-                                                                        entry_def.name.to_case(Case::Snake),
-                                                                        entry_def.name.to_case(Case::Snake),
-                                                                        entry_def.name.to_case(Case::Snake)).as_str()
-                                                                )?;
-                                                                entry_type_match.arms.push(new_arm);
-                                                            }
-                                                        } else if is_update_entry(&op_entry_arm.pat)
-                                                        {
-                                                            // Add new entry type to match arm
-                                                            if find_ending_match_expr(
-                                                                &mut op_entry_arm.body,
-                                                            )
-                                                            .is_none()
-                                                            {
-                                                                // Change empty invalid to match on entry_type
-                                                                *op_entry_arm.body =
-                                                                    syn::parse_str::<syn::Expr>(
-                                                                        "match app_entry {}",
-                                                                    )?;
-                                                            }
-
-                                                            // Add new entry type to match arm
-                                                            if let Some(entry_type_match) =
-                                                                find_ending_match_expr(
-                                                                    &mut op_entry_arm.body,
-                                                                )
-                                                            {
-                                                                let new_arm: syn::Arm = syn::parse_str(
-                                                                    format!("EntryTypes::{}({}) => validate_create_{}(EntryCreationAction::Update(action), {}),", 
-                                                                        entry_def.name.to_case(Case::Pascal),
-                                                                        entry_def.name.to_case(Case::Snake),
-                                                                        entry_def.name.to_case(Case::Snake),
-                                                                        entry_def.name.to_case(Case::Snake)).as_str()
-                                                                )?;
-                                                                entry_type_match.arms.push(new_arm);
-                                                            }
-                                                        }
-                                                    }
-                                                }
+                                                handle_store_entry_arm(
+                                                    arm,
+                                                    &pascal_entry_def_name,
+                                                    &snake_entry_def_name,
+                                                )?;
                                             } else if path_segment_str == "RegisterUpdate" {
-                                                if let Some(op_entry_match_expr) =
-                                                    find_ending_match_expr(&mut arm.body)
-                                                {
-                                                    for op_entry_arm in
-                                                        &mut op_entry_match_expr.arms
-                                                    {
-                                                        if let syn::Pat::Struct(pat_struct) =
-                                                            &mut op_entry_arm.pat
-                                                        {
-                                                            if let Some(ps) =
-                                                                pat_struct.path.segments.last()
-                                                            {
-                                                                if ps.ident == "Entry" {
-                                                                    // Add new entry type to match arm
-                                                                    if find_ending_match_expr(
-                                                                        &mut op_entry_arm.body,
-                                                                    )
-                                                                    .is_none()
-                                                                    {
-                                                                        // Change empty invalid to match on entry_type
-                                                                        *op_entry_arm.body = syn::parse_quote! {
-                                                                            {
-                                                                                let original_action = must_get_action(action.clone().original_action_address)?
-                                                                                    .action()
-                                                                                    .to_owned();
-                                                                                let original_create_action = EntryCreationAction::try_from(original_action)
-                                                                                    .map_err(|e| wasm_error!(e.to_string()))?;
-                                                                                match app_entry {}
-                                                                            }
-                                                                        };
-                                                                    }
-
-                                                                    // Add new entry type to match arm
-                                                                    if let Some(entry_type_match) =
-                                                                        find_ending_match_expr(
-                                                                            &mut op_entry_arm.body,
-                                                                        )
-                                                                    {
-                                                                        let new_arm: syn::Arm = syn::parse_str(
-                                                                             format!(r#"
-EntryTypes::{pascal_entry_def_name}({snake_entry_def_name}) => {{
-    let original_app_entry = must_get_valid_record(action.clone().original_action_address)?;
-    let original_{snake_entry_def_name} = {pascal_entry_def_name}::try_from(original_app_entry)?;
-    validate_update_{snake_entry_def_name}(action, {snake_entry_def_name}, original_create_action, original_{snake_entry_def_name})
-}}"#, 
-                                                                            ).as_str()
-                                                                        )?;
-                                                                        entry_type_match
-                                                                            .arms
-                                                                            .insert(0, new_arm);
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
+                                                handle_register_update_arm(
+                                                    arm,
+                                                    &pascal_entry_def_name,
+                                                    &snake_entry_def_name,
+                                                )?;
                                             } else if path_segment_str == "RegisterDelete" {
-                                                if find_ending_match_expr(&mut arm.body).is_none() {
-                                                    *arm.body = syn::parse_quote! {
-                                                        {
-                                                            let original_action_hash = delete_entry.clone().action.deletes_address;
-                                                            let original_record = must_get_valid_record(original_action_hash)?;
-                                                            let original_record_action = original_record.action().clone();
-                                                            let original_action = match EntryCreationAction::try_from(original_record_action) {
-                                                                Ok(action) => action,
-                                                                Err(e) => return Ok(ValidateCallbackResult::Invalid(e.to_string())),
-                                                            };
-                                                            let app_entry_type = match original_action.entry_type() {
-                                                                EntryType::App(app_entry_type) => app_entry_type,
-                                                                _ => {
-                                                                    return Ok(ValidateCallbackResult::Valid);
-                                                                }
-                                                            };
-                                                            let entry = match original_record.entry().as_option() {
-                                                                Some(entry) => entry,
-                                                                None => {
-                                                                    if original_action.entry_type().visibility().is_public() {
-                                                                        return Ok(ValidateCallbackResult::Invalid(
-                                                                            "Original record for a delete of a public entry must contain an entry"
-                                                                                .to_string(),
-                                                                        ));
-                                                                    } else {
-                                                                        return Ok(ValidateCallbackResult::Valid);
-                                                                    }
-                                                                }
-                                                            };
-                                                            let original_app_entry = match EntryTypes::deserialize_from_type(
-                                                                app_entry_type.zome_index,
-                                                                app_entry_type.entry_index,
-                                                                entry,
-                                                            )? {
-                                                                Some(app_entry) => app_entry,
-                                                                None => {
-                                                                    return Ok(ValidateCallbackResult::Invalid(
-                                                                        "Original app entry must be one of the defined entry types for this zome"
-                                                                            .to_string(),
-                                                                    ));
-                                                                }
-                                                            };
-                                                            match original_app_entry {}
-                                                        }
-                                                    };
-                                                }
-
-                                                // Add new entry type to match arm
-                                                if let Some(match_expr) =
-                                                    find_ending_match_expr(&mut arm.body)
-                                                {
-                                                    let new_arm: syn::Arm = syn::parse_str(
-                                                  format!(r#"
-EntryTypes::{pascal_entry_def_name}(original_{snake_entry_def_name}) => {{
-    validate_delete_{snake_entry_def_name}(delete_entry.clone().action, original_action, original_{snake_entry_def_name})
-}}"#, 
-                                                 ).as_str()
-                                             )?;
-                                                    match_expr.arms.insert(0, new_arm);
-                                                }
+                                                handle_register_delete_arm(
+                                                    arm,
+                                                    &pascal_entry_def_name,
+                                                    &snake_entry_def_name,
+                                                )?;
                                             }
                                         }
                                     }
@@ -903,4 +525,329 @@ EntryTypes::{pascal_entry_def_name}(original_{snake_entry_def_name}) => {{
         }
     }
     Ok(())
+}
+
+fn handle_store_record_arm(
+    arm: &mut syn::Arm,
+    pascal_entry_def_name: &str,
+    snake_entry_def_name: &str,
+) -> ScaffoldResult<()> {
+    if let Some(op_entry_match_expr) = find_ending_match_expr(&mut arm.body) {
+        for op_record_arm in &mut op_entry_match_expr.arms {
+            if is_entry(&op_record_arm.pat, "CreateEntry") {
+                // Add new entry type to match arm
+                if find_ending_match_expr(&mut op_record_arm.body).is_none() {
+                    // Change empty invalid to match on entry_type
+                    *op_record_arm.body = syn::parse_quote! {match app_entry {}};
+                }
+
+                // Add new entry type to match arm
+                if let Some(entry_type_match) = find_ending_match_expr(&mut op_record_arm.body) {
+                    let new_arm: syn::Arm = syn::parse_str(
+                        &format!("EntryTypes::{}({}) => validate_create_{}(EntryCreationAction::Create(action), {}),", 
+                            pascal_entry_def_name,
+                            snake_entry_def_name,
+                            snake_entry_def_name,
+                            snake_entry_def_name
+                        )
+                    )?;
+                    entry_type_match.arms.push(new_arm);
+                }
+            } else if is_entry(&op_record_arm.pat, "UpdateEntry") {
+                // Add new entry type to match arm
+                if find_ending_match_expr(&mut op_record_arm.body).is_none() {
+                    // Change empty invalid to match on entry_type
+                    *op_record_arm.body = syn::parse_quote! {
+                        {
+                            let original_record = must_get_valid_record(original_action_hash)?;
+                            let original_action = original_record.action().clone();
+                            let original_action = match original_action {
+                                Action::Create(create) => EntryCreationAction::Create(create),
+                                Action::Update(update) => EntryCreationAction::Update(update),
+                                _ => {
+                                    return Ok(ValidateCallbackResult::Invalid("Original action for an update must be a Create or Update action".to_string()));
+                                }
+                            };
+                            match app_entry {}
+                        }
+                    };
+                }
+
+                // Add new entry type to match arm
+                if let Some(entry_type_match) = find_ending_match_expr(&mut op_record_arm.body) {
+                    let new_arm: syn::Arm = syn::parse_str(format!(
+                        r#"EntryTypes::{pascal_entry_def_name}({snake_entry_def_name}) => {{
+                            let result = validate_create_{snake_entry_def_name}(EntryCreationAction::Update(action.clone()), {snake_entry_def_name}.clone())?;
+                            if let ValidateCallbackResult::Valid = result {{
+                                let original_{snake_entry_def_name}: Option<{pascal_entry_def_name}> = original_record.entry().to_app_option().map_err(|e| wasm_error!(e))?;
+                                let original_{snake_entry_def_name} = match original_{snake_entry_def_name} {{
+                                    Some({snake_entry_def_name}) => {snake_entry_def_name},
+                                    None => {{
+                                        return Ok(ValidateCallbackResult::Invalid("The updated entry type must be the same as the original entry type".to_string()));
+                                    }}
+                                }};
+                                validate_update_{snake_entry_def_name}(action, {snake_entry_def_name}, original_action, original_{snake_entry_def_name})
+                            }} else {{
+                                Ok(result)
+                            }}
+                        }},"#,).as_str())?;
+                    entry_type_match.arms.push(new_arm);
+                }
+            } else if is_entry(&op_record_arm.pat, "DeleteEntry") {
+                // Add new entry type to match arm
+                if find_ending_match_expr(&mut op_record_arm.body).is_none() {
+                    // Change empty invalid to match on entry_type
+                    *op_record_arm.body = syn::parse_quote! {
+                        {
+                            let original_record = must_get_valid_record(original_action_hash)?;
+                            let original_action = original_record.action().clone();
+                            let original_action = match original_action {
+                                Action::Create(create) => EntryCreationAction::Create(create),
+                                Action::Update(update) => EntryCreationAction::Update(update),
+                                _ => {
+                                    return Ok(ValidateCallbackResult::Invalid("Original action for a delete must be a Create or Update action".to_string()));
+                                }
+                            };
+                            let app_entry_type = match original_action.entry_type() {
+                                EntryType::App(app_entry_type) => app_entry_type,
+                                _ => {
+                                    return Ok(ValidateCallbackResult::Valid);
+                                }
+                            };
+                            let entry = match original_record.entry().as_option() {
+                                Some(entry) => entry,
+                                None => {
+                                    if original_action.entry_type().visibility().is_public() {
+                                        return Ok(ValidateCallbackResult::Invalid(
+                                        "Original record for a delete of a public entry must contain an entry"
+                                            .to_string(),
+                                    ));
+                                    } else {
+                                        return Ok(ValidateCallbackResult::Valid);
+                                    }
+                                }
+                            };
+                            let original_app_entry = match EntryTypes::deserialize_from_type(
+                                app_entry_type.zome_index,
+                                app_entry_type.entry_index,
+                                entry,
+                            )? {
+                                Some(app_entry) => app_entry,
+                                None => {
+                                    return Ok(ValidateCallbackResult::Invalid(
+                                        "Original app entry must be one of the defined entry types for this zome"
+                                            .to_string(),
+                                    ));
+                                }
+                            };
+                            match original_app_entry {}
+                        }
+                    };
+                }
+
+                // Add new entry type to match arm
+                if let Some(entry_type_match) = find_ending_match_expr(&mut op_record_arm.body) {
+                    let new_arm: syn::Arm = syn::parse_str(
+                        &format!("EntryTypes::{}(original_{}) => validate_delete_{}(action, original_action, original_{}),", 
+                            pascal_entry_def_name,
+                            snake_entry_def_name,
+                            snake_entry_def_name,
+                            snake_entry_def_name,
+                        )
+                    )?;
+                    entry_type_match.arms.push(new_arm);
+                }
+            }
+        }
+    }
+    Ok(())
+}
+
+fn handle_store_entry_arm(
+    arm: &mut syn::Arm,
+    pascal_entry_def_name: &str,
+    snake_entry_def_name: &str,
+) -> ScaffoldResult<()> {
+    if let Some(op_entry_match_expr) = find_ending_match_expr(&mut arm.body) {
+        for op_entry_arm in &mut op_entry_match_expr.arms {
+            if is_entry(&op_entry_arm.pat, "CreateEntry") {
+                // Add new entry type to match arm
+                if find_ending_match_expr(&mut op_entry_arm.body).is_none() {
+                    // Change empty invalid to match on entry_type
+                    *op_entry_arm.body = syn::parse_quote! {match app_entry {}};
+                }
+
+                // Add new entry type to match arm
+                if let Some(entry_type_match) = find_ending_match_expr(&mut op_entry_arm.body) {
+                    let new_arm: syn::Arm = syn::parse_str(
+                        &format!("EntryTypes::{}({}) => validate_create_{}(EntryCreationAction::Create(action), {}),", 
+                            pascal_entry_def_name,
+                            snake_entry_def_name,
+                            snake_entry_def_name,
+                            snake_entry_def_name,
+                        )
+                    )?;
+                    entry_type_match.arms.push(new_arm);
+                }
+            } else if is_entry(&op_entry_arm.pat, "UpdateEntry") {
+                // Add new entry type to match arm
+                if find_ending_match_expr(&mut op_entry_arm.body).is_none() {
+                    // Change empty invalid to match on entry_type
+                    *op_entry_arm.body = syn::parse_str::<syn::Expr>("match app_entry {}")?;
+                }
+
+                // Add new entry type to match arm
+                if let Some(entry_type_match) = find_ending_match_expr(&mut op_entry_arm.body) {
+                    let new_arm: syn::Arm = syn::parse_str(
+                        &format!("EntryTypes::{}({}) => validate_create_{}(EntryCreationAction::Update(action), {}),", 
+                            pascal_entry_def_name,
+                            snake_entry_def_name,
+                            snake_entry_def_name,
+                            snake_entry_def_name,
+                        )
+                    )?;
+                    entry_type_match.arms.push(new_arm);
+                }
+            }
+        }
+    }
+    Ok(())
+}
+
+fn handle_register_update_arm(
+    arm: &mut syn::Arm,
+    pascal_entry_def_name: &str,
+    snake_entry_def_name: &str,
+) -> ScaffoldResult<()> {
+    if let Some(op_entry_match_expr) = find_ending_match_expr(&mut arm.body) {
+        for op_entry_arm in &mut op_entry_match_expr.arms {
+            if let syn::Pat::Struct(pat_struct) = &mut op_entry_arm.pat {
+                if let Some(ps) = pat_struct.path.segments.last() {
+                    if ps.ident == "Entry" {
+                        // Add new entry type to match arm
+                        if find_ending_match_expr(&mut op_entry_arm.body).is_none() {
+                            // Change empty invalid to match on entry_type
+                            *op_entry_arm.body = syn::parse_quote! {
+                                {
+                                    let original_action = must_get_action(action.clone().original_action_address)?
+                                        .action()
+                                        .to_owned();
+                                    let original_create_action = EntryCreationAction::try_from(original_action)
+                                        .map_err(|e| wasm_error!(e.to_string()))?;
+                                    match app_entry {}
+                                }
+                            };
+                        }
+
+                        // Add new entry type to match arm
+                        if let Some(entry_type_match) =
+                            find_ending_match_expr(&mut op_entry_arm.body)
+                        {
+                            let new_arm: syn::Arm = syn::parse_str(&format!(
+                                r#"EntryTypes::{pascal_entry_def_name}({snake_entry_def_name}) => {{
+                                    let original_app_entry = must_get_valid_record(action.clone().original_action_address)?;
+                                    let original_{snake_entry_def_name} = {pascal_entry_def_name}::try_from(original_app_entry)?;
+                                    validate_update_{snake_entry_def_name}(action, {snake_entry_def_name}, original_create_action, original_{snake_entry_def_name})
+                                }}"#,
+                            ))?;
+                            entry_type_match.arms.insert(0, new_arm);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    Ok(())
+}
+
+fn handle_register_delete_arm(
+    arm: &mut syn::Arm,
+    pascal_entry_def_name: &str,
+    snake_entry_def_name: &str,
+) -> ScaffoldResult<()> {
+    if find_ending_match_expr(&mut arm.body).is_none() {
+        *arm.body = syn::parse_quote! {
+            {
+                let original_action_hash = delete_entry.clone().action.deletes_address;
+                let original_record = must_get_valid_record(original_action_hash)?;
+                let original_record_action = original_record.action().clone();
+                let original_action = match EntryCreationAction::try_from(original_record_action) {
+                    Ok(action) => action,
+                    Err(e) => return Ok(ValidateCallbackResult::Invalid(e.to_string())),
+                };
+                let app_entry_type = match original_action.entry_type() {
+                    EntryType::App(app_entry_type) => app_entry_type,
+                    _ => {
+                        return Ok(ValidateCallbackResult::Valid);
+                    }
+                };
+                let entry = match original_record.entry().as_option() {
+                    Some(entry) => entry,
+                    None => {
+                        if original_action.entry_type().visibility().is_public() {
+                            return Ok(ValidateCallbackResult::Invalid(
+                                "Original record for a delete of a public entry must contain an entry"
+                                    .to_string(),
+                            ));
+                        } else {
+                            return Ok(ValidateCallbackResult::Valid);
+                        }
+                    }
+                };
+                let original_app_entry = match EntryTypes::deserialize_from_type(
+                    app_entry_type.zome_index,
+                    app_entry_type.entry_index,
+                    entry,
+                )? {
+                    Some(app_entry) => app_entry,
+                    None => {
+                        return Ok(ValidateCallbackResult::Invalid(
+                            "Original app entry must be one of the defined entry types for this zome"
+                                .to_string(),
+                        ));
+                    }
+                };
+                match original_app_entry {}
+            }
+        };
+    }
+
+    // Add new entry type to match arm
+    if let Some(match_expr) = find_ending_match_expr(&mut arm.body) {
+        let new_arm: syn::Arm = syn::parse_str(&format!(
+            r#"EntryTypes::{pascal_entry_def_name}(original_{snake_entry_def_name}) => {{
+                validate_delete_{snake_entry_def_name}(delete_entry.clone().action, original_action, original_{snake_entry_def_name})
+            }}"#,
+        ))?;
+        match_expr.arms.insert(0, new_arm);
+    }
+
+    Ok(())
+}
+
+pub fn find_ending_match_expr_in_block(block: &mut syn::Block) -> Option<&mut syn::ExprMatch> {
+    if let Some(e) = block.stmts.last_mut() {
+        match e {
+            syn::Stmt::Expr(syn::Expr::Match(e_m), _) => Some(e_m),
+            _ => None,
+        }
+    } else {
+        None
+    }
+}
+pub fn find_ending_match_expr(e: &mut syn::Expr) -> Option<&mut syn::ExprMatch> {
+    match e {
+        syn::Expr::Match(expr_match) => Some(expr_match),
+        syn::Expr::Block(expr_block) => find_ending_match_expr_in_block(&mut expr_block.block),
+        _ => None,
+    }
+}
+
+fn is_entry(pat: &syn::Pat, entry: &str) -> bool {
+    if let syn::Pat::Struct(pat_struct) = pat {
+        if let Some(ps) = pat_struct.path.segments.last() {
+            return ps.ident == entry;
+        }
+    }
+    false
 }
