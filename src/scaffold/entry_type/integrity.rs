@@ -543,7 +543,7 @@ fn handle_store_record_arm(
 
                 // Add new entry type to match arm
                 if let Some(entry_type_match) = find_ending_match_expr(&mut op_record_arm.body) {
-                    let new_arm: syn::Arm = syn::parse_str(
+                    let new_arm = syn::parse_str(
                         &format!("EntryTypes::{}({}) => validate_create_{}(EntryCreationAction::Create(action), {}),", 
                             pascal_entry_def_name,
                             snake_entry_def_name,
@@ -575,7 +575,7 @@ fn handle_store_record_arm(
 
                 // Add new entry type to match arm
                 if let Some(entry_type_match) = find_ending_match_expr(&mut op_record_arm.body) {
-                    let new_arm: syn::Arm = syn::parse_str(format!(
+                    let new_arm = syn::parse_str(&format!(
                         r#"EntryTypes::{pascal_entry_def_name}({snake_entry_def_name}) => {{
                             let result = validate_create_{snake_entry_def_name}(EntryCreationAction::Update(action.clone()), {snake_entry_def_name}.clone())?;
                             if let ValidateCallbackResult::Valid = result {{
@@ -590,7 +590,8 @@ fn handle_store_record_arm(
                             }} else {{
                                 Ok(result)
                             }}
-                        }},"#,).as_str())?;
+                        }},"#,
+                    ))?;
                     entry_type_match.arms.push(new_arm);
                 }
             } else if is_entry(&op_record_arm.pat, "DeleteEntry") {
@@ -617,14 +618,9 @@ fn handle_store_record_arm(
                             let entry = match original_record.entry().as_option() {
                                 Some(entry) => entry,
                                 None => {
-                                    if original_action.entry_type().visibility().is_public() {
-                                        return Ok(ValidateCallbackResult::Invalid(
-                                        "Original record for a delete of a public entry must contain an entry"
-                                            .to_string(),
+                                    return Ok(ValidateCallbackResult::Invalid(
+                                        "Original record for a delete must contain an entry".to_string(),
                                     ));
-                                    } else {
-                                        return Ok(ValidateCallbackResult::Valid);
-                                    }
                                 }
                             };
                             let original_app_entry = match EntryTypes::deserialize_from_type(
@@ -647,7 +643,7 @@ fn handle_store_record_arm(
 
                 // Add new entry type to match arm
                 if let Some(entry_type_match) = find_ending_match_expr(&mut op_record_arm.body) {
-                    let new_arm: syn::Arm = syn::parse_str(
+                    let new_arm = syn::parse_str(
                         &format!("EntryTypes::{}(original_{}) => validate_delete_{}(action, original_action, original_{}),", 
                             pascal_entry_def_name,
                             snake_entry_def_name,
@@ -679,7 +675,7 @@ fn handle_store_entry_arm(
 
                 // Add new entry type to match arm
                 if let Some(entry_type_match) = find_ending_match_expr(&mut op_entry_arm.body) {
-                    let new_arm: syn::Arm = syn::parse_str(
+                    let new_arm = syn::parse_str(
                         &format!("EntryTypes::{}({}) => validate_create_{}(EntryCreationAction::Create(action), {}),", 
                             pascal_entry_def_name,
                             snake_entry_def_name,
@@ -698,7 +694,7 @@ fn handle_store_entry_arm(
 
                 // Add new entry type to match arm
                 if let Some(entry_type_match) = find_ending_match_expr(&mut op_entry_arm.body) {
-                    let new_arm: syn::Arm = syn::parse_str(
+                    let new_arm = syn::parse_str(
                         &format!("EntryTypes::{}({}) => validate_create_{}(EntryCreationAction::Update(action), {}),", 
                             pascal_entry_def_name,
                             snake_entry_def_name,
@@ -732,8 +728,12 @@ fn handle_register_update_arm(
                                     let original_action = must_get_action(action.clone().original_action_address)?
                                         .action()
                                         .to_owned();
-                                    let original_create_action = EntryCreationAction::try_from(original_action)
-                                        .map_err(|e| wasm_error!(e.to_string()))?;
+                                    let original_create_action = match EntryCreationAction::try_from(original_action) {
+                                        Ok(action) => action,
+                                        Err(e) => {
+                                            return Ok(ValidateCallbackResult::Invalid("Expected to get EntryCreationAction from Action"));
+                                        }
+                                    };
                                     match app_entry {}
                                 }
                             };
@@ -743,10 +743,17 @@ fn handle_register_update_arm(
                         if let Some(entry_type_match) =
                             find_ending_match_expr(&mut op_entry_arm.body)
                         {
-                            let new_arm: syn::Arm = syn::parse_str(&format!(
+                            let new_arm = syn::parse_str(&format!(
                                 r#"EntryTypes::{pascal_entry_def_name}({snake_entry_def_name}) => {{
                                     let original_app_entry = must_get_valid_record(action.clone().original_action_address)?;
-                                    let original_{snake_entry_def_name} = {pascal_entry_def_name}::try_from(original_app_entry)?;
+                                    let original_{snake_entry_def_name} = match {pascal_entry_def_name}::try_from(original_app_entry) {{
+                                        Ok(entry) => entry,
+                                        Err(e) => {{
+                                            return Ok(ValidateCallbackResult::Invalid(
+                                                "Expected to get {pascal_entry_def_name} from Record".to_string()
+                                            ));
+                                        }}
+                                    }};
                                     validate_update_{snake_entry_def_name}(action, {snake_entry_def_name}, original_create_action, original_{snake_entry_def_name})
                                 }}"#,
                             ))?;
@@ -784,14 +791,9 @@ fn handle_register_delete_arm(
                 let entry = match original_record.entry().as_option() {
                     Some(entry) => entry,
                     None => {
-                        if original_action.entry_type().visibility().is_public() {
-                            return Ok(ValidateCallbackResult::Invalid(
-                                "Original record for a delete of a public entry must contain an entry"
-                                    .to_string(),
-                            ));
-                        } else {
-                            return Ok(ValidateCallbackResult::Valid);
-                        }
+                        return Ok(ValidateCallbackResult::Invalid(
+                            "Original record for a delete must contain an entry".to_string(),
+                        ));
                     }
                 };
                 let original_app_entry = match EntryTypes::deserialize_from_type(
@@ -814,7 +816,7 @@ fn handle_register_delete_arm(
 
     // Add new entry type to match arm
     if let Some(match_expr) = find_ending_match_expr(&mut arm.body) {
-        let new_arm: syn::Arm = syn::parse_str(&format!(
+        let new_arm = syn::parse_str(&format!(
             r#"EntryTypes::{pascal_entry_def_name}(original_{snake_entry_def_name}) => {{
                 validate_delete_{snake_entry_def_name}(delete_entry.clone().action, original_action, original_{snake_entry_def_name})
             }}"#,
