@@ -470,44 +470,45 @@ fn add_entry_type_to_validation_arms(
     let pascal_entry_def_name = entry_def.name.to_case(Case::Pascal);
     let snake_entry_def_name = entry_def.name.to_case(Case::Snake);
     if let syn::Item::Fn(item_fn) = item {
-        if item_fn.sig.ident == "validate" {
-            for stmt in &mut item_fn.block.stmts {
-                if let syn::Stmt::Expr(syn::Expr::Match(match_expr), _) = stmt {
-                    if let syn::Expr::Try(try_expr) = &mut *match_expr.expr {
-                        if let syn::Expr::MethodCall(call) = &mut *try_expr.expr {
-                            if call.method == "flattened" {
-                                for arm in &mut match_expr.arms {
-                                    if let syn::Pat::TupleStruct(pat_tuple_struct) = &mut arm.pat {
-                                        if let Some(path_segment) =
-                                            pat_tuple_struct.path.segments.last()
-                                        {
-                                            let path_segment_str = path_segment.ident.to_string();
-                                            if path_segment_str == "StoreRecord" {
-                                                handle_store_record_arm(
-                                                    arm,
-                                                    &pascal_entry_def_name,
-                                                    &snake_entry_def_name,
-                                                )?;
-                                            } else if path_segment_str == "StoreEntry" {
-                                                handle_store_entry_arm(
-                                                    arm,
-                                                    &pascal_entry_def_name,
-                                                    &snake_entry_def_name,
-                                                )?;
-                                            } else if path_segment_str == "RegisterUpdate" {
-                                                handle_register_update_arm(
-                                                    arm,
-                                                    &pascal_entry_def_name,
-                                                    &snake_entry_def_name,
-                                                )?;
-                                            } else if path_segment_str == "RegisterDelete" {
-                                                handle_register_delete_arm(
-                                                    arm,
-                                                    &pascal_entry_def_name,
-                                                    &snake_entry_def_name,
-                                                )?;
-                                            }
-                                        }
+        // early exit if #[hdk_extern] annotated validate function does not exist
+        if item_fn.sig.ident != "validate" {
+            return Ok(());
+        }
+        for stmt in &mut item_fn.block.stmts {
+            if let syn::Stmt::Expr(syn::Expr::Match(match_expr), _) = stmt {
+                if let syn::Expr::Try(try_expr) = &mut *match_expr.expr {
+                    if let syn::Expr::MethodCall(call) = &mut *try_expr.expr {
+                        // find op.flattened() method call
+                        if call.method != "flattened" {
+                            continue;
+                        }
+                        for arm in &mut match_expr.arms {
+                            if let syn::Pat::TupleStruct(pat_tuple_struct) = &mut arm.pat {
+                                if let Some(path_segment) = pat_tuple_struct.path.segments.last() {
+                                    if path_segment.ident == "StoreRecord" {
+                                        handle_store_record_arm(
+                                            arm,
+                                            &pascal_entry_def_name,
+                                            &snake_entry_def_name,
+                                        )?;
+                                    } else if path_segment.ident == "StoreEntry" {
+                                        handle_store_entry_arm(
+                                            arm,
+                                            &pascal_entry_def_name,
+                                            &snake_entry_def_name,
+                                        )?;
+                                    } else if path_segment.ident == "RegisterUpdate" {
+                                        handle_register_update_arm(
+                                            arm,
+                                            &pascal_entry_def_name,
+                                            &snake_entry_def_name,
+                                        )?;
+                                    } else if path_segment.ident == "RegisterDelete" {
+                                        handle_register_delete_arm(
+                                            arm,
+                                            &pascal_entry_def_name,
+                                            &snake_entry_def_name,
+                                        )?;
                                     }
                                 }
                             }
@@ -727,6 +728,7 @@ fn handle_register_update_arm(
         for op_entry_arm in &mut op_entry_match_expr.arms {
             if let syn::Pat::Struct(pat_struct) = &mut op_entry_arm.pat {
                 if let Some(ps) = pat_struct.path.segments.last() {
+                    // find OpUpdate::Entry
                     if ps.ident == "Entry" {
                         // Add new entry type to match arm
                         if find_ending_match_expr(&mut op_entry_arm.body).is_none() {
