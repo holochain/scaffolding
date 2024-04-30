@@ -1,7 +1,7 @@
 use convert_case::{Case, Casing};
 use itertools::Itertools;
 use proc_macro2::TokenStream;
-use quote::{format_ident, quote, ToTokens};
+use quote::{format_ident, quote};
 use std::{ffi::OsString, path::PathBuf};
 
 use crate::error::{ScaffoldError, ScaffoldResult};
@@ -812,20 +812,16 @@ fn add_entry_type_to_validation_arms(
                                                                     .is_none()
                                                                     {
                                                                         // Change empty invalid to match on entry_type
-                                                                        *op_entry_arm.body =
-                                                                            syn::parse_str::<
-                                                                                syn::Expr,
-                                                                            >(
-                                                                                r#"
-{
-    let original_action = must_get_action(action.clone().original_action_address)?
-        .action()
-        .to_owned();
-    let original_action = EntryCreationAction::try_from(original_action)
-        .map_err(|e| wasm_error!(e.to_string()))?;
-    match app_entry {}
-}"#,
-                                                                            )?;
+                                                                        *op_entry_arm.body = syn::parse_quote! {
+                                                                            {
+                                                                                let original_action = must_get_action(action.clone().original_action_address)?
+                                                                                    .action()
+                                                                                    .to_owned();
+                                                                                let original_create_action = EntryCreationAction::try_from(original_action)
+                                                                                    .map_err(|e| wasm_error!(e.to_string()))?;
+                                                                                match app_entry {}
+                                                                            }
+                                                                        };
                                                                     }
 
                                                                     // Add new entry type to match arm
@@ -839,7 +835,7 @@ fn add_entry_type_to_validation_arms(
 EntryTypes::{pascal_entry_def_name}({snake_entry_def_name}) => {{
     let original_app_entry = must_get_valid_record(action.clone().original_action_address)?;
     let original_{snake_entry_def_name} = {pascal_entry_def_name}::try_from(original_app_entry)?;
-    validate_update_{snake_entry_def_name}(action, {snake_entry_def_name}, original_action, original_{snake_entry_def_name})
+    validate_update_{snake_entry_def_name}(action, {snake_entry_def_name}, original_create_action, original_{snake_entry_def_name})
 }}"#, 
                                                                             ).as_str()
                                                                         )?;
@@ -855,48 +851,49 @@ EntryTypes::{pascal_entry_def_name}({snake_entry_def_name}) => {{
                                             } else if path_segment_str
                                                 .eq(&String::from("RegisterDelete"))
                                             {
-                                                if arm.body.as_ref().to_token_stream().to_string().contains("There are no entry types in this integrity zome") {
-                                                    *arm.body = syn::parse_str::<syn::Expr>(r#"{
-                                                        let original_action_hash = delete_entry.clone().action.deletes_address;
-                                                        let original_record = must_get_valid_record(original_action_hash)?;
-                                                        let original_action = original_record.action().clone();
-                                                        let original_action = EntryCreationAction::try_from(original_action)
-                                                            .map_err(|e| wasm_error!(e.to_string()))?;
-                                                        let app_entry_type = match original_action.entry_type() {
-                                                            EntryType::App(app_entry_type) => app_entry_type,
-                                                            _ => {
-                                                                return Ok(ValidateCallbackResult::Valid);
-                                                            }
-                                                        };
-                                                        let entry = match original_record.entry().as_option() {
-                                                            Some(entry) => entry,
-                                                            None => {
-                                                                if original_action.entry_type().visibility().is_public() {
-                                                                    return Ok(ValidateCallbackResult::Invalid(
-                                                                        "Original record for a delete of a public entry must contain an entry"
-                                                                            .to_string(),
-                                                                    ));
-                                                                } else {
+                                                if find_ending_match_expr(&mut arm.body).is_none() {
+                                                    *arm.body = syn::parse_quote! {
+                                                        {
+                                                            let original_action_hash = delete_entry.clone().action.deletes_address;
+                                                            let original_record = must_get_valid_record(original_action_hash)?;
+                                                            let original_record_action = original_record.action().clone();
+                                                            let original_action = EntryCreationAction::try_from(original_record_action)
+                                                                .map_err(|e| wasm_error!(e.to_string()))?;
+                                                            let app_entry_type = match original_action.entry_type() {
+                                                                EntryType::App(app_entry_type) => app_entry_type,
+                                                                _ => {
                                                                     return Ok(ValidateCallbackResult::Valid);
                                                                 }
-                                                            }
-                                                        };
-                                                        let original_app_entry = match EntryTypes::deserialize_from_type(
-                                                            app_entry_type.zome_index,
-                                                            app_entry_type.entry_index,
-                                                            entry,
-                                                        )? {
-                                                            Some(app_entry) => app_entry,
-                                                            None => {
-                                                                return Ok(ValidateCallbackResult::Invalid(
-                                                                    "Original app entry must be one of the defined entry types for this zome"
-                                                                        .to_string(),
-                                                                ));
-                                                            }
-                                                        };
-                                                        match original_app_entry {}
-                                                    }"#,
-                                                   )?;
+                                                            };
+                                                            let entry = match original_record.entry().as_option() {
+                                                                Some(entry) => entry,
+                                                                None => {
+                                                                    if original_action.entry_type().visibility().is_public() {
+                                                                        return Ok(ValidateCallbackResult::Invalid(
+                                                                            "Original record for a delete of a public entry must contain an entry"
+                                                                                .to_string(),
+                                                                        ));
+                                                                    } else {
+                                                                        return Ok(ValidateCallbackResult::Valid);
+                                                                    }
+                                                                }
+                                                            };
+                                                            let original_app_entry = match EntryTypes::deserialize_from_type(
+                                                                app_entry_type.zome_index,
+                                                                app_entry_type.entry_index,
+                                                                entry,
+                                                            )? {
+                                                                Some(app_entry) => app_entry,
+                                                                None => {
+                                                                    return Ok(ValidateCallbackResult::Invalid(
+                                                                        "Original app entry must be one of the defined entry types for this zome"
+                                                                            .to_string(),
+                                                                    ));
+                                                                }
+                                                            };
+                                                            match original_app_entry {}
+                                                        }
+                                                    };
                                                 }
 
                                                 // Add new entry type to match arm
