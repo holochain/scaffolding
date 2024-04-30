@@ -332,7 +332,7 @@ pub use {}::*;
                             if item_enum
                                 .variants
                                 .iter()
-                                .any(|v| v.ident == &pascal_entry_def_name)
+                                .any(|v| v.ident == pascal_entry_def_name)
                             {
                                 return Err(ScaffoldError::EntryTypeAlreadyExists(
                                     pascal_entry_def_name.clone(),
