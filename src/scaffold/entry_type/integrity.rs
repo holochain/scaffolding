@@ -34,11 +34,9 @@ pub fn render_entry_definition_struct(entry_def: &EntryDefinition) -> ScaffoldRe
         })
         .collect::<ScaffoldResult<Vec<TokenStream>>>()?;
     Ok(quote! {
-
       pub struct #name {
         #(pub #fields),*
       }
-
     })
 }
 
