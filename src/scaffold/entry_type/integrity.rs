@@ -731,7 +731,9 @@ fn handle_register_update_arm(
                                     let original_create_action = match EntryCreationAction::try_from(original_action) {
                                         Ok(action) => action,
                                         Err(e) => {
-                                            return Ok(ValidateCallbackResult::Invalid("Expected to get EntryCreationAction from Action"));
+                                            return Ok(ValidateCallbackResult::Invalid(
+                                                format!("Expected to get EntryCreationAction from Action: {e:?}")
+                                            ));
                                         }
                                     };
                                     match app_entry {}
@@ -780,7 +782,9 @@ fn handle_register_delete_arm(
                 let original_record_action = original_record.action().clone();
                 let original_action = match EntryCreationAction::try_from(original_record_action) {
                     Ok(action) => action,
-                    Err(e) => return Ok(ValidateCallbackResult::Invalid(e.to_string())),
+                    Err(e) => return Ok(ValidateCallbackResult::Invalid(
+                        format!("Expected to get EntryCreationAction from Action: {e:?}")
+                    )),
                 };
                 let app_entry_type = match original_action.entry_type() {
                     EntryType::App(app_entry_type) => app_entry_type,
