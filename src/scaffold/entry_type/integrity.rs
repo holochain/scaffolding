@@ -68,7 +68,7 @@ pub fn render_entry_definition_file(
             Ok(ValidateCallbackResult::Valid)
         },
         false => quote! {
-             Ok(ValidateCallbackResult::Invalid(String::from(#updated_invalid_reason)))
+            Ok(ValidateCallbackResult::Invalid(String::from(#updated_invalid_reason)))
         },
     };
     let validate_update = quote! {
@@ -94,7 +94,7 @@ pub fn render_entry_definition_file(
             Ok(ValidateCallbackResult::Valid)
         },
         false => quote! {
-             Ok(ValidateCallbackResult::Invalid(String::from(#deleted_invalid_reason)))
+            Ok(ValidateCallbackResult::Invalid(String::from(#deleted_invalid_reason)))
         },
     };
     let validate_delete = quote! {
