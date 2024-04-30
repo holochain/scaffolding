@@ -214,9 +214,7 @@ pub fn render_entry_definition_file(
 fn is_create_entry(pat: &syn::Pat) -> bool {
     if let syn::Pat::Struct(pat_struct) = pat {
         if let Some(ps) = pat_struct.path.segments.last() {
-            if ps.ident.to_string().eq(&String::from("CreateEntry")) {
-                return true;
-            }
+            return ps.ident == "CreateEntry";
         }
     }
     false
@@ -234,7 +232,7 @@ fn is_update_entry(pat: &syn::Pat) -> bool {
 fn is_delete_entry(pat: &syn::Pat) -> bool {
     if let syn::Pat::Struct(pat_struct) = pat {
         if let Some(ps) = pat_struct.path.segments.last() {
-            return p.ident == "DeleteEntry";
+            return ps.ident == "DeleteEntry";
         }
     }
     false
@@ -788,11 +786,7 @@ fn add_entry_type_to_validation_arms(
                                                             if let Some(ps) =
                                                                 pat_struct.path.segments.last()
                                                             {
-                                                                if ps
-                                                                    .ident
-                                                                    .to_string()
-                                                                    .eq(&String::from("Entry"))
-                                                                {
+                                                                if ps.ident == "Entry" {
                                                                     // Add new entry type to match arm
                                                                     if find_ending_match_expr(
                                                                         &mut op_entry_arm.body,
@@ -856,9 +850,14 @@ EntryTypes::{pascal_entry_def_name}({snake_entry_def_name}) => {{
                                                             let entry = match original_record.entry().as_option() {
                                                                 Some(entry) => entry,
                                                                 None => {
-                                                                    return Ok(ValidateCallbackResult::Invalid(
-                                                                        "Original record for a delete contain an entry".to_string(),
-                                                                    ));
+                                                                    if original_action.entry_type().visibility().is_public() {
+                                                                        return Ok(ValidateCallbackResult::Invalid(
+                                                                            "Original record for a delete of a public entry must contain an entry"
+                                                                                .to_string(),
+                                                                        ));
+                                                                    } else {
+                                                                        return Ok(ValidateCallbackResult::Valid);
+                                                                    }
                                                                 }
                                                             };
                                                             let original_app_entry = match EntryTypes::deserialize_from_type(
