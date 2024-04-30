@@ -73,7 +73,7 @@ pub fn render_entry_definition_file(
              Ok(ValidateCallbackResult::Invalid(String::from(#updated_invalid_reason)))
         },
     };
-    let validate_update: TokenStream = quote! {
+    let validate_update = quote! {
         pub fn #validate_update_fn(
             _action: Update,
             #new_entry_arg: #name_pascal,
@@ -90,7 +90,7 @@ pub fn render_entry_definition_file(
 
     let deleted_invalid_reason = format!("{} cannot be deleted", plural_name_title);
 
-    let validate_delete_result: TokenStream = match crud.delete {
+    let validate_delete_result = match crud.delete {
         true => quote! {
             /// TODO: add the appropriate validation rules
             Ok(ValidateCallbackResult::Valid)
@@ -99,7 +99,7 @@ pub fn render_entry_definition_file(
              Ok(ValidateCallbackResult::Invalid(String::from(#deleted_invalid_reason)))
         },
     };
-    let validate_delete: TokenStream = quote! {
+    let validate_delete = quote! {
         pub fn #validate_delete_fn(
             _action: Delete,
             _original_action: EntryCreationAction,
@@ -182,33 +182,31 @@ pub fn render_entry_definition_file(
         })
         .collect();
 
-    let token_stream = quote! {
-      use hdi::prelude::*;
+    let token_stream = syn::parse_quote! {
+        use hdi::prelude::*;
 
-      #(#type_definitions)*
+        #(#type_definitions)*
 
-      #[hdk_entry_helper]
-      #[derive(Clone, PartialEq)]
-      #entry_def_token_stream
+        #[hdk_entry_helper]
+        #[derive(Clone, PartialEq)]
+        #entry_def_token_stream
 
-      pub fn #validate_create_fn(
-          _action: EntryCreationAction,
-          #create_new_entry_arg: #name_pascal
-      ) -> ExternResult<ValidateCallbackResult> {
-          #(#deps_validation)*
+        pub fn #validate_create_fn(
+            _action: EntryCreationAction,
+            #create_new_entry_arg: #name_pascal
+        ) -> ExternResult<ValidateCallbackResult> {
+            #(#deps_validation)*
 
-          /// TODO: add the appropriate validation rules
-          Ok(ValidateCallbackResult::Valid)
-      }
+            /// TODO: add the appropriate validation rules
+            Ok(ValidateCallbackResult::Valid)
+        }
 
-      #validate_update
+        #validate_update
 
-      #validate_delete
+        #validate_delete
     };
 
-    let file = syn::parse_file(token_stream.to_string().as_str())?;
-
-    Ok(file)
+    Ok(token_stream)
 }
 
 pub fn add_entry_type_to_integrity_zome(
