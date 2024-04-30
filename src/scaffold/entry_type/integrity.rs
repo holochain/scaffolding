@@ -291,23 +291,21 @@ pub use {}::*;
                 // update generic parameters
                 for item in &mut file.items {
                     if let syn::Item::Fn(item_fn) = item {
-                        if item_fn.sig.ident == "validate" {
-                            for stmt in &mut item_fn.block.stmts {
-                                if let syn::Stmt::Expr(syn::Expr::Match(match_expr), _) = stmt {
-                                    if let syn::Expr::Try(try_expr) = &mut *match_expr.expr {
-                                        if let syn::Expr::MethodCall(call) = &mut *try_expr.expr {
-                                            if call.method == "flattened" {
-                                                if let Some(turbofish) = &mut call.turbofish {
-                                                    if let Some(first_arg) =
-                                                        turbofish.args.first_mut()
-                                                    {
-                                                        *first_arg = syn::GenericArgument::Type(
-                                                            syn::parse_str::<syn::Type>(
-                                                                "EntryTypes",
-                                                            )?,
-                                                        );
-                                                    }
-                                                }
+                        if item_fn.sig.ident != "validate" {
+                            continue;
+                        }
+                        for stmt in &mut item_fn.block.stmts {
+                            if let syn::Stmt::Expr(syn::Expr::Match(match_expr), _) = stmt {
+                                if let syn::Expr::Try(try_expr) = &mut *match_expr.expr {
+                                    if let syn::Expr::MethodCall(call) = &mut *try_expr.expr {
+                                        if call.method != "flattened" {
+                                            continue;
+                                        }
+                                        if let Some(turbofish) = &mut call.turbofish {
+                                            if let Some(first_arg) = turbofish.args.first_mut() {
+                                                *first_arg = syn::GenericArgument::Type(
+                                                    syn::parse_quote! {EntryTypes},
+                                                );
                                             }
                                         }
                                     }
@@ -358,8 +356,7 @@ pub use {}::*;
 
             // If the file is lib.rs, we already have the entry struct imported so no need to import it again
             if found && file_path.file_name() != Some(OsString::from("lib.rs").as_os_str()) {
-                file.items
-                    .insert(0, syn::parse_str::<syn::Item>("use crate::*;").unwrap());
+                file.items.insert(0, syn::parse_quote! {use crate::*;});
             }
 
             Ok(file)
@@ -698,7 +695,7 @@ fn handle_store_entry_arm(
                 // Add new entry type to match arm
                 if find_ending_match_expr(&mut op_entry_arm.body).is_none() {
                     // Change empty invalid to match on entry_type
-                    *op_entry_arm.body = syn::parse_str::<syn::Expr>("match app_entry {}")?;
+                    *op_entry_arm.body = syn::parse_quote! {match app_entry {}};
                 }
 
                 // Add new entry type to match arm
