@@ -868,14 +868,9 @@ EntryTypes::{pascal_entry_def_name}({snake_entry_def_name}) => {{
                                                             let entry = match original_record.entry().as_option() {
                                                                 Some(entry) => entry,
                                                                 None => {
-                                                                    if original_action.entry_type().visibility().is_public() {
-                                                                        return Ok(ValidateCallbackResult::Invalid(
-                                                                            "Original record for a delete of a public entry must contain an entry"
-                                                                                .to_string(),
-                                                                        ));
-                                                                    } else {
-                                                                        return Ok(ValidateCallbackResult::Valid);
-                                                                    }
+                                                                    return Ok(ValidateCallbackResult::Invalid(
+                                                                        "Original record for a delete contain an entry".to_string(),
+                                                                    ));
                                                                 }
                                                             };
                                                             let original_app_entry = match EntryTypes::deserialize_from_type(
