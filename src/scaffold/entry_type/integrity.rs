@@ -225,9 +225,7 @@ fn is_create_entry(pat: &syn::Pat) -> bool {
 fn is_update_entry(pat: &syn::Pat) -> bool {
     if let syn::Pat::Struct(pat_struct) = pat {
         if let Some(ps) = pat_struct.path.segments.last() {
-            if ps.ident.to_string().eq(&String::from("UpdateEntry")) {
-                return true;
-            }
+            return ps.ident == "UpdateEntry";
         }
     }
     false
@@ -236,9 +234,7 @@ fn is_update_entry(pat: &syn::Pat) -> bool {
 fn is_delete_entry(pat: &syn::Pat) -> bool {
     if let syn::Pat::Struct(pat_struct) = pat {
         if let Some(ps) = pat_struct.path.segments.last() {
-            if ps.ident.to_string().eq(&String::from("DeleteEntry")) {
-                return true;
-            }
+            return p.ident == "DeleteEntry";
         }
     }
     false
@@ -346,16 +342,12 @@ pub use {}::*;
 
                 for item in &mut file.items {
                     if let syn::Item::Fn(item_fn) = item {
-                        if item_fn.sig.ident.to_string().eq(&String::from("validate")) {
+                        if item_fn.sig.ident == "validate" {
                             for stmt in &mut item_fn.block.stmts {
                                 if let syn::Stmt::Expr(syn::Expr::Match(match_expr), _) = stmt {
                                     if let syn::Expr::Try(try_expr) = &mut *match_expr.expr {
                                         if let syn::Expr::MethodCall(call) = &mut *try_expr.expr {
-                                            if call
-                                                .method
-                                                .to_string()
-                                                .eq(&String::from("flattened"))
-                                            {
+                                            if call.method == "flattened" {
                                                 if let Some(turbofish) = &mut call.turbofish {
                                                     if let Some(first_arg) =
                                                         turbofish.args.first_mut()
@@ -386,7 +378,7 @@ pub use {}::*;
                             a.path()
                                 .segments
                                 .iter()
-                                .any(|s| s.ident.eq("hdk_entry_types"))
+                                .any(|s| s.ident == "hdk_entry_types")
                         }) {
                             if item_enum
                                 .variants
@@ -458,7 +450,7 @@ pub fn get_all_entry_types(
                         a.path()
                             .segments
                             .iter()
-                            .any(|s| s.ident.eq("hdk_entry_types"))
+                            .any(|s| s.ident == "hdk_entry_types")
                     }) {
                         return Some(item_enum.clone());
                     }
@@ -531,12 +523,12 @@ fn add_entry_type_to_validation_arms(
     let pascal_entry_def_name = entry_def.name.to_case(Case::Pascal);
     let snake_entry_def_name = entry_def.name.to_case(Case::Snake);
     if let syn::Item::Fn(item_fn) = item {
-        if item_fn.sig.ident.to_string().eq(&String::from("validate")) {
+        if item_fn.sig.ident == "validate" {
             for stmt in &mut item_fn.block.stmts {
                 if let syn::Stmt::Expr(syn::Expr::Match(match_expr), _) = stmt {
                     if let syn::Expr::Try(try_expr) = &mut *match_expr.expr {
                         if let syn::Expr::MethodCall(call) = &mut *try_expr.expr {
-                            if call.method.to_string().eq(&String::from("flattened")) {
+                            if call.method == "flattened" {
                                 for arm in &mut match_expr.arms {
                                     if let syn::Pat::TupleStruct(pat_tuple_struct) = &mut arm.pat {
                                         if let Some(path_segment) =
@@ -544,7 +536,7 @@ fn add_entry_type_to_validation_arms(
                                         {
                                             let path_segment_str = path_segment.ident.to_string();
 
-                                            if path_segment_str.eq(&String::from("StoreRecord")) {
+                                            if path_segment_str == "StoreRecord" {
                                                 if let Some(op_entry_match_expr) =
                                                     find_ending_match_expr(&mut arm.body)
                                                 {
@@ -714,9 +706,7 @@ fn add_entry_type_to_validation_arms(
                                                         }
                                                     }
                                                 }
-                                            } else if path_segment_str
-                                                .eq(&String::from("StoreEntry"))
-                                            {
+                                            } else if path_segment_str == "StoreEntry" {
                                                 if let Some(op_entry_match_expr) =
                                                     find_ending_match_expr(&mut arm.body)
                                                 {
@@ -785,9 +775,7 @@ fn add_entry_type_to_validation_arms(
                                                         }
                                                     }
                                                 }
-                                            } else if path_segment_str
-                                                .eq(&String::from("RegisterUpdate"))
-                                            {
+                                            } else if path_segment_str == "RegisterUpdate" {
                                                 if let Some(op_entry_match_expr) =
                                                     find_ending_match_expr(&mut arm.body)
                                                 {
@@ -848,17 +836,17 @@ EntryTypes::{pascal_entry_def_name}({snake_entry_def_name}) => {{
                                                         }
                                                     }
                                                 }
-                                            } else if path_segment_str
-                                                .eq(&String::from("RegisterDelete"))
-                                            {
+                                            } else if path_segment_str == "RegisterDelete" {
                                                 if find_ending_match_expr(&mut arm.body).is_none() {
                                                     *arm.body = syn::parse_quote! {
                                                         {
                                                             let original_action_hash = delete_entry.clone().action.deletes_address;
                                                             let original_record = must_get_valid_record(original_action_hash)?;
                                                             let original_record_action = original_record.action().clone();
-                                                            let original_action = EntryCreationAction::try_from(original_record_action)
-                                                                .map_err(|e| wasm_error!(e.to_string()))?;
+                                                            let original_action = match EntryCreationAction::try_from(original_record_action) {
+                                                                Ok(action) => action,
+                                                                Err(e) => return Ok(ValidateCallbackResult::Invalid(e.to_string())),
+                                                            };
                                                             let app_entry_type = match original_action.entry_type() {
                                                                 EntryType::App(app_entry_type) => app_entry_type,
                                                                 _ => {
