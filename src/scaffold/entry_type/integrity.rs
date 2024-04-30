@@ -267,25 +267,20 @@ pub use {}::*;
 
             // If there are no entry types definitions in this zome, first add the empty enum
             if entry_types.is_none() && file_path == PathBuf::from("lib.rs") {
-                let entry_types_item = syn::parse_str::<syn::Item>(
-                    "#[derive(Serialize, Deserialize)]
-                     #[serde(tag = \"type\")]
-                     #[hdk_entry_types]
-                     #[unit_enum(UnitEntryTypes)]
-                     pub enum EntryTypes {}",
-                )?;
+                let entry_types_item = syn::parse_quote! {
+                    #[derive(Serialize, Deserialize)]
+                    #[serde(tag = "type")]
+                    #[hdk_entry_types]
+                    #[unit_enum(UnitEntryTypes)]
+                    pub enum EntryTypes {}
+                };
 
                 // Insert the entry types just before LinkTypes or before the first function if LinkTypes doesn't exist
-                match file.items.iter().find_position(|i| {
-                    if let syn::Item::Enum(item_enum) = i {
-                        if item_enum.ident.to_string().eq(&String::from("LinkTypes")) {
-                            return true;
-                        }
+                match file.items.iter().find_position(|item| {
+                    if let syn::Item::Enum(item_enum) = item {
+                        return item_enum.ident == "LinkTypes";
                     }
-                    if let syn::Item::Fn(_) = i {
-                        return true;
-                    }
-                    false
+                    matches!(item, syn::Item::Fn(_))
                 }) {
                     Some((i, _)) => {
                         file.items.insert(i, entry_types_item);
@@ -326,10 +321,10 @@ pub use {}::*;
             file.items = file
                 .items
                 .into_iter()
-                .map(|mut i| {
-                    if let syn::Item::Enum(mut item_enum) = i.clone() {
-                        if item_enum.attrs.iter().any(|a| {
-                            a.path()
+                .map(|mut item| {
+                    if let syn::Item::Enum(mut item_enum) = item.clone() {
+                        if item_enum.attrs.iter().any(|attr| {
+                            attr.path()
                                 .segments
                                 .iter()
                                 .any(|s| s.ident == "hdk_entry_types")
@@ -337,29 +332,27 @@ pub use {}::*;
                             if item_enum
                                 .variants
                                 .iter()
-                                .any(|v| v.ident.to_string().eq(&pascal_entry_def_name))
+                                .any(|v| v.ident == &pascal_entry_def_name)
                             {
                                 return Err(ScaffoldError::EntryTypeAlreadyExists(
                                     pascal_entry_def_name.clone(),
                                     dna_manifest.name(),
-                                    zome_file_tree.zome_manifest.name.0.to_string(),
+                                    zome_file_tree.zome_manifest.name.to_string(),
                                 ));
                             }
-
                             found = true;
-                            let new_variant = syn::parse_str::<syn::Variant>(
-                                format!("{}({})", pascal_entry_def_name, pascal_entry_def_name)
-                                    .as_str(),
-                            )
+                            let new_variant = syn::parse_str::<syn::Variant>(&format!(
+                                "{pascal_entry_def_name}({pascal_entry_def_name})"
+                            ))
                             .unwrap();
                             item_enum.variants.push(new_variant);
                             return Ok(syn::Item::Enum(item_enum));
                         }
                     }
 
-                    add_entry_type_to_validation_arms(&mut i, entry_def)?;
+                    add_entry_type_to_validation_arms(&mut item, entry_def)?;
 
-                    Ok(i)
+                    Ok(item)
                 })
                 .collect::<ScaffoldResult<Vec<syn::Item>>>()?;
 
@@ -543,14 +536,14 @@ fn handle_store_record_arm(
 
                 // Add new entry type to match arm
                 if let Some(entry_type_match) = find_ending_match_expr(&mut op_record_arm.body) {
-                    let new_arm = syn::parse_str(
-                        &format!("EntryTypes::{}({}) => validate_create_{}(EntryCreationAction::Create(action), {}),", 
-                            pascal_entry_def_name,
-                            snake_entry_def_name,
-                            snake_entry_def_name,
-                            snake_entry_def_name
-                        )
-                    )?;
+                    let new_arm = syn::parse_str(&format!(
+                        r#"EntryTypes::{pascal_entry_def_name}({snake_entry_def_name}) => {{
+                            validate_create_{snake_entry_def_name}(
+                                EntryCreationAction::Create(action),
+                                {snake_entry_def_name},
+                            )
+                        }}"#
+                    ))?;
                     entry_type_match.arms.push(new_arm);
                 }
             } else if is_entry(&op_record_arm.pat, "UpdateEntry") {
@@ -565,7 +558,9 @@ fn handle_store_record_arm(
                                 Action::Create(create) => EntryCreationAction::Create(create),
                                 Action::Update(update) => EntryCreationAction::Update(update),
                                 _ => {
-                                    return Ok(ValidateCallbackResult::Invalid("Original action for an update must be a Create or Update action".to_string()));
+                                    return Ok(ValidateCallbackResult::Invalid(
+                                        "Original action for an update must be a Create or Update action".to_string()
+                                    ));
                                 }
                             };
                             match app_entry {}
@@ -579,14 +574,24 @@ fn handle_store_record_arm(
                         r#"EntryTypes::{pascal_entry_def_name}({snake_entry_def_name}) => {{
                             let result = validate_create_{snake_entry_def_name}(EntryCreationAction::Update(action.clone()), {snake_entry_def_name}.clone())?;
                             if let ValidateCallbackResult::Valid = result {{
-                                let original_{snake_entry_def_name}: Option<{pascal_entry_def_name}> = original_record.entry().to_app_option().map_err(|e| wasm_error!(e))?;
+                                let original_{snake_entry_def_name}: Option<{pascal_entry_def_name}> = original_record
+                                    .entry()
+                                    .to_app_option()
+                                    .map_err(|e| wasm_error!(e))?;
                                 let original_{snake_entry_def_name} = match original_{snake_entry_def_name} {{
                                     Some({snake_entry_def_name}) => {snake_entry_def_name},
                                     None => {{
-                                        return Ok(ValidateCallbackResult::Invalid("The updated entry type must be the same as the original entry type".to_string()));
+                                        return Ok(ValidateCallbackResult::Invalid(
+                                            "The updated entry type must be the same as the original entry type".to_string()
+                                        ));
                                     }}
                                 }};
-                                validate_update_{snake_entry_def_name}(action, {snake_entry_def_name}, original_action, original_{snake_entry_def_name})
+                                validate_update_{snake_entry_def_name}(
+                                    action,
+                                    {snake_entry_def_name},
+                                    original_action,
+                                    original_{snake_entry_def_name},
+                                )
                             }} else {{
                                 Ok(result)
                             }}
@@ -606,7 +611,9 @@ fn handle_store_record_arm(
                                 Action::Create(create) => EntryCreationAction::Create(create),
                                 Action::Update(update) => EntryCreationAction::Update(update),
                                 _ => {
-                                    return Ok(ValidateCallbackResult::Invalid("Original action for a delete must be a Create or Update action".to_string()));
+                                    return Ok(ValidateCallbackResult::Invalid(
+                                        "Original action for a delete must be a Create or Update action".to_string()
+                                    ));
                                 }
                             };
                             let app_entry_type = match original_action.entry_type() {
@@ -643,14 +650,15 @@ fn handle_store_record_arm(
 
                 // Add new entry type to match arm
                 if let Some(entry_type_match) = find_ending_match_expr(&mut op_record_arm.body) {
-                    let new_arm = syn::parse_str(
-                        &format!("EntryTypes::{}(original_{}) => validate_delete_{}(action, original_action, original_{}),", 
-                            pascal_entry_def_name,
-                            snake_entry_def_name,
-                            snake_entry_def_name,
-                            snake_entry_def_name,
-                        )
-                    )?;
+                    let new_arm = syn::parse_str(&format!(
+                        r#"EntryTypes::{pascal_entry_def_name}(original_{snake_entry_def_name}) => {{
+                            validate_delete_{snake_entry_def_name}(
+                                action, 
+                                original_action, 
+                                original_{snake_entry_def_name},
+                            )
+                        }}"#
+                    ))?;
                     entry_type_match.arms.push(new_arm);
                 }
             }
@@ -675,14 +683,14 @@ fn handle_store_entry_arm(
 
                 // Add new entry type to match arm
                 if let Some(entry_type_match) = find_ending_match_expr(&mut op_entry_arm.body) {
-                    let new_arm = syn::parse_str(
-                        &format!("EntryTypes::{}({}) => validate_create_{}(EntryCreationAction::Create(action), {}),", 
-                            pascal_entry_def_name,
-                            snake_entry_def_name,
-                            snake_entry_def_name,
-                            snake_entry_def_name,
-                        )
-                    )?;
+                    let new_arm = syn::parse_str(&format!(
+                        r#"EntryTypes::{pascal_entry_def_name}({snake_entry_def_name}) => {{
+                                validate_create_{snake_entry_def_name}(
+                                    EntryCreationAction::Create(action),
+                                    {snake_entry_def_name},
+                                )
+                        }},"#
+                    ))?;
                     entry_type_match.arms.push(new_arm);
                 }
             } else if is_entry(&op_entry_arm.pat, "UpdateEntry") {
@@ -694,14 +702,14 @@ fn handle_store_entry_arm(
 
                 // Add new entry type to match arm
                 if let Some(entry_type_match) = find_ending_match_expr(&mut op_entry_arm.body) {
-                    let new_arm = syn::parse_str(
-                        &format!("EntryTypes::{}({}) => validate_create_{}(EntryCreationAction::Update(action), {}),", 
-                            pascal_entry_def_name,
-                            snake_entry_def_name,
-                            snake_entry_def_name,
-                            snake_entry_def_name,
-                        )
-                    )?;
+                    let new_arm = syn::parse_str(&format!(
+                        r#"EntryTypes::{pascal_entry_def_name}({snake_entry_def_name}) => {{
+                                validate_create_{snake_entry_def_name}(
+                                    EntryCreationAction::Update(action),
+                                    {snake_entry_def_name},
+                                )
+                        }}"#
+                    ))?;
                     entry_type_match.arms.push(new_arm);
                 }
             }
@@ -752,11 +760,16 @@ fn handle_register_update_arm(
                                         Ok(entry) => entry,
                                         Err(e) => {{
                                             return Ok(ValidateCallbackResult::Invalid(
-                                                "Expected to get {pascal_entry_def_name} from Record".to_string()
+                                                format!("Expected to get {pascal_entry_def_name} from Record: {{e:?}}")
                                             ));
                                         }}
                                     }};
-                                    validate_update_{snake_entry_def_name}(action, {snake_entry_def_name}, original_create_action, original_{snake_entry_def_name})
+                                    validate_update_{snake_entry_def_name}(
+                                        action,
+                                        {snake_entry_def_name},
+                                        original_create_action,
+                                        original_{snake_entry_def_name},
+                                    )
                                 }}"#,
                             ))?;
                             entry_type_match.arms.insert(0, new_arm);
@@ -782,9 +795,9 @@ fn handle_register_delete_arm(
                 let original_record_action = original_record.action().clone();
                 let original_action = match EntryCreationAction::try_from(original_record_action) {
                     Ok(action) => action,
-                    Err(e) => return Ok(ValidateCallbackResult::Invalid(
-                        format!("Expected to get EntryCreationAction from Action: {e:?}")
-                    )),
+                    Err(e) => return Ok(ValidateCallbackResult::Invalid(format!(
+                        "Expected to get EntryCreationAction from Action: {e:?}"
+                    ))),
                 };
                 let app_entry_type = match original_action.entry_type() {
                     EntryType::App(app_entry_type) => app_entry_type,
@@ -822,7 +835,11 @@ fn handle_register_delete_arm(
     if let Some(match_expr) = find_ending_match_expr(&mut arm.body) {
         let new_arm = syn::parse_str(&format!(
             r#"EntryTypes::{pascal_entry_def_name}(original_{snake_entry_def_name}) => {{
-                validate_delete_{snake_entry_def_name}(delete_entry.clone().action, original_action, original_{snake_entry_def_name})
+                validate_delete_{snake_entry_def_name}(
+                    delete_entry.clone().action, 
+                    original_action, 
+                    original_{snake_entry_def_name}
+                )
             }}"#,
         ))?;
         match_expr.arms.insert(0, new_arm);
@@ -841,6 +858,7 @@ pub fn find_ending_match_expr_in_block(block: &mut syn::Block) -> Option<&mut sy
         None
     }
 }
+
 pub fn find_ending_match_expr(e: &mut syn::Expr) -> Option<&mut syn::ExprMatch> {
     match e {
         syn::Expr::Match(expr_match) => Some(expr_match),
