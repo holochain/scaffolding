@@ -335,10 +335,10 @@ pub use {}::*;
                                 ));
                             }
                             found = true;
-                            let new_variant = syn::parse_str::<syn::Variant>(&format!(
-                                "{pascal_entry_def_name}({pascal_entry_def_name})"
-                            ))
-                            .unwrap();
+                            let pascal_entry_def_name = format_ident!("{pascal_entry_def_name}");
+                            let new_variant = syn::parse_quote! {
+                                #pascal_entry_def_name(#pascal_entry_def_name)
+                            };
                             item_enum.variants.push(new_variant);
                             return Ok(syn::Item::Enum(item_enum));
                         }
@@ -463,7 +463,7 @@ fn add_entry_type_to_validation_arms(
     let pascal_entry_def_name = entry_def.name.to_case(Case::Pascal);
     let snake_entry_def_name = entry_def.name.to_case(Case::Snake);
     if let syn::Item::Fn(item_fn) = item {
-        // early exit if #[hdk_extern] annotated validate function does not exist
+        // early exit if # annotated validate function does not exist
         if item_fn.sig.ident != "validate" {
             return Ok(());
         }
