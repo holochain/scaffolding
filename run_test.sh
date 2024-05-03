@@ -6,20 +6,26 @@ TEMPLATE_PATH="/tmp"
 APP_NAME="forum"
 TEMPLATE_NAME=
 SCOPE=
+OVERRIDE_HOLOCHAIN_VERSION=
 
 # parse args
-while getopts ":t:s:" opt; do
+while getopts ":t:s:o:" opt; do
   case $opt in
-  t) TEMPLATE_NAME="$OPTARG" ;;
-  s) SCOPE="$OPTARG" ;;
-  \?)
-    echo "Invalid option: -$OPTARG" >&2
-    exit 1
-    ;;
-  :)
-    echo "Option -$OPTARG requires an argument." >&2
-    exit 1
-    ;;
+    t) TEMPLATE_NAME="$OPTARG" ;;
+    s) SCOPE="$OPTARG" ;;
+    o) OVERRIDE_HOLOCHAIN_VERSION="$OPTARG" ;;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2
+      exit 1
+      ;;
+    :)
+      if [ "$OPTARG" == "o" ]; then
+        OVERRIDE_HOLOCHAIN_VERSION=
+        continue
+      fi
+      echo "Option -$OPTARG requires an argument." >&2
+      exit 1
+      ;;
   esac
 done
 
@@ -29,6 +35,10 @@ cleanup_tmp() {
 
 print_version() {
   echo "$(hc-scaffold --version)"
+}
+
+build_test_with_overriden_holochain_version() {
+   nix develop --override-input "versions/holochain" github:holochain/holochain/$OVERRIDE_HOLOCHAIN_VERSION --command bash -c $1
 }
 
 setup_and_build_happ() {
@@ -57,6 +67,18 @@ setup_and_build_happ() {
   hc-scaffold link-type certificate:EntryHash like --delete false --bidirectional false
   hc-scaffold link-type agent:creator post:EntryHash --delete false --bidirectional true
 
+  if [[ -n "$OVERRIDE_HOLOCHAIN_VERSION" ]]; then
+    build_test_with_overriden_holochain_version "
+      set -e
+      npm i
+      npm run build -w ui
+      npm t
+      npm run package
+    "
+    cd ..
+    exit 0
+  fi
+
   nix develop --command bash -c "
     set -e
     npm i
@@ -75,6 +97,16 @@ setup_and_build_hello_world() {
   hc-scaffold example hello-world
   cd hello-world
 
+  if [[ -n "$OVERRIDE_HOLOCHAIN_VERSION" ]]; then
+    build_test_with_overriden_holochain_version "
+      set -e
+      npm i
+      npm t 
+    "
+    cd ..
+    exit 0
+  fi
+  
   nix develop --command bash -c "
     set -e
     npm i
