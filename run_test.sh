@@ -37,6 +37,10 @@ print_version() {
   echo "$(hc-scaffold --version)"
 }
 
+build_test_with_overriden_holochain_version() {
+   nix develop --override-input "versions/holochain" github:holochain/holochain/$OVERRIDE_HOLOCHAIN_VERSION --command bash -c $1
+}
+
 setup_and_build_happ() {
   print_version
   cleanup_tmp "$1"
@@ -64,13 +68,13 @@ setup_and_build_happ() {
   hc-scaffold link-type agent:creator post:EntryHash --delete false --bidirectional true
 
   if [[ -n "$OVERRIDE_HOLOCHAIN_VERSION" ]]; then
-    nix develop --override-input "versions/holochain" github:holochain/holochain/$OVERRIDE_HOLOCHAIN_VERSION --command bash -c "
+    build_test_with_overriden_holochain_version "
       set -e
       npm i
       npm run build -w ui
       npm t
       npm run package
-      "
+    "
     cd ..
     exit 0
   fi
@@ -94,11 +98,11 @@ setup_and_build_hello_world() {
   cd hello-world
 
   if [[ -n "$OVERRIDE_HOLOCHAIN_VERSION" ]]; then
-    nix develop --override-input "versions/holochain" github:holochain/holochain/$OVERRIDE_HOLOCHAIN_VERSION --command bash -c "
+    build_test_with_overriden_holochain_version "
       set -e
       npm i
       npm t 
-      "
+    "
     cd ..
     exit 0
   fi
