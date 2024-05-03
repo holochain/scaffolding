@@ -17,7 +17,8 @@ use crate::scaffold::example::{choose_example, Example};
 use crate::scaffold::link_type::scaffold_link_type;
 use crate::scaffold::web_app::scaffold_web_app;
 use crate::scaffold::web_app::uis::{
-    choose_ui_framework, guess_or_choose_framework, template_for_ui_framework, UiFramework,
+    choose_non_vanilla_ui_framework, choose_ui_framework, guess_or_choose_framework,
+    template_for_ui_framework, UiFramework,
 };
 use crate::scaffold::zome::utils::{select_integrity_zomes, select_scaffold_zome_options};
 use crate::scaffold::zome::{
@@ -262,7 +263,7 @@ impl HcScaffold {
                     HcScaffoldCommand::WebApp { .. } => choose_ui_framework()?,
                     HcScaffoldCommand::Example { ref example, .. } => match example {
                         Some(Example::HelloWorld) => UiFramework::Vanilla,
-                        _ => choose_ui_framework()?,
+                        _ => choose_non_vanilla_ui_framework()?,
                     },
                     _ => {
                         let file_tree = load_directory_into_memory(&current_dir)?;
