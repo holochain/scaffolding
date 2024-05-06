@@ -1,5 +1,5 @@
 /// npm: https://www.npmjs.com/package/@holochain/tryorama
-pub const TRYORAMA_VERSION: &str = "^v0.16.0-dev.5";
+pub const TRYORAMA_VERSION: &str = "^v0.16.0-dev.6";
 
 /// npm: https://www.npmjs.com/package/@holochain/client
 pub const HOLOCHAIN_CLIENT_VERSION: &str = "^0.17.0-dev.12";
