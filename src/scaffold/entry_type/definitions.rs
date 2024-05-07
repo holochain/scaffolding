@@ -34,6 +34,7 @@ pub enum FieldType {
 
 impl TryFrom<String> for FieldType {
     type Error = ScaffoldError;
+
     fn try_from(value: String) -> Result<Self, Self::Error> {
         let list = FieldType::list();
 
@@ -202,6 +203,7 @@ pub struct EntryTypeReference {
     pub entry_type: String,
     pub reference_entry_hash: bool,
 }
+
 impl EntryTypeReference {
     pub fn hash_type(&self) -> FieldType {
         match self.reference_entry_hash {
@@ -209,6 +211,7 @@ impl EntryTypeReference {
             false => FieldType::ActionHash,
         }
     }
+
     pub fn field_name(&self, cardinality: &Cardinality) -> String {
         match cardinality {
             Cardinality::Vector => format!(
@@ -218,6 +221,7 @@ impl EntryTypeReference {
             _ => format!("{}_hash", self.entry_type.to_case(Case::Snake)),
         }
     }
+
     pub fn to_string(&self, c: &Cardinality) -> String {
         match c {
             Cardinality::Vector => pluralizer::pluralize(self.entry_type.as_str(), 2, false),
@@ -252,6 +256,7 @@ pub enum Referenceable {
     Agent { role: String },
     EntryType(EntryTypeReference),
 }
+
 impl Serialize for Referenceable {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
