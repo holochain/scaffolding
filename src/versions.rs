@@ -1,32 +1,26 @@
-pub fn tryorama_version() -> String {
-    String::from("^v0.16.0-dev.3")
-}
+/// npm: https://www.npmjs.com/package/@holochain/tryorama
+pub const TRYORAMA_VERSION: &str = "^0.16.0-dev.6";
 
-pub fn holochain_client_version() -> String {
-    String::from("^0.17.0-dev.9")
-}
+/// npm: https://www.npmjs.com/package/@holochain/client
+pub const HOLOCHAIN_CLIENT_VERSION: &str = "^0.17.0-dev.12";
 
-pub fn hc_spin_version() -> String {
-    String::from("0.300.2-dev.3")
-}
+/// npm: https://www.npmjs.com/package/@holochain/hc-spin
+pub const HC_SPIN_VERSION: &str = "0.300.2-dev.5";
 
 // TODO: update to 0.3 compatible version
-pub fn web_sdk_version() -> String {
-    String::from("^0.6.10-prerelease")
-}
+/// npm: https://www.npmjs.com/package/@holo-host/web-sdk
+pub const WEB_SDK_VERSION: &str = "^0.6.19-prerelease";
 
-pub fn hdi_version() -> String {
-    holochain::HDI_VERSION.to_string()
-}
+pub const HDI_VERSION: &str = holochain::HDI_VERSION;
 
-pub fn hdk_version() -> String {
-    holochain::HDK_VERSION.to_string()
-}
+pub const HDK_VERSION: &str = holochain::HDK_VERSION;
 
-pub fn holochain_version() -> String {
-    holochain::HOLOCHAIN_VERSION.to_string()
-}
+pub const HOLOCHAIN_VERSION: &str = holochain::HOLOCHAIN_VERSION;
 
-pub fn holochain_nix_version() -> String {
-    String::from("weekly")
-}
+/// https://github.com/holochain/holochain/tree/develop/versions
+pub const HOLOCHAIN_NIX_VERSION: &str = "weekly";
+
+/// source: https://github.com/darksoil-studio/holochain-playground/tree/main/packages/cli/server
+///
+/// npm: https://www.npmjs.com/package/@holochain-playground/cli
+pub const HOLOCHAIN_PLAYGROUND_CLI_VERSION: &str = "^0.2.0";

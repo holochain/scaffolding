@@ -1,6 +1,6 @@
 import { LitElement, html } from 'lit';
 import { state, customElement, property } from 'lit/decorators.js';
-import { AppAgentClient, AgentPubKey, Link, EntryHash, ActionHash, Record, NewEntryAction } from '@holochain/client';
+import { AppClient, AgentPubKey, Link, EntryHash, ActionHash, Record, NewEntryAction } from '@holochain/client';
 import { consume } from '@lit-labs/context';
 import { Task } from '@lit-labs/task';
 import '@material/mwc-circular-progress';
@@ -13,7 +13,7 @@ import './{{kebab_case referenceable.name}}-detail';
 @customElement('{{kebab_case collection_name}}')
 export class {{pascal_case collection_name}} extends LitElement {
   @consume({ context: clientContext })
-  client!: AppAgentClient;
+  client!: AppClient;
   
 {{#if (eq collection_type.type "ByAuthor")}}
   @property({

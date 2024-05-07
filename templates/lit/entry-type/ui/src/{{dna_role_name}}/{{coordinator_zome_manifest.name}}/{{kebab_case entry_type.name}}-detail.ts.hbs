@@ -1,6 +1,6 @@
 import { LitElement, html } from 'lit';
 import { state, customElement, property } from 'lit/decorators.js';
-import { EntryHash, Record, ActionHash, AppAgentClient, DnaHash } from '@holochain/client';
+import { EntryHash, Record, ActionHash, AppClient, DnaHash } from '@holochain/client';
 import { consume } from '@lit-labs/context';
 import { Task } from '@lit-labs/task';
 import { decode } from '@msgpack/msgpack';
@@ -27,7 +27,7 @@ import { {{pascal_case entry_type.name}}{{#each entry_type.fields}}{{#if (eq fie
 @customElement('{{kebab_case entry_type.name}}-detail')
 export class {{pascal_case entry_type.name}}Detail extends LitElement {
   @consume({ context: clientContext })
-  client!: AppAgentClient;
+  client!: AppClient;
 
   @property({
     hasChanged: (newVal: {{#if entry_type.reference_entry_hash}}EntryHash{{else}}ActionHash{{/if}}, oldVal: {{#if entry_type.reference_entry_hash}}EntryHash{{else}}ActionHash{{/if}}) => newVal?.toString() !== oldVal?.toString()

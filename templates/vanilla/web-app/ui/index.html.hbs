@@ -25,11 +25,10 @@
     <div id="content"></div>
 
     <script type="module">
-      import { AppWebsocket, AppAgentWebsocket } from '@holochain/client';
+      import { AppWebsocket } from '@holochain/client';
       
       async function connect() {
-        // We pass an unused string as the url because it will dynamically be replaced in launcher environments
-        const appAgentWebsocket = await AppAgentWebsocket.connect('{{app_name}}');
+        const AppWebsocket = await AppWebsocket.connect();
         
         alert("Connected to holochain!");
       }

@@ -35,7 +35,7 @@
     </div>
 
     <script type="module">
-      import { AppWebsocket, AppAgentWebsocket, encodeHashToBase64 } from '@holochain/client';
+      import { AppWebsocket, encodeHashToBase64 } from '@holochain/client';
       import renderIcon from '@holo-host/identicon'
       
       let client = undefined
@@ -45,7 +45,7 @@
       }
       
       async function connect() {
-        client = await AppAgentWebsocket.connect('hello-world');
+        client = await AppWebsocket.connect();
         const canvas = document.getElementById('pubkey')
         pubkey.title = encodeHashToBase64(client.myPubKey)
         const opts = {

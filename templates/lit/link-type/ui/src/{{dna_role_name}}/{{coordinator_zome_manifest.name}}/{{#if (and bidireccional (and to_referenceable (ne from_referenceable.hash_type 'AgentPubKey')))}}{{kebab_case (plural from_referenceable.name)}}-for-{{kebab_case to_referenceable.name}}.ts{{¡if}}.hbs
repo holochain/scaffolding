@@ -1,6 +1,6 @@
 import { LitElement, html } from 'lit';
 import { state, property, customElement } from 'lit/decorators.js';
-import { AgentPubKey, Link, EntryHash, ActionHash, Record, AppAgentClient, NewEntryAction } from '@holochain/client';
+import { AgentPubKey, Link, EntryHash, ActionHash, Record, AppClient, NewEntryAction } from '@holochain/client';
 import { consume } from '@lit-labs/context';
 import { Task } from '@lit-labs/task';
 import { clientContext } from '../../contexts';
@@ -12,7 +12,7 @@ import './{{kebab_case from_referenceable.name}}-detail';
 @customElement('{{kebab_case (plural from_referenceable.name)}}-for-{{kebab_case to_referenceable.name}}')
 export class {{pascal_case (plural from_referenceable.name)}}For{{pascal_case to_referenceable.name}} extends LitElement {
   @consume({ context: clientContext })
-  client!: AppAgentClient;
+  client!: AppClient;
   
   @property({
     hasChanged: (newVal: {{to_referenceable.hash_type}}, oldVal: {{to_referenceable.hash_type}}) => newVal?.toString() !== oldVal?.toString()

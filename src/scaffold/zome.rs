@@ -15,7 +15,7 @@ use crate::{
         integrity::scaffold_integrity_zome_templates, ScaffoldedTemplate,
     },
     utils::input_with_case,
-    versions::{hdi_version, hdk_version},
+    versions,
 };
 use build_fs_tree::{dir, file};
 use holochain_types::prelude::{DnaManifest, ZomeManifest};
@@ -334,10 +334,16 @@ fn try_to_guess_coordinator_zomes_location(
 pub fn add_common_zome_dependencies_to_workspace_cargo(
     file_tree: FileTree,
 ) -> ScaffoldResult<FileTree> {
-    let file_tree =
-        add_workspace_external_dependency(file_tree, "hdi", &format!("={}", hdi_version()))?;
-    let file_tree =
-        add_workspace_external_dependency(file_tree, "hdk", &format!("={}", hdk_version()))?;
+    let file_tree = add_workspace_external_dependency(
+        file_tree,
+        "hdi",
+        &format!("={}", versions::HDI_VERSION),
+    )?;
+    let file_tree = add_workspace_external_dependency(
+        file_tree,
+        "hdk",
+        &format!("={}", versions::HDK_VERSION),
+    )?;
     let file_tree = add_workspace_external_dependency(file_tree, "serde", "1.0")?;
     Ok(file_tree)
 }

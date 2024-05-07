@@ -1,14 +1,14 @@
 <script lang="ts">
 import { onMount, getContext } from 'svelte';
 import '@material/mwc-circular-progress';
-import type { Link, ActionHash, EntryHash, AppAgentClient, Record, AgentPubKey, NewEntryAction } from '@holochain/client';
+import type { Link, ActionHash, EntryHash, AppClient, Record, AgentPubKey, NewEntryAction } from '@holochain/client';
 import { clientContext } from '../../contexts';
 import type { {{pascal_case ../entry_type.name}}, {{pascal_case ../coordinator_zome_manifest.name}}Signal } from './types';
 import {{pascal_case ../entry_type.name}}Detail from './{{pascal_case ../entry_type.name}}Detail.svelte';
 
 export let {{camel_case linked_from.singular_arg}}: {{linked_from.hash_type}};
 
-let client: AppAgentClient = (getContext(clientContext) as any).getClient();
+let client: AppClient = (getContext(clientContext) as any).getClient();
 
 let hashes: Array<ActionHash> | undefined = [];
 

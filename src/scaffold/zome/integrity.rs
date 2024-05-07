@@ -74,35 +74,25 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
             _ => Ok(ValidateCallbackResult::Valid)
         },
         FlatOp::RegisterUpdate(update_entry) => match update_entry {
-            OpUpdate::Entry {
-                original_action,
-                original_app_entry,
-                app_entry,
-                action
-            } => Ok(ValidateCallbackResult::Invalid(
-                "There are no entry types in this integrity zome".to_string(),
-            )),
+            OpUpdate::Entry { app_entry, action } => {
+                Ok(ValidateCallbackResult::Invalid(
+                    "There are no entry types in this integrity zome".to_string(),
+                ))
+            },
             _ => Ok(ValidateCallbackResult::Valid)
         },
-        FlatOp::RegisterDelete(delete_entry) => match delete_entry {
-            OpDelete::Entry {
-                original_action,
-                original_app_entry,
-                action
-            } => Ok(ValidateCallbackResult::Invalid(
-                "There are no entry types in this integrity zome".to_string(),
-            )),
-            _ => Ok(ValidateCallbackResult::Valid),
-        },
+        FlatOp::RegisterDelete(delete_entry) => Ok(ValidateCallbackResult::Invalid(
+            "There are no entry types in this integrity zome".to_string(),
+        )),
         FlatOp::RegisterCreateLink {
             link_type,
             base_address,
             target_address,
             tag,
             action
-        } => Ok(ValidateCallbackResult::Invalid(String::from(
-            "There are no link types in this integrity zome",
-        ))),
+        } => Ok(ValidateCallbackResult::Invalid(
+            "There are no link types in this integrity zome".to_string()
+        )),
         FlatOp::RegisterDeleteLink {
             link_type,
             base_address,
@@ -110,9 +100,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
             tag,
             original_action,
             action
-        } => Ok(ValidateCallbackResult::Invalid(String::from(
-            "There are no link types in this integrity zome",
-        ))),
+        } => Ok(ValidateCallbackResult::Invalid("There are no link types in this integrity zome".to_string())),
         FlatOp::StoreRecord(store_record) => match store_record {
             /// Complementary validation to the `StoreEntry` Op, in which the record itself is validated
             /// If you want to optimize performance, you can remove the validation for an entry type here and keep it in `StoreEntry`

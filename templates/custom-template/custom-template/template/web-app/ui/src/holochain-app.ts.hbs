@@ -1,9 +1,9 @@
 import { LitElement, css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import {
-  AppAgentWebsocket,
+  AppWebsocket,
   ActionHash,
-  AppAgentClient,
+  AppClient,
 } from '@holochain/client';
 {{#if holo_enabled}}
 import WebSdk from '@holo-host/web-sdk'
@@ -27,7 +27,7 @@ export class HolochainApp extends LitElement {
 
   @provide({ context: clientContext })
   @property({ type: Object })
-  client!: AppAgentClient;
+  client!: AppClient;
 
   async firstUpdated() {
   {{#if holo_enabled}}
@@ -47,11 +47,11 @@ export class HolochainApp extends LitElement {
     this.client = client;
 
     } else {
-      this.client = await AppAgentWebsocket.connect('{{app_name}}');
+      this.client = await AppWebsocket.connect();
       this.loading = false;
     }
   {{else}}
-    this.client = await AppAgentWebsocket.connect('{{app_name}}');
+    this.client = await AppWebsocket.connect();
     this.loading = false;
   {{/if}}
   }
