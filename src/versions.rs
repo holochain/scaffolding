@@ -1,13 +1,13 @@
 /// npm: https://www.npmjs.com/package/@holochain/tryorama
-pub const TRYORAMA_VERSION: &str = "^0.16.0-dev.6";
+pub const TRYORAMA_VERSION: &str = "^0.17.0-dev.0";
 
 /// npm: https://www.npmjs.com/package/@holochain/client
-pub const HOLOCHAIN_CLIENT_VERSION: &str = "^0.17.0-dev.12";
+pub const HOLOCHAIN_CLIENT_VERSION: &str = "^0.18.0-dev.0";
 
 /// npm: https://www.npmjs.com/package/@holochain/hc-spin
-pub const HC_SPIN_VERSION: &str = "0.300.2-dev.5";
+pub const HC_SPIN_VERSION: &str = "^0.400.0-dev.0";
 
-// TODO: update to 0.3 compatible version
+// TODO: update to 0.4 compatible version
 /// npm: https://www.npmjs.com/package/@holo-host/web-sdk
 pub const WEB_SDK_VERSION: &str = "^0.6.19-prerelease";
 
