@@ -10,17 +10,19 @@ pub enum Example {
     Forum,
 }
 
-impl ToString for Example {
-    fn to_string(&self) -> String {
-        match self {
-            Example::HelloWorld => String::from("hello-world"),
-            Example::Forum => String::from("forum"),
-        }
+impl std::fmt::Display for Example {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let str = match self {
+            Example::HelloWorld => "hello-world",
+            Example::Forum => "forum",
+        };
+        write!(f, "{str}")
     }
 }
 
 impl FromStr for Example {
     type Err = ScaffoldError;
+
     fn from_str(s: &str) -> ScaffoldResult<Self> {
         match s {
             "hello-world" => Ok(Example::HelloWorld),

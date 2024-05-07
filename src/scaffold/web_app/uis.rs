@@ -20,15 +20,15 @@ pub enum UiFramework {
     Vue,
 }
 
-impl ToString for UiFramework {
-    fn to_string(&self) -> String {
-        match self {
+impl std::fmt::Display for UiFramework {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let str = match self {
             UiFramework::Vanilla => "vanilla",
             UiFramework::Lit => "lit",
             UiFramework::Svelte => "svelte",
             UiFramework::Vue => "vue",
-        }
-        .into()
+        };
+        write!(f, "{str}")
     }
 }
 

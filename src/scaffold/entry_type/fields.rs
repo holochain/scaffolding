@@ -252,8 +252,8 @@ pub fn choose_field(
             let link_from = Confirm::with_theme(&ColorfulTheme::default())
                     .with_prompt(
                         format!(
-                            "Should a link from the {} provided in this field also be created when entries of this type are created?", 
-                            field_type.to_string())
+                            "Should a link from the {field_type} provided in this field also be created when entries of this type are created?", 
+                        )
                     )
                     .interact()?;
 

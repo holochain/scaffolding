@@ -53,23 +53,22 @@ impl TryFrom<String> for FieldType {
     }
 }
 
-impl ToString for FieldType {
-    fn to_string(&self) -> String {
-        use FieldType::*;
-        match self {
-            Bool => "bool",
-            String => "String",
-            U32 => "u32",
-            I32 => "i32",
-            F32 => "f32",
-            Timestamp => "Timestamp",
-            ActionHash => "ActionHash",
-            EntryHash => "EntryHash",
-            DnaHash => "DnaHash",
-            AgentPubKey => "AgentPubKey",
-            Enum { .. } => "Enum",
-        }
-        .into()
+impl std::fmt::Display for FieldType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let str = match self {
+            FieldType::Bool => "bool",
+            FieldType::String => "String",
+            FieldType::U32 => "u32",
+            FieldType::I32 => "i32",
+            FieldType::F32 => "f32",
+            FieldType::Timestamp => "Timestamp",
+            FieldType::ActionHash => "ActionHash",
+            FieldType::EntryHash => "EntryHash",
+            FieldType::DnaHash => "DnaHash",
+            FieldType::AgentPubKey => "AgentPubKey",
+            FieldType::Enum { .. } => "Enum",
+        };
+        write!(f, "{str}")
     }
 }
 
