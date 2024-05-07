@@ -16,9 +16,7 @@ use crate::scaffold::entry_type::{fields::parse_fields, scaffold_entry_type};
 use crate::scaffold::example::{choose_example, Example};
 use crate::scaffold::link_type::scaffold_link_type;
 use crate::scaffold::web_app::scaffold_web_app;
-use crate::scaffold::web_app::uis::{
-    choose_ui_framework, guess_or_choose_framework, template_for_ui_framework, UiFramework,
-};
+use crate::scaffold::web_app::uis::UiFramework;
 use crate::scaffold::zome::utils::{select_integrity_zomes, select_scaffold_zome_options};
 use crate::scaffold::zome::{
     integrity_zome_name, scaffold_coordinator_zome, scaffold_coordinator_zome_in_path,
@@ -247,7 +245,7 @@ impl HcScaffold {
                     "lit" | "svelte" | "vanilla" | "vue" => {
                         let ui_framework = UiFramework::from_str(template)?;
                         template_name_or_path = ui_framework.to_string();
-                        template_for_ui_framework(&ui_framework)?
+                        ui_framework.template_filetree()?
                     }
                     custom_template_path => {
                         template_name_or_path = custom_template_path.to_string();
@@ -259,20 +257,17 @@ impl HcScaffold {
             }
             None => {
                 let ui_framework = match self.command {
-                    HcScaffoldCommand::WebApp { .. } => choose_ui_framework()?,
+                    HcScaffoldCommand::WebApp { .. } => UiFramework::choose()?,
                     HcScaffoldCommand::Example { ref example, .. } => match example {
                         Some(Example::HelloWorld) => UiFramework::Vanilla,
-                        _ => choose_ui_framework()?,
+                        _ => UiFramework::choose_non_vanilla()?,
                     },
                     _ => {
                         let file_tree = load_directory_into_memory(&current_dir)?;
-                        guess_or_choose_framework(&file_tree)?
+                        UiFramework::try_from(&file_tree)?
                     }
                 };
-                (
-                    ui_framework.to_string(),
-                    template_for_ui_framework(&ui_framework)?,
-                )
+                (ui_framework.to_string(), ui_framework.template_filetree()?)
             }
         };
 

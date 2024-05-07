@@ -12,12 +12,79 @@ static SVELTE_TEMPLATES: Dir<'static> = include_dir!("$CARGO_MANIFEST_DIR/templa
 static VUE_TEMPLATES: Dir<'static> = include_dir!("$CARGO_MANIFEST_DIR/templates/vue");
 static VANILLA_TEMPLATES: Dir<'static> = include_dir!("$CARGO_MANIFEST_DIR/templates/vanilla");
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub enum UiFramework {
     Vanilla,
     Lit,
     Svelte,
     Vue,
+}
+
+impl UiFramework {
+    pub fn template_filetree(&self) -> ScaffoldResult<FileTree> {
+        let dir = match self {
+            UiFramework::Lit => &LIT_TEMPLATES,
+            UiFramework::Vanilla => &VANILLA_TEMPLATES,
+            UiFramework::Svelte => &SVELTE_TEMPLATES,
+            UiFramework::Vue => &VUE_TEMPLATES,
+        };
+        dir_to_file_tree(dir)
+    }
+
+    pub fn choose() -> ScaffoldResult<UiFramework> {
+        let frameworks = [
+            UiFramework::Lit,
+            UiFramework::Svelte,
+            UiFramework::Vue,
+            UiFramework::Vanilla,
+        ];
+        let selection = Select::with_theme(&ColorfulTheme::default())
+            .with_prompt("Choose UI framework:")
+            .default(0)
+            .items(&frameworks[..])
+            .interact()?;
+        Ok(frameworks[selection])
+    }
+
+    pub fn choose_non_vanilla() -> ScaffoldResult<UiFramework> {
+        let frameworks = [UiFramework::Lit, UiFramework::Svelte, UiFramework::Vue];
+        let selection = Select::with_theme(&ColorfulTheme::default())
+            .with_prompt("Choose UI framework:")
+            .default(0)
+            .items(&frameworks[..])
+            .interact()?;
+        Ok(frameworks[selection])
+    }
+}
+
+impl TryFrom<&FileTree> for UiFramework {
+    type Error = ScaffoldError;
+
+    fn try_from(app_file_tree: &FileTree) -> Result<Self, Self::Error> {
+        let ui_package_json_path = PathBuf::from("ui/package.json");
+        if file_exists(app_file_tree, &ui_package_json_path) {
+            let v: Vec<OsString> = ui_package_json_path
+                .iter()
+                .map(|s| s.to_os_string())
+                .collect();
+            let ui_package_json = app_file_tree
+                .path(&mut v.iter())
+                .ok_or(ScaffoldError::PathNotFound(ui_package_json_path.clone()))?
+                .file_content()
+                .ok_or(ScaffoldError::PathNotFound(ui_package_json_path.clone()))?
+                .clone();
+            if ui_package_json.contains("lit") {
+                return Ok(UiFramework::Lit);
+            } else if ui_package_json.contains("svelte") {
+                return Ok(UiFramework::Svelte);
+            } else if ui_package_json.contains("vue") {
+                return Ok(UiFramework::Vue);
+            } else if !dir_exists(app_file_tree, &PathBuf::from("ui/src")) {
+                return Ok(UiFramework::Vanilla);
+            }
+        }
+        UiFramework::choose()
+    }
 }
 
 impl std::fmt::Display for UiFramework {
@@ -47,65 +114,4 @@ impl FromStr for UiFramework {
             )),
         }
     }
-}
-
-pub fn guess_or_choose_framework(app_file_tree: &FileTree) -> ScaffoldResult<UiFramework> {
-    let ui_package_json_path = PathBuf::from("ui/package.json");
-
-    if file_exists(app_file_tree, &ui_package_json_path) {
-        let v: Vec<OsString> = ui_package_json_path
-            .iter()
-            .map(|s| s.to_os_string())
-            .collect();
-        let ui_package_json = app_file_tree
-            .path(&mut v.iter())
-            .ok_or(ScaffoldError::PathNotFound(ui_package_json_path.clone()))?
-            .file_content()
-            .ok_or(ScaffoldError::PathNotFound(ui_package_json_path.clone()))?
-            .clone();
-
-        if ui_package_json.contains("lit") {
-            return Ok(UiFramework::Lit);
-        } else if ui_package_json.contains("svelte") {
-            return Ok(UiFramework::Svelte);
-        } else if ui_package_json.contains("vue") {
-            return Ok(UiFramework::Vue);
-        } else if !dir_exists(app_file_tree, &PathBuf::from("ui/src")) {
-            return Ok(UiFramework::Vanilla);
-        }
-    }
-    choose_ui_framework()
-}
-
-pub fn choose_ui_framework() -> ScaffoldResult<UiFramework> {
-    let frameworks = ["Vue", "Svelte", "Lit", "Vanilla"];
-    let selection = Select::with_theme(&ColorfulTheme::default())
-        .with_prompt("Choose UI framework:")
-        .default(0)
-        .items(&frameworks[..])
-        .interact()?;
-
-    UiFramework::from_str(frameworks[selection].to_lowercase().as_str())
-}
-
-pub fn choose_non_vanilla_ui_framework() -> ScaffoldResult<UiFramework> {
-    let frameworks = ["Vue", "Svelte", "Lit"];
-    let selection = Select::with_theme(&ColorfulTheme::default())
-        .with_prompt("Choose UI framework:")
-        .default(0)
-        .items(&frameworks[..])
-        .interact()?;
-
-    UiFramework::from_str(frameworks[selection].to_lowercase().as_str())
-}
-
-pub fn template_for_ui_framework(framework: &UiFramework) -> ScaffoldResult<FileTree> {
-    let dir = match framework {
-        UiFramework::Lit => &LIT_TEMPLATES,
-        UiFramework::Vanilla => &VANILLA_TEMPLATES,
-        UiFramework::Svelte => &SVELTE_TEMPLATES,
-        UiFramework::Vue => &VUE_TEMPLATES,
-    };
-
-    dir_to_file_tree(dir)
 }

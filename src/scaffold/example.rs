@@ -38,8 +38,8 @@ impl FromStr for Example {
 pub fn choose_example() -> ScaffoldResult<Example> {
     let selection = Select::with_theme(&ColorfulTheme::default())
         .with_prompt("Choose example:")
-        .item("hello-world")
-        .item("forum")
+        .item(Example::HelloWorld)
+        .item(Example::Forum)
         .default(0)
         .interact()?;
 
