@@ -355,16 +355,7 @@ pub fn delete_handler(entry_def: &EntryDefinition) -> String {
         .collect();
 
     let delete_depending_links = match linked_from_fields.is_empty() {
-        true => format!(
-            r#"
-    let details = get_details(original_{snake_entry_def_name}_hash.clone(), GetOptions::default())?
-        .ok_or(wasm_error!(WasmErrorInner::Guest("{{pascal_entry_def_name}} not found".to_string())))?;
-    let record = match details {{
-        Details::Record(details) => Ok(details.record),
-        _ => Err(wasm_error!(WasmErrorInner::Guest("Malformed get details response".to_string()))),
-    }}?;
-            "#
-        ),
+        true => Default::default(),
         false => {
             let mut delete_links = format!(
                 r#"

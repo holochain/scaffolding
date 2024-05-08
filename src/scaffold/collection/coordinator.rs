@@ -231,6 +231,23 @@ fn add_delete_link_in_delete_function(
             ));
         }
         CollectionType::ByAuthor => {
+            delete_link_stmts.insert(
+                0,
+                format!(
+                    r#"
+                let record = match details {{
+                    Details::Record(details) => Ok(details.record),
+                    _ => Err(wasm_error!(WasmErrorInner::Guest(String::from(
+                        "Malformed get details response"
+                    )))),
+                }}?;
+            "#
+                ),
+            );
+            delete_link_stmts.insert(0, format!(r#"
+                let details = get_details(original_{snake_case_entry_type}_hash.clone(), GetOptions::default())?
+                    .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("{{pascal_entry_def_name}} not found"))))?;
+            "#));
             delete_link_stmts.push(format!(
                 r#"let links = get_links(
                     GetLinksInputBuilder::try_new(record.action().author().clone(), LinkTypes::{link_type_name})?.build()
@@ -249,8 +266,8 @@ fn add_delete_link_in_delete_function(
     };
 
     let stmts = delete_link_stmts
-        .into_iter()
-        .map(|s| syn::parse_str::<syn::Stmt>(s.as_str()))
+        .iter()
+        .map(|s| syn::parse_str::<syn::Stmt>(s))
         .collect::<Result<Vec<syn::Stmt>, syn::Error>>()?;
 
     let crate_src_path = zome_file_tree.zome_crate_path.join("src");
@@ -270,8 +287,8 @@ fn add_delete_link_in_delete_function(
             file.items = file
                 .items
                 .into_iter()
-                .map(|i| {
-                    if let syn::Item::Fn(mut item_fn) = i.clone() {
+                .map(|item| {
+                    if let syn::Item::Fn(mut item_fn) = item.clone() {
                         if item_fn
                             .attrs
                             .iter()
@@ -288,7 +305,7 @@ fn add_delete_link_in_delete_function(
                         }
                     }
 
-                    i
+                    item
                 })
                 .collect();
 
