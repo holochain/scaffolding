@@ -177,5 +177,5 @@ pub fn check_no_whitespace(input: &str, identifier: &str) -> ScaffoldResult<()> 
 }
 
 pub fn unparse(file: &syn::File) -> String {
-    prettyplease::unparse(file).replace("///", "//")
+    prettyplease::unparse(file)
 }
