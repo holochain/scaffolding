@@ -233,8 +233,7 @@ fn add_delete_link_in_delete_function(
         CollectionType::ByAuthor => {
             delete_link_stmts.insert(
                 0,
-                format!(
-                    r#"
+                r#"
                 let record = match details {{
                     Details::Record(details) => Ok(details.record),
                     _ => Err(wasm_error!(WasmErrorInner::Guest(String::from(
@@ -242,7 +241,7 @@ fn add_delete_link_in_delete_function(
                     )))),
                 }}?;
             "#
-                ),
+                .to_string(),
             );
             delete_link_stmts.insert(0, format!(r#"
                 let details = get_details(original_{snake_case_entry_type}_hash.clone(), GetOptions::default())?
