@@ -34,6 +34,7 @@ pub enum FieldType {
 
 impl TryFrom<String> for FieldType {
     type Error = ScaffoldError;
+
     fn try_from(value: String) -> Result<Self, Self::Error> {
         let list = FieldType::list();
 
@@ -53,23 +54,22 @@ impl TryFrom<String> for FieldType {
     }
 }
 
-impl ToString for FieldType {
-    fn to_string(&self) -> String {
-        use FieldType::*;
-        match self {
-            Bool => "bool",
-            String => "String",
-            U32 => "u32",
-            I32 => "i32",
-            F32 => "f32",
-            Timestamp => "Timestamp",
-            ActionHash => "ActionHash",
-            EntryHash => "EntryHash",
-            DnaHash => "DnaHash",
-            AgentPubKey => "AgentPubKey",
-            Enum { .. } => "Enum",
-        }
-        .into()
+impl std::fmt::Display for FieldType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let str = match self {
+            FieldType::Bool => "bool",
+            FieldType::String => "String",
+            FieldType::U32 => "u32",
+            FieldType::I32 => "i32",
+            FieldType::F32 => "f32",
+            FieldType::Timestamp => "Timestamp",
+            FieldType::ActionHash => "ActionHash",
+            FieldType::EntryHash => "EntryHash",
+            FieldType::DnaHash => "DnaHash",
+            FieldType::AgentPubKey => "AgentPubKey",
+            FieldType::Enum { .. } => "Enum",
+        };
+        write!(f, "{str}")
     }
 }
 
@@ -203,6 +203,7 @@ pub struct EntryTypeReference {
     pub entry_type: String,
     pub reference_entry_hash: bool,
 }
+
 impl EntryTypeReference {
     pub fn hash_type(&self) -> FieldType {
         match self.reference_entry_hash {
@@ -210,6 +211,7 @@ impl EntryTypeReference {
             false => FieldType::ActionHash,
         }
     }
+
     pub fn field_name(&self, cardinality: &Cardinality) -> String {
         match cardinality {
             Cardinality::Vector => format!(
@@ -219,6 +221,7 @@ impl EntryTypeReference {
             _ => format!("{}_hash", self.entry_type.to_case(Case::Snake)),
         }
     }
+
     pub fn to_string(&self, c: &Cardinality) -> String {
         match c {
             Cardinality::Vector => pluralizer::pluralize(self.entry_type.as_str(), 2, false),
@@ -253,6 +256,7 @@ pub enum Referenceable {
     Agent { role: String },
     EntryType(EntryTypeReference),
 }
+
 impl Serialize for Referenceable {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where

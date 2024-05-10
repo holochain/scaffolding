@@ -36,7 +36,7 @@ setup_and_build_happ() {
   cleanup_tmp "$1"
 
   cd $TEMPLATE_PATH
-  hc-scaffold --template "$2" web-app "$1" --setup-nix true
+  hc-scaffold --template "$2" web-app "$1" --setup-nix true -F
   cd "$1"
 
   hc-scaffold dna forum
@@ -93,7 +93,7 @@ if [[ -n "$SCOPE" ]]; then
     rm -rf /tmp/holo-flake
     cd /tmp
 
-    hc-scaffold --template vue web-app holo-flake --setup-nix true
+    hc-scaffold --template vue web-app holo-flake --setup-nix true -F
     cd holo-flake
 
     nix develop --command bash -c "
@@ -110,7 +110,7 @@ if [[ -n "$SCOPE" ]]; then
     rm -rf /tmp/holo-flake
     cd /tmp
 
-    hc-scaffold --template vue web-app holo-flake --setup-nix true --holo
+    hc-scaffold --template vue web-app holo-flake --setup-nix true --holo -F
     cd holo-flake
 
     nix develop --command bash -c "

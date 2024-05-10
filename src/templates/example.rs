@@ -5,7 +5,7 @@ use crate::{
     error::ScaffoldResult,
     file_tree::{file_content, FileTree},
     scaffold::example::Example,
-    versions::{hdi_version, hdk_version, holochain_client_version},
+    versions,
 };
 
 use super::{
@@ -13,11 +13,11 @@ use super::{
 };
 
 #[derive(Serialize)]
-pub struct ScaffoldExampleData {
-    pub example: String,
-    pub holochain_client_version: String,
-    pub hdk_version: String,
-    pub hdi_version: String,
+pub struct ScaffoldExampleData<'a> {
+    pub example: &'a str,
+    pub holochain_client_version: &'a str,
+    pub hdk_version: &'a str,
+    pub hdi_version: &'a str,
 }
 
 pub fn scaffold_example(
@@ -26,10 +26,10 @@ pub fn scaffold_example(
     example: &Example,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     let data = ScaffoldExampleData {
-        example: example.to_string(),
-        holochain_client_version: holochain_client_version(),
-        hdk_version: hdk_version(),
-        hdi_version: hdi_version(),
+        example: &example.to_string(),
+        holochain_client_version: versions::HOLOCHAIN_CLIENT_VERSION,
+        hdk_version: versions::HDK_VERSION,
+        hdi_version: versions::HDI_VERSION,
     };
     let h = build_handlebars(template_file_tree)?;
 

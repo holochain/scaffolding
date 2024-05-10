@@ -1,4 +1,4 @@
-use dialoguer::{theme::ColorfulTheme, MultiSelect};
+use dialoguer::{theme::ColorfulTheme, MultiSelect, Select};
 use holochain_types::prelude::{DnaManifest, ZomeManifest};
 
 use crate::error::ScaffoldResult;
@@ -56,5 +56,28 @@ pub fn get_coordinator_zomes_for_integrity(
                 None => false,
             })
             .collect(),
+    }
+}
+
+/// Select whether to scaffold zome pair or integrity / coordintor zomes
+///
+/// # Example
+/// ```rs,no_run
+/// let (scaffold_integrity, scaffold_coordintor) = select_scaffold_zome_options().unwrap();
+/// ```
+pub fn select_scaffold_zome_options() -> ScaffoldResult<(bool, bool)> {
+    let option = Select::with_theme(&ColorfulTheme::default())
+        .with_prompt("What do you want to scaffold?")
+        .default(0)
+        .items(&[
+            "Integrity/coordinator zome-pair (recommended)",
+            "Only an integrity zome",
+            "Only a coordinator zome",
+        ])
+        .interact()?;
+    match option {
+        0 => Ok((true, true)),
+        1 => Ok((true, false)),
+        _ => Ok((false, true)),
     }
 }

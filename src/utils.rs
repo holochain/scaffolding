@@ -13,7 +13,7 @@ pub fn choose_directory_path(prompt: &str, app_file_tree: &FileTree) -> Scaffold
     let mut current_path = PathBuf::new();
 
     while chosen_directory.is_none() {
-        let mut folders = get_folders_names(&dir_content(app_file_tree, &current_path)?);
+        let mut folders = get_folder_names(&dir_content(app_file_tree, &current_path)?);
 
         folders = folders
             .clone()
@@ -56,11 +56,16 @@ pub fn choose_directory_path(prompt: &str, app_file_tree: &FileTree) -> Scaffold
     Ok(d)
 }
 
-fn get_folders_names(folder: &BTreeMap<OsString, FileTree>) -> Vec<String> {
+fn get_folder_names(folder: &BTreeMap<OsString, FileTree>) -> Vec<String> {
     folder
         .iter()
-        .filter(|d| d.1.dir_content().is_some())
-        .map(|(n, _)| n.to_str().unwrap().to_string())
+        .filter_map(|(key, val)| {
+            if val.dir_content().is_some() {
+                key.to_str().map(|s| s.to_owned())
+            } else {
+                None
+            }
+        })
         .collect()
 }
 

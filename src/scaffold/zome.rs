@@ -1,3 +1,4 @@
+use convert_case::Case;
 use dialoguer::{theme::ColorfulTheme, Confirm, Select};
 use mr_bundle::Location;
 use regex::Regex;
@@ -7,13 +8,14 @@ use std::{
 };
 
 use crate::{
-    file_tree::{file_exists, insert_file_tree_in_dir, FileTree},
+    file_tree::{build_file_tree, file_exists, insert_file_tree_in_dir, FileTree},
     reserved_words::check_for_reserved_words,
     templates::{
         coordinator::scaffold_coordinator_zome_templates,
         integrity::scaffold_integrity_zome_templates, ScaffoldedTemplate,
     },
-    versions::{hdi_version, hdk_version},
+    utils::input_with_case,
+    versions,
 };
 use build_fs_tree::{dir, file};
 use holochain_types::prelude::{DnaManifest, ZomeManifest};
@@ -332,10 +334,16 @@ fn try_to_guess_coordinator_zomes_location(
 pub fn add_common_zome_dependencies_to_workspace_cargo(
     file_tree: FileTree,
 ) -> ScaffoldResult<FileTree> {
-    let file_tree =
-        add_workspace_external_dependency(file_tree, "hdi", &format!("={}", hdi_version()))?;
-    let file_tree =
-        add_workspace_external_dependency(file_tree, "hdk", &format!("={}", hdk_version()))?;
+    let file_tree = add_workspace_external_dependency(
+        file_tree,
+        "hdi",
+        &format!("={}", versions::HDI_VERSION),
+    )?;
+    let file_tree = add_workspace_external_dependency(
+        file_tree,
+        "hdk",
+        &format!("={}", versions::HDK_VERSION),
+    )?;
     let file_tree = add_workspace_external_dependency(file_tree, "serde", "1.0")?;
     Ok(file_tree)
 }
@@ -494,4 +502,38 @@ pub fn scaffold_coordinator_zome(
         dependencies,
         &path_to_scaffold_in,
     )
+}
+
+pub fn scaffold_zome_pair(
+    app_file_tree: FileTree,
+    template_file_tree: FileTree,
+    dna_name: &str,
+) -> Result<(), ScaffoldError> {
+    let mut dna_file_tree = DnaFileTree::get_or_choose(app_file_tree, &Some(dna_name.to_string()))?;
+    let dna_manifest_path = dna_file_tree.dna_manifest_path.clone();
+
+    let zome_name = input_with_case(
+            "Enter coordinator zome name (snake_case):\n(The integrity zome will automatically be named '{name of coordinator zome}_integrity')\n",
+            Case::Snake,
+        )?;
+
+    let integrity_zome_name = integrity_zome_name(&zome_name);
+    let ScaffoldedTemplate { file_tree, .. } = scaffold_integrity_zome(
+        dna_file_tree,
+        &template_file_tree,
+        &integrity_zome_name,
+        &None,
+    )?;
+    dna_file_tree = DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
+
+    let ScaffoldedTemplate { file_tree, .. } = scaffold_coordinator_zome(
+        dna_file_tree,
+        &template_file_tree,
+        &zome_name,
+        &Some(vec![integrity_zome_name]),
+        &None,
+    )?;
+
+    build_file_tree(file_tree, ".")?;
+    Ok(())
 }

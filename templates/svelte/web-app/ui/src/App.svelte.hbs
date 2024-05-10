@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount, setContext } from 'svelte';
-  import type { ActionHash, AppAgentClient } from '@holochain/client';
-  import { AppAgentWebsocket } from '@holochain/client';
+  import type { ActionHash, AppClient } from '@holochain/client';
+  import { AppWebsocket } from '@holochain/client';
 {{#if holo_enabled}}
   import WebSdk from '@holo-host/web-sdk'
 {{/if}}
@@ -9,7 +9,7 @@
 
   import { clientContext } from './contexts';
 
-  let client: AppAgentClient | undefined;
+  let client: AppClient | undefined;
 
   let loading = true; 
 
@@ -39,12 +39,12 @@
     (client as WebSdk).signUp({ cancellable: false });
 
     } else {
-      client = await AppAgentWebsocket.connect('{{app_name}}');
+      client = await AppWebsocket.connect();
 
       loading = false;
     }
   {{else}}
-    client = await AppAgentWebsocket.connect('{{app_name}}');
+    client = await AppWebsocket.connect();
 
     loading = false;
   {{/if}}
