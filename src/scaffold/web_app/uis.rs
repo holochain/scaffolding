@@ -1,3 +1,4 @@
+use colored::Colorize;
 use dialoguer::{theme::ColorfulTheme, Select};
 use include_dir::{include_dir, Dir};
 use std::{ffi::OsString, path::PathBuf, str::FromStr};
@@ -29,7 +30,12 @@ impl UiFramework {
             UiFramework::Vanilla => &VANILLA_TEMPLATES,
             UiFramework::Svelte => &SVELTE_TEMPLATES,
             UiFramework::Vue => &VUE_TEMPLATES,
-            UiFramework::Other(_) => &HEADLESS_TEMPLATE,
+            UiFramework::Other(other) if other == "headless (no ui)" => &HEADLESS_TEMPLATE,
+            UiFramework::Other(t) => {
+                return Err(ScaffoldError::MalformedTemplate(format!(
+                    "Inbuilt template {t} not found."
+                )));
+            }
         };
         dir_to_file_tree(dir)
     }
@@ -40,9 +46,10 @@ impl UiFramework {
             UiFramework::Svelte,
             UiFramework::Vue,
             UiFramework::Vanilla,
+            UiFramework::Other("headless (no ui)".to_owned()),
         ];
         let selection = Select::with_theme(&ColorfulTheme::default())
-            .with_prompt("Choose UI framework:")
+            .with_prompt("Choose UI framework: (Use arrow-keys. Return to submit)")
             .default(0)
             .items(&frameworks[..])
             .interact()?;
@@ -52,7 +59,7 @@ impl UiFramework {
     pub fn choose_non_vanilla() -> ScaffoldResult<UiFramework> {
         let frameworks = [UiFramework::Lit, UiFramework::Svelte, UiFramework::Vue];
         let selection = Select::with_theme(&ColorfulTheme::default())
-            .with_prompt("Choose UI framework:")
+            .with_prompt("Choose UI framework: (Use arrow-keys. Return to submit)")
             .default(0)
             .items(&frameworks[..])
             .interact()?;
@@ -93,11 +100,12 @@ impl TryFrom<&FileTree> for UiFramework {
 impl std::fmt::Display for UiFramework {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let str = match self {
-            UiFramework::Vanilla => "vanilla",
-            UiFramework::Lit => "lit",
-            UiFramework::Svelte => "svelte",
-            UiFramework::Vue => "vue",
-            UiFramework::Other(value) => value,
+            UiFramework::Vanilla => "vanilla".yellow(),
+            UiFramework::Lit => "lit".blue(),
+            UiFramework::Svelte => "svelte".red(),
+            UiFramework::Vue => "vue".green(),
+            UiFramework::Other(value) if value == "headless (no ui)" => value.italic(),
+            UiFramework::Other(value) => value.normal(),
         };
         write!(f, "{str}")
     }
