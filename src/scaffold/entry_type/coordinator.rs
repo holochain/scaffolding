@@ -115,14 +115,16 @@ pub fn updates_link_name(entry_def_name: &str) -> String {
     format!("{}Updates", entry_def_name.to_case(Case::Pascal))
 }
 
-pub fn read_handler_with_linking_to_updates(entry_def_name: &str) -> String {
-    let snake_entry_def_name = entry_def_name.to_case(Case::Snake);
+pub fn read_handler_with_linking_to_updates(entry_def: &EntryDefinition) -> String {
+    let snake_entry_def_name = entry_def.snake_case_name();
+    let updates_link_name = updates_link_name(&entry_def.name);
+
     format!(
         r#"
         #[hdk_extern]
         pub fn get_latest_{snake_entry_def_name}(original_{snake_entry_def_name}_hash: ActionHash) -> ExternResult<Option<Record>> {{
             let links = get_links(
-                GetLinksInputBuilder::try_new(original_{snake_entry_def_name}_hash.clone(), LinkTypes::{})?.build(),
+                GetLinksInputBuilder::try_new(original_{snake_entry_def_name}_hash.clone(), LinkTypes::{updates_link_name})?.build(),
             )?;
 
             let latest_link = links.into_iter().max_by(|link_a, link_b| link_a.timestamp.cmp(&link_b.timestamp));
@@ -155,7 +157,7 @@ pub fn read_handler_with_linking_to_updates(entry_def_name: &str) -> String {
             }};
 
             let links = get_links(
-                GetLinksInputBuilder::try_new(original_{snake_entry_def_name}_hash.clone(), LinkTypes::{})?.build(),
+                GetLinksInputBuilder::try_new(original_{snake_entry_def_name}_hash.clone(), LinkTypes::{updates_link_name})?.build(),
             )?;
 
             let get_input: Vec<GetInput> = links
@@ -174,8 +176,6 @@ pub fn read_handler_with_linking_to_updates(entry_def_name: &str) -> String {
             Ok(records)
         }}
         "#,
-        updates_link_name(entry_def_name),
-        updates_link_name(entry_def_name),
     )
 }
 
@@ -257,50 +257,46 @@ pub fn create_handler(entry_def: &EntryDefinition) -> String {
     )
 }
 
-pub fn update_handler(entry_def_name: &str, link_from_original_to_each_update: bool) -> String {
+pub fn update_handler(
+    entry_def: &EntryDefinition,
+    link_from_original_to_each_update: bool,
+) -> String {
     match link_from_original_to_each_update {
-        true => update_handler_linking_on_each_update(entry_def_name),
-        false => update_handler_without_linking_on_each_update(entry_def_name),
+        true => update_handler_linking_on_each_update(entry_def),
+        false => update_handler_without_linking_on_each_update(entry_def),
     }
 }
 
-pub fn update_handler_without_linking_on_each_update(entry_def_name: &str) -> String {
+pub fn update_handler_without_linking_on_each_update(entry_def: &EntryDefinition) -> String {
+    let snake_entry_def_name = entry_def.snake_case_name();
+    let pascal_entry_def_name = entry_def.pascal_case_name();
+
     format!(
         r#"
         #[derive(Serialize, Deserialize, Debug)]
-            pub struct Update{}Input {{
-            pub previous_{}_hash: ActionHash,
-            pub updated_{}: {}
+            pub struct Update{pascal_entry_def_name}Input {{
+            pub previous_{snake_entry_def_name}_hash: ActionHash,
+            pub updated_{snake_entry_def_name}: {pascal_entry_def_name}
         }}
 
         #[hdk_extern]
-        pub fn update_{}(input: Update{}Input) -> ExternResult<Record> {{
-            let updated_{}_hash = update_entry(input.previous_{}_hash, &input.updated_{})?;
+        pub fn update_{snake_entry_def_name}(input: Update{pascal_entry_def_name}Input) -> ExternResult<Record> {{
+            let updated_{snake_entry_def_name}_hash = update_entry(input.previous_{snake_entry_def_name}_hash, &input.updated_{snake_entry_def_name})?;
 
-            let record = get(updated_{}_hash.clone(), GetOptions::default())?
-                .ok_or(wasm_error!(WasmErrorInner::Guest("Could not find the newly updated {}".to_string())))?;
+            let record = get(updated_{snake_entry_def_name}_hash.clone(), GetOptions::default())?
+                .ok_or(wasm_error!(WasmErrorInner::Guest("Could not find the newly updated {pascal_entry_def_name}".to_string())))?;
                 
             Ok(record)
         }}
         "#,
-        entry_def_name.to_case(Case::Pascal),
-        entry_def_name.to_case(Case::Snake),
-        entry_def_name.to_case(Case::Snake),
-        entry_def_name.to_case(Case::Pascal),
-        entry_def_name.to_case(Case::Snake),
-        entry_def_name.to_case(Case::Pascal),
-        entry_def_name.to_case(Case::Snake),
-        entry_def_name.to_case(Case::Snake),
-        entry_def_name.to_case(Case::Snake),
-        entry_def_name.to_case(Case::Snake),
-        entry_def_name.to_case(Case::Pascal)
     )
 }
 
-pub fn update_handler_linking_on_each_update(entry_def_name: &str) -> String {
-    let snake_entry_def_name = entry_def_name.to_case(Case::Snake);
-    let pascal_entry_def_name = entry_def_name.to_case(Case::Pascal);
-    let link_type_variant_name = updates_link_name(entry_def_name);
+pub fn update_handler_linking_on_each_update(entry_def: &EntryDefinition) -> String {
+    let snake_entry_def_name = entry_def.snake_case_name();
+    let pascal_entry_def_name = entry_def.pascal_case_name();
+    let link_type_variant_name = updates_link_name(&entry_def.name);
+
     format!(
         r#"
     #[derive(Serialize, Deserialize, Debug)]
@@ -472,14 +468,13 @@ fn initial_crud_handlers(
     if !crud.update {
         initial.push_str(no_update_read_handler(entry_def).as_str());
     } else if link_from_original_to_each_update {
-        initial.push_str(read_handler_with_linking_to_updates(&entry_def.name).as_str());
+        initial.push_str(read_handler_with_linking_to_updates(entry_def).as_str());
     } else {
         initial.push_str(read_handler_without_linking_to_updates(entry_def).as_str());
     }
 
     if crud.update {
-        initial
-            .push_str(update_handler(&entry_def.name, link_from_original_to_each_update).as_str());
+        initial.push_str(update_handler(entry_def, link_from_original_to_each_update).as_str());
     }
 
     if crud.delete {
