@@ -96,12 +96,9 @@ pub fn add_link_handler(
         .to_string(&Cardinality::Single)
         .to_case(Case::Pascal);
 
-    let bidirectional_create = match bidirectional {
-        true => format!(
-            r#"create_link(input.target_{to_arg_name}, input.base_{from_arg_name}, LinkTypes::{inverse_link_type_name}, ())?;"#
-        ),
-        false => String::new(),
-    };
+    let bidirectional_create = bidirectional.then_some(
+        format!("create_link(input.target_{to_arg_name}, input.base_{from_arg_name}, LinkTypes::{inverse_link_type_name}, ())?;")
+    ).unwrap_or_default();
 
     format!(
         r#"
@@ -151,8 +148,8 @@ fn get_links_handler_to_agent(
         .to_string(&Cardinality::Vector)
         .to_case(Case::Snake);
 
-    let get_deleted_links_handler = if delete {
-        format!(
+    let get_deleted_links_handler = delete
+        .then_some(format!(
             r#"
             #[hdk_extern]
             pub fn get_deleted_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}(
@@ -171,10 +168,8 @@ fn get_links_handler_to_agent(
                     .collect())
             }}
             "#
-        )
-    } else {
-        String::new()
-    };
+        ))
+        .unwrap_or_default();
 
     format!(
         r#"
@@ -208,8 +203,8 @@ fn get_links_handler_to_entry(
         .to_string(&Cardinality::Vector)
         .to_case(Case::Snake);
 
-    let get_deleted_links_handler = match delete {
-        true => format!(
+    let get_deleted_links_handler = delete
+        .then_some(format!(
             r#"
             #[hdk_extern]
             pub fn get_deleted_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}(
@@ -228,9 +223,8 @@ fn get_links_handler_to_entry(
                     .collect())
             }}
             "#
-        ),
-        false => String::new(),
-    };
+        ))
+        .unwrap_or_default();
 
     format!(
         r#"
@@ -284,8 +278,8 @@ fn remove_link_handlers(
     let from_link = from_link_hash_type(&to_hash_type);
     let from_inverse = from_link_hash_type(&from_hash_type);
 
-    let bidirectional_remove = match bidirectional {
-        true => format!(
+    let bidirectional_remove = bidirectional.then_some(
+        format!(
             r#"
             let links = get_links(
                 GetLinksInputBuilder::try_new(input.target_{to_arg_name}.clone(), LinkTypes::{inverse_link_type_name})?.build(),
@@ -297,9 +291,8 @@ fn remove_link_handlers(
                 }}
             }}
             "#
-        ),
-        false => String::new(),
-    };
+        )
+    ).unwrap_or_default();
 
     format!(
         r#"
@@ -335,18 +328,21 @@ fn normal_handlers(
     delete: bool,
     bidirectional: bool,
 ) -> String {
-    let inverse_get = match bidirectional {
-        true => format!(
-            "{}",
-            get_links_handler(to_referenceable, from_referenceable, delete)
-        ),
-        false => String::new(),
-    };
+    let inverse_get = bidirectional
+        .then_some(get_links_handler(
+            to_referenceable,
+            from_referenceable,
+            delete,
+        ))
+        .unwrap_or_default();
 
-    let delete_link_handler = match delete {
-        true => remove_link_handlers(from_referenceable, to_referenceable, bidirectional),
-        false => String::new(),
-    };
+    let delete_link_handler = delete
+        .then_some(remove_link_handlers(
+            from_referenceable,
+            to_referenceable,
+            bidirectional,
+        ))
+        .unwrap_or_default();
 
     let add_links_handler = add_link_handler(from_referenceable, to_referenceable, bidirectional);
     let get_links_handler = get_links_handler(from_referenceable, to_referenceable, delete);
