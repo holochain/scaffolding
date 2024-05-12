@@ -33,7 +33,6 @@ impl UiFramework {
             UiFramework::Vue => "vue",
             UiFramework::Headless => "headless",
         };
-        println!("UiFramework Name == {}", name.to_string());
         name.to_string()
     }
 
