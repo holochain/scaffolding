@@ -77,6 +77,8 @@ impl UiFramework {
 impl TryFrom<&FileTree> for UiFramework {
     type Error = ScaffoldError;
 
+    /// Try to get ui framework from app file tree, if the ui framework cannot be inferred, then
+    /// the user will be prompted to choose one via `UiFramework::choose`
     fn try_from(app_file_tree: &FileTree) -> Result<Self, Self::Error> {
         let ui_package_json_path = PathBuf::from("ui/package.json");
         if file_exists(app_file_tree, &ui_package_json_path) {
@@ -88,8 +90,8 @@ impl TryFrom<&FileTree> for UiFramework {
                 .path(&mut v.iter())
                 .ok_or(ScaffoldError::PathNotFound(ui_package_json_path.clone()))?
                 .file_content()
-                .ok_or(ScaffoldError::PathNotFound(ui_package_json_path.clone()))?
-                .clone();
+                .map(|c| c.to_owned())
+                .ok_or(ScaffoldError::PathNotFound(ui_package_json_path.clone()))?;
             if ui_package_json.contains("lit") {
                 return Ok(UiFramework::Lit);
             } else if ui_package_json.contains("svelte") {

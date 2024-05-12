@@ -256,8 +256,6 @@ impl HcScaffold {
                     },
                     _ => {
                         let file_tree = load_directory_into_memory(&current_dir)?;
-                        // Try to get ui framework from app file tree, if the ui framework cannot be inferred, then
-                        // the user will be prompted to choose one via `UiFramework::choose`
                         UiFramework::try_from(&file_tree)?
                     }
                 };
