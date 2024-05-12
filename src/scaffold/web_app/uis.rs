@@ -127,11 +127,9 @@ impl FromStr for UiFramework {
             "vue" => Ok(UiFramework::Vue),
             "lit" => Ok(UiFramework::Lit),
             "headless" => Ok(UiFramework::Headless),
-            value => {
-                return Err(ScaffoldError::MalformedTemplate(format!(
-                    "Invalid value: {value}, expected vanilla, svelte, vue, lit or headless"
-                )));
-            }
+            value => Err(ScaffoldError::MalformedTemplate(format!(
+                "Invalid value: {value}, expected vanilla, svelte, vue, lit or headless"
+            ))),
         }
     }
 }
