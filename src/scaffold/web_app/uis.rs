@@ -20,22 +20,30 @@ pub enum UiFramework {
     Lit,
     Svelte,
     Vue,
-    Other(String),
+    Headless,
 }
 
 impl UiFramework {
+    /// Gets the non-ANSI escaped name of the ui framework
+    pub fn name(&self) -> String {
+        let name = match self {
+            UiFramework::Vanilla => "vanilla",
+            UiFramework::Lit => "lit",
+            UiFramework::Svelte => "svelte",
+            UiFramework::Vue => "vue",
+            UiFramework::Headless => "headless",
+        };
+        println!("UiFramework Name == {}", name.to_string());
+        name.to_string()
+    }
+
     pub fn template_filetree(&self) -> ScaffoldResult<FileTree> {
         let dir = match self {
             UiFramework::Lit => &LIT_TEMPLATES,
             UiFramework::Vanilla => &VANILLA_TEMPLATES,
             UiFramework::Svelte => &SVELTE_TEMPLATES,
             UiFramework::Vue => &VUE_TEMPLATES,
-            UiFramework::Other(other) if other == "headless (no ui)" => &HEADLESS_TEMPLATE,
-            UiFramework::Other(t) => {
-                return Err(ScaffoldError::MalformedTemplate(format!(
-                    "Inbuilt template {t} not found."
-                )));
-            }
+            UiFramework::Headless => &HEADLESS_TEMPLATE,
         };
         dir_to_file_tree(dir)
     }
@@ -46,7 +54,7 @@ impl UiFramework {
             UiFramework::Svelte,
             UiFramework::Vue,
             UiFramework::Vanilla,
-            UiFramework::Other("headless (no ui)".to_owned()),
+            UiFramework::Headless,
         ];
         let selection = Select::with_theme(&ColorfulTheme::default())
             .with_prompt("Choose UI framework: (Use arrow-keys. Return to submit)")
@@ -104,8 +112,7 @@ impl std::fmt::Display for UiFramework {
             UiFramework::Lit => "lit".blue(),
             UiFramework::Svelte => "svelte".red(),
             UiFramework::Vue => "vue".green(),
-            UiFramework::Other(value) if value == "headless (no ui)" => value.italic(),
-            UiFramework::Other(value) => value.normal(),
+            UiFramework::Headless => "headless (no ui)".italic(),
         };
         write!(f, "{str}")
     }
@@ -115,12 +122,17 @@ impl FromStr for UiFramework {
     type Err = ScaffoldError;
 
     fn from_str(s: &str) -> ScaffoldResult<UiFramework> {
-        match s {
+        match s.to_ascii_lowercase().as_str() {
             "vanilla" => Ok(UiFramework::Vanilla),
             "svelte" => Ok(UiFramework::Svelte),
             "vue" => Ok(UiFramework::Vue),
             "lit" => Ok(UiFramework::Lit),
-            other => Ok(UiFramework::Other(other.to_owned())),
+            "headless" => Ok(UiFramework::Headless),
+            value => {
+                return Err(ScaffoldError::MalformedTemplate(format!(
+                    "Invalid value: {value}, expected vanilla, svelte, vue, lit or headless"
+                )));
+            }
         }
     }
 }
