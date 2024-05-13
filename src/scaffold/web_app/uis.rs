@@ -110,8 +110,8 @@ impl std::fmt::Display for UiFramework {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let str = match self {
             UiFramework::Vanilla => "vanilla".yellow(),
-            UiFramework::Lit => "lit".blue(),
-            UiFramework::Svelte => "svelte".red(),
+            UiFramework::Lit => "lit".bright_blue(),
+            UiFramework::Svelte => "svelte".bright_red(),
             UiFramework::Vue => "vue".green(),
             UiFramework::Headless => "headless (no ui)".italic(),
         };
