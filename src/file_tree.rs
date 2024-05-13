@@ -187,19 +187,20 @@ pub fn map_rust_files<F: Fn(PathBuf, syn::File) -> ScaffoldResult<syn::File> + C
     file_tree: &mut FileTree,
     map_fn: F,
 ) -> ScaffoldResult<()> {
-    map_all_files(file_tree, |file_path, s| {
+    map_all_files(file_tree, |file_path, contents| {
         if let Some(extension) = file_path.extension() {
             if extension == "rs" {
-                let rust_file: syn::File = syn::parse_str(s.as_str()).map_err(|e| {
-                    ScaffoldError::MalformedFile(file_path.clone(), format!("{}", e))
-                })?;
-                let new_file = map_fn(file_path, rust_file)?;
-
-                return Ok(unparse(&new_file));
+                let original_file: syn::File = syn::parse_str(&contents)
+                    .map_err(|e| ScaffoldError::MalformedFile(file_path.clone(), e.to_string()))?;
+                let new_file = map_fn(file_path, original_file.clone())?;
+                // Only reformat the file via unparse if the contents of the newly modified
+                // file are different from the original
+                if new_file != original_file {
+                    return Ok(unparse(&new_file));
+                }
             }
         }
-
-        Ok(s)
+        Ok(contents)
     })
 }
 
