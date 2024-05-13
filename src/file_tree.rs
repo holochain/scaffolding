@@ -1,3 +1,4 @@
+use anyhow::Context;
 use build_fs_tree::{dir, file, Build, FileSystemTree, MergeableFileSystemTree};
 use ignore::WalkBuilder;
 use include_dir::Dir;
@@ -183,7 +184,7 @@ fn find_map_files_rec<T, F: Fn(&PathBuf, &String) -> Option<T>>(
     found_files
 }
 
-pub fn map_rust_files<F: Fn(PathBuf, syn::File) -> ScaffoldResult<syn::File> + Clone>(
+pub fn map_rust_files<F: Fn(PathBuf, syn::File) -> ScaffoldResult<syn::File> + Copy>(
     file_tree: &mut FileTree,
     map_fn: F,
 ) -> ScaffoldResult<()> {
@@ -239,7 +240,7 @@ pub fn unflatten_file_tree(
     Ok(file_tree)
 }
 
-pub fn map_all_files<F: Fn(PathBuf, String) -> ScaffoldResult<String> + Clone>(
+pub fn map_all_files<F: Fn(PathBuf, String) -> ScaffoldResult<String> + Copy>(
     file_tree: &mut FileTree,
     map_fn: F,
 ) -> ScaffoldResult<()> {
@@ -247,24 +248,26 @@ pub fn map_all_files<F: Fn(PathBuf, String) -> ScaffoldResult<String> + Clone>(
     Ok(())
 }
 
-fn map_all_files_rec<F: Fn(PathBuf, String) -> ScaffoldResult<String> + Clone>(
+fn map_all_files_rec<F: Fn(PathBuf, String) -> ScaffoldResult<String> + Copy>(
     file_tree: &mut FileTree,
     current_path: PathBuf,
     map_fn: F,
 ) -> ScaffoldResult<()> {
-    if let Some(c) = file_tree.dir_content_mut() {
-        for (key, mut tree) in c.clone().into_iter() {
+    if let Some(dir) = file_tree.dir_content_mut() {
+        for (key, mut tree) in dir.clone().into_iter() {
             let child_path = current_path.join(&key);
-            match tree.clone() {
-                FileTree::Directory(_dir_contents) => {
-                    map_all_files_rec(&mut tree, child_path, map_fn.clone())?;
+            match &tree {
+                FileTree::Directory(_) => {
+                    map_all_files_rec(&mut tree, child_path, map_fn)?;
                 }
                 FileTree::File(file_contents) => {
-                    *tree.file_content_mut().unwrap() = map_fn(child_path, file_contents)?;
+                    *tree
+                        .file_content_mut()
+                        .context("Failed to get mutable reference of file tree")? =
+                        map_fn(child_path, file_contents.to_owned())?;
                 }
             }
-
-            c.insert(key.clone(), tree.clone());
+            dir.insert(key, tree);
         }
     }
 
