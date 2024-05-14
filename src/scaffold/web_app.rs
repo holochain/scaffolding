@@ -42,14 +42,8 @@ fn web_app_skeleton(
             .insert(OsString::from("flake.nix"), flake_nix(holo_enabled));
     }
 
-    let mut scaffold_template_result =
+    let scaffold_template_result =
         scaffold_web_app_template(app_file_tree, template_file_tree, &app_name, holo_enabled)?;
-
-    scaffold_template_result
-        .file_tree
-        .dir_content_mut()
-        .unwrap()
-        .insert(OsString::from("dnas"), dir! {});
 
     Ok(scaffold_template_result)
 }
