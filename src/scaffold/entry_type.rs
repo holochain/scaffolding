@@ -95,11 +95,10 @@ pub fn scaffold_entry_type(
                 .iter()
                 .map(|s| s.to_os_string())
                 .collect();
-            let empty_dir = dir! {};
             choose_fields(
                 name,
                 &zome_file_tree,
-                template_file_tree.path(&mut v.iter()).unwrap_or(&empty_dir),
+                template_file_tree.path(&mut v.iter()).unwrap_or(&dir! {}),
                 no_ui,
             )?
         }
@@ -145,7 +144,7 @@ pub fn scaffold_entry_type(
         .filter_map(|f| f.linked_from.clone())
         .collect();
 
-    for l in linked_from.clone() {
+    for l in linked_from {
         zome_file_tree = add_link_type_to_integrity_zome(
             zome_file_tree,
             &link_type_name(&l, &entry_def.referenceable()),

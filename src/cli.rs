@@ -45,7 +45,7 @@ use structopt::StructOpt;
 pub struct HcScaffold {
     #[structopt(short, long)]
     /// The template to use for the scaffold command
-    /// Can either be an option from the built-in templates: "vanilla", "vue", "lit", "svelte"
+    /// Can either be an option from the built-in templates: "vanilla", "vue", "lit", "svelte", "headless"
     /// Or a path to a custom template
     template: Option<String>,
 
@@ -203,7 +203,6 @@ pub enum HcScaffoldCommand {
         /// Skips UI generation for this collection.
         no_ui: bool,
     },
-
     Example {
         /// Name of the example to scaffold. One of ['hello-world', 'forum'].
         example: Option<Example>,
@@ -216,44 +215,37 @@ pub enum HcScaffoldCommand {
 impl HcScaffold {
     pub async fn run(self) -> anyhow::Result<()> {
         let current_dir = std::env::current_dir()?;
-        let template_config = if let Some(t) = &self.template {
-            // Only read from config if the template is inbuilt and not a path
-            if Path::new(t).exists() {
-                None
-            } else {
-                get_template_config(&current_dir)?
-            }
-        } else {
-            None
-        };
+        let template_config = get_template_config(&current_dir)?;
         let template = match (&template_config, &self.template) {
             (Some(config), Some(template)) if &config.template != template => {
                 return Err(ScaffoldError::InvalidArguments(format!(
-                "The value {template} passed with `--template` does not match the template the web-app was scaffolded with: {}",
-                config.template
+                "The value {} passed with `--template` does not match the template the web-app was scaffolded with: {}",
+                template.italic(),
+                config.template.italic(),
             )).into())
             }
-            (Some(config), _) => Some(&config.template),
+            // Only read from config if the template is inbuilt and not a path
+            (Some(config), _)  if !Path::new(&config.template).exists() => Some(&config.template),
             (_, t) => t.as_ref(),
         };
 
+        // Given a template either passed via the --template flag or retreived via the hcScaffold config,
+        // get the template file tree and the ui framework name or custom template path
         let (template, template_file_tree) = match template {
-            Some(template) => {
-                let template_name_or_path;
-                let file_tree = match template.as_str() {
-                    "lit" | "svelte" | "vanilla" | "vue" => {
-                        let ui_framework = UiFramework::from_str(template)?;
-                        template_name_or_path = ui_framework.to_string();
-                        ui_framework.template_filetree()?
-                    }
-                    custom_template_path => {
-                        template_name_or_path = custom_template_path.to_string();
-                        let templates_dir = current_dir.join(PathBuf::from(custom_template_path));
-                        load_directory_into_memory(&templates_dir)?
-                    }
-                };
-                (template_name_or_path.to_owned(), file_tree)
-            }
+            Some(template) => match template.to_lowercase().as_str() {
+                "lit" | "svelte" | "vanilla" | "vue" | "headless" => {
+                    let ui_framework = UiFramework::from_str(template)?;
+                    (ui_framework.name(), ui_framework.template_filetree()?)
+                }
+                custom_template_path if Path::new(custom_template_path).exists() => {
+                    let templates_dir = current_dir.join(PathBuf::from(custom_template_path));
+                    (
+                        custom_template_path.to_string(),
+                        load_directory_into_memory(&templates_dir)?,
+                    )
+                }
+                path => return Err(ScaffoldError::PathNotFound(PathBuf::from(path)).into()),
+            },
             None => {
                 let ui_framework = match self.command {
                     HcScaffoldCommand::WebApp { .. } => UiFramework::choose()?,
@@ -266,7 +258,7 @@ impl HcScaffold {
                         UiFramework::try_from(&file_tree)?
                     }
                 };
-                (ui_framework.to_string(), ui_framework.template_filetree()?)
+                (ui_framework.name(), ui_framework.template_filetree()?)
             }
         };
 
