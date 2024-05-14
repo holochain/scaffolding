@@ -9,8 +9,7 @@ use crate::scaffold::collection::{scaffold_collection, CollectionType};
 use crate::scaffold::dna::{scaffold_dna, DnaFileTree};
 use crate::scaffold::entry_type::crud::{parse_crud, Crud};
 use crate::scaffold::entry_type::definitions::{
-    parse_entry_type_reference, parse_referenceable, Cardinality, EntryTypeReference,
-    FieldDefinition, FieldType, Referenceable,
+    Cardinality, EntryTypeReference, FieldDefinition, FieldType, Referenceable,
 };
 use crate::scaffold::entry_type::{fields::parse_fields, scaffold_entry_type};
 use crate::scaffold::example::{choose_example, Example};
@@ -160,11 +159,11 @@ pub enum HcScaffoldCommand {
         /// Name of the integrity zome in which you want to scaffold the link type
         zome: Option<String>,
 
-        #[structopt(parse(try_from_str = parse_referenceable))]
+        #[structopt(parse(try_from_str = Referenceable::from_str))]
         /// Entry type (or agent role) used as the base for the links
         from_referenceable: Option<Referenceable>,
 
-        #[structopt(parse(try_from_str = parse_referenceable))]
+        #[structopt(parse(try_from_str = Referenceable::from_str))]
         /// Entry type (or agent role) used as the target for the links
         to_referenceable: Option<Referenceable>,
 
@@ -196,7 +195,7 @@ pub enum HcScaffoldCommand {
         /// Collection name, just to differentiate it from other collections
         collection_name: Option<String>,
 
-        #[structopt(parse(try_from_str = parse_entry_type_reference))]
+        #[structopt(parse(try_from_str = EntryTypeReference::from_str))]
         /// Entry type that is going to be added to the collection
         entry_type: Option<EntryTypeReference>,
 
