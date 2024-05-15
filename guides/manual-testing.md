@@ -6,7 +6,7 @@ With the Scaffolding repository checked out, switch to the Git revision you want
 
 Start the Nix development environment for the Scaffolding tool using:
 
-```
+```shell
 nix develop --override-input "versions/scaffolding" "path://$PWD"
 ```
 
@@ -17,10 +17,21 @@ For example, `cd /tmp`. You're now ready to scaffold a new app with `hc-scaffold
 
 When following the instructions that the Scaffolding outputs, ignore `nix develop` and instead run:
 
-```
+```shell
 nix develop --override-input "versions/scaffolding" <path-to-local-scaffolding-clone>
 ```
 
 Which will ensure that you keep using the updated Scaffolding tool inside the scaffolded hApp environment.
 
 Now you can proceed with testing your changes as needed.
+
+#### Testing against a different holochain version
+
+If you would like to test your hApp against a different version of holochain you can override the holochain input like so,
+we again ignore running `nix develop` as instructed by Scaffolding outputs.
+
+```shell
+nix develop --override-input "versions/holochain" github:holochain/holochain/holochain-<tag>
+```
+
+Replace the `tag` with the holochain version you would like to test against i.e `0.3.0-beta-dev.48`
