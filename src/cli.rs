@@ -238,7 +238,7 @@ impl HcScaffold {
                     (ui_framework.name(), ui_framework.template_filetree()?)
                 }
                 custom_template_path if Path::new(custom_template_path).exists() => {
-                    let templates_dir = current_dir.join(PathBuf::from(custom_template_path));
+                    let templates_dir = current_dir.join(custom_template_path);
                     (
                         custom_template_path.to_string(),
                         load_directory_into_memory(&templates_dir)?,
