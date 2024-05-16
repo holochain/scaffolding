@@ -31,7 +31,7 @@ If you would like to test your hApp against a different version of holochain you
 we again ignore running `nix develop` as instructed by Scaffolding outputs.
 
 ```shell
-nix develop --override-input "versions/holochain" github:holochain/holochain/holochain-<tag>
+nix develop --override-input "versions/holochain" "github:holochain/holochain/holochain-<tag>"
 ```
 
 Replace the `tag` with the holochain version you would like to test against i.e `0.3.0-beta-dev.48`
