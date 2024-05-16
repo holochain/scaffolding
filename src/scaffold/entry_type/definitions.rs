@@ -1,13 +1,11 @@
+use std::str::FromStr;
+
 use convert_case::{Case, Casing};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use serde::{ser::SerializeStruct, Deserialize, Serialize, Serializer};
 
-use crate::{
-    error::{ScaffoldError, ScaffoldResult},
-    reserved_words::check_for_reserved_words,
-    utils::check_case,
-};
+use crate::{error::ScaffoldError, reserved_words::check_for_reserved_words, utils::check_case};
 
 #[derive(Deserialize, Debug, Clone, Serialize)]
 #[serde(tag = "type")]
@@ -95,6 +93,7 @@ impl FieldType {
 
     pub fn rust_type(&self) -> TokenStream {
         use FieldType::*;
+
         match self {
             Bool => quote!(bool),
             String => quote!(String),
@@ -230,25 +229,29 @@ impl EntryTypeReference {
     }
 }
 
-pub fn parse_entry_type_reference(s: &str) -> ScaffoldResult<EntryTypeReference> {
-    let sp: Vec<&str> = s.split(':').collect();
-    check_case(sp[0], "entry type reference", Case::Snake)?;
+impl FromStr for EntryTypeReference {
+    type Err = ScaffoldError;
 
-    let reference_entry_hash = match sp.len() {
-        0 | 1 => false,
-        _ => match sp[1] {
-            "EntryHash" => true,
-            "ActionHash" => false,
-            _ => Err(ScaffoldError::InvalidArguments(String::from(
-                "second argument for reference type must be \"EntryHash\" or \"ActionHash\"",
-            )))?,
-        },
-    };
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let sp: Vec<&str> = s.split(':').collect();
+        check_case(sp[0], "entry type reference", Case::Snake)?;
 
-    Ok(EntryTypeReference {
-        entry_type: sp[0].to_string().to_case(Case::Pascal),
-        reference_entry_hash,
-    })
+        let reference_entry_hash = match sp.len() {
+            0 | 1 => false,
+            _ => match sp[1] {
+                "EntryHash" => true,
+                "ActionHash" => false,
+                _ => Err(ScaffoldError::InvalidArguments(String::from(
+                    "second argument for reference type must be \"EntryHash\" or \"ActionHash\"",
+                )))?,
+            },
+        };
+
+        Ok(EntryTypeReference {
+            entry_type: sp[0].to_string().to_case(Case::Pascal),
+            reference_entry_hash,
+        })
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -270,22 +273,26 @@ impl Serialize for Referenceable {
     }
 }
 
-pub fn parse_referenceable(s: &str) -> ScaffoldResult<Referenceable> {
-    let sp: Vec<&str> = s.split(':').collect();
+impl FromStr for Referenceable {
+    type Err = ScaffoldError;
 
-    check_case(sp[0], "referenceable", Case::Snake)?;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let sp: Vec<&str> = s.split(':').collect();
 
-    Ok(match sp[0] {
-        "agent" => match sp.len() {
-            0 | 1 => Referenceable::Agent {
-                role: String::from("agent"),
+        check_case(sp[0], "referenceable", Case::Snake)?;
+
+        Ok(match sp[0] {
+            "agent" => match sp.len() {
+                0 | 1 => Referenceable::Agent {
+                    role: String::from("agent"),
+                },
+                _ => Referenceable::Agent {
+                    role: sp[1].to_string(),
+                },
             },
-            _ => Referenceable::Agent {
-                role: sp[1].to_string(),
-            },
-        },
-        _ => Referenceable::EntryType(parse_entry_type_reference(s)?),
-    })
+            _ => Referenceable::EntryType(EntryTypeReference::from_str(s)?),
+        })
+    }
 }
 
 impl Referenceable {
@@ -331,5 +338,17 @@ impl EntryDefinition {
             entry_type: self.name.clone(),
             reference_entry_hash: self.reference_entry_hash,
         })
+    }
+
+    pub fn snake_case_name(&self) -> String {
+        self.name.to_case(Case::Snake)
+    }
+
+    pub fn pascal_case_name(&self) -> String {
+        self.name.to_case(Case::Pascal)
+    }
+
+    pub fn camel_case_name(&self) -> String {
+        self.name.to_case(Case::Camel)
     }
 }
