@@ -180,6 +180,9 @@ pub fn unparse(file: &syn::File) -> String {
     add_newlines(&prettyplease::unparse(file).replace("///", "//"))
 }
 
+/// Inserts new lines that are stripped out by `syn` during programmatic
+/// manipulation of Rust code. Newlines and white spaces are not considered
+/// tokens by `syn`, so this function restores them to improve code readability.
 fn add_newlines(input: &str) -> String {
     let mut formatted_code = String::new();
     let lines: Vec<&str> = input.lines().collect();
