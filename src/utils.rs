@@ -177,5 +177,29 @@ pub fn check_no_whitespace(input: &str, identifier: &str) -> ScaffoldResult<()> 
 }
 
 pub fn unparse(file: &syn::File) -> String {
-    prettyplease::unparse(file).replace("///", "//")
+    add_newlines(&prettyplease::unparse(file).replace("///", "//"))
+}
+
+fn add_newlines(input: &str) -> String {
+    let mut formatted_code = String::new();
+    let lines: Vec<&str> = input.lines().collect();
+    let mut after_imports = false;
+    for (i, line) in lines.iter().enumerate() {
+        // Add a newline after the imports block
+        if !after_imports && line.trim().is_empty() {
+            after_imports = true;
+            formatted_code.push_str("\n");
+        }
+        // Add newlines between #[hdk_extern] functions
+        if line.trim().starts_with("#[hdk_extern]") && i > 0 {
+            formatted_code.push_str("\n");
+        }
+        // Add newlines between #[derive] annotated structs/enums
+        if line.trim().starts_with("#[derive") && i > 0 {
+            formatted_code.push_str("\n");
+        }
+        formatted_code.push_str(line);
+        formatted_code.push('\n');
+    }
+    formatted_code
 }

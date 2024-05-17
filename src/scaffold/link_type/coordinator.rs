@@ -1,4 +1,6 @@
 use convert_case::{Case, Casing};
+use proc_macro2::TokenStream;
+use quote::format_ident;
 
 use crate::{
     error::ScaffoldResult,
@@ -123,7 +125,7 @@ pub fn get_links_handler(
     from_referenceable: &Referenceable,
     to_referenceable: &Referenceable,
     delete: bool,
-) -> String {
+) -> TokenStream {
     match to_referenceable {
         Referenceable::Agent { .. } => {
             get_links_handler_to_agent(from_referenceable, to_referenceable, delete)
@@ -136,28 +138,38 @@ fn get_links_handler_to_agent(
     from_referenceable: &Referenceable,
     to_referenceable: &Referenceable,
     delete: bool,
-) -> String {
-    let from_hash_type = from_referenceable.hash_type().to_string();
-    let from_arg_name = from_referenceable.field_name(&Cardinality::Single);
+) -> TokenStream {
+    let from_hash_type = format_ident!("{}", from_referenceable.hash_type().to_string());
+    let from_arg_name = format_ident!("{}", from_referenceable.field_name(&Cardinality::Single));
 
-    let pascal_link_type_name = link_type_name(from_referenceable, to_referenceable);
-    let singular_snake_from_entry_type = from_referenceable
-        .to_string(&Cardinality::Single)
-        .to_case(Case::Snake);
-    let plural_snake_to_entry_type = to_referenceable
-        .to_string(&Cardinality::Vector)
-        .to_case(Case::Snake);
+    let pascal_link_type_name =
+        format_ident!("{}", link_type_name(from_referenceable, to_referenceable));
+    let singular_snake_from_entry_type = format_ident!(
+        "{}",
+        from_referenceable
+            .to_string(&Cardinality::Single)
+            .to_case(Case::Snake)
+    );
+    let plural_snake_to_entry_type = format_ident!(
+        "{}",
+        to_referenceable
+            .to_string(&Cardinality::Vector)
+            .to_case(Case::Snake)
+    );
+
+    let get_deleted_entry_for_entry_function_name = format_ident!(
+        "get_deleted_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}"
+    );
 
     let get_deleted_links_handler = delete
-        .then_some(format!(
-            r#"
+        .then_some(quote::quote! {
             #[hdk_extern]
-            pub fn get_deleted_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}(
-                {from_arg_name}: {from_hash_type},
-            ) -> ExternResult<Vec<(SignedActionHashed, Vec<SignedActionHashed>)>> {{
+            pub fn #get_deleted_entry_for_entry_function_name(
+                #from_arg_name: #from_hash_type,
+            ) -> ExternResult<Vec<(SignedActionHashed, Vec<SignedActionHashed>)>> {
                 let details = get_link_details(
-                    {from_arg_name},
-                    LinkTypes::{pascal_link_type_name},
+                    #from_arg_name,
+                    LinkTypes::#pascal_link_type_name,
                     None,
                     GetOptions::default(),
                 )?;
@@ -166,53 +178,66 @@ fn get_links_handler_to_agent(
                     .into_iter()
                     .filter(|(_link, deletes)| !deletes.is_empty())
                     .collect())
-            }}
-            "#
-        ))
+            }
+        })
         .unwrap_or_default();
 
-    format!(
-        r#"
+    let get_entry_for_entry_function_name =
+        format_ident!("get_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}");
+
+    quote::quote! {
         #[hdk_extern]
-        pub fn get_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}({from_arg_name}: {from_hash_type}) -> ExternResult<Vec<Link>> {{
+        pub fn #get_entry_for_entry_function_name(#from_arg_name: #from_hash_type) -> ExternResult<Vec<Link>> {
             get_links(
-                GetLinksInputBuilder::try_new({from_arg_name}, LinkTypes::{pascal_link_type_name})?.build(),
+                GetLinksInputBuilder::try_new(#from_arg_name, LinkTypes::#pascal_link_type_name)?.build(),
             )
-        }}
-        {get_deleted_links_handler}
-        "#,
-    )
+        }
+
+        #get_deleted_links_handler
+    }
 }
 
 fn get_links_handler_to_entry(
     from_referenceable: &Referenceable,
     to_entry_type: &EntryTypeReference,
     delete: bool,
-) -> String {
-    let from_hash_type = from_referenceable.hash_type().to_string();
-    let from_arg_name = from_referenceable.field_name(&Cardinality::Single);
+) -> TokenStream {
+    let from_hash_type = format_ident!("{}", from_referenceable.hash_type().to_string());
+    let from_arg_name = format_ident!("{}", from_referenceable.field_name(&Cardinality::Single));
 
-    let pascal_link_type_name = link_type_name(
-        from_referenceable,
-        &Referenceable::EntryType(to_entry_type.clone()),
+    let pascal_link_type_name = format_ident!(
+        "{}",
+        link_type_name(
+            from_referenceable,
+            &Referenceable::EntryType(to_entry_type.clone()),
+        )
     );
-    let singular_snake_from_entry_type = from_referenceable
-        .to_string(&Cardinality::Single)
-        .to_case(Case::Snake);
-    let plural_snake_to_entry_type = to_entry_type
-        .to_string(&Cardinality::Vector)
-        .to_case(Case::Snake);
+    let singular_snake_from_entry_type = format_ident!(
+        "{}",
+        from_referenceable
+            .to_string(&Cardinality::Single)
+            .to_case(Case::Snake)
+    );
+    let plural_snake_to_entry_type = format_ident!(
+        "{}",
+        to_entry_type
+            .to_string(&Cardinality::Vector)
+            .to_case(Case::Snake)
+    );
+
+    let get_deleted_entry_for_entry_function_name = format_ident!(
+        "get_deleted_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}"
+    );
 
     let get_deleted_links_handler = delete
-        .then_some(format!(
-            r#"
+        .then_some(quote::quote! {
             #[hdk_extern]
-            pub fn get_deleted_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}(
-                {from_arg_name}: {from_hash_type},
-            ) -> ExternResult<Vec<(SignedActionHashed, Vec<SignedActionHashed>)>> {{
+            pub fn #get_deleted_entry_for_entry_function_name(
+                #from_arg_name: #from_hash_type,
+            ) -> ExternResult<Vec<(SignedActionHashed, Vec<SignedActionHashed>)>> {
                 let details = get_link_details(
-                    {from_arg_name},
-                    LinkTypes::{pascal_link_type_name},
+                    #from_arg_name,
+                    LinkTypes::#pascal_link_type_name,
                     None,
                     GetOptions::default(),
                 )?;
@@ -221,22 +246,23 @@ fn get_links_handler_to_entry(
                     .into_iter()
                     .filter(|(_link, deletes)| !deletes.is_empty())
                     .collect())
-            }}
-            "#
-        ))
+            }
+        })
         .unwrap_or_default();
 
-    format!(
-        r#"
+    let get_entry_for_entry_function_name =
+        format_ident!("get_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}");
+
+    quote::quote! {
         #[hdk_extern]
-        pub fn get_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}({from_arg_name}: {from_hash_type}) -> ExternResult<Vec<Link>> {{
+        pub fn #get_entry_for_entry_function_name(#from_arg_name: #from_hash_type) -> ExternResult<Vec<Link>> {
             get_links(
-                GetLinksInputBuilder::try_new({from_arg_name}, LinkTypes::{pascal_link_type_name})?.build(),
+                GetLinksInputBuilder::try_new(#from_arg_name, LinkTypes::#pascal_link_type_name)?.build(),
             )
-        }}
-        {get_deleted_links_handler}
-        "#,
-    )
+        }
+
+        #get_deleted_links_handler
+    }
 }
 
 fn from_link_hash_type(hash_type: &str) -> String {
