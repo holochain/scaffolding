@@ -193,7 +193,9 @@ fn add_newlines(input: &str) -> String {
             formatted_code.push_str("\n");
         }
         // Add newlines between #[hdk_extern] functions
-        if line.trim().starts_with("#[hdk_extern]") && i > 0 {
+        if (line.trim().starts_with("#[hdk_extern]") && i > 0)
+            || (line.trim().starts_with("fn") && i > 0)
+        {
             formatted_code.push_str("\n");
         }
         // Add newlines between #[derive] annotated structs/enums

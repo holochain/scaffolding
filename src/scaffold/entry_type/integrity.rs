@@ -59,19 +59,20 @@ pub fn render_entry_definition_file(
         format_ident!("validate_update_{}", entry_def.name.to_case(Case::Snake));
     let new_entry_arg = format_ident!("_{}", entry_def.name.to_case(Case::Snake));
     let original_entry_arg = format_ident!("_original_{}", entry_def.name.to_case(Case::Snake));
-
     let updated_invalid_reason = format!("{} cannot be updated", plural_name_title);
 
-    let validate_update_result: TokenStream = match crud.update {
-        true => quote! {
-            /// TODO: add the appropriate validation rules
+    let validate_update_result = if crud.update {
+        quote! {
             Ok(ValidateCallbackResult::Valid)
-        },
-        false => quote! {
+        }
+    } else {
+        quote! {
             Ok(ValidateCallbackResult::Invalid(String::from(#updated_invalid_reason)))
-        },
+        }
     };
+
     let validate_update = quote! {
+        /// TODO: add the appropriate validation rules
         pub fn #validate_update_fn(
             _action: Update,
             #new_entry_arg: #name_pascal,
@@ -85,19 +86,20 @@ pub fn render_entry_definition_file(
     let validate_delete_fn =
         format_ident!("validate_delete_{}", entry_def.name.to_case(Case::Snake));
     let deleted_post_arg = format_ident!("_original_{}", entry_def.name.to_case(Case::Snake));
-
     let deleted_invalid_reason = format!("{} cannot be deleted", plural_name_title);
 
-    let validate_delete_result = match crud.delete {
-        true => quote! {
-            /// TODO: add the appropriate validation rules
+    let validate_delete_result = if crud.update {
+        quote! {
             Ok(ValidateCallbackResult::Valid)
-        },
-        false => quote! {
+        }
+    } else {
+        quote! {
             Ok(ValidateCallbackResult::Invalid(String::from(#deleted_invalid_reason)))
-        },
+        }
     };
+
     let validate_delete = quote! {
+        /// TODO: add the appropriate validation rules
         pub fn #validate_delete_fn(
             _action: Delete,
             _original_action: EntryCreationAction,
@@ -151,7 +153,6 @@ pub fn render_entry_definition_file(
                 (Cardinality::Vector, false) => quote! {
                     for action_hash in #create_new_entry_arg.#field_name.clone() {
                         let record = must_get_valid_record(action_hash)?;
-
                         let #dependant_entry_type_snake: crate::#dependant_entry_type_pascal = record.entry().to_app_option()
                             .map_err(|e| wasm_error!(e))?
                             .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("Dependant action must be accompanied by an entry"))))?;
@@ -159,20 +160,17 @@ pub fn render_entry_definition_file(
                 },
                 (Cardinality::Single,true) => quote! {
                     let entry = must_get_entry(#create_new_entry_arg.#field_name.clone())?;
-
                     let #dependant_entry_type_snake = crate::#dependant_entry_type_pascal::try_from(entry)?;
                 },
                 (Cardinality::Option, true) => quote! {
                     if let Some(entry_hash) = #create_new_entry_arg.#field_name.clone() {
                         let entry = must_get_entry(entry_hash)?;
-
                         let #dependant_entry_type_snake = crate::#dependant_entry_type_pascal::try_from(entry)?;
                     }
                 },
                 (Cardinality::Vector, true) => quote! {
                     for entry_hash in #create_new_entry_arg.#field_name.clone() {
                         let entry = must_get_entry(entry_hash)?;
-
                         let #dependant_entry_type_snake = crate::#dependant_entry_type_pascal::try_from(entry)?;
                     }
                 },
@@ -185,17 +183,17 @@ pub fn render_entry_definition_file(
 
         #(#type_definitions)*
 
-        #[hdk_entry_helper]
         #[derive(Clone, PartialEq)]
+        #[hdk_entry_helper]
         #entry_def_token_stream
 
+        /// TODO: add the appropriate validation rules
         pub fn #validate_create_fn(
             _action: EntryCreationAction,
             #create_new_entry_arg: #name_pascal
         ) -> ExternResult<ValidateCallbackResult> {
             #(#deps_validation)*
 
-            /// TODO: add the appropriate validation rules
             Ok(ValidateCallbackResult::Valid)
         }
 
@@ -234,13 +232,12 @@ pub fn add_entry_type_to_integrity_zome(
 
     let lib_rs_path = crate_src_path.join("lib.rs");
 
-    map_file(&mut file_tree, &lib_rs_path, |s| {
+    map_file(&mut file_tree, &lib_rs_path, |contents| {
         Ok(format!(
-            r#"pub mod {};
-pub use {}::*;
+            r#"pub mod {snake_entry_def_name};
+               pub use {snake_entry_def_name}::*;
 
-{}"#,
-            snake_entry_def_name, snake_entry_def_name, s
+               {contents}"#,
         ))
     })?;
 
