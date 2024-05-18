@@ -241,7 +241,12 @@ pub fn create_link_for_cardinality(
 
     match cardinality {
         Cardinality::Single => quote! {
-            create_link(#snake_entry_def_name.#field_name.clone(), #link_target.clone(), LinkTypes::#link_type_name, ())?;
+            create_link(
+                #snake_entry_def_name.#field_name.clone(),
+                #link_target.clone(),
+                LinkTypes::#link_type_name,
+                (),
+            )?;
         },
         Cardinality::Option => quote! {
             if let Some(base) = #snake_entry_def_name.#field_name.clone() {
@@ -291,11 +296,15 @@ pub fn create_handler(entry_def: &EntryDefinition) -> TokenStream {
     quote! {
         #[hdk_extern]
         pub fn #create_entry_function_name(#snake_entry_def_name: #pascal_entry_def_name) -> ExternResult<Record> {
-            let #entry_hash_variable_name = create_entry(&EntryTypes::#pascal_entry_def_name(#snake_entry_def_name.clone()))?;
+            let #entry_hash_variable_name = create_entry(
+                &EntryTypes::#pascal_entry_def_name(#snake_entry_def_name.clone())
+            )?;
             #(#create_links)*
 
             let record = get(#entry_hash_variable_name.clone(), GetOptions::default())?
-                .ok_or(wasm_error!(WasmErrorInner::Guest("Could not find the newly created pascal_entry_def_name".to_string())))?;
+                .ok_or(wasm_error!(
+                    WasmErrorInner::Guest("Could not find the newly created pascal_entry_def_name".to_string())
+                ))?;
             Ok(record)
         }
     }
@@ -332,10 +341,14 @@ pub fn update_handler_without_linking_on_each_update(entry_def: &EntryDefinition
 
         #[hdk_extern]
         pub fn #update_entry_def_function_name(input: #update_input_struct) -> ExternResult<Record> {
-            let #updated_entry_hash_variable_name = update_entry(input.#previous_entry_def_hash, &input.#updated_entry_def)?;
+            let #updated_entry_hash_variable_name = update_entry(
+                input.#previous_entry_def_hash, &input.#updated_entry_def
+            )?;
 
             let record = get(#updated_entry_hash_variable_name.clone(), GetOptions::default())?
-                .ok_or(wasm_error!(WasmErrorInner::Guest("Could not find the newly updated #pascal_entry_def_name".to_string())))?;
+                .ok_or(wasm_error!(
+                    WasmErrorInner::Guest("Could not find the newly updated #pascal_entry_def_name".to_string())
+                ))?;
 
             Ok(record)
         }
@@ -369,12 +382,22 @@ pub fn update_handler_linking_on_each_update(entry_def: &EntryDefinition) -> Tok
 
         #[hdk_extern]
         pub fn #update_entry_def_function_name(input: #update_input_type_struct) -> ExternResult<Record> {
-            let #updated_entry_def_hash = update_entry(input.#previous_entry_def_hash.clone(), &input.#updated_entry_def_name)?;
+            let #updated_entry_def_hash = update_entry(
+                input.#previous_entry_def_hash.clone(),
+                &input.#updated_entry_def_name,
+            )?;
 
-            create_link(input.#original_entry_def_hash.clone(), #updated_entry_def_hash.clone(), LinkTypes::#link_type_variant_name, ())?;
+            create_link(
+                input.#original_entry_def_hash.clone(),
+                #updated_entry_def_hash.clone(),
+                LinkTypes::#link_type_variant_name,
+                (),
+            )?;
 
             let record = get(#updated_entry_def_hash.clone(), GetOptions::default())?
-                .ok_or(wasm_error!(WasmErrorInner::Guest("Could not find the newly updated #pascal_entry_def_name".to_string())))?;
+                .ok_or(wasm_error!(
+                    WasmErrorInner::Guest("Could not find the newly updated #pascal_entry_def_name".to_string())
+                ))?;
 
             Ok(record)
         }
@@ -460,7 +483,12 @@ pub fn delete_handler(entry_def: &EntryDefinition) -> TokenStream {
                     "Malformed get details response"
                 )))),
             }?;
-            let entry = record.entry().as_option().ok_or(wasm_error!(WasmErrorInner::Guest("#pascal_entry_def_name record has no entry".to_string())))?;
+            let entry = record
+                .entry()
+                .as_option()
+                .ok_or(wasm_error!(
+                    WasmErrorInner::Guest("#pascal_entry_def_name record has no entry".to_string())
+                ))?;
             let #snake_entry_def_name = <#pascal_entry_def_name>::try_from(entry)?;
             #(#delete_links)*
         }
@@ -557,7 +585,7 @@ fn signal_has_entry_types(signal_enum: &syn::ItemEnum) -> bool {
     signal_enum
         .variants
         .iter()
-        .any(|v| v.ident.to_string().eq(&String::from("EntryCreated")))
+        .any(|v| v.ident == "EntryCreated")
 }
 
 fn signal_action_has_entry_types(expr_match: &syn::ExprMatch) -> bool {
@@ -600,7 +628,7 @@ fn signal_action_match_arms() -> ScaffoldResult<Vec<syn::Arm>> {
         syn::parse_quote! {
             Action::Create(_create) => {
                 if let Ok(Some(app_entry)) = get_entry_for_action(&action.hashed.hash) {
-                emit_signal(Signal::EntryCreated { action, app_entry })?;
+                    emit_signal(Signal::EntryCreated { action, app_entry })?;
                 }
                 Ok(())
             }
@@ -671,8 +699,7 @@ pub fn add_crud_functions_to_coordinator(
         Ok(format!(
             r#"pub mod {};
 
-            {contents}
-            "#,
+            {contents}"#,
             &entry_def_snake_case_name
         ))
     })?;
@@ -701,10 +728,14 @@ pub fn add_crud_functions_to_coordinator(
                     }
 
                     if let syn::Item::Fn(item_fn) = item {
-                        if item_fn.sig.ident.eq("signal_action") {
+                        if item_fn.sig.ident == "signal_action" {
                             if find_ending_match_expr_in_block(&mut item_fn.block).is_none() {
                                 item_fn.block = Box::new(syn::parse_quote! {
-                                    { match action.hashed.content.clone() { _ => Ok(()) } }
+                                    {
+                                        match action.hashed.content.clone() {
+                                            _ => Ok(())
+                                        }
+                                    }
                                 });
                             }
 
@@ -726,11 +757,11 @@ pub fn add_crud_functions_to_coordinator(
                         fn get_entry_for_action(action_hash: &ActionHash) -> ExternResult<Option<EntryTypes>> {
                             let record = match get_details(action_hash.clone(), GetOptions::default())? {
                                 Some(Details::Record(record_details)) => record_details.record,
-                                _ => { return Ok(None); }
+                                _ => return Ok(None),
                             };
                             let entry = match record.entry().as_option() {
                                 Some(entry) => entry,
-                                None => { return Ok(None); }
+                                None => return Ok(None),
                             };
                             let (zome_index, entry_index) = match record.action().entry_type() {
                                 Some(EntryType::App(AppEntryDef {
@@ -738,7 +769,7 @@ pub fn add_crud_functions_to_coordinator(
                                     entry_index,
                                     ..
                                 })) => (zome_index, entry_index),
-                                _ => { return Ok(None); }
+                                _ => return Ok(None),
                             };
                             EntryTypes::deserialize_from_type(*zome_index, *entry_index, entry)
                         }

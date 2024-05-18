@@ -9,7 +9,6 @@ use crate::file_tree::{dir_content, FileTree};
 
 pub fn choose_directory_path(prompt: &str, app_file_tree: &FileTree) -> ScaffoldResult<PathBuf> {
     let mut chosen_directory: Option<PathBuf> = None;
-
     let mut current_path = PathBuf::new();
 
     while chosen_directory.is_none() {
