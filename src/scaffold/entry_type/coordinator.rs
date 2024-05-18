@@ -698,8 +698,7 @@ pub fn add_crud_functions_to_coordinator(
     map_file(&mut file_tree, &lib_rs_path, |contents| {
         Ok(format!(
             r#"pub mod {};
-
-            {contents}"#,
+{contents}"#,
             &entry_def_snake_case_name
         ))
     })?;

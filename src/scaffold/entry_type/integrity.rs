@@ -235,9 +235,8 @@ pub fn add_entry_type_to_integrity_zome(
     map_file(&mut file_tree, &lib_rs_path, |contents| {
         Ok(format!(
             r#"pub mod {snake_entry_def_name};
-               pub use {snake_entry_def_name}::*;
-
-               {contents}"#,
+pub use {snake_entry_def_name}::*;
+{contents}"#,
         ))
     })?;
 

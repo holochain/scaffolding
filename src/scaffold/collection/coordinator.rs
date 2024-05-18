@@ -392,12 +392,10 @@ pub fn add_collection_to_coordinators(
 
     let lib_rs_path = crate_src_path.join("lib.rs");
 
-    map_file(&mut file_tree, &lib_rs_path, |s| {
+    map_file(&mut file_tree, &lib_rs_path, |contents| {
         Ok(format!(
-            r#"pub mod {};
-
-{}"#,
-            snake_link_type_name, s
+            r#"pub mod {snake_link_type_name};
+{contents}"#,
         ))
     })?;
 
