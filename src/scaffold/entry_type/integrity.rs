@@ -63,6 +63,7 @@ pub fn render_entry_definition_file(
 
     let validate_update_result = if crud.update {
         quote! {
+            /// TODO: add the appropriate validation rules
             Ok(ValidateCallbackResult::Valid)
         }
     } else {
@@ -72,7 +73,6 @@ pub fn render_entry_definition_file(
     };
 
     let validate_update = quote! {
-        /// TODO: add the appropriate validation rules
         pub fn #validate_update_fn(
             _action: Update,
             #new_entry_arg: #name_pascal,
@@ -90,6 +90,7 @@ pub fn render_entry_definition_file(
 
     let validate_delete_result = if crud.update {
         quote! {
+            /// TODO: add the appropriate validation rules
             Ok(ValidateCallbackResult::Valid)
         }
     } else {
@@ -99,7 +100,6 @@ pub fn render_entry_definition_file(
     };
 
     let validate_delete = quote! {
-        /// TODO: add the appropriate validation rules
         pub fn #validate_delete_fn(
             _action: Delete,
             _original_action: EntryCreationAction,
