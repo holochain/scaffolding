@@ -183,9 +183,14 @@ fn add_newlines(input: &str) -> String {
             after_imports = true;
             formatted_code.push_str("\n");
         }
-        // Add newlines between #[hdk_extern] functions
-        if (line.trim().starts_with("#[hdk_extern]") && i > 0)
-            || (line.trim().starts_with("fn") && i > 0)
+        // Add newlines between #[hdk_extern] annotated functions
+        if line.trim().starts_with("#[hdk_extern") && i > 0 {
+            formatted_code.push_str("\n");
+        }
+
+        // Add newlines between non #[hdk_extern] annoteted functions
+        if (line.trim().starts_with("pub fn") && i > 0)
+            && (!lines[i - 1].starts_with("#[hdk_extern"))
         {
             formatted_code.push_str("\n");
         }
