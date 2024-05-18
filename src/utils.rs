@@ -4,6 +4,7 @@ use std::{ffi::OsString, path::PathBuf};
 use anyhow::Context;
 use convert_case::{Case, Casing};
 use dialoguer::{theme::ColorfulTheme, Input, Select, Validator};
+use regex::Regex;
 
 use crate::error::{ScaffoldError, ScaffoldResult};
 use crate::file_tree::{dir_content, FileTree};
@@ -189,9 +190,14 @@ fn add_newlines(input: &str) -> String {
         }
 
         // Add newlines between non #[hdk_extern] annoteted functions
-        if (line.trim().starts_with("fn") && i > 0) && (!lines[i - 1].starts_with("#[hdk_extern")) {
+        let functon_regex =
+            Regex::new(r"(?m)^\s*(pub\s+fn|fn)\s+\w+\s*\(").expect("functon_regex is ivalid");
+        if (functon_regex.is_match(line.trim()) && i > 0)
+            && (!lines[i - 1].starts_with("#[hdk_extern"))
+        {
             formatted_code.push_str("\n");
         }
+
         // Add newlines between #[derive] annotated structs/enums
         if line.trim().starts_with("#[derive") && i > 0 {
             formatted_code.push_str("\n");
