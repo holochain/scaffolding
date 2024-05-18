@@ -1,6 +1,7 @@
 use std::collections::BTreeMap;
 use std::{ffi::OsString, path::PathBuf};
 
+use anyhow::Context;
 use convert_case::{Case, Casing};
 use dialoguer::{theme::ColorfulTheme, Input, Select, Validator};
 
@@ -48,11 +49,11 @@ pub fn choose_directory_path(prompt: &str, app_file_tree: &FileTree) -> Scaffold
         }
     }
 
-    let d = chosen_directory.expect("Couldn't choose directory");
+    let dir = chosen_directory.context("Couldn't choose directory")?;
 
-    println!("{} Selected path: {:?}", prompt, current_path);
+    println!("{prompt} Selected path: {current_path:?}");
 
-    Ok(d)
+    Ok(dir)
 }
 
 fn get_folder_names(folder: &BTreeMap<OsString, FileTree>) -> Vec<String> {
@@ -60,37 +61,38 @@ fn get_folder_names(folder: &BTreeMap<OsString, FileTree>) -> Vec<String> {
         .iter()
         .filter_map(|(key, val)| {
             if val.dir_content().is_some() {
-                key.to_str().map(|s| s.to_owned())
-            } else {
-                None
+                return key.to_str().map(|s| s.to_owned());
             }
+            None
         })
         .collect()
 }
 
 /// "yes" or "no" input dialog, with the option to specify a recommended answer (yes = true, no = false)
 pub fn input_yes_or_no(prompt: &str, recommended: Option<bool>) -> ScaffoldResult<bool> {
-    let mut yes_recommended = "";
-    let mut no_recommended = "";
+    let yes_recommended = if recommended == Some(true) {
+        " (recommended)"
+    } else {
+        ""
+    };
+    let no_recommended = if recommended == Some(false) {
+        " (recommended)"
+    } else {
+        ""
+    };
 
-    match recommended {
-        Some(true) => yes_recommended = " (recommended)",
-        Some(false) => no_recommended = " (recommended)",
-        None => (),
-    }
+    let items = [
+        format!("Yes{}", yes_recommended),
+        format!("No{}", no_recommended),
+    ];
 
-    match Select::with_theme(&ColorfulTheme::default())
+    let selection = Select::with_theme(&ColorfulTheme::default())
         .with_prompt(prompt)
         .default(0)
-        .items(&[
-            format!("Yes{}", yes_recommended),
-            format!("No{}", no_recommended),
-        ])
-        .interact()?
-    {
-        1 => Ok(false),
-        _ => Ok(true),
-    }
+        .items(&items)
+        .interact()?;
+
+    Ok(selection == 0)
 }
 
 pub fn input_with_custom_validation<'a, V>(prompt: &str, validator: V) -> ScaffoldResult<String>
@@ -110,10 +112,7 @@ pub fn input_with_case(prompt: &str, case: Case) -> ScaffoldResult<String> {
     let input: String = Input::with_theme(&ColorfulTheme::default())
         .with_prompt(prompt)
         .validate_with(|input: &String| -> Result<(), String> {
-            match input.is_case(case) {
-                false => Err(format!("Input must be {:?} case.", case)),
-                true => Ok(()),
-            }
+            check_case(input, "Input", case).map_err(|e| e.to_string())
         })
         .interact_text()?;
 
@@ -129,10 +128,7 @@ pub fn input_with_case_and_initial_text(
         .with_prompt(prompt)
         .with_initial_text(initial_text)
         .validate_with(|input: &String| -> Result<(), String> {
-            match input.is_case(case) {
-                false => Err(format!("Input must be {:?} case.", case)),
-                true => Ok(()),
-            }
+            check_case(input, "Input", case).map_err(|e| e.to_string())
         })
         .interact_text()?;
 
@@ -142,11 +138,8 @@ pub fn input_with_case_and_initial_text(
 pub fn input_no_whitespace(prompt: &str) -> ScaffoldResult<String> {
     let input = Input::with_theme(&ColorfulTheme::default())
         .with_prompt(prompt)
-        .validate_with(|input: &String| -> Result<(), &str> {
-            match input.as_str().contains(char::is_whitespace) {
-                true => Err("Input must *not* contain white spaces."),
-                false => Ok(()),
-            }
+        .validate_with(|input: &String| -> Result<(), String> {
+            check_no_whitespace(input, "Input").map_err(|e| e.to_string())
         })
         .interact_text()?;
 
@@ -155,24 +148,22 @@ pub fn input_no_whitespace(prompt: &str) -> ScaffoldResult<String> {
 
 /// Raises an error if input is not of the appropriate_case
 pub fn check_case(input: &str, identifier: &str, case: Case) -> ScaffoldResult<()> {
-    match input.is_case(case) {
-        true => Ok(()),
-        false => Err(ScaffoldError::InvalidStringFormat(format!(
-            "{} must be snake_case",
-            identifier
-        ))),
+    if !input.is_case(case) {
+        return Err(ScaffoldError::InvalidStringFormat(format!(
+            "{identifier} must be snake_case",
+        )));
     }
+    Ok(())
 }
 
 /// Raises an error if input is contains white spaces
 pub fn check_no_whitespace(input: &str, identifier: &str) -> ScaffoldResult<()> {
-    match input.contains(char::is_whitespace) {
-        true => Err(ScaffoldError::InvalidStringFormat(format!(
-            "{} must *not* contain whitespaces.",
-            identifier
-        ))),
-        false => Ok(()),
+    if input.contains(char::is_whitespace) {
+        return Err(ScaffoldError::InvalidStringFormat(format!(
+            "{identifier} must *not* contain whitespaces.",
+        )));
     }
+    Ok(())
 }
 
 pub fn unparse(file: &syn::File) -> String {
