@@ -320,13 +320,12 @@ fn from_link_hash_type(hash_type: &str) -> TokenStream {
         _ => {
             let lower_hash_type = hash_type.to_case(Case::Lower);
             let into_hash_method_name = format_ident!("into_{}", hash_type.to_case(Case::Snake));
+            let error_message = format!("No {lower_hash_type} associated with link");
             quote! {
                 link.target
                     .clone()
                     .#into_hash_method_name()
-                    .ok_or(wasm_error!(
-                        WasmErrorInner::Guest(format!("No {} associated with link", #lower_hash_type))
-                    ))?
+                    .ok_or(wasm_error!(WasmErrorInner::Guest(#error_message.to_string())))?
             }
         }
     }
@@ -378,11 +377,11 @@ fn remove_link_handlers(
             let links = get_links(
                 GetLinksInputBuilder::try_new(input.#target_field_name.clone(), LinkTypes::#inverse_link_type_name)?.build(),
             )?;
-            for link in links {{
-                if #from_inverse == &input.#base_field_name {{
+            for link in links {
+                if #from_inverse == input.#base_field_name {
                     delete_link(link.create_link_hash)?;
-                }}
-            }}
+                }
+            }
         }
     ).unwrap_or_default();
 
@@ -394,18 +393,18 @@ fn remove_link_handlers(
         }
 
         #[hdk_extern]
-        pub fn #remove_entry_for_entry_function_name(input: #remove_entry_for_entry_struct_name) -> ExternResult<()> {{
+        pub fn #remove_entry_for_entry_function_name(input: #remove_entry_for_entry_struct_name) -> ExternResult<()> {
             let links = get_links(
                 GetLinksInputBuilder::try_new(input.#base_field_name.clone(), LinkTypes::#pascal_link_type_name)?.build(),
             )?;
-            for link in links {{
-                if #from_link == &input.#target_field_name {{
+            for link in links {
+                if #from_link == input.#target_field_name {
                     delete_link(link.create_link_hash)?;
-                }}
-            }}
+                }
+            }
             #bidirectional_remove
             Ok(())
-        }}
+        }
     }
 }
 
@@ -496,7 +495,6 @@ pub fn add_link_type_functions_to_coordinator(
     map_file(&mut file_tree, &lib_rs_path, |contents| {
         Ok(format!(
             r#"pub mod {snake_link_type_name};
-
 {contents}"#,
         ))
     })?;
