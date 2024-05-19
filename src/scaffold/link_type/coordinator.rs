@@ -77,7 +77,6 @@ fn metadata_handlers(
             let links = get_links(
                 GetLinksInputBuilder::try_new(#snake_from_arg, LinkTypes::#pascal_link_type_name)?.build(),
             )?;
-
             let #snake_link_type_name: Vec<String> = links
                 .into_iter()
                 .map(|link|
@@ -85,7 +84,6 @@ fn metadata_handlers(
                         .map_err(|e| wasm_error!(WasmErrorInner::Guest(format!("Error converting link tag to string: {{:?}}", e))))
                 )
                 .collect::<ExternResult<Vec<String>>>()?;
-
             Ok(#snake_link_type_name)
         }
     }

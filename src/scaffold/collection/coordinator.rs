@@ -3,6 +3,8 @@ use std::ffi::OsString;
 use convert_case::{Case, Casing};
 use dialoguer::{theme::ColorfulTheme, Select};
 use holochain_types::prelude::ZomeManifest;
+use quote::format_ident;
+use syn::parse_quote;
 
 use crate::{
     error::{ScaffoldError, ScaffoldResult},
@@ -199,90 +201,89 @@ fn add_delete_link_in_delete_function(
     let zome_file_tree = ZomeFileTree::from_zome_manifest(dna_file_tree, chosen_coordinator_zome)?;
 
     let snake_case_entry_type = entry_type_reference.entry_type.to_case(Case::Snake);
+    let pascal_entry_def_name = entry_type_reference.entry_type.to_case(Case::Pascal);
 
-    let target_hash_variable = match entry_type_reference.reference_entry_hash {
-        true =>
-            r#"record.action().entry_hash().ok_or(wasm_error!(WasmErrorInner::Guest("Record does not have an entry".to_string())))?"#.to_string()
-        ,
-        false => format!("&original_{snake_case_entry_type}_hash"),
-    };
-    let into_hash_fn = match entry_type_reference.reference_entry_hash {
-        true => "into_entry_hash()".to_string(),
-        false => "into_action_hash()".to_string(),
+    let target_hash_variable = if entry_type_reference.reference_entry_hash {
+        quote::quote! {
+            record.action().entry_hash().ok_or(wasm_error!(WasmErrorInner::Guest("Record does not have an entry".to_string())))?
+        }
+    } else {
+        let original_hash = format_ident!("original_{snake_case_entry_type}_hash");
+        quote::quote! {#original_hash}
     };
 
-    let mut delete_link_stmts: Vec<String> = vec![];
-    match collection_type {
+    let into_hash_fn = if entry_type_reference.reference_entry_hash {
+        format_ident!("into_entry_hash")
+    } else {
+        format_ident!("into_action_hash")
+    };
+
+    let delete_link_stmts: Vec<syn::Stmt> = match collection_type {
         CollectionType::Global => {
-            delete_link_stmts.push(format!(r#"let path = Path::from("{}");"#, collection_name));
-            delete_link_stmts.push(format!(
-                r#"let links = get_links(
-                    GetLinksInputBuilder::try_new(path.path_entry_hash()?, LinkTypes::{link_type_name})?.build(),
-                )?;"#,
-            ));
-            delete_link_stmts.push(format!(
-                r#"for link in links {{
-                    if let Some(hash) = link.target.{into_hash_fn} {{
-                       if hash.eq({target_hash_variable}) {{
-                            delete_link(link.create_link_hash)?;
-                        }}
-                    }}
-                }}"#,
-            ));
+            let link_type_name = format_ident!("{link_type_name}");
+            vec![
+                parse_quote! {let path = Path::from(#collection_name);},
+                parse_quote! {
+                    let links = get_links(
+                        GetLinksInputBuilder::try_new(path.path_entry_hash()?, LinkTypes::#link_type_name)?.build(),
+                    )?;
+                },
+                parse_quote! {
+                    for link in links {
+                        if let Some(hash) = link.target.#into_hash_fn() {
+                           if hash == #target_hash_variable {
+                                delete_link(link.create_link_hash)?;
+                            }
+                        }
+                    }
+                },
+            ]
         }
         CollectionType::ByAuthor => {
-            delete_link_stmts.insert(
-                0,
-                r#"
-                let record = match details {{
-                    Details::Record(details) => Ok(details.record),
-                    _ => Err(wasm_error!(WasmErrorInner::Guest(String::from(
-                        "Malformed get details response"
-                    )))),
-                }}?;
-            "#
-                .to_string(),
-            );
-            delete_link_stmts.insert(0, format!(r#"
-                let details = get_details(original_{snake_case_entry_type}_hash.clone(), GetOptions::default())?
-                    .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("{{pascal_entry_def_name}} not found"))))?;
-            "#));
-            delete_link_stmts.push(format!(
-                r#"let links = get_links(
-                    GetLinksInputBuilder::try_new(record.action().author().clone(), LinkTypes::{link_type_name})?.build()
-                )?;"#,
-            ));
-            delete_link_stmts.push(format!(
-                r#"for link in links {{
-                    if let Some(hash) = link.target.{into_hash_fn} {{
-                       if hash.eq({target_hash_variable}) {{
-                            delete_link(link.create_link_hash)?;
-                        }}
-                    }}
-                }}"#,
-            ));
+            let original_hash = format_ident!("original_{snake_case_entry_type}_hash");
+            let error_message = format!("{pascal_entry_def_name} not found");
+            let link_type_name = format_ident!("{link_type_name}");
+            vec![
+                parse_quote! {
+                    let details = get_details(#original_hash.clone(), GetOptions::default())?
+                    .ok_or(
+                        wasm_error!(WasmErrorInner::Guest(#error_message.to_string()))
+                    )?;
+                },
+                parse_quote! {
+                    let record = match details {
+                        Details::Record(details) => Ok(details.record),
+                        _ => Err(wasm_error!(WasmErrorInner::Guest("Malformed get details response".to_string()))),
+                    }?;
+                },
+                parse_quote! {
+                    let links = get_links(
+                        GetLinksInputBuilder::try_new(record.action().author().clone(), LinkTypes::#link_type_name)?.build()
+                    )?;
+                },
+                parse_quote! {
+                    for link in links {
+                        if let Some(hash) = link.target.#into_hash_fn() {
+                           if hash == #target_hash_variable {
+                                delete_link(link.create_link_hash)?;
+                            }
+                        }
+                    }
+                },
+            ]
         }
     };
-
-    let stmts = delete_link_stmts
-        .iter()
-        .map(|s| syn::parse_str::<syn::Stmt>(s))
-        .collect::<Result<Vec<syn::Stmt>, syn::Error>>()?;
 
     let crate_src_path = zome_file_tree.zome_crate_path.join("src");
 
     let mut file_tree = zome_file_tree.dna_file_tree.file_tree();
 
-    let v: Vec<OsString> = crate_src_path
-        .clone()
-        .iter()
-        .map(|s| s.to_os_string())
-        .collect();
+    let v: Vec<OsString> = crate_src_path.iter().map(|s| s.to_os_string()).collect();
     map_rust_files(
         file_tree
             .path_mut(&mut v.iter())
             .ok_or(ScaffoldError::PathNotFound(crate_src_path.clone()))?,
-        |_file_path, mut file| {
+        |_, mut file| {
             file.items = file
                 .items
                 .into_iter()
@@ -291,23 +292,22 @@ fn add_delete_link_in_delete_function(
                         if item_fn
                             .attrs
                             .iter()
-                            .any(|a| a.path().segments.iter().any(|s| s.ident.eq("hdk_extern")))
-                            && item_fn.sig.ident.eq(&fn_name.sig.ident)
+                            .any(|a| a.path().segments.iter().any(|s| s.ident == "hdk_extern"))
+                            && item_fn.sig.ident == fn_name.sig.ident
                         {
-                            for new_stmt in stmts.clone() {
+                            if let Some(delete_stmt) = item_fn.block.stmts.pop() {
                                 item_fn
                                     .block
                                     .stmts
-                                    .insert(item_fn.block.stmts.len() - 1, new_stmt);
+                                    .extend(delete_link_stmts.clone().into_iter());
+                                item_fn.block.stmts.push(delete_stmt);
                             }
                             return syn::Item::Fn(item_fn);
                         }
                     }
-
                     item
                 })
                 .collect();
-
             Ok(file)
         },
     )
@@ -389,7 +389,6 @@ pub fn add_collection_to_coordinators(
     insert_file(&mut file_tree, &collection_path, &getter)?;
 
     // 2. Add this file as a module in the entry point for the crate
-
     let lib_rs_path = crate_src_path.join("lib.rs");
 
     map_file(&mut file_tree, &lib_rs_path, |contents| {
