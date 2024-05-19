@@ -31,6 +31,7 @@ pub fn no_update_read_handler(entry_def: &EntryDefinition) -> TokenStream {
             let get_entry_def_function_name = format_ident!("get_{snake_entry_def_name}");
             let entry_hash_param = format_ident!("{snake_entry_def_name}_hash");
             let entry_hash_param_type = format_ident!("{hash_type}");
+
             quote! {
                 #[hdk_extern]
                 pub fn #get_entry_def_function_name(#entry_hash_param: #entry_hash_param_type) -> ExternResult<Option<Record>> {
@@ -48,6 +49,7 @@ pub fn no_update_read_handler(entry_def: &EntryDefinition) -> TokenStream {
             let get_entry_def_function_name = format_ident!("get_{snake_entry_def_name}");
             let entry_hash_param = format_ident!("{snake_entry_def_name}_hash");
             let entry_hash_param_type = format_ident!("{hash_type}");
+
             quote! {
                 #[hdk_extern]
                 pub fn #get_entry_def_function_name(#entry_hash_param: #entry_hash_param_type) -> ExternResult<Option<Record>> {
@@ -417,9 +419,7 @@ pub fn delete_handler(entry_def: &EntryDefinition) -> TokenStream {
         .cloned()
         .collect();
 
-    let delete_depending_links = if linked_from_fields.is_empty() {
-        quote! {}
-    } else {
+    let delete_depending_links = if !linked_from_fields.is_empty() {
         let mut delete_links = Vec::new();
         for linked_from_field in linked_from_fields {
             let linked_from = linked_from_field
@@ -474,6 +474,7 @@ pub fn delete_handler(entry_def: &EntryDefinition) -> TokenStream {
             };
             delete_links.push(delete_this_link);
         }
+
         quote! {
             let details = get_details(#original_entry_hash.clone(), GetOptions::default())?
                 .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("#pascal_entry_def_name not found"))))?;
@@ -492,6 +493,8 @@ pub fn delete_handler(entry_def: &EntryDefinition) -> TokenStream {
             let #snake_entry_def_name = <#pascal_entry_def_name>::try_from(entry)?;
             #(#delete_links)*
         }
+    } else {
+        quote! {}
     };
 
     let delete_function_name = format_ident!("delete_{}", snake_entry_def_name);
