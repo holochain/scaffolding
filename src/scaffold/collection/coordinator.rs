@@ -133,11 +133,7 @@ fn add_create_link_in_create_function(
 
     let mut file_tree = zome_file_tree.dna_file_tree.file_tree();
 
-    let v: Vec<OsString> = crate_src_path
-        .clone()
-        .iter()
-        .map(|s| s.to_os_string())
-        .collect();
+    let v: Vec<OsString> = crate_src_path.iter().map(|s| s.to_os_string()).collect();
     map_rust_files(
         file_tree
             .path_mut(&mut v.iter())
@@ -146,8 +142,8 @@ fn add_create_link_in_create_function(
             file.items = file
                 .items
                 .into_iter()
-                .map(|i| {
-                    if let syn::Item::Fn(mut item_fn) = i.clone() {
+                .map(|item| {
+                    if let syn::Item::Fn(mut item_fn) = item.clone() {
                         if item_fn
                             .attrs
                             .iter()
@@ -164,11 +160,9 @@ fn add_create_link_in_create_function(
                             return syn::Item::Fn(item_fn);
                         }
                     }
-
-                    i
+                    item
                 })
                 .collect();
-
             Ok(file)
         },
     )
