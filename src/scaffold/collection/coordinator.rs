@@ -235,18 +235,18 @@ fn add_delete_link_in_delete_function(
             delete_link_stmts.insert(
                 0,
                 r#"
-                let record = match details {{
+                let record = match details {
                     Details::Record(details) => Ok(details.record),
                     _ => Err(wasm_error!(WasmErrorInner::Guest(String::from(
                         "Malformed get details response"
                     )))),
-                }}?;
+                }?;
             "#
                 .to_string(),
             );
             delete_link_stmts.insert(0, format!(r#"
                 let details = get_details(original_{snake_case_entry_type}_hash.clone(), GetOptions::default())?
-                    .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("{pascal_entry_def_name} not found"))))?;
+                    .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("{pascal_case_entry_type} not found"))))?;
             "#));
             delete_link_stmts.push(format!(
                 r#"let links = get_links(
