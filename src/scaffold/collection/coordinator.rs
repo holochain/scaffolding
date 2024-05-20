@@ -3,7 +3,8 @@ use std::ffi::OsString;
 use convert_case::{Case, Casing};
 use dialoguer::{theme::ColorfulTheme, Select};
 use holochain_types::prelude::ZomeManifest;
-use quote::format_ident;
+use proc_macro2::TokenStream;
+use quote::{format_ident, quote};
 use syn::parse_quote;
 
 use crate::{
@@ -18,6 +19,7 @@ use crate::{
             ZomeFileTree,
         },
     },
+    utils::unparse,
 };
 
 use super::CollectionType;
@@ -26,37 +28,44 @@ fn global_collection_getter(
     integrity_zome_name: &str,
     collection_name: &str,
     link_type_name: &str,
-) -> String {
-    let snake_collection_name = collection_name.to_case(Case::Snake);
+) -> TokenStream {
+    let get_collection_function_name =
+        format_ident!("get_{}", collection_name.to_case(Case::Snake));
+    let link_type_name = format_ident!("{link_type_name}");
+    let integrity_zome_name = format_ident!("{integrity_zome_name}");
+    let snake_collection_name = format!("{}", collection_name.to_case(Case::Snake));
 
-    format!(
-        r#"use hdk::prelude::*;
-use {integrity_zome_name}::*;
+    quote! {
+        use hdk::prelude::*;
+        use #integrity_zome_name::*;
 
-#[hdk_extern]
-pub fn get_{snake_collection_name}() -> ExternResult<Vec<Link>> {{
-    let path = Path::from("{snake_collection_name}");
-    get_links(GetLinksInputBuilder::try_new(path.path_entry_hash()?, LinkTypes::{link_type_name})?.build())
-}}
-"#,
-    )
+        #[hdk_extern]
+        pub fn #get_collection_function_name() -> ExternResult<Vec<Link>> {
+            let path = Path::from(#snake_collection_name);
+            get_links(GetLinksInputBuilder::try_new(path.path_entry_hash()?, LinkTypes::#link_type_name)?.build())
+        }
+    }
 }
 
 fn by_author_collection_getter(
     integrity_zome_name: &str,
     collection_name: &str,
     link_type_name: &str,
-) -> String {
-    format!(
-        r#"use hdk::prelude::*;
-use {integrity_zome_name}::*;
+) -> TokenStream {
+    let get_collection_function_name =
+        format_ident!("get_{}", collection_name.to_case(Case::Snake));
+    let link_type_name = format_ident!("{link_type_name}");
+    let integrity_zome_name = format_ident!("{integrity_zome_name}");
 
-#[hdk_extern]
-pub fn get_{collection_name}(author: AgentPubKey) -> ExternResult<Vec<Link>> {{
-    get_links(GetLinksInputBuilder::try_new(author, LinkTypes::{link_type_name})?.build())
-}}
-"#,
-    )
+    quote! {
+        use hdk::prelude::*;
+        use #integrity_zome_name::*;
+
+        #[hdk_extern]
+        pub fn #get_collection_function_name(author: AgentPubKey) -> ExternResult<Vec<Link>> {
+            get_links(GetLinksInputBuilder::try_new(author, LinkTypes::#link_type_name)?.build())
+        }
+    }
 }
 
 fn add_create_link_in_create_function(
@@ -86,41 +95,39 @@ fn add_create_link_in_create_function(
 
     let snake_case_entry_type = entry_type_reference.entry_type.to_case(Case::Snake);
 
-    let mut create_link_stmts = match entry_type_reference.reference_entry_hash {
-        true => vec![format!(
-            "let {}_entry_hash = hash_entry(&{})?;",
-            snake_case_entry_type, snake_case_entry_type
-        )],
-        false => vec![],
+    let mut create_link_stmts: Vec<syn::Stmt> = if entry_type_reference.reference_entry_hash {
+        let entry_hash_variable_name = format_ident!("{snake_case_entry_type}_entry_hash");
+        let snake_case_entry_type = format_ident!("{snake_case_entry_type}");
+        vec![parse_quote! {
+            let #entry_hash_variable_name = hash_entry(&#snake_case_entry_type)?;
+        }]
+    } else {
+        vec![]
     };
 
-    let link_to_variable = match entry_type_reference.reference_entry_hash {
-        true => format!("{}_entry_hash", snake_case_entry_type),
-        false => format!("{}_hash", snake_case_entry_type),
+    let link_to_variable = if entry_type_reference.reference_entry_hash {
+        format_ident!("{snake_case_entry_type}_entry_hash")
+    } else {
+        format_ident!("{snake_case_entry_type}_hash")
     };
+    let link_type_name = format_ident!("{link_type_name}");
 
     match collection_type {
         CollectionType::Global => {
-            create_link_stmts.push(format!(r#"let path = Path::from("{}");"#, collection_name));
-            create_link_stmts.push(format!(
-                r#"create_link(path.path_entry_hash()?, {}.clone(), LinkTypes::{}, ())?;"#,
-                link_to_variable, link_type_name
-            ));
+            create_link_stmts.push(parse_quote! {let path = Path::from(#collection_name);});
+            create_link_stmts.push(parse_quote! {
+                create_link(path.path_entry_hash()?, #link_to_variable.clone(), LinkTypes::#link_type_name, ())?;
+            });
         }
         CollectionType::ByAuthor => {
-            create_link_stmts
-                .push("let my_agent_pub_key = agent_info()?.agent_latest_pubkey;".to_string());
-            create_link_stmts.push(format!(
-                r#"create_link(my_agent_pub_key, {}.clone(), LinkTypes::{}, ())?;"#,
-                link_to_variable, link_type_name
-            ));
+            create_link_stmts.push(parse_quote! {
+                let my_agent_pub_key = agent_info()?.agent_latest_pubkey;
+            });
+            create_link_stmts.push(parse_quote! {
+                create_link(my_agent_pub_key, #link_to_variable.clone(), LinkTypes::#link_type_name, ())?;
+            });
         }
     };
-
-    let stmts = create_link_stmts
-        .into_iter()
-        .map(|s| syn::parse_str::<syn::Stmt>(s.as_str()))
-        .collect::<Result<Vec<syn::Stmt>, syn::Error>>()?;
 
     let crate_src_path = zome_file_tree.zome_crate_path.join("src");
 
@@ -135,7 +142,7 @@ fn add_create_link_in_create_function(
         file_tree
             .path_mut(&mut v.iter())
             .ok_or(ScaffoldError::PathNotFound(crate_src_path.clone()))?,
-        |_file_path, mut file| {
+        |_, mut file| {
             file.items = file
                 .items
                 .into_iter()
@@ -144,14 +151,15 @@ fn add_create_link_in_create_function(
                         if item_fn
                             .attrs
                             .iter()
-                            .any(|a| a.path().segments.iter().any(|s| s.ident.eq("hdk_extern")))
-                            && item_fn.sig.ident.eq(&fn_name.sig.ident)
+                            .any(|a| a.path().segments.iter().any(|s| s.ident == "hdk_extern"))
+                            && item_fn.sig.ident == fn_name.sig.ident
                         {
-                            for new_stmt in stmts.clone() {
+                            if let Some(return_stmt) = item_fn.block.stmts.pop() {
                                 item_fn
                                     .block
                                     .stmts
-                                    .insert(item_fn.block.stmts.len() - 1, new_stmt);
+                                    .extend(create_link_stmts.clone().into_iter());
+                                item_fn.block.stmts.push(return_stmt);
                             }
                             return syn::Item::Fn(item_fn);
                         }
@@ -204,12 +212,12 @@ fn add_delete_link_in_delete_function(
     let pascal_entry_def_name = entry_type_reference.entry_type.to_case(Case::Pascal);
 
     let target_hash_variable = if entry_type_reference.reference_entry_hash {
-        quote::quote! {
+        quote! {
             record.action().entry_hash().ok_or(wasm_error!(WasmErrorInner::Guest("Record does not have an entry".to_string())))?
         }
     } else {
         let original_hash = format_ident!("original_{snake_case_entry_type}_hash");
-        quote::quote! {#original_hash}
+        quote! {#original_hash}
     };
 
     let into_hash_fn = if entry_type_reference.reference_entry_hash {
@@ -365,7 +373,6 @@ pub fn add_collection_to_coordinators(
     }?;
 
     // 1. Create an INDEX_NAME.rs in "src/", with the appropriate zome functions
-
     let zome_file_tree = ZomeFileTree::from_zome_manifest(
         integrity_zome_file_tree.dna_file_tree,
         coordinator_zome.clone(),
@@ -386,7 +393,12 @@ pub fn add_collection_to_coordinators(
 
     let crate_src_path = zome_file_tree.zome_crate_path.join("src");
     let collection_path = crate_src_path.join(format!("{}.rs", snake_link_type_name.clone()));
-    insert_file(&mut file_tree, &collection_path, &getter)?;
+
+    let file = unparse(&syn::parse_quote! {
+        #getter
+    });
+
+    insert_file(&mut file_tree, &collection_path, &file)?;
 
     // 2. Add this file as a module in the entry point for the crate
     let lib_rs_path = crate_src_path.join("lib.rs");
