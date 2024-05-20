@@ -182,11 +182,11 @@ fn add_newlines(input: &str) -> String {
         // Add a newline after the imports block
         if !after_imports && line.trim().is_empty() {
             after_imports = true;
-            formatted_code.push_str("\n");
+            formatted_code.push('\n');
         }
         // Add newlines between #[hdk_extern] annotated functions
         if line.trim().starts_with("#[hdk_extern") && i > 0 {
-            formatted_code.push_str("\n");
+            formatted_code.push('\n');
         }
 
         // Add newlines between non #[hdk_extern] annoteted functions
@@ -195,12 +195,12 @@ fn add_newlines(input: &str) -> String {
         if (functon_regex.is_match(line.trim()) && i > 0)
             && (!lines[i - 1].starts_with("#[hdk_extern"))
         {
-            formatted_code.push_str("\n");
+            formatted_code.push('\n');
         }
 
         // Add newlines between #[derive] annotated structs/enums
         if line.trim().starts_with("#[derive") && i > 0 {
-            formatted_code.push_str("\n");
+            formatted_code.push('\n');
         }
         formatted_code.push_str(line);
         formatted_code.push('\n');
