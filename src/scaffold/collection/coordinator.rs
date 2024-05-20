@@ -33,7 +33,7 @@ fn global_collection_getter(
         format_ident!("get_{}", collection_name.to_case(Case::Snake));
     let link_type_name = format_ident!("{link_type_name}");
     let integrity_zome_name = format_ident!("{integrity_zome_name}");
-    let snake_collection_name = format!("{}", collection_name.to_case(Case::Snake));
+    let snake_collection_name = collection_name.to_case(Case::Snake);
 
     quote! {
         use hdk::prelude::*;
