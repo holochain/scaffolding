@@ -213,7 +213,11 @@ fn add_delete_link_in_delete_function(
 
     let target_hash_variable = if entry_type_reference.reference_entry_hash {
         quote! {
-            record.action().entry_hash().ok_or(wasm_error!(WasmErrorInner::Guest("Record does not have an entry".to_string())))?
+            record
+                .action()
+                .entry_hash()
+                .ok_or(wasm_error!(WasmErrorInner::Guest("Record does not have an entry".to_string())))?
+                .clone()
         }
     } else {
         let original_hash = format_ident!("original_{snake_case_entry_type}_hash");
