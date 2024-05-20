@@ -232,9 +232,10 @@ pub fn create_link_for_cardinality(
     cardinality: &Cardinality,
 ) -> TokenStream {
     let snake_entry_def_name = entry_def.snake_case_name();
-    let link_target = match entry_def.reference_entry_hash {
-        true => format_ident!("{snake_entry_def_name}_entry_hash",),
-        false => format_ident!("{snake_entry_def_name}_hash",),
+    let link_target = if entry_def.reference_entry_hash {
+        format_ident!("{snake_entry_def_name}_entry_hash")
+    } else {
+        format_ident!("{snake_entry_def_name}_hash")
     };
 
     let link_type_name = format_ident!("{link_type_name}");
@@ -276,7 +277,7 @@ pub fn create_handler(entry_def: &EntryDefinition) -> TokenStream {
     let entry_hash_variable_name = format_ident!("{}_entry_hash", entry_def.snake_case_name());
     let mut create_links = match entry_def.reference_entry_hash {
         true if linked_from_count > 0 => vec![quote! {
-            let #entry_hash_variable_name = hash_entry(&#snake_entry_def_name)?;,
+            let #entry_hash_variable_name = hash_entry(&#snake_entry_def_name)?;
         }],
         _ => vec![],
     };
