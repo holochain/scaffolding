@@ -482,22 +482,22 @@ pub fn delete_handler(entry_def: &EntryDefinition) -> TokenStream {
             delete_links.push(delete_this_link);
         }
 
-        let error_message = format!("{} record has no entry", entry_def.pascal_case_name());
+        let get_details_error_message = format!("{pascal_entry_def_name} not found");
+        let entry_from_record_error_message =
+            format!("{} record has no entry", entry_def.pascal_case_name());
 
         quote! {
             let details = get_details(#original_entry_hash.clone(), GetOptions::default())?
-                .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("#pascal_entry_def_name not found"))))?;
+                .ok_or(wasm_error!(WasmErrorInner::Guest(#get_details_error_message.to_string())))?;
             let record = match details {
                 Details::Record(details) => Ok(details.record),
-                _ => Err(wasm_error!(WasmErrorInner::Guest(String::from(
-                    "Malformed get details response"
-                )))),
+                _ => Err(wasm_error!(WasmErrorInner::Guest("Malformed get details response".to_string()))),
             }?;
             let entry = record
                 .entry()
                 .as_option()
                 .ok_or(wasm_error!(
-                    WasmErrorInner::Guest(#error_message.to_string())
+                    WasmErrorInner::Guest(#entry_from_record_error_message.to_string())
                 ))?;
             let #snake_entry_def_name = <#pascal_entry_def_name>::try_from(entry)?;
             #(#delete_links)*
