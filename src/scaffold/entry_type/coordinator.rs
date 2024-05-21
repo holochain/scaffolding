@@ -295,6 +295,10 @@ pub fn create_handler(entry_def: &EntryDefinition) -> TokenStream {
 
     let create_entry_function_name = format_ident!("create_{snake_entry_def_name}");
     let entry_hash_variable_name = format_ident!("{snake_entry_def_name}_hash");
+    let error_message = format!(
+        "Could not find the newly created {}",
+        entry_def.pascal_case_name()
+    );
 
     quote! {
         #[hdk_extern]
@@ -305,9 +309,7 @@ pub fn create_handler(entry_def: &EntryDefinition) -> TokenStream {
             #(#create_links)*
 
             let record = get(#entry_hash_variable_name.clone(), GetOptions::default())?
-                .ok_or(wasm_error!(
-                    WasmErrorInner::Guest("Could not find the newly created pascal_entry_def_name".to_string())
-                ))?;
+                .ok_or(wasm_error!(WasmErrorInner::Guest(#error_message.to_string())))?;
             Ok(record)
         }
     }
@@ -334,6 +336,10 @@ pub fn update_handler_without_linking_on_each_update(entry_def: &EntryDefinition
 
     let update_entry_def_function_name = format_ident!("update_{snake_entry_def_name}");
     let updated_entry_hash_variable_name = format_ident!("updated_{snake_entry_def_name}_hash");
+    let error_message = format!(
+        "Could not find the newly updated {}",
+        entry_def.pascal_case_name()
+    );
 
     quote! {
         #[derive(Serialize, Deserialize, Debug)]
@@ -350,7 +356,7 @@ pub fn update_handler_without_linking_on_each_update(entry_def: &EntryDefinition
 
             let record = get(#updated_entry_hash_variable_name.clone(), GetOptions::default())?
                 .ok_or(wasm_error!(
-                    WasmErrorInner::Guest("Could not find the newly updated #pascal_entry_def_name".to_string())
+                    WasmErrorInner::Guest(#error_message.to_string())
                 ))?;
 
             Ok(record)
@@ -375,6 +381,8 @@ pub fn update_handler_linking_on_each_update(entry_def: &EntryDefinition) -> Tok
     let previous_entry_def_hash = format_ident!("previous_{snake_entry_def_name}_hash");
     let updated_entry_def_hash = format_ident!("updated_{snake_entry_def_name}_hash");
 
+    let error_message = format!("Could not find the newly updated {pascal_entry_def_name}");
+
     quote! {
         #[derive(Serialize, Deserialize, Debug)]
         pub struct #update_input_type_struct {
@@ -398,9 +406,7 @@ pub fn update_handler_linking_on_each_update(entry_def: &EntryDefinition) -> Tok
             )?;
 
             let record = get(#updated_entry_def_hash.clone(), GetOptions::default())?
-                .ok_or(wasm_error!(
-                    WasmErrorInner::Guest("Could not find the newly updated #pascal_entry_def_name".to_string())
-                ))?;
+                .ok_or(wasm_error!(WasmErrorInner::Guest(#error_message.to_string())))?;
 
             Ok(record)
         }
@@ -476,6 +482,8 @@ pub fn delete_handler(entry_def: &EntryDefinition) -> TokenStream {
             delete_links.push(delete_this_link);
         }
 
+        let error_message = format!("{} record has no entry", entry_def.pascal_case_name());
+
         quote! {
             let details = get_details(#original_entry_hash.clone(), GetOptions::default())?
                 .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("#pascal_entry_def_name not found"))))?;
@@ -489,7 +497,7 @@ pub fn delete_handler(entry_def: &EntryDefinition) -> TokenStream {
                 .entry()
                 .as_option()
                 .ok_or(wasm_error!(
-                    WasmErrorInner::Guest("#pascal_entry_def_name record has no entry".to_string())
+                    WasmErrorInner::Guest(#error_message.to_string())
                 ))?;
             let #snake_entry_def_name = <#pascal_entry_def_name>::try_from(entry)?;
             #(#delete_links)*

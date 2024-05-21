@@ -59,7 +59,7 @@ pub fn render_entry_definition_file(
         format_ident!("validate_update_{}", entry_def.name.to_case(Case::Snake));
     let new_entry_arg = format_ident!("_{}", entry_def.name.to_case(Case::Snake));
     let original_entry_arg = format_ident!("_original_{}", entry_def.name.to_case(Case::Snake));
-    let updated_invalid_reason = format!("{} cannot be updated", plural_name_title);
+    let updated_invalid_reason = format!("{plural_name_title} cannot be updated");
 
     let validate_update_result = if crud.update {
         quote! {
@@ -68,7 +68,7 @@ pub fn render_entry_definition_file(
         }
     } else {
         quote! {
-            Ok(ValidateCallbackResult::Invalid(String::from(#updated_invalid_reason)))
+            Ok(ValidateCallbackResult::Invalid(#updated_invalid_reason.to_string()))
         }
     };
 
@@ -86,16 +86,16 @@ pub fn render_entry_definition_file(
     let validate_delete_fn =
         format_ident!("validate_delete_{}", entry_def.name.to_case(Case::Snake));
     let deleted_post_arg = format_ident!("_original_{}", entry_def.name.to_case(Case::Snake));
-    let deleted_invalid_reason = format!("{} cannot be deleted", plural_name_title);
+    let deleted_invalid_reason = format!("{plural_name_title} cannot be deleted");
 
-    let validate_delete_result = if crud.update {
+    let validate_delete_result = if crud.delete {
         quote! {
             /// TODO: add the appropriate validation rules
             Ok(ValidateCallbackResult::Valid)
         }
     } else {
         quote! {
-            Ok(ValidateCallbackResult::Invalid(String::from(#deleted_invalid_reason)))
+            Ok(ValidateCallbackResult::Invalid(#deleted_invalid_reason.to_string()))
         }
     };
 
