@@ -187,13 +187,13 @@ pub fn render_entry_definition_file(
         #[hdk_entry_helper]
         #entry_def_token_stream
 
-        /// TODO: add the appropriate validation rules
         pub fn #validate_create_fn(
             _action: EntryCreationAction,
             #create_new_entry_arg: #name_pascal
         ) -> ExternResult<ValidateCallbackResult> {
             #(#deps_validation)*
 
+            /// TODO: add the appropriate validation rules
             Ok(ValidateCallbackResult::Valid)
         }
 
