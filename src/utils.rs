@@ -167,7 +167,9 @@ pub fn check_no_whitespace(input: &str, identifier: &str) -> ScaffoldResult<()> 
     Ok(())
 }
 
-pub fn unparse(file: &syn::File) -> String {
+/// Unparses a parsed `syn::File` to formatted rust code
+/// as a String. Formatting is handled under the hood by `prettyplease::unparse`
+pub fn unparse_pretty(file: &syn::File) -> String {
     add_newlines(&prettyplease::unparse(file).replace("///", "//"))
 }
 

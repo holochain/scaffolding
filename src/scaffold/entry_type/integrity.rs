@@ -9,7 +9,7 @@ use crate::file_tree::insert_file;
 use crate::scaffold::dna::DnaFileTree;
 use crate::scaffold::zome::coordinator::find_extern_function_in_zomes;
 use crate::scaffold::zome::utils::get_coordinator_zomes_for_integrity;
-use crate::utils::unparse;
+use crate::utils::unparse_pretty;
 use crate::{
     file_tree::{find_map_rust_files, map_file, map_rust_files},
     scaffold::zome::ZomeFileTree,
@@ -226,7 +226,11 @@ pub fn add_entry_type_to_integrity_zome(
 
     let mut file_tree = zome_file_tree.dna_file_tree.file_tree();
 
-    insert_file(&mut file_tree, &entry_def_path, &unparse(&entry_def_file))?;
+    insert_file(
+        &mut file_tree,
+        &entry_def_path,
+        &unparse_pretty(&entry_def_file),
+    )?;
 
     // 2. Add this file as a module in the entry point for the crate
 

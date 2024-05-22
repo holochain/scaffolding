@@ -13,7 +13,7 @@ use crate::{
         link_type::{coordinator::get_links_handler, link_type_name},
         zome::ZomeFileTree,
     },
-    utils::unparse,
+    utils::unparse_pretty,
 };
 
 use super::{
@@ -691,7 +691,7 @@ pub fn add_crud_functions_to_coordinator(
 
     let mut file_tree = zome_file_tree.dna_file_tree.file_tree();
 
-    let file = unparse(&initial_crud_handlers(
+    let file = unparse_pretty(&initial_crud_handlers(
         integrity_zome_name,
         entry_def,
         crud,

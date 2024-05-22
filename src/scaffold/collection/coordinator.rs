@@ -19,7 +19,7 @@ use crate::{
             ZomeFileTree,
         },
     },
-    utils::unparse,
+    utils::unparse_pretty,
 };
 
 use super::CollectionType;
@@ -392,9 +392,7 @@ pub fn add_collection_to_coordinators(
     let crate_src_path = zome_file_tree.zome_crate_path.join("src");
     let collection_path = crate_src_path.join(format!("{}.rs", snake_link_type_name.clone()));
 
-    let file = unparse(&syn::parse_quote! {
-        #getter
-    });
+    let file = unparse_pretty(&syn::parse_quote! { #getter });
 
     insert_file(&mut file_tree, &collection_path, &file)?;
 

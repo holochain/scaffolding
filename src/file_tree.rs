@@ -8,7 +8,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 use crate::error::{ScaffoldError, ScaffoldResult};
-use crate::utils::unparse;
+use crate::utils::unparse_pretty;
 
 pub type FileTree = FileSystemTree<OsString, String>;
 
@@ -194,10 +194,10 @@ pub fn map_rust_files<F: Fn(PathBuf, syn::File) -> ScaffoldResult<syn::File> + C
                 let original_file: syn::File = syn::parse_str(&contents)
                     .map_err(|e| ScaffoldError::MalformedFile(file_path.clone(), e.to_string()))?;
                 let new_file = map_fn(file_path, original_file.clone())?;
-                // Only reformat the file via unparse if the contents of the newly modified
+                // Only reformat the file via unparse_pretty if the contents of the newly modified
                 // file are different from the original
                 if new_file != original_file {
-                    return Ok(unparse(&new_file));
+                    return Ok(unparse_pretty(&new_file));
                 }
             }
         }

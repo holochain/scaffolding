@@ -10,7 +10,7 @@ use crate::{
         entry_type::definitions::{Cardinality, EntryTypeReference, Referenceable},
         zome::ZomeFileTree,
     },
-    utils::unparse,
+    utils::unparse_pretty,
 };
 
 use super::link_type_name;
@@ -483,9 +483,7 @@ pub fn add_link_type_functions_to_coordinator(
             bidirectional,
         ),
     };
-    let file = unparse(&syn::parse_quote! {
-        #handlers
-    });
+    let file = unparse_pretty(&syn::parse_quote! { #handlers });
 
     insert_file(&mut file_tree, &new_file_path, &file)?;
 
