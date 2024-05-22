@@ -9,7 +9,7 @@ use crate::file_tree::insert_file;
 use crate::scaffold::dna::DnaFileTree;
 use crate::scaffold::zome::coordinator::find_extern_function_in_zomes;
 use crate::scaffold::zome::utils::get_coordinator_zomes_for_integrity;
-use crate::utils::unparse;
+use crate::utils::unparse_pretty;
 use crate::{
     file_tree::{find_map_rust_files, map_file, map_rust_files},
     scaffold::zome::ZomeFileTree,
@@ -59,18 +59,19 @@ pub fn render_entry_definition_file(
         format_ident!("validate_update_{}", entry_def.name.to_case(Case::Snake));
     let new_entry_arg = format_ident!("_{}", entry_def.name.to_case(Case::Snake));
     let original_entry_arg = format_ident!("_original_{}", entry_def.name.to_case(Case::Snake));
+    let updated_invalid_reason = format!("{plural_name_title} cannot be updated");
 
-    let updated_invalid_reason = format!("{} cannot be updated", plural_name_title);
-
-    let validate_update_result: TokenStream = match crud.update {
-        true => quote! {
+    let validate_update_result = if crud.update {
+        quote! {
             /// TODO: add the appropriate validation rules
             Ok(ValidateCallbackResult::Valid)
-        },
-        false => quote! {
-            Ok(ValidateCallbackResult::Invalid(String::from(#updated_invalid_reason)))
-        },
+        }
+    } else {
+        quote! {
+            Ok(ValidateCallbackResult::Invalid(#updated_invalid_reason.to_string()))
+        }
     };
+
     let validate_update = quote! {
         pub fn #validate_update_fn(
             _action: Update,
@@ -85,18 +86,19 @@ pub fn render_entry_definition_file(
     let validate_delete_fn =
         format_ident!("validate_delete_{}", entry_def.name.to_case(Case::Snake));
     let deleted_post_arg = format_ident!("_original_{}", entry_def.name.to_case(Case::Snake));
+    let deleted_invalid_reason = format!("{plural_name_title} cannot be deleted");
 
-    let deleted_invalid_reason = format!("{} cannot be deleted", plural_name_title);
-
-    let validate_delete_result = match crud.delete {
-        true => quote! {
+    let validate_delete_result = if crud.delete {
+        quote! {
             /// TODO: add the appropriate validation rules
             Ok(ValidateCallbackResult::Valid)
-        },
-        false => quote! {
-            Ok(ValidateCallbackResult::Invalid(String::from(#deleted_invalid_reason)))
-        },
+        }
+    } else {
+        quote! {
+            Ok(ValidateCallbackResult::Invalid(#deleted_invalid_reason.to_string()))
+        }
     };
+
     let validate_delete = quote! {
         pub fn #validate_delete_fn(
             _action: Delete,
@@ -151,7 +153,6 @@ pub fn render_entry_definition_file(
                 (Cardinality::Vector, false) => quote! {
                     for action_hash in #create_new_entry_arg.#field_name.clone() {
                         let record = must_get_valid_record(action_hash)?;
-
                         let #dependant_entry_type_snake: crate::#dependant_entry_type_pascal = record.entry().to_app_option()
                             .map_err(|e| wasm_error!(e))?
                             .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("Dependant action must be accompanied by an entry"))))?;
@@ -159,20 +160,17 @@ pub fn render_entry_definition_file(
                 },
                 (Cardinality::Single,true) => quote! {
                     let entry = must_get_entry(#create_new_entry_arg.#field_name.clone())?;
-
                     let #dependant_entry_type_snake = crate::#dependant_entry_type_pascal::try_from(entry)?;
                 },
                 (Cardinality::Option, true) => quote! {
                     if let Some(entry_hash) = #create_new_entry_arg.#field_name.clone() {
                         let entry = must_get_entry(entry_hash)?;
-
                         let #dependant_entry_type_snake = crate::#dependant_entry_type_pascal::try_from(entry)?;
                     }
                 },
                 (Cardinality::Vector, true) => quote! {
                     for entry_hash in #create_new_entry_arg.#field_name.clone() {
                         let entry = must_get_entry(entry_hash)?;
-
                         let #dependant_entry_type_snake = crate::#dependant_entry_type_pascal::try_from(entry)?;
                     }
                 },
@@ -185,8 +183,8 @@ pub fn render_entry_definition_file(
 
         #(#type_definitions)*
 
-        #[hdk_entry_helper]
         #[derive(Clone, PartialEq)]
+        #[hdk_entry_helper]
         #entry_def_token_stream
 
         pub fn #validate_create_fn(
@@ -228,19 +226,21 @@ pub fn add_entry_type_to_integrity_zome(
 
     let mut file_tree = zome_file_tree.dna_file_tree.file_tree();
 
-    insert_file(&mut file_tree, &entry_def_path, &unparse(&entry_def_file))?;
+    insert_file(
+        &mut file_tree,
+        &entry_def_path,
+        &unparse_pretty(&entry_def_file),
+    )?;
 
     // 2. Add this file as a module in the entry point for the crate
 
     let lib_rs_path = crate_src_path.join("lib.rs");
 
-    map_file(&mut file_tree, &lib_rs_path, |s| {
+    map_file(&mut file_tree, &lib_rs_path, |contents| {
         Ok(format!(
-            r#"pub mod {};
-pub use {}::*;
-
-{}"#,
-            snake_entry_def_name, snake_entry_def_name, s
+            r#"pub mod {snake_entry_def_name};
+pub use {snake_entry_def_name}::*;
+{contents}"#,
         ))
     })?;
 
