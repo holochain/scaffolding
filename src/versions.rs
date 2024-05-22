@@ -2,10 +2,10 @@
 pub const TRYORAMA_VERSION: &str = "^0.16.0-dev.6";
 
 /// npm: https://www.npmjs.com/package/@holochain/client
-pub const HOLOCHAIN_CLIENT_VERSION: &str = "^0.17.0-dev.12";
+pub const HOLOCHAIN_CLIENT_VERSION: &str = "^0.17.0-rc.0";
 
 /// npm: https://www.npmjs.com/package/@holochain/hc-spin
-pub const HC_SPIN_VERSION: &str = "0.300.2-dev.5";
+pub const HC_SPIN_VERSION: &str = "0.300.2-dev.6";
 
 // TODO: update to 0.3 compatible version
 /// npm: https://www.npmjs.com/package/@holo-host/web-sdk
