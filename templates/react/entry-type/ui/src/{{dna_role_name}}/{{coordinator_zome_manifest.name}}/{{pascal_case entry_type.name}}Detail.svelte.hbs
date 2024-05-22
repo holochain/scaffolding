@@ -1,0 +1,146 @@
+<script lang="ts">
+import { createEventDispatcher, onMount, getContext } from 'svelte';
+import '@material/mwc-circular-progress';
+import { decode } from '@msgpack/msgpack';
+import type { Record, ActionHash, AppClient, EntryHash, AgentPubKey, DnaHash } from '@holochain/client';
+import { clientContext } from '../../contexts';
+import type { {{pascal_case entry_type.name}}{{#each entry_type.fields}}{{#if (eq field_type.type "Enum")}}, {{field_type.label}}{{/if}}{{/each}} } from './types';
+import '@material/mwc-circular-progress';
+import type { Snackbar } from '@material/mwc-snackbar';
+import '@material/mwc-snackbar';
+import '@material/mwc-icon-button';
+{{#if crud.update}}
+import Edit{{pascal_case entry_type.name}} from './Edit{{pascal_case entry_type.name}}.svelte'; 
+{{/if}}
+{{#uniq_lines}}
+  {{#each entry_type.fields}}
+    {{#if widget}}
+{{> (concat field_type.type "/" widget "/detail/imports") }}
+
+    {{/if}}
+  {{/each}}
+{{/uniq_lines}}
+
+const dispatch = createEventDispatcher();
+
+export let {{camel_case entry_type.name}}Hash: {{#if entry_type.reference_entry_hash}}EntryHash{{else}}ActionHash{{/if}};
+
+let client: AppClient = (getContext(clientContext) as any).getClient();
+
+let loading: boolean;
+let error: any = undefined;
+
+let record: Record | undefined;
+let {{camel_case entry_type.name}}: {{pascal_case entry_type.name}} | undefined;
+
+{{#if crud.update}}
+let editing = false;
+{{/if}}
+
+{{#if crud.delete}}
+let errorSnackbar: Snackbar;
+{{/if}}
+  
+$: {{#if crud.update}}editing, {{/if}} error, loading, record, {{camel_case entry_type.name}};
+
+onMount(async () => {
+  if ({{camel_case entry_type.name}}Hash === undefined) {
+    throw new Error(`The {{camel_case entry_type.name}}Hash input is required for the {{pascal_case entry_type.name}}Detail element`);
+  }
+  await fetch{{pascal_case entry_type.name}}();
+});
+
+async function fetch{{pascal_case entry_type.name}}() {
+  loading = true;
+  
+  try {
+    record = await client.callZome({
+      cap_secret: null,
+      role_name: '{{dna_role_name}}',
+      zome_name: '{{coordinator_zome_manifest.name}}',
+      fn_name: '{{#if crud.update}}get_latest_{{snake_case entry_type.name}}{{else}}get_{{snake_case entry_type.name}}{{/if}}',
+      payload: {{camel_case entry_type.name}}Hash,
+    });
+    if (record) {
+      {{camel_case entry_type.name}} = decode((record.entry as any).Present.entry) as {{pascal_case entry_type.name}};
+    }
+  } catch (e) {
+    error = e;
+  }
+
+  loading = false;
+}
+
+{{#if crud.delete}}
+async function delete{{pascal_case entry_type.name}}() {
+  try {
+    await client.callZome({
+      cap_secret: null,
+      role_name: '{{dna_role_name}}',
+      zome_name: '{{coordinator_zome_manifest.name}}',
+      fn_name: 'delete_{{snake_case entry_type.name}}',
+      payload: {{camel_case entry_type.name}}Hash,
+    });
+    dispatch('{{kebab_case entry_type.name}}-deleted', { {{camel_case entry_type.name}}Hash: {{camel_case entry_type.name}}Hash });
+  } catch (e: any) {
+    errorSnackbar.labelText = `Error deleting the {{lower_case entry_type.name}}: ${e.data.data}`;
+    errorSnackbar.show();
+  }
+}
+{{/if}}
+</script>
+
+{{#if crud.delete}}
+<mwc-snackbar bind:this={errorSnackbar} leading>
+</mwc-snackbar>
+{{/if}}
+
+{#if loading}
+<div style="display: flex; flex: 1; align-items: center; justify-content: center">
+  <mwc-circular-progress indeterminate></mwc-circular-progress>
+</div>
+{:else if error}
+<span>Error fetching the {{lower_case entry_type.name}}: {error.data.data}</span>
+{{#if crud.update}}
+{:else if editing}
+<Edit{{pascal_case entry_type.name}}
+{{#if link_from_original_to_each_update}}
+  original{{pascal_case entry_type.name}}Hash={ {{camel_case entry_type.name}}Hash}
+{{/if}}
+  currentRecord={record}
+  on:{{kebab_case entry_type.name}}-updated={async () => {
+    editing = false;
+    await fetch{{pascal_case entry_type.name}}()
+  } }
+  on:edit-canceled={() => { editing = false; } }
+></Edit{{pascal_case entry_type.name}}>
+{{/if}}
+{:else}
+
+<div style="display: flex; flex-direction: column">
+  <div style="display: flex; flex-direction: row">
+    <span style="flex: 1"></span>
+{{#if crud.update}}
+    <mwc-icon-button style="margin-left: 8px" icon="edit" on:click={() => { editing = true; } }></mwc-icon-button>
+{{/if}}
+{{#if crud.delete}}
+    <mwc-icon-button style="margin-left: 8px" icon="delete" on:click={() => delete{{pascal_case entry_type.name}}()}></mwc-icon-button>
+{{/if}}
+  </div>
+
+{{#each entry_type.fields}}
+  {{#if widget}}	  
+    {{#if (not (eq cardinality "vector") )}}
+  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+    <span style="margin-right: 4px"><strong>{{title_case field_name}}:</strong></span>
+    <span style="white-space: pre-line">{{> (concat field_type.type "/" widget "/detail/render") variable_to_read=(concat (camel_case ../entry_type.name) "?." (snake_case field_name) ) }}</span>
+  </div>
+    {{else}}
+  {{> Vec/detail/render variable_to_read=(concat (camel_case ../entry_type.name) "?." (snake_case field_name) ) field_name=field_name field_type=field_type widget=widget }}
+    {{/if}}
+
+  {{/if}}
+{{/each}}
+</div>
+{/if}
+

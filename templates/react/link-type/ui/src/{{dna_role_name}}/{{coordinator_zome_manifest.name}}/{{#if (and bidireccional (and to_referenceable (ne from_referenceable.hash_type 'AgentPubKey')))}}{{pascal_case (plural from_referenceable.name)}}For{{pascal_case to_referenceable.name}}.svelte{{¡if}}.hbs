@@ -1,0 +1,67 @@
+<script lang="ts">
+import { onMount, getContext } from 'svelte';
+import '@material/mwc-circular-progress';
+import type { Link, Record, ActionHash, EntryHash, AgentPubKey, AppClient, NewEntryAction } from '@holochain/client';
+import { clientContext } from '../../contexts';
+import {{pascal_case from_referenceable.name}}Detail from './{{pascal_case from_referenceable.name}}Detail.svelte';
+import type { {{pascal_case coordinator_zome_manifest.name}}Signal } from './types';
+
+export let {{camel_case to_referenceable.singular_arg}}: {{to_referenceable.hash_type}};
+
+let client: AppClient = (getContext(clientContext) as any).getClient();
+
+let hashes: Array<{{from_referenceable.hash_type}}> | undefined;
+
+let loading = true;
+let error: any = undefined;
+
+$: hashes, loading, error;
+
+onMount(async () => {
+  if ({{camel_case to_referenceable.singular_arg}} === undefined) {
+    throw new Error(`The {{camel_case to_referenceable.singular_arg}} input is required for the {{pascal_case (plural from_referenceable.name)}}For{{pascal_case to_referenceable.name}} element`);
+  }
+
+  try {
+    const links: Array<Link> = await client.callZome({
+      cap_secret: null,
+      role_name: '{{dna_role_name}}',
+      zome_name: '{{snake_case coordinator_zome_manifest.name}}',
+      fn_name: 'get_{{snake_case (plural from_referenceable.name)}}_for_{{snake_case to_referenceable.name}}',
+      payload: {{camel_case to_referenceable.singular_arg}},
+    });
+    hashes = links.map(l => l.target);
+  } catch (e) {
+    error = e;
+  }
+  loading = false;
+  
+  client.on('signal', signal => {
+    if (signal.zome_name !== '{{coordinator_zome_manifest.name}}') return;
+    const payload = signal.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;
+    if (payload.type !== 'LinkCreated') return;
+    if (payload.link_type !== '{{pascal_case bidirectional}}') return;
+
+    hashes = [...hashes, payload.action.hashed.content.target_address];
+  });
+});
+
+</script>
+
+{#if loading }
+<div style="display: flex; flex: 1; align-items: center; justify-content: center">
+  <mwc-circular-progress indeterminate></mwc-circular-progress>
+</div>
+{:else if error}
+<span>Error fetching {{lower_case (plural from_referenceable.name)}}: {error.data.data}.</span>
+{:else if hashes.length === 0}
+<span>No {{lower_case (plural from_referenceable.name)}} found for this {{lower_case to_referenceable.name}}.</span>
+{:else}
+<div style="display: flex; flex-direction: column">
+  {#each hashes as hash}
+    <div style="margin-bottom: 8px;">
+      <{{pascal_case from_referenceable.name}}Detail {{camel_case from_referenceable.name}}Hash={hash}></{{pascal_case from_referenceable.name}}Detail>
+    </div>
+  {/each}
+</div>
+{/if}
