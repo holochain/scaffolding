@@ -173,11 +173,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1715075584,
-        "narHash": "sha256-AZbckXdtu526rjCP+CNhLBmPFs2tKVwfvhvmKBDuH4c=",
+        "lastModified": 1716456243,
+        "narHash": "sha256-VFL7wHUD1S6wYtnTzDH7LLskEH1WWKWVdkVL7Azll4g=",
         "owner": "holochain",
         "repo": "holochain",
-        "rev": "de729662e1d0812ef008bf56fde2c0cfcc3c5232",
+        "rev": "0ba81254837d0f2ea7ddf4185e8eba547c0eb8a6",
         "type": "github"
       },
       "original": {
@@ -189,16 +189,16 @@
     "holochain_2": {
       "flake": false,
       "locked": {
-        "lastModified": 1714578487,
-        "narHash": "sha256-R0nmeZEEkHBCPmLiuWpx54qjGrrbay4b0QxxIJXsn2o=",
+        "lastModified": 1715735100,
+        "narHash": "sha256-l0X+rEQqKUnCgXajbN1Sob9uyPXvU6/zieiwu/fcgdQ=",
         "owner": "holochain",
         "repo": "holochain",
-        "rev": "f64ad12ccb5e3c872f5588a32437f03fef0b154b",
+        "rev": "75da69b6cd08b23abefbfaec7c80de6ff762cbf8",
         "type": "github"
       },
       "original": {
         "owner": "holochain",
-        "ref": "holochain-0.4.0-dev.1",
+        "ref": "holochain-0.4.0-dev.3",
         "repo": "holochain",
         "type": "github"
       }
@@ -223,11 +223,11 @@
     "launcher": {
       "flake": false,
       "locked": {
-        "lastModified": 1714396970,
-        "narHash": "sha256-I/Vpxtg8cwhrrD5JugEgE4Qk8fZR6VewGm5FX69vbm0=",
+        "lastModified": 1715106263,
+        "narHash": "sha256-a7iQ8pKGz6fghJrtXq0Xamp57GE8Hd3w5YQASzz5Wlk=",
         "owner": "holochain",
         "repo": "launcher",
-        "rev": "b96d5aa790bf0da0a8f0c44741276f7f9c4b6b41",
+        "rev": "92bd39e1c66912d61c35c4725d7b106959888670",
         "type": "github"
       },
       "original": {
@@ -254,11 +254,11 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1714906307,
-        "narHash": "sha256-UlRZtrCnhPFSJlDQE7M0eyhgvuuHBTe1eJ9N9AQlJQ0=",
+        "lastModified": 1716293225,
+        "narHash": "sha256-pU9ViBVE3XYb70xZx+jK6SEVphvt7xMTbm6yDIF4xPs=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "25865a40d14b3f9cf19f19b924e2ab4069b09588",
+        "rev": "3eaeaeb6b1e08a016380c279f8846e0bd8808916",
         "type": "github"
       },
       "original": {
@@ -332,11 +332,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1715048276,
-        "narHash": "sha256-SqWSTvCjNBBnV/WIQdaxVi5V9H3VJ7cOJAxPQdR1TBY=",
+        "lastModified": 1716430594,
+        "narHash": "sha256-vdVzaGD5p+KG7XHepIeX5rUPmdzEcF2w6rhqfr0SNkI=",
         "owner": "oxalica",
         "repo": "rust-overlay",
-        "rev": "b037d65c988421b54024e62691eace4f2fe623bc",
+        "rev": "ee0db3aeebafeaada2b98d076de6d314b4c8682e",
         "type": "github"
       },
       "original": {
@@ -348,11 +348,11 @@
     "scaffolding": {
       "flake": false,
       "locked": {
-        "lastModified": 1713363855,
-        "narHash": "sha256-Y9KsDAjlZZab07NL7pI1izxLOYT4BWYTx1h9DilW8Fk=",
+        "lastModified": 1716239903,
+        "narHash": "sha256-ODy5wH8kAXRRM05qlGVah0R3p04H6JxQMlRk/IrZGEk=",
         "owner": "holochain",
         "repo": "scaffolding",
-        "rev": "9ac485d52122b92bd2988a8fea1a8e4d9a18c3a1",
+        "rev": "4b2116e27fcbf7bd56a121598e0b798461badf09",
         "type": "github"
       },
       "original": {
@@ -386,11 +386,11 @@
       },
       "locked": {
         "dir": "versions/weekly",
-        "lastModified": 1715075584,
-        "narHash": "sha256-AZbckXdtu526rjCP+CNhLBmPFs2tKVwfvhvmKBDuH4c=",
+        "lastModified": 1716456243,
+        "narHash": "sha256-VFL7wHUD1S6wYtnTzDH7LLskEH1WWKWVdkVL7Azll4g=",
         "owner": "holochain",
         "repo": "holochain",
-        "rev": "de729662e1d0812ef008bf56fde2c0cfcc3c5232",
+        "rev": "0ba81254837d0f2ea7ddf4185e8eba547c0eb8a6",
         "type": "github"
       },
       "original": {
