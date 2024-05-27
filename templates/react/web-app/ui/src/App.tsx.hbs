@@ -1,0 +1,31 @@
+import holochainLogo from './assets/holochainLogo.png'
+import './App.css'
+import { useContext } from 'react'
+import { HolochainContext } from './contexts/HolochainContext'
+
+function App() {
+  const { error, loading } = useContext(HolochainContext)
+  return (
+    <>
+      <div>
+        <a href="https://developer.holochain.org/get-started/" target="_blank">
+          <img src={holochainLogo} className="logo holochain" alt="holochain logo" />
+        </a>
+      </div>
+      <h1>Holochain React hApp</h1>
+      <div>
+        <div className="card">
+          {loading ? 'connecting...' : (error ? error.message : 'Connected to Conductor API')}
+        </div>
+        <p>
+          Import components into <code>src/App.tsx</code> and save to test HMR
+        </p>
+      <p className="read-the-docs">
+        Click on the Holochain logo to learn more
+      </p>
+      </div>
+    </>
+  )
+}
+
+export default App

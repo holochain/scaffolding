@@ -938,11 +938,7 @@ impl HcScaffoldTemplate {
 
         match self {
             HcScaffoldTemplate::Clone { .. } => {
-                println!(
-                    r#"Template initialized to folder {:?}
-"#,
-                    target_template
-                );
+                println!(r#"Template initialized to folder {:?} "#, target_template);
             }
         }
         Ok(())
