@@ -1,9 +1,7 @@
-<div>
-  <h4>{{title_case field_name}}</h4>
-  {#each {{camel_case field_name}} as el, i}
-    {{> (concat field_type.type "/" widget "/edit/render") label="" variable_to_read="el" variable_to_change=(concat (camel_case field_name) "[i]" ) }} }`)}
-  {/each}
-  <button onClick={() => set{{pascal_case field_name}}([...{{camel_case field_name}}, {{> (concat field_type.type "/" widget "/initial-value") field_type=field_type}}])}>
-    Add {{title_case field_name}}
-  </button>
-</div>
+<h4>{{title_case field_name}}</h4>
+{#each {{camel_case field_name}} as el, i}
+  {{> (concat field_type.type "/" widget "/edit/render") label="" variable_to_read="el" variable_to_change=(concat (camel_case field_name) "[i]" ) }} }`)}
+{/each}
+<button onClick={() => set{{pascal_case field_name}}([...{{camel_case field_name}}, {{> (concat field_type.type "/" widget "/initial-value") field_type=field_type}}])}>
+  Add {{title_case field_name}}
+</button>

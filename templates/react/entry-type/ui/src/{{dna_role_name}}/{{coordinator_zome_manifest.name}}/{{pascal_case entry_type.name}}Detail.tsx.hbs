@@ -86,11 +86,11 @@ const {{pascal_case entry_type.name}}Detail: FC<{{pascal_case entry_type.name}}D
 	
   return (
     <div>
-			{{{#if crud.update}}editing ? (
+			{ {{#if crud.update}}editing ? (
 				<div>
 					<Edit{{pascal_case entry_type.name}}
 {{#if link_from_original_to_each_update}}
-						original{{pascal_case entry_type.name}}Hash={{{camel_case entry_type.name}}Hash}
+						original{{pascal_case entry_type.name}}Hash={ {{camel_case entry_type.name}}Hash }
 {{/if}}
 						currentRecord={record}
 						current{{pascal_case entry_type.name}}={{{camel_case entry_type.name}}}

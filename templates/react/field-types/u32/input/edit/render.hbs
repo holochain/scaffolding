@@ -1,4 +1,2 @@
-<div>
-  <label for="{{label}}">{{label}}</label>
-  <input type="number" id="{{label}}" name="{{label}}" {{#if variable_to_read}}value={ {{variable_to_read}} }{{/if}} onChange={e => set{{pascal_case variable_to_change}}}(e.target.value) />
-</div>
+<label htmlFor="{{label}}">{{label}}</label>
+<input type="number" id="{{label}}" name="{{label}}" {{#if variable_to_read}}value={ {{variable_to_read}} }{{/if}} onChange={e => set{{pascal_case variable_to_change}}}(e.target.value) />
