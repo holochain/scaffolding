@@ -1,0 +1,70 @@
+import  { FC, useCallback, useState, useEffect, useContext } from 'react';
+import { Link, HolochainError, AppSignalCb } from '@holochain/client';
+
+import {{pascal_case ../entry_type.name}}Detail from './{{pascal_case ../entry_type.name}}Detail';
+import type { {{pascal_case ../entry_type.name}}, {{pascal_case ../coordinator_zome_manifest.name}}Signal } from './types';
+import { HolochainContext } from '../../contexts/HolochainContext';
+
+const {{pascal_case (plural ../entry_type.name)}}For{{pascal_case linked_from.name}}: FC<{{pascal_case (plural ../entry_type.name)}}For{{pascal_case linked_from.name}}Props> = ({{{camel_case linked_from.singular_arg}}}) => {
+  const {client} = useContext(HolochainContext);
+  const [hashes, setHashes] = useState<Uint8Array[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<HolochainError | undefined>();
+
+  const fetch{{pascal_case (plural ../entry_type.name)}} = useCallback(async () => {
+		setLoading(true)
+    try {
+      const links: Link[] = await client?.callZome({
+        cap_secret: null,
+				role_name: '{{../dna_role_name}}',
+				zome_name: '{{../coordinator_zome_manifest.name}}',
+				fn_name: 'get_{{snake_case (plural ../entry_type.name)}}_for_{{snake_case linked_from.name}}',
+				payload: {{camel_case linked_from.singular_arg}}
+      });
+      setHashes(links.map((l) => l.target));
+    } catch (e) {
+      setError(e as HolochainError);
+    } finally {
+      setLoading(false);
+		}
+  }, [creator, client]);
+
+  useEffect(() => {
+    fetch{{pascal_case (plural ../entry_type.name)}}();
+    
+    const handleSignal: AppSignalCb = (signal) => {
+			if (signal.zome_name !== '{{../coordinator_zome_manifest.name}}') return;
+			const payload = signal.payload as {{pascal_case ../coordinator_zome_manifest.name}}Signal;
+			if (!(payload.type === 'EntryCreated' && payload.app_entry.type === '{{pascal_case ../entry_type.name}}')) return;
+			await fetch{{pascal_case (plural ../entry_type.name)}}();
+    };
+
+    client?.on('signal', handleSignal);
+  }, [client, fetch{{pascal_case (plural ../entry_type.name)}}]);
+
+  if (loading) {
+    return <div>loading...</div>;
+  }
+
+  return (
+    <div>
+      {error ? (
+        <span>Error fetching the {{plural ../entry_type.name}}: {error.message}</span>
+      ) : hashes.length > 0 ? (
+        <div style={{ marginBottom: '8px' }}>
+          {hashes.map((hash, i) => (
+            <{{pascal_case ../entry_type.name}}Detail key={i} {{camel_case (plural ../entry_type.name)}}Hash={hash} on{{pascal_case ../entry_type.name}}Deleted={fetch{{pascal_case (plural ../entry_type.name)}}} />
+          ))}
+        </div>
+      ) : (
+        <span>No {{plural ../entry_type.name}} found for this {{lower_case linked_from.name}}.</span>
+      )}
+    </div>
+  );
+};
+
+interface {{pascal_case (plural ../entry_type.name)}}For{{pascal_case linked_from.name}}Props {
+	{{camel_case linked_from.singular_arg}}: {{linked_from.hash_type}}: Uint8Array
+}
+
+export default {{pascal_case (plural ../entry_type.name)}}For{{pascal_case linked_from.name}};
