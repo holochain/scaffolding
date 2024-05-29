@@ -1,5 +1,5 @@
 <label htmlFor="{{label}}">{{label}}:</label>
-<select name="{{label}}" id="{{label}}" onChange={ (e) => set{{pascal_case ../variable_to_change}}(e.target.value) }>
+<select name="{{label}}" onChange={ (e) => set{{pascal_case ../variable_to_change}}(e.target.value) }>
   {{#each field_type.variants}}
   <option {{#if ../variable_to_read}}selected={ {{../variable_to_read}}.type === '{{pascal_case this}}' }{{/if}} value="{{this}}">
     {{title_case this}}

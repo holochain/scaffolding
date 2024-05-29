@@ -1,4 +1,4 @@
-import { FC, useState, useContext } from 'react';
+import { FC, useState, useContext, useEffect } from 'react';
 import type { {{pascal_case entry_type.name}}{{#each entry_type.fields}}{{#if (eq field_type.type "Enum")}}, {{field_type.label}}{{/if}}{{/each}} } from './types';
 import { HolochainContext } from '../../contexts/HolochainContext';
 {{#uniq_lines}}
@@ -12,16 +12,23 @@ import { HolochainContext } from '../../contexts/HolochainContext';
 
 const Create{{pascal_case entry_type.name}}: FC<Create{{pascal_case entry_type.name}}Props> = ({ on{{pascal_case entry_type.name}}Created }) => {
   const {client} = useContext(HolochainContext);
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
+{{#each entry_type.fields}}
+  {{#if widget }}
+    {{#if (not (eq cardinality "vector" ) )}}
+	const [{{camel_case field_name}}, set{{pascal_case field_name}}] = useState<{{> (concat field_type.type "/type")}} | undefined>();
+    {{else}}
+	const [{{camel_case field_name}}, set{{pascal_case field_name}}] = useState<{{> (concat field_type.type "/type")}}[] | undefined>();
+    {{/if}}
+  {{/if}}
+{{/each}}
   const [is{{pascal_case entry_type.name}}Valid, setIs{{pascal_case entry_type.name}}Valid] = useState(false);
 
   const create{{pascal_case entry_type.name}} = async () => {
-	const {{camel_case entry_type.name}}Entry: {{pascal_case entry_type.name}} = { 
+		const {{camel_case entry_type.name}}Entry: {{pascal_case entry_type.name}} = { 
 {{#each entry_type.fields}}
-    {{snake_case field_name}}: {{camel_case field_name}}{{#if (eq cardinality "single")}}!{{/if}},
+      {{snake_case field_name}}: {{camel_case field_name}}{{#if (eq cardinality "single")}}!{{/if}},
 {{/each}}
-  };
+    };
     try {
       const record = await client?.callZome({
         cap_secret: null,
@@ -36,23 +43,24 @@ const Create{{pascal_case entry_type.name}}: FC<Create{{pascal_case entry_type.n
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, setState: any) => {
-    setState(e.target.value);
-    setIs{{pascal_case entry_type.name}}Valid({{#each entry_type.fields}}{{#if widget}}{{#if (eq cardinality "single")}} && {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate=(camel_case field_name) }}{{/if}}{{#if (eq cardinality "vector")}} && {{camel_case field_name}}.every(e => {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate="e" }}){{/if}}{{/if}}{{/each}});
-  };
+	useEffect(() => {
+    setIs{{pascal_case entry_type.name}}Valid(true{{#each entry_type.fields}}{{#if widget}}{{#if (eq cardinality "single")}} && {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate=(camel_case field_name) }}{{/if}}{{#if (eq cardinality "vector")}} && {{camel_case field_name}}.every(e => {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate="e" }}){{/if}}{{/if}}{{/each}});
+  }, [{{#each entry_type.fields}}{{#if widget}}{{camel_case field_name}}{{/if}}{{#unless @last}}, {{/unless}}{{/each}}]);
 
   return (
     <div>
 			<h3>Create {{pascal_case entry_type.name}}</h3>
 {{#each entry_type.fields}}
 	{{#if widget}}
-				<div>
-		{{#if (not (eq cardinality "vector") )}}
-					{{> (concat field_type.type "/" widget "/edit/render") label=(title_case field_name) variable_to_read=(camel_case field_name) variable_to_change=(camel_case field_name) required=(eq cardinality "single") }}
-		{{else}}
-					{{> Vec/edit/render field_name=field_name field_type=field_type widget=widget }}
-		{{/if}}
-				</div>
+			<div>
+				{{#if (not (eq cardinality "vector") )}}
+				{{> (concat field_type.type "/" widget "/edit/render") label=(title_case field_name) variable_to_read=(camel_case field_name) variable_to_change=(camel_case field_name) required=(eq cardinality "single") }}
+				{{else}}
+				{{> Vec/edit/render field_name=field_name field_type=field_type widget=widget }}
+				{{/if}}
+
+			</div>
+
 	{{/if}}
 {{/each}}
 			<button disabled={!is{{pascal_case entry_type.name}}Valid} onClick={() => create{{pascal_case entry_type.name}}()}>

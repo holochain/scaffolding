@@ -27,7 +27,7 @@ const {{pascal_case collection_name}}: FC{{#if (eq collection_type.type "ByAutho
     } finally {
       setLoading(false);
 		}
-  }, [client]);
+  }, [client{{#if (eq collection_type.type "ByAuthor")}}, author{{/if}}]);
 
   useEffect(() => {
 {{#if (eq collection_type.type "ByAuthor")}}
@@ -39,17 +39,17 @@ const {{pascal_case collection_name}}: FC{{#if (eq collection_type.type "ByAutho
     
     const handleSignal: AppSignalCb = (signal) => {
       if (signal.zome_name !== '{{coordinator_zome_manifest.name}}') return;
-    	const payload = signal.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;
-   	 	if (payload.type !== 'EntryCreated') return;
-    	if (payload.app_entry.type !== '{{pascal_case referenceable.name}}') return;
+      const payload = signal.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;
+      if (payload.type !== 'EntryCreated') return;
+      if (payload.app_entry.type !== '{{pascal_case referenceable.name}}') return;
 {{#if (eq collection_type.type "ByAuthor")}}
-    	if (author.toString() !== client.myPubKey.toString()) return;
+      if (author.toString() !== client?.myPubKey.toString()) return;
 {{/if}}
       setHashes((prevHashes) => [...prevHashes, {{#if (eq referenceable.hash_type "ActionHash")}}payload.action.hashed.hash{{else}}(payload.action.hashed.content as NewEntryAction).entry_hash{{/if}}]);
     };
 
     client?.on('signal', handleSignal);
-  }, [client, fetch{{pascal_case (plural referenceable.name)}}]);
+  }, [client, fetch{{pascal_case (plural referenceable.name)}}{{#if (eq collection_type.type "ByAuthor")}}, author{{/if}}]);
 
   if (loading) {
     return <div>loading...</div>;
@@ -60,9 +60,9 @@ const {{pascal_case collection_name}}: FC{{#if (eq collection_type.type "ByAutho
       {error ? (
         <span>Error fetching the {{lower_case (plural referenceable.name)}}: {error.message}</span>
       ) : hashes.length > 0 ? (
-        <div style={{ marginBottom: '8px' }}>
+        <div>
           {hashes.map((hash, i) => (
-            <<{{pascal_case referenceable.name}}Detail key={i} {{camel_case referenceable.name}}Hash={hash} on{{pascal_case referenceable.name}}Deleted={fetch{{pascal_case (plural referenceable.name)}}} />
+            <{{pascal_case referenceable.name}}Detail key={i} {{camel_case referenceable.name}}Hash={hash} on{{pascal_case referenceable.name}}Deleted={fetch{{pascal_case (plural referenceable.name)}}} />
           ))}
         </div>
       ) : (

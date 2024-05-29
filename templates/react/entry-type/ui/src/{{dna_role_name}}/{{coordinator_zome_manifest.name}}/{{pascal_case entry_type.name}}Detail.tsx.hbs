@@ -64,6 +64,7 @@ const {{pascal_case entry_type.name}}Detail: FC<{{pascal_case entry_type.name}}D
 		}
   };
 {{/if}}
+
   useEffect(() => {
     if (!{{camel_case entry_type.name}}Hash) {
       throw new Error(`The {{camel_case entry_type.name}}Hash prop is required for this component`);
@@ -93,15 +94,15 @@ const {{pascal_case entry_type.name}}Detail: FC<{{pascal_case entry_type.name}}D
 						original{{pascal_case entry_type.name}}Hash={ {{camel_case entry_type.name}}Hash }
 {{/if}}
 						currentRecord={record}
-						current{{pascal_case entry_type.name}}={{{camel_case entry_type.name}}}
+						current{{pascal_case entry_type.name}}={ {{camel_case entry_type.name}} }
 						on{{pascal_case entry_type.name}}Updated={async () => {
 							setEditing(false);
-							await {{pascal_case entry_type.name}}();
+							await fetch{{pascal_case entry_type.name}}();
 						}}
 						onEditCanceled={() => setEditing(false)}
 					/>
 				</div>
-			) :{{/if}}record ? (
+			) : {{/if}}record ? (
 				<div>
 					<div>
 {{#if crud.update}}
@@ -114,10 +115,10 @@ const {{pascal_case entry_type.name}}Detail: FC<{{pascal_case entry_type.name}}D
 {{#each entry_type.fields}}
   {{#if widget}}	  
     {{#if (not (eq cardinality "vector") )}}
-  <div>
-    <span><strong>{{title_case field_name}}:</strong></span>
-    <span>{{> (concat field_type.type "/" widget "/detail/render") variable_to_read=(concat (camel_case ../entry_type.name) "?." (snake_case field_name) ) }}</span>
-  </div>
+					<div>
+						<span><strong>{{title_case field_name}}:</strong></span>
+						<span>{{> (concat field_type.type "/" widget "/detail/render") variable_to_read=(concat (camel_case ../entry_type.name) "?." (snake_case field_name) ) }}</span>
+					</div>
     {{else}}
   {{> Vec/detail/render variable_to_read=(concat (camel_case ../entry_type.name) "?." (snake_case field_name) ) field_name=field_name field_type=field_type widget=widget }}
     {{/if}}

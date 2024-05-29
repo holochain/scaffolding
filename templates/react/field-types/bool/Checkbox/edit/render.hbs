@@ -1,2 +1,2 @@
 <label htmlFor="{{label}}">{{label}}</label>
-<input type="checkbox" name="{{label}}" checked={ {{variable_to_read}} } />
+<input type="checkbox" name="{{label}}" checked={ {{variable_to_read}} } onChange={(e) => set{{pascal_case variable_to_change}}(e.target.checked)} />
