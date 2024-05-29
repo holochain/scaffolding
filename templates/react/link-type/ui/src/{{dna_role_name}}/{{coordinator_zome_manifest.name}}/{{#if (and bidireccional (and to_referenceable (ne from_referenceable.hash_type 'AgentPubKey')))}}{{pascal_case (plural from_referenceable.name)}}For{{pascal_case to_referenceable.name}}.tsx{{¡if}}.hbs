@@ -46,13 +46,13 @@ const {{pascal_case (plural from_referenceable.name)}}For{{pascal_case to_refere
   }, [client, fetch{{pascal_case (plural from_referenceable.name)}}]);
 
   if (loading) {
-    return <div>loading...</div>;
+    return <progress />;
   }
 
   return (
     <div>
       {error ? (
-        <span>Error fetching {{lower_case (plural from_referenceable.name)}}: {error.data.data}.</span>
+        <article>Error fetching {{lower_case (plural from_referenceable.name)}}: {error.data.data}.</article>
       ) : hashes.length > 0 ? (
         <div>
           {hashes.map((hash, i) => (
@@ -60,7 +60,7 @@ const {{pascal_case (plural from_referenceable.name)}}For{{pascal_case to_refere
           ))}
         </div>
       ) : (
-        <span>No {{lower_case (plural from_referenceable.name)}} found for this {{lower_case to_referenceable.name}}.</span>
+        <article>No {{lower_case (plural from_referenceable.name)}} found for this {{lower_case to_referenceable.name}}.</article>
       )}
     </div>
   );

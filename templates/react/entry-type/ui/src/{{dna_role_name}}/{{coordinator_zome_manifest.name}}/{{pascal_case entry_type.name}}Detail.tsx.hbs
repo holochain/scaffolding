@@ -22,7 +22,7 @@ const {{pascal_case entry_type.name}}Detail: FC<{{pascal_case entry_type.name}}D
 {{#if crud.update}}
   const [editing, setEditing] = useState(false);
 {{/if}}
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<HolochainError | undefined>()
 
   const fetch{{pascal_case entry_type.name}} = useCallback(async () => {
@@ -78,11 +78,11 @@ const {{pascal_case entry_type.name}}Detail: FC<{{pascal_case entry_type.name}}D
   }, [record]);
 
 	if (loading) {
-		return <div>loading...</div>
+		return <progress />
 	}
 	
 	if (error) {
-		return <div>Error: {error.message}</div>
+		return <article>Error: {error.message}</article>
 	}
 	
   return (
@@ -103,7 +103,7 @@ const {{pascal_case entry_type.name}}Detail: FC<{{pascal_case entry_type.name}}D
 					/>
 				</div>
 			) : {{/if}}record ? (
-				<div>
+				<section>
 					<div>
 {{#if crud.update}}
 						<button onClick={() => setEditing(true)}>edit</button>
@@ -124,9 +124,9 @@ const {{pascal_case entry_type.name}}Detail: FC<{{pascal_case entry_type.name}}D
     {{/if}}
   {{/if}}
 {{/each}}
-				</div>
+				</section>
 			) : (
-				<span>The requested {{camel_case entry_type.name}} was not found.</span>
+				<article>The requested {{camel_case entry_type.name}} was not found.</article>
 			)}
     </div>
   );

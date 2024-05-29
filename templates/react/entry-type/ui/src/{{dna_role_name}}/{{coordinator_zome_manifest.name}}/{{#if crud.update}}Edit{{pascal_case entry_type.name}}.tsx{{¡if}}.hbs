@@ -88,11 +88,11 @@ const Edit{{pascal_case entry_type.name}}: FC<Edit{{pascal_case entry_type.name}
 	]);
 
   useEffect(() => {
-    if (currentRecord) {
+    if (!currentRecord) {
       throw new Error(`The currentRecord prop is required`);
     }
 {{#if link_from_original_to_each_update}}
-    if (original{{pascal_case entry_type.name}}Hash) {
+    if (!original{{pascal_case entry_type.name}}Hash) {
       throw new Error(`The original{{pascal_case entry_type.name}}Hash prop is required`);
     }
 {{/if}}
@@ -103,8 +103,8 @@ const Edit{{pascal_case entry_type.name}}: FC<Edit{{pascal_case entry_type.name}
   }, [{{#each entry_type.fields}}{{#if widget}}{{camel_case field_name}}{{#unless @last}}, {{/unless}}{{/if}}{{/each}}]);
 
   return (
-    <div>
-      <span>Edit {{pascal_case entry_type.name}}</span>
+    <section>
+      <h3>Edit {{pascal_case entry_type.name}}</h3>
 {{#each entry_type.fields}}
   {{#if widget}}
 			<div>
@@ -122,7 +122,7 @@ const Edit{{pascal_case entry_type.name}}: FC<Edit{{pascal_case entry_type.name}
 				<button onClick={onEditCanceled}>Cancel</button>
 				<button onClick={update{{pascal_case entry_type.name}}} disabled={!is{{pascal_case entry_type.name}}Valid}>Edit {{pascal_case entry_type.name}}</button>
       </div>
-    </div>
+    </section>
   );
 };
 
