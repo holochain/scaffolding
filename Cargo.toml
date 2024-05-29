@@ -1,7 +1,7 @@
 [package]
 edition = "2021"
 name = "holochain_scaffolding_cli"
-version = "0.4000.0-dev.3"
+version = "0.4000.0-dev.4"
 description = "CLI to easily generate and modify holochain apps"
 license = "CAL-1.0"
 homepage = "https://developer.holochain.org"
@@ -18,8 +18,8 @@ name = "holochain_scaffolding_cli"
 path = "src/lib.rs"
 
 [dependencies]
-holochain = { features = ["test_utils"], version = "0.4.0-dev.3"}
-holochain_types = "0.4.0-dev.3"
+holochain = { features = ["test_utils"], version = "0.4.0-dev.5"}
+holochain_types = "0.4.0-dev.5"
 holochain_util = { features = ["backtrace"], version = "0.4.0-dev.1" }
 mr_bundle = "0.4.0-dev.1"
 
