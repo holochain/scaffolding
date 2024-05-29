@@ -1,3 +1,4 @@
+import type { AppClient, Record, EntryHash, AgentPubKey, ActionHash, DnaHash } from '@holochain/client';
 import { FC, useState, useContext, useEffect } from 'react';
 import type { {{pascal_case entry_type.name}}{{#each entry_type.fields}}{{#if (eq field_type.type "Enum")}}, {{field_type.label}}{{/if}}{{/each}} } from './types';
 import { HolochainContext } from '../../contexts/HolochainContext';
@@ -10,7 +11,7 @@ import { HolochainContext } from '../../contexts/HolochainContext';
   {{/each}}
 {{/uniq_lines}}
 
-const Create{{pascal_case entry_type.name}}: FC<Create{{pascal_case entry_type.name}}Props> = ({ on{{pascal_case entry_type.name}}Created }) => {
+const Create{{pascal_case entry_type.name}}: FC<Create{{pascal_case entry_type.name}}Props> = ({ on{{pascal_case entry_type.name}}Created{{#each entry_type.fields}}{{#if (not widget) }}{{#if (eq cardinality "vector")}}, {{camel_case field_name}}{{else}}, {{camel_case field_name}}{{/if}}{{/if}}{{/each}} }) => {
   const {client} = useContext(HolochainContext);
 {{#each entry_type.fields}}
   {{#if widget }}
@@ -45,7 +46,7 @@ const Create{{pascal_case entry_type.name}}: FC<Create{{pascal_case entry_type.n
 
 	useEffect(() => {
     setIs{{pascal_case entry_type.name}}Valid(true{{#each entry_type.fields}}{{#if widget}}{{#if (eq cardinality "single")}} && {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate=(camel_case field_name) }}{{/if}}{{#if (eq cardinality "vector")}} && {{camel_case field_name}}.every(e => {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate="e" }}){{/if}}{{/if}}{{/each}});
-  }, [{{#each entry_type.fields}}{{#if widget}}{{camel_case field_name}}{{/if}}{{#unless @last}}, {{/unless}}{{/each}}]);
+  }, [{{#each entry_type.fields}}{{#if widget}}{{camel_case field_name}}{{#unless @last}}, {{/unless}}{{/if}}{{/each}}]);
 
   return (
     <div>
@@ -71,7 +72,16 @@ const Create{{pascal_case entry_type.name}}: FC<Create{{pascal_case entry_type.n
 };
 
 interface Create{{pascal_case entry_type.name}}Props {
-	on{{pascal_case entry_type.name}}Created?: (hash?: Uint8Array) => void
+	on{{pascal_case entry_type.name}}Created?: (hash?: Uint8Array) => void,
+{{#each entry_type.fields}}
+  {{#if (not widget) }}
+    {{#if (eq cardinality "vector")}}
+  {{camel_case field_name}}: {{> (concat field_type.type "/type") }}[],
+    {{else}}
+  {{camel_case field_name}}{{#if (eq cardinality "single")}}{{/if}}: {{> (concat field_type.type "/type") }}{{#if (eq cardinality "option")}} | undefined{{/if}},
+    {{/if}}
+  {{/if}}
+{{/each}}
 }
 
 export default Create{{pascal_case entry_type.name}};

@@ -35,19 +35,20 @@ const Edit{{pascal_case entry_type.name}}: FC<Edit{{pascal_case entry_type.name}
   const [is{{pascal_case entry_type.name}}Valid, setIs{{pascal_case entry_type.name}}Valid] = useState(false);
 
   const update{{pascal_case entry_type.name}} = useCallback(async () => {
-		const {{camel_case entry_type.name}}: {{pascal_case entry_type.name}} = {
+		const {{camel_case entry_type.name}}: Partial<{{pascal_case entry_type.name}}> = {
 {{#each entry_type.fields}}
 	{{#if widget}}
 		{{#if (eq cardinality "single") }}
-				{{snake_case field_name}}: {{camel_case field_name}}!,
+				{{snake_case field_name}}: {{camel_case field_name}},
 			{{else}}
 				{{snake_case field_name}}: {{camel_case field_name}}{{#if (eq cardinality "vector") }} as {{> (concat field_type.type "/type") }}[]{{/if}},
 		{{/if}}
+	{{else}}
 	{{/if}}
 {{/each}}
 {{#each entry_type.fields}}
 	{{#if (not widget)}}
-				{{snake_case field_name}}: current{{pascal_case ../entry_type.name}}!.{{snake_case field_name}},
+				{{snake_case field_name}}: current{{pascal_case ../entry_type.name}}?.{{snake_case field_name}},
 	{{/if}}
 {{/each}}
 		};
@@ -79,7 +80,7 @@ const Edit{{pascal_case entry_type.name}}: FC<Edit{{pascal_case entry_type.name}
 	{{/if}}
 {{#each entry_type.fields}}
   {{#if (not widget)}}
-		current{{pascal_case ../entry_type.name}}!.{{snake_case field_name}},
+		current{{pascal_case ../entry_type.name}}?.{{snake_case field_name}},
 	{{else}}
     {{camel_case field_name}},
 	{{/if}}
@@ -99,7 +100,7 @@ const Edit{{pascal_case entry_type.name}}: FC<Edit{{pascal_case entry_type.name}
 
   useEffect(() => {
     setIs{{pascal_case entry_type.name}}Valid(true{{#each entry_type.fields}}{{#if widget}}{{#if (eq cardinality "single")}} && {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate=(camel_case field_name) }}{{/if}}{{#if (eq cardinality "vector")}} && {{camel_case field_name}}.every(e => {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate="e" }}){{/if}}{{/if}}{{/each}});
-  }, [{{#each entry_type.fields}}{{#if widget}}{{camel_case field_name}}{{/if}}{{#unless @last}}, {{/unless}}{{/each}}]);
+  }, [{{#each entry_type.fields}}{{#if widget}}{{camel_case field_name}}{{#unless @last}}, {{/unless}}{{/if}}{{/each}}]);
 
   return (
     <div>
