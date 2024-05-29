@@ -2,7 +2,7 @@ import  { FC, useCallback, useState, useEffect, useContext } from 'react';
 import { Link, HolochainError, AppSignalCb } from '@holochain/client';
 
 import {{pascal_case ../entry_type.name}}Detail from './{{pascal_case ../entry_type.name}}Detail';
-import type { {{pascal_case ../entry_type.name}}, {{pascal_case ../coordinator_zome_manifest.name}}Signal } from './types';
+import type { {{pascal_case ../coordinator_zome_manifest.name}}Signal } from './types';
 import { HolochainContext } from '../../contexts/HolochainContext';
 
 const {{pascal_case (plural ../entry_type.name)}}For{{pascal_case linked_from.name}}: FC<{{pascal_case (plural ../entry_type.name)}}For{{pascal_case linked_from.name}}Props> = ({{{camel_case linked_from.singular_arg}}}) => {
@@ -27,12 +27,12 @@ const {{pascal_case (plural ../entry_type.name)}}For{{pascal_case linked_from.na
     } finally {
       setLoading(false);
 		}
-  }, [creator, client]);
+  }, [client]);
 
   useEffect(() => {
     fetch{{pascal_case (plural ../entry_type.name)}}();
     
-    const handleSignal: AppSignalCb = (signal) => {
+    const handleSignal: AppSignalCb = async (signal) => {
 			if (signal.zome_name !== '{{../coordinator_zome_manifest.name}}') return;
 			const payload = signal.payload as {{pascal_case ../coordinator_zome_manifest.name}}Signal;
 			if (!(payload.type === 'EntryCreated' && payload.app_entry.type === '{{pascal_case ../entry_type.name}}')) return;
@@ -53,7 +53,7 @@ const {{pascal_case (plural ../entry_type.name)}}For{{pascal_case linked_from.na
       ) : hashes.length > 0 ? (
         <div>
           {hashes.map((hash, i) => (
-            <{{pascal_case ../entry_type.name}}Detail key={i} {{camel_case (plural ../entry_type.name)}}Hash={hash} on{{pascal_case ../entry_type.name}}Deleted={fetch{{pascal_case (plural ../entry_type.name)}}} />
+            <{{pascal_case ../entry_type.name}}Detail key={i} {{camel_case ../entry_type.name}}Hash={hash} on{{pascal_case ../entry_type.name}}Deleted={fetch{{pascal_case (plural ../entry_type.name)}}} />
           ))}
         </div>
       ) : (
@@ -64,7 +64,7 @@ const {{pascal_case (plural ../entry_type.name)}}For{{pascal_case linked_from.na
 };
 
 interface {{pascal_case (plural ../entry_type.name)}}For{{pascal_case linked_from.name}}Props {
-	{{camel_case linked_from.singular_arg}}: {{linked_from.hash_type}}: Uint8Array
+	{{camel_case linked_from.singular_arg}}: Uint8Array
 }
 
 export default {{pascal_case (plural ../entry_type.name)}}For{{pascal_case linked_from.name}};
