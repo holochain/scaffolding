@@ -1,5 +1,5 @@
-import React, { createContext, useEffect, useRef, useState } from 'react';
-import { AppWebsocket, type AppClient } from '@holochain/client';
+import { AppWebsocket, HolochainError, type AppClient } from '@holochain/client';
+import { createContext, FC, useEffect, useRef, useState } from 'react';
 
 export const HolochainContext = createContext<HolochainContextValues>({
   client: undefined,
@@ -7,9 +7,9 @@ export const HolochainContext = createContext<HolochainContextValues>({
 	loading: true,
 });
 
-const HolochainProvider: React.FC<HolochainProviderProps> = ({ children }) => {
+const HolochainProvider: FC<HolochainProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
-	const [error, setError] = useState<unknown>();
+	const [error, setError] = useState<HolochainError | undefined>();
   const client = useRef<AppClient>();
   
   const value = { client: client.current, error, loading };
@@ -19,7 +19,7 @@ const HolochainProvider: React.FC<HolochainProviderProps> = ({ children }) => {
       try {
         client.current = await AppWebsocket.connect();
       } catch (error) {
-				setError(error)
+				setError(error as HolochainError)
         console.error('Failed to establish websocket connection:', error);
       } finally {
         setLoading(false);
@@ -37,7 +37,7 @@ const HolochainProvider: React.FC<HolochainProviderProps> = ({ children }) => {
 
 interface HolochainContextValues {
 	client: AppClient | undefined,
-	error: unknown | undefined,
+	error: HolochainError | undefined,
 	loading: boolean,
 }
 
