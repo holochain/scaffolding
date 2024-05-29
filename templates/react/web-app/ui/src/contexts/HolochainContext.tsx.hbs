@@ -7,7 +7,7 @@ export const HolochainContext = createContext<HolochainContextValues>({
 	loading: true,
 });
 
-const HolochainClientProvider: React.FC<HolochainClientProviderProps> = ({ children }) => {
+const HolochainProvider: React.FC<HolochainProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<unknown>();
   const client = useRef<AppClient>();
@@ -41,8 +41,8 @@ interface HolochainContextValues {
 	loading: boolean,
 }
 
-interface HolochainClientProviderProps {
+interface HolochainProviderProps {
   children: React.ReactNode;
 }
 
-export default HolochainClientProvider;
+export default HolochainProvider;
