@@ -1,9 +1,9 @@
 import holochainLogo from './assets/holochainLogo.svg'
-import './App.css'
 import { useContext } from 'react'
 import { HolochainContext } from './contexts/HolochainContext'
+import './App.css'
 
-function App() {
+const App = () => {
   const { error, loading } = useContext(HolochainContext)
   return (
     <>
