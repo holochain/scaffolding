@@ -21,7 +21,9 @@ const {{pascal_case (plural from_referenceable.name)}}For{{pascal_case to_refere
 				fn_name: 'get_{{snake_case (plural from_referenceable.name)}}_for_{{snake_case to_referenceable.name}}',
 				payload: {{camel_case to_referenceable.singular_arg}},
       });
-      setHashes(links.map((l) => l.target));
+      if (links?.length) {
+        setHashes(links.map((l) => l.target));
+      }
     } catch (e) {
       setError(e as HolochainError);
     } finally {
