@@ -1,18 +1,18 @@
-import holochainLogo from './assets/holochainLogo.svg'
-import { useContext } from 'react'
-import { HolochainContext } from './contexts/HolochainContext'
+import holochainLogo from './assets/holochainLogo.svg';
+import { useContext } from 'react';
+import { HolochainContext } from './contexts/HolochainContext';
 import AllPosts from './forum/posts/AllPosts';
 import CreatePost from './forum/posts/CreatePost';
 
-import './App.css'
+import './App.css';
 
 const App = () => {
-  const { error, loading } = useContext(HolochainContext)
+  const { error, loading } = useContext(HolochainContext);
 	if (loading) {
-		return <div>loading...</div>
+		return <progress />;
 	}
 	if (error) {
-		return <div>Error starting app: {error.message}</div>
+		return <article>Error starting app: {error.message}</article>;
 	}
   return (
     <div>
@@ -23,4 +23,4 @@ const App = () => {
   )
 }
 
-export default App
+export default App;
