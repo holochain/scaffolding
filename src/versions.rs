@@ -23,4 +23,4 @@ pub const HOLOCHAIN_NIX_VERSION: &str = "0_3_rc";
 /// source: https://github.com/darksoil-studio/holochain-playground/tree/main/packages/cli/server
 ///
 /// npm: https://www.npmjs.com/package/@holochain-playground/cli
-pub const HOLOCHAIN_PLAYGROUND_CLI_VERSION: &str = "^0.2.0";
+pub const HOLOCHAIN_PLAYGROUND_CLI_VERSION: &str = "^0.300.0-rc.0";
