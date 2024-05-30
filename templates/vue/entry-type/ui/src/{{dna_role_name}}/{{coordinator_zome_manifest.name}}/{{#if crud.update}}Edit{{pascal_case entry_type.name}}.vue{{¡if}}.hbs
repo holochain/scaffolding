@@ -137,7 +137,7 @@ export default defineComponent({
         this.$emit('{{kebab_case entry_type.name}}-updated', updateRecord.signed_action.hashed.hash);
       } catch (e: any) {
         const errorSnackbar = this.$refs['update-error'] as Snackbar;
-        errorSnackbar.labelText = `Error updating the {{lower_case entry_type.name}}: ${e.data}`;
+        errorSnackbar.labelText = `Error updating the {{lower_case entry_type.name}}: ${e.message}`;
         errorSnackbar.show();
       }
     },

@@ -1,6 +1,6 @@
 import { LitElement, html } from 'lit';
 import { state, customElement, property } from 'lit/decorators.js';
-import { AppClient, AgentPubKey, Link, EntryHash, ActionHash, Record, NewEntryAction } from '@holochain/client';
+import { AppClient, AgentPubKey, Link, EntryHash, ActionHash, Record, NewEntryAction, HolochainError } from '@holochain/client';
 import { consume } from '@lit-labs/context';
 import { Task } from '@lit-labs/task';
 import '@material/mwc-circular-progress';
@@ -73,7 +73,7 @@ export class {{pascal_case collection_name}} extends LitElement {
         </div>
       `,
       complete: (links) => this.renderList([...this.signaledHashes, ...links.map(l => l.target)]),
-      error: (e: any) => html`<span>Error fetching the {{lower_case (plural referenceable.name)}}: ${e.data.data}.</span>`
+      error: (e: HolochainError) => html`<span>Error fetching the {{lower_case (plural referenceable.name)}}: ${e.message}.</span>`
     });
   }
 }
