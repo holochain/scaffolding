@@ -1,5 +1,6 @@
 import type { AppClient, Record, EntryHash, AgentPubKey, ActionHash, DnaHash } from '@holochain/client';
 import { FC, useState, useContext, useEffect } from 'react';
+
 import type { {{pascal_case entry_type.name}}{{#each entry_type.fields}}{{#if (eq field_type.type "Enum")}}, {{field_type.label}}{{/if}}{{/each}} } from './types';
 import { HolochainContext } from '../../contexts/HolochainContext';
 {{#uniq_lines}}
@@ -16,9 +17,9 @@ const Create{{pascal_case entry_type.name}}: FC<Create{{pascal_case entry_type.n
 {{#each entry_type.fields}}
   {{#if widget }}
     {{#if (not (eq cardinality "vector" ) )}}
-	const [{{camel_case field_name}}, set{{pascal_case field_name}}] = useState<{{> (concat field_type.type "/type")}} | undefined>();
+	const [{{camel_case field_name}}, set{{pascal_case field_name}}] = useState<{{> (concat field_type.type "/type")}}>({{> (concat field_type.type "/sample")}});
     {{else}}
-	const [{{camel_case field_name}}, set{{pascal_case field_name}}] = useState<{{> (concat field_type.type "/type")}}[] | undefined>();
+	const [{{camel_case field_name}}, set{{pascal_case field_name}}] = useState<{{> (concat field_type.type "/type")}}[]>({{> (concat field_type.type "/sample")}});
     {{/if}}
   {{/if}}
 {{/each}}

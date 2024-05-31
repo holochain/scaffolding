@@ -1,5 +1,5 @@
+import { Link, HolochainError } from '@holochain/client';
 import  { FC, useCallback, useState, useEffect, useContext } from 'react';
-import { Link, HolochainError, AppSignalCb } from '@holochain/client';
 
 import {{pascal_case to_referenceable.name}}Detail from './{{pascal_case to_referenceable.name}}Detail';
 import type { {{pascal_case ../coordinator_zome_manifest.name}}Signal } from './types';
@@ -31,19 +31,18 @@ const {{pascal_case (plural to_referenceable.name)}}For{{pascal_case from_refere
 		}
   }, [client]);
 
+  const handleSignal = useCallback(async (signal) => {
+    if (signal.zome_name !== '{{coordinator_zome_manifest.name}}') return;
+    const payload = signal.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;
+    if (payload.type !== 'LinkCreated') return;
+    if (payload.link_type !== '{{pascal_case link_type_name}}') return;
+    await fetch{{pascal_case (plural to_referenceable.name)}}();
+  }, [fetch{{pascal_case (plural to_referenceable.name)}}]);
+
   useEffect(() => {
     fetch{{pascal_case (plural to_referenceable.name)}}();
-    
-    const handleSignal: AppSignalCb = async (signal) => {
-			if (signal.zome_name !== '{{coordinator_zome_manifest.name}}') return;
-    	const payload = signal.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;
-    	if (payload.type !== 'LinkCreated') return;
-    	if (payload.link_type !== '{{pascal_case link_type_name}}') return;
-			await fetch{{pascal_case (plural to_referenceable.name)}}();
-    };
-
     client?.on('signal', handleSignal);
-  }, [client, fetch{{pascal_case (plural to_referenceable.name)}}]);
+  }, [client]);
 
   if (loading) {
     return <progress />;

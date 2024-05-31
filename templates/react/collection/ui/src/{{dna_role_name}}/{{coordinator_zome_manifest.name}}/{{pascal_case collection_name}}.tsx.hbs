@@ -1,5 +1,5 @@
+import { Link, HolochainError{{#if (eq collection_type.type "ByAuthor")}}, AgentPubKey{{/if}}{{#if (eq referenceable.hash_type "EntryHash")}}, NewEntryAction{{/if}} } from '@holochain/client';
 import  { FC, useCallback, useState, useEffect, useContext } from 'react';
-import { Link, HolochainError, AppSignalCb{{#if (eq collection_type.type "ByAuthor")}}, AgentPubKey{{/if}}{{#if (eq referenceable.hash_type "EntryHash")}}, NewEntryAction{{/if}} } from '@holochain/client';
 
 import type { {{pascal_case coordinator_zome_manifest.name}}Signal } from './types';
 import {{pascal_case referenceable.name}}Detail from './{{pascal_case referenceable.name}}Detail';
@@ -31,6 +31,17 @@ const {{pascal_case collection_name}}: FC{{#if (eq collection_type.type "ByAutho
 		}
   }, [client{{#if (eq collection_type.type "ByAuthor")}}, author{{/if}}]);
 
+  const handleSignal = useCallback((signal) => {
+    if (signal.zome_name !== '{{coordinator_zome_manifest.name}}') return;
+    const payload = signal.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;
+    if (payload.type !== 'EntryCreated') return;
+    if (payload.app_entry.type !== '{{pascal_case referenceable.name}}') return;
+{{#if (eq collection_type.type "ByAuthor")}}
+    if (author.toString() !== client?.myPubKey.toString()) return;
+{{/if}}
+    setHashes((prevHashes) => [...prevHashes, {{#if (eq referenceable.hash_type "ActionHash")}}payload.action.hashed.hash{{else}}(payload.action.hashed.content as NewEntryAction).entry_hash{{/if}}]);
+  }, [setHashes]);
+
   useEffect(() => {
 {{#if (eq collection_type.type "ByAuthor")}}
     if (author === undefined) {
@@ -38,20 +49,8 @@ const {{pascal_case collection_name}}: FC{{#if (eq collection_type.type "ByAutho
     }
 {{/if}}
     fetch{{pascal_case (plural referenceable.name)}}();
-    
-    const handleSignal: AppSignalCb = (signal) => {
-      if (signal.zome_name !== '{{coordinator_zome_manifest.name}}') return;
-      const payload = signal.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;
-      if (payload.type !== 'EntryCreated') return;
-      if (payload.app_entry.type !== '{{pascal_case referenceable.name}}') return;
-{{#if (eq collection_type.type "ByAuthor")}}
-      if (author.toString() !== client?.myPubKey.toString()) return;
-{{/if}}
-      setHashes((prevHashes) => [...prevHashes, {{#if (eq referenceable.hash_type "ActionHash")}}payload.action.hashed.hash{{else}}(payload.action.hashed.content as NewEntryAction).entry_hash{{/if}}]);
-    };
-
     client?.on('signal', handleSignal);
-  }, [client, fetch{{pascal_case (plural referenceable.name)}}{{#if (eq collection_type.type "ByAuthor")}}, author{{/if}}]);
+  }, [client, handleSignal, fetch{{pascal_case (plural referenceable.name)}}{{#if (eq collection_type.type "ByAuthor")}}, author{{/if}}]);
 
   if (loading) {
     return <progress />;
