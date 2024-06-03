@@ -116,7 +116,7 @@ const {{pascal_case entry_type.name}}Detail: FC<{{pascal_case entry_type.name}}D
   {{#if widget}}	  
     {{#if (not (eq cardinality "vector") )}}
 					<div>
-						<span><strong>{{title_case field_name}}:</strong></span>
+						<span><strong>{{title_case field_name}}: </strong></span>
 						<span>{{> (concat field_type.type "/" widget "/detail/render") variable_to_read=(concat (camel_case ../entry_type.name) "?." (snake_case field_name) ) }}</span>
 					</div>
     {{else}}
