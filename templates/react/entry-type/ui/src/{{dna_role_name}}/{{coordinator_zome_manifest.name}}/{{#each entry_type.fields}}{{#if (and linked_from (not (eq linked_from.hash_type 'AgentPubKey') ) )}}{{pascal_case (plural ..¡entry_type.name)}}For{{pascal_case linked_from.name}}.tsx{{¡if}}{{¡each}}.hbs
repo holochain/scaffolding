@@ -44,13 +44,13 @@ const {{pascal_case (plural ../entry_type.name)}}For{{pascal_case linked_from.na
   }, [client, handleSignal]);
 
   if (loading) {
-    return <div>loading...</div>;
+    return <progress />;
   }
 
   return (
     <div>
       {error ? (
-        <span>Error fetching the {{plural ../entry_type.name}}: {error.message}</span>
+        <article>Error fetching the {{plural ../entry_type.name}}: {error.message}</article>
       ) : hashes.length > 0 ? (
         <div>
           {hashes.map((hash, i) => (
@@ -58,7 +58,7 @@ const {{pascal_case (plural ../entry_type.name)}}For{{pascal_case linked_from.na
           ))}
         </div>
       ) : (
-        <span>No {{plural ../entry_type.name}} found for this {{lower_case linked_from.name}}.</span>
+        <article>No {{plural ../entry_type.name}} found for this {{lower_case linked_from.name}}.</article>
       )}
     </div>
   );
