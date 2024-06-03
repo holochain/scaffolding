@@ -1,4 +1,4 @@
-import { Link, HolochainError } from '@holochain/client';
+import { Link, AppSignal, HolochainError } from '@holochain/client';
 import  { FC, useCallback, useState, useEffect, useContext } from 'react';
 
 import {{pascal_case to_referenceable.name}}Detail from './{{pascal_case to_referenceable.name}}Detail';
@@ -31,7 +31,7 @@ const {{pascal_case (plural to_referenceable.name)}}For{{pascal_case from_refere
 		}
   }, [client]);
 
-  const handleSignal = useCallback(async (signal) => {
+  const handleSignal = useCallback(async (signal: AppSignal) => {
     if (signal.zome_name !== '{{coordinator_zome_manifest.name}}') return;
     const payload = signal.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;
     if (payload.type !== 'LinkCreated') return;

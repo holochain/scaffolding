@@ -1,4 +1,4 @@
-import { Link, HolochainError{{#if (eq collection_type.type "ByAuthor")}}, AgentPubKey{{/if}}{{#if (eq referenceable.hash_type "EntryHash")}}, NewEntryAction{{/if}} } from '@holochain/client';
+import { Link, AppSignal, HolochainError{{#if (eq collection_type.type "ByAuthor")}}, AgentPubKey{{/if}}{{#if (eq referenceable.hash_type "EntryHash")}}, NewEntryAction{{/if}} } from '@holochain/client';
 import  { FC, useCallback, useState, useEffect, useContext } from 'react';
 
 import type { {{pascal_case coordinator_zome_manifest.name}}Signal } from './types';
@@ -31,7 +31,7 @@ const {{pascal_case collection_name}}: FC{{#if (eq collection_type.type "ByAutho
 		}
   }, [client{{#if (eq collection_type.type "ByAuthor")}}, author{{/if}}]);
 
-  const handleSignal = useCallback((signal) => {
+  const handleSignal = useCallback((signal: AppSignal) => {
     if (signal.zome_name !== '{{coordinator_zome_manifest.name}}') return;
     const payload = signal.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;
     if (payload.type !== 'EntryCreated') return;
