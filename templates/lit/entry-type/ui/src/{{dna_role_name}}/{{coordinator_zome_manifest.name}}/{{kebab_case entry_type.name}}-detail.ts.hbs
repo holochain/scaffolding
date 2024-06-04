@@ -145,7 +145,7 @@ export class {{pascal_case entry_type.name}}Detail extends LitElement {
         <mwc-circular-progress indeterminate></mwc-circular-progress>
       </div>`,
       complete: (maybeRecord) => this.render{{pascal_case entry_type.name}}(maybeRecord),
-      error: (e: HolochainError) => html`<span>Error fetching the {{lower_case entry_type.name}}: ${e.message}</span>`
+      error: (e: any) => html`<span>Error fetching the {{lower_case entry_type.name}}: ${e.message}</span>`
     });
   }
 }
