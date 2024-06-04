@@ -6,7 +6,7 @@
   "scripts": {
     "start": "vite --clearScreen false --port $UI_PORT",
     "build": "vite build",
-    "package": "npm run build && cd dist && bestzip ../dist.zip *"
+    "package": "npm run build && rimraf dist.zip && cd dist && bestzip ../dist.zip *"
   },
   "dependencies": {
     "@holochain/client": "{{holochain_client_version}}",
