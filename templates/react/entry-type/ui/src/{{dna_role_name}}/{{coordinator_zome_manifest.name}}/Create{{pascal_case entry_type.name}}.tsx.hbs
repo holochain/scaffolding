@@ -17,9 +17,9 @@ const Create{{pascal_case entry_type.name}}: FC<Create{{pascal_case entry_type.n
 {{#each entry_type.fields}}
   {{#if widget }}
     {{#if (not (eq cardinality "vector" ) )}}
-  const [{{camel_case field_name}}, set{{pascal_case field_name}}] = useState<{{> (concat field_type.type "/type")}}>({{> (concat field_type.type "/sample")}});
+  const [{{camel_case field_name}}, set{{pascal_case field_name}}] = useState<{{> (concat field_type.type "/type")}}>({{> (concat field_type.type "/default")}});
     {{else}}
-  const [{{camel_case field_name}}, set{{pascal_case field_name}}] = useState<{{> (concat field_type.type "/type")}}[]>({{> (concat field_type.type "/sample")}});
+  const [{{camel_case field_name}}, set{{pascal_case field_name}}] = useState<{{> (concat field_type.type "/type")}}[]>({{> (concat field_type.type "/default")}});
     {{/if}}
   {{/if}}
 {{/each}}
