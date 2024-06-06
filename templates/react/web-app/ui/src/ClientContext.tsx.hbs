@@ -1,13 +1,13 @@
 import { AppWebsocket, HolochainError, type AppClient } from '@holochain/client';
 import { createContext, FC, useEffect, useRef, useState } from 'react';
 
-export const HolochainContext = createContext<HolochainContextValues>({
+export const ClientContext = createContext<ClientContextValues>({
   client: undefined,
 	error: undefined,
 	loading: true,
 });
 
-const HolochainProvider: FC<HolochainProviderProps> = ({ children }) => {
+const ClientProvider: FC<ClientProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<HolochainError | undefined>();
   const client = useRef<AppClient>();
@@ -35,14 +35,14 @@ const HolochainProvider: FC<HolochainProviderProps> = ({ children }) => {
   );
 };
 
-interface HolochainContextValues {
+interface ClientContextValues {
 	client: AppClient | undefined,
 	error: HolochainError | undefined,
 	loading: boolean,
 }
 
-interface HolochainProviderProps {
+interface ClientProviderProps {
   children: React.ReactNode;
 }
 
-export default HolochainProvider;
+export default ClientProvider;

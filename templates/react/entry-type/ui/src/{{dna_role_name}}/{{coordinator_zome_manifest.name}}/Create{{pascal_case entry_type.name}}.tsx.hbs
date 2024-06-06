@@ -2,7 +2,7 @@ import type { AppClient, Record, EntryHash, AgentPubKey, ActionHash, DnaHash } f
 import { FC, useState, useContext, useEffect } from 'react';
 
 import type { {{pascal_case entry_type.name}}{{#each entry_type.fields}}{{#if (eq field_type.type "Enum")}}, {{field_type.label}}{{/if}}{{/each}} } from './types';
-import { HolochainContext } from '../../contexts/HolochainContext';
+import { ClientContext } from '../../ClientContext';
 {{#uniq_lines}}
   {{#each entry_type.fields}}
     {{#if widget}}
@@ -13,7 +13,7 @@ import { HolochainContext } from '../../contexts/HolochainContext';
 {{/uniq_lines}}
 
 const Create{{pascal_case entry_type.name}}: FC<Create{{pascal_case entry_type.name}}Props> = ({ on{{pascal_case entry_type.name}}Created{{#each entry_type.fields}}{{#if (not widget) }}{{#if (eq cardinality "vector")}}, {{camel_case field_name}}{{else}}, {{camel_case field_name}}{{/if}}{{/if}}{{/each}} }) => {
-  const {client} = useContext(HolochainContext);
+  const {client} = useContext(ClientContext);
 {{#each entry_type.fields}}
   {{#if widget }}
     {{#if (not (eq cardinality "vector" ) )}}

@@ -2,10 +2,10 @@ import { useContext } from 'react';
 
 import './App.css'
 import holochainLogo from './assets/holochainLogo.svg';
-import { HolochainContext } from './contexts/HolochainContext';
+import { ClientContext } from './ClientContext';
 
 const App = () => {
-  const { error, loading } = useContext(HolochainContext)
+  const { error, loading } = useContext(ClientContext);
   return (
     <>
       <div>
@@ -16,7 +16,7 @@ const App = () => {
       <h1>Holochain React hApp</h1>
       <div>
         <div className="card">
-          {loading ? 'connecting...' : (error ? error.message : 'Connected to Conductor API')}
+          {loading ? 'connecting...' : (error ? error.message : 'Client is connected.')}
         </div>
         <p>
           Import scaffolded components into <code>src/App.tsx</code> to use your hApp

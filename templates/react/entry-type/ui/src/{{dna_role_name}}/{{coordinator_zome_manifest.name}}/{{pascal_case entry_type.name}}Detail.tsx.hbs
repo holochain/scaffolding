@@ -13,10 +13,10 @@ import Edit{{pascal_case entry_type.name}} from './Edit{{pascal_case entry_type.
   {{/each}}
 {{/uniq_lines}}
 import type { {{pascal_case entry_type.name}}{{#each entry_type.fields}}{{#if (eq field_type.type "Enum")}}, {{field_type.label}}{{/if}}{{/each}} } from './types';
-import { HolochainContext } from '../../contexts/HolochainContext';
+import { ClientContext } from '../../ClientContext';
 
 const {{pascal_case entry_type.name}}Detail: FC<{{pascal_case entry_type.name}}DetailProps> = ({ {{camel_case entry_type.name}}Hash, on{{pascal_case entry_type.name}}Deleted }) => {
-	const {client} = useContext(HolochainContext)
+	const {client} = useContext(ClientContext);
   const [record, setRecord] = useState<Record | undefined>(undefined);
   const [{{camel_case entry_type.name}}, set{{pascal_case entry_type.name}}] = useState<{{pascal_case entry_type.name}} | undefined>(undefined);
 {{#if crud.update}}

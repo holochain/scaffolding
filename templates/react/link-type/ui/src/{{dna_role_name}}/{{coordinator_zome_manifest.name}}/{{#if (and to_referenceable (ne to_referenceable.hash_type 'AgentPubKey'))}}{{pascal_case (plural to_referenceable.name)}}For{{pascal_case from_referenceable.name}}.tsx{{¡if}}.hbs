@@ -3,10 +3,10 @@ import  { FC, useCallback, useState, useEffect, useContext } from 'react';
 
 import {{pascal_case to_referenceable.name}}Detail from './{{pascal_case to_referenceable.name}}Detail';
 import type { {{pascal_case ../coordinator_zome_manifest.name}}Signal } from './types';
-import { HolochainContext } from '../../contexts/HolochainContext';
+import { ClientContext } from '../../ClientContext';
 
 const {{pascal_case (plural to_referenceable.name)}}For{{pascal_case from_referenceable.name}}: FC<{{pascal_case (plural to_referenceable.name)}}For{{pascal_case from_referenceable.name}}Props > = ({ {{camel_case from_referenceable.singular_arg}} }) => {
-  const {client} = useContext(HolochainContext);
+  const {client} = useContext(ClientContext);
   const [hashes, setHashes] = useState<Uint8Array[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<HolochainError | undefined>();

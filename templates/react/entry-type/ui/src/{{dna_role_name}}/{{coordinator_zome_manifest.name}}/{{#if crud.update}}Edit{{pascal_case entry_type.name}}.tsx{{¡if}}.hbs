@@ -2,7 +2,7 @@ import { Record, HolochainError } from '@holochain/client';
 import { FC, useState, useEffect, useContext, useCallback } from 'react';
 
 import type { {{pascal_case entry_type.name}}{{#each entry_type.fields}}{{#if (eq field_type.type "Enum")}}, {{field_type.label}}{{/if}}{{/each}} } from './types';
-import { HolochainContext } from '../../contexts/HolochainContext';
+import { ClientContext } from '../../ClientContext';
 {{#uniq_lines}}
   {{#each entry_type.fields}}
     {{#if widget}}
@@ -22,7 +22,7 @@ const Edit{{pascal_case entry_type.name}}: FC<Edit{{pascal_case entry_type.name}
 	on{{pascal_case entry_type.name}}UpdateError,
 	onEditCanceled,
 }) => {
-  const {client} = useContext(HolochainContext);
+  const {client} = useContext(ClientContext);
 {{#each entry_type.fields}}
   {{#if widget }}
     {{#if (not (eq cardinality "vector" ) )}}
