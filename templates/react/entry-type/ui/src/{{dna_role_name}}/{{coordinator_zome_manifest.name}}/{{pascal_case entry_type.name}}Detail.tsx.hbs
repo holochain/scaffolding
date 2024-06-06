@@ -104,14 +104,6 @@ const {{pascal_case entry_type.name}}Detail: FC<{{pascal_case entry_type.name}}D
         </div>
       ) : {{/if}}record ? (
         <section>
-          <div>
-{{#if crud.update}}
-            <button onClick={() => setEditing(true)}>edit</button>
-{{/if}}
-{{#if crud.delete}}
-            <button onClick={delete{{pascal_case entry_type.name}}}>delete</button>
-{{/if}}
-          </div>
 {{#each entry_type.fields}}
   {{#if widget}}    
     {{#if (not (eq cardinality "vector") )}}
@@ -124,6 +116,14 @@ const {{pascal_case entry_type.name}}Detail: FC<{{pascal_case entry_type.name}}D
     {{/if}}
   {{/if}}
 {{/each}}
+          <div>
+{{#if crud.update}}
+            <button onClick={() => setEditing(true)}>edit</button>
+{{/if}}
+{{#if crud.delete}}
+            <button onClick={delete{{pascal_case entry_type.name}}}>delete</button>
+{{/if}}
+          </div>
         </section>
       ) : (
         <article>The requested {{camel_case entry_type.name}} was not found.</article>
