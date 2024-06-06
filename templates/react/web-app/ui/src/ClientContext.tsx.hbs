@@ -11,11 +11,11 @@ const IS_HOLO = ['true', '1', 't'].includes(import.meta.env.VITE_APP_IS_HOLO?.to
 export const ClientContext = createContext<ClientContextValues>({
   client: undefined,
   error: undefined,
-  loading: true,
+  loading: false,
 });
 
 const ClientProvider: FC<ClientProviderProps> = ({ children }) => {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<HolochainError | undefined>();
   const holochainClient = useRef<AppClient>();
 {{#if holo_enabled}}
@@ -29,8 +29,14 @@ const ClientProvider: FC<ClientProviderProps> = ({ children }) => {
   };
 
 {{#if holo_enabled}}
+  const signOut = async () => {
+    await holoClient.current.signOut();
+    await holoClient.current.signIn({ cancellable: false });
+  }
+
   useEffect(() => {
     const connectClient = async () => {
+      setLoading(true);
       try {
         if (IS_HOLO) {
           holoClient.current = await WebSdk.connect({
@@ -70,11 +76,8 @@ const ClientProvider: FC<ClientProviderProps> = ({ children }) => {
     <ClientContext.Provider value={value}>
       {children}
 {{#if holo_enabled}}
-    {IS_HOLO && (
-      <>
-        <br />
-        <button onClick={() => holoClient.current?.signOut()}>Sign Out</button>
-      </>
+    {IS_HOLO && holoClient.current && (
+      <button onClick={() => signOut()}>Sign Out</button>
     )}
 {{/if}}
     </ClientContext.Provider>
