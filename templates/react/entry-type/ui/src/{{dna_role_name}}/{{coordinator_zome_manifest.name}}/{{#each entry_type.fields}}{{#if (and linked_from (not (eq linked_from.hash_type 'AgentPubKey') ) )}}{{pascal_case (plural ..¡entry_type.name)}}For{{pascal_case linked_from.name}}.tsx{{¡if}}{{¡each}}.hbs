@@ -5,7 +5,7 @@ import {{pascal_case ../entry_type.name}}Detail from './{{pascal_case ../entry_t
 import type { {{pascal_case ../coordinator_zome_manifest.name}}Signal } from './types';
 import { ClientContext } from '../../ClientContext';
 
-const {{pascal_case (plural ../entry_type.name)}}For{{pascal_case linked_from.name}}: FC<{{pascal_case (plural ../entry_type.name)}}For{{pascal_case linked_from.name}}Props> = ({{{camel_case linked_from.singular_arg}}}) => {
+const {{pascal_case (plural ../entry_type.name)}}For{{pascal_case linked_from.name}}: FC<{{pascal_case (plural ../entry_type.name)}}For{{pascal_case linked_from.name}}Props> = ({ {{camel_case linked_from.singular_arg}} }) => {
   const {client} = useContext(ClientContext);
   const [hashes, setHashes] = useState<Uint8Array[]>([]);
   const [loading, setLoading] = useState(false);
