@@ -3,9 +3,14 @@
   "version": "0.1.0",
   "scripts": {
     "start": "vite --port $UI_PORT --clearScreen false",
-    "build": "vue-tsc --noEmit && vite build",
+    "build": "npm run check && vite build",
+  {{#if holo_enabled}}
+    "build:holo": "VITE_APP_IS_HOLO=true vite build",
+    "package:holo": "npm run build:holo && rimraf dist.zip && cd dist && bestzip ../dist.zip *",
+  {{/if}}
+    "check": "vue-tsc --noEmit",
     "preview": "vite preview",
-    "package": "npm run build && cd dist && bestzip ../dist.zip *"
+    "package": "npm run build && rimraf dist.zip && cd dist && bestzip ../dist.zip *"
   },
   "dependencies": {
     "@holochain/client": "{{holochain_client_version}}",
@@ -29,6 +34,7 @@
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.0.0",
     "bestzip": "^2.2.0",
+    "rimraf": "^3.0.2",
     "typescript": "^4.9.3",
     "vite": "^4.0.4",
     "vite-plugin-checker": "^0.5.1",

@@ -2764,7 +2764,7 @@ dependencies = [
 
 [[package]]
 name = "holochain_scaffolding_cli"
-version = "0.2001.6"
+version = "0.2001.7"
 dependencies = [
  "anyhow",
  "assert_cmd",
