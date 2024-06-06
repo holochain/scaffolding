@@ -1,5 +1,12 @@
 import { AppWebsocket, HolochainError, type AppClient } from '@holochain/client';
+{{#if holo_enabled}}
+import WebSdk from '@holo-host/web-sdk'
+{{/if}}
 import { createContext, FC, useEffect, useRef, useState } from 'react';
+
+{{#if holo_enabled}}
+const IS_HOLO = ['true', '1', 't'].includes(import.meta.env.VITE_APP_IS_HOLO?.toLowerCase());
+{{/if}}
 
 export const ClientContext = createContext<ClientContextValues>({
   client: undefined,
@@ -10,14 +17,30 @@ export const ClientContext = createContext<ClientContextValues>({
 const ClientProvider: FC<ClientProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<HolochainError | undefined>();
-  const client = useRef<AppClient>();
+  const holochainClient = useRef<AppClient>();
+{{#if holo_enabled}}
+  const holoClient = useRef<WebSdk>();
+{{/if}}
   
-  const value = { client: client.current, error, loading };
+  const value = {
+    client: {{#if holo_enabled}}IS_HOLO ? holoClient.current as WebSdk : holochainClient.current as AppClient{{else}}holochainClient.current{{/if}},
+    error,
+    loading
+  };
 
+{{#if holo_enabled}}
   useEffect(() => {
     const connectClient = async () => {
       try {
-        client.current = await AppWebsocket.connect();
+        if (IS_HOLO) {
+          holoClient.current = await WebSdk.connect({
+            chaperoneUrl: import.meta.env.VITE_APP_CHAPERONE_URL,
+            authFormCustomization: { appName: '{{app_name}}' }
+          });
+          (holoClient.current as WebSdk).signUp({ cancellable: false });
+        } else {
+          holochainClient.current = await AppWebsocket.connect();
+        }
       } catch (error) {
 				setError(error as HolochainError)
         console.error('Failed to establish websocket connection:', error);
@@ -27,16 +50,39 @@ const ClientProvider: FC<ClientProviderProps> = ({ children }) => {
     };
     connectClient();
   }, []);
+{{else}}
+  useEffect(() => {
+    const connectClient = async () => {
+      try {
+        holochainClient.current = await AppWebsocket.connect();
+      } catch (error) {
+				setError(error as HolochainError)
+        console.error('Failed to establish websocket connection:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    connectClient();
+  }, []);
+{{/if}}
 
   return (
-    <HolochainContext.Provider value={value}>
+    <ClientContext.Provider value={value}>
       {children}
-    </HolochainContext.Provider>
+{{#if holo_enabled}}
+    {IS_HOLO && (
+      <>
+        <br />
+        <button onClick={() => holoClient.current?.signOut()}>Sign Out</button>
+      </>
+    )}
+{{/if}}
+    </ClientContext.Provider>
   );
 };
 
 interface ClientContextValues {
-	client: AppClient | undefined,
+	client: AppClient{{#if holo_enabled}} | WebSdk{{/if}} | undefined,
 	error: HolochainError | undefined,
 	loading: boolean,
 }
