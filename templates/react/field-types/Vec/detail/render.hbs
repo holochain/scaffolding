@@ -1,6 +1,6 @@
 <div>
   <h4>{{title_case field_name}}</h4>
-  {#each {{variable_to_read}} as el}
-    <span>{{> (concat field_type.type "/" widget "/detail/render") variable_to_read="el"}}</span>
-  {/each}
+  { {{ variable_to_read }}.map((el, i) => (
+    <span i={i}>{{> (concat field_type.type "/" widget "/detail/render") variable_to_read="el"}}</span>
+  ))}
 </div>
