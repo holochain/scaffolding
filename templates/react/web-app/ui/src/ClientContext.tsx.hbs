@@ -10,13 +10,13 @@ const IS_HOLO = ['true', '1', 't'].includes(import.meta.env.VITE_APP_IS_HOLO?.to
 
 export const ClientContext = createContext<ClientContextValues>({
   client: undefined,
-	error: undefined,
-	loading: true,
+  error: undefined,
+  loading: true,
 });
 
 const ClientProvider: FC<ClientProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
-	const [error, setError] = useState<HolochainError | undefined>();
+  const [error, setError] = useState<HolochainError | undefined>();
   const holochainClient = useRef<AppClient>();
 {{#if holo_enabled}}
   const holoClient = useRef<WebSdk>();
@@ -42,7 +42,7 @@ const ClientProvider: FC<ClientProviderProps> = ({ children }) => {
           holochainClient.current = await AppWebsocket.connect();
         }
       } catch (error) {
-				setError(error as HolochainError)
+        setError(error as HolochainError)
         console.error('Failed to establish websocket connection:', error);
       } finally {
         setLoading(false);
@@ -56,7 +56,7 @@ const ClientProvider: FC<ClientProviderProps> = ({ children }) => {
       try {
         holochainClient.current = await AppWebsocket.connect();
       } catch (error) {
-				setError(error as HolochainError)
+        setError(error as HolochainError)
         console.error('Failed to establish websocket connection:', error);
       } finally {
         setLoading(false);
@@ -82,9 +82,9 @@ const ClientProvider: FC<ClientProviderProps> = ({ children }) => {
 };
 
 interface ClientContextValues {
-	client: AppClient{{#if holo_enabled}} | WebSdk{{/if}} | undefined,
-	error: HolochainError | undefined,
-	loading: boolean,
+  client: AppClient{{#if holo_enabled}} | WebSdk{{/if}} | undefined,
+  error: HolochainError | undefined,
+  loading: boolean,
 }
 
 interface ClientProviderProps {

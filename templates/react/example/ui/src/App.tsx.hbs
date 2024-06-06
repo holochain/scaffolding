@@ -8,17 +8,17 @@ import './App.css';
 
 const App = () => {
   const { error, loading } = useContext(HolochainContext);
-	if (loading) {
-		return <progress />;
-	}
-	if (error) {
-		return <article>Error starting app: {error.message}</article>;
-	}
+  if (loading) {
+    return <progress />;
+  }
+  if (error) {
+    return <article>Error starting app: {error.message}</article>;
+  }
   return (
     <div>
-			<h2>Welcome to the Forum hApp</h2>
-			<AllPosts />
-			<CreatePost />
+      <h2>Welcome to the Forum hApp</h2>
+      <AllPosts />
+      <CreatePost />
     </div>
   )
 }

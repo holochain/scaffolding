@@ -12,14 +12,14 @@ const {{pascal_case (plural from_referenceable.name)}}For{{pascal_case to_refere
   const [error, setError] = useState<HolochainError | undefined>();
 
   const fetch{{pascal_case (plural from_referenceable.name)}} = useCallback(async () => {
-		setLoading(true)
+    setLoading(true)
     try {
       const links: Link[] = await client?.callZome({
         cap_secret: null,
-				role_name: '{{dna_role_name}}',
-				zome_name: '{{snake_case coordinator_zome_manifest.name}}',
-				fn_name: 'get_{{snake_case (plural from_referenceable.name)}}_for_{{snake_case to_referenceable.name}}',
-				payload: {{camel_case to_referenceable.singular_arg}},
+        role_name: '{{dna_role_name}}',
+        zome_name: '{{snake_case coordinator_zome_manifest.name}}',
+        fn_name: 'get_{{snake_case (plural from_referenceable.name)}}_for_{{snake_case to_referenceable.name}}',
+        payload: {{camel_case to_referenceable.singular_arg}},
       });
       if (links?.length) {
         setHashes(links.map((l) => l.target));
@@ -28,7 +28,7 @@ const {{pascal_case (plural from_referenceable.name)}}For{{pascal_case to_refere
       setError(e as HolochainError);
     } finally {
       setLoading(false);
-		}
+    }
   }, [client]);
 
   const handleSignal = useCallback(async (signal: AppSignal) => {
@@ -66,7 +66,7 @@ const {{pascal_case (plural from_referenceable.name)}}For{{pascal_case to_refere
 };
 
 interface {{pascal_case (plural from_referenceable.name)}}For{{pascal_case to_referenceable.name}}Props {
-	{{camel_case to_referenceable.singular_arg}}: Uint8Array
+  {{camel_case to_referenceable.singular_arg}}: Uint8Array
 }
 
 export default {{pascal_case (plural from_referenceable.name)}}For{{pascal_case to_referenceable.name}};
