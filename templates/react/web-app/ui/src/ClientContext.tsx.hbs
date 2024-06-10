@@ -59,6 +59,7 @@ const ClientProvider: FC<ClientProviderProps> = ({ children }) => {
 {{else}}
   useEffect(() => {
     const connectClient = async () => {
+      setLoading(true);
       try {
         holochainClient.current = await AppWebsocket.connect();
       } catch (error) {
