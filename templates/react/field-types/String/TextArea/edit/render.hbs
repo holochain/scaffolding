@@ -6,7 +6,7 @@
   value={ {{variable_to_read}} }
 {{/if}}
   onChange={(e) => {
-    set{{pascal_case variable_to_change}}(prevValues => prevValues.map((v, idx) => {
+    set{{pascal_case variable_to_change}}(prevValues => prevValues?.map((v, idx) => {
       if ({{key}} === idx) {
         v = e.target.value;
       }
