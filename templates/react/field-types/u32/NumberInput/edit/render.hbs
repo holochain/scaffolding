@@ -6,6 +6,7 @@
   {{#if variable_to_read}}
   value={ {{variable_to_read}} }
   {{/if}}
+  min="0"
   onChange={(e) => {
     set{{pascal_case variable_to_change}}(prevValues => prevValues.map((v, idx) => {
       if ({{key}} === idx) {
