@@ -127,7 +127,7 @@ export default defineComponent({
         this.$emit('{{kebab_case entry_type.name}}-created', record.signed_action.hashed.hash);
       } catch (e: any) {
         const errorSnackbar = this.$refs['create-error'] as Snackbar;
-        errorSnackbar.labelText = `Error creating the {{lower_case entry_type.name}}: ${e.data}`;
+        errorSnackbar.labelText = `Error creating the {{lower_case entry_type.name}}: ${e.message}`;
         errorSnackbar.show();
       }
     },

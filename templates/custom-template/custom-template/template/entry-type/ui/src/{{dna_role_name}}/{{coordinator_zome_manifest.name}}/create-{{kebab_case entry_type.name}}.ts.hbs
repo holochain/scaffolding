@@ -99,7 +99,7 @@ export class Create{{pascal_case entry_type.name}} extends LitElement {
       }));
     } catch (e: any) {
       const errorSnackbar = this.shadowRoot?.getElementById('create-error') as Snackbar;
-      errorSnackbar.labelText = `Error creating the {{lower_case entry_type.name}}: ${e.data.data}`;
+      errorSnackbar.labelText = `Error creating the {{lower_case entry_type.name}}: ${e.message}`;
       errorSnackbar.show();
     }
   }

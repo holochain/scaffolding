@@ -63,7 +63,7 @@ export class {{pascal_case (plural to_referenceable.name)}}For{{pascal_case from
         <mwc-circular-progress indeterminate></mwc-circular-progress>
       </div>`,
       complete: (links) => this.renderList([...this.signaledHashes, ...links.map(l => l.target)]),
-      error: (e: any) => html`<span>Error fetching the {{lower_case (plural to_referenceable.name)}}: ${e.data.data}.</span>`
+      error: (e: any) => html`<span>Error fetching the {{lower_case (plural to_referenceable.name)}}: ${e.message}.</span>`
     });
   }
 }
