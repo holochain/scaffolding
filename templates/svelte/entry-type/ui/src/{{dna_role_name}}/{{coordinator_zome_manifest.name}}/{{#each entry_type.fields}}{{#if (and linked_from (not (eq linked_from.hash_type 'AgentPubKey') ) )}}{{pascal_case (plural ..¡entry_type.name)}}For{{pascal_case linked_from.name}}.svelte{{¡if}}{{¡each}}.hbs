@@ -1,7 +1,7 @@
 <script lang="ts">
 import { onMount, getContext } from 'svelte';
 import '@material/mwc-circular-progress';
-import type { Link, ActionHash, EntryHash, AppClient, Record, AgentPubKey, NewEntryAction } from '@holochain/client';
+import type { Link, ActionHash, EntryHash, AppClient, Record, AgentPubKey, NewEntryAction, HolochainError } from '@holochain/client';
 import { clientContext } from '../../contexts';
 import type { {{pascal_case ../entry_type.name}}, {{pascal_case ../coordinator_zome_manifest.name}}Signal } from './types';
 import {{pascal_case ../entry_type.name}}Detail from './{{pascal_case ../entry_type.name}}Detail.svelte';
@@ -44,7 +44,7 @@ async function fetch{{pascal_case (plural ../entry_type.name)}}() {
     });
     hashes = links.map(l => l.target);
   } catch (e) {
-    error = e;
+    error = e as HolochainError;
   }
   loading = false;
 }
@@ -56,7 +56,7 @@ async function fetch{{pascal_case (plural ../entry_type.name)}}() {
   <mwc-circular-progress indeterminate></mwc-circular-progress>
 </div>
 {:else if error}
-<span>Error fetching {{lower_case (plural ../entry_type.name)}}: ${error.data.data}.</span>
+<span>Error fetching {{lower_case (plural ../entry_type.name)}}: ${error.message}.</span>
 {:else if hashes.length === 0}
 <span>No {{lower_case (plural ../entry_type.name)}} found for this {{lower_case linked_from.name}}.</span>
 {:else}

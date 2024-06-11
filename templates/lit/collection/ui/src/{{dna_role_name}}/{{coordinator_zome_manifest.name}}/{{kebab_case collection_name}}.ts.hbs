@@ -73,7 +73,7 @@ export class {{pascal_case collection_name}} extends LitElement {
         </div>
       `,
       complete: (links) => this.renderList([...this.signaledHashes, ...links.map(l => l.target)]),
-      error: (e: any) => html`<span>Error fetching the {{lower_case (plural referenceable.name)}}: ${e.data.data}.</span>`
+      error: (e: any) => html`<span>Error fetching the {{lower_case (plural referenceable.name)}}: ${e.message}.</span>`
     });
   }
 }
