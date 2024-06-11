@@ -1,0 +1,87 @@
+import type { AppClient, Record, EntryHash, AgentPubKey, ActionHash, DnaHash } from '@holochain/client';
+import { FC, useState, useContext, useEffect } from 'react';
+
+import type { {{pascal_case entry_type.name}}{{#each entry_type.fields}}{{#if (eq field_type.type "Enum")}}, {{field_type.label}}{{/if}}{{/each}} } from './types';
+import { ClientContext } from '../../ClientContext';
+{{#uniq_lines}}
+  {{#each entry_type.fields}}
+    {{#if widget}}
+{{> (concat field_type.type "/" widget "/edit/imports") }}
+
+    {{/if}}
+  {{/each}}
+{{/uniq_lines}}
+
+const Create{{pascal_case entry_type.name}}: FC<Create{{pascal_case entry_type.name}}Props> = ({ on{{pascal_case entry_type.name}}Created{{#each entry_type.fields}}{{#if (not widget) }}{{#if (eq cardinality "vector")}}, {{camel_case field_name}}{{else}}, {{camel_case field_name}}{{/if}}{{/if}}{{/each}} }) => {
+  const {client} = useContext(ClientContext);
+{{#each entry_type.fields}}
+  {{#if widget }}
+    {{#if (not (eq cardinality "vector" ) )}}
+  const [{{camel_case field_name}}, set{{pascal_case field_name}}] = useState<{{> (concat field_type.type "/type")}}>({{> (concat field_type.type "/default")}});
+    {{else}}
+  const [{{camel_case field_name}}, set{{pascal_case field_name}}] = useState<{{> (concat field_type.type "/type")}}[]>({{> (concat field_type.type "/default")}});
+    {{/if}}
+  {{/if}}
+{{/each}}
+  const [is{{pascal_case entry_type.name}}Valid, setIs{{pascal_case entry_type.name}}Valid] = useState(false);
+
+  const create{{pascal_case entry_type.name}} = async () => {
+    const {{camel_case entry_type.name}}Entry: {{pascal_case entry_type.name}} = { 
+{{#each entry_type.fields}}
+      {{snake_case field_name}}: {{camel_case field_name}}{{#if (eq cardinality "single")}}!{{/if}},
+{{/each}}
+    };
+    try {
+      const record = await client?.callZome({
+        cap_secret: null,
+        role_name: '{{dna_role_name}}',
+        zome_name: '{{coordinator_zome_manifest.name}}',
+        fn_name: 'create_{{snake_case entry_type.name}}',
+        payload: {{camel_case entry_type.name}}Entry,
+      });
+      on{{pascal_case entry_type.name}}Created && on{{pascal_case entry_type.name}}Created(record.signed_action.hashed.hash);
+    } catch (e) {
+      console.error(e)
+    }
+  };
+
+  useEffect(() => {
+    setIs{{pascal_case entry_type.name}}Valid(true{{#each entry_type.fields}}{{#if widget}}{{#if (eq cardinality "single")}} && {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate=(camel_case field_name) }}{{/if}}{{#if (eq cardinality "vector")}} && {{camel_case field_name}}.every(e => {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate="e" }}){{/if}}{{/if}}{{/each}});
+  }, [{{#each entry_type.fields}}{{#if widget}}{{camel_case field_name}}{{#unless @last}}, {{/unless}}{{/if}}{{/each}}]);
+
+  return (
+    <div>
+      <h3>Create {{pascal_case entry_type.name}}</h3>
+{{#each entry_type.fields}}
+  {{#if widget}}
+      <div>
+        {{#if (not (eq cardinality "vector") )}}
+        {{> (concat field_type.type "/" widget "/edit/render") label=(title_case field_name) variable_to_read=(camel_case field_name) variable_to_change=(camel_case field_name) required=(eq cardinality "single") }}
+        {{else}}
+        {{> Vec/edit/render field_name=field_name field_type=field_type widget=widget }}
+        {{/if}}
+      </div>
+
+  {{/if}}
+{{/each}}
+      <button disabled={!is{{pascal_case entry_type.name}}Valid} onClick={() => create{{pascal_case entry_type.name}}()}>
+        Create {{pascal_case entry_type.name}}
+      </button>
+    </div>
+  );
+};
+
+interface Create{{pascal_case entry_type.name}}Props {
+  on{{pascal_case entry_type.name}}Created?: (hash?: Uint8Array) => void,
+{{#each entry_type.fields}}
+  {{#if (not widget) }}
+    {{#if (eq cardinality "vector")}}
+  {{camel_case field_name}}: {{> (concat field_type.type "/type") }}[],
+    {{else}}
+  {{camel_case field_name}}{{#if (eq cardinality "single")}}{{/if}}: {{> (concat field_type.type "/type") }}{{#if (eq cardinality "option")}} | undefined{{/if}},
+    {{/if}}
+  {{/if}}
+{{/each}}
+}
+
+export default Create{{pascal_case entry_type.name}};

@@ -1,0 +1,72 @@
+import { Link, AppSignal, HolochainError } from '@holochain/client';
+import  { FC, useCallback, useState, useEffect, useContext } from 'react';
+
+import {{pascal_case from_referenceable.name}}Detail from './{{pascal_case from_referenceable.name}}Detail';
+import type { {{pascal_case ../coordinator_zome_manifest.name}}Signal } from './types';
+import { ClientContext } from '../../ClientContext';
+
+const {{pascal_case (plural from_referenceable.name)}}For{{pascal_case to_referenceable.name}}: FC<{{pascal_case (plural from_referenceable.name)}}For{{pascal_case to_referenceable.name}}Props> = ({ {{camel_case to_referenceable.singular_arg}} }) => {
+  const {client} = useContext(ClientContext);
+  const [hashes, setHashes] = useState<Uint8Array[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<HolochainError | undefined>();
+
+  const fetch{{pascal_case (plural from_referenceable.name)}} = useCallback(async () => {
+    setLoading(true)
+    try {
+      const links: Link[] = await client?.callZome({
+        cap_secret: null,
+        role_name: '{{dna_role_name}}',
+        zome_name: '{{snake_case coordinator_zome_manifest.name}}',
+        fn_name: 'get_{{snake_case (plural from_referenceable.name)}}_for_{{snake_case to_referenceable.name}}',
+        payload: {{camel_case to_referenceable.singular_arg}},
+      });
+      if (links?.length) {
+        setHashes(links.map((l) => l.target));
+      }
+    } catch (e) {
+      setError(e as HolochainError);
+    } finally {
+      setLoading(false);
+    }
+  }, [client]);
+
+  const handleSignal = useCallback(async (signal: AppSignal) => {
+    if (signal.zome_name !== '{{coordinator_zome_manifest.name}}') return;
+    const payload = signal.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;
+    if (payload.type !== 'LinkCreated') return;
+    if (payload.link_type !== '{{pascal_case bidirectional}}') return;
+    await fetch{{pascal_case (plural from_referenceable.name)}}();
+  }, [fetch{{pascal_case (plural from_referenceable.name)}}]);
+
+  useEffect(() => {
+    fetch{{pascal_case (plural from_referenceable.name)}}();
+    client?.on('signal', handleSignal);
+  }, [client, handleSignal]);
+
+  if (loading) {
+    return <progress />;
+  }
+
+  return (
+    <div>
+      {error ? (
+        <article>Error fetching {{lower_case (plural from_referenceable.name)}}: {error.data.data}.</article>
+      ) : hashes.length > 0 ? (
+        <div>
+          {hashes.map((hash, i) => (
+            <{{pascal_case from_referenceable.name}}Detail key={i} {{camel_case from_referenceable.name}}Hash={hash} />
+          ))}
+        </div>
+      ) : (
+        <article>No {{lower_case (plural from_referenceable.name)}} found for this {{lower_case to_referenceable.name}}.</article>
+      )}
+    </div>
+  );
+};
+
+interface {{pascal_case (plural from_referenceable.name)}}For{{pascal_case to_referenceable.name}}Props {
+  {{camel_case to_referenceable.singular_arg}}: Uint8Array
+}
+
+export default {{pascal_case (plural from_referenceable.name)}}For{{pascal_case to_referenceable.name}};

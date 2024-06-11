@@ -1,0 +1,22 @@
+<label htmlFor="{{label}}">{{label}}</label>
+{{#if (eq cardinality "vector")}}
+
+<input
+  type="text"
+  name="{{label}}"
+{{#if variable_to_read}}
+  value={ {{variable_to_read}} }
+{{/if}}
+  onChange={(e) => {
+    set{{pascal_case variable_to_change}}(prevValues => prevValues?.map((v, idx) => {
+      if ({{key}} === idx) {
+        v = e.target.value;
+      }
+      return v;
+    }))
+  }}
+/>
+{{else}}
+
+<input type="text" name="{{label}}" {{#if variable_to_read}}value={ {{variable_to_read}} }{{/if}} onChange={(e) => set{{pascal_case variable_to_change}}(e.target.value)} />
+{{/if}}
