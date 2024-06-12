@@ -382,7 +382,7 @@ impl EntryDefinition {
                     "export type {label} = {};\n",
                     variants
                         .iter()
-                        .map(|v| format!("'{}'", v))
+                        .map(|v| format!("{{type: '{}'}}", v))
                         .collect::<Vec<_>>()
                         .join(" | ")
                 );
@@ -528,7 +528,7 @@ mod test {
 
         let ts_interface = &other_entry.ts_type_codegen();
 
-        let expected_ts_interface = r#"export type ExampleEnum = 'Variant1' | 'Variant2' | 'Variant3';
+        let expected_ts_interface = r#"export type ExampleEnum = {type: 'Variant1'} | {type: 'Variant2'} | {type: 'Variant3'};
 
 export interface ExampleEntry {
   field_one: string;
