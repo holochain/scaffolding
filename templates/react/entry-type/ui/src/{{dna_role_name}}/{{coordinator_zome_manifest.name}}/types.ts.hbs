@@ -4,22 +4,4 @@
 {{replace previous_file_content "export type EntryTypes =" (concat "export type EntryTypes =\n | ({ type: '" (pascal_case entry_type.name) "'; } & " (pascal_case entry_type.name) ")")}}
 {{/if}}
 
-{{#each entry_type.fields}}
-  {{#if (eq field_type.type "Enum")}}
-export interface {{field_type.label}} {
-  type:  
-    {{#each field_type.variants}}
-    | '{{this}}'
-    {{/each}};
-}
-  {{/if}}
-{{/each}}
-
-export interface {{pascal_case entry_type.name}} { {{#each entry_type.fields}}
-  {{#if (not (eq cardinality "vector" ) )}}
-  {{snake_case field_name}}: {{> (concat field_type.type "/type") }}{{#if (eq cardinality "option")}} | undefined{{/if}};
-  {{else}}
-  {{snake_case field_name}}: Array<{{> (concat field_type.type "/type") }}>;
-  {{/if}}
-  {{/each}}
-}
+{{entry_type_ts_types}}
