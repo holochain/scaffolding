@@ -1,6 +1,5 @@
 <label htmlFor="{{label}}">{{label}}</label>
 {{#if (eq cardinality "vector")}}
-
 <textarea
   name="{{label}}"
 {{#if variable_to_read}}
@@ -20,6 +19,5 @@
 >
 </textarea>
 {{else}}
-
 <textarea name="{{label}}" {{#if variable_to_read}}value={ {{variable_to_read}} }{{/if}} onChange={(e) => set{{pascal_case variable_to_change}}(e.target.value)} {{#if required}}required{{/if}}></textarea>
 {{/if}}

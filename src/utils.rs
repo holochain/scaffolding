@@ -4,6 +4,8 @@ use std::{ffi::OsString, path::PathBuf};
 use anyhow::Context;
 use convert_case::{Case, Casing};
 use dialoguer::{theme::ColorfulTheme, Input, Select, Validator};
+use dprint_plugin_typescript::configuration::ConfigurationBuilder;
+use dprint_plugin_typescript::format_text;
 use regex::Regex;
 
 use crate::error::{ScaffoldError, ScaffoldResult};
@@ -208,4 +210,36 @@ fn add_newlines(input: &str) -> String {
         formatted_code.push('\n');
     }
     formatted_code
+}
+
+/// Try to progrmatically format javascript/ typescript/ jsx / tsx code
+/// svelte and vue code not supported, therefore will not be formatted
+pub fn format_code<P: Into<PathBuf>>(code: &str, file_name: P) -> ScaffoldResult<String> {
+    let file_path: PathBuf = file_name.into();
+
+    if let Some(extension) = file_path.extension().and_then(|ext| ext.to_str()) {
+        match extension {
+            "ts" | "js" | "tsx" | "jsx" => {
+                let config = ConfigurationBuilder::new()
+                    .line_width(120)
+                    .indent_width(2)
+                    .build();
+
+                let formatted_code = format_text(&file_path, code.to_owned(), &config)
+                    .map_err(|e| {
+                        println!("{e:?}");
+                        e
+                    })
+                    .context("Failed to format text")?;
+
+                if let Some(value) = formatted_code {
+                    return Ok(value);
+                }
+            }
+            // TODO: Implement formatters for svelte and vue files
+            _ => {}
+        }
+    }
+
+    Ok(code.to_owned())
 }
