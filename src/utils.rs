@@ -193,7 +193,7 @@ fn add_newlines(input: &str) -> String {
 
         // Add newlines between non #[hdk_extern] annoteted functions
         let functon_regex =
-            Regex::new(r"(?m)^\s*(pub\s+fn|fn)\s+\w+\s*\(").expect("functon_regex is ivalid");
+            Regex::new(r"(?m)^\s*(pub\s+fn|fn)\s+\w+\s*\(").expect("functon_regex is invalid");
         if (functon_regex.is_match(line.trim()) && i > 0)
             && (!lines[i - 1].starts_with("#[hdk_extern"))
         {
