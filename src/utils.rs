@@ -243,7 +243,7 @@ pub fn format_code<P: Into<PathBuf>>(code: &str, file_name: P) -> ScaffoldResult
                     indent_width: 2,
                 };
                 let formatted_code =
-                    dprint_plugin_vue::format(&file_path, &code, &config, |path, raw, _| {
+                    dprint_plugin_vue::format(&file_path, code, &config, |path, raw, _| {
                         let extension = path
                             .extension()
                             .context("Failed to get path extension")?
