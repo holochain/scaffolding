@@ -5,7 +5,7 @@ use anyhow::Context;
 use convert_case::{Case, Casing};
 use dialoguer::{theme::ColorfulTheme, Input, Select, Validator};
 use dprint_plugin_typescript::configuration::ConfigurationBuilder;
-use dprint_plugin_typescript::format_text;
+use dprint_plugin_vue::configuration::Configuration;
 use regex::Regex;
 
 use crate::error::{ScaffoldError, ScaffoldResult};
@@ -213,33 +213,155 @@ fn add_newlines(input: &str) -> String {
 }
 
 /// Try to progrmatically format javascript/ typescript/ jsx / tsx code
-/// svelte and vue code not supported, therefore will not be formatted
+/// TODO: Vue: only the <script> portion is formatted, the rest of the sfc blocks are not
+/// TODO: Svelte: formatting is not supported
 pub fn format_code<P: Into<PathBuf>>(code: &str, file_name: P) -> ScaffoldResult<String> {
     let file_path: PathBuf = file_name.into();
+    let ts_format_config = ConfigurationBuilder::new()
+        .line_width(120)
+        .indent_width(2)
+        .build();
 
     if let Some(extension) = file_path.extension().and_then(|ext| ext.to_str()) {
         match extension {
             "ts" | "js" | "tsx" | "jsx" => {
-                let config = ConfigurationBuilder::new()
-                    .line_width(120)
-                    .indent_width(2)
-                    .build();
-
-                let formatted_code = format_text(&file_path, code.to_owned(), &config)
-                    .map_err(|e| {
-                        println!("{e:?}");
-                        e
-                    })
-                    .context("Failed to format text")?;
+                let formatted_code = dprint_plugin_typescript::format_text(
+                    &file_path,
+                    code.to_owned(),
+                    &ts_format_config,
+                )
+                .context("Failed to format text")?;
 
                 if let Some(value) = formatted_code {
                     return Ok(value);
                 }
             }
-            // TODO: Implement formatters for svelte and vue files
+            "vue" => {
+                let config = Configuration {
+                    indent_template: true,
+                    use_tabs: false,
+                    indent_width: 2,
+                };
+                let formatted_code =
+                    dprint_plugin_vue::format(&file_path, &code, &config, |path, raw, _| {
+                        let extension = path
+                            .extension()
+                            .context("Failed to get path extension")?
+                            .to_str()
+                            .context("Failed to convert extension to string")?;
+                        match extension {
+                            "ts" => Ok(dprint_plugin_typescript::format_text(
+                                path,
+                                raw,
+                                &ts_format_config,
+                            )
+                            .context("Failed to format")?),
+                            // TODO: Implement formatting for the remaining vue sfc blocks
+                            _ => Ok(Some(raw)),
+                        }
+                    })?;
+                return Ok(formatted_code);
+            }
             _ => {}
         }
     }
 
     Ok(code.to_owned())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_format_typescript_code() {
+        let code = "function foo() { console.log('Hello, world!'); }";
+        let file_name = "test.ts";
+        let result = format_code(code, file_name);
+        assert!(result.is_ok());
+        let formatted_code = result.unwrap();
+        assert_eq!(
+            formatted_code,
+            "function foo() {\n  console.log(\"Hello, world!\");\n}\n"
+        );
+    }
+
+    #[test]
+    fn test_format_javascript_code() {
+        let code = "function foo() { console.log('Hello, world!'); }";
+        let file_name = "test.js";
+        let result = format_code(code, file_name);
+        assert!(result.is_ok());
+        let formatted_code = result.unwrap();
+        assert_eq!(
+            formatted_code,
+            "function foo() {\n  console.log(\"Hello, world!\");\n}\n"
+        );
+    }
+
+    #[test]
+    fn test_format_tsx_code() {
+        let code = "const foo = () => (<div>Hello, world!</div>);";
+        let file_name = "test.tsx";
+        let result = format_code(code, file_name);
+        assert!(result.is_ok());
+        let formatted_code = result.unwrap();
+        assert_eq!(
+            formatted_code,
+            "const foo = () => <div>Hello, world!</div>;\n"
+        );
+    }
+
+    #[test]
+    fn test_format_jsx_code() {
+        let code = "const foo = () => (<div>Hello, world!</div>);";
+        let file_name = "test.jsx";
+        let result = format_code(code, file_name);
+        assert!(result.is_ok());
+        let formatted_code = result.unwrap();
+        assert_eq!(
+            formatted_code,
+            "const foo = () => <div>Hello, world!</div>;\n"
+        );
+    }
+
+    #[test]
+    fn test_format_vue_code() {
+        let code = r#"<template><div>{{ message }}</div></template>
+<script lang="ts">
+export default {
+  data() {
+    return {message: 'Hello, world!'}
+  }
+};
+</script>
+"#;
+        let file_name = "test.vue";
+        let result = format_code(code, file_name);
+        assert!(result.is_ok());
+        let formatted_code = result.unwrap();
+        let expected_output = r#"<template>
+  <div>{{ message }}</div>
+</template>
+
+<script lang="ts">
+export default {
+  data() {
+    return { message: "Hello, world!" };
+  },
+};
+</script>
+"#;
+        assert_eq!(formatted_code, expected_output);
+    }
+
+    #[test]
+    fn test_format_svelte() {
+        let code = "function foo() { console.log('Hello, world!'); }";
+        let file_name = "test.svelte";
+        let result = format_code(code, file_name);
+        assert!(result.is_ok());
+        let formatted_code = result.unwrap();
+        assert_eq!(formatted_code, code); // should return code as is
+    }
 }
