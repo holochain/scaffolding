@@ -469,9 +469,9 @@ mod test {
 
         let post_ts_interface = &post_entry.ts_type_codegen();
         let expected_post_ts_interface = r#"export interface Post {
-            title: string;
-            content: string;
-          }"#;
+  title: string;
+  content: string;
+}"#;
         assert_eq!(expected_post_ts_interface, post_ts_interface);
 
         let comment_ts_interface = &comment_entry.ts_type_codegen();
