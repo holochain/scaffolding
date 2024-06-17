@@ -5,7 +5,7 @@ use std::{ffi::OsString, path::PathBuf, str::FromStr};
 
 use crate::{
     error::{ScaffoldError, ScaffoldResult},
-    file_tree::{dir_exists, dir_to_file_tree, file_exists, FileTree},
+    file_tree::{dir_exists, file_exists, template_dirs_to_file_tree, FileTree},
 };
 
 static LIT_TEMPLATES: Dir<'static> =
@@ -47,7 +47,7 @@ impl UiFramework {
     }
 
     pub fn template_filetree(&self) -> ScaffoldResult<FileTree> {
-        let dir = match self {
+        let ui_framework_dir = match self {
             UiFramework::Lit => &LIT_TEMPLATES,
             UiFramework::Vanilla => &VANILLA_TEMPLATES,
             UiFramework::Svelte => &SVELTE_TEMPLATES,
@@ -55,14 +55,8 @@ impl UiFramework {
             UiFramework::React => &REACT_TEMPLATES,
             UiFramework::Headless => &HEADLESS_TEMPLATE,
         };
-        dir_to_file_tree(dir)
+        template_dirs_to_file_tree(ui_framework_dir, &GENERIC_TEMPLATES)
     }
-
-    pub fn generic_templates_filetree(&self) -> ScaffoldResult<FileTree> {
-        dir_to_file_tree(&GENERIC_TEMPLATES)
-    }
-
-    pub fn get_common_templates_file_tree(&self) {}
 
     pub fn choose() -> ScaffoldResult<UiFramework> {
         let frameworks = [

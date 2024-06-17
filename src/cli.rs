@@ -1,7 +1,5 @@
 use crate::error::{ScaffoldError, ScaffoldResult};
-use crate::file_tree::{
-    build_file_tree, file_content, load_directory_into_memory, map_file, FileTree,
-};
+use crate::file_tree::{build_file_tree, file_content, load_directory_into_memory, FileTree};
 use crate::scaffold::app::cargo::exec_metadata;
 use crate::scaffold::app::nix::setup_nix_developer_environment;
 use crate::scaffold::app::AppFileTree;
@@ -33,8 +31,6 @@ use colored::Colorize;
 use convert_case::Case;
 use dialoguer::theme::ColorfulTheme;
 use dialoguer::Input;
-use serde::{Deserialize, Serialize};
-use serde_json::Value;
 use std::ffi::OsString;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
