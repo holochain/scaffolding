@@ -14,11 +14,12 @@ use super::{
 };
 
 #[derive(Serialize, Debug)]
-pub struct ScaffoldEntryTypeData {
+pub struct ScaffoldEntryTypeData<'a> {
     pub app_name: String,
     pub dna_role_name: String,
     pub coordinator_zome_manifest: ZomeManifest,
     pub entry_type: EntryDefinition,
+    pub entry_type_ts_types: &'a str,
     pub crud: Crud,
     pub link_from_original_to_each_update: bool,
 }
@@ -32,6 +33,7 @@ pub fn scaffold_entry_type_templates(
     dna_role_name: &str,
     coordinator_zome: &ZomeManifest,
     entry_type: &EntryDefinition,
+    entry_type_ts_types: &str,
     crud: &Crud,
     link_from_original_to_each_update: bool,
     no_ui: bool,
@@ -41,6 +43,7 @@ pub fn scaffold_entry_type_templates(
         dna_role_name: dna_role_name.to_owned(),
         coordinator_zome_manifest: coordinator_zome.clone(),
         entry_type: entry_type.clone(),
+        entry_type_ts_types,
         crud: crud.clone(),
         link_from_original_to_each_update,
     };
