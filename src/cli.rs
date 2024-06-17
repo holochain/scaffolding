@@ -871,7 +871,7 @@ Add new collections for that entry type with:
                     "The value {} passed with `--template` does not match the template the web-app was scaffolded with: {}",
                     template.italic(),
                     config.template.italic(),
-                )).into());
+                )));
             }
             (Some(config), _) if !Path::new(&config.template).exists() => Some(&config.template),
             (_, t) => t.as_ref(),
@@ -890,7 +890,7 @@ Add new collections for that entry type with:
                         load_directory_into_memory(&templates_dir)?,
                     ))
                 }
-                path => Err(ScaffoldError::PathNotFound(PathBuf::from(path)).into()),
+                path => Err(ScaffoldError::PathNotFound(PathBuf::from(path))),
             },
             None => {
                 let ui_framework = match &self.command {
