@@ -6,6 +6,7 @@ use crate::scaffold::app::cargo::exec_metadata;
 use crate::scaffold::app::nix::setup_nix_developer_environment;
 use crate::scaffold::app::AppFileTree;
 use crate::scaffold::collection::{scaffold_collection, CollectionType};
+use crate::scaffold::config::ScaffoldConfig;
 use crate::scaffold::dna::{scaffold_dna, DnaFileTree};
 use crate::scaffold::entry_type::crud::{parse_crud, Crud};
 use crate::scaffold::entry_type::definitions::{
@@ -215,52 +216,9 @@ pub enum HcScaffoldCommand {
 impl HcScaffold {
     pub async fn run(self) -> anyhow::Result<()> {
         let current_dir = std::env::current_dir()?;
-        let template_config = get_template_config(&current_dir)?;
-        let template = match (&template_config, &self.template) {
-            (Some(config), Some(template)) if &config.template != template => {
-                return Err(ScaffoldError::InvalidArguments(format!(
-                "The value {} passed with `--template` does not match the template the web-app was scaffolded with: {}",
-                template.italic(),
-                config.template.italic(),
-            )).into())
-            }
-            // Only read from config if the template is inbuilt and not a path
-            (Some(config), _)  if !Path::new(&config.template).exists() => Some(&config.template),
-            (_, t) => t.as_ref(),
-        };
-
-        // Given a template either passed via the --template flag or retreived via the hcScaffold config,
-        // get the template file tree and the ui framework name or custom template path
-        let (template, template_file_tree) = match template {
-            Some(template) => match template.to_lowercase().as_str() {
-                "lit" | "svelte" | "vanilla" | "vue" | "react" | "headless" => {
-                    let ui_framework = UiFramework::from_str(template)?;
-                    (ui_framework.name(), ui_framework.template_filetree()?)
-                }
-                custom_template_path if Path::new(custom_template_path).exists() => {
-                    let templates_dir = current_dir.join(custom_template_path);
-                    (
-                        custom_template_path.to_string(),
-                        load_directory_into_memory(&templates_dir)?,
-                    )
-                }
-                path => return Err(ScaffoldError::PathNotFound(PathBuf::from(path)).into()),
-            },
-            None => {
-                let ui_framework = match self.command {
-                    HcScaffoldCommand::WebApp { .. } => UiFramework::choose()?,
-                    HcScaffoldCommand::Example { ref example, .. } => match example {
-                        Some(Example::HelloWorld) => UiFramework::Vanilla,
-                        _ => UiFramework::choose_non_vanilla()?,
-                    },
-                    _ => {
-                        let file_tree = load_directory_into_memory(&current_dir)?;
-                        UiFramework::try_from(&file_tree)?
-                    }
-                };
-                (ui_framework.name(), ui_framework.template_filetree()?)
-            }
-        };
+        let scaffold_config = ScaffoldConfig::from_package_json_path(&current_dir)?;
+        let (template, template_file_tree) =
+            self.get_template(&current_dir, scaffold_config.as_ref())?;
 
         match self.command {
             HcScaffoldCommand::WebApp {
@@ -313,7 +271,7 @@ impl HcScaffold {
                     holo_enabled,
                 )?;
 
-                let file_tree = write_scaffold_config(file_tree, &template)?;
+                let file_tree = ScaffoldConfig::write_to_package_json(file_tree, &template)?;
 
                 build_file_tree(dir! {&name => file_tree}, ".")?;
 
@@ -883,6 +841,8 @@ Add new collections for that entry type with:
                     next_instructions,
                 } = scaffold_example(file_tree, &template_file_tree, &example)?;
 
+                let file_tree = ScaffoldConfig::write_to_package_json(file_tree, &template)?;
+
                 build_file_tree(file_tree, &app_dir)?;
 
                 // set up nix
@@ -902,6 +862,55 @@ Add new collections for that entry type with:
         }
 
         Ok(())
+    }
+
+    fn get_template(
+        &self,
+        current_dir: &Path,
+        scaffold_config: Option<&ScaffoldConfig>,
+    ) -> Result<(String, FileTree), ScaffoldError> {
+        let template = match (scaffold_config, &self.template) {
+            (Some(config), Some(template)) if &config.template != template => {
+                return Err(ScaffoldError::InvalidArguments(format!(
+                    "The value {} passed with `--template` does not match the template the web-app was scaffolded with: {}",
+                    template.italic(),
+                    config.template.italic(),
+                )).into());
+            }
+            (Some(config), _) if !Path::new(&config.template).exists() => Some(&config.template),
+            (_, t) => t.as_ref(),
+        };
+
+        match template {
+            Some(template) => match template.to_lowercase().as_str() {
+                "lit" | "svelte" | "vanilla" | "vue" | "react" | "headless" => {
+                    let ui_framework = UiFramework::from_str(template)?;
+                    Ok((ui_framework.name(), ui_framework.template_filetree()?))
+                }
+                custom_template_path if Path::new(custom_template_path).exists() => {
+                    let templates_dir = current_dir.join(custom_template_path);
+                    Ok((
+                        custom_template_path.to_string(),
+                        load_directory_into_memory(&templates_dir)?,
+                    ))
+                }
+                path => Err(ScaffoldError::PathNotFound(PathBuf::from(path)).into()),
+            },
+            None => {
+                let ui_framework = match &self.command {
+                    HcScaffoldCommand::WebApp { .. } => UiFramework::choose()?,
+                    HcScaffoldCommand::Example { ref example, .. } => match example {
+                        Some(Example::HelloWorld) => UiFramework::Vanilla,
+                        _ => UiFramework::choose_non_vanilla()?,
+                    },
+                    _ => {
+                        let file_tree = load_directory_into_memory(current_dir)?;
+                        UiFramework::try_from(&file_tree)?
+                    }
+                };
+                Ok((ui_framework.name(), ui_framework.template_filetree()?))
+            }
+        }
     }
 }
 
@@ -990,57 +999,4 @@ fn setup_git_environment(path: &Path) -> ScaffoldResult<()> {
         println!("Warning: error running \"git add .\"");
     }
     Ok(())
-}
-
-/// Write hcScaffold config to the hApp's root `package.json` file
-fn write_scaffold_config(
-    mut web_app_file_tree: FileTree,
-    template: &str,
-) -> ScaffoldResult<FileTree> {
-    if Path::new(template).exists() {
-        return Ok(web_app_file_tree);
-    }
-    let config = TemplateConfig {
-        template: template.to_owned(),
-    };
-    let package_json_path = PathBuf::from("package.json");
-    map_file(&mut web_app_file_tree, &package_json_path, |c| {
-        let original_content = c.clone();
-        let json = serde_json::from_str::<Value>(&c)?;
-        let json = match json {
-            Value::Object(mut o) => {
-                o.insert(
-                    "hcScaffold".to_owned(),
-                    serde_json::to_value(&config).unwrap(),
-                );
-                o
-            }
-            _ => return Ok(original_content),
-        };
-        let json = serde_json::to_value(json)?;
-        let json = serde_json::to_string_pretty(&json)?;
-        Ok(json)
-    })?;
-    Ok(web_app_file_tree)
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-pub struct TemplateConfig {
-    template: String,
-}
-
-/// Gets template config written to the root `package.json` file when the hApp was
-/// originally scaffolded
-fn get_template_config(current_dir: &Path) -> ScaffoldResult<Option<TemplateConfig>> {
-    let package_json_path = current_dir.join("package.json");
-    let Ok(file) = fs::read_to_string(package_json_path) else {
-        return Ok(None);
-    };
-    let file = serde_json::from_str::<Value>(&file)?;
-    if let Some(config) = file.get("hcScaffold") {
-        let config = serde_json::from_value(config.to_owned())?;
-        Ok(Some(config))
-    } else {
-        Ok(None)
-    }
 }
