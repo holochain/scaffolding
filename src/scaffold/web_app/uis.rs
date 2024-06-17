@@ -8,12 +8,19 @@ use crate::{
     file_tree::{dir_exists, dir_to_file_tree, file_exists, FileTree},
 };
 
-static LIT_TEMPLATES: Dir<'static> = include_dir!("$CARGO_MANIFEST_DIR/templates/lit");
-static SVELTE_TEMPLATES: Dir<'static> = include_dir!("$CARGO_MANIFEST_DIR/templates/svelte");
-static VUE_TEMPLATES: Dir<'static> = include_dir!("$CARGO_MANIFEST_DIR/templates/vue");
-static VANILLA_TEMPLATES: Dir<'static> = include_dir!("$CARGO_MANIFEST_DIR/templates/vanilla");
-static REACT_TEMPLATES: Dir<'static> = include_dir!("$CARGO_MANIFEST_DIR/templates/react");
+static LIT_TEMPLATES: Dir<'static> =
+    include_dir!("$CARGO_MANIFEST_DIR/templates/ui-frameworks/lit");
+static SVELTE_TEMPLATES: Dir<'static> =
+    include_dir!("$CARGO_MANIFEST_DIR/templates/ui-frameworks/svelte");
+static VUE_TEMPLATES: Dir<'static> =
+    include_dir!("$CARGO_MANIFEST_DIR/templates/ui-frameworks/vue");
+static VANILLA_TEMPLATES: Dir<'static> =
+    include_dir!("$CARGO_MANIFEST_DIR/templates/ui-frameworks/vanilla");
+static REACT_TEMPLATES: Dir<'static> =
+    include_dir!("$CARGO_MANIFEST_DIR/templates/ui-frameworks/react");
+
 static HEADLESS_TEMPLATE: Dir<'static> = include_dir!("$CARGO_MANIFEST_DIR/templates/headless");
+static GENERIC_TEMPLATES: Dir<'static> = include_dir!("$CARGO_MANIFEST_DIR/templates/generic");
 
 #[derive(Debug, Clone)]
 pub enum UiFramework {
@@ -50,6 +57,12 @@ impl UiFramework {
         };
         dir_to_file_tree(dir)
     }
+
+    pub fn generic_templates_filetree(&self) -> ScaffoldResult<FileTree> {
+        dir_to_file_tree(&GENERIC_TEMPLATES)
+    }
+
+    pub fn get_common_templates_file_tree(&self) {}
 
     pub fn choose() -> ScaffoldResult<UiFramework> {
         let frameworks = [
