@@ -10,7 +10,7 @@ use crate::{
         coordinator::scaffold_coordinator_zome_templates,
         integrity::scaffold_integrity_zome_templates, ScaffoldedTemplate,
     },
-    versions::{hdi_version, hdk_version},
+    versions,
 };
 use build_fs_tree::{dir, file};
 use holochain_types::prelude::{DnaManifest, ZomeManifest};
@@ -332,15 +332,18 @@ pub fn add_common_zome_dependencies_to_workspace_cargo(
     let file_tree = add_workspace_external_dependency(
         file_tree,
         &"hdi".to_string(),
-        &format!("={}", hdi_version()),
+        &format!("={}", versions::HDI_VERSION),
     )?;
     let file_tree = add_workspace_external_dependency(
         file_tree,
         &"hdk".to_string(),
-        &format!("={}", hdk_version()),
+        &format!("={}", versions::HDK_VERSION),
     )?;
-    let file_tree =
-        add_workspace_external_dependency(file_tree, &"serde".to_string(), &"=1.0.166".to_string())?;
+    let file_tree = add_workspace_external_dependency(
+        file_tree,
+        &"serde".to_string(),
+        &"=1.0.166".to_string(),
+    )?;
 
     Ok(file_tree)
 }

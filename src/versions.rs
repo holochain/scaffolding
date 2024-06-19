@@ -1,31 +1,20 @@
-pub fn tryorama_version() -> String {
-    String::from("^0.15.4")
-}
+/// npm: https://www.npmjs.com/package/@holochain/tryorama
+pub const TRYORAMA_VERSION: &str = "^0.15.4";
 
-pub fn holochain_client_version() -> String {
-    String::from("^0.16.11")
-}
+/// npm: https://www.npmjs.com/package/@holochain/client
+pub const HOLOCHAIN_CLIENT_VERSION: &str = "^0.16.11";
 
-pub fn hc_spin_version() -> String {
-    String::from("^0.200.12")
-}
+/// npm: https://www.npmjs.com/package/@holochain/hc-spin
+pub const HC_SPIN_VERSION: &str = "^0.200.15";
 
-pub fn web_sdk_version() -> String {
-    String::from("^0.6.10-prerelease")
-}
+/// npm: https://www.npmjs.com/package/@holo-host/web-sdk
+pub const WEB_SDK_VERSION: &str = "^0.6.19-prerelease";
 
-pub fn hdi_version() -> String {
-    holochain::HDI_VERSION.to_string()
-}
+pub const HDI_VERSION: &str = holochain::HDI_VERSION;
 
-pub fn hdk_version() -> String {
-    holochain::HDK_VERSION.to_string()
-}
+pub const HDK_VERSION: &str = holochain::HDK_VERSION;
 
-pub fn holochain_version() -> String {
-    holochain::HOLOCHAIN_VERSION.to_string()
-}
+pub const HOLOCHAIN_VERSION: &str = holochain::HOLOCHAIN_VERSION;
 
-pub fn holochain_nix_version() -> String {
-    String::from("0_2")
-}
+/// https://github.com/holochain/holochain/tree/develop/versions
+pub const HOLOCHAIN_NIX_VERSION: &str = "0_2";

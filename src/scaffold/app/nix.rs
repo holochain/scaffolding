@@ -7,10 +7,10 @@ use std::process::{Command, Stdio};
 
 use crate::error::{ScaffoldError, ScaffoldResult};
 use crate::file_tree::*;
-use crate::versions::holochain_nix_version;
+use crate::versions;
 
 pub fn flake_nix(holo_enabled: bool) -> FileTree {
-    let holochain_nix_version = holochain_nix_version();
+    let holochain_nix_version = versions::HOLOCHAIN_NIX_VERSION;
 
     let holo_inputs = holo_enabled
         .then_some(
