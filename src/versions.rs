@@ -8,7 +8,7 @@ pub const HOLOCHAIN_CLIENT_VERSION: &str = "^0.16.11";
 pub const HC_SPIN_VERSION: &str = "^0.200.15";
 
 /// npm: https://www.npmjs.com/package/@holo-host/web-sdk
-pub const WEB_SDK_VERSION: &str = "^0.6.10-prerelease";
+pub const WEB_SDK_VERSION: &str = "^0.6.19-prerelease";
 
 pub const HDI_VERSION: &str = holochain::HDI_VERSION;
 
