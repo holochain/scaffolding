@@ -245,12 +245,12 @@ test('create and delete {{pascal_case entry_type.name}}', async () => {
     assert.ok(oldestDeleteFor{{pascal_case entry_type.name}});
         
     // Bob gets the deletions for {{pascal_case entry_type.name}}
-    const deletesFor{{title_case entry_type.name}}: SignedActionHashed[] = await bob.cells[0].callZome({
+    const deletesFor{{pascal_case entry_type.name}}: SignedActionHashed[] = await bob.cells[0].callZome({
       zome_name: "{{coordinator_zome_manifest.name}}",
       fn_name: "get_all_deletes_for_{{snake_case entry_type.name}}",
       payload: record.signed_action.hashed.hash,
     });
-    assert.equal(deletesFor{{title_case entry_type.name}}.length, 1);
+    assert.equal(deletesFor{{pascal_case entry_type.name}}.length, 1);
 
   {{#each entry_type.fields}}
     {{#if linked_from}}
