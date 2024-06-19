@@ -1,0 +1,1 @@
+{ {{#each field_type.variants}}{{#unless @last}} {{../variable_to_read}}.type === '{{pascal_case this}}' ?{{/unless}} `{{title_case this}}`{{#unless @last}} :{{/unless}} {{/each}} }

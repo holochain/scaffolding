@@ -2,7 +2,7 @@
 import { createEventDispatcher, onMount, getContext } from 'svelte';
 import '@material/mwc-circular-progress';
 import { decode } from '@msgpack/msgpack';
-import type { Record, ActionHash, AppClient, EntryHash, AgentPubKey, DnaHash } from '@holochain/client';
+import type { Record, ActionHash, AppClient, EntryHash, AgentPubKey, DnaHash, HolochainError } from '@holochain/client';
 import { clientContext } from '../../contexts';
 import type { {{pascal_case entry_type.name}}{{#each entry_type.fields}}{{#if (eq field_type.type "Enum")}}, {{field_type.label}}{{/if}}{{/each}} } from './types';
 import '@material/mwc-circular-progress';
@@ -65,7 +65,7 @@ async function fetch{{pascal_case entry_type.name}}() {
       {{camel_case entry_type.name}} = decode((record.entry as any).Present.entry) as {{pascal_case entry_type.name}};
     }
   } catch (e) {
-    error = e;
+    error = e as HolochainError;
   }
 
   loading = false;
@@ -83,7 +83,7 @@ async function delete{{pascal_case entry_type.name}}() {
     });
     dispatch('{{kebab_case entry_type.name}}-deleted', { {{camel_case entry_type.name}}Hash: {{camel_case entry_type.name}}Hash });
   } catch (e: any) {
-    errorSnackbar.labelText = `Error deleting the {{lower_case entry_type.name}}: ${e.data.data}`;
+    errorSnackbar.labelText = `Error deleting the {{lower_case entry_type.name}}: ${e.message}`;
     errorSnackbar.show();
   }
 }
@@ -100,7 +100,7 @@ async function delete{{pascal_case entry_type.name}}() {
   <mwc-circular-progress indeterminate></mwc-circular-progress>
 </div>
 {:else if error}
-<span>Error fetching the {{lower_case entry_type.name}}: {error.data.data}</span>
+<span>Error fetching the {{lower_case entry_type.name}}: {error.message}</span>
 {{#if crud.update}}
 {:else if editing}
 <Edit{{pascal_case entry_type.name}}

@@ -112,6 +112,24 @@ impl FieldType {
         }
     }
 
+    pub fn ts_type(&self) -> &str {
+        use FieldType::*;
+
+        match self {
+            Bool => "boolean",
+            String => "string",
+            U32 => "number",
+            I32 => "number",
+            F32 => "number",
+            Timestamp => "number",
+            AgentPubKey => "AgentPubKey",
+            ActionHash => "ActionHash",
+            EntryHash => "EntryHash",
+            DnaHash => "DnaHash",
+            Enum { label, .. } => label,
+        }
+    }
+
     // Define a non-primitive rust type for this widget
     pub fn rust_type_definition(&self) -> Option<TokenStream> {
         match self {
@@ -350,5 +368,175 @@ impl EntryDefinition {
 
     pub fn camel_case_name(&self) -> String {
         self.name.to_case(Case::Camel)
+    }
+
+    /// Generate entry definition as typescript interface
+    pub fn ts_type_codegen(&self) -> String {
+        let mut ts_interface = format!("export interface {} {{\n", &self.pascal_case_name());
+        let mut ts_enums = String::new();
+
+        for field in &self.fields {
+            let ts_type = field.field_type.ts_type();
+            if let FieldType::Enum { label, variants } = &field.field_type {
+                let enum_definition = format!(
+                    "export type {label} = {};\n",
+                    variants
+                        .iter()
+                        .map(|v| format!("{{type: '{}'}}", v))
+                        .collect::<Vec<_>>()
+                        .join(" | ")
+                );
+                ts_enums.push_str(&enum_definition);
+            }
+            let ts_field = match field.cardinality {
+                Cardinality::Single => {
+                    format!("  {}: {};", &field.field_name.to_case(Case::Snake), ts_type)
+                }
+                Cardinality::Option => format!(
+                    "  {}: {} | undefined;",
+                    &field.field_name.to_case(Case::Snake),
+                    ts_type
+                ),
+                Cardinality::Vector => {
+                    format!(
+                        "  {}: Array<{}>;",
+                        &field.field_name.to_case(Case::Snake),
+                        ts_type
+                    )
+                }
+            };
+            ts_interface.push_str(&ts_field);
+            ts_interface.push('\n');
+        }
+        ts_interface.push('}');
+        ts_enums
+            .is_empty()
+            .then_some(ts_interface.clone())
+            .unwrap_or(format!("{ts_enums}\n{}", ts_interface.clone()))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_entry_def_ts_codegen_with_primitive_fields() {
+        let post_entry = EntryDefinition {
+            name: "post".to_string(),
+            fields: vec![
+                FieldDefinition {
+                    field_name: "title".to_string(),
+                    field_type: FieldType::String,
+                    widget: Some("TextField".to_string()),
+                    cardinality: Cardinality::Single,
+                    linked_from: None,
+                },
+                FieldDefinition {
+                    field_name: "content".to_string(),
+                    field_type: FieldType::String,
+                    widget: Some("TextArea".to_string()),
+                    cardinality: Cardinality::Single,
+                    linked_from: None,
+                },
+            ],
+            reference_entry_hash: false,
+        };
+
+        let comment_entry = EntryDefinition {
+            name: "post".to_string(),
+            fields: vec![
+                FieldDefinition {
+                    field_name: "comment".to_string(),
+                    field_type: FieldType::String,
+                    widget: Some("TextArea".to_string()),
+                    cardinality: Cardinality::Single,
+                    linked_from: None,
+                },
+                FieldDefinition {
+                    field_name: "post_hash".to_string(),
+                    field_type: FieldType::ActionHash,
+                    widget: None,
+                    cardinality: Cardinality::Single,
+                    linked_from: Some(Referenceable::EntryType(EntryTypeReference {
+                        entry_type: post_entry.name.to_string(),
+                        reference_entry_hash: false,
+                    })),
+                },
+            ],
+            reference_entry_hash: false,
+        };
+
+        let post_ts_interface = &post_entry.ts_type_codegen();
+        let expected_post_ts_interface = r#"export interface Post {
+  title: string;
+  content: string;
+}"#;
+        assert_eq!(expected_post_ts_interface, post_ts_interface);
+
+        let comment_ts_interface = &comment_entry.ts_type_codegen();
+        let expected_comment_ts_inteface = r#"export interface Post {
+  comment: string;
+  post_hash: ActionHash;
+}"#;
+        assert_eq!(expected_comment_ts_inteface, comment_ts_interface)
+    }
+
+    #[test]
+    fn test_entry_def_ts_codegen_with_enums_arrays_arrays_and_options() {
+        let other_entry = EntryDefinition {
+            name: "example_entry".to_string(),
+            fields: vec![
+                FieldDefinition {
+                    field_name: "field_one".to_string(),
+                    field_type: FieldType::String,
+                    widget: None,
+                    cardinality: Cardinality::Single,
+                    linked_from: None,
+                },
+                FieldDefinition {
+                    field_name: "field_two".to_string(),
+                    field_type: FieldType::U32,
+                    widget: None,
+                    cardinality: Cardinality::Option,
+                    linked_from: None,
+                },
+                FieldDefinition {
+                    field_name: "field_three".to_string(),
+                    field_type: FieldType::Bool,
+                    widget: None,
+                    cardinality: Cardinality::Vector,
+                    linked_from: None,
+                },
+                FieldDefinition {
+                    field_name: "enum_field".to_string(),
+                    field_type: FieldType::Enum {
+                        label: "ExampleEnum".to_string(),
+                        variants: vec![
+                            "Variant1".to_string(),
+                            "Variant2".to_string(),
+                            "Variant3".to_string(),
+                        ],
+                    },
+                    widget: None,
+                    cardinality: Cardinality::Single,
+                    linked_from: None,
+                },
+            ],
+            reference_entry_hash: false,
+        };
+
+        let ts_interface = &other_entry.ts_type_codegen();
+
+        let expected_ts_interface = r#"export type ExampleEnum = {type: 'Variant1'} | {type: 'Variant2'} | {type: 'Variant3'};
+
+export interface ExampleEntry {
+  field_one: string;
+  field_two: number | undefined;
+  field_three: Array<boolean>;
+  enum_field: ExampleEnum;
+}"#;
+
+        assert_eq!(ts_interface, expected_ts_interface);
     }
 }

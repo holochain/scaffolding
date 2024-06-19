@@ -45,7 +45,7 @@ use structopt::StructOpt;
 pub struct HcScaffold {
     #[structopt(short, long)]
     /// The template to use for the scaffold command
-    /// Can either be an option from the built-in templates: "vanilla", "vue", "lit", "svelte", "headless"
+    /// Can either be an option from the built-in templates: "vanilla", "vue", "lit", "svelte", "react", "headless"
     /// Or a path to a custom template
     template: Option<String>,
 
@@ -233,7 +233,7 @@ impl HcScaffold {
         // get the template file tree and the ui framework name or custom template path
         let (template, template_file_tree) = match template {
             Some(template) => match template.to_lowercase().as_str() {
-                "lit" | "svelte" | "vanilla" | "vue" | "headless" => {
+                "lit" | "svelte" | "vanilla" | "vue" | "react" | "headless" => {
                     let ui_framework = UiFramework::from_str(template)?;
                     (ui_framework.name(), ui_framework.template_filetree()?)
                 }
@@ -938,11 +938,7 @@ impl HcScaffoldTemplate {
 
         match self {
             HcScaffoldTemplate::Clone { .. } => {
-                println!(
-                    r#"Template initialized to folder {:?}
-"#,
-                    target_template
-                );
+                println!(r#"Template initialized to folder {:?} "#, target_template);
             }
         }
         Ok(())

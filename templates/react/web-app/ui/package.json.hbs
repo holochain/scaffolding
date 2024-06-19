@@ -1,0 +1,31 @@
+{
+  "name": "ui",
+  "version": "0.1.0",
+  "scripts": {
+    "start": "vite --clearScreen false --port $UI_PORT",
+    "build": "vite build",
+{{#if holo_enabled}}
+    "build:holo": "VITE_APP_IS_HOLO=true vite build",
+    "package:holo": "npm run build:holo && rimraf dist.zip && cd dist && bestzip ../dist.zip *",
+{{/if}}
+    "package": "npm run build && rimraf dist.zip && cd dist && bestzip ../dist.zip *"
+  },
+  "dependencies": {
+    "@holochain/client": "{{holochain_client_version}}",
+{{#if holo_enabled}}
+    "@holo-host/web-sdk": "{{web_sdk_version}}",
+{{/if}}
+    "@msgpack/msgpack": "^2.8.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.66",
+    "@types/react-dom": "^18.2.22",
+    "@vitejs/plugin-react": "^4.2.1",
+    "bestzip": "^2.2.1",
+    "typescript": "^5.2.2",
+    "vite": "^5.2.0"
+  },
+  "type": "module"
+}

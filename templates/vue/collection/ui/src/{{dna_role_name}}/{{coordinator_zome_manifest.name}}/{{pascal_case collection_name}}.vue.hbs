@@ -4,7 +4,7 @@
   </div>
 
   <div v-else style="display: flex; flex-direction: column">
-    <span v-if="error">Error fetching the {{lower_case (plural referenceable.name)}}: {{{{raw}}}} {{error.data}}.{{{{/raw}}}}</span>
+    <span v-if="error">Error fetching the {{lower_case (plural referenceable.name)}}: {{{{raw}}}} {{error.message}}.{{{{/raw}}}}</span>
     <div v-else-if="hashes && hashes.length > 0" style="margin-bottom: 8px">
       <{{pascal_case referenceable.name}}Detail 
         v-for="(hash, i) in hashes" 
@@ -22,7 +22,7 @@
 <script lang="ts">
 import { defineComponent, inject, toRaw, ComputedRef } from 'vue';
 import { decode } from '@msgpack/msgpack';
-import { AppClient, NewEntryAction, Link, Record, AgentPubKey, EntryHash, ActionHash } from '@holochain/client';
+import { AppClient, NewEntryAction, Link, Record, AgentPubKey, EntryHash, ActionHash, HolochainError } from '@holochain/client';
 import '@material/mwc-circular-progress';
 import {{pascal_case referenceable.name}}Detail from './{{pascal_case referenceable.name}}Detail.vue';
 import { {{pascal_case coordinator_zome_manifest.name}}Signal } from './types';
@@ -77,7 +77,7 @@ export default defineComponent({
         });
         this.hashes = links.map(l => l.target);
       } catch (e) {
-        this.error = e;
+        this.error = e as HolochainError;
       }
       this.loading = false;
     }

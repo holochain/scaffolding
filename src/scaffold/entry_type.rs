@@ -133,6 +133,7 @@ pub fn scaffold_entry_type(
         fields,
         reference_entry_hash,
     };
+    let entry_def_ts_types = entry_def.ts_type_codegen();
 
     let integrity_zome_name = zome_file_tree.zome_manifest.name.0.to_string();
 
@@ -217,6 +218,7 @@ pub fn scaffold_entry_type(
         &dna_manifest.name(),
         &coordinator_zome,
         &entry_def,
+        &entry_def_ts_types,
         &crud,
         link_from_original_to_each_update,
         no_ui,

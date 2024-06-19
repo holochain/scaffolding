@@ -1,0 +1,140 @@
+import { Record, HolochainError } from '@holochain/client';
+import { decode } from '@msgpack/msgpack';
+import  { FC, useState, useEffect, useContext, useCallback } from 'react';
+
+{{#if crud.update}}
+import Edit{{pascal_case entry_type.name}} from './Edit{{pascal_case entry_type.name}}'; 
+{{/if}}
+{{#uniq_lines}}
+  {{#each entry_type.fields}}
+    {{#if widget}}
+{{> (concat field_type.type "/" widget "/detail/imports") }}
+    {{/if}}
+  {{/each}}
+{{/uniq_lines}}
+import type { {{pascal_case entry_type.name}}{{#each entry_type.fields}}{{#if (eq field_type.type "Enum")}}, {{field_type.label}}{{/if}}{{/each}} } from './types';
+import { ClientContext } from '../../ClientContext';
+
+const {{pascal_case entry_type.name}}Detail: FC<{{pascal_case entry_type.name}}DetailProps> = ({ {{camel_case entry_type.name}}Hash, on{{pascal_case entry_type.name}}Deleted }) => {
+  const {client} = useContext(ClientContext);
+  const [record, setRecord] = useState<Record | undefined>(undefined);
+  const [{{camel_case entry_type.name}}, set{{pascal_case entry_type.name}}] = useState<{{pascal_case entry_type.name}} | undefined>(undefined);
+{{#if crud.update}}
+  const [editing, setEditing] = useState(false);
+{{/if}}
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<HolochainError | undefined>()
+
+  const fetch{{pascal_case entry_type.name}} = useCallback(async () => {
+    setLoading(true);
+    setRecord(undefined);
+    try {
+      const result = await client?.callZome({
+        cap_secret: null,
+        role_name: '{{dna_role_name}}',
+        zome_name: '{{coordinator_zome_manifest.name}}',
+        fn_name: '{{#if crud.update}}get_latest_{{snake_case entry_type.name}}{{else}}get_{{snake_case entry_type.name}}{{/if}}',
+        payload: {{camel_case entry_type.name}}Hash,
+      });
+      setRecord(result);
+      setLoading(false);
+    } catch (e) {
+      setError(e as HolochainError)
+    } finally {
+      setLoading(false)
+    }
+  }, [client, {{camel_case entry_type.name}}Hash]);
+
+{{#if crud.delete}}
+  const delete{{pascal_case entry_type.name}} = async () => {
+    setLoading(true)
+    try {
+      await client?.callZome({
+        cap_secret: null,
+        role_name: '{{dna_role_name}}',
+        zome_name: '{{coordinator_zome_manifest.name}}',
+        fn_name: 'delete_{{snake_case entry_type.name}}',
+        payload: {{camel_case entry_type.name}}Hash,
+      });
+      on{{pascal_case entry_type.name}}Deleted && on{{pascal_case entry_type.name}}Deleted({{camel_case entry_type.name}}Hash)
+    } catch (e) {
+      setError(e as HolochainError)
+    } finally {
+      setLoading(false)
+    }
+  };
+{{/if}}
+
+  useEffect(() => {
+    if (!{{camel_case entry_type.name}}Hash) {
+      throw new Error(`The {{camel_case entry_type.name}}Hash prop is required for this component`);
+    }
+    fetch{{pascal_case entry_type.name}}();
+  }, [fetch{{pascal_case entry_type.name}}, {{camel_case entry_type.name}}Hash]);
+
+  useEffect(() => {
+    if (!record) return
+    set{{pascal_case entry_type.name}}(decode((record.entry as any).Present.entry) as {{pascal_case entry_type.name}});
+  }, [record]);
+
+  if (loading) {
+    return <progress />
+  }
+  
+  if (error) {
+    return <article>Error: {error.message}</article>
+  }
+  
+  return (
+    <div>
+      { {{#if crud.update}}editing ? (
+        <div>
+          <Edit{{pascal_case entry_type.name}}
+{{#if link_from_original_to_each_update}}
+            original{{pascal_case entry_type.name}}Hash={ {{camel_case entry_type.name}}Hash }
+{{/if}}
+            currentRecord={record}
+            current{{pascal_case entry_type.name}}={ {{camel_case entry_type.name}} }
+            on{{pascal_case entry_type.name}}Updated={async () => {
+              setEditing(false);
+              await fetch{{pascal_case entry_type.name}}();
+            }}
+            onEditCanceled={() => setEditing(false)}
+          />
+        </div>
+      ) : {{/if}}record ? (
+        <section>
+{{#each entry_type.fields}}
+  {{#if widget}}    
+    {{#if (not (eq cardinality "vector") )}}
+          <div>
+            <span><strong>{{title_case field_name}}: </strong></span>
+            <span>{{> (concat field_type.type "/" widget "/detail/render") variable_to_read=(concat (camel_case ../entry_type.name) "?." (snake_case field_name) ) }}</span>
+          </div>
+    {{else}}
+  {{> Vec/detail/render variable_to_read=(concat (camel_case ../entry_type.name) "?." (snake_case field_name) ) field_name=field_name field_type=field_type widget=widget }}
+    {{/if}}
+  {{/if}}
+{{/each}}
+          <div>
+{{#if crud.update}}
+            <button onClick={() => setEditing(true)}>edit</button>
+{{/if}}
+{{#if crud.delete}}
+            <button onClick={delete{{pascal_case entry_type.name}}}>delete</button>
+{{/if}}
+          </div>
+        </section>
+      ) : (
+        <article>The requested {{camel_case entry_type.name}} was not found.</article>
+      )}
+    </div>
+  );
+};
+
+interface {{pascal_case entry_type.name}}DetailProps {
+  {{camel_case entry_type.name}}Hash: Uint8Array
+  on{{pascal_case entry_type.name}}Deleted?: ({{camel_case entry_type.name}}Hash: Uint8Array) => void
+}
+
+export default {{pascal_case entry_type.name}}Detail;

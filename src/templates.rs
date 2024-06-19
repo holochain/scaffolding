@@ -9,6 +9,7 @@ use crate::error::ScaffoldResult;
 use crate::file_tree::{
     file_content, find_files, flatten_file_tree, unflatten_file_tree, FileTree,
 };
+use crate::utils::format_code;
 
 pub mod helpers;
 
@@ -167,9 +168,9 @@ pub fn render_template_file_tree<T: Serialize>(
 
                     for (i, f) in files_to_create.into_iter().enumerate() {
                         let target_path = PathBuf::from(path_prefix.clone()).join(f);
+                        let formatted_contents = format_code(&new_contents_split[i], &target_path)?;
 
-                        transformed_templates
-                            .insert(target_path, Some(new_contents_split[i].clone()));
+                        transformed_templates.insert(target_path, Some(formatted_contents));
                     }
                 }
             } else if if_regex.is_match(path.to_str().unwrap()) {
@@ -191,7 +192,9 @@ pub fn render_template_file_tree<T: Serialize>(
                         &contents,
                         &value,
                     )?;
-                    transformed_templates.insert(target_path, Some(new_contents));
+                    let formatted_contents = format_code(&new_contents, file_name)?;
+
+                    transformed_templates.insert(target_path, Some(formatted_contents));
                 }
             } else if let Some(e) = path.extension() {
                 if e == "hbs" {
@@ -205,8 +208,9 @@ pub fn render_template_file_tree<T: Serialize>(
                         &contents,
                         &value,
                     )?;
+                    let formatted_contents = format_code(&new_contents, &target_path)?;
 
-                    transformed_templates.insert(target_path, Some(new_contents));
+                    transformed_templates.insert(target_path, Some(formatted_contents));
                 }
             }
         } else {

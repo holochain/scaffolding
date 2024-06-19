@@ -1,7 +1,7 @@
 <script lang="ts">
 import { onMount, getContext } from 'svelte';
 import '@material/mwc-circular-progress';
-import type { Record, EntryHash, ActionHash, AgentPubKey, AppClient, NewEntryAction } from '@holochain/client';
+import type { Record, EntryHash, ActionHash, AgentPubKey, AppClient, NewEntryAction, HolochainError } from '@holochain/client';
 import { clientContext } from '../../contexts';
 import {{pascal_case to_referenceable.name}}Detail from './{{pascal_case to_referenceable.name}}Detail.svelte';
 import type { {{pascal_case coordinator_zome_manifest.name}}Signal } from './types';
@@ -32,7 +32,7 @@ onMount(async () => {
     });
     hashes = links.map(l => l.target);
   } catch (e) {
-    error = e;
+    error = e as HolochainError;
   }
   loading = false;
 
@@ -53,7 +53,7 @@ onMount(async () => {
   <mwc-circular-progress indeterminate></mwc-circular-progress>
 </div>
 {:else if error}
-<span>Error fetching {{lower_case (plural to_referenceable.name)}}: {error.data.data}.</span>
+<span>Error fetching {{lower_case (plural to_referenceable.name)}}: {error.message}.</span>
 {:else if hashes.length === 0}
 <span>No {{lower_case (plural to_referenceable.name)}} found for this {{lower_case from_referenceable.name}}.</span>
 {:else}

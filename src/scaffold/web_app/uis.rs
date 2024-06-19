@@ -12,6 +12,7 @@ static LIT_TEMPLATES: Dir<'static> = include_dir!("$CARGO_MANIFEST_DIR/templates
 static SVELTE_TEMPLATES: Dir<'static> = include_dir!("$CARGO_MANIFEST_DIR/templates/svelte");
 static VUE_TEMPLATES: Dir<'static> = include_dir!("$CARGO_MANIFEST_DIR/templates/vue");
 static VANILLA_TEMPLATES: Dir<'static> = include_dir!("$CARGO_MANIFEST_DIR/templates/vanilla");
+static REACT_TEMPLATES: Dir<'static> = include_dir!("$CARGO_MANIFEST_DIR/templates/react");
 static HEADLESS_TEMPLATE: Dir<'static> = include_dir!("$CARGO_MANIFEST_DIR/templates/headless");
 
 #[derive(Debug, Clone)]
@@ -20,6 +21,7 @@ pub enum UiFramework {
     Lit,
     Svelte,
     Vue,
+    React,
     Headless,
 }
 
@@ -31,6 +33,7 @@ impl UiFramework {
             UiFramework::Lit => "lit",
             UiFramework::Svelte => "svelte",
             UiFramework::Vue => "vue",
+            UiFramework::React => "react",
             UiFramework::Headless => "headless",
         };
         name.to_string()
@@ -42,6 +45,7 @@ impl UiFramework {
             UiFramework::Vanilla => &VANILLA_TEMPLATES,
             UiFramework::Svelte => &SVELTE_TEMPLATES,
             UiFramework::Vue => &VUE_TEMPLATES,
+            UiFramework::React => &REACT_TEMPLATES,
             UiFramework::Headless => &HEADLESS_TEMPLATE,
         };
         dir_to_file_tree(dir)
@@ -52,6 +56,7 @@ impl UiFramework {
             UiFramework::Lit,
             UiFramework::Svelte,
             UiFramework::Vue,
+            UiFramework::React,
             UiFramework::Vanilla,
             UiFramework::Headless,
         ];
@@ -64,7 +69,12 @@ impl UiFramework {
     }
 
     pub fn choose_non_vanilla() -> ScaffoldResult<UiFramework> {
-        let frameworks = [UiFramework::Lit, UiFramework::Svelte, UiFramework::Vue];
+        let frameworks = [
+            UiFramework::Lit,
+            UiFramework::Svelte,
+            UiFramework::React,
+            UiFramework::Vue,
+        ];
         let selection = Select::with_theme(&ColorfulTheme::default())
             .with_prompt("Choose UI framework: (Use arrow-keys. Return to submit)")
             .default(0)
@@ -98,6 +108,8 @@ impl TryFrom<&FileTree> for UiFramework {
                 return Ok(UiFramework::Svelte);
             } else if ui_package_json.contains("vue") {
                 return Ok(UiFramework::Vue);
+            } else if ui_package_json.contains("react") {
+                return Ok(UiFramework::React);
             } else if !dir_exists(app_file_tree, &PathBuf::from("ui/src")) {
                 return Ok(UiFramework::Vanilla);
             }
@@ -112,6 +124,7 @@ impl std::fmt::Display for UiFramework {
             UiFramework::Vanilla => "vanilla".yellow(),
             UiFramework::Lit => "lit".bright_blue(),
             UiFramework::Svelte => "svelte".bright_red(),
+            UiFramework::React => "react".cyan(),
             UiFramework::Vue => "vue".green(),
             UiFramework::Headless => "headless (no ui)".italic(),
         };
@@ -127,6 +140,7 @@ impl FromStr for UiFramework {
             "vanilla" => Ok(UiFramework::Vanilla),
             "svelte" => Ok(UiFramework::Svelte),
             "vue" => Ok(UiFramework::Vue),
+            "react" => Ok(UiFramework::React),
             "lit" => Ok(UiFramework::Lit),
             "headless" => Ok(UiFramework::Headless),
             value => Err(ScaffoldError::MalformedTemplate(format!(
