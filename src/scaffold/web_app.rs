@@ -14,6 +14,7 @@ use super::app::{
     nix::flake_nix,
 };
 
+pub mod package_manager;
 pub mod uis;
 
 fn web_app_skeleton(
