@@ -10,6 +10,7 @@ use crate::{
 
 #[derive(Debug, Default, Clone, Copy, Eq, PartialEq)]
 pub enum PackageManager {
+    Bun,
     #[default]
     Npm,
     Pnpm,
@@ -19,6 +20,7 @@ pub enum PackageManager {
 impl PackageManager {
     pub fn choose() -> ScaffoldResult<PackageManager> {
         let managers = [
+            PackageManager::Bun,
             PackageManager::Npm,
             PackageManager::Yarn,
             PackageManager::Pnpm,
@@ -41,14 +43,16 @@ impl PackageManager {
 
     pub fn install_script(&self) -> String {
         match self {
-            PackageManager::Npm => format!("npm install"),
-            PackageManager::Pnpm => format!("pnpm add"),
-            PackageManager::Yarn => format!("yarn add"),
+            PackageManager::Bun => "bun install".to_string(),
+            PackageManager::Npm => "npm install".to_string(),
+            PackageManager::Pnpm => "pnpm add".to_string(),
+            PackageManager::Yarn => "yarn add".to_string(),
         }
     }
 
     pub fn run_script(&self, script: &str) -> String {
         match self {
+            PackageManager::Bun => format!("bun run {script}"),
             PackageManager::Npm => format!("npm run {script}"),
             PackageManager::Pnpm => format!("pnpm run {script}"),
             PackageManager::Yarn => format!("yarn {script}"),
@@ -57,9 +61,10 @@ impl PackageManager {
 
     pub fn run_workspace_script(&self, workspace: &str, script: &str) -> String {
         match self {
+            PackageManager::Bun => format!("bun run --filter {workspace} {script}"),
             PackageManager::Npm => format!("npm run {script} --workspace {workspace}"),
             PackageManager::Yarn => format!("yarn workspace {workspace} {script}"),
-            PackageManager::Pnpm => format!("pnpm run {script} --filter {workspace}"),
+            PackageManager::Pnpm => format!("pnpm --filter {workspace} {script}"),
         }
     }
 }
@@ -67,8 +72,9 @@ impl PackageManager {
 impl std::fmt::Display for PackageManager {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let str = match self {
+            PackageManager::Bun => "bun".truecolor(139, 69, 19),
             PackageManager::Npm => "npm".bright_red(),
-            PackageManager::Pnpm => "pnpm".red().on_yellow(),
+            PackageManager::Pnpm => "pnpm".red().yellow(),
             PackageManager::Yarn => "yarn".cyan(),
         };
         write!(f, "{str}")
@@ -80,6 +86,7 @@ impl std::str::FromStr for PackageManager {
 
     fn from_str(s: &str) -> ScaffoldResult<PackageManager> {
         match s.to_ascii_lowercase().as_str() {
+            "bun" => Ok(PackageManager::Bun),
             "npm" => Ok(PackageManager::Npm),
             "pnpm" => Ok(PackageManager::Pnpm),
             "yarn" => Ok(PackageManager::Yarn),
@@ -94,16 +101,19 @@ impl TryFrom<&FileTree> for PackageManager {
     type Error = ScaffoldError;
 
     fn try_from(app_file_tree: &FileTree) -> ScaffoldResult<PackageManager> {
+        let bun_lockfile = Path::new("bun.lockb");
         let npm_lockfile = Path::new("package-lock.json");
         let yarn_lockfile = Path::new("yarn.lock");
         let pnpm_lockfile = Path::new("pnpm-lock.yaml");
 
-        if PackageManager::lockfile_exists(app_file_tree, &npm_lockfile) {
+        if PackageManager::lockfile_exists(app_file_tree, bun_lockfile) {
+            Ok(PackageManager::Bun)
+        } else if PackageManager::lockfile_exists(app_file_tree, npm_lockfile) {
             Ok(PackageManager::Npm)
-        } else if PackageManager::lockfile_exists(app_file_tree, &yarn_lockfile) {
-            Ok(PackageManager::Yarn)
-        } else if PackageManager::lockfile_exists(app_file_tree, &pnpm_lockfile) {
+        } else if PackageManager::lockfile_exists(app_file_tree, pnpm_lockfile) {
             Ok(PackageManager::Pnpm)
+        } else if PackageManager::lockfile_exists(app_file_tree, yarn_lockfile) {
+            Ok(PackageManager::Yarn)
         } else {
             PackageManager::choose()
         }
@@ -125,6 +135,13 @@ mod tests {
             lockfile => file!(""),
             "dnas" => dir! {},
         }
+    }
+
+    #[test]
+    fn test_try_from_file_tree_bun() {
+        let app_file_tree = setup_file_tree_with_lockfile("bun.lockb");
+        let package_manager = PackageManager::try_from(&app_file_tree).unwrap();
+        assert_eq!(package_manager, PackageManager::Bun);
     }
 
     #[test]
