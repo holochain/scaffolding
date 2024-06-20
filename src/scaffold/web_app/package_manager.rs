@@ -8,7 +8,7 @@ use crate::{
     file_tree::FileTree,
 };
 
-#[derive(Debug, Default, Clone, Copy)]
+#[derive(Debug, Default, Clone, Copy, Eq, PartialEq)]
 pub enum PackageManager {
     #[default]
     Npm,
@@ -107,5 +107,44 @@ impl TryFrom<&FileTree> for PackageManager {
         } else {
             PackageManager::choose()
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use build_fs_tree::{dir, file};
+
+    use super::*;
+
+    fn setup_file_tree_with_lockfile(lockfile: &str) -> FileTree {
+        dir! {
+            ".gitignore" => file!(""),
+            "workdir" => dir!{},
+            "Cargo.toml" => file!(""),
+            "package.json" => file!(""),
+            lockfile => file!(""),
+            "dnas" => dir! {},
+        }
+    }
+
+    #[test]
+    fn test_try_from_file_tree_npm() {
+        let app_file_tree = setup_file_tree_with_lockfile("package-lock.json");
+        let package_manager = PackageManager::try_from(&app_file_tree).unwrap();
+        assert_eq!(package_manager, PackageManager::Npm);
+    }
+
+    #[test]
+    fn test_try_from_file_tree_yarn() {
+        let app_file_tree = setup_file_tree_with_lockfile("yarn.lock");
+        let package_manager = PackageManager::try_from(&app_file_tree).unwrap();
+        assert_eq!(package_manager, PackageManager::Yarn);
+    }
+
+    #[test]
+    fn test_try_from_file_tree_pnpm() {
+        let app_file_tree = setup_file_tree_with_lockfile("pnpm-lock.yaml");
+        let package_manager = PackageManager::try_from(&app_file_tree).unwrap();
+        assert_eq!(package_manager, PackageManager::Pnpm);
     }
 }
