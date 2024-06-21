@@ -5,15 +5,22 @@ use std::{ffi::OsString, path::PathBuf, str::FromStr};
 
 use crate::{
     error::{ScaffoldError, ScaffoldResult},
-    file_tree::{dir_exists, dir_to_file_tree, file_exists, FileTree},
+    file_tree::{dir_exists, file_exists, template_dirs_to_file_tree, FileTree},
 };
 
-static LIT_TEMPLATES: Dir<'static> = include_dir!("$CARGO_MANIFEST_DIR/templates/lit");
-static SVELTE_TEMPLATES: Dir<'static> = include_dir!("$CARGO_MANIFEST_DIR/templates/svelte");
-static VUE_TEMPLATES: Dir<'static> = include_dir!("$CARGO_MANIFEST_DIR/templates/vue");
-static VANILLA_TEMPLATES: Dir<'static> = include_dir!("$CARGO_MANIFEST_DIR/templates/vanilla");
-static REACT_TEMPLATES: Dir<'static> = include_dir!("$CARGO_MANIFEST_DIR/templates/react");
+static LIT_TEMPLATES: Dir<'static> =
+    include_dir!("$CARGO_MANIFEST_DIR/templates/ui-frameworks/lit");
+static SVELTE_TEMPLATES: Dir<'static> =
+    include_dir!("$CARGO_MANIFEST_DIR/templates/ui-frameworks/svelte");
+static VUE_TEMPLATES: Dir<'static> =
+    include_dir!("$CARGO_MANIFEST_DIR/templates/ui-frameworks/vue");
+static VANILLA_TEMPLATES: Dir<'static> =
+    include_dir!("$CARGO_MANIFEST_DIR/templates/ui-frameworks/vanilla");
+static REACT_TEMPLATES: Dir<'static> =
+    include_dir!("$CARGO_MANIFEST_DIR/templates/ui-frameworks/react");
+
 static HEADLESS_TEMPLATE: Dir<'static> = include_dir!("$CARGO_MANIFEST_DIR/templates/headless");
+static GENERIC_TEMPLATES: Dir<'static> = include_dir!("$CARGO_MANIFEST_DIR/templates/generic");
 
 #[derive(Debug, Clone)]
 pub enum UiFramework {
@@ -40,7 +47,7 @@ impl UiFramework {
     }
 
     pub fn template_filetree(&self) -> ScaffoldResult<FileTree> {
-        let dir = match self {
+        let ui_framework_dir = match self {
             UiFramework::Lit => &LIT_TEMPLATES,
             UiFramework::Vanilla => &VANILLA_TEMPLATES,
             UiFramework::Svelte => &SVELTE_TEMPLATES,
@@ -48,7 +55,7 @@ impl UiFramework {
             UiFramework::React => &REACT_TEMPLATES,
             UiFramework::Headless => &HEADLESS_TEMPLATE,
         };
-        dir_to_file_tree(dir)
+        template_dirs_to_file_tree(ui_framework_dir, &GENERIC_TEMPLATES)
     }
 
     pub fn choose() -> ScaffoldResult<UiFramework> {

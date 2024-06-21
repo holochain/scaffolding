@@ -305,9 +305,12 @@ pub fn create_dir_all(file_tree: &mut FileTree, path: &Path) -> ScaffoldResult<(
     Ok(())
 }
 
-pub fn dir_to_file_tree(dir: &Dir<'_>) -> ScaffoldResult<FileTree> {
-    let flattened = walk_dir(dir);
-
+pub fn template_dirs_to_file_tree(
+    ui_framework_template_dir: &Dir<'_>,
+    generic_template_dir: &Dir<'_>,
+) -> ScaffoldResult<FileTree> {
+    let mut flattened = walk_dir(ui_framework_template_dir);
+    flattened.extend(walk_dir(generic_template_dir));
     unflatten_file_tree(&flattened)
 }
 
