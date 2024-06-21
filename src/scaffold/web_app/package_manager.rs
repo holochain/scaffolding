@@ -101,18 +101,13 @@ impl TryFrom<&FileTree> for PackageManager {
     type Error = ScaffoldError;
 
     fn try_from(app_file_tree: &FileTree) -> ScaffoldResult<PackageManager> {
-        let bun_lockfile = Path::new("bun.lockb");
-        let npm_lockfile = Path::new("package-lock.json");
-        let yarn_lockfile = Path::new("yarn.lock");
-        let pnpm_lockfile = Path::new("pnpm-lock.yaml");
-
-        if PackageManager::lockfile_exists(app_file_tree, bun_lockfile) {
+        if PackageManager::lockfile_exists(app_file_tree, Path::new("bun.lockb")) {
             Ok(PackageManager::Bun)
-        } else if PackageManager::lockfile_exists(app_file_tree, npm_lockfile) {
+        } else if PackageManager::lockfile_exists(app_file_tree, Path::new("package-lock.json")) {
             Ok(PackageManager::Npm)
-        } else if PackageManager::lockfile_exists(app_file_tree, pnpm_lockfile) {
+        } else if PackageManager::lockfile_exists(app_file_tree, Path::new("pnpm-lock.yaml")) {
             Ok(PackageManager::Pnpm)
-        } else if PackageManager::lockfile_exists(app_file_tree, yarn_lockfile) {
+        } else if PackageManager::lockfile_exists(app_file_tree, Path::new("yarn.lock")) {
             Ok(PackageManager::Yarn)
         } else {
             PackageManager::choose()
@@ -126,41 +121,46 @@ mod tests {
 
     use super::*;
 
-    fn setup_file_tree_with_lockfile(lockfile: &str) -> FileTree {
+    fn setup_filetree(lockfile: &str) -> FileTree {
         dir! {
-            ".gitignore" => file!(""),
-            "workdir" => dir!{},
-            "Cargo.toml" => file!(""),
-            "package.json" => file!(""),
-            lockfile => file!(""),
+            ".github" => dir! {},
             "dnas" => dir! {},
+            "tests" => dir! {},
+            "ui" => dir! {},
+            "workdir" => dir! {},
+            ".gitignore" => file!(""),
+            "Cargo.toml" => file!(""),
+            "flake.nix" => file!(""),
+            lockfile => file!(""),
+            "package.json" => file!(""),
+            "README.md" => file!(""),
         }
     }
 
     #[test]
     fn test_try_from_file_tree_bun() {
-        let app_file_tree = setup_file_tree_with_lockfile("bun.lockb");
+        let app_file_tree = setup_filetree("bun.lockb");
         let package_manager = PackageManager::try_from(&app_file_tree).unwrap();
         assert_eq!(package_manager, PackageManager::Bun);
     }
 
     #[test]
     fn test_try_from_file_tree_npm() {
-        let app_file_tree = setup_file_tree_with_lockfile("package-lock.json");
+        let app_file_tree = setup_filetree("package-lock.json");
         let package_manager = PackageManager::try_from(&app_file_tree).unwrap();
         assert_eq!(package_manager, PackageManager::Npm);
     }
 
     #[test]
     fn test_try_from_file_tree_yarn() {
-        let app_file_tree = setup_file_tree_with_lockfile("yarn.lock");
+        let app_file_tree = setup_filetree("yarn.lock");
         let package_manager = PackageManager::try_from(&app_file_tree).unwrap();
         assert_eq!(package_manager, PackageManager::Yarn);
     }
 
     #[test]
     fn test_try_from_file_tree_pnpm() {
-        let app_file_tree = setup_file_tree_with_lockfile("pnpm-lock.yaml");
+        let app_file_tree = setup_filetree("pnpm-lock.yaml");
         let package_manager = PackageManager::try_from(&app_file_tree).unwrap();
         assert_eq!(package_manager, PackageManager::Pnpm);
     }
