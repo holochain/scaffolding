@@ -30,15 +30,17 @@ fn validate_referenceable(
             let entry_type_snake = format_ident!("_{}", entry_type.entry_type.to_case(Case::Snake));
             let entry_type_pascal =
                 format_ident!("{}", entry_type.entry_type.to_case(Case::Pascal));
-            match entry_type.reference_entry_hash {
-                true => quote! {
+
+            if entry_type.reference_entry_hash {
+                quote! {
                     /// Check the entry type for the given entry hash
                     let entry_hash = #address_ident.into_entry_hash().ok_or(wasm_error!(WasmErrorInner::Guest("No entry hash associated with link".to_string())))?;
                     let entry = must_get_entry(entry_hash)?.content;
 
                     let #entry_type_snake = crate::#entry_type_pascal::try_from(entry)?;
-                },
-                false => quote! {
+                }
+            } else {
+                quote! {
                     /// Check the entry type for the given action hash
                     let action_hash = #address_ident.into_action_hash().ok_or(wasm_error!(
                         WasmErrorInner::Guest("No action hash associated with link".to_string())
@@ -47,7 +49,7 @@ fn validate_referenceable(
 
                     let #entry_type_snake: crate::#entry_type_pascal = record.entry().to_app_option()
                       .map_err(|e| wasm_error!(e))?.ok_or(wasm_error!(WasmErrorInner::Guest("Linked action must reference an entry".to_string())))?;
-                },
+                }
             }
         }
         _ => quote! {},
@@ -82,7 +84,7 @@ pub fn add_link_type_to_integrity_zome(
                         a.path()
                             .segments
                             .iter()
-                            .any(|s| s.ident.eq("hdk_link_types"))
+                            .any(|s| s.ident == "hdk_link_types")
                     }) {
                         return true;
                     }
@@ -114,11 +116,11 @@ pub fn add_link_type_to_integrity_zome(
         |file_path, mut file| {
             // If there are no link types in this zome, first add the empty enum
             if hdk_link_types_instances.is_empty() && file_path == PathBuf::from("lib.rs") {
-                let link_types_item = syn::parse_str::<syn::Item>(
-                    "#[derive(Serialize, Deserialize)]
-                     #[hdk_link_types]
-                     pub enum LinkTypes {}",
-                )?;
+                let link_types_item = syn::parse_quote! {
+                    #[derive(Serialize, Deserialize)]
+                    #[hdk_link_types]
+                    pub enum LinkTypes {}
+                };
 
                 // Insert the link types just before the first function
                 match file

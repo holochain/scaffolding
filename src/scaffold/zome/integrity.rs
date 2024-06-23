@@ -1,20 +1,18 @@
 pub fn initial_cargo_toml(zome_name: &str) -> String {
     format!(
         r#"[package]
-name = "{}"
+name = "{zome_name}"
 version = "0.0.1"
 edition = "2021"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
-name = "{}"
+name = "{zome_name}"
 
 [dependencies]
 hdi = {{ workspace = true }}
-
 serde = {{ workspace = true }}
 "#,
-        zome_name, zome_name,
     )
 }
 

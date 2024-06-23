@@ -77,7 +77,7 @@ pub fn scaffold_entry_type(
     zome_file_tree: ZomeFileTree,
     template_file_tree: &FileTree,
     name: &str,
-    maybe_crud: &Option<Crud>,
+    maybe_crud: Option<Crud>,
     maybe_reference_entry_hash: Option<bool>,
     maybe_link_from_original_to_each_update: Option<bool>,
     maybe_fields: Option<&Vec<FieldDefinition>>,
@@ -206,8 +206,7 @@ pub fn scaffold_entry_type(
 
     let dna_manifest = zome_file_tree.dna_file_tree.dna_manifest.clone();
 
-    let app_file_tree =
-        AppFileTree::get_or_choose(zome_file_tree.dna_file_tree.file_tree(), &None)?;
+    let app_file_tree = AppFileTree::get_or_choose(zome_file_tree.dna_file_tree.file_tree(), None)?;
 
     let app_name = app_file_tree.app_manifest.app_name().to_string();
 
