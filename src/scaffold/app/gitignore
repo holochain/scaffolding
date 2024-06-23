@@ -1,5 +1,4 @@
-pub fn gitignore() -> String {
-    r#"# editors
+# editors
 /.idea
 /.vscode
 
@@ -24,6 +23,3 @@ pub fn gitignore() -> String {
 .hc*
 .running
 .hc
-"#
-    .to_string()
-}
