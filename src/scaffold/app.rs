@@ -32,7 +32,7 @@ impl AppFileTree {
 
     pub fn get_or_choose(
         file_tree: FileTree,
-        app_name: &Option<String>,
+        app_name: Option<&str>,
     ) -> ScaffoldResult<AppFileTree> {
         let app_manifests = find_app_manifests(&file_tree)?;
 

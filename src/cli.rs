@@ -260,8 +260,8 @@ impl HcScaffold {
                     file_tree,
                     next_instructions,
                 } = scaffold_web_app(
-                    name.clone(),
-                    description,
+                    &name,
+                    description.as_deref(),
                     !setup_nix,
                     &template_file_tree,
                     holo_enabled,
@@ -289,7 +289,7 @@ impl HcScaffold {
                     // prompt to scaffold DNA
                     let dna_name = input_with_case("Initial DNA name (snake_case):", Case::Snake)?;
                     let file_tree = load_directory_into_memory(&current_dir.join(&name))?;
-                    let app_file_tree = AppFileTree::get_or_choose(file_tree, &Some(name.clone()))?;
+                    let app_file_tree = AppFileTree::get_or_choose(file_tree, Some(&name))?;
                     let ScaffoldedTemplate { file_tree, .. } =
                         scaffold_dna(app_file_tree, &template_file_tree, &dna_name)?;
 
@@ -350,7 +350,7 @@ Here's how you can get started with developing your application:
 
                 let file_tree = load_directory_into_memory(&current_dir)?;
 
-                let app_file_tree = AppFileTree::get_or_choose(file_tree, &app)?;
+                let app_file_tree = AppFileTree::get_or_choose(file_tree, app.as_deref())?;
 
                 let ScaffoldedTemplate {
                     file_tree,
@@ -400,7 +400,7 @@ Add new zomes to your DNA with:
                     None => input_with_case(name_prompt, Case::Snake)?,
                 };
 
-                let mut dna_file_tree = DnaFileTree::get_or_choose(file_tree, &dna)?;
+                let mut dna_file_tree = DnaFileTree::get_or_choose(file_tree, dna.as_deref())?;
                 let dna_manifest_path = dna_file_tree.dna_manifest_path.clone();
 
                 let mut zome_next_instructions: (Option<String>, Option<String>) = (None, None);
@@ -432,9 +432,10 @@ Add new zomes to your DNA with:
                 }
 
                 if scaffold_coordinator {
-                    let dependencies = match scaffold_integrity {
-                        true => Some(vec![integrity_zome_name(&name)]),
-                        false => {
+                    let dependencies = {
+                        if scaffold_integrity {
+                            Some(vec![integrity_zome_name(&name)])
+                        } else {
                             let integrity_zomes = select_integrity_zomes(&dna_file_tree.dna_manifest, Some(
                               "Select integrity zome(s) this coordinator zome depends on (SPACE to select/unselect, ENTER to continue):"
                             ))?;
@@ -448,7 +449,7 @@ Add new zomes to your DNA with:
                         dna_file_tree,
                         &template_file_tree,
                         &name,
-                        &dependencies,
+                        dependencies.as_ref(),
                         &coordinator,
                     )?;
                     zome_next_instructions.1 = next_instructions;
@@ -505,8 +506,9 @@ Add new entry definitions to your zome with:
                     None => input_with_case("Entry type name (snake_case):", Case::Snake)?,
                 };
 
-                let dna_file_tree = DnaFileTree::get_or_choose(file_tree, &dna)?;
-                let zome_file_tree = ZomeFileTree::get_or_choose_integrity(dna_file_tree, &zome)?;
+                let dna_file_tree = DnaFileTree::get_or_choose(file_tree, dna.as_deref())?;
+                let zome_file_tree =
+                    ZomeFileTree::get_or_choose_integrity(dna_file_tree, zome.as_deref())?;
 
                 if no_ui {
                     let warning_text = r#"
@@ -524,7 +526,7 @@ inadvertently reference or expect elements from the skipped entry type."#
                     zome_file_tree,
                     &template_file_tree,
                     &name,
-                    &crud,
+                    crud,
                     reference_entry_hash,
                     link_from_original_to_each_update,
                     fields.as_ref(),
@@ -558,8 +560,9 @@ Add new collections for that entry type with:
             } => {
                 let file_tree = load_directory_into_memory(&current_dir)?;
 
-                let dna_file_tree = DnaFileTree::get_or_choose(file_tree, &dna)?;
-                let zome_file_tree = ZomeFileTree::get_or_choose_integrity(dna_file_tree, &zome)?;
+                let dna_file_tree = DnaFileTree::get_or_choose(file_tree, dna.as_deref())?;
+                let zome_file_tree =
+                    ZomeFileTree::get_or_choose_integrity(dna_file_tree, zome.as_deref())?;
 
                 let ScaffoldedTemplate {
                     file_tree,
@@ -567,10 +570,10 @@ Add new collections for that entry type with:
                 } = scaffold_link_type(
                     zome_file_tree,
                     &template_file_tree,
-                    &from_referenceable,
-                    &to_referenceable,
-                    &delete,
-                    &bidirectional,
+                    from_referenceable.as_ref(),
+                    to_referenceable.as_ref(),
+                    delete,
+                    bidirectional,
                     no_ui,
                 )?;
 
@@ -591,8 +594,9 @@ Add new collections for that entry type with:
             } => {
                 let file_tree = load_directory_into_memory(&current_dir)?;
 
-                let dna_file_tree = DnaFileTree::get_or_choose(file_tree, &dna)?;
-                let zome_file_tree = ZomeFileTree::get_or_choose_integrity(dna_file_tree, &zome)?;
+                let dna_file_tree = DnaFileTree::get_or_choose(file_tree, dna.as_deref())?;
+                let zome_file_tree =
+                    ZomeFileTree::get_or_choose_integrity(dna_file_tree, zome.as_deref())?;
 
                 let name = match collection_name {
                     Some(n) => {
@@ -612,8 +616,8 @@ Add new collections for that entry type with:
                     zome_file_tree,
                     &template_file_tree,
                     &name,
-                    &collection_type,
-                    &entry_type,
+                    collection_type,
+                    entry_type,
                     no_ui,
                 )?;
 
@@ -657,8 +661,8 @@ Add new collections for that entry type with:
                     Example::HelloWorld => {
                         // scaffold web-app
                         let ScaffoldedTemplate { file_tree, .. } = scaffold_web_app(
-                            example_name.clone(),
-                            Some("A simple 'hello world' application.".to_string()),
+                            &example_name,
+                            Some("A simple 'hello world' application."),
                             false,
                             &template_file_tree,
                             holo_enabled,
@@ -669,8 +673,8 @@ Add new collections for that entry type with:
                     Example::Forum => {
                         // scaffold web-app
                         let ScaffoldedTemplate { file_tree, .. } = scaffold_web_app(
-                            example_name.clone(),
-                            Some("A simple 'forum' application.".to_string()),
+                            &example_name,
+                            Some("A simple 'forum' application."),
                             false,
                             &template_file_tree,
                             holo_enabled,
@@ -680,13 +684,12 @@ Add new collections for that entry type with:
                         let dna_name = "forum";
 
                         let app_file_tree =
-                            AppFileTree::get_or_choose(file_tree, &Some(example_name.clone()))?;
+                            AppFileTree::get_or_choose(file_tree, Some(&example_name))?;
                         let ScaffoldedTemplate { file_tree, .. } =
                             scaffold_dna(app_file_tree, &template_file_tree, dna_name)?;
 
                         // scaffold integrity zome posts
-                        let dna_file_tree =
-                            DnaFileTree::get_or_choose(file_tree, &Some(dna_name.to_owned()))?;
+                        let dna_file_tree = DnaFileTree::get_or_choose(file_tree, Some(dna_name))?;
                         let dna_manifest_path = dna_file_tree.dna_manifest_path.clone();
 
                         let integrity_zome_name = "posts_integrity";
@@ -717,7 +720,7 @@ Add new collections for that entry type with:
                                 dna_file_tree,
                                 &template_file_tree,
                                 coordinator_zome_name,
-                                &Some(vec![integrity_zome_name.to_owned()]),
+                                Some(&vec![integrity_zome_name.to_owned()]),
                                 &coordinator_zome_path,
                             )?;
 
@@ -732,7 +735,7 @@ Add new collections for that entry type with:
 
                         let zome_file_tree = ZomeFileTree::get_or_choose_integrity(
                             dna_file_tree,
-                            &Some(integrity_zome_name.to_owned()),
+                            Some(integrity_zome_name),
                         )?;
 
                         let post_entry_type_name = "post";
@@ -741,7 +744,7 @@ Add new collections for that entry type with:
                             zome_file_tree,
                             &template_file_tree,
                             "post",
-                            &Some(Crud {
+                            Some(Crud {
                                 update: true,
                                 delete: true,
                             }),
@@ -771,14 +774,14 @@ Add new collections for that entry type with:
 
                         let zome_file_tree = ZomeFileTree::get_or_choose_integrity(
                             dna_file_tree,
-                            &Some("posts_integrity".to_string()),
+                            Some("posts_integrity"),
                         )?;
 
                         let ScaffoldedTemplate { file_tree, .. } = scaffold_entry_type(
                             zome_file_tree,
                             &template_file_tree,
                             "comment",
-                            &Some(Crud {
+                            Some(Crud {
                                 update: false,
                                 delete: true,
                             }),
@@ -813,15 +816,15 @@ Add new collections for that entry type with:
 
                         let zome_file_tree = ZomeFileTree::get_or_choose_integrity(
                             dna_file_tree,
-                            &Some(integrity_zome_name.to_string()),
+                            Some(integrity_zome_name),
                         )?;
 
                         let ScaffoldedTemplate { file_tree, .. } = scaffold_collection(
                             zome_file_tree,
                             &template_file_tree,
                             "all_posts",
-                            &Some(CollectionType::Global),
-                            &Some(EntryTypeReference {
+                            Some(CollectionType::Global),
+                            Some(EntryTypeReference {
                                 entry_type: "post".to_string(),
                                 reference_entry_hash: false,
                             }),
