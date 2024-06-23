@@ -9,7 +9,7 @@ use crate::{error::ScaffoldError, file_tree::FileTree};
 
 use super::app::{
     cargo::workspace_cargo_toml,
-    gitignore::gitignore,
+    git::gitignore,
     manifests::{empty_happ_manifest, web_happ_manifest},
     nix::flake_nix,
 };

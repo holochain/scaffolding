@@ -10,7 +10,7 @@ use crate::{
 };
 
 pub mod cargo;
-pub mod gitignore;
+pub mod git;
 pub mod manifests;
 pub mod nix;
 pub mod utils;

@@ -1,8 +1,7 @@
-use crate::error::{ScaffoldError, ScaffoldResult};
-use crate::file_tree::{
-    build_file_tree, file_content, load_directory_into_memory, map_file, FileTree,
-};
+use crate::error::ScaffoldError;
+use crate::file_tree::{build_file_tree, file_content, load_directory_into_memory, FileTree};
 use crate::scaffold::app::cargo::exec_metadata;
+use crate::scaffold::app::git::setup_git_environment;
 use crate::scaffold::app::nix::setup_nix_developer_environment;
 use crate::scaffold::app::AppFileTree;
 use crate::scaffold::collection::{scaffold_collection, CollectionType};
@@ -36,7 +35,6 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::ffi::OsString;
 use std::path::{Path, PathBuf};
-use std::process::{Command, Stdio};
 use std::str::FromStr;
 use std::{env, fs};
 use structopt::StructOpt;
@@ -954,96 +952,5 @@ impl HcScaffoldTemplate {
                 ..
             } => target_template.clone(),
         }
-    }
-}
-
-fn setup_git_environment(path: &Path) -> ScaffoldResult<()> {
-    let output = Command::new("git")
-        .stdout(Stdio::inherit())
-        .current_dir(path)
-        .args(["init", "--initial-branch=main"])
-        .output()?;
-
-    if !output.status.success() {
-        let output = Command::new("git")
-            .stdout(Stdio::inherit())
-            .stderr(Stdio::inherit())
-            .current_dir(path)
-            .args(["init"])
-            .output()?;
-        if !output.status.success() {
-            println!("Warning: error running \"git init\"");
-            return Ok(());
-        }
-
-        let _output = Command::new("git")
-            .current_dir(path)
-            .args(["branch", "main"])
-            .output()?;
-    }
-
-    let output = Command::new("git")
-        .stdout(Stdio::inherit())
-        .stderr(Stdio::inherit())
-        .current_dir(path)
-        .args(["add", "."])
-        .output()?;
-
-    if !output.status.success() {
-        println!("Warning: error running \"git add .\"");
-    }
-    Ok(())
-}
-
-/// Write hcScaffold config to the hApp's root `package.json` file
-fn write_scaffold_config(
-    mut web_app_file_tree: FileTree,
-    template: &str,
-) -> ScaffoldResult<FileTree> {
-    if Path::new(template).exists() {
-        return Ok(web_app_file_tree);
-    }
-    let config = TemplateConfig {
-        template: template.to_owned(),
-    };
-    let package_json_path = PathBuf::from("package.json");
-    map_file(&mut web_app_file_tree, &package_json_path, |c| {
-        let original_content = c.clone();
-        let json = serde_json::from_str::<Value>(&c)?;
-        let json = match json {
-            Value::Object(mut o) => {
-                o.insert(
-                    "hcScaffold".to_owned(),
-                    serde_json::to_value(&config).unwrap(),
-                );
-                o
-            }
-            _ => return Ok(original_content),
-        };
-        let json = serde_json::to_value(json)?;
-        let json = serde_json::to_string_pretty(&json)?;
-        Ok(json)
-    })?;
-    Ok(web_app_file_tree)
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-pub struct TemplateConfig {
-    template: String,
-}
-
-/// Gets template config written to the root `package.json` file when the hApp was
-/// originally scaffolded
-fn get_template_config(current_dir: &Path) -> ScaffoldResult<Option<TemplateConfig>> {
-    let package_json_path = current_dir.join("package.json");
-    let Ok(file) = fs::read_to_string(package_json_path) else {
-        return Ok(None);
-    };
-    let file = serde_json::from_str::<Value>(&file)?;
-    if let Some(config) = file.get("hcScaffold") {
-        let config = serde_json::from_value(config.to_owned())?;
-        Ok(Some(config))
-    } else {
-        Ok(None)
     }
 }
