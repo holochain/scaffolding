@@ -58,6 +58,7 @@ pub fn flake_nix(holo_enabled: bool) -> FileTree {
               packages = [
                 pkgs.nodejs_20
                 pkgs.corepack_20
+                pkgs.bun
                 {holo_packages}
               ];
             }};
