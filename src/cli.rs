@@ -47,7 +47,7 @@ pub struct HcScaffold {
     /// Or a path to a custom template
     template: Option<String>,
 
-    #[structopt(long, parse(try_from_str = PackageManager::from_str), default_value="npm")]
+    #[structopt(short, long, parse(try_from_str = PackageManager::from_str), default_value="npm")]
     package_manager: PackageManager,
 
     #[structopt(subcommand)]

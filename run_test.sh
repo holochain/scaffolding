@@ -36,7 +36,7 @@ setup_and_build_happ() {
   cleanup_tmp "$1"
 
   cd $TEMPLATE_PATH
-  hc-scaffold --template "$2" web-app "$1" --setup-nix true -F
+  hc-scaffold -pm="pnpm" --template="$2" web-app "$1" --setup-nix true -F
   cd "$1"
 
   hc-scaffold dna forum
@@ -72,7 +72,7 @@ setup_and_build_hello_world() {
   cleanup_tmp hello-world
 
   cd $TEMPLATE_PATH
-  hc-scaffold example hello-world
+  hc-scaffold -pm="pnpm" example hello-world
   cd hello-world
 
   nix develop --command bash -c "
