@@ -14,6 +14,7 @@ use crate::scaffold::entry_type::definitions::{
 use crate::scaffold::entry_type::{fields::parse_fields, scaffold_entry_type};
 use crate::scaffold::example::{choose_example, Example};
 use crate::scaffold::link_type::scaffold_link_type;
+use crate::scaffold::web_app::package_manager::SubCommand;
 use crate::scaffold::web_app::scaffold_web_app;
 use crate::scaffold::web_app::{package_manager::PackageManager, uis::UiFramework};
 use crate::scaffold::zome::utils::{select_integrity_zomes, select_scaffold_zome_options};
@@ -46,7 +47,7 @@ pub struct HcScaffold {
     /// Or a path to a custom template
     template: Option<String>,
 
-    #[structopt(long, parse(try_from_str = PackageManager::from_str), default_value="PackageManager::Npm")]
+    #[structopt(long, parse(try_from_str = PackageManager::from_str), default_value="npm")]
     package_manager: PackageManager,
 
     #[structopt(subcommand)]
@@ -332,13 +333,17 @@ Here's how you can get started with developing your application:
 - Set up your development environment:
 
   cd {name}{nix_instructions}
-  npm install {dna_instructions}
+  {} {dna_instructions}
 
 - Enhance your app by executing further hc scaffold commands to add more features.
 
 - Then, at any point in time you can start your application with:
 
-  npm start"#,
+  {}"#,
+                        self.package_manager
+                            .run_command_string(SubCommand::Install, None),
+                        self.package_manager
+                            .run_command_string(SubCommand::Run("start".to_string()), None)
                     );
                 }
             }
@@ -548,8 +553,7 @@ inadvertently reference or expect elements from the skipped entry type."#
                         r#"
 Add new collections for that entry type with:
 
-  hc scaffold collection
-"#,
+  hc scaffold collection"#,
                     );
                 }
             }

@@ -114,7 +114,7 @@ impl std::str::FromStr for PackageManager {
             "pnpm" => Ok(PackageManager::Pnpm),
             "yarn" => Ok(PackageManager::Yarn),
             value => Err(ScaffoldError::MalformedTemplate(format!(
-                "Invalid value: {value}, expected vanilla, svelte, vue, lit or headless"
+                "Invalid value: {value}, expected bun, npm, pnpm, or yarn"
             ))),
         }
     }
