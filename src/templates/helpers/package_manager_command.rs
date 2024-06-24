@@ -66,3 +66,42 @@ pub fn register_package_manager_command(mut h: Handlebars) -> Handlebars {
 
     h
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use handlebars::Handlebars;
+    use serde_json::json;
+
+    #[test]
+    fn test_package_manager_command_helper_yarn() {
+        let hbs = setup_handlebars();
+        let template = r#"{{(package_manager_command "yarn" "install" null)}}"#;
+        let s = hbs.render_template(template, &json!(null)).unwrap();
+        assert_eq!("yarn install", s);
+
+        let template = r#"{{package_manager_command "yarn" "package" "ui"}}"#;
+        let s = hbs.render_template(template, &json!(null)).unwrap();
+        assert_eq!("yarn workspace ui package", s);
+
+        let template = r#"{{package_manager_command "yarn" "build:happ" null}}"#;
+        let s = hbs.render_template(template, &json!(null)).unwrap();
+        assert_eq!("yarn build:happ", s);
+    }
+
+    #[test]
+    fn test_package_manager_command_helper_with_invalid_package_manager() {
+        let hbs = setup_handlebars();
+        // invalid/ unsupported package manager
+        let template = r#"{{(package_manager_command "unknown" "install" null)}}"#;
+        if let Err(e) = hbs.render_template(template, &json!(null)) {
+            assert!(e.to_string().contains("Invalid package manager"));
+        };
+    }
+
+    fn setup_handlebars<'a>() -> Handlebars<'a> {
+        let hbs = Handlebars::new();
+        let hbs = register_package_manager_command(hbs);
+        hbs
+    }
+}
