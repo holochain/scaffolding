@@ -57,8 +57,8 @@ pub fn flake_nix(holo_enabled: bool) -> FileTree {
               inputsFrom = [ inputs'.holochain-flake.devShells.holonix ];
               packages = [
                 pkgs.nodejs_20
+                pkgs.corepack_20
                 {holo_packages}
-                # more packages go here
               ];
             }};
           }};
