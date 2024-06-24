@@ -82,7 +82,7 @@ pub fn scaffold_collection(
     )?;
 
     let collection_type = match maybe_collection_type {
-        Some(t) => Ok(t.clone()),
+        Some(t) => Ok(t),
         None => choose_collection_type(),
     }?;
 

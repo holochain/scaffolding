@@ -107,7 +107,7 @@ pub fn scaffold_entry_type(
     let reference_entry_hash = maybe_reference_entry_hash.unwrap_or(false);
 
     let crud = match maybe_crud {
-        Some(c) => c.clone(),
+        Some(c) => c,
         None => choose_crud(),
     };
 

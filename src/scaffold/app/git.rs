@@ -6,7 +6,7 @@ use crate::error::ScaffoldResult;
 
 pub fn setup_git_environment<P: AsRef<Path>>(path: P) -> ScaffoldResult<()> {
     if let Err(e) = (|| {
-        let repo = Repository::init_opts(path, &RepositoryInitOptions::new().initial_head("main"))?;
+        let repo = Repository::init_opts(path, RepositoryInitOptions::new().initial_head("main"))?;
         let mut index = repo.index()?;
         index.add_all(["*"].iter(), IndexAddOption::DEFAULT, None)?;
         index.write()?;
