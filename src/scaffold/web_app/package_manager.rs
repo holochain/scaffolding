@@ -86,7 +86,7 @@ impl PackageManager {
         match self {
             PackageManager::Npm => "npm install",
             PackageManager::Yarn => "yarn install",
-            PackageManager::Pnpm => "pnpm install",
+            PackageManager::Pnpm => "pnpm -r install",
             PackageManager::Bun => "bun install",
         }
     }
