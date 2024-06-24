@@ -15,7 +15,7 @@ use crate::scaffold::entry_type::{fields::parse_fields, scaffold_entry_type};
 use crate::scaffold::example::{choose_example, Example};
 use crate::scaffold::link_type::scaffold_link_type;
 use crate::scaffold::web_app::scaffold_web_app;
-use crate::scaffold::web_app::uis::UiFramework;
+use crate::scaffold::web_app::{package_manager::PackageManager, uis::UiFramework};
 use crate::scaffold::zome::utils::{select_integrity_zomes, select_scaffold_zome_options};
 use crate::scaffold::zome::{
     integrity_zome_name, scaffold_coordinator_zome, scaffold_coordinator_zome_in_path,
@@ -45,6 +45,9 @@ pub struct HcScaffold {
     /// Can either be an option from the built-in templates: "vanilla", "vue", "lit", "svelte", "react", "headless"
     /// Or a path to a custom template
     template: Option<String>,
+
+    #[structopt(long, parse(try_from_str = PackageManager::from_str), default_value="PackageManager::Npm")]
+    package_manager: PackageManager,
 
     #[structopt(subcommand)]
     command: HcScaffoldCommand,
@@ -262,6 +265,7 @@ impl HcScaffold {
                 } = scaffold_web_app(
                     &name,
                     description.as_deref(),
+                    self.package_manager,
                     !setup_nix,
                     &template_file_tree,
                     holo_enabled,
@@ -663,6 +667,7 @@ Add new collections for that entry type with:
                         let ScaffoldedTemplate { file_tree, .. } = scaffold_web_app(
                             &example_name,
                             Some("A simple 'hello world' application."),
+                            self.package_manager,
                             false,
                             &template_file_tree,
                             holo_enabled,
@@ -675,6 +680,7 @@ Add new collections for that entry type with:
                         let ScaffoldedTemplate { file_tree, .. } = scaffold_web_app(
                             &example_name,
                             Some("A simple 'forum' application."),
+                            self.package_manager,
                             false,
                             &template_file_tree,
                             holo_enabled,

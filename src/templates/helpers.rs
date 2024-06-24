@@ -6,6 +6,7 @@ use serde_json::Value;
 
 pub mod filter;
 pub mod merge;
+pub mod package_manager_command;
 pub mod uniq_lines;
 
 use filter::register_filter;
