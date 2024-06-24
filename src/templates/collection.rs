@@ -46,7 +46,7 @@ pub fn scaffold_collection_templates(
         dna_role_name: dna_role_name.to_owned(),
         coordinator_zome_manifest: coordinator_zome_manifest.clone(),
         collection_name: collection_name.to_owned(),
-        collection_type: collection_type.clone(),
+        collection_type: *collection_type,
         referenceable: Referenceable::EntryType(entry_type_reference.clone()),
         deletable,
     };

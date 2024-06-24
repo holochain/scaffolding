@@ -1,20 +1,18 @@
 name: "test"
 on:
-  # Trigger the workflow on push or pull request,
-  # but only for the main branch
   push: 
-    branches: [ main, develop ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main ]
 
 jobs:
   testbuild:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Install nix
-        uses: cachix/install-nix-action@v18
+        uses: cachix/install-nix-action@v25
         with:
           install_url: https://releases.nixos.org/nix/nix-2.12.0/install
           extra_nix_config: |
@@ -27,4 +25,3 @@ jobs:
       - name: Install and test
         run: |
           nix develop --command bash -c "npm i && npm t"
-

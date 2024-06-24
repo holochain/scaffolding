@@ -78,6 +78,7 @@ pub fn select_scaffold_zome_options() -> ScaffoldResult<(bool, bool)> {
     match option {
         0 => Ok((true, true)),
         1 => Ok((true, false)),
-        _ => Ok((false, true)),
+        2 => Ok((false, true)),
+        _ => unreachable!("Invalid selection option"),
     }
 }

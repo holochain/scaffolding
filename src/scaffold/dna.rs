@@ -38,7 +38,7 @@ pub struct DnaFileTree {
 impl DnaFileTree {
     pub fn get_or_choose(
         file_tree: FileTree,
-        dna_name: &Option<String>,
+        dna_name: Option<&str>,
     ) -> ScaffoldResult<DnaFileTree> {
         let dna_manifests = find_dna_manifests(&file_tree)?;
 
@@ -52,7 +52,7 @@ impl DnaFileTree {
             (_, Some(name)) => dna_manifests
                 .into_iter()
                 .find(|(_, m)| m.name().to_string().eq(name))
-                .ok_or(ScaffoldError::DnaNotFound(name.clone())),
+                .ok_or(ScaffoldError::DnaNotFound(name.to_owned())),
         }?;
 
         Ok(DnaFileTree {

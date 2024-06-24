@@ -188,6 +188,7 @@ fn add_newlines(input: &str) -> String {
             after_imports = true;
             formatted_code.push('\n');
         }
+
         // Add newlines between #[hdk_extern] annotated functions
         if line.trim().starts_with("#[hdk_extern") && i > 0 {
             formatted_code.push('\n');

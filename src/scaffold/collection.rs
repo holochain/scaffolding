@@ -26,7 +26,7 @@ use super::{
 
 pub mod coordinator;
 
-#[derive(Serialize, Debug, Clone)]
+#[derive(Serialize, Debug, Clone, Copy)]
 #[serde(tag = "type")]
 pub enum CollectionType {
     Global,
@@ -68,8 +68,8 @@ pub fn scaffold_collection(
     integrity_zome_file_tree: ZomeFileTree,
     template_file_tree: &FileTree,
     collection_name: &str,
-    maybe_collection_type: &Option<CollectionType>,
-    maybe_entry_type: &Option<EntryTypeReference>,
+    maybe_collection_type: Option<CollectionType>,
+    maybe_entry_type: Option<EntryTypeReference>,
     no_ui: bool,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     check_for_reserved_words(collection_name)?;
@@ -82,7 +82,7 @@ pub fn scaffold_collection(
     )?;
 
     let collection_type = match maybe_collection_type {
-        Some(t) => Ok(t.clone()),
+        Some(t) => Ok(t),
         None => choose_collection_type(),
     }?;
 
@@ -92,14 +92,17 @@ pub fn scaffold_collection(
         .map(|e| e.entry_type)
         .collect();
     let entry_type = match maybe_entry_type {
-        Some(et) => match all_entries_names.contains(&et.entry_type.to_case(Case::Pascal)) {
-            true => Ok(et.clone()),
-            false => Err(ScaffoldError::EntryTypeNotFound(
-                et.entry_type.clone(),
-                integrity_zome_file_tree.dna_file_tree.dna_manifest.name(),
-                integrity_zome_file_tree.zome_manifest.name.0.to_string(),
-            )),
-        },
+        Some(et) => {
+            if all_entries_names.contains(&et.entry_type.to_case(Case::Pascal)) {
+                Ok(et.clone())
+            } else {
+                Err(ScaffoldError::EntryTypeNotFound(
+                    et.entry_type.clone(),
+                    integrity_zome_file_tree.dna_file_tree.dna_manifest.name(),
+                    integrity_zome_file_tree.zome_manifest.name.0.to_string(),
+                ))
+            }
+        }
         None => choose_entry_type_reference(&all_entries, "Which entry type should be collected?"),
     }?;
 
@@ -124,7 +127,7 @@ pub fn scaffold_collection(
 
     let dna_name = dna_file_tree.dna_manifest.name();
 
-    let app_file_tree = AppFileTree::get_or_choose(dna_file_tree.file_tree(), &None)?;
+    let app_file_tree = AppFileTree::get_or_choose(dna_file_tree.file_tree(), None)?;
 
     let app_name = app_file_tree.app_manifest.app_name().to_string();
 
