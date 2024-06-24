@@ -229,7 +229,7 @@ mod tests {
     fn test_run_with_pnpm() {
         let app_file_tree = setup_filetree("pnpm-lock.yaml");
         let package_manager = PackageManager::try_from(&app_file_tree).unwrap();
-        let expected_command = "pnpm install";
+        let expected_command = "pnpm -r install";
         let actual_command = package_manager.run_command_string(SubCommand::Install, None);
         assert_eq!(expected_command, actual_command);
 
