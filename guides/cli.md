@@ -252,7 +252,8 @@ hc-scaffold template <SUBCOMMAND>
 Clone the template in use into a new custom template.
 
 **Usage:**
-```
+
+```bash
 hc-scaffold template clone [OPTIONS]
 ```
 
