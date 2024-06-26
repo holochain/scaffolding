@@ -42,11 +42,15 @@ use structopt::StructOpt;
 #[derive(Debug, StructOpt)]
 pub struct HcScaffold {
     #[structopt(short, long)]
-    /// The template to use for the scaffold command
+    /// The template to use for the hc-scaffold commands
     /// Can either be an option from the built-in templates: "vanilla", "vue", "lit", "svelte", "react", "headless"
     /// Or a path to a custom template
     template: Option<String>,
 
+    /// The package manager to use for the hc-scaffold commands.
+    /// Can be one of the following: "bun", "npm", "pnpm", or "yarn".
+    /// When a lockfile is detected, the respective package manager will be used as the default value;
+    /// otherwise, npm will be set as the default.
     #[structopt(short, long, parse(try_from_str = PackageManager::from_str), default_value="npm")]
     package_manager: PackageManager,
 
@@ -54,7 +58,7 @@ pub struct HcScaffold {
     command: HcScaffoldCommand,
 }
 
-/// The list of subcommands for `hc scaffold`
+/// A command-line interface for creating and modifying a Holochain application (hApp).
 #[derive(Debug, StructOpt)]
 #[structopt(setting = structopt::clap::AppSettings::InferSubcommands)]
 pub enum HcScaffoldCommand {
@@ -204,6 +208,7 @@ pub enum HcScaffoldCommand {
         /// Skips UI generation for this collection.
         no_ui: bool,
     },
+    /// Scaffold an example hApp
     Example {
         /// Name of the example to scaffold. One of ['hello-world', 'forum'].
         example: Option<Example>,
@@ -848,7 +853,12 @@ Add new collections for that entry type with:
                 let ScaffoldedTemplate {
                     file_tree,
                     next_instructions,
-                } = scaffold_example(file_tree, &template_file_tree, &example)?;
+                } = scaffold_example(
+                    file_tree,
+                    self.package_manager,
+                    &template_file_tree,
+                    &example,
+                )?;
 
                 let file_tree = ScaffoldConfig::write_to_package_json(file_tree, &template)?;
 
