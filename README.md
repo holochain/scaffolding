@@ -1,6 +1,37 @@
 # Holochain Scaffolding CLI
 
-CLI to easily generate and edit holochain apps.
+A command-line interface for creating and modifying a Holochain application (hApp).
+
+```
+USAGE:
+    hc-scaffold [OPTIONS] <SUBCOMMAND>
+
+FLAGS:
+    -h, --help       Prints help information
+    -V, --version    Prints version information
+
+OPTIONS:
+    -p, --package-manager <package-manager>    The package manager to use for the hc-scaffold commands. Can be one of
+                                               the following: "bun", "npm", "pnpm", or "yarn". When a lockfile is
+                                               detected, the respective package manager will be used as the default
+                                               value; otherwise, npm will be set as the default [default: npm]
+    -t, --template <template>                  The template to use for the hc-scaffold commands Can either be an option
+                                               from the built-in templates: "vanilla", "vue", "lit", "svelte", "react",
+                                               "headless" Or a path to a custom template
+
+SUBCOMMANDS:
+    collection    Scaffold a collection of entries in an existing zome
+    dna           Scaffold a DNA into an existing app
+    entry-type    Scaffold an entry type and CRUD functions into an existing zome
+    example       Scaffold an example hApp
+    help          Prints this message or the help of the given subcommand(s)
+    link-type     Scaffold a link type and its appropriate zome functions into an existing zome
+    template      Manage custom templates
+    web-app       Scaffold a new, empty web app
+    zome          Scaffold one or multiple zomes into an existing DNA
+```
+
+See the full CLI reference [here](/guides/cli.md)
 
 ## Obtaining the scaffolding tool through holonix
 
@@ -43,7 +74,7 @@ hc scaffold collection global all_posts
 hc scaffold link-type
 ```
 
-## Documentation
+## Custom Templates
 
 See the [docs.rs documentation](https://docs.rs/holochain_scaffolding_cli) to learn how to use and create custom templates.
 

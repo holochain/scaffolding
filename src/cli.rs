@@ -1,3 +1,5 @@
+#![doc = include_str!("../guides/cli.md")]
+
 use crate::error::ScaffoldError;
 use crate::file_tree::{build_file_tree, file_content, load_directory_into_memory, FileTree};
 use crate::scaffold::app::cargo::exec_metadata;
