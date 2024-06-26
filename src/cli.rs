@@ -634,7 +634,7 @@ Add new collections for that entry type with:
                 println!("\nCollection {} scaffolded!", name.italic());
 
                 if let Some(i) = next_instructions {
-                    println!("\n{i}");
+                    println!("{i}");
                 }
             }
             HcScaffoldCommand::Example {
