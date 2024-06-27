@@ -20,10 +20,6 @@ hc-scaffold [OPTIONS] <SUBCOMMAND>
 
 ### Options
 
-- `-p`, `--package-manager <package-manager>`  
-  The package manager to use for the `hc-scaffold` commands. Can be one of the following: "bun", "npm", "pnpm", or "yarn". When a lockfile is detected, the respective package manager will be used as the default value; otherwise, npm will be set as the default.  
-  **Default:** `npm`
-
 - `-t`, `--template <template>`  
   The template to use for the `hc-scaffold` commands. Can either be an option from the built-in templates: "vanilla", "vue", "lit", "svelte", "react", "headless" or a path to a custom template.
 
@@ -41,9 +37,6 @@ hc-scaffold [OPTIONS] <SUBCOMMAND>
 - `example`  
   Scaffold an example hApp.
   
-- `help`  
-  Prints this message or the help of the given subcommand(s).
-  
 - `link-type`  
   Scaffold a link type and its appropriate zome functions into an existing zome.
   
@@ -55,6 +48,9 @@ hc-scaffold [OPTIONS] <SUBCOMMAND>
   
 - `zome`  
   Scaffold one or multiple zomes into an existing DNA.
+
+- `help`  
+  Prints this message or the help of the given subcommand(s).
 
 ## Subcommand Details
 
@@ -254,7 +250,7 @@ Clone the template in use into a new custom template.
 **Usage:**
 
 ```bash
-hc-scaffold template clone [OPTIONS]
+hc-scaffold template clone [FLAGS] [OPTIONS]
 ```
 
 #### Flags
@@ -277,7 +273,7 @@ Scaffold a new, empty web app.
 **Usage:**
 
 ```bash
-hc-scaffold web-app [FLAGS] [ARGS]
+hc-scaffold web-app [FLAGS] [OPTIONS] [ARGS]
 ```
 
 #### Flags
@@ -288,11 +284,14 @@ hc-scaffold web-app [FLAGS] [ARGS]
 - `-h`, `--help`  
   Prints help information.
 
+#### Options
+
 - `--setup-nix`  
   Whether to setup the holonix development environment for this web app.
 
-- `-V`, `--version`  
-  Prints version information.
+- `-p`, `--package-manager <package-manager>`  
+  The package manager to use for scaffolding the web app. Can be one of the following: "bun", "npm", "pnpm", or "yarn". When a lockfile is detected, the respective package manager will be used as the default value; otherwise, npm will be set as the default.  
+  **Default:** `npm`
 
 #### Arguments
 
@@ -309,7 +308,7 @@ Scaffold one or multiple zomes into an existing DNA.
 **Usage:**
 
 ```bash
-hc-scaffold zome [OPTIONS] [name]
+hc-scaffold zome [FLAGS] [OPTIONS] [ARGS]
 ```
 
 #### Flags
@@ -335,3 +334,32 @@ hc-scaffold zome [OPTIONS] [name]
 
 - `<name>`  
   Name of the zome being scaffolded.
+
+### `hc-scaffold example`
+
+Scaffolds an example Holochain application to help you get started quickly
+
+**Usage**
+
+```bash
+hc-scaffold example [FLAGS] [ARGS]
+```
+
+#### Flags
+
+- `-h`, `--help`  
+  Prints help information.
+
+- `-V`, `--version`  
+  Prints version information.
+
+- `-p`, `--package-manager <package-manager>`  
+  The package manager to use for scaffolding the example. Can be one of the following: "bun", "npm", "pnpm", or "yarn". When a lockfile is detected, the respective package manager will be used as the default value; otherwise, npm will be set as the default.  
+  **Default:** `npm`
+
+#### Arguments
+
+- `<example>`
+  The name of the example to scaffold. Available options are:
+  - `hello-world`
+  - `forum`
