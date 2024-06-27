@@ -73,8 +73,8 @@ pub enum HcScaffoldCommand {
         /// Can be one of the following: "bun", "npm", "pnpm", or "yarn".
         /// When a lockfile is detected, the respective package manager will be used as the default value;
         /// otherwise, npm will be set as the default.
-        #[structopt(short, long, parse(try_from_str = PackageManager::from_str), default_value="npm")]
-        package_manager: PackageManager,
+        #[structopt(short, long, parse(try_from_str = PackageManager::from_str))]
+        package_manager: Option<PackageManager>,
 
         #[structopt(long = "holo", hidden = true)]
         holo_enabled: bool,
@@ -219,8 +219,8 @@ pub enum HcScaffoldCommand {
         /// Can be one of the following: "bun", "npm", "pnpm", or "yarn".
         /// When a lockfile is detected, the respective package manager will be used as the default value;
         /// otherwise, npm will be set as the default.
-        #[structopt(short, long, parse(try_from_str = PackageManager::from_str), default_value="npm")]
-        package_manager: PackageManager,
+        #[structopt(short, long, parse(try_from_str = PackageManager::from_str))]
+        package_manager: Option<PackageManager>,
 
         #[structopt(long = "holo", hidden = true)]
         holo_enabled: bool,
@@ -273,6 +273,11 @@ impl HcScaffold {
                         "Do you want to set up the holonix development environment for this project?", 
                         Some(true)
                     )?
+                };
+
+                let package_manager = match package_manager {
+                    Some(p) => p,
+                    None => PackageManager::choose()?,
                 };
 
                 let ScaffoldedTemplate {
@@ -678,6 +683,11 @@ Add new collections for that entry type with:
                     ))
                     .into());
                 }
+
+                let package_manager = match package_manager {
+                    Some(p) => p,
+                    None => PackageManager::choose()?,
+                };
 
                 // Match on example types
                 let file_tree = match example {

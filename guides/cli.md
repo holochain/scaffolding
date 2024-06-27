@@ -12,11 +12,11 @@ hc-scaffold [OPTIONS] <SUBCOMMAND>
 
 ### Flags
 
-- `-h`, `--help`  
-  Prints help information.
-
 - `-V`, `--version`  
   Prints version information.
+
+- `-h`, `--help`  
+  Prints help information.
 
 ### Options
 
@@ -66,14 +66,14 @@ hc-scaffold collection [FLAGS] [OPTIONS] [ARGS]
 
 #### Flags
 
-- `-h`, `--help`  
-  Prints help information.
-
 - `--no-ui`  
   Skips UI generation for this collection.
 
 - `-V`, `--version`  
   Prints version information.
+
+- `-h`, `--help`  
+  Prints help information.
 
 #### Options
 
@@ -106,11 +106,12 @@ hc-scaffold dna [OPTIONS] [name]
 
 #### Flags
 
+- `-V`, `--version`  
+  Prints version information.
+
 - `-h`, `--help`  
   Prints help information.
 
-- `-V`, `--version`  
-  Prints version information.
 
 #### Options
 
@@ -134,9 +135,6 @@ hc-scaffold entry-type [FLAGS] [OPTIONS] [--] [name]
 
 #### Flags
 
-- `-h`, `--help`  
-  Prints help information.
-
 - `--no-ui`  
   Skips UI generation for this entry-type, overriding any specified widgets in the `--fields` option.
   
@@ -146,6 +144,10 @@ hc-scaffold entry-type [FLAGS] [OPTIONS] [--] [name]
 
 - `-V`, `--version`  
   Prints version information.
+
+- `-h`, `--help`  
+  Prints help information.
+
 
 #### Options
 
@@ -281,17 +283,16 @@ hc-scaffold web-app [FLAGS] [OPTIONS] [ARGS]
 - `-F`, `--disable-fast-track`  
   Whether to skip setting up an initial DNA and its zome(s) after the web app is scaffolded.
 
+- `--setup-nix`  
+  Whether to setup the holonix development environment for this web app.
+
 - `-h`, `--help`  
   Prints help information.
 
 #### Options
 
-- `--setup-nix`  
-  Whether to setup the holonix development environment for this web app.
-
 - `-p`, `--package-manager <package-manager>`  
-  The package manager to use for scaffolding the web app. Can be one of the following: "bun", "npm", "pnpm", or "yarn". When a lockfile is detected, the respective package manager will be used as the default value; otherwise, npm will be set as the default.  
-  **Default:** `npm`
+  The package manager to use for scaffolding the web app. Can be one of the following: "bun", "npm", "pnpm", or "yarn".
 
 #### Arguments
 
@@ -342,7 +343,7 @@ Scaffolds an example Holochain application to help you get started quickly
 **Usage**
 
 ```bash
-hc-scaffold example [FLAGS] [ARGS]
+hc-scaffold example [FLAGS] [OPTIONS] [ARGS]
 ```
 
 #### Flags
@@ -353,9 +354,11 @@ hc-scaffold example [FLAGS] [ARGS]
 - `-V`, `--version`  
   Prints version information.
 
+
+### Options
+
 - `-p`, `--package-manager <package-manager>`  
-  The package manager to use for scaffolding the example. Can be one of the following: "bun", "npm", "pnpm", or "yarn". When a lockfile is detected, the respective package manager will be used as the default value; otherwise, npm will be set as the default.  
-  **Default:** `npm`
+  The package manager to use for scaffolding the example. Can be one of the following: "bun", "npm", "pnpm", or "yarn".
 
 #### Arguments
 

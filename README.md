@@ -11,13 +11,9 @@ FLAGS:
     -V, --version    Prints version information
 
 OPTIONS:
-    -p, --package-manager <package-manager>    The package manager to use for the hc-scaffold commands. Can be one of
-                                               the following: "bun", "npm", "pnpm", or "yarn". When a lockfile is
-                                               detected, the respective package manager will be used as the default
-                                               value; otherwise, npm will be set as the default [default: npm]
-    -t, --template <template>                  The template to use for the hc-scaffold commands Can either be an option
-                                               from the built-in templates: "vanilla", "vue", "lit", "svelte", "react",
-                                               "headless" Or a path to a custom template
+    -t, --template <template>    The template to use for the hc-scaffold commands Can either be an option from the
+                                 built-in templates: "vanilla", "vue", "lit", "svelte", "react", "headless" Or a path to
+                                 a custom template
 
 SUBCOMMANDS:
     collection    Scaffold a collection of entries in an existing zome

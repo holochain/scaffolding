@@ -36,7 +36,7 @@ setup_and_build_happ() {
   cleanup_tmp "$1"
 
   cd $TEMPLATE_PATH
-  hc-scaffold --package-manager yarn --template="$2" web-app "$1" --setup-nix true -F
+  hc-scaffold --template="$2" web-app "$1" --package-manager yarn --setup-nix true -F
   cd "$1"
 
   hc-scaffold dna forum
@@ -72,7 +72,7 @@ setup_and_build_hello_world() {
   cleanup_tmp hello-world
 
   cd $TEMPLATE_PATH
-  hc-scaffold --package-manager yarn example hello-world
+  hc-scaffold example --package-manager yarn hello-world
   cd hello-world
 
   nix develop --command bash -c "
