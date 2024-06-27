@@ -271,7 +271,7 @@ fn handle_if_template_regex<'a, T: Serialize>(
             &h,
             existing_app_file_tree,
             &target_path,
-            &contents.to_owned(),
+            &contents,
             &serde_json::json!(data),
         )?;
         let new_contents = format_code(&new_contents, file_name)?;
