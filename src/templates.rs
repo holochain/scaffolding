@@ -157,7 +157,7 @@ pub fn render_template_file_tree<T: Serialize>(
                         let target_path = PathBuf::from(new_path).with_extension("");
 
                         let new_contents = render_template_file(
-                            &h,
+                            h,
                             existing_app_file_tree,
                             &target_path,
                             &contents,
@@ -184,9 +184,9 @@ pub fn render_template_file_tree<T: Serialize>(
     unflatten_file_tree(&transformed_templates)
 }
 
-fn handle_each_regex_template<'a, T: Serialize>(
-    h: &Handlebars<'a>,
-    path: &PathBuf,
+fn handle_each_regex_template<T: Serialize>(
+    h: &Handlebars,
+    path: &Path,
     path_str: &str,
     contents: &str,
     existing_app_file_tree: &FileTree,
@@ -198,7 +198,7 @@ fn handle_each_regex_template<'a, T: Serialize>(
 
     let new_path_suffix = EACH_TEMPLATE_REGEX.replace(path_str, "{{#each ${b} }}${a}.hbs{{/each}}");
 
-    let all_paths = h.render_template(&new_path_suffix.to_string(), data)?;
+    let all_paths = h.render_template(new_path_suffix.as_ref(), data)?;
 
     let files_to_create = all_paths
         .split(".hbs")
@@ -229,15 +229,14 @@ fn handle_each_regex_template<'a, T: Serialize>(
         )
     };
     let new_contents = render_template_file(
-        &h,
+        h,
         existing_app_file_tree,
-        &path,
+        path,
         &new_all_contents,
         &serde_json::json!(data),
     )?;
     let new_contents_split: Vec<String> = new_contents
         .split(delimiter)
-        .into_iter()
         .map(|s| s.to_string())
         .collect();
 
@@ -249,8 +248,8 @@ fn handle_each_regex_template<'a, T: Serialize>(
     Ok(())
 }
 
-fn handle_if_template_regex<'a, T: Serialize>(
-    h: &Handlebars<'a>,
+fn handle_if_template_regex<T: Serialize>(
+    h: &Handlebars,
     path_str: &str,
     contents: &str,
     existing_app_file_tree: &FileTree,
@@ -268,10 +267,10 @@ fn handle_if_template_regex<'a, T: Serialize>(
         let target_path = PathBuf::from(path_prefix.clone()).join(file_name);
 
         let new_contents = render_template_file(
-            &h,
+            h,
             existing_app_file_tree,
             &target_path,
-            &contents,
+            contents,
             &serde_json::json!(data),
         )?;
         let new_contents = format_code(&new_contents, file_name)?;
@@ -281,7 +280,7 @@ fn handle_if_template_regex<'a, T: Serialize>(
     Ok(())
 }
 
-pub fn render_template_file_tree_and_merge_with_existing<'a, T: Serialize>(
+pub fn render_template_file_tree_and_merge_with_existing<T: Serialize>(
     app_file_tree: FileTree,
     h: &Handlebars,
     template_file_tree: &FileTree,
