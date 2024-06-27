@@ -82,9 +82,6 @@ pub fn render_template_file(
     value: &serde_json::Value,
 ) -> ScaffoldResult<String> {
     let mut value = value.clone();
-    let target_path_str = target_path
-        .to_str()
-        .context("Failed to convert PathBuf to str")?;
 
     if let Ok(previous_content) = file_content(existing_app_file_tree, target_path) {
         value
@@ -94,8 +91,9 @@ pub fn render_template_file(
     }
 
     let mut h = h.clone();
-    h.register_template_string(target_path_str, template_str)?;
-    let new_contents = h.render(target_path_str, &value)?;
+    h.register_template_string(target_path.to_str().unwrap(), template_str)
+        .map_err(Box::new)?;
+    let new_contents = h.render(target_path.to_str().unwrap(), &value)?;
 
     Ok(new_contents)
 }
@@ -162,6 +160,7 @@ pub fn render_template_file_tree<T: Serialize>(
                                 &contents,
                                 &serde_json::json!(data),
                             )?;
+                            let new_contents = format_code(&new_contents, &target_path)?;
 
                             transformed_templates.insert(target_path, Some(new_contents));
                         }
@@ -217,21 +216,17 @@ fn handle_each_regex_template<'a, T: Serialize>(
     let each_if_re =
         Regex::new(EACH_IF_TEMPLATE_REGEX).context("EACH_IF_TEMPLATE_REGEX is invalid")?;
     let b = each_regex.replace(path_str, "${b}");
-    let new_all_contents = match each_if_re.is_match(path_str) {
-        true => {
-            let d = each_if_re.replace(path_str, "${d}");
-            format!(
-                "{{{{#each {} }}}}{{{{#if {} }}}}\n{}{}{{{{/if}}}}{{{{/each}}}}",
-                b, d, contents, delimiter
-            )
-        }
-
-        false => {
-            format!(
-                "{{{{#each {} }}}}\n{}{}{{{{/each}}}}",
-                b, contents, delimiter
-            )
-        }
+    let new_all_contents = if each_if_re.is_match(path_str) {
+        let d = each_if_re.replace(path_str, "${d}");
+        format!(
+            "{{{{#each {} }}}}{{{{#if {} }}}}\n{}{}{{{{/if}}}}{{{{/each}}}}",
+            b, d, contents, delimiter
+        )
+    } else {
+        format!(
+            "{{{{#each {} }}}}\n{}{}{{{{/each}}}}",
+            b, contents, delimiter
+        )
     };
     let new_contents = render_template_file(
         &h,
@@ -248,8 +243,8 @@ fn handle_each_regex_template<'a, T: Serialize>(
 
     for (i, f) in files_to_create.into_iter().enumerate() {
         let target_path = PathBuf::from(path_prefix.clone()).join(f);
-
-        transformed_templates.insert(target_path, Some(new_contents_split[i].clone()));
+        let new_contents = format_code(&new_contents_split[i].clone(), &target_path)?;
+        transformed_templates.insert(target_path, Some(new_contents));
     }
     Ok(())
 }
@@ -280,6 +275,8 @@ fn handle_if_template_regex<'a, T: Serialize>(
             &contents.to_owned(),
             &serde_json::json!(data),
         )?;
+        let new_contents = format_code(&new_contents, file_name)?;
+
         transformed_templates.insert(target_path, Some(new_contents));
     }
     Ok(())
