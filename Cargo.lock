@@ -2915,6 +2915,7 @@ dependencies = [
  "include_dir",
  "itertools 0.10.5",
  "mr_bundle",
+ "once_cell",
  "path-clean",
  "pluralizer",
  "prettyplease",

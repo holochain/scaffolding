@@ -1,12 +1,13 @@
 use anyhow::Context;
 use build_fs_tree::serde::Serialize;
 use handlebars::Handlebars;
+use once_cell::sync::Lazy;
 use regex::Regex;
 use std::collections::BTreeMap;
 use std::ffi::OsString;
 use std::path::{Path, PathBuf};
 
-use crate::error::ScaffoldResult;
+use crate::error::{ScaffoldError, ScaffoldResult};
 use crate::file_tree::{
     file_content, find_files, flatten_file_tree, unflatten_file_tree, FileTree,
 };
@@ -23,11 +24,18 @@ pub mod integrity;
 pub mod link_type;
 pub mod web_app;
 
-const EACH_TEMPLATE_REGEX: &str =
-    r"(?P<c>(.)*)/\{\{#each (?P<b>([^\{\}])*)\}\}(?P<a>(.)*)\{\{/each\}\}.hbs\z";
-const EACH_IF_TEMPLATE_REGEX: &str = r"(?P<c>(.)*)/\{\{#each (?P<b>([^\{\}])*)\}\}\{\{#if (?P<d>([^\{\}])*)\}\}(?P<a>(.)*)\{\{/if\}\}\{\{/each\}\}.hbs\z";
-const IF_TEMPLATE_REGEX: &str =
-    r"(?P<c>(.)*)/\{\{#if (?P<b>([^\{\}])*)\}\}(?P<a>(.)*)\{\{/if\}\}.hbs\z";
+static EACH_TEMPLATE_REGEX: Lazy<Regex> = Lazy::new(|| {
+    Regex::new(r"(?P<c>(.)*)/\{\{#each (?P<b>([^\{\}])*)\}\}(?P<a>(.)*)\{\{/each\}\}.hbs\z")
+        .expect("EACH_TEMPLATE_REGEX is invalid")
+});
+static EACH_IF_TEMPLATE_REGEX: Lazy<Regex> = Lazy::new(|| {
+    Regex::new(r"(?P<c>(.)*)/\{\{#each (?P<b>([^\{\}])*)\}\}\{\{#if (?P<d>([^\{\}])*)\}\}(?P<a>(.)*)\{\{/if\}\}\{\{/each\}\}.hbs\z")
+        .expect("EACH_IF_TEMPLATE_REGEX is invalid")
+});
+static IF_TEMPLATE_REGEX: Lazy<Regex> = Lazy::new(|| {
+    Regex::new(r"(?P<c>(.)*)/\{\{#if (?P<b>([^\{\}])*)\}\}(?P<a>(.)*)\{\{/if\}\}.hbs\z")
+        .expect("IF_TEMPLATE_REGEX is invalid")
+});
 
 pub struct ScaffoldedTemplate {
     pub file_tree: FileTree,
@@ -118,13 +126,8 @@ pub fn render_template_file_tree<T: Serialize>(
         );
         let path_str = path.to_str().context("Failed to convert PathBuf to str")?;
         if let Some(contents) = maybe_contents {
-            let each_regex =
-                Regex::new(EACH_TEMPLATE_REGEX).context("EACH_TEMPLATE_REGEX is invalid")?;
-            let if_regex = Regex::new(IF_TEMPLATE_REGEX).context("IF_TEMPLATE_REGEX is invalid")?;
-
-            match (each_regex.is_match(path_str), if_regex.is_match(path_str)) {
-                (true, _) => handle_each_regex_template(
-                    each_regex,
+            if EACH_TEMPLATE_REGEX.is_match(path_str) {
+                handle_each_regex_template(
                     h,
                     &path,
                     path_str,
@@ -132,40 +135,40 @@ pub fn render_template_file_tree<T: Serialize>(
                     existing_app_file_tree,
                     data,
                     &mut transformed_templates,
-                )?,
-                (_, true) => handle_if_template_regex(
-                    if_regex,
+                )?;
+            } else if IF_TEMPLATE_REGEX.is_match(path_str) {
+                handle_if_template_regex(
                     h,
                     path_str,
                     &contents,
                     existing_app_file_tree,
                     data,
                     &mut transformed_templates,
-                )?,
-                _ => {
-                    if let Some(e) = path.extension() {
-                        if e == "hbs" {
-                            let new_path = h.render_template(
-                                path.as_os_str()
-                                    .to_str()
-                                    .context("Failed to convert OsStr to str")?,
-                                data,
-                            )?;
-                            let target_path = PathBuf::from(new_path).with_extension("");
+                )?;
+            } else {
+                path.extension().map_or(Ok::<_, ScaffoldError>(()), |e| {
+                    if e == "hbs" {
+                        let new_path = h.render_template(
+                            path.as_os_str()
+                                .to_str()
+                                .context("Failed to convert OsStr to str")?,
+                            data,
+                        )?;
+                        let target_path = PathBuf::from(new_path).with_extension("");
 
-                            let new_contents = render_template_file(
-                                &h,
-                                existing_app_file_tree,
-                                &target_path,
-                                &contents,
-                                &serde_json::json!(data),
-                            )?;
-                            let new_contents = format_code(&new_contents, &target_path)?;
+                        let new_contents = render_template_file(
+                            &h,
+                            existing_app_file_tree,
+                            &target_path,
+                            &contents,
+                            &serde_json::json!(data),
+                        )?;
+                        let new_contents = format_code(&new_contents, &target_path)?;
 
-                            transformed_templates.insert(target_path, Some(new_contents));
-                        }
+                        transformed_templates.insert(target_path, Some(new_contents));
                     }
-                }
+                    Ok(())
+                })?;
             }
         } else {
             let new_path = h.render_template(
@@ -182,7 +185,6 @@ pub fn render_template_file_tree<T: Serialize>(
 }
 
 fn handle_each_regex_template<'a, T: Serialize>(
-    each_regex: Regex,
     h: &Handlebars<'a>,
     path: &PathBuf,
     path_str: &str,
@@ -191,10 +193,10 @@ fn handle_each_regex_template<'a, T: Serialize>(
     data: &T,
     transformed_templates: &mut BTreeMap<PathBuf, Option<String>>,
 ) -> ScaffoldResult<()> {
-    let path_prefix = each_regex.replace(path_str, "${c}");
+    let path_prefix = EACH_TEMPLATE_REGEX.replace(path_str, "${c}");
     let path_prefix = h.render_template(path_prefix.to_string().as_str(), data)?;
 
-    let new_path_suffix = each_regex.replace(path_str, "{{#each ${b} }}${a}.hbs{{/each}}");
+    let new_path_suffix = EACH_TEMPLATE_REGEX.replace(path_str, "{{#each ${b} }}${a}.hbs{{/each}}");
 
     let all_paths = h.render_template(&new_path_suffix.to_string(), data)?;
 
@@ -213,11 +215,9 @@ fn handle_each_regex_template<'a, T: Serialize>(
     }
 
     let delimiter = "\n----END_OF_FILE_DELIMITER----\n";
-    let each_if_re =
-        Regex::new(EACH_IF_TEMPLATE_REGEX).context("EACH_IF_TEMPLATE_REGEX is invalid")?;
-    let b = each_regex.replace(path_str, "${b}");
-    let new_all_contents = if each_if_re.is_match(path_str) {
-        let d = each_if_re.replace(path_str, "${d}");
+    let b = EACH_TEMPLATE_REGEX.replace(path_str, "${b}");
+    let new_all_contents = if EACH_IF_TEMPLATE_REGEX.is_match(path_str) {
+        let d = EACH_IF_TEMPLATE_REGEX.replace(path_str, "${d}");
         format!(
             "{{{{#each {} }}}}{{{{#if {} }}}}\n{}{}{{{{/if}}}}{{{{/each}}}}",
             b, d, contents, delimiter
@@ -250,7 +250,6 @@ fn handle_each_regex_template<'a, T: Serialize>(
 }
 
 fn handle_if_template_regex<'a, T: Serialize>(
-    if_regex: Regex,
     h: &Handlebars<'a>,
     path_str: &str,
     contents: &str,
@@ -258,10 +257,10 @@ fn handle_if_template_regex<'a, T: Serialize>(
     data: &T,
     transformed_templates: &mut BTreeMap<PathBuf, Option<String>>,
 ) -> ScaffoldResult<()> {
-    let path_prefix = if_regex.replace(path_str, "${c}");
+    let path_prefix = IF_TEMPLATE_REGEX.replace(path_str, "${c}");
     let path_prefix = h.render_template(path_prefix.to_string().as_str(), data)?;
 
-    let new_path_suffix = if_regex.replace(path_str, "{{#if ${b} }}${a}.hbs{{/if}}");
+    let new_path_suffix = IF_TEMPLATE_REGEX.replace(path_str, "{{#if ${b} }}${a}.hbs{{/if}}");
 
     let new_template = h.render_template(new_path_suffix.to_string().as_str(), data)?;
 
