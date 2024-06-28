@@ -885,7 +885,7 @@ Add new collections for that entry type with:
                 build_file_tree(file_tree, &app_dir)?;
 
                 // set up nix
-                if setup_nix == Some(true) || setup_nix == None {
+                if let Some(true) | None = setup_nix {
                     if let Err(err) = setup_nix_developer_environment(&app_dir) {
                         fs::remove_dir_all(&app_dir)?;
                         return Err(err)?;
