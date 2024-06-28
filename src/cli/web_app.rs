@@ -16,6 +16,7 @@ use crate::{
 };
 
 #[derive(Debug, StructOpt)]
+/// Scaffold a new, empty web app
 pub struct WebApp {
     /// Name of the app to scaffold
     pub name: Option<String>,

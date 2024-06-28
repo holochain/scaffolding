@@ -30,6 +30,7 @@ use crate::{
 };
 
 #[derive(Debug, StructOpt)]
+/// Scaffold an example hApp
 pub struct Example {
     /// Name of the example to scaffold. One of ['hello-world', 'forum'].
     pub example: Option<ExampleType>,

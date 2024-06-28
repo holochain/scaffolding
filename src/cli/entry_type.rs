@@ -19,6 +19,7 @@ use crate::{
 };
 
 #[derive(Debug, StructOpt)]
+/// Scaffold an entry type and CRUD functions into an existing zome
 pub struct EntryType {
     #[structopt(long)]
     /// Name of the dna in which you want to scaffold the zome
@@ -76,7 +77,7 @@ impl EntryType {
         if self.no_ui {
             let warning_text = r#"
 WARNING: Opting out of UI generation for this entry-type but not for other entry-types, link-types or collections associated with it
-may result in potential UI inconsistencies. Specifically, UI elements intended for associated entry-types, link-types or collections could 
+may result in potential UI inconsistencies. Specifically, UI elements intended for associated entry-types, link-types or collections could
 inadvertently reference or expect elements from the skipped entry type."#
                 .yellow();
             println!("{warning_text}");

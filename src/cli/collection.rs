@@ -17,6 +17,7 @@ use crate::{
 };
 
 #[derive(Debug, StructOpt)]
+/// Scaffold a collection of entries in an existing zome
 pub struct Collection {
     #[structopt(long)]
     /// Name of the dna in which you want to scaffold the zome

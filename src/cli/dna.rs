@@ -10,6 +10,7 @@ use crate::{
 };
 
 #[derive(Debug, StructOpt)]
+/// Scaffold a DNA into an existing app
 pub struct Dna {
     #[structopt(long)]
     /// Name of the app in which you want to scaffold the DNA

@@ -20,6 +20,7 @@ use crate::{
 };
 
 #[derive(Debug, StructOpt)]
+/// Scaffold one or multiple zomes into an existing DNA
 pub struct Zome {
     #[structopt(long)]
     /// Name of the dna in which you want to scaffold the zome

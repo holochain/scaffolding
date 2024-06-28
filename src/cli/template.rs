@@ -8,6 +8,7 @@ use crate::file_tree::FileTree;
 
 #[derive(Debug, StructOpt)]
 #[structopt(setting = structopt::clap::AppSettings::InferSubcommands)]
+/// Manage custom templates
 pub enum Template {
     /// Clone the template in use into a new custom template
     Clone {

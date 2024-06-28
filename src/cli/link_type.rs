@@ -12,6 +12,7 @@ use crate::{
 };
 
 #[derive(Debug, StructOpt)]
+/// Scaffold a link type and its appropriate zome functions into an existing zome
 pub struct LinkType {
     #[structopt(long)]
     /// Name of the dna in which you want to scaffold the zome
