@@ -34,11 +34,11 @@ pub mod integrity;
 pub mod utils;
 
 fn check_field_definitions(
-    entry_type_name: &String,
+    entry_type_name: &str,
     zome_file_tree: &ZomeFileTree,
-    fields: &Vec<FieldDefinition>,
+    fields: &[FieldDefinition],
 ) -> ScaffoldResult<()> {
-    let entry_types = get_all_entry_types(zome_file_tree)?.unwrap_or_else(|| vec![]);
+    let entry_types = get_all_entry_types(zome_file_tree)?.unwrap_or_else(Vec::new);
 
     let entry_types_names: Vec<String> = entry_types
         .clone()
@@ -71,14 +71,16 @@ fn check_field_definitions(
     }
 }
 
+// TODO: group some params into a new-type or prefer builder pattern
+#[allow(clippy::too_many_arguments)]
 pub fn scaffold_entry_type(
     zome_file_tree: ZomeFileTree,
     template_file_tree: &FileTree,
-    name: &String,
-    maybe_crud: &Option<Crud>,
-    maybe_reference_entry_hash: &Option<bool>,
-    maybe_link_from_original_to_each_update: &Option<bool>,
-    maybe_fields: &Option<Vec<FieldDefinition>>,
+    name: &str,
+    maybe_crud: Option<Crud>,
+    maybe_reference_entry_hash: Option<bool>,
+    maybe_link_from_original_to_each_update: Option<bool>,
+    maybe_fields: Option<&Vec<FieldDefinition>>,
     no_ui: bool,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     check_for_reserved_words(name)?;
@@ -93,45 +95,25 @@ pub fn scaffold_entry_type(
                 .iter()
                 .map(|s| s.to_os_string())
                 .collect();
-            let empty_dir = dir! {};
             choose_fields(
                 name,
                 &zome_file_tree,
-                template_file_tree.path(&mut v.iter()).unwrap_or(&empty_dir),
+                template_file_tree.path(&mut v.iter()).unwrap_or(&dir! {}),
                 no_ui,
             )?
         }
     };
 
-    let reference_entry_hash = match maybe_reference_entry_hash {
-        Some(r) => r.clone(),
-        None => {
-            // TODO: understand if this question is necessary, or if we can assume ActionHash
-            // let selection = Select::with_theme(&ColorfulTheme::default())
-            //     .with_prompt(String::from(
-            //         "Choose hash type to refererence this entry type:",
-            //     ))
-            //     .default(0)
-            //     .item("ActionHash (recommended)")
-            //     .item("EntryHash")
-            //     .interact()?;
-
-            // match selection {
-            //     0 => false,
-            //     _ => true,
-            // }
-            false
-        }
-    };
+    let reference_entry_hash = maybe_reference_entry_hash.unwrap_or(false);
 
     let crud = match maybe_crud {
-        Some(c) => c.clone(),
+        Some(c) => c,
         None => choose_crud(),
     };
 
     let link_from_original_to_each_update = match crud.update {
         true => match maybe_link_from_original_to_each_update {
-            Some(l) => l.clone(),
+            Some(l) => l,
             None => {
                 let selection = Select::with_theme(&ColorfulTheme::default())
                 .with_prompt("Should a link from the original entry be created when this entry is updated?")
@@ -147,10 +129,11 @@ pub fn scaffold_entry_type(
     };
 
     let entry_def = EntryDefinition {
-        name: name.clone(),
+        name: name.to_owned(),
         fields,
         reference_entry_hash,
     };
+    let entry_def_ts_types = entry_def.ts_type_codegen();
 
     let integrity_zome_name = zome_file_tree.zome_manifest.name.0.to_string();
 
@@ -162,7 +145,7 @@ pub fn scaffold_entry_type(
         .filter_map(|f| f.linked_from.clone())
         .collect();
 
-    for l in linked_from.clone() {
+    for l in linked_from {
         zome_file_tree = add_link_type_to_integrity_zome(
             zome_file_tree,
             &link_type_name(&l, &entry_def.referenceable()),
@@ -175,7 +158,7 @@ pub fn scaffold_entry_type(
 
     let coordinator_zomes_for_integrity = get_coordinator_zomes_for_integrity(
         &zome_file_tree.dna_file_tree.dna_manifest,
-        &zome_file_tree.zome_manifest.name.0.to_string(),
+        zome_file_tree.zome_manifest.name.0.as_ref(),
     );
 
     let coordinator_zome = match coordinator_zomes_for_integrity.len() {
@@ -223,8 +206,7 @@ pub fn scaffold_entry_type(
 
     let dna_manifest = zome_file_tree.dna_file_tree.dna_manifest.clone();
 
-    let app_file_tree =
-        AppFileTree::get_or_choose(zome_file_tree.dna_file_tree.file_tree(), &None)?;
+    let app_file_tree = AppFileTree::get_or_choose(zome_file_tree.dna_file_tree.file_tree(), None)?;
 
     let app_name = app_file_tree.app_manifest.app_name().to_string();
 
@@ -235,6 +217,7 @@ pub fn scaffold_entry_type(
         &dna_manifest.name(),
         &coordinator_zome,
         &entry_def,
+        &entry_def_ts_types,
         &crud,
         link_from_original_to_each_update,
         no_ui,

@@ -4,7 +4,8 @@ use std::{ffi::OsString, path::PathBuf};
 use crate::{
     error::ScaffoldResult,
     file_tree::{file_content, FileTree},
-    scaffold::example::Example, versions::{hdi_version, hdk_version, holochain_client_version},
+    scaffold::{example::Example, web_app::package_manager::PackageManager},
+    versions,
 };
 
 use super::{
@@ -12,25 +13,28 @@ use super::{
 };
 
 #[derive(Serialize)]
-pub struct ScaffoldExampleData {
-    pub example: String,
-    pub holochain_client_version: String,
-    pub hdk_version: String,
-    pub hdi_version: String,
+pub struct ScaffoldExampleData<'a> {
+    pub example: &'a str,
+    pub holochain_client_version: &'a str,
+    pub hdk_version: &'a str,
+    pub hdi_version: &'a str,
+    pub package_manager: PackageManager,
 }
 
 pub fn scaffold_example(
     mut app_file_tree: FileTree,
+    package_manager: PackageManager,
     template_file_tree: &FileTree,
     example: &Example,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     let data = ScaffoldExampleData {
-        example: example.to_string(),
-        holochain_client_version: holochain_client_version(),
-        hdk_version: hdk_version(),
-        hdi_version: hdi_version(),
+        example: &example.to_string(),
+        holochain_client_version: versions::HOLOCHAIN_CLIENT_VERSION,
+        hdk_version: versions::HDK_VERSION,
+        hdi_version: versions::HDI_VERSION,
+        package_manager,
     };
-    let h = build_handlebars(&template_file_tree)?;
+    let h = build_handlebars(template_file_tree)?;
 
     let example_path = PathBuf::from("example");
     let v: Vec<OsString> = example_path.iter().map(|s| s.to_os_string()).collect();
@@ -45,7 +49,7 @@ pub fn scaffold_example(
     }
 
     let next_instructions = match file_content(
-        &template_file_tree,
+        template_file_tree,
         &PathBuf::from("example.instructions.hbs"),
     ) {
         Ok(content) => Some(h.render_template(content.as_str(), &data)?),

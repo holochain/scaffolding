@@ -10,7 +10,7 @@ use crate::{
 };
 
 pub mod cargo;
-pub mod gitignore;
+pub mod git;
 pub mod manifests;
 pub mod nix;
 pub mod utils;
@@ -25,14 +25,14 @@ impl AppFileTree {
     pub fn file_tree(self) -> FileTree {
         self.file_tree
     }
-    
-    pub fn file_tree_ref<'a>(&'a self) -> &'a FileTree {
+
+    pub fn file_tree_ref(&self) -> &FileTree {
         &self.file_tree
     }
 
     pub fn get_or_choose(
         file_tree: FileTree,
-        app_name: &Option<String>,
+        app_name: Option<&str>,
     ) -> ScaffoldResult<AppFileTree> {
         let app_manifests = find_app_manifests(&file_tree)?;
 

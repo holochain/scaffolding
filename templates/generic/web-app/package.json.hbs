@@ -1,0 +1,37 @@
+{
+  "name": "{{app_name}}-dev",
+  "private": true,
+  "workspaces": [
+    "ui",
+    "tests"
+  ],
+  "scripts": {
+    "start": "AGENTS=${AGENTS:-2} BOOTSTRAP_PORT=$(get-port) SIGNAL_PORT=$(get-port) {{(package_manager_command package_manager "network" null)}}",
+    "network": "hc sandbox clean && {{(package_manager_command package_manager "build:happ" null)}} && UI_PORT=$(get-port) concurrently \"{{(package_manager_command package_manager "start" "ui")}}\" \"{{(package_manager_command package_manager "launch:happ" null)}}\" \"holochain-playground\"",
+    "test": "{{(package_manager_command package_manager "build:zomes" null)}} && hc app pack workdir --recursive && {{(package_manager_command package_manager "test" "tests")}}",
+    "launch:happ": "hc-spin -n $AGENTS --ui-port $UI_PORT workdir/{{app_name}}.happ",
+    "start:tauri": "AGENTS=${AGENTS:-2} BOOTSTRAP_PORT=$(get-port) SIGNAL_PORT=$(get-port) {{(package_manager_command package_manager "network:tauri" null)}}",
+    "network:tauri": "hc sandbox clean && {{(package_manager_command package_manager "build:happ" null)}} && UI_PORT=$(get-port) concurrently \"{{(package_manager_command package_manager "start" "ui")}}\" \"{{(package_manager_command package_manager "launch:tauri" null)}}\" \"holochain-playground\"",
+    "launch:tauri": "concurrently \"hc run-local-services --bootstrap-port $BOOTSTRAP_PORT --signal-port $SIGNAL_PORT\" \"echo pass | RUST_LOG=warn hc launch --piped -n $AGENTS workdir/{{app_name}}.happ --ui-port $UI_PORT network --bootstrap http://127.0.0.1:\"$BOOTSTRAP_PORT\" webrtc ws://127.0.0.1:\"$SIGNAL_PORT\"\"",
+  {{#if holo_enabled}}
+    "start:holo": "AGENTS=${AGENTS:-2} {{(package_manager_command package_manager "network:holo" null)}}",
+    "network:holo": "{{(package_manager_command package_manager "build:happ" null)}} && UI_PORT=$(get-port) concurrently \"{{(package_manager_command package_manager "launch:holo-dev-server" null)}}\" \"holochain-playground ws://localhost:4444\" \"concurrently-repeat 'VITE_APP_CHAPERONE_URL=http://localhost:24274 VITE_APP_IS_HOLO=true {{(package_manager_command package_manager "start" "ui")}}' $AGENTS\"",
+    "launch:holo-dev-server": "holo-dev-server workdir/{{app_name}}.happ",
+  {{/if}}
+    "package": "{{(package_manager_command package_manager "build:happ" null)}} && {{(package_manager_command package_manager "package" "ui")}} && hc web-app pack workdir --recursive",
+    "build:happ": "{{(package_manager_command package_manager "build:zomes" null)}} && hc app pack workdir --recursive",
+    "build:zomes": "RUSTFLAGS='' CARGO_TARGET_DIR=target cargo build --release --target wasm32-unknown-unknown"
+  },
+  "devDependencies": {
+    "@holochain-playground/cli": "{{holochain_playground_cli_version}}",
+    "@holochain/hc-spin": "{{hc_spin_version}}",
+    "concurrently": "^6.2.1",
+  {{#if holo_enabled}}
+    "concurrently-repeat": "^0.0.1",
+  {{/if}}
+    "get-port-cli": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

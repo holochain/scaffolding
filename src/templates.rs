@@ -1,20 +1,18 @@
+use anyhow::Context;
 use build_fs_tree::serde::Serialize;
-use dialoguer::theme::ColorfulTheme;
-use dialoguer::Select;
 use handlebars::Handlebars;
+use once_cell::sync::Lazy;
 use regex::Regex;
 use std::collections::BTreeMap;
 use std::ffi::OsString;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use crate::error::{ScaffoldError, ScaffoldResult};
 use crate::file_tree::{
-    dir_content, dir_exists, file_content, find_files, flatten_file_tree, unflatten_file_tree,
-    FileTree,
+    file_content, find_files, flatten_file_tree, unflatten_file_tree, FileTree,
 };
-use crate::scaffold::web_app::uis::{guess_or_choose_framework, template_for_ui_framework};
+use crate::utils::format_code;
 
-pub mod get;
 pub mod helpers;
 
 pub mod collection;
@@ -25,6 +23,19 @@ pub mod example;
 pub mod integrity;
 pub mod link_type;
 pub mod web_app;
+
+static EACH_TEMPLATE_REGEX: Lazy<Regex> = Lazy::new(|| {
+    Regex::new(r"(?P<c>(.)*)/\{\{#each (?P<b>([^\{\}])*)\}\}(?P<a>(.)*)\{\{/each\}\}.hbs\z")
+        .expect("EACH_TEMPLATE_REGEX is invalid")
+});
+static EACH_IF_TEMPLATE_REGEX: Lazy<Regex> = Lazy::new(|| {
+    Regex::new(r"(?P<c>(.)*)/\{\{#each (?P<b>([^\{\}])*)\}\}\{\{#if (?P<d>([^\{\}])*)\}\}(?P<a>(.)*)\{\{/if\}\}\{\{/each\}\}.hbs\z")
+        .expect("EACH_IF_TEMPLATE_REGEX is invalid")
+});
+static IF_TEMPLATE_REGEX: Lazy<Regex> = Lazy::new(|| {
+    Regex::new(r"(?P<c>(.)*)/\{\{#if (?P<b>([^\{\}])*)\}\}(?P<a>(.)*)\{\{/if\}\}.hbs\z")
+        .expect("IF_TEMPLATE_REGEX is invalid")
+});
 
 pub struct ScaffoldedTemplate {
     pub file_tree: FileTree,
@@ -52,50 +63,52 @@ pub fn register_all_partials_in_dir<'a>(
     file_tree: &FileTree,
 ) -> ScaffoldResult<Handlebars<'a>> {
     let partials = find_files(file_tree, &|path, _contents| {
-        if let Some(e) = PathBuf::from(path).extension() {
-            if e == "hbs" {
-                return true;
-            }
-        }
-        return false;
+        PathBuf::from(path)
+            .extension()
+            .map_or(false, |e| e == "hbs")
     });
 
     for (path, content) in partials {
         h.register_partial(
-            path.with_extension("").as_os_str().to_str().unwrap(),
+            path.with_extension("")
+                .as_os_str()
+                .to_str()
+                .context("Failed to convert OsStr to str")?,
             content.trim(),
-        )?;
+        )
+        .map_err(Box::new)?;
     }
 
     Ok(h)
 }
 
-pub fn render_template_file<'a>(
-    h: &Handlebars<'a>,
+pub fn render_template_file(
+    h: &Handlebars,
     existing_app_file_tree: &FileTree,
-    target_path: &PathBuf,
-    template_str: &String,
+    target_path: &Path,
+    template_str: &str,
     value: &serde_json::Value,
 ) -> ScaffoldResult<String> {
     let mut value = value.clone();
 
-    if let Ok(previous_content) = file_content(existing_app_file_tree, &target_path) {
+    if let Ok(previous_content) = file_content(existing_app_file_tree, target_path) {
         value
             .as_object_mut()
-            .unwrap()
+            .context("Failed to get Value as a mutable object")?
             .insert("previous_file_content".into(), previous_content.into());
     }
 
     let mut h = h.clone();
-    h.register_template_string(target_path.to_str().unwrap(), template_str)?;
+    h.register_template_string(target_path.to_str().unwrap(), template_str)
+        .map_err(Box::new)?;
     let new_contents = h.render(target_path.to_str().unwrap(), &value)?;
 
     Ok(new_contents)
 }
 
-pub fn render_template_file_tree<'a, T: Serialize>(
+pub fn render_template_file_tree<T: Serialize>(
     existing_app_file_tree: &FileTree,
-    h: &Handlebars<'a>,
+    h: &Handlebars,
     templates_file_tree: &FileTree,
     data: &T,
 ) -> ScaffoldResult<FileTree> {
@@ -103,118 +116,67 @@ pub fn render_template_file_tree<'a, T: Serialize>(
 
     let mut transformed_templates: BTreeMap<PathBuf, Option<String>> = BTreeMap::new();
 
-    let new_data = serde_json::to_string(data)?;
-    let value: serde_json::Value = serde_json::from_str(new_data.as_str())?;
-
     for (path, maybe_contents) in flattened_templates {
-        let path = PathBuf::from(path.to_str().unwrap().replace('¡', "/"));
-        let path = PathBuf::from(path.to_str().unwrap().replace('\'', "\""));
+        // Normalize the file path by replacing special characters:
+        let path = PathBuf::from(
+            path.to_str()
+                .context("Failed to convert PathBuf to str")?
+                .replace('¡', "/")
+                .replace('\'', "\""),
+        );
+        let path_str = path.to_str().context("Failed to convert PathBuf to str")?;
         if let Some(contents) = maybe_contents {
-            let re = Regex::new(
-                r"(?P<c>(.)*)/\{\{#each (?P<b>([^\{\}])*)\}\}(?P<a>(.)*)\{\{/each\}\}.hbs\z",
-            )
-            .unwrap();
-            let if_regex = Regex::new(
-                r"(?P<c>(.)*)/\{\{#if (?P<b>([^\{\}])*)\}\}(?P<a>(.)*)\{\{/if\}\}.hbs\z",
-            )
-            .unwrap();
+            if EACH_TEMPLATE_REGEX.is_match(path_str) {
+                handle_each_regex_template(
+                    h,
+                    &path,
+                    path_str,
+                    &contents,
+                    existing_app_file_tree,
+                    data,
+                    &mut transformed_templates,
+                )?;
+            } else if IF_TEMPLATE_REGEX.is_match(path_str) {
+                handle_if_template_regex(
+                    h,
+                    path_str,
+                    &contents,
+                    existing_app_file_tree,
+                    data,
+                    &mut transformed_templates,
+                )?;
+            } else {
+                path.extension().map_or(Ok::<_, ScaffoldError>(()), |e| {
+                    if e == "hbs" {
+                        let new_path = h.render_template(
+                            path.as_os_str()
+                                .to_str()
+                                .context("Failed to convert OsStr to str")?,
+                            data,
+                        )?;
+                        let target_path = PathBuf::from(new_path).with_extension("");
 
-            if re.is_match(path.to_str().unwrap()) {
-                let path_prefix = re.replace(path.to_str().unwrap(), "${c}");
-                let path_prefix = h.render_template(path_prefix.to_string().as_str(), data)?;
+                        let new_contents = render_template_file(
+                            h,
+                            existing_app_file_tree,
+                            &target_path,
+                            &contents,
+                            &serde_json::json!(data),
+                        )?;
+                        let new_contents = format_code(&new_contents, &target_path)?;
 
-                let new_path_suffix =
-                    re.replace(path.to_str().unwrap(), "{{#each ${b} }}${a}.hbs{{/each}}");
-
-                let all_paths = h.render_template(new_path_suffix.to_string().as_str(), data)?;
-
-                let files_to_create: Vec<String> = all_paths
-                    .split(".hbs")
-                    .map(|s| s.to_string())
-                    .filter(|s| !s.is_empty())
-                    .collect();
-
-                if files_to_create.len() > 0 {
-                    let delimiter = "\n----END_OF_FILE_DELIMITER----\n";
-
-                    let each_if_re = Regex::new(
-                    r"(?P<c>(.)*)/\{\{#each (?P<b>([^\{\}])*)\}\}\{\{#if (?P<d>([^\{\}])*)\}\}(?P<a>(.)*)\{\{/if\}\}\{\{/each\}\}.hbs\z",
-                )
-                .unwrap();
-                    let b = re.replace(path.to_str().unwrap(), "${b}");
-                    let new_all_contents = match each_if_re.is_match(path.to_str().unwrap()) {
-                        true => {
-                            let d = each_if_re.replace(path.to_str().unwrap(), "${d}");
-                            format!(
-                                "{{{{#each {} }}}}{{{{#if {} }}}}\n{}{}{{{{/if}}}}{{{{/each}}}}",
-                                b, d, contents, delimiter
-                            )
-                        }
-
-                        false => format!(
-                            "{{{{#each {} }}}}\n{}{}{{{{/each}}}}",
-                            b, contents, delimiter
-                        ),
-                    };
-                    let new_contents = render_template_file(
-                        &h,
-                        existing_app_file_tree,
-                        &path,
-                        &new_all_contents,
-                        &value,
-                    )?;
-                    let new_contents_split: Vec<String> = new_contents
-                        .split(delimiter)
-                        .into_iter()
-                        .map(|s| s.to_string())
-                        .collect();
-
-                    for (i, f) in files_to_create.into_iter().enumerate() {
-                        let target_path = PathBuf::from(path_prefix.clone()).join(f);
-
-                        transformed_templates
-                            .insert(target_path, Some(new_contents_split[i].clone()));
+                        transformed_templates.insert(target_path, Some(new_contents));
                     }
-                }
-            } else if if_regex.is_match(path.to_str().unwrap()) {
-                let path_prefix = if_regex.replace(path.to_str().unwrap(), "${c}");
-                let path_prefix = h.render_template(path_prefix.to_string().as_str(), data)?;
-
-                let new_path_suffix =
-                    if_regex.replace(path.to_str().unwrap(), "{{#if ${b} }}${a}.hbs{{/if}}");
-
-                let new_template = h.render_template(new_path_suffix.to_string().as_str(), data)?;
-
-                if let Some(file_name) = new_template.strip_suffix(".hbs") {
-                    let target_path = PathBuf::from(path_prefix.clone()).join(file_name);
-
-                    let new_contents = render_template_file(
-                        &h,
-                        existing_app_file_tree,
-                        &target_path,
-                        &contents,
-                        &value,
-                    )?;
-                    transformed_templates.insert(target_path, Some(new_contents));
-                }
-            } else if let Some(e) = path.extension() {
-                if e == "hbs" {
-                    let new_path = h.render_template(path.as_os_str().to_str().unwrap(), data)?;
-                    let target_path = PathBuf::from(new_path).with_extension("");
-
-                    let new_contents = render_template_file(
-                        &h,
-                        existing_app_file_tree,
-                        &target_path,
-                        &contents,
-                        &value,
-                    )?;
-
-                    transformed_templates.insert(target_path, Some(new_contents));
-                }
+                    Ok(())
+                })?;
             }
         } else {
-            let new_path = h.render_template(path.as_os_str().to_str().unwrap(), data)?;
+            let new_path = h.render_template(
+                path.as_os_str()
+                    .to_str()
+                    .context("Failed to convert OsStr to str")?,
+                data,
+            )?;
             transformed_templates.insert(PathBuf::from(new_path), None);
         }
     }
@@ -222,9 +184,105 @@ pub fn render_template_file_tree<'a, T: Serialize>(
     unflatten_file_tree(&transformed_templates)
 }
 
-pub fn render_template_file_tree_and_merge_with_existing<'a, T: Serialize>(
+fn handle_each_regex_template<T: Serialize>(
+    h: &Handlebars,
+    path: &Path,
+    path_str: &str,
+    contents: &str,
+    existing_app_file_tree: &FileTree,
+    data: &T,
+    transformed_templates: &mut BTreeMap<PathBuf, Option<String>>,
+) -> ScaffoldResult<()> {
+    let path_prefix = EACH_TEMPLATE_REGEX.replace(path_str, "${c}");
+    let path_prefix = h.render_template(path_prefix.to_string().as_str(), data)?;
+
+    let new_path_suffix = EACH_TEMPLATE_REGEX.replace(path_str, "{{#each ${b} }}${a}.hbs{{/each}}");
+
+    let all_paths = h.render_template(new_path_suffix.as_ref(), data)?;
+
+    let files_to_create = all_paths
+        .split(".hbs")
+        .filter_map(|s| {
+            if s.is_empty() {
+                return None;
+            }
+            Some(s.to_string())
+        })
+        .collect::<Vec<String>>();
+
+    if files_to_create.is_empty() {
+        return Ok(());
+    }
+
+    let delimiter = "\n----END_OF_FILE_DELIMITER----\n";
+    let b = EACH_TEMPLATE_REGEX.replace(path_str, "${b}");
+    let new_all_contents = if EACH_IF_TEMPLATE_REGEX.is_match(path_str) {
+        let d = EACH_IF_TEMPLATE_REGEX.replace(path_str, "${d}");
+        format!(
+            "{{{{#each {} }}}}{{{{#if {} }}}}\n{}{}{{{{/if}}}}{{{{/each}}}}",
+            b, d, contents, delimiter
+        )
+    } else {
+        format!(
+            "{{{{#each {} }}}}\n{}{}{{{{/each}}}}",
+            b, contents, delimiter
+        )
+    };
+    let new_contents = render_template_file(
+        h,
+        existing_app_file_tree,
+        path,
+        &new_all_contents,
+        &serde_json::json!(data),
+    )?;
+    let new_contents_split: Vec<String> = new_contents
+        .split(delimiter)
+        .map(|s| s.to_string())
+        .collect();
+
+    for (i, f) in files_to_create.into_iter().enumerate() {
+        let target_path = PathBuf::from(path_prefix.clone()).join(f);
+        let new_contents = format_code(&new_contents_split[i].clone(), &target_path)?;
+        transformed_templates.insert(target_path, Some(new_contents));
+    }
+    Ok(())
+}
+
+fn handle_if_template_regex<T: Serialize>(
+    h: &Handlebars,
+    path_str: &str,
+    contents: &str,
+    existing_app_file_tree: &FileTree,
+    data: &T,
+    transformed_templates: &mut BTreeMap<PathBuf, Option<String>>,
+) -> ScaffoldResult<()> {
+    let path_prefix = IF_TEMPLATE_REGEX.replace(path_str, "${c}");
+    let path_prefix = h.render_template(path_prefix.to_string().as_str(), data)?;
+
+    let new_path_suffix = IF_TEMPLATE_REGEX.replace(path_str, "{{#if ${b} }}${a}.hbs{{/if}}");
+
+    let new_template = h.render_template(new_path_suffix.to_string().as_str(), data)?;
+
+    if let Some(file_name) = new_template.strip_suffix(".hbs") {
+        let target_path = PathBuf::from(path_prefix.clone()).join(file_name);
+
+        let new_contents = render_template_file(
+            h,
+            existing_app_file_tree,
+            &target_path,
+            contents,
+            &serde_json::json!(data),
+        )?;
+        let new_contents = format_code(&new_contents, file_name)?;
+
+        transformed_templates.insert(target_path, Some(new_contents));
+    }
+    Ok(())
+}
+
+pub fn render_template_file_tree_and_merge_with_existing<T: Serialize>(
     app_file_tree: FileTree,
-    h: &Handlebars<'a>,
+    h: &Handlebars,
     template_file_tree: &FileTree,
     data: &T,
 ) -> ScaffoldResult<FileTree> {
@@ -237,66 +295,4 @@ pub fn render_template_file_tree_and_merge_with_existing<'a, T: Serialize>(
     flattened_app_file_tree.extend(flattened_templates);
 
     unflatten_file_tree(&flattened_app_file_tree)
-}
-
-pub fn templates_path() -> PathBuf {
-    PathBuf::from(".templates")
-}
-
-pub fn choose_or_get_template_file_tree(
-    file_tree: &FileTree,
-    template: &Option<String>,
-) -> ScaffoldResult<FileTree> {
-    if dir_exists(file_tree, &templates_path()) {
-        let template_name = choose_or_get_template(file_tree, template)?;
-
-        Ok(FileTree::Directory(dir_content(
-            &file_tree,
-            &templates_path().join(template_name),
-        )?))
-    } else {
-        let ui_framework = guess_or_choose_framework(file_tree)?;
-
-        template_for_ui_framework(&ui_framework)
-    }
-}
-
-pub fn choose_or_get_template(
-    file_tree: &FileTree,
-    template: &Option<String>,
-) -> ScaffoldResult<String> {
-    let templates_path = PathBuf::new().join(templates_path());
-
-    let templates_dir_content =
-        dir_content(file_tree, &templates_path).map_err(|_e| ScaffoldError::NoTemplatesFound)?;
-
-    let templates = templates_dir_content
-        .iter()
-        .filter_map(|(k, v)| {
-            if v.file_content().is_some() {
-                return None;
-            }
-            k.to_str().map(|s| s.to_string())
-        })
-        .collect::<Vec<String>>();
-
-    let chosen_template_name = match (template, templates.len()) {
-        (_, 0) => Err(ScaffoldError::NoTemplatesFound),
-        (None, 1) => Ok(templates[0].clone()),
-        (None, _) => {
-            let option = Select::with_theme(&ColorfulTheme::default())
-                .with_prompt("Which template should we use?")
-                .default(0)
-                .items(&templates[..])
-                .interact()?;
-
-            Ok(templates[option].clone())
-        }
-        (Some(t), _) => match templates.contains(&t) {
-            true => Ok(t.clone()),
-            false => Err(ScaffoldError::TemplateNotFound(t.clone())),
-        },
-    }?;
-
-    Ok(chosen_template_name)
 }

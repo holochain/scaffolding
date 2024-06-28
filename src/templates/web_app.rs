@@ -5,10 +5,8 @@ use serde::Serialize;
 use crate::{
     error::ScaffoldResult,
     file_tree::{file_content, FileTree},
-    versions::{
-        hc_spin_version, hdi_version, hdk_version, holochain_client_version, holochain_version,
-        tryorama_version,
-    },
+    scaffold::web_app::package_manager::PackageManager,
+    versions,
 };
 
 use super::{
@@ -16,31 +14,38 @@ use super::{
 };
 
 #[derive(Serialize)]
-pub struct ScaffoldWebAppData {
-    pub app_name: String,
-    pub holochain_version: String,
-    pub hdk_version: String,
-    pub hdi_version: String,
-    pub holochain_client_version: String,
-    pub hc_spin_version: String,
-    pub tryorama_version: String,
+pub struct ScaffoldWebAppData<'a> {
+    pub app_name: &'a str,
+    pub holochain_version: &'a str,
+    pub hdk_version: &'a str,
+    pub hdi_version: &'a str,
+    pub holochain_client_version: &'a str,
+    pub holochain_playground_cli_version: &'a str,
+    pub holo_web_sdk_version: &'a str,
+    pub hc_spin_version: &'a str,
+    pub package_manager: PackageManager,
+    pub tryorama_version: &'a str,
     pub holo_enabled: bool,
 }
 
 pub fn scaffold_web_app_template(
     mut app_file_tree: FileTree,
     template_file_tree: &FileTree,
-    app_name: &String,
+    app_name: &str,
+    package_manager: PackageManager,
     holo_enabled: bool,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     let data = ScaffoldWebAppData {
-        app_name: app_name.clone(),
-        holochain_version: holochain_version(),
-        hdk_version: hdk_version(),
-        hdi_version: hdi_version(),
-        holochain_client_version: holochain_client_version(),
-        hc_spin_version: hc_spin_version(),
-        tryorama_version: tryorama_version(),
+        app_name,
+        holochain_version: versions::HOLOCHAIN_VERSION,
+        hdk_version: versions::HDK_VERSION,
+        hdi_version: versions::HDI_VERSION,
+        holochain_client_version: versions::HOLOCHAIN_CLIENT_VERSION,
+        holo_web_sdk_version: versions::WEB_SDK_VERSION,
+        holochain_playground_cli_version: versions::HOLOCHAIN_PLAYGROUND_CLI_VERSION,
+        hc_spin_version: versions::HC_SPIN_VERSION,
+        package_manager,
+        tryorama_version: versions::TRYORAMA_VERSION,
         holo_enabled,
     };
 
@@ -59,7 +64,7 @@ pub fn scaffold_web_app_template(
     }
 
     let next_instructions = match file_content(
-        &template_file_tree,
+        template_file_tree,
         &PathBuf::from("web-app.instructions.hbs"),
     ) {
         Ok(content) => Some(h.render_template(content.as_str(), &data)?),

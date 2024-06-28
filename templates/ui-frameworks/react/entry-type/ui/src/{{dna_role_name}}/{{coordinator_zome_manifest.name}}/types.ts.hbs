@@ -1,0 +1,7 @@
+{{#if (includes previous_file_content "export type EntryTypes = {};")}}
+{{replace previous_file_content "export type EntryTypes = {};" (concat "/* dprint-ignore-start */\nexport type EntryTypes =\n | ({  type: '" (pascal_case entry_type.name) "'; } & " (pascal_case entry_type.name) ");" "\n/* dprint-ignore-end */")}}
+{{else}}
+{{replace previous_file_content "/* dprint-ignore-start */\nexport type EntryTypes =" (concat "/* dprint-ignore-start */\nexport type EntryTypes =\n | ({ type: '" (pascal_case entry_type.name) "'; } & " (pascal_case entry_type.name) ")")}}
+{{/if}}
+
+{{entry_type_ts_types}}

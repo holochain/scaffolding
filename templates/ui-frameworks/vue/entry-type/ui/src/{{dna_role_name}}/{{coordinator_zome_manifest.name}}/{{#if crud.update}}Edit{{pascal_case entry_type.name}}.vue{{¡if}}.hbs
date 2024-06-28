@@ -1,0 +1,153 @@
+<template>
+  <mwc-snackbar ref="update-error"></mwc-snackbar>
+
+  <div style="display: flex; flex-direction: column">
+    <span style="font-size: 18px">Edit {{title_case entry_type.name}}</span>
+{{#each entry_type.fields}}
+  {{#if widget}}
+      <div style="margin-bottom: 16px">
+    {{#if (not (eq cardinality "vector") )}}
+      {{> (concat field_type.type "/" widget "/edit/render") label=(title_case field_name) variable_to_read=(camel_case field_name) variable_to_change=(camel_case field_name) required=(eq cardinality "single")}}
+    {{else}}
+      {{> Vec/edit/render field_name=field_name field_type=field_type widget=widget }}
+    {{/if}}
+
+      </div>
+
+  {{/if}}
+{{/each}}
+
+
+    <div style="display: flex; flex-direction: row">
+      <mwc-button
+        outlined
+        label="Cancel"
+        @click="$emit('edit-canceled')"
+        style="flex: 1; margin-right: 16px;"
+      ></mwc-button>
+      <mwc-button 
+        raised
+        label="Save"
+        :disabled="!is{{pascal_case entry_type.name}}Valid"
+        @click="update{{pascal_case entry_type.name}}"
+        style="flex: 1;"
+      ></mwc-button>
+    </div>
+  </div>
+</template>
+<script lang="ts">
+import { defineComponent, inject, ComputedRef } from 'vue';
+import { AppClient, Record, AgentPubKey, EntryHash, ActionHash, DnaHash } from '@holochain/client';
+import { {{pascal_case entry_type.name}}{{#each entry_type.fields}}{{#if (eq field_type.type "Enum")}}, {{field_type.label}}{{/if}}{{/each}} } from './types';
+import '@material/mwc-button';
+import '@material/mwc-snackbar';
+import { decode } from '@msgpack/msgpack';
+import { Snackbar } from '@material/mwc-snackbar';
+{{#uniq_lines}}
+  {{#each entry_type.fields}}
+    {{#if widget}}
+{{> (concat field_type.type "/" widget "/edit/imports") }}
+
+    {{/if}}
+  {{/each}}
+{{/uniq_lines}}
+
+export default defineComponent({
+  data(): {
+{{#each entry_type.fields}}
+  {{#if widget}}
+    {{#if (not (eq cardinality "vector" ) )}}
+    {{camel_case field_name}}: {{> (concat field_type.type "/type")}};
+    {{else}}
+    {{camel_case field_name}}: Array<{{> (concat field_type.type "/type")}}>;
+    {{/if}}
+  {{/if}}
+{{/each}}
+  } {
+    const current{{pascal_case entry_type.name}} = decode((this.currentRecord.entry as any).Present.entry) as {{pascal_case entry_type.name}};
+    return { 
+      {{#each entry_type.fields}}
+        {{#if widget}}
+          {{#if (not (eq cardinality "vector" ) )}}
+      {{camel_case field_name}}: current{{pascal_case ../entry_type.name}}.{{snake_case field_name}},
+          {{else}}
+      {{camel_case field_name}}: current{{pascal_case ../entry_type.name}}.{{snake_case field_name}},
+          {{/if}}
+        {{/if}}
+      {{/each}}
+    }
+  },
+  props: {
+{{#if link_from_original_to_each_update}}
+    original{{pascal_case entry_type.name}}Hash: {
+      type: null,
+      required: true,
+    },
+{{/if}}
+    currentRecord: {
+      type: Object,
+      required: true
+    }
+  },
+  computed: {
+    current{{pascal_case entry_type.name}}() {
+      return decode((this.currentRecord.entry as any).Present.entry) as {{pascal_case entry_type.name}};
+    },
+    is{{pascal_case entry_type.name}}Valid() {
+      return true{{#each entry_type.fields}}{{#if widget}}{{#if (eq cardinality "single")}} && {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate=(concat "this." (camel_case field_name)) }}{{/if}}{{#if (eq cardinality "vector")}} && this.{{camel_case field_name}}.every(e => {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate="e" }}){{/if}}{{/if}}{{/each}};
+    },
+  },
+  mounted() {
+    if (this.currentRecord === undefined) {
+      throw new Error(`The currentRecord input is required for the Edit{{pascal_case entry_type.name}} element`);
+    }
+  {{#if link_from_original_to_each_update}}
+    if (this.original{{pascal_case entry_type.name}}Hash === undefined) {
+      throw new Error(`The original{{pascal_case entry_type.name}}Hash input is required for the Edit{{pascal_case entry_type.name}} element`);
+    }
+  {{/if}}
+  },
+  methods: {
+    async update{{pascal_case entry_type.name}}() {
+
+      const {{camel_case entry_type.name}}: {{pascal_case entry_type.name}} = { 
+{{#each entry_type.fields}}
+  {{#if widget}}
+        {{snake_case field_name}}: this.{{camel_case field_name}},
+  {{else}}
+        {{snake_case field_name}}: this.current{{pascal_case ../entry_type.name}}.{{snake_case field_name}},
+  {{/if}}
+{{/each}}
+      };
+
+      try {
+        const updateRecord: Record = await this.client.callZome({
+          cap_secret: null,
+          role_name: '{{dna_role_name}}',
+          zome_name: '{{coordinator_zome_manifest.name}}',
+          fn_name: 'update_{{snake_case entry_type.name}}',
+          payload: {
+{{#if link_from_original_to_each_update}}
+            original_{{snake_case entry_type.name}}_hash: this.original{{pascal_case entry_type.name}}Hash,
+{{/if}}
+            previous_{{snake_case entry_type.name}}_hash: this.currentRecord.signed_action.hashed.hash,
+            updated_{{snake_case entry_type.name}}: {{camel_case entry_type.name}}
+          }
+        });
+        this.$emit('{{kebab_case entry_type.name}}-updated', updateRecord.signed_action.hashed.hash);
+      } catch (e: any) {
+        const errorSnackbar = this.$refs['update-error'] as Snackbar;
+        errorSnackbar.labelText = `Error updating the {{lower_case entry_type.name}}: ${e.message}`;
+        errorSnackbar.show();
+      }
+    },
+  },
+  emits: ['{{kebab_case entry_type.name}}-updated', 'edit-canceled'],
+  setup() {
+    const client = (inject('client') as ComputedRef<AppClient>).value;
+    return {
+      client,
+    };
+  },
+})
+</script>

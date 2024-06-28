@@ -51,10 +51,10 @@ pub fn link_type_name(
 pub fn scaffold_link_type(
     zome_file_tree: ZomeFileTree,
     template_file_tree: &FileTree,
-    from_referenceable: &Option<Referenceable>,
-    to_referenceable: &Option<Referenceable>,
-    delete: &Option<bool>,
-    bidirectional: &Option<bool>,
+    from_referenceable: Option<&Referenceable>,
+    to_referenceable: Option<&Referenceable>,
+    delete: Option<bool>,
+    bidirectional: Option<bool>,
     no_ui: bool,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     let dna_manifest_path = zome_file_tree.dna_file_tree.dna_manifest_path.clone();
@@ -63,13 +63,13 @@ pub fn scaffold_link_type(
     let from_referenceable = get_or_choose_referenceable(
         &zome_file_tree,
         from_referenceable,
-        &String::from("Link from which entry type?"),
+        "Link from which entry type?",
     )?;
 
     let to_referenceable = get_or_choose_optional_reference_type(
         &zome_file_tree,
         to_referenceable,
-        &String::from("Link to which entry type?"),
+        "Link to which entry type?",
     )?;
 
     let link_type = match to_referenceable.clone() {
@@ -79,13 +79,13 @@ pub fn scaffold_link_type(
 
     let bidirectional = match (&to_referenceable, bidirectional) {
         (None, _) => false,
-        (_, Some(b)) => b.clone(),
+        (_, Some(b)) => b,
         (_, None) => Confirm::with_theme(&ColorfulTheme::default())
             .with_prompt("Should the link be bidirectional?")
             .interact()?,
     };
     let delete = match delete {
-        Some(d) => d.clone(),
+        Some(d) => d,
         None => Confirm::with_theme(&ColorfulTheme::default())
             .with_prompt("Can the link be deleted?")
             .interact()?,
@@ -101,11 +101,7 @@ pub fn scaffold_link_type(
     insert_file(
         &mut file_tree,
         &crate_src_path.join(&link_type_file_name),
-        &format!(
-            "use hdi::prelude::*;
-
-"
-        ),
+        "use hdi::prelude::*;",
     )?;
 
     // 2. Add this file as a module in the entry point for the crate
@@ -113,7 +109,7 @@ pub fn scaffold_link_type(
     let lib_rs_path = crate_src_path.join("lib.rs");
 
     map_file(&mut file_tree, &lib_rs_path, |s| {
-        format!(
+        Ok(format!(
             r#"pub mod {};
 pub use {}::*;
 
@@ -121,7 +117,7 @@ pub use {}::*;
             link_type.to_case(Case::Snake),
             link_type.to_case(Case::Snake),
             s
-        )
+        ))
     })?;
 
     let dna_file_tree = DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
@@ -138,7 +134,7 @@ pub use {}::*;
 
     let inverse_link_type = if bidirectional {
         if let Some(to) = &to_referenceable {
-            let inverse_link_type = link_type_name(&to, &from_referenceable);
+            let inverse_link_type = link_type_name(to, &from_referenceable);
             zome_file_tree = add_link_type_to_integrity_zome(
                 zome_file_tree,
                 &inverse_link_type,
@@ -159,7 +155,7 @@ pub use {}::*;
 
     let coordinator_zomes_for_integrity = get_coordinator_zomes_for_integrity(
         &zome_file_tree.dna_file_tree.dna_manifest,
-        &zome_file_tree.zome_manifest.name.0.to_string(),
+        zome_file_tree.zome_manifest.name.0.as_ref(),
     );
 
     let coordinator_zome = match coordinator_zomes_for_integrity.len() {
@@ -200,14 +196,13 @@ pub use {}::*;
         bidirectional,
     )?;
 
-    let app_file_tree =
-        AppFileTree::get_or_choose(zome_file_tree.dna_file_tree.file_tree(), &None)?;
+    let app_file_tree = AppFileTree::get_or_choose(zome_file_tree.dna_file_tree.file_tree(), None)?;
 
     let app_name = app_file_tree.app_manifest.app_name().to_string();
 
     scaffold_link_type_templates(
         app_file_tree.file_tree(),
-        &template_file_tree,
+        template_file_tree,
         &app_name,
         &dna_manifest.name(),
         &coordinator_zome,
@@ -215,7 +210,7 @@ pub use {}::*;
         &from_referenceable,
         &to_referenceable,
         delete,
-        &inverse_link_type,
+        inverse_link_type.as_deref(),
         no_ui,
     )
 }

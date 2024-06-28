@@ -9,20 +9,27 @@ on:
     branches: [ develop, develop-0.1, develop-0.2 ]
 
 jobs:
-  unittests:
+  test_fmt_lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
       - uses: dtolnay/rust-toolchain@stable
 
-      - run: cargo test --no-fail-fast
+      - name: Unittests
+        run: cargo test --no-fail-fast
+
+      - name: Format Rust
+        run: cargo fmt --all --check
+
+      - name : Lint Rust
+        run: cargo clippy --all-targets -- -D warnings
   
   testbuild:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        template: [ svelte, vue, lit, vanilla ]
+        template: [ svelte, vue, lit, react, vanilla ]
     steps:
       - uses: actions/checkout@v4
 
@@ -30,26 +37,28 @@ jobs:
         uses: ./.github/actions/extend-space
   
       - name: Install nix
-        uses: cachix/install-nix-action@v23
+        uses: cachix/install-nix-action@v25
         with:
-          install_url: https://releases.nixos.org/nix/nix-2.13.3/install
+          install_url: https://releases.nixos.org/nix/nix-2.20.0/install
           extra_nix_config: |
             experimental-features = flakes nix-command
 
-      - uses: cachix/cachix-action@v12
+      - uses: cachix/cachix-action@v14
         with:
           name: holochain-ci
 
       - name: Build and test
         run: |
           cd $GITHUB_WORKSPACE
-          nix develop --override-input "versions/scaffolding" . .#ci --command ./run_test.sh -a forum -t ${{ matrix.template }}
+          nix develop --override-input "versions/scaffolding" . .#ci --command ./run_test.sh -t ${{ matrix.template }}
 
   testbuild_by_scope:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        scope: [ hello_world ]
+        scope:
+          - hello_world
+          - holo_integration
     steps:
       - uses: actions/checkout@v4
 
@@ -57,13 +66,13 @@ jobs:
         uses: ./.github/actions/extend-space
   
       - name: Install nix
-        uses: cachix/install-nix-action@v23
+        uses: cachix/install-nix-action@v25
         with:
           install_url: https://releases.nixos.org/nix/nix-2.13.3/install
           extra_nix_config: |
             experimental-features = flakes nix-command
 
-      - uses: cachix/cachix-action@v12
+      - uses: cachix/cachix-action@v14
         with:
           name: holochain-ci
 

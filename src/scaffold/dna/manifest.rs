@@ -5,9 +5,9 @@ use holochain_types::prelude::{
 
 use crate::error::{ScaffoldError, ScaffoldResult};
 
-pub fn empty_dna_manifest(dna_name: String) -> ScaffoldResult<String> {
+pub fn empty_dna_manifest(dna_name: &str) -> ScaffoldResult<String> {
     let manifest: DnaManifest = DnaManifestCurrentBuilder::default()
-        .name(dna_name.clone())
+        .name(dna_name.to_owned())
         .integrity(IntegrityManifest {
             network_seed: None,
             origin_time: HumanTimestamp::Micros(Timestamp::now()),
@@ -34,11 +34,11 @@ pub fn check_zome_doesnt_exist(
         DnaManifest::V1(m) => m.coordinator,
     };
 
-    if let Some(_) = coordinator_manifest
+    if coordinator_manifest
         .zomes
         .iter()
         .chain(integrity_manifest.zomes.iter())
-        .find(|z| z.name.to_string().eq(&zome_manifest.name.0.to_string()))
+        .any(|z| z.name.to_string().eq(&zome_manifest.name.0.to_string()))
     {
         return Err(ScaffoldError::ZomeAlreadyExists(
             zome_manifest.name.0.to_string(),

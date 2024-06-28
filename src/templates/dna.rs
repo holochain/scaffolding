@@ -19,15 +19,15 @@ pub struct ScaffoldDnaData {
 pub fn scaffold_dna_templates(
     mut app_file_tree: FileTree,
     template_file_tree: &FileTree,
-    app_name: &String,
-    dna_name: &String,
+    app_name: &str,
+    dna_name: &str,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     let data = ScaffoldDnaData {
-        app_name: app_name.clone(),
-        dna_name: dna_name.clone(),
+        app_name: app_name.to_owned(),
+        dna_name: dna_name.to_owned(),
     };
 
-    let h = build_handlebars(&template_file_tree)?;
+    let h = build_handlebars(template_file_tree)?;
 
     let field_types_path = PathBuf::from("dna");
     let v: Vec<OsString> = field_types_path.iter().map(|s| s.to_os_string()).collect();
@@ -42,7 +42,7 @@ pub fn scaffold_dna_templates(
     }
 
     let next_instructions =
-        match file_content(&template_file_tree, &PathBuf::from("dna.instructions.hbs")) {
+        match file_content(template_file_tree, &PathBuf::from("dna.instructions.hbs")) {
             Ok(content) => Some(h.render_template(content.as_str(), &data)?),
             Err(_) => None,
         };

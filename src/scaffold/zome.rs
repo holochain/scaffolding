@@ -1,16 +1,21 @@
+use convert_case::Case;
 use dialoguer::{theme::ColorfulTheme, Confirm, Select};
 use mr_bundle::Location;
 use regex::Regex;
-use std::{ffi::OsString, path::PathBuf};
+use std::{
+    ffi::OsString,
+    path::{Path, PathBuf},
+};
 
 use crate::{
-    file_tree::{file_exists, insert_file_tree_in_dir, FileTree},
+    file_tree::{build_file_tree, file_exists, insert_file_tree_in_dir, FileTree},
     reserved_words::check_for_reserved_words,
     templates::{
         coordinator::scaffold_coordinator_zome_templates,
         integrity::scaffold_integrity_zome_templates, ScaffoldedTemplate,
     },
-    versions::{hdi_version, hdk_version},
+    utils::input_with_case,
+    versions,
 };
 use build_fs_tree::{dir, file};
 use holochain_types::prelude::{DnaManifest, ZomeManifest};
@@ -45,7 +50,7 @@ pub struct ZomeFileTree {
 impl ZomeFileTree {
     pub fn get_or_choose_integrity(
         dna_file_tree: DnaFileTree,
-        integrity_zome_name: &Option<String>,
+        integrity_zome_name: Option<&str>,
     ) -> ScaffoldResult<ZomeFileTree> {
         let integrity_zomes = match dna_file_tree.dna_manifest.clone() {
             DnaManifest::V1(v1) => v1.integrity.zomes.clone(),
@@ -70,7 +75,7 @@ impl ZomeFileTree {
                 .into_iter()
                 .find(|zome| zome.name.0.to_string().eq(name))
                 .ok_or(ScaffoldError::IntegrityZomeNotFound(
-                    name.clone(),
+                    name.to_owned(),
                     dna_file_tree.dna_manifest.name(),
                 )),
         }?;
@@ -85,7 +90,7 @@ impl ZomeFileTree {
 
         let lib_rs_path = zome_crate_path.join("src").join("lib.rs");
 
-        if !file_exists(&dna_file_tree.file_tree_ref(), &lib_rs_path) {
+        if !file_exists(dna_file_tree.file_tree_ref(), &lib_rs_path) {
             return Err(ScaffoldError::PathNotFound(lib_rs_path.clone()));
         }
 
@@ -131,19 +136,19 @@ fn zome_crate_path(
     }
 }
 
-pub fn integrity_zome_name(coordinator_zome_name: &String) -> String {
+pub fn integrity_zome_name(coordinator_zome_name: &str) -> String {
     format!("{}_integrity", coordinator_zome_name)
 }
 
 pub fn iter_all_eq<T: PartialEq>(iter: impl IntoIterator<Item = T>) -> Option<T> {
     let mut iter = iter.into_iter();
     let first = iter.next()?;
-    iter.all(|elem| elem == first).then(|| first)
+    iter.all(|elem| elem == first).then_some(first)
 }
 
 fn choose_integrity_zome(
-    dna_name: &String,
-    integrity_zomes: &Vec<ZomeManifest>,
+    dna_name: &str,
+    integrity_zomes: &[ZomeManifest],
 ) -> ScaffoldResult<ZomeManifest> {
     let integrity_zome_names: Vec<String> = integrity_zomes
         .iter()
@@ -226,7 +231,7 @@ fn try_to_guess_integrity_zomes_location(
     let maybe_packages_paths = get_workspace_packages_locations(dna_file_tree.file_tree_ref())?;
 
     match maybe_packages_paths {
-        Some(mut packages_paths) if packages_paths.len() != 0 => {
+        Some(mut packages_paths) if !packages_paths.is_empty() => {
             for p in packages_paths.iter_mut() {
                 // Pop the "Cargo.toml" component
                 p.pop();
@@ -308,7 +313,7 @@ fn try_to_guess_coordinator_zomes_location(
     let maybe_packages_paths = get_workspace_packages_locations(dna_file_tree.file_tree_ref())?;
 
     match maybe_packages_paths {
-        Some(mut packages_paths) if packages_paths.len() != 0 => {
+        Some(mut packages_paths) if !packages_paths.is_empty() => {
             for p in packages_paths.iter_mut() {
                 // Pop the "Cargo.toml" component
                 p.pop();
@@ -331,25 +336,23 @@ pub fn add_common_zome_dependencies_to_workspace_cargo(
 ) -> ScaffoldResult<FileTree> {
     let file_tree = add_workspace_external_dependency(
         file_tree,
-        &"hdi".to_string(),
-        &format!("={}", hdi_version()),
+        "hdi",
+        &format!("={}", versions::HDI_VERSION),
     )?;
     let file_tree = add_workspace_external_dependency(
         file_tree,
-        &"hdk".to_string(),
-        &format!("={}", hdk_version()),
+        "hdk",
+        &format!("={}", versions::HDK_VERSION),
     )?;
-    let file_tree =
-        add_workspace_external_dependency(file_tree, &"serde".to_string(), &"1.0".to_string())?;
-
+    let file_tree = add_workspace_external_dependency(file_tree, "serde", "1.0")?;
     Ok(file_tree)
 }
 
 pub fn scaffold_integrity_zome_with_path(
     dna_file_tree: DnaFileTree,
     template_file_tree: &FileTree,
-    zome_name: &String,
-    path: &PathBuf,
+    zome_name: &str,
+    path: &Path,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     check_for_reserved_words(zome_name)?;
 
@@ -360,7 +363,7 @@ pub fn scaffold_integrity_zome_with_path(
 
     let folder_name = match zome_name.strip_suffix("_integrity") {
         Some(f) => f.to_string(),
-        None => zome_name.clone(),
+        None => zome_name.to_owned(),
     };
 
     let mut file_tree =
@@ -377,13 +380,13 @@ pub fn scaffold_integrity_zome_with_path(
 
     let dna_file_tree = DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
 
-    let zome_manifest = new_integrity_zome_manifest(&dna_file_tree, &zome_name)?;
+    let zome_manifest = new_integrity_zome_manifest(&dna_file_tree, zome_name)?;
 
     let dna_file_tree = add_integrity_zome_to_manifest(dna_file_tree, zome_manifest.clone())?;
 
     scaffold_integrity_zome_templates(
         dna_file_tree.file_tree(),
-        &template_file_tree,
+        template_file_tree,
         &dna_manifest.name(),
         &zome_manifest,
     )
@@ -392,7 +395,7 @@ pub fn scaffold_integrity_zome_with_path(
 pub fn scaffold_integrity_zome(
     dna_file_tree: DnaFileTree,
     template_file_tree: &FileTree,
-    zome_name: &String,
+    zome_name: &str,
     path: &Option<PathBuf>,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     let path_to_scaffold_in = match path {
@@ -429,9 +432,9 @@ pub fn scaffold_integrity_zome(
 pub fn scaffold_coordinator_zome_in_path(
     dna_file_tree: DnaFileTree,
     template_file_tree: &FileTree,
-    zome_name: &String,
-    dependencies: &Option<Vec<String>>,
-    path: &PathBuf,
+    zome_name: &str,
+    dependencies: Option<&Vec<String>>,
+    path: &Path,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     check_for_reserved_words(zome_name)?;
 
@@ -460,7 +463,7 @@ pub fn scaffold_coordinator_zome_in_path(
 
     scaffold_coordinator_zome_templates(
         file_tree,
-        &template_file_tree,
+        template_file_tree,
         &dna_manifest.name(),
         &coordinator_zome_manifest,
     )
@@ -469,8 +472,8 @@ pub fn scaffold_coordinator_zome_in_path(
 pub fn scaffold_coordinator_zome(
     dna_file_tree: DnaFileTree,
     template_file_tree: &FileTree,
-    zome_name: &String,
-    dependencies: &Option<Vec<String>>,
+    zome_name: &str,
+    dependencies: Option<&Vec<String>>,
     path: &Option<PathBuf>,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     let prompt = String::from("Where should the coordinator zome be scaffolded?");
@@ -499,4 +502,38 @@ pub fn scaffold_coordinator_zome(
         dependencies,
         &path_to_scaffold_in,
     )
+}
+
+pub fn scaffold_zome_pair(
+    app_file_tree: FileTree,
+    template_file_tree: FileTree,
+    dna_name: &str,
+) -> Result<(), ScaffoldError> {
+    let mut dna_file_tree = DnaFileTree::get_or_choose(app_file_tree, Some(dna_name))?;
+    let dna_manifest_path = dna_file_tree.dna_manifest_path.clone();
+
+    let zome_name = input_with_case(
+            "Enter coordinator zome name (snake_case):\n(The integrity zome will automatically be named '{name of coordinator zome}_integrity')\n",
+            Case::Snake,
+        )?;
+
+    let integrity_zome_name = integrity_zome_name(&zome_name);
+    let ScaffoldedTemplate { file_tree, .. } = scaffold_integrity_zome(
+        dna_file_tree,
+        &template_file_tree,
+        &integrity_zome_name,
+        &None,
+    )?;
+    dna_file_tree = DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
+
+    let ScaffoldedTemplate { file_tree, .. } = scaffold_coordinator_zome(
+        dna_file_tree,
+        &template_file_tree,
+        &zome_name,
+        Some(&vec![integrity_zome_name]),
+        &None,
+    )?;
+
+    build_file_tree(file_tree, ".")?;
+    Ok(())
 }

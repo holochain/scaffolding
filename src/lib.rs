@@ -38,9 +38,12 @@
 //!
 //! The scaffolding tool comes with 4 built-in templates:
 //!
-//! - Vue
-//! - Svelte
-//! - Lit
+//! - Vue (with TypeScript)
+//! - Svelte (with TypeScript)
+//! - Lit (with TypeScript)
+//! - React (with TypeScript)
+//! - Vanilla
+//! - Headless (no ui) - [best for building headless hApps or using a unsupported ui framework without having to create a custom template]
 //!
 //! These templates provide most of the skeleton you need to start your own holochain app.
 //!
@@ -50,23 +53,40 @@
 //!
 //! ## Using custom templates
 //!
-//! If you know of some already existing template that you want to use, simply scaffold a new web-app pointing to its git repository with:
+//! All `hc scaffold` commands accept an optional `--template` argument. This argument can be:
+//! - Either one of the built-in templates:
+//!   - "vue"
+//!   - "svelte"
+//!   - "lit"
+//!   - "react"
+//!   - "vanilla"
+//!   - "headless" (no ui)
+//! - Or a path to a custom template.
+//!   - E.g `hc-scaffold --template ./path/to/custom/template/folder web-app`
 //!
-//! `hc scaffold web-app forum --templates-url https://github.com/holochain-open-dev/templates`
+//! If you know of some already existing custom template, look first in the documentation of that template for instructions on how to use it, in case the template offers a nix wrapper command, which is much easier to use.
 //!
-//! If instead, you want to use that template within an already existing repository, you can use this command instead:
+//! Otherwise, you can just clone it and use it like this:  
 //!
-//! `hc scaffold template get https://github.com/holochain-open-dev/templates`
+//! `hc scaffold --template ./path/to/custom/template web-app forum`
 //!
-//! Both of the previous commands will create a `.templates` folder in the root folder of your repository, with a copy of the template.
+//! ## Template config
 //!
-//! From this point on, any command that you execute with the scaffolding tool is going to use that custom template instead of the built-in ones.
+//! When you run `hc-scaffold --template ./path/to/custom/template/folder web-app` or `hc-scaffold example` for the first time, the root `package.json` file
+//! of the scaffolded project will contain an `"hcScaffold"` field with some configuration about the template used to scaffold
+//! the project:
 //!
-//! If later on the template adds some new features and you want to include them in your repository, you can just run this command again:
+//! ```json
+//! {
+//!   "hcScaffold": {
+//!     "template": "/* template name i.e. react/vue/svelte/lit/vanilla or path to custom template */"
+//!   }
+//! }
+//! ```
 //!
-//! `hc scaffold template get https://github.com/holochain-open-dev/templates`
-//!
-//! And select "Merge with existing template", to overwrite the old one.
+//! The scaffolding CLI will read from this config for subsequent commands, so you do not need to explicitly
+//! pass the `--template` flag for every command. This also provides a guardrail to prevent mixing up templates
+//! for different `hc-scaffold` commands.
 //!
 //! ## How to create a custom template
 //!
@@ -74,11 +94,15 @@
 //!
 //! The best way to start creating a custom template is to go from one of the built-in ones, and modify it.
 //!
-//! To create a custom template, run this command and select the built-in template that you want to go from, and also give a name to your template.
+//! To create a custom template, execute these steps:
 //!
-//! `hc scaffold template init`
+//! 1. Run this command:
+//! `nix flake init -t github:holochain/scaffolding`
+//! 2. A new dir `custom-template` will be created in the current directory. Check this new folder in a version control system like git.
+//! 3. Replace all instances of `<TODO:REPLACE_ME_WITH_THE_APPROPRIATE_GIT_URL>` in its `README.md` file with the appropriate git URL (eg. "github:holochain-open-dev/templates").
+//! 4. Replace all instances of `<TODO:REPLACE_ME_WITH_THE_APPROPRIATE_GIT_URL>` in its `template/web-app/flake.nix.hbs` file with the appropriate git URL (eg. "github:holochain-open-dev/templates").
 //!
-//! At this point, you'll have a `.templates/<TEMPLATE NAME>` folder. That's where your custom template lives.
+//! That's it! At this point you will have a correctly functioning custom template repository with tests, a `README.md` documenting how to use it, and a `template` folder. That's where your custom template lives.
 //!
 //! Templates have this directory structure:
 //!
@@ -92,19 +116,21 @@
 //! link-type/
 //! web-app/
 //!
-//! Each folder corresponds to the templates that are going to be created when running a specific command. This is the steps that are executed:
+//! Each folder corresponds to the templates that are created when running a specific command. Here are the steps executed:
 //!
 //! 1. The user executes a scaffolding command, like `hc scaffold web-app`.
-//! 2. The scaffolding tool asks the user to input all the necessary information.
-//! 3. The apropriate **backend** and **testing** code is created automatically, the custom template can't influence it.
-//! 4. The scaffolding tool looks for a custom template in the `.templates` folder.
-//! 5. If there is one, it will look for a folder inside that custom template that corresponds to the command being run.
-//!   - Eg. `hc scaffold web-app` will look for a folder named `web-app`.
-//! 6. If there is one, it will copy the directory structure inside that folder and select the files with the `.hbs` extension.
-//! 7. It will render the contents of each of the files using as context the appropriate data from the command.
-//!   - Eg. in `hc scaffold web-app`, one of the fields of the context is `app_name`, which is the name of the app that the user input.
-//! 8. Lastly, it will merge the resulting directory structure with the existing repository structure. If a file already existed, it will overwrite its contents.
-//!
+//!    - Optionally, they may pass a `--template` argument, specifying the template name or local path to use.
+//!    - The `--template` value is saved in the root `package.json` file's `hcScaffold` key for future reference and to prevent the use of different templates in the same project.
+//! 2. The scaffolding tool prompts the user to input all necessary information for the command.
+//! 3. **Backend** code is automatically generated, independent of custom templates.
+//! 4. If a `--template` argument is provided:
+//!    - A check is performed to ensure alignment with the originally scaffolded hApp. If successful, it uses the provided template.
+//! 5. For the selected template, the tool searches for a corresponding folder inside it based on the command.
+//!    - For example, `hc scaffold web-app` searches for a folder named `web-app`.
+//! 6. If found, it copies the directory structure within that folder, selecting files with the `.hbs` extension.
+//! 7. It renders the contents of each file using appropriate data from the command.
+//!    - For instance, in `hc scaffold web-app`, one context field is `app_name`, representing the user-input app name.
+//! 8. Finally, it merges the resulting directory structure with the existing repository. If a file already exists, its contents are overwritten.
 //! You can take a look at [Writing templates](#writing-templates) to learn how to write your own templates.
 //!
 //! This is the list of commands and the templates they use:

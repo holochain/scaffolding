@@ -1,0 +1,69 @@
+import { LitElement, html } from 'lit';
+import { state, property, customElement } from 'lit/decorators.js';
+import { AgentPubKey, Link, EntryHash, ActionHash, Record, AppClient, NewEntryAction } from '@holochain/client';
+import { consume } from '@lit-labs/context';
+import { Task } from '@lit-labs/task';
+import '@material/mwc-circular-progress';
+
+import { clientContext } from '../../contexts';
+import './{{kebab_case to_referenceable.name}}-detail';
+import { {{pascal_case coordinator_zome_manifest.name}}Signal } from './types';
+
+@customElement('{{kebab_case (plural to_referenceable.name)}}-for-{{kebab_case from_referenceable.name}}')
+export class {{pascal_case (plural to_referenceable.name)}}For{{pascal_case from_referenceable.name}} extends LitElement {
+  @consume({ context: clientContext })
+  client!: AppClient;
+  
+  @property({
+    hasChanged: (newVal: {{from_referenceable.hash_type}}, oldVal: {{from_referenceable.hash_type}}) => newVal?.toString() !== oldVal?.toString()
+  })
+  {{camel_case from_referenceable.singular_arg}}!: {{from_referenceable.hash_type}}; 
+
+  @state()
+  signaledHashes: Array<{{to_referenceable.hash_type}}> = [];
+
+  _fetch{{pascal_case (plural to_referenceable.name)}} = new Task(this, ([{{camel_case from_referenceable.singular_arg}}]) => this.client.callZome({
+      cap_secret: null,
+      role_name: '{{dna_role_name}}',
+      zome_name: '{{coordinator_zome_manifest.name}}',
+      fn_name: 'get_{{snake_case (plural to_referenceable.name)}}_for_{{snake_case from_referenceable.name}}',
+      payload: {{camel_case from_referenceable.singular_arg}},
+  }) as Promise<Array<Link>>, () => [this.{{camel_case from_referenceable.singular_arg}}]);
+
+  firstUpdated() {
+    if (this.{{camel_case from_referenceable.singular_arg}} === undefined) {
+      throw new Error(`The {{camel_case from_referenceable.singular_arg}} property is required for the {{kebab_case (plural to_referenceable.name)}}-for-{{kebab_case from_referenceable.name}} element`);
+    }
+
+    this.client.on('signal', signal => {
+      if (signal.zome_name !== '{{coordinator_zome_manifest.name}}') return;
+      const payload = signal.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;
+      if (payload.type !== 'LinkCreated') return;
+      if (payload.link_type !== '{{pascal_case link_type_name}}') return;
+
+      this.signaledHashes = [payload.action.hashed.content.target_address, ...this.signaledHashes];
+    });
+  }
+
+  renderList(hashes: Array<{{to_referenceable.hash_type}}>) {
+    if (hashes.length === 0) return html`<span>No {{lower_case (plural to_referenceable.name)}} found for this {{lower_case from_referenceable.name}}</span>`;
+    
+    return html`
+      <div style="display: flex; flex-direction: column">
+        ${hashes.map(hash => 
+          html`<{{kebab_case to_referenceable.name}}-detail .{{camel_case to_referenceable.name}}Hash=${hash} style="margin-bottom: 16px;"></{{kebab_case to_referenceable.name}}-detail>`
+        )}
+      </div>
+    `;
+  }
+
+  render() {
+    return this._fetch{{pascal_case (plural to_referenceable.name)}}.render({
+      pending: () => html`<div style="display: flex; flex: 1; align-items: center; justify-content: center">
+        <mwc-circular-progress indeterminate></mwc-circular-progress>
+      </div>`,
+      complete: (links) => this.renderList([...this.signaledHashes, ...links.map(l => l.target)]),
+      error: (e: any) => html`<span>Error fetching the {{lower_case (plural to_referenceable.name)}}: ${e.message}.</span>`
+    });
+  }
+}

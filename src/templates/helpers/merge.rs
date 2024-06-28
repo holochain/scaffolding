@@ -6,15 +6,15 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Map, Number, Value};
 
 pub fn get_scope_open_and_close_char_indexes(
-    text: &String,
-    scope_opener: &String,
+    text: &str,
+    scope_opener: &str,
 ) -> Result<(usize, usize), RenderError> {
-    let mut index = text.find(scope_opener.as_str()).ok_or(RenderError::new(
+    let mut index = text.find(scope_opener).ok_or(RenderError::new(
         "Given scope opener not found in the given parameter",
     ))?;
 
     index = index + scope_opener.len() - 1;
-    let scope_opener_index = index.clone();
+    let scope_opener_index = index;
     let mut scope_count = 1;
 
     while scope_count > 0 {
@@ -94,7 +94,7 @@ impl HelperDef for Merge {
                 let mut previous_index = s.len();
 
                 let mut matched_scopes: Vec<MatchedScopedData> = matched_scopes
-                    .into_iter()
+                    .iter()
                     .filter_map(|ms| serde_json::from_value::<MatchedScopedData>(ms.clone()).ok())
                     .collect();
 
@@ -132,11 +132,11 @@ struct MatchedScopedData {
     __old_scope_length: usize,
 }
 
-const MATCHED_SCOPES: &'static str = "__matched_scopes";
-const SCOPE_CONTENT: &'static str = "__scope_content";
-const STARTING_INDEX: &'static str = "__starting_index";
-const NEW_SCOPE_CONTENT: &'static str = "__new_scope_content";
-const OLD_SCOPE_LENGTH: &'static str = "__old_scope_length";
+const MATCHED_SCOPES: &str = "__matched_scopes";
+const SCOPE_CONTENT: &str = "__scope_content";
+const STARTING_INDEX: &str = "__starting_index";
+const NEW_SCOPE_CONTENT: &str = "__new_scope_content";
+const OLD_SCOPE_LENGTH: &str = "__old_scope_length";
 
 #[derive(Clone, Copy)]
 pub struct MatchScope;
@@ -164,7 +164,7 @@ impl HelperDef for MatchScope {
 
         let Some(Value::String(scope_content)) = data.get(SCOPE_CONTENT) else {
             return Err(RenderError::new(
-            "match_scope needs to be placed inside a merge helper",
+                "match_scope needs to be placed inside a merge helper",
             ));
         };
 
@@ -177,7 +177,7 @@ impl HelperDef for MatchScope {
             .to_string();
 
         let (scope_opener_index, scope_close_index) =
-            get_scope_open_and_close_char_indexes(&scope_content, &scope_opener)?;
+            get_scope_open_and_close_char_indexes(scope_content, &scope_opener)?;
 
         let previous_scope_content =
             &scope_content[(scope_opener_index + 1)..scope_close_index].to_string();
@@ -225,7 +225,7 @@ impl HelperDef for MatchScope {
     }
 }
 
-pub fn register_merge<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
+pub fn register_merge(mut h: Handlebars) -> Handlebars {
     h.register_helper("merge", Box::new(Merge));
     h.register_helper("match_scope", Box::new(MatchScope));
 

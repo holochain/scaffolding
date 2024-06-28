@@ -21,15 +21,15 @@ pub struct ScaffoldIntegrityZomeData {
 pub fn scaffold_integrity_zome_templates(
     mut app_file_tree: FileTree,
     template_file_tree: &FileTree,
-    dna_role_name: &String,
+    dna_role_name: &str,
     zome_manifest: &ZomeManifest,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     let data = ScaffoldIntegrityZomeData {
-        dna_role_name: dna_role_name.clone(),
+        dna_role_name: dna_role_name.to_owned(),
         zome_manifest: zome_manifest.clone(),
     };
 
-    let h = build_handlebars(&template_file_tree)?;
+    let h = build_handlebars(template_file_tree)?;
 
     let field_types_path = PathBuf::from("integrity-zome");
     let v: Vec<OsString> = field_types_path.iter().map(|s| s.to_os_string()).collect();
@@ -44,7 +44,7 @@ pub fn scaffold_integrity_zome_templates(
     }
 
     let next_instructions = match file_content(
-        &template_file_tree,
+        template_file_tree,
         &PathBuf::from("integrity-zome.instructions.hbs"),
     ) {
         Ok(content) => Some(h.render_template(content.as_str(), &data)?),

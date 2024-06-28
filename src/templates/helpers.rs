@@ -2,19 +2,19 @@ use convert_case::{Case, Casing};
 use handlebars::{
     handlebars_helper, Context, Handlebars, Helper, HelperResult, Output, RenderContext,
 };
+use package_manager_command::register_package_manager_command;
 use serde_json::Value;
 
-pub mod merge;
-pub mod uniq_lines;
 pub mod filter;
-pub mod file_exists;
+pub mod merge;
+pub mod package_manager_command;
+pub mod uniq_lines;
 
+use filter::register_filter;
 use merge::register_merge;
 use uniq_lines::register_uniq_lines;
-use filter::register_filter;
-use file_exists::register_file_exists;
 
-pub fn register_helpers<'a>(h: Handlebars<'a>) -> Handlebars<'a> {
+pub fn register_helpers(h: Handlebars) -> Handlebars {
     let h = register_concat_helper(h);
     let h = register_contains_helper(h);
     let h = register_includes_helper(h);
@@ -24,12 +24,12 @@ pub fn register_helpers<'a>(h: Handlebars<'a>) -> Handlebars<'a> {
     let h = register_merge(h);
     let h = register_uniq_lines(h);
     let h = register_filter(h);
-    let h = register_file_exists(h);
+    let h = register_package_manager_command(h);
 
     h
 }
 
-pub fn register_concat_helper<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
+pub fn register_concat_helper(mut h: Handlebars) -> Handlebars {
     h.register_helper(
         "concat",
         Box::new(
@@ -41,7 +41,7 @@ pub fn register_concat_helper<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
              -> HelperResult {
                 let result = h
                     .params()
-                    .into_iter()
+                    .iter()
                     .map(|p| p.render())
                     .collect::<Vec<String>>()
                     .join("");
@@ -55,28 +55,28 @@ pub fn register_concat_helper<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
     h
 }
 
-pub fn register_contains_helper<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
+pub fn register_contains_helper(mut h: Handlebars) -> Handlebars {
     handlebars_helper!(contains: |list: Option<Vec<Value>>, value: Value| list.is_some() && list.unwrap().contains(&value));
     h.register_helper("contains", Box::new(contains));
 
     h
 }
 
-pub fn register_includes_helper<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
+pub fn register_includes_helper(mut h: Handlebars) -> Handlebars {
     handlebars_helper!(includes: |string: String, substring: String| string.contains(&substring));
     h.register_helper("includes", Box::new(includes));
 
     h
 }
 
-pub fn register_replace_helper<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
+pub fn register_replace_helper(mut h: Handlebars) -> Handlebars {
     handlebars_helper!(replace: |s: String, pattern: String, replaced_by: String| s.replace(&pattern, replaced_by.as_str()));
     h.register_helper("replace", Box::new(replace));
 
     h
 }
 
-pub fn register_pluralize_helpers<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
+pub fn register_pluralize_helpers(mut h: Handlebars) -> Handlebars {
     handlebars_helper!(singular: |s: String| pluralizer::pluralize(s.as_str(), 1, false));
     h.register_helper("singular", Box::new(singular));
     handlebars_helper!(plural: |s: String| pluralizer::pluralize(s.as_str(), 2, false));
@@ -85,7 +85,7 @@ pub fn register_pluralize_helpers<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
     h
 }
 
-pub fn register_case_helpers<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
+pub fn register_case_helpers(mut h: Handlebars) -> Handlebars {
     handlebars_helper!(title_case: |s: String| s.to_case(Case::Title));
     h.register_helper("title_case", Box::new(title_case));
 

@@ -28,7 +28,6 @@ impl HelperDef for UniqLines {
 
         let unique_lines: Vec<String> = rendered_string
             .split('\n')
-            .into_iter()
             .map(|s| s.to_string())
             .collect::<HashSet<String>>()
             .into_iter()
@@ -39,7 +38,7 @@ impl HelperDef for UniqLines {
     }
 }
 
-pub fn register_uniq_lines<'a>(mut h: Handlebars<'a>) -> Handlebars<'a> {
+pub fn register_uniq_lines(mut h: Handlebars) -> Handlebars {
     h.register_helper("uniq_lines", Box::new(UniqLines));
 
     h

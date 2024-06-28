@@ -12,10 +12,10 @@ use crate::{
 
 use super::ZomeFileTree;
 
-pub fn initial_cargo_toml(zome_name: &String, dependencies: &Option<Vec<String>>) -> String {
+pub fn initial_cargo_toml(zome_name: &str, dependencies: Option<&Vec<String>>) -> String {
     let deps = match dependencies {
         Some(d) => d
-            .into_iter()
+            .iter()
             .map(|d| format!(r#"{} = {{ workspace = true }}"#, d))
             .collect::<Vec<String>>()
             .join("\n"),
@@ -24,26 +24,23 @@ pub fn initial_cargo_toml(zome_name: &String, dependencies: &Option<Vec<String>>
 
     format!(
         r#"[package]
-name = "{}"
+name = "{zome_name}"
 version = "0.0.1"
 edition = "2021"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
-name = "{}"
+name = "{zome_name}"
 
 [dependencies]
 hdk = {{ workspace = true }}
-
 serde = {{ workspace = true }}
-
-{} 
+{deps} 
 "#,
-        zome_name, zome_name, deps
     )
 }
 
-pub fn initial_lib_rs(dependencies: &Option<Vec<String>>) -> String {
+pub fn initial_lib_rs(dependencies: Option<&Vec<String>>) -> String {
     let integrity_imports = match dependencies {
         None => String::from(""),
         Some(deps) => {
@@ -61,7 +58,7 @@ pub fn initial_lib_rs(dependencies: &Option<Vec<String>>) -> String {
 
 /// Called the first time a zome call is made to the cell containing this zome
 #[hdk_extern]
-pub fn init(_: ()) -> ExternResult<InitCallbackResult> {{
+pub fn init() -> ExternResult<InitCallbackResult> {{
   Ok(InitCallbackResult::Pass)
 }}
 
@@ -86,32 +83,30 @@ pub fn post_commit(committed_actions: Vec<SignedActionHashed>) {{
 fn signal_action(action: SignedActionHashed) -> ExternResult<()> {{
     Ok(())
 }}
-
 "#
     )
 }
 
 fn choose_extern_function(
     functions_by_zome: &BTreeMap<String, Vec<ItemFn>>,
-    prompt: &String,
+    prompt: &str,
 ) -> ScaffoldResult<(String, ItemFn)> {
     let all_functions: Vec<(String, ItemFn)> = functions_by_zome
         .iter()
-        .map(|(z, fns)| {
+        .flat_map(|(z, fns)| {
             fns.iter()
                 .map(|f| (z.clone(), f.clone()))
                 .collect::<Vec<(String, ItemFn)>>()
         })
-        .flatten()
         .collect();
 
     let all_fns_str: Vec<String> = all_functions
         .iter()
-        .map(|(z, f)| format!(r#""{}", in zome "{}""#, f.sig.ident.to_string(), z))
+        .map(|(z, f)| format!(r#""{}", in zome "{}""#, f.sig.ident, z))
         .collect();
 
     let selection = Select::with_theme(&ColorfulTheme::default())
-        .with_prompt(prompt.as_str())
+        .with_prompt(prompt)
         .default(0)
         .items(&all_fns_str[..])
         .interact()?;
@@ -122,8 +117,8 @@ fn choose_extern_function(
 pub fn find_extern_function_or_choose(
     dna_file_tree: &DnaFileTree,
     coordinator_zomes: &Vec<ZomeManifest>,
-    fn_name_to_find: &String,
-    prompt: &String,
+    fn_name_to_find: &str,
+    prompt: &str,
 ) -> ScaffoldResult<(ZomeManifest, ItemFn)> {
     let mut functions_by_zome: BTreeMap<String, Vec<ItemFn>> = BTreeMap::new();
 
@@ -146,7 +141,7 @@ pub fn find_extern_function_or_choose(
         functions_by_zome.insert(coordinator_zome.name.to_string(), all_extern_functions);
     }
 
-    let (zome_name, fn_name) = choose_extern_function(&functions_by_zome, &prompt)?;
+    let (zome_name, fn_name) = choose_extern_function(&functions_by_zome, prompt)?;
 
     let chosen_zome = coordinator_zomes
         .iter()
@@ -163,9 +158,9 @@ pub fn find_extern_function_or_choose(
 
 pub fn find_extern_function_in_zome(
     zome_file_tree: &ZomeFileTree,
-    fn_name: &String,
+    fn_name: &str,
 ) -> ScaffoldResult<Option<ItemFn>> {
-    let all_extern_functions = find_all_extern_functions(&zome_file_tree)?;
+    let all_extern_functions = find_all_extern_functions(zome_file_tree)?;
     Ok(all_extern_functions
         .into_iter()
         .find(|f| f.sig.ident.eq(fn_name)))
@@ -174,7 +169,7 @@ pub fn find_extern_function_in_zome(
 pub fn find_extern_function_in_zomes(
     dna_file_tree: &DnaFileTree,
     zomes: &Vec<ZomeManifest>,
-    fn_name_to_find: &String,
+    fn_name_to_find: &str,
 ) -> ScaffoldResult<Option<(ZomeManifest, ItemFn)>> {
     for coordinator_zome in zomes {
         let dna_file_tree = DnaFileTree::from_dna_manifest_path(
@@ -230,5 +225,5 @@ pub fn find_all_extern_functions(zome_file_tree: &ZomeFileTree) -> ScaffoldResul
         },
     );
 
-    Ok(hdk_extern_instances.values().cloned().flatten().collect())
+    Ok(hdk_extern_instances.values().flatten().cloned().collect())
 }
