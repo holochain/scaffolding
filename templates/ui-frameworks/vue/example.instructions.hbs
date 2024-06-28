@@ -2,5 +2,5 @@ Run the example app with:
 
   cd {{example}}
   nix develop 
-  npm install
-  npm start
+  {{(package_manager_command package_manager "install" null)}}
+  {{(package_manager_command package_manager "start" null)}}

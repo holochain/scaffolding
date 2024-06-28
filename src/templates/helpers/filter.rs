@@ -1,13 +1,13 @@
 use handlebars::{Context, Handlebars, Helper, HelperDef, RenderContext, RenderError, ScopedJson};
 use serde_json::{json, Map, Value};
 
-#[derive(Clone, Copy)]
-pub struct FilterHelper;
-
 /// A Handlebars helper to filter an iterable JSON value.
 /// It receives the value to be filtered and a string containing the condition predicate,
 /// then uses Handlebars' truthy logic to filter the items in the value.
 /// It also supports the `#if` helper's `includeZero` optional parameter.
+#[derive(Clone, Copy)]
+pub struct FilterHelper;
+
 impl HelperDef for FilterHelper {
     fn call_inner<'reg: 'rc, 'rc>(
         &self,

@@ -36,7 +36,7 @@ setup_and_build_happ() {
   cleanup_tmp "$1"
 
   cd $TEMPLATE_PATH
-  hc-scaffold --template "$2" web-app "$1" --setup-nix true -F
+  hc-scaffold --template="$2" web-app "$1" --package-manager yarn --setup-nix true -F
   cd "$1"
 
   hc-scaffold dna forum
@@ -59,10 +59,10 @@ setup_and_build_happ() {
 
   nix develop --command bash -c "
     set -e
-    npm i
-    npm run build -w ui
-    npm t
-    npm run package
+    yarn install
+    yarn workspace ui build
+    yarn run test
+    yarn package
     "
   cd ..
 }
@@ -72,13 +72,13 @@ setup_and_build_hello_world() {
   cleanup_tmp hello-world
 
   cd $TEMPLATE_PATH
-  hc-scaffold example hello-world
+  hc-scaffold example --package-manager yarn hello-world
   cd hello-world
 
   nix develop --command bash -c "
     set -e
-    npm i
-    npm t 
+    yarn install
+    yarn test
     "
   cd ..
 }

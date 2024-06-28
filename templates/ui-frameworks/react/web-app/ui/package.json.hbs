@@ -6,9 +6,9 @@
     "build": "vite build",
 {{#if holo_enabled}}
     "build:holo": "VITE_APP_IS_HOLO=true vite build",
-    "package:holo": "npm run build:holo && rimraf dist.zip && cd dist && bestzip ../dist.zip *",
+    "package:holo": "{{(package_manager_command package_manager "build:holo" null)}} && rimraf dist.zip && cd dist && bestzip ../dist.zip *",
 {{/if}}
-    "package": "npm run build && rimraf dist.zip && cd dist && bestzip ../dist.zip *"
+    "package": "{{(package_manager_command package_manager "build" null)}} && rimraf dist.zip && cd dist && bestzip ../dist.zip *"
   },
   "dependencies": {
     "@holochain/client": "{{holochain_client_version}}",
@@ -25,6 +25,7 @@
     "@vitejs/plugin-react": "^4.2.1",
     "bestzip": "^2.2.1",
     "typescript": "^5.2.2",
+    "rimraf": "^5.0.7",
     "vite": "^5.2.0"
   },
   "type": "module"

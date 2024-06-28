@@ -1,4 +1,5 @@
 use build_fs_tree::{dir, file};
+use package_manager::PackageManager;
 use std::path::PathBuf;
 
 use crate::error::ScaffoldResult;
@@ -14,11 +15,13 @@ use super::app::{
     nix::flake_nix,
 };
 
+pub mod package_manager;
 pub mod uis;
 
 pub fn scaffold_web_app(
     app_name: &str,
     description: Option<&str>,
+    package_manager: PackageManager,
     skip_nix: bool,
     template_file_tree: &FileTree,
     holo_enabled: bool,
@@ -42,8 +45,13 @@ pub fn scaffold_web_app(
             .insert("flake.nix".into(), flake_nix(holo_enabled));
     }
 
-    let scaffold_template_result =
-        scaffold_web_app_template(app_file_tree, template_file_tree, app_name, holo_enabled)?;
+    let scaffold_template_result = scaffold_web_app_template(
+        app_file_tree,
+        template_file_tree,
+        app_name,
+        package_manager,
+        holo_enabled,
+    )?;
 
     Ok(scaffold_template_result)
 }

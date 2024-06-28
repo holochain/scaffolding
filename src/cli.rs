@@ -1,3 +1,5 @@
+#![doc = include_str!("../guides/cli.md")]
+
 use crate::error::ScaffoldError;
 use crate::file_tree::{build_file_tree, file_content, load_directory_into_memory, FileTree};
 use crate::scaffold::app::cargo::exec_metadata;
@@ -14,8 +16,9 @@ use crate::scaffold::entry_type::definitions::{
 use crate::scaffold::entry_type::{fields::parse_fields, scaffold_entry_type};
 use crate::scaffold::example::{choose_example, Example};
 use crate::scaffold::link_type::scaffold_link_type;
+use crate::scaffold::web_app::package_manager::SubCommand;
 use crate::scaffold::web_app::scaffold_web_app;
-use crate::scaffold::web_app::uis::UiFramework;
+use crate::scaffold::web_app::{package_manager::PackageManager, uis::UiFramework};
 use crate::scaffold::zome::utils::{select_integrity_zomes, select_scaffold_zome_options};
 use crate::scaffold::zome::{
     integrity_zome_name, scaffold_coordinator_zome, scaffold_coordinator_zome_in_path,
@@ -41,7 +44,7 @@ use structopt::StructOpt;
 #[derive(Debug, StructOpt)]
 pub struct HcScaffold {
     #[structopt(short, long)]
-    /// The template to use for the scaffold command
+    /// The template to use for the hc-scaffold commands
     /// Can either be an option from the built-in templates: "vanilla", "vue", "lit", "svelte", "react", "headless"
     /// Or a path to a custom template
     template: Option<String>,
@@ -50,7 +53,7 @@ pub struct HcScaffold {
     command: HcScaffoldCommand,
 }
 
-/// The list of subcommands for `hc scaffold`
+/// A command-line interface for creating and modifying a Holochain application (hApp).
 #[derive(Debug, StructOpt)]
 #[structopt(setting = structopt::clap::AppSettings::InferSubcommands)]
 pub enum HcScaffoldCommand {
@@ -65,6 +68,13 @@ pub enum HcScaffoldCommand {
         #[structopt(long)]
         /// Whether to setup the holonix development environment for this web-app
         setup_nix: bool,
+
+        /// The package manager to use for the hc-scaffold commands.
+        /// Can be one of the following: "bun", "npm", "pnpm", or "yarn".
+        /// When a lockfile is detected, the respective package manager will be used as the default value;
+        /// otherwise, npm will be set as the default.
+        #[structopt(short, long, parse(try_from_str = PackageManager::from_str))]
+        package_manager: Option<PackageManager>,
 
         #[structopt(long = "holo", hidden = true)]
         holo_enabled: bool,
@@ -200,9 +210,17 @@ pub enum HcScaffoldCommand {
         /// Skips UI generation for this collection.
         no_ui: bool,
     },
+    /// Scaffold an example hApp
     Example {
         /// Name of the example to scaffold. One of ['hello-world', 'forum'].
         example: Option<Example>,
+
+        /// The package manager to use with the example
+        /// Can be one of the following: "bun", "npm", "pnpm", or "yarn".
+        /// When a lockfile is detected, the respective package manager will be used as the default value;
+        /// otherwise, npm will be set as the default.
+        #[structopt(short, long, parse(try_from_str = PackageManager::from_str))]
+        package_manager: Option<PackageManager>,
 
         #[structopt(long = "holo", hidden = true)]
         holo_enabled: bool,
@@ -221,6 +239,7 @@ impl HcScaffold {
                 name,
                 description,
                 setup_nix,
+                package_manager,
                 holo_enabled,
                 disable_fast_track,
             } => {
@@ -256,12 +275,18 @@ impl HcScaffold {
                     )?
                 };
 
+                let package_manager = match package_manager {
+                    Some(p) => p,
+                    None => PackageManager::choose()?,
+                };
+
                 let ScaffoldedTemplate {
                     file_tree,
                     next_instructions,
                 } = scaffold_web_app(
                     &name,
                     description.as_deref(),
+                    package_manager,
                     !setup_nix,
                     &template_file_tree,
                     holo_enabled,
@@ -328,13 +353,16 @@ Here's how you can get started with developing your application:
 - Set up your development environment:
 
   cd {name}{nix_instructions}
-  npm install {dna_instructions}
+  {} {dna_instructions}
 
 - Enhance your app by executing further hc scaffold commands to add more features.
 
 - Then, at any point in time you can start your application with:
 
-  npm start"#,
+  {}"#,
+                        package_manager.run_command_string(SubCommand::Install, None),
+                        package_manager
+                            .run_command_string(SubCommand::Run("start".to_string()), None)
                     );
                 }
             }
@@ -544,8 +572,7 @@ inadvertently reference or expect elements from the skipped entry type."#
                         r#"
 Add new collections for that entry type with:
 
-  hc scaffold collection
-"#,
+  hc scaffold collection"#,
                     );
                 }
             }
@@ -626,11 +653,12 @@ Add new collections for that entry type with:
                 println!("\nCollection {} scaffolded!", name.italic());
 
                 if let Some(i) = next_instructions {
-                    println!("\n{i}");
+                    println!("{i}");
                 }
             }
             HcScaffoldCommand::Example {
                 example,
+                package_manager,
                 holo_enabled,
             } => {
                 let example = match example {
@@ -656,6 +684,11 @@ Add new collections for that entry type with:
                     .into());
                 }
 
+                let package_manager = match package_manager {
+                    Some(p) => p,
+                    None => PackageManager::choose()?,
+                };
+
                 // Match on example types
                 let file_tree = match example {
                     Example::HelloWorld => {
@@ -663,6 +696,7 @@ Add new collections for that entry type with:
                         let ScaffoldedTemplate { file_tree, .. } = scaffold_web_app(
                             &example_name,
                             Some("A simple 'hello world' application."),
+                            package_manager,
                             false,
                             &template_file_tree,
                             holo_enabled,
@@ -675,6 +709,7 @@ Add new collections for that entry type with:
                         let ScaffoldedTemplate { file_tree, .. } = scaffold_web_app(
                             &example_name,
                             Some("A simple 'forum' application."),
+                            package_manager,
                             false,
                             &template_file_tree,
                             holo_enabled,
@@ -838,7 +873,7 @@ Add new collections for that entry type with:
                 let ScaffoldedTemplate {
                     file_tree,
                     next_instructions,
-                } = scaffold_example(file_tree, &template_file_tree, &example)?;
+                } = scaffold_example(file_tree, package_manager, &template_file_tree, &example)?;
 
                 let file_tree = ScaffoldConfig::write_to_package_json(file_tree, &template)?;
 
