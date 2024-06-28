@@ -80,7 +80,7 @@ pub enum HcScaffoldCommand {
         holo_enabled: bool,
 
         /// Whether to skip setting up an initial DNA and it's zome(s) after the web app is scaffolded
-        #[structopt(long = "disable-fast-track", short = "F")]
+        #[structopt(long, short = "F")]
         disable_fast_track: bool,
     },
     /// Manage custom templates

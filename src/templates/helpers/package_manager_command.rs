@@ -14,14 +14,10 @@ impl HelperDef for PackageManagerCommandHelper {
         &self,
         h: &Helper<'reg, 'rc>,
         _r: &'reg Handlebars<'reg>,
-        ctx: &'rc Context,
+        _ctx: &'rc Context,
         _rc: &mut RenderContext<'reg, 'rc>,
         out: &mut dyn Output,
     ) -> HelperResult {
-        let p = &h.params()[0];
-        if p.is_value_missing() {
-            println!("Value is missing for {:?}, ctx: {:?}", p, ctx);
-        }
         let mut params = h.params().iter();
         let package_manager = params
             .next()
