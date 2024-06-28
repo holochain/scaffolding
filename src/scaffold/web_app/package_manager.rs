@@ -58,9 +58,7 @@ impl PackageManager {
     /// Generates the command string for a given sub-command and optional workspace.
     pub fn run_command_string(&self, sub_command: SubCommand, workspace: Option<&str>) -> String {
         match sub_command {
-            SubCommand::Install => {
-                return self.install_command_string().to_string();
-            }
+            SubCommand::Install => self.install_command_string().to_string(),
             SubCommand::Run(script) => match self {
                 PackageManager::Bun => match workspace {
                     Some(workspace) => format!("bun run --filter {workspace} {script}"),
