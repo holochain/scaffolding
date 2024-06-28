@@ -4,7 +4,7 @@ use std::{ffi::OsString, path::PathBuf};
 use crate::{
     error::ScaffoldResult,
     file_tree::{file_content, FileTree},
-    scaffold::{example::Example, web_app::package_manager::PackageManager},
+    scaffold::{example::ExampleType, web_app::package_manager::PackageManager},
     versions,
 };
 
@@ -25,7 +25,7 @@ pub fn scaffold_example(
     mut app_file_tree: FileTree,
     package_manager: PackageManager,
     template_file_tree: &FileTree,
-    example: &Example,
+    example: &ExampleType,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     let data = ScaffoldExampleData {
         example: &example.to_string(),
