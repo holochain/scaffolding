@@ -216,7 +216,7 @@ pub enum HcScaffoldCommand {
         example: Option<Example>,
 
         #[structopt(long)]
-        /// Whether to setup the holonix development environment for this web-app
+        /// Whether to setup the holonix development environment for the example hApp
         setup_nix: Option<bool>,
 
         /// The package manager to use with the example

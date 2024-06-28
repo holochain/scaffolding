@@ -360,6 +360,9 @@ hc-scaffold example [FLAGS] [OPTIONS] [ARGS]
 - `-p`, `--package-manager <package-manager>`  
   The package manager to use for scaffolding the example. Can be one of the following: "bun", "npm", "pnpm", or "yarn".
 
+- `--setup-nix <setup-nix>`
+  Whether to setup the holonix development environment for the example hApp
+
 #### Arguments
 
 - `<example>`
