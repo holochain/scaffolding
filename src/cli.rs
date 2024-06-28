@@ -215,6 +215,10 @@ pub enum HcScaffoldCommand {
         /// Name of the example to scaffold. One of ['hello-world', 'forum'].
         example: Option<Example>,
 
+        #[structopt(long)]
+        /// Whether to setup the holonix development environment for this web-app
+        setup_nix: Option<bool>,
+
         /// The package manager to use with the example
         /// Can be one of the following: "bun", "npm", "pnpm", or "yarn".
         /// When a lockfile is detected, the respective package manager will be used as the default value;
@@ -660,6 +664,7 @@ Add new collections for that entry type with:
                 example,
                 package_manager,
                 holo_enabled,
+                setup_nix,
             } => {
                 let example = match example {
                     Some(e) => e,
@@ -880,10 +885,12 @@ Add new collections for that entry type with:
                 build_file_tree(file_tree, &app_dir)?;
 
                 // set up nix
-                if let Err(err) = setup_nix_developer_environment(&app_dir) {
-                    fs::remove_dir_all(&app_dir)?;
-                    return Err(err)?;
-                }
+                if let Some(true) | None = setup_nix {
+                    if let Err(err) = setup_nix_developer_environment(&app_dir) {
+                        fs::remove_dir_all(&app_dir)?;
+                        return Err(err)?;
+                    }
+                };
 
                 setup_git_environment(&app_dir)?;
 
