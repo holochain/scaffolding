@@ -259,7 +259,7 @@ impl Example {
             next_instructions,
         } = scaffold_example(file_tree, package_manager, &template_file_tree, &example)?;
 
-        let file_tree = ScaffoldConfig::write_to_package_json(file_tree, &template)?;
+        let file_tree = ScaffoldConfig::write_to_package_json(file_tree, template)?;
 
         build_file_tree(file_tree, &app_dir)?;
 
