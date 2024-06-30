@@ -53,9 +53,10 @@ impl Zome {
             _ => (self.integrity.is_some(), self.coordinator.is_some()),
         };
 
-        let name_prompt = match (scaffold_integrity, scaffold_coordinator) {
-            (true, true) => "Enter coordinator zome name (snake_case):\n (The integrity zome will automatically be named '{name of coordinator zome}_integrity')\n",
-            _ => "Enter zome name (snake_case):",
+        let name_prompt = if scaffold_integrity && scaffold_coordinator {
+            "Enter coordinator zome name (snake_case):\n (The integrity zome will automatically be named '{name of coordinator zome}_integrity')\n"
+        } else {
+            "Enter zome name (snake_case):"
         };
 
         let name = match self.name {
