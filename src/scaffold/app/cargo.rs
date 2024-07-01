@@ -9,6 +9,7 @@ use cargo_metadata::{Metadata, MetadataCommand};
 
 use crate::error::{ScaffoldError, ScaffoldResult};
 
+#[inline]
 pub fn workspace_cargo_toml() -> String {
     r#"[workspace]
 members = [

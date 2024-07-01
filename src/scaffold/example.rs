@@ -10,6 +10,22 @@ pub enum ExampleType {
     Forum,
 }
 
+impl ExampleType {
+    pub fn choose() -> ScaffoldResult<Self> {
+        let selection = Select::with_theme(&ColorfulTheme::default())
+            .with_prompt("Choose example:")
+            .item(ExampleType::HelloWorld)
+            .item(ExampleType::Forum)
+            .default(0)
+            .interact()?;
+
+        match selection {
+            0 => Ok(ExampleType::HelloWorld),
+            _ => Ok(ExampleType::Forum),
+        }
+    }
+}
+
 impl std::fmt::Display for ExampleType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let str = match self {
@@ -32,19 +48,5 @@ impl FromStr for ExampleType {
                 "hello-world, forum".to_string(),
             )),
         }
-    }
-}
-
-pub fn choose_example() -> ScaffoldResult<ExampleType> {
-    let selection = Select::with_theme(&ColorfulTheme::default())
-        .with_prompt("Choose example:")
-        .item(ExampleType::HelloWorld)
-        .item(ExampleType::Forum)
-        .default(0)
-        .interact()?;
-
-    match selection {
-        0 => Ok(ExampleType::HelloWorld),
-        _ => Ok(ExampleType::Forum),
     }
 }

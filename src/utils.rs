@@ -71,6 +71,7 @@ fn get_folder_names(folder: &BTreeMap<OsString, FileTree>) -> Vec<String> {
         .collect()
 }
 
+#[inline]
 /// "yes" or "no" input dialog, with the option to specify a recommended answer (yes = true, no = false)
 pub fn input_yes_or_no(prompt: &str, recommended: Option<bool>) -> ScaffoldResult<bool> {
     let yes_recommended = if recommended == Some(true) {
@@ -98,6 +99,7 @@ pub fn input_yes_or_no(prompt: &str, recommended: Option<bool>) -> ScaffoldResul
     Ok(selection == 0)
 }
 
+#[inline]
 pub fn input_with_custom_validation<'a, V>(prompt: &str, validator: V) -> ScaffoldResult<String>
 where
     V: Validator<String> + 'a,
@@ -111,6 +113,7 @@ where
     Ok(input)
 }
 
+#[inline]
 pub fn input_with_case(prompt: &str, case: Case) -> ScaffoldResult<String> {
     let input: String = Input::with_theme(&ColorfulTheme::default())
         .with_prompt(prompt)
@@ -122,6 +125,7 @@ pub fn input_with_case(prompt: &str, case: Case) -> ScaffoldResult<String> {
     Ok(input)
 }
 
+#[inline]
 pub fn input_with_case_and_initial_text(
     prompt: &str,
     case: Case,
@@ -138,6 +142,7 @@ pub fn input_with_case_and_initial_text(
     Ok(input)
 }
 
+#[inline]
 pub fn input_no_whitespace(prompt: &str) -> ScaffoldResult<String> {
     let input = Input::with_theme(&ColorfulTheme::default())
         .with_prompt(prompt)
@@ -149,6 +154,7 @@ pub fn input_no_whitespace(prompt: &str) -> ScaffoldResult<String> {
     Ok(input)
 }
 
+#[inline]
 /// Raises an error if input is not of the appropriate_case
 pub fn check_case(input: &str, identifier: &str, case: Case) -> ScaffoldResult<()> {
     if !input.is_case(case) {
@@ -159,6 +165,7 @@ pub fn check_case(input: &str, identifier: &str, case: Case) -> ScaffoldResult<(
     Ok(())
 }
 
+#[inline]
 /// Raises an error if input is contains white spaces
 pub fn check_no_whitespace(input: &str, identifier: &str) -> ScaffoldResult<()> {
     if input.contains(char::is_whitespace) {
@@ -169,6 +176,7 @@ pub fn check_no_whitespace(input: &str, identifier: &str) -> ScaffoldResult<()> 
     Ok(())
 }
 
+#[inline]
 /// Unparses a parsed `syn::File` to formatted rust code
 /// as a String. Formatting is handled under the hood by `prettyplease::unparse`
 pub fn unparse_pretty(file: &syn::File) -> String {

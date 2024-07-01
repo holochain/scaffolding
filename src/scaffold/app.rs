@@ -22,10 +22,12 @@ pub struct AppFileTree {
 }
 
 impl AppFileTree {
+    #[inline]
     pub fn file_tree(self) -> FileTree {
         self.file_tree
     }
 
+    #[inline]
     pub fn file_tree_ref(&self) -> &FileTree {
         &self.file_tree
     }

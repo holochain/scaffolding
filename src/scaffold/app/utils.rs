@@ -12,15 +12,6 @@ use crate::error::{ScaffoldError, ScaffoldResult};
 
 use super::{choose_app, find_app_manifests};
 
-pub fn read_app_manifest(
-    app_file_tree: &FileTree,
-    app_manifest_path: &Path,
-) -> ScaffoldResult<AppManifest> {
-    let content = file_content(app_file_tree, app_manifest_path)?;
-    let manifest: AppManifest = serde_yaml::from_str(content.as_str())?;
-    Ok(manifest)
-}
-
 pub fn get_or_choose_app_manifest_path_for_dna_manifest(
     app_file_tree: &FileTree,
     dna_manifest_path: &Path,
@@ -52,7 +43,8 @@ pub fn get_or_choose_app_manifest_path_for_dna_manifest(
     Ok(path)
 }
 
-pub fn bundled_dnas_paths(
+#[inline]
+fn bundled_dnas_paths(
     app_file_tree: &FileTree,
     app_manifest_path: &Path,
 ) -> ScaffoldResult<Vec<PathBuf>> {
@@ -75,4 +67,14 @@ pub fn bundled_dnas_paths(
     }
 
     Ok(dna_paths)
+}
+
+#[inline]
+fn read_app_manifest(
+    app_file_tree: &FileTree,
+    app_manifest_path: &Path,
+) -> ScaffoldResult<AppManifest> {
+    let content = file_content(app_file_tree, app_manifest_path)?;
+    let manifest: AppManifest = serde_yaml::from_str(content.as_str())?;
+    Ok(manifest)
 }

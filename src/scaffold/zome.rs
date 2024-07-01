@@ -136,6 +136,7 @@ fn zome_crate_path(
     }
 }
 
+#[inline]
 pub fn integrity_zome_name(coordinator_zome_name: &str) -> String {
     format!("{}_integrity", coordinator_zome_name)
 }

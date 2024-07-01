@@ -20,7 +20,7 @@ use crate::{
             },
             scaffold_entry_type,
         },
-        example::{choose_example, ExampleType},
+        example::ExampleType,
         web_app::{package_manager::PackageManager, scaffold_web_app},
         zome::{
             scaffold_coordinator_zome_in_path, scaffold_integrity_zome_with_path, ZomeFileTree,
@@ -54,7 +54,7 @@ impl Example {
     pub async fn run(self, template_file_tree: FileTree, template: &str) -> anyhow::Result<()> {
         let example = match self.example {
             Some(e) => e,
-            None => choose_example()?,
+            None => ExampleType::choose()?,
         };
         let example_name = example.to_string();
 

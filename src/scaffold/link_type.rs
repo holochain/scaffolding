@@ -27,27 +27,6 @@ use super::{
 pub mod coordinator;
 pub mod integrity;
 
-pub fn link_type_name(
-    from_referenceable: &Referenceable,
-    to_referenceable: &Referenceable,
-) -> String {
-    format!(
-        "{}To{}",
-        pluralizer::pluralize(
-            from_referenceable.to_string(&Cardinality::Single).as_str(),
-            1,
-            false
-        )
-        .to_case(Case::Pascal),
-        pluralizer::pluralize(
-            to_referenceable.to_string(&Cardinality::Vector).as_str(),
-            2,
-            false
-        )
-        .to_case(Case::Pascal),
-    )
-}
-
 pub fn scaffold_link_type(
     zome_file_tree: ZomeFileTree,
     template_file_tree: &FileTree,
@@ -212,5 +191,27 @@ pub use {}::*;
         delete,
         inverse_link_type.as_deref(),
         no_ui,
+    )
+}
+
+#[inline]
+pub fn link_type_name(
+    from_referenceable: &Referenceable,
+    to_referenceable: &Referenceable,
+) -> String {
+    format!(
+        "{}To{}",
+        pluralizer::pluralize(
+            from_referenceable.to_string(&Cardinality::Single).as_str(),
+            1,
+            false
+        )
+        .to_case(Case::Pascal),
+        pluralizer::pluralize(
+            to_referenceable.to_string(&Cardinality::Vector).as_str(),
+            2,
+            false
+        )
+        .to_case(Case::Pascal),
     )
 }

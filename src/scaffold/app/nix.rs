@@ -9,6 +9,7 @@ use crate::error::{ScaffoldError, ScaffoldResult};
 use crate::file_tree::*;
 use crate::versions;
 
+#[inline]
 pub fn flake_nix(holo_enabled: bool) -> FileTree {
     let holochain_nix_version = versions::HOLOCHAIN_NIX_VERSION;
 
