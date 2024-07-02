@@ -43,7 +43,7 @@ pub fn get_or_choose_app_manifest_path_for_dna_manifest(
     Ok(path)
 }
 
-fn bundled_dnas_paths(
+pub fn bundled_dnas_paths(
     app_file_tree: &FileTree,
     app_manifest_path: &Path,
 ) -> ScaffoldResult<Vec<PathBuf>> {
@@ -68,11 +68,11 @@ fn bundled_dnas_paths(
     Ok(dna_paths)
 }
 
-fn read_app_manifest(
+pub fn read_app_manifest(
     app_file_tree: &FileTree,
     app_manifest_path: &Path,
 ) -> ScaffoldResult<AppManifest> {
     let content = file_content(app_file_tree, app_manifest_path)?;
-    let manifest: AppManifest = serde_yaml::from_str(content.as_str())?;
+    let manifest: AppManifest = serde_yml::from_str(content.as_str())?;
     Ok(manifest)
 }

@@ -20,7 +20,7 @@ pub fn empty_happ_manifest(
         .unwrap()
         .into();
 
-    let s = serde_yaml::to_string(&manifest)?;
+    let s = serde_yml::to_string(&manifest)?;
     Ok(s)
 }
 
@@ -41,6 +41,6 @@ pub fn web_happ_manifest<P: Into<PathBuf>>(
         .unwrap()
         .into();
 
-    let s = serde_yaml::to_string(&manifest)?;
+    let s = serde_yml::to_string(&manifest)?;
     Ok(s)
 }
