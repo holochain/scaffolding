@@ -8,7 +8,7 @@ use crate::{
 
 use build_fs_tree::dir;
 use convert_case::{Case, Casing};
-use dialoguer::{theme::ColorfulTheme, MultiSelect, Select};
+use dialoguer::{theme::ColorfulTheme, Select};
 
 use crate::error::{ScaffoldError, ScaffoldResult};
 
@@ -32,44 +32,6 @@ pub mod definitions;
 pub mod fields;
 pub mod integrity;
 pub mod utils;
-
-fn check_field_definitions(
-    entry_type_name: &str,
-    zome_file_tree: &ZomeFileTree,
-    fields: &[FieldDefinition],
-) -> ScaffoldResult<()> {
-    let entry_types = get_all_entry_types(zome_file_tree)?.unwrap_or_else(Vec::new);
-
-    let entry_types_names: Vec<String> = entry_types
-        .clone()
-        .into_iter()
-        .map(|et| et.entry_type.clone())
-        .collect();
-
-    let linked_from_entry_type: Vec<EntryTypeReference> = fields
-        .iter()
-        .filter_map(|f| f.linked_from.clone())
-        .filter_map(|t| match t {
-            Referenceable::Agent { .. } => None,
-            Referenceable::EntryType(et) => Some(et),
-        })
-        .collect();
-
-    match linked_from_entry_type.into_iter().find(|l| {
-        !entry_types_names.contains(&l.entry_type.to_case(Case::Pascal))
-            && !l
-                .entry_type
-                .to_case(Case::Pascal)
-                .eq(&entry_type_name.to_case(Case::Pascal))
-    }) {
-        Some(t) => Err(ScaffoldError::EntryTypeNotFound(
-            t.entry_type.clone(),
-            zome_file_tree.dna_file_tree.dna_manifest.name(),
-            zome_file_tree.zome_manifest.name.0.to_string(),
-        )),
-        None => Ok(()),
-    }
-}
 
 // TODO: group some params into a new-type or prefer builder pattern
 #[allow(clippy::too_many_arguments)]
@@ -108,7 +70,7 @@ pub fn scaffold_entry_type(
 
     let crud = match maybe_crud {
         Some(c) => c,
-        None => choose_crud(),
+        None => Crud::choose()?,
     };
 
     let link_from_original_to_each_update = match crud.update {
@@ -224,28 +186,40 @@ pub fn scaffold_entry_type(
     )
 }
 
-fn choose_crud() -> Crud {
-    let selections = MultiSelect::with_theme(&ColorfulTheme::default())
-        .with_prompt("Which CRUD functions should be scaffolded (SPACE to select/unselect, ENTER to continue)?")
-        .item_checked("Update", true)
-        .item_checked("Delete", true)
-        .interact()
-        .unwrap();
+fn check_field_definitions(
+    entry_type_name: &str,
+    zome_file_tree: &ZomeFileTree,
+    fields: &[FieldDefinition],
+) -> ScaffoldResult<()> {
+    let entry_types = get_all_entry_types(zome_file_tree)?.unwrap_or_else(Vec::new);
 
-    let mut crud = Crud {
-        delete: false,
+    let entry_types_names: Vec<String> = entry_types
+        .clone()
+        .into_iter()
+        .map(|et| et.entry_type.clone())
+        .collect();
 
-        update: false,
-    };
+    let linked_from_entry_type: Vec<EntryTypeReference> = fields
+        .iter()
+        .filter_map(|f| f.linked_from.clone())
+        .filter_map(|t| match t {
+            Referenceable::Agent { .. } => None,
+            Referenceable::EntryType(et) => Some(et),
+        })
+        .collect();
 
-    for selection in selections {
-        if selection == 0 {
-            crud.update = true;
-        }
-        if selection == 1 {
-            crud.delete = true;
-        }
+    match linked_from_entry_type.into_iter().find(|l| {
+        !entry_types_names.contains(&l.entry_type.to_case(Case::Pascal))
+            && !l
+                .entry_type
+                .to_case(Case::Pascal)
+                .eq(&entry_type_name.to_case(Case::Pascal))
+    }) {
+        Some(t) => Err(ScaffoldError::EntryTypeNotFound(
+            t.entry_type.clone(),
+            zome_file_tree.dna_file_tree.dna_manifest.name(),
+            zome_file_tree.zome_manifest.name.0.to_string(),
+        )),
+        None => Ok(()),
     }
-
-    crud
 }

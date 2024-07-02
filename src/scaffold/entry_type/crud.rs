@@ -1,15 +1,33 @@
 use std::str::FromStr;
 
 use anyhow::anyhow;
+use dialoguer::{theme::ColorfulTheme, MultiSelect};
 use serde::Serialize;
 
-use crate::error::ScaffoldError;
+use crate::error::{ScaffoldError, ScaffoldResult};
 
-#[derive(Debug, Serialize, Clone, Copy)]
+#[derive(Debug, Default, Serialize, Clone, Copy)]
 pub struct Crud {
     // We don't include create and read because they must always exist
     pub update: bool,
     pub delete: bool,
+}
+
+impl Crud {
+    pub fn choose() -> ScaffoldResult<Self> {
+        let selections = MultiSelect::with_theme(&ColorfulTheme::default())
+            .with_prompt("Which CRUD functions should be scaffolded (SPACE to select/unselect, ENTER to continue)?")
+            .item_checked("Update", true)
+            .item_checked("Delete", true)
+            .interact()?;
+
+        let mut crud = Crud::default();
+
+        crud.update = selections.contains(&0);
+        crud.delete = selections.contains(&1);
+
+        Ok(crud)
+    }
 }
 
 impl FromStr for Crud {
@@ -23,10 +41,7 @@ impl FromStr for Crud {
             return Err(anyhow!("read ('r') must be present").into());
         }
 
-        let mut crud = Crud {
-            update: false,
-            delete: false,
-        };
+        let mut crud = Crud::default();
 
         for c in crud_str.chars() {
             match c {
