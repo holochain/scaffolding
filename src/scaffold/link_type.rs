@@ -194,7 +194,6 @@ pub use {}::*;
     )
 }
 
-#[inline]
 pub fn link_type_name(
     from_referenceable: &Referenceable,
     to_referenceable: &Referenceable,

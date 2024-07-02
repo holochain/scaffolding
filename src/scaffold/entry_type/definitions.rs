@@ -358,17 +358,14 @@ impl EntryDefinition {
         })
     }
 
-    #[inline]
     pub fn snake_case_name(&self) -> String {
         self.name.to_case(Case::Snake)
     }
 
-    #[inline]
     pub fn pascal_case_name(&self) -> String {
         self.name.to_case(Case::Pascal)
     }
 
-    #[inline]
     pub fn camel_case_name(&self) -> String {
         self.name.to_case(Case::Camel)
     }

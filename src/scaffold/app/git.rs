@@ -23,7 +23,6 @@ pub fn setup_git_environment<P: AsRef<Path>>(path: P) -> ScaffoldResult<()> {
     Ok(())
 }
 
-#[inline]
 pub fn gitignore() -> &'static str {
     include_str!("./gitignore")
 }

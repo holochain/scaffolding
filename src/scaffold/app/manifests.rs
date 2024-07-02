@@ -8,7 +8,6 @@ use mr_bundle::Location;
 
 use crate::error::ScaffoldResult;
 
-#[inline]
 pub fn empty_happ_manifest(
     app_name: &str,
     app_description: Option<&str>,
@@ -25,7 +24,6 @@ pub fn empty_happ_manifest(
     Ok(s)
 }
 
-#[inline]
 pub fn web_happ_manifest<P: Into<PathBuf>>(
     app_name: &str,
     happ_path: P,

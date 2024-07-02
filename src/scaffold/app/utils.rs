@@ -43,7 +43,6 @@ pub fn get_or_choose_app_manifest_path_for_dna_manifest(
     Ok(path)
 }
 
-#[inline]
 fn bundled_dnas_paths(
     app_file_tree: &FileTree,
     app_manifest_path: &Path,
@@ -69,7 +68,6 @@ fn bundled_dnas_paths(
     Ok(dna_paths)
 }
 
-#[inline]
 fn read_app_manifest(
     app_file_tree: &FileTree,
     app_manifest_path: &Path,
