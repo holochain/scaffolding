@@ -1,4 +1,9 @@
+use std::str::FromStr;
+
+use anyhow::anyhow;
 use serde::Serialize;
+
+use crate::error::ScaffoldError;
 
 #[derive(Debug, Serialize, Clone, Copy)]
 pub struct Crud {
@@ -7,35 +12,40 @@ pub struct Crud {
     pub delete: bool,
 }
 
-pub fn parse_crud(crud_str: &str) -> Result<Crud, String> {
-    if !crud_str.contains('c') {
-        return Err(String::from("create ('c') must be present"));
-    }
-    if !crud_str.contains('r') {
-        return Err(String::from("read ('r') must be present"));
-    }
+impl FromStr for Crud {
+    type Err = ScaffoldError;
 
-    let mut crud = Crud {
-        update: false,
-        delete: false,
-    };
+    fn from_str(crud_str: &str) -> Result<Self, Self::Err> {
+        if !crud_str.contains('c') {
+            return Err(anyhow!("create ('c') must be present").into());
+        }
+        if !crud_str.contains('r') {
+            return Err(anyhow!("read ('r') must be present").into());
+        }
 
-    for c in crud_str.chars() {
-        match c {
-            'c' | 'r' => {}
-            'u' => {
-                crud.update = true;
-            }
-            'd' => {
-                crud.delete = true;
-            }
-            _ => {
-                return Err(String::from(
-                    "Only 'c', 'r', 'u' and 'd' are allowed in the crud argument",
-                ));
+        let mut crud = Crud {
+            update: false,
+            delete: false,
+        };
+
+        for c in crud_str.chars() {
+            match c {
+                'c' | 'r' => {}
+                'u' => {
+                    crud.update = true;
+                }
+                'd' => {
+                    crud.delete = true;
+                }
+                _ => {
+                    return Err(anyhow!(
+                        "Only 'c', 'r', 'u' and 'd' are allowed in the crud argument",
+                    )
+                    .into());
+                }
             }
         }
-    }
 
-    Ok(crud)
+        Ok(crud)
+    }
 }

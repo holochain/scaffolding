@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use colored::Colorize;
 use convert_case::Case;
 use structopt::StructOpt;
@@ -6,12 +8,7 @@ use crate::{
     file_tree::{build_file_tree, load_directory_into_memory, FileTree},
     scaffold::{
         dna::DnaFileTree,
-        entry_type::{
-            crud::{parse_crud, Crud},
-            definitions::FieldDefinition,
-            fields::parse_fields,
-            scaffold_entry_type,
-        },
+        entry_type::{crud::Crud, definitions::FieldDefinition, scaffold_entry_type},
         zome::ZomeFileTree,
     },
     templates::ScaffoldedTemplate,
@@ -37,7 +34,7 @@ pub struct EntryType {
     /// If referred to by "EntryHash", the entries can't be updated or deleted
     pub reference_entry_hash: Option<bool>,
 
-    #[structopt(long, parse(try_from_str = parse_crud))]
+    #[structopt(long, parse(try_from_str = Crud::from_str))]
     /// The Create, "Read", "Update", and "Delete" zome call functions that should be scaffolded for this entry type
     /// If "--reference-entry-hash" is "true", only "Create" and "Read" will be scaffolded
     pub crud: Option<Crud>,
@@ -47,9 +44,9 @@ pub struct EntryType {
     /// Only applies if update is selected in the "crud" argument
     pub link_from_original_to_each_update: Option<bool>,
 
-    #[structopt(long, value_delimiter = ",", parse(try_from_str = parse_fields))]
+    #[structopt(long, value_delimiter = ",", parse(try_from_str = FieldDefinition::from_str))]
     /// The fields that the entry type struct should contain
-    /// Grammar: <FIELD_NAME>:<FIELD_TYPE>:<WIDGET>:<LINKED_FROM> , (widget and linked_from are optional)
+    /// Syntax: <FIELD_NAME>:<FIELD_TYPE>:<WIDGET>:<LINKED_FROM> , (widget and linked_from are optional)
     /// Eg. "title:String:TextField" , "posts_hashes:Vec\<ActionHash\>::Post"
     pub fields: Option<Vec<FieldDefinition>>,
 
