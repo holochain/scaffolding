@@ -21,10 +21,10 @@ impl Crud {
             .item_checked("Delete", true)
             .interact()?;
 
-        let mut crud = Crud::default();
-
-        crud.update = selections.contains(&0);
-        crud.delete = selections.contains(&1);
+        let crud = Crud {
+            update: selections.contains(&0),
+            delete: selections.contains(&1),
+        };
 
         Ok(crud)
     }
@@ -46,17 +46,13 @@ impl FromStr for Crud {
         for c in crud_str.chars() {
             match c {
                 'c' | 'r' => {}
-                'u' => {
-                    crud.update = true;
-                }
-                'd' => {
-                    crud.delete = true;
-                }
+                'u' => crud.update = true,
+                'd' => crud.delete = true,
                 _ => {
                     return Err(anyhow!(
                         "Only 'c', 'r', 'u' and 'd' are allowed in the crud argument",
                     )
-                    .into());
+                    .into())
                 }
             }
         }
