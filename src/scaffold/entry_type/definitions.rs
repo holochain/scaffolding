@@ -85,8 +85,8 @@ impl FieldType {
             FieldType::DnaHash,
             FieldType::AgentPubKey,
             FieldType::Enum {
-                label: String::from(""),
-                variants: vec![],
+                label: String::new(),
+                variants: Vec::new(),
             },
         ]
     }

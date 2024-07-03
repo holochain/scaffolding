@@ -5,7 +5,7 @@ use anyhow::Context;
 use convert_case::{Case, Casing};
 use dialoguer::{theme::ColorfulTheme, Input, Select, Validator};
 use dprint_plugin_typescript::configuration::ConfigurationBuilder;
-use dprint_plugin_vue::configuration::Configuration;
+use dprint_vue_plugin::configuration::Configuration;
 use regex::Regex;
 
 use crate::error::{ScaffoldError, ScaffoldResult};
@@ -244,7 +244,7 @@ pub fn format_code<P: Into<PathBuf>>(code: &str, file_name: P) -> ScaffoldResult
                     indent_width: 2,
                 };
                 let formatted_code =
-                    dprint_plugin_vue::format(&file_path, code, &config, |path, raw, _| {
+                    dprint_vue_plugin::format(&file_path, code, &config, |path, raw, _| {
                         let extension = path
                             .extension()
                             .context("Failed to get path extension")?
