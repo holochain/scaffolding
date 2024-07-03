@@ -1626,19 +1626,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "dprint-plugin-vue"
-version = "0.6.0"
-source = "git+https://github.com/c12i/dprint-plugin-vue.git#313a89c306a1b258f5a29d2b09ce1cca9ea0bf18"
-dependencies = [
- "anyhow",
- "dprint-core 0.59.1",
- "nom",
- "serde",
- "serde_json",
- "vue-sfc",
-]
-
-[[package]]
 name = "dprint-swc-ext"
 version = "0.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1653,6 +1640,20 @@ dependencies = [
  "swc_ecma_ast",
  "swc_ecma_parser",
  "text_lines",
+]
+
+[[package]]
+name = "dprint-vue-plugin"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1139a880cd085315df24192388a42a93df95ab8c76b578384b5c34bc5c7d3083"
+dependencies = [
+ "anyhow",
+ "dprint-core 0.59.1",
+ "nom",
+ "serde",
+ "serde_json",
+ "vue-sfc",
 ]
 
 [[package]]
@@ -2843,7 +2844,7 @@ dependencies = [
  "dialoguer",
  "dirs 4.0.0",
  "dprint-plugin-typescript",
- "dprint-plugin-vue",
+ "dprint-vue-plugin",
  "git2",
  "handlebars",
  "holochain",
