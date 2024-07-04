@@ -56,7 +56,7 @@ pub struct EntryType {
 }
 
 impl EntryType {
-    pub fn run(self, template_file_tree: FileTree, template: &str) -> anyhow::Result<()> {
+    pub fn run(self, template_file_tree: FileTree) -> anyhow::Result<()> {
         let current_dir = std::env::current_dir()?;
         let file_tree = load_directory_into_memory(&current_dir)?;
         let name = match self.name {
