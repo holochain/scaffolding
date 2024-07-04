@@ -51,8 +51,7 @@ impl Dna {
                 r#"
 Add new zomes to your DNA with:
 
-  hc scaffold zome
-"#,
+  hc scaffold zome"#,
             );
         }
 

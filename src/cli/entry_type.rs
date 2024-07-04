@@ -19,7 +19,7 @@ use crate::{
 /// Scaffold an entry type and CRUD functions into an existing zome
 pub struct EntryType {
     #[structopt(long)]
-    /// Name of the dna in which you want to scaffold the zome
+    /// Name of the dna in which you want to scaffold the entry type
     pub dna: Option<String>,
 
     #[structopt(long)]

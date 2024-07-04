@@ -54,7 +54,9 @@ impl HcScaffold {
             self.get_template(&current_dir, scaffold_config.as_ref())?;
 
         match self.command {
-            HcScaffoldCommand::WebApp(web_app) => web_app.run(template_file_tree).await?,
+            HcScaffoldCommand::WebApp(web_app) => {
+                web_app.run(template_file_tree, &template).await?
+            }
             HcScaffoldCommand::Template(template) => template.run(template_file_tree)?,
             HcScaffoldCommand::Dna(dna) => dna.run(template_file_tree)?,
             HcScaffoldCommand::Zome(zome) => zome.run(template_file_tree)?,
