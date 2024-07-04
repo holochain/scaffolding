@@ -223,9 +223,10 @@ pub struct EntryTypeReference {
 
 impl EntryTypeReference {
     pub fn hash_type(&self) -> FieldType {
-        match self.reference_entry_hash {
-            true => FieldType::EntryHash,
-            false => FieldType::ActionHash,
+        if self.reference_entry_hash {
+            FieldType::EntryHash
+        } else {
+            FieldType::ActionHash
         }
     }
 

@@ -35,8 +35,8 @@ impl PackageManager {
         let managers = [
             PackageManager::Bun,
             PackageManager::Npm,
-            PackageManager::Yarn,
             PackageManager::Pnpm,
+            PackageManager::Yarn,
         ];
         let selection = Select::with_theme(&ColorfulTheme::default())
             .with_prompt("Choose a package manager: (Use arrow-keys. Return to submit)")
