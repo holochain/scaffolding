@@ -35,6 +35,7 @@ pub enum CollectionType {
 
 impl FromStr for CollectionType {
     type Err = ScaffoldError;
+
     fn from_str(s: &str) -> ScaffoldResult<Self> {
         match s {
             "global" => Ok(CollectionType::Global),

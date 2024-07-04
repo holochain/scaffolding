@@ -14,33 +14,26 @@ use super::{
 };
 
 pub fn choose_reference_entry_hash(prompt: &str, recommended: bool) -> ScaffoldResult<bool> {
-    match recommended {
-        true => {
-            let selection = Select::with_theme(&ColorfulTheme::default())
-                .with_prompt(prompt)
-                .default(0)
-                .item("EntryHash (recommended)")
-                .item("ActionHash")
-                .interact()?;
+    let selection = if recommended {
+        Select::with_theme(&ColorfulTheme::default())
+            .with_prompt(prompt)
+            .default(0)
+            .item("EntryHash (recommended)")
+            .item("ActionHash")
+            .interact()?
+    } else {
+        Select::with_theme(&ColorfulTheme::default())
+            .with_prompt(prompt)
+            .default(0)
+            .item("ActionHash (recommended)")
+            .item("EntryHash")
+            .interact()?
+    };
 
-            match selection {
-                0 => Ok(true),
-                _ => Ok(false),
-            }
-        }
-        false => {
-            let selection = Select::with_theme(&ColorfulTheme::default())
-                .with_prompt(prompt)
-                .default(0)
-                .item("ActionHash (recommended)")
-                .item("EntryHash")
-                .interact()?;
-
-            match selection {
-                0 => Ok(false),
-                _ => Ok(true),
-            }
-        }
+    if recommended {
+        Ok(selection == 0)
+    } else {
+        Ok(selection != 0)
     }
 }
 

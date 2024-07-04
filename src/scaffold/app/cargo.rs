@@ -58,59 +58,6 @@ pub fn add_workspace_path_dependency(
     add_workspace_dependency(app_file_tree, crate_name, &toml::Value::Table(table))
 }
 
-fn add_workspace_dependency(
-    mut app_file_tree: FileTree,
-    crate_name: &str,
-    crate_location: &toml::Value,
-) -> ScaffoldResult<FileTree> {
-    let mut workspace_cargo_toml = get_workspace_cargo_toml(&app_file_tree)?;
-    let workspace_table = workspace_cargo_toml
-        .as_table_mut()
-        .ok_or(ScaffoldError::MalformedFile(
-            workspace_cargo_toml_path(&app_file_tree),
-            String::from("file does not conform to toml"),
-        ))?
-        .get_mut("workspace")
-        .ok_or(ScaffoldError::MalformedFile(
-            workspace_cargo_toml_path(&app_file_tree),
-            String::from("no workspace table found in workspace root"),
-        ))?
-        .as_table_mut()
-        .ok_or(ScaffoldError::MalformedFile(
-            workspace_cargo_toml_path(&app_file_tree),
-            String::from("workspace key is not a table"),
-        ))?;
-
-    let mut dependencies = match workspace_table.get("dependencies") {
-        Some(d) => d
-            .as_table()
-            .ok_or(ScaffoldError::MalformedFile(
-                workspace_cargo_toml_path(&app_file_tree),
-                String::from("workspace.dependencies is not a table"),
-            ))?
-            .clone(),
-        None => toml::map::Map::new(),
-    };
-
-    dependencies.insert(crate_name.to_owned(), crate_location.clone());
-    workspace_table.insert(
-        String::from("dependencies"),
-        toml::Value::Table(dependencies),
-    );
-
-    let path = workspace_cargo_toml_path(&app_file_tree);
-
-    let cargo_toml_str = toml::to_string(&workspace_cargo_toml)?;
-
-    insert_file(&mut app_file_tree, &path, &cargo_toml_str)?;
-
-    Ok(app_file_tree)
-}
-
-fn workspace_cargo_toml_path(_app_file_tree: &FileTree) -> PathBuf {
-    PathBuf::new().join("Cargo.toml")
-}
-
 pub fn get_workspace_packages_locations(
     app_file_tree: &FileTree,
 ) -> ScaffoldResult<Option<Vec<PathBuf>>> {
@@ -229,4 +176,58 @@ pub fn exec_metadata(app_file_tree: &FileTree) -> Result<Metadata, cargo_metadat
         .find(|line| line.starts_with('{'))
         .ok_or(cargo_metadata::Error::NoJson)?;
     MetadataCommand::parse(stdout)
+}
+
+fn add_workspace_dependency(
+    mut app_file_tree: FileTree,
+    crate_name: &str,
+    crate_location: &toml::Value,
+) -> ScaffoldResult<FileTree> {
+    let mut workspace_cargo_toml = get_workspace_cargo_toml(&app_file_tree)?;
+    let workspace_table = workspace_cargo_toml
+        .as_table_mut()
+        .ok_or(ScaffoldError::MalformedFile(
+            workspace_cargo_toml_path(&app_file_tree),
+            String::from("file does not conform to toml"),
+        ))?
+        .get_mut("workspace")
+        .ok_or(ScaffoldError::MalformedFile(
+            workspace_cargo_toml_path(&app_file_tree),
+            String::from("no workspace table found in workspace root"),
+        ))?
+        .as_table_mut()
+        .ok_or(ScaffoldError::MalformedFile(
+            workspace_cargo_toml_path(&app_file_tree),
+            String::from("workspace key is not a table"),
+        ))?;
+
+    let mut dependencies = match workspace_table.get("dependencies") {
+        Some(d) => d
+            .as_table()
+            .ok_or(ScaffoldError::MalformedFile(
+                workspace_cargo_toml_path(&app_file_tree),
+                String::from("workspace.dependencies is not a table"),
+            ))?
+            .clone(),
+        None => toml::map::Map::new(),
+    };
+
+    dependencies.insert(crate_name.to_owned(), crate_location.clone());
+    workspace_table.insert(
+        String::from("dependencies"),
+        toml::Value::Table(dependencies),
+    );
+
+    let path = workspace_cargo_toml_path(&app_file_tree);
+
+    let cargo_toml_str = toml::to_string(&workspace_cargo_toml)?;
+
+    insert_file(&mut app_file_tree, &path, &cargo_toml_str)?;
+
+    Ok(app_file_tree)
+}
+
+#[inline]
+fn workspace_cargo_toml_path(_app_file_tree: &FileTree) -> PathBuf {
+    PathBuf::new().join("Cargo.toml")
 }

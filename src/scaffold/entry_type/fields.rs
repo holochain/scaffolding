@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::{path::PathBuf, str::FromStr};
 
 use convert_case::{Case, Casing};
 use dialoguer::{theme::ColorfulTheme, Confirm, Select};
@@ -18,6 +18,88 @@ use super::{
     integrity::get_all_entry_types,
 };
 
+impl FromStr for FieldDefinition {
+    type Err = ScaffoldError;
+
+    fn from_str(fields_str: &str) -> Result<Self, Self::Err> {
+        let sp: Vec<&str> = fields_str.split(':').collect();
+
+        let field_name = sp[0].to_string();
+
+        check_case(&field_name, "field_name", Case::Snake)?;
+
+        let field_type_str = sp[1].to_string();
+
+        let vec_regex = Regex::new(r"Vec<(?P<a>(.)*)>\z").unwrap();
+        let option_regex = Regex::new(r"Option<(?P<a>(.)*)>\z").unwrap();
+
+        let (field_type, cardinality) = if vec_regex.is_match(field_type_str.as_str()) {
+            let field_type = vec_regex.replace(field_type_str.as_str(), "${a}");
+
+            if field_type == "Enum" {
+                (parse_enum(fields_str)?, Cardinality::Vector)
+            } else {
+                (
+                    FieldType::try_from(field_type.to_string())?,
+                    Cardinality::Vector,
+                )
+            }
+        } else if option_regex.is_match(field_type_str.as_str()) {
+            let field_type = option_regex.replace(field_type_str.as_str(), "${a}");
+
+            if field_type == "Enum" {
+                (parse_enum(fields_str)?, Cardinality::Option)
+            } else {
+                (
+                    FieldType::try_from(field_type.to_string())?,
+                    Cardinality::Option,
+                )
+            }
+        } else if field_type_str == "Enum" {
+            (parse_enum(fields_str)?, Cardinality::Single)
+        } else {
+            (
+                FieldType::try_from(field_type_str.to_string())?,
+                Cardinality::Single,
+            )
+        };
+
+        let widget = if sp.len() > 2 {
+            match sp[2] {
+                "" => None,
+                _ => Some(sp[2].to_string()),
+            }
+        } else {
+            None
+        };
+
+        let linked_from = match field_type {
+            FieldType::AgentPubKey => match sp.len() {
+                4 => Some(Referenceable::Agent {
+                    role: sp[3].to_string(),
+                }),
+                _ => None,
+            },
+            FieldType::EntryHash | FieldType::ActionHash => match sp.len() {
+                4 => Some(Referenceable::EntryType(EntryTypeReference {
+                    entry_type: sp[3].to_string(),
+                    reference_entry_hash: matches!(field_type, FieldType::EntryHash),
+                })),
+                _ => None,
+            },
+            _ => None,
+        };
+
+        Ok(FieldDefinition {
+            field_name,
+            field_type,
+            widget,
+            cardinality,
+            linked_from,
+        })
+    }
+}
+
 fn parse_enum(fields_str: &str) -> ScaffoldResult<FieldType> {
     let sp: Vec<&str> = fields_str.split(':').collect();
 
@@ -26,84 +108,6 @@ fn parse_enum(fields_str: &str) -> ScaffoldResult<FieldType> {
     let variants = sp[4].split('.').map(|v| v.to_case(Case::Pascal)).collect();
 
     Ok(FieldType::Enum { label, variants })
-}
-
-pub fn parse_fields(fields_str: &str) -> ScaffoldResult<FieldDefinition> {
-    let sp: Vec<&str> = fields_str.split(':').collect();
-
-    let field_name = sp[0].to_string();
-
-    check_case(&field_name, "field_name", Case::Snake)?;
-
-    let field_type_str = sp[1].to_string();
-
-    let vec_regex = Regex::new(r"Vec<(?P<a>(.)*)>\z").unwrap();
-    let option_regex = Regex::new(r"Option<(?P<a>(.)*)>\z").unwrap();
-
-    let (field_type, cardinality) = if vec_regex.is_match(field_type_str.as_str()) {
-        let field_type = vec_regex.replace(field_type_str.as_str(), "${a}");
-
-        if field_type == "Enum" {
-            (parse_enum(fields_str)?, Cardinality::Vector)
-        } else {
-            (
-                FieldType::try_from(field_type.to_string())?,
-                Cardinality::Vector,
-            )
-        }
-    } else if option_regex.is_match(field_type_str.as_str()) {
-        let field_type = option_regex.replace(field_type_str.as_str(), "${a}");
-
-        if field_type == "Enum" {
-            (parse_enum(fields_str)?, Cardinality::Option)
-        } else {
-            (
-                FieldType::try_from(field_type.to_string())?,
-                Cardinality::Option,
-            )
-        }
-    } else if field_type_str == "Enum" {
-        (parse_enum(fields_str)?, Cardinality::Single)
-    } else {
-        (
-            FieldType::try_from(field_type_str.to_string())?,
-            Cardinality::Single,
-        )
-    };
-
-    let widget = if sp.len() > 2 {
-        match sp[2] {
-            "" => None,
-            _ => Some(sp[2].to_string()),
-        }
-    } else {
-        None
-    };
-
-    let linked_from = match field_type {
-        FieldType::AgentPubKey => match sp.len() {
-            4 => Some(Referenceable::Agent {
-                role: sp[3].to_string(),
-            }),
-            _ => None,
-        },
-        FieldType::EntryHash | FieldType::ActionHash => match sp.len() {
-            4 => Some(Referenceable::EntryType(EntryTypeReference {
-                entry_type: sp[3].to_string(),
-                reference_entry_hash: matches!(field_type, FieldType::EntryHash),
-            })),
-            _ => None,
-        },
-        _ => None,
-    };
-
-    Ok(FieldDefinition {
-        field_name,
-        field_type,
-        widget,
-        cardinality,
-        linked_from,
-    })
 }
 
 pub fn choose_widget(
@@ -252,7 +256,7 @@ pub fn choose_field(
             let link_from = Confirm::with_theme(&ColorfulTheme::default())
                     .with_prompt(
                         format!(
-                            "Should a link from the {field_type} provided in this field also be created when entries of this type are created?", 
+                            "Should a link from the {field_type} provided in this field also be created when entries of this type are created?",
                         )
                     )
                     .interact()?;
