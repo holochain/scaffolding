@@ -7,6 +7,7 @@ use crate::{
 };
 
 use build_fs_tree::dir;
+use colored::Colorize;
 use convert_case::{Case, Casing};
 use dialoguer::{theme::ColorfulTheme, Select};
 
@@ -46,6 +47,15 @@ pub fn scaffold_entry_type(
     no_ui: bool,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     check_for_reserved_words(name)?;
+
+    if no_ui {
+        let warning_text = r#"
+WARNING: Opting out of UI generation for this entry-type but not for other entry-types, link-types or collections associated with it
+may result in potential UI inconsistencies. Specifically, UI elements intended for associated entry-types, link-types or collections could
+inadvertently reference or expect elements from the skipped entry type."#
+            .yellow();
+        println!("{warning_text}");
+    }
 
     let fields = match maybe_fields {
         Some(f) => {
