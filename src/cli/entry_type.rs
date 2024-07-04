@@ -56,7 +56,7 @@ pub struct EntryType {
 }
 
 impl EntryType {
-    pub fn run(self, template_file_tree: FileTree) -> anyhow::Result<()> {
+    pub fn run(self, template_file_tree: FileTree, template: &str) -> anyhow::Result<()> {
         let current_dir = std::env::current_dir()?;
         let file_tree = load_directory_into_memory(&current_dir)?;
         let name = match self.name {
@@ -71,7 +71,7 @@ impl EntryType {
         let zome_file_tree =
             ZomeFileTree::get_or_choose_integrity(dna_file_tree, self.zome.as_deref())?;
 
-        if self.no_ui {
+        if self.no_ui && template != "headless" {
             let warning_text = r#"
 WARNING: Opting out of UI generation for this entry-type but not for other entry-types, link-types or collections associated with it
 may result in potential UI inconsistencies. Specifically, UI elements intended for associated entry-types, link-types or collections could

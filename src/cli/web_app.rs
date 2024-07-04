@@ -96,7 +96,7 @@ impl WebApp {
             self.holo_enabled,
         )?;
 
-        let file_tree = ScaffoldConfig::write_to_package_json(file_tree, &template)?;
+        let file_tree = ScaffoldConfig::write_to_package_json(file_tree, template)?;
 
         build_file_tree(file_tree, &app_folder)?;
 
@@ -169,7 +169,7 @@ Here's how you can get started with developing your application:
         let dna_name = input_with_case("Initial DNA name (snake_case):", Case::Snake)?;
 
         let file_tree = load_directory_into_memory(&path.join(name))?;
-        let app_file_tree = AppFileTree::get_or_choose(file_tree, Some(&name))?;
+        let app_file_tree = AppFileTree::get_or_choose(file_tree, Some(name))?;
 
         let ScaffoldedTemplate { file_tree, .. } =
             scaffold_dna(app_file_tree, &template_file_tree, &dna_name)?;

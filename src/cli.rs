@@ -60,7 +60,9 @@ impl HcScaffold {
             HcScaffoldCommand::Template(template) => template.run(template_file_tree)?,
             HcScaffoldCommand::Dna(dna) => dna.run(template_file_tree)?,
             HcScaffoldCommand::Zome(zome) => zome.run(template_file_tree)?,
-            HcScaffoldCommand::EntryType(entry_type) => entry_type.run(template_file_tree)?,
+            HcScaffoldCommand::EntryType(entry_type) => {
+                entry_type.run(template_file_tree, &template)?
+            }
             HcScaffoldCommand::LinkType(link_type) => link_type.run(template_file_tree)?,
             HcScaffoldCommand::Collection(collection) => collection.run(template_file_tree)?,
             HcScaffoldCommand::Example(example) => {
