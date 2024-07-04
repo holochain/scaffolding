@@ -73,21 +73,23 @@ pub fn scaffold_entry_type(
         None => Crud::choose()?,
     };
 
-    let link_from_original_to_each_update = match crud.update {
-        true => match maybe_link_from_original_to_each_update {
-            Some(l) => l,
-            None => {
-                let selection = Select::with_theme(&ColorfulTheme::default())
-                .with_prompt("Should a link from the original entry be created when this entry is updated?")
+    let link_from_original_to_each_update = if crud.update {
+        if let Some(l) = maybe_link_from_original_to_each_update {
+            l
+        } else {
+            let selection = Select::with_theme(&ColorfulTheme::default())
+                .with_prompt(
+                    "Should a link from the original entry be created when this entry is updated?",
+                )
                 .default(0)
                 .item("Yes (more storage cost but better read performance, recommended)")
                 .item("No (less storage cost but worse read performance)")
                 .interact()?;
 
-                selection == 0
-            }
-        },
-        false => false,
+            selection == 0
+        }
+    } else {
+        false
     };
 
     let entry_def = EntryDefinition {

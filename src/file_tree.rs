@@ -116,13 +116,13 @@ pub fn find_files<F: Fn(&PathBuf, &String) -> bool>(
     file_tree: &FileTree,
     find_by_path_and_contents: &F,
 ) -> BTreeMap<PathBuf, String> {
-    find_map_files(
-        file_tree,
-        &|file_name, file_contents| match find_by_path_and_contents(file_name, file_contents) {
-            true => Some(file_contents.clone()),
-            false => None,
-        },
-    )
+    find_map_files(file_tree, &|file_name, file_contents| {
+        if find_by_path_and_contents(file_name, file_contents) {
+            Some(file_contents.clone())
+        } else {
+            None
+        }
+    })
 }
 
 pub fn find_map_rust_files<T, F: Fn(&PathBuf, &syn::File) -> Option<T>>(
