@@ -1,35 +1,28 @@
 <template>
-  <div v-if="loading" style="display: flex; flex: 1; align-items: center; justify-content: center">
-    <mwc-circular-progress indeterminate></mwc-circular-progress>
+  <progress v-if="loading"></progress>
+  <article v-if="error">Error fetching the {{lower_case (plural ../entry_type.name)}}: {{{{raw}}}} {{error}}.{{{{/raw}}}}</article>
+  <div v-else-if="hashes && hashes.length > 0">
+    <{{pascal_case ../entry_type.name}}Detail
+      v-for="(hash, i) in hashes"
+      :key="i"
+      :{{kebab_case ../entry_type.name}}-hash="hash"
+      @{{kebab_case ../entry_type.name}}-deleted="fetch{{pascal_case (plural ../entry_type.name)}}()"
+    >
+    </{{pascal_case ../entry_type.name}}Detail>
   </div>
-  
-  <div v-else style="display: flex; flex-direction: column">
-    <span v-if="error">Error fetching the {{lower_case (plural ../entry_type.name)}}: {{{{raw}}}} {{error}}.{{{{/raw}}}}</span>
-    <div v-else-if="hashes && hashes.length > 0" style="margin-bottom: 8px">
-      <{{pascal_case ../entry_type.name}}Detail 
-        v-for="(hash, i) in hashes" 
-        :key="i"
-        :{{kebab_case ../entry_type.name}}-hash="hash" 
-        @{{kebab_case ../entry_type.name}}-deleted="fetch{{pascal_case (plural ../entry_type.name)}}()"
-      >
-      </{{pascal_case ../entry_type.name}}Detail>
-    </div>
-    <span v-else>No {{lower_case (plural ../entry_type.name)}} found for this {{lower_case linked_from.name}}.</span>
-  </div>
-
+  <article v-else>No {{lower_case (plural ../entry_type.name)}} found for this {{lower_case linked_from.name}}.</article>
 </template>
 
 <script lang="ts">
 import { defineComponent, inject, ComputedRef, toRaw } from 'vue';
 import { decode } from '@msgpack/msgpack';
 import { AppClient, Link, Record, ActionHash, AgentPubKey, HolochainError } from '@holochain/client';
-import '@material/mwc-circular-progress';
 import {{pascal_case ../entry_type.name}}Detail from './{{pascal_case ../entry_type.name}}Detail.vue';
 import { {{pascal_case ../coordinator_zome_manifest.name}}Signal } from './types';
 
 export default defineComponent({
   components: {
-    {{pascal_case ../entry_type.name}}Detail
+    {{pascal_case ../entry_type.name}}Detail,
   },
   props: {
     {{camel_case linked_from.singular_arg}}: {
