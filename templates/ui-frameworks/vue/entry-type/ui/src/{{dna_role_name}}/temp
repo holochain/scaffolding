@@ -1,0 +1,51 @@
+<template>
+  <div>
+    <template v-if="crud.update">
+      <template v-if="editing">
+        <div>
+          <Edit{{ pascalCase(entry_type.name) }}
+            <template v-if="link_from_original_to_each_update">
+              original{{ pascalCase(entry_type.name) }}Hash="{{ camelCase(entry_type.name) }}Hash"
+            </template>
+            currentRecord="record"
+            current{{ pascalCase(entry_type.name) }}="{{ camelCase(entry_type.name) }}"
+            @{{ pascalCase(entry_type.name) }}Updated="async () => {
+              setEditing(false);
+              await fetch{{ pascalCase(entry_type.name) }}();
+            }"
+            @EditCanceled="() => setEditing(false)"
+          />
+        </div>
+      </template>
+      <template v-else>
+        <section v-if="record">
+          <template v-for="field in entry_type.fields">
+            <template v-if="field.widget">
+              <template v-if="field.cardinality !== 'vector'">
+                <div>
+                  <span><strong>{{ titleCase(field.field_name) }}: </strong></span>
+                  <span>{{ renderFieldDetail(field) }}</span>
+                </div>
+              </template>
+              <template v-else>
+                <VecDetailRender
+                  :variableToRead="camelCase(entry_type.name) + '?.' + snakeCase(field.field_name)"
+                  :fieldName="field.field_name"
+                  :fieldType="field.field_type"
+                  :widget="field.widget"
+                />
+              </template>
+            </template>
+          </template>
+          <div>
+            <button v-if="crud.update" @click="setEditing(true)">edit</button>
+            <button v-if="crud.delete" @click="delete{{ pascalCase(entry_type.name) }}">delete</button>
+          </div>
+        </section>
+      </template>
+    </template>
+    <template v-else>
+      <article>The requested {{ camelCase(entry_type.name) }} was not found.</article>
+    </template>
+  </div>
+</template>

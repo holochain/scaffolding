@@ -8,6 +8,8 @@ trim_trailing_whitespace = true
 
 [*.hbs]
 insert_final_newline = false
+indent_style = space
+indent_size = 2
 
 [*.md]
 indent_style = space
