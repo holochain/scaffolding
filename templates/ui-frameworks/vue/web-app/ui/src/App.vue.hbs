@@ -20,7 +20,7 @@
 
 <script lang="ts">
 import { defineComponent, computed } from 'vue';
-import { AppClient, AppWebsocket } from '@holochain/client';
+import { AppClient, AppWebsocket, HolochainError } from '@holochain/client';
 {{#if holo_enabled}}
 import WebSdk from '@holo-host/web-sdk';
 import type { AgentState } from '@holo-host/web-sdk';
@@ -68,6 +68,7 @@ export default defineComponent({
       }
     } catch (e) {
       this.error = e as HolochainError;
+    } finally {
       this.loading = false;
     }
   {{else}}
@@ -76,7 +77,8 @@ export default defineComponent({
       this.client = await AppWebsocket.connect();
     } catch (e) {
       this.error = e as HolochainError;
-      this.loading = false
+    } finally {
+      this.loading = false;
     }
   {{/if}}
   },
