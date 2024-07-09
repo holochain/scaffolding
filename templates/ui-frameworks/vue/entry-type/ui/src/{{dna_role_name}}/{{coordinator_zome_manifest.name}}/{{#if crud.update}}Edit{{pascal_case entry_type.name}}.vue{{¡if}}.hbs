@@ -1,11 +1,8 @@
 <template>
-  <mwc-snackbar ref="update-error"></mwc-snackbar>
-
-  <div style="display: flex; flex-direction: column">
-    <span style="font-size: 18px">Edit {{title_case entry_type.name}}</span>
+  <section>
 {{#each entry_type.fields}}
   {{#if widget}}
-      <div style="margin-bottom: 16px">
+      <div>
     {{#if (not (eq cardinality "vector") )}}
       {{> (concat field_type.type "/" widget "/edit/render") label=(title_case field_name) variable_to_read=(camel_case field_name) variable_to_change=(camel_case field_name) required=(eq cardinality "single")}}
     {{else}}
@@ -17,32 +14,21 @@
   {{/if}}
 {{/each}}
 
-
-    <div style="display: flex; flex-direction: row">
-      <mwc-button
-        outlined
-        label="Cancel"
-        @click="$emit('edit-canceled')"
-        style="flex: 1; margin-right: 16px;"
-      ></mwc-button>
-      <mwc-button 
-        raised
-        label="Save"
-        :disabled="!is{{pascal_case entry_type.name}}Valid"
-        @click="update{{pascal_case entry_type.name}}"
-        style="flex: 1;"
-      ></mwc-button>
+    <div>
+      <button @click="$emit('edit-canceled')">Cancel</button>
+      <button
+        :disabled="!is{{pascal_case entry_type.name}}Valid" @click="update{{pascal_case entry_type.name}}"
+      >
+        Edit {{pascal_case entry_type.name}}
+      </button>
     </div>
-  </div>
+    </section>
 </template>
 <script lang="ts">
 import { defineComponent, inject, ComputedRef } from 'vue';
 import { AppClient, Record, AgentPubKey, EntryHash, ActionHash, DnaHash } from '@holochain/client';
 import { {{pascal_case entry_type.name}}{{#each entry_type.fields}}{{#if (eq field_type.type "Enum")}}, {{field_type.label}}{{/if}}{{/each}} } from './types';
-import '@material/mwc-button';
-import '@material/mwc-snackbar';
 import { decode } from '@msgpack/msgpack';
-import { Snackbar } from '@material/mwc-snackbar';
 {{#uniq_lines}}
   {{#each entry_type.fields}}
     {{#if widget}}
@@ -65,7 +51,7 @@ export default defineComponent({
 {{/each}}
   } {
     const current{{pascal_case entry_type.name}} = decode((this.currentRecord.entry as any).Present.entry) as {{pascal_case entry_type.name}};
-    return { 
+    return {
       {{#each entry_type.fields}}
         {{#if widget}}
           {{#if (not (eq cardinality "vector" ) )}}
@@ -110,7 +96,7 @@ export default defineComponent({
   methods: {
     async update{{pascal_case entry_type.name}}() {
 
-      const {{camel_case entry_type.name}}: {{pascal_case entry_type.name}} = { 
+      const {{camel_case entry_type.name}}: {{pascal_case entry_type.name}} = {
 {{#each entry_type.fields}}
   {{#if widget}}
         {{snake_case field_name}}: this.{{camel_case field_name}},
@@ -136,9 +122,7 @@ export default defineComponent({
         });
         this.$emit('{{kebab_case entry_type.name}}-updated', updateRecord.signed_action.hashed.hash);
       } catch (e: any) {
-        const errorSnackbar = this.$refs['update-error'] as Snackbar;
-        errorSnackbar.labelText = `Error updating the {{lower_case entry_type.name}}: ${e.message}`;
-        errorSnackbar.show();
+        console.error(e);
       }
     },
   },
