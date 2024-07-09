@@ -25,7 +25,9 @@ a:hover {
 body {
   margin: 0;
   display: flex;
-  place-items: center;
+  justify-content: center;
+  text-align: center;
+  align-items: center;
   min-width: 320px;
   min-height: 100vh;
 }
@@ -92,7 +94,7 @@ input[type="checkbox"] {
   width: auto;
   margin-bottom: 1em;
   transform: scale(1.5);
-  margin-right: 0.5em; 
+  margin-right: 0.5em;
   vertical-align: middle;
 }
 
@@ -105,7 +107,7 @@ input:focus {
 textarea {
   display: block;
   width: 540px;
-  height: 150px; 
+  height: 150px;
   padding: 0.75em;
   margin: 0.5em 0;
   border: 1px solid #ccc;
@@ -115,7 +117,7 @@ textarea {
   color: inherit;
   background-color: #2c2c2c;
   transition: border-color 0.25s, box-shadow 0.25s;
-  resize: none; 
+  resize: none;
 }
 
 textarea:focus {
@@ -176,10 +178,10 @@ article {
   color: rgba(255, 255, 255, 0.87);
   text-align: center;
   padding: 2rem;
-  background-color: #333333; 
-  border: 1px solid #555555; 
+  background-color: #333333;
+  border: 1px solid #555555;
   border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   margin: 1rem auto;
   max-width: 500px;
 }
@@ -187,11 +189,11 @@ article {
 section {
   padding: 2rem;
   margin: 1rem 0;
-  background-color: #333333; 
-  border: 1px solid #555555; 
+  background-color: #333333;
+  border: 1px solid #555555;
   border-radius: 8px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); 
-  transition: transform 0.3s, box-shadow 0.3s; 
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s, box-shadow 0.3s;
   max-width: 500px;
 }
 
@@ -203,7 +205,7 @@ section:hover {
 section div {
   margin-bottom: 1.5rem;
   padding: 1rem;
-  background-color: #444444; 
+  background-color: #444444;
   border: 1px solid #666666;
   border-radius: 4px;
 }
@@ -229,7 +231,7 @@ section span {
   margin: 0;
   font-size: 1em;
   line-height: 1.6;
-  color: rgba(255, 255, 255, 0.87); 
+  color: rgba(255, 255, 255, 0.87);
 }
 
 section div:has(button) {
@@ -244,7 +246,7 @@ progress {
 }
 
 progress::-webkit-progress-bar {
-  background-color: #444444; 
+  background-color: #444444;
   border-radius: 8px;
 }
 
@@ -254,6 +256,6 @@ progress::-webkit-progress-value {
 }
 
 progress::-moz-progress-bar {
-  background-color: #646cff; 
+  background-color: #646cff;
   border-radius: 8px;
 }
