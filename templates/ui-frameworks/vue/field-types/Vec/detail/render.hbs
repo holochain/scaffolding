@@ -1,4 +1,8 @@
-<div style="display: flex; flex-direction: column; margin-bottom: 16px;">
-  <span><strong>{{title_case field_name}}</strong></span>
-  <span v-for="el in {{variable_to_read}}" style="white-space: pre-line">{{> (concat field_type.type "/" widget "/detail/render") variable_to_read="el"}}</span>
-</div>
+<h4>{{title_case field_name}}</h4>
+  <div v-for="(value, i) in {{camel_case field_name}}" :key="i">
+    {{> (concat field_type.type "/" widget "/edit/render") label=(pascal_case field_name) variable_to_read="value" variable_to_change=(camel_case field_name) key="i" }}
+
+  </div>
+<button @click="{{camel_case field_name}} = [...{{camel_case field_name}}, {{> (concat field_type.type "/" widget "/initial-value") field_type=field_type}}]" widget "/initial-value") field_type=field_type}}])">
+  Add {{title_case field_name}}
+</button>
