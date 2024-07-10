@@ -1,3 +1,4 @@
+use anyhow::Context;
 use holochain_types::prelude::{
     CoordinatorManifest, DnaManifest, DnaManifestCurrentBuilder, HumanTimestamp, IntegrityManifest,
     Timestamp, ZomeManifest,
@@ -17,7 +18,7 @@ pub fn empty_dna_manifest(dna_name: &str) -> ScaffoldResult<String> {
         .coordinator(CoordinatorManifest { zomes: vec![] })
         .lineage(vec![])
         .build()
-        .unwrap()
+        .context("Failed to build DnaManifest")?
         .into();
 
     let s = serde_yaml::to_string(&manifest)?;
