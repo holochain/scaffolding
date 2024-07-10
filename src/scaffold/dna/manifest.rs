@@ -15,6 +15,7 @@ pub fn empty_dna_manifest(dna_name: &str) -> ScaffoldResult<String> {
             zomes: vec![],
         })
         .coordinator(CoordinatorManifest { zomes: vec![] })
+        .lineage(vec![])
         .build()
         .unwrap()
         .into();
