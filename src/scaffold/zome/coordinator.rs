@@ -35,7 +35,7 @@ name = "{zome_name}"
 [dependencies]
 hdk = {{ workspace = true }}
 serde = {{ workspace = true }}
-{deps} 
+{deps}
 "#,
     )
 }
@@ -182,7 +182,7 @@ pub fn find_extern_function_in_zomes(
 
         if let Some(item_fn) = all_extern_functions
             .iter()
-            .find(|item_fn| item_fn.sig.ident.to_string().eq(fn_name_to_find))
+            .find(|item_fn| item_fn.sig.ident == fn_name_to_find)
         {
             return Ok(Some((coordinator_zome.clone(), item_fn.clone())));
         }

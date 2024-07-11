@@ -428,17 +428,18 @@ pub fn get_all_entry_types(
                     &coordinators_for_zome,
                     &format!("get_{}", v.to_case(Case::Snake)),
                 )? {
-                    Some((_z, item_fn)) => {
-                        match item_fn
-                            .sig
-                            .inputs
-                            .first()
-                            .expect("Extern function must have one argument")
-                        {
-                            syn::FnArg::Typed(typed) => entry_hash_type.eq(&(*typed.ty)),
-                            _ => false,
-                        }
-                    }
+                    Some((_, item_fn)) => item_fn
+                        .sig
+                        .inputs
+                        .first()
+                        .and_then(|first_arg| {
+                            if let syn::FnArg::Typed(syn::PatType { ty, .. }) = first_arg {
+                                Some(entry_hash_type == **ty)
+                            } else {
+                                None
+                            }
+                        })
+                        .unwrap_or(false),
                     None => false,
                 };
                 entry_types.push(EntryTypeReference {
@@ -647,8 +648,8 @@ fn handle_store_record_arm(
                     let new_arm = syn::parse_str(&format!(
                         r#"EntryTypes::{pascal_entry_def_name}(original_{snake_entry_def_name}) => {{
                             validate_delete_{snake_entry_def_name}(
-                                action, 
-                                original_action, 
+                                action,
+                                original_action,
                                 original_{snake_entry_def_name},
                             )
                         }}"#
@@ -831,8 +832,8 @@ fn handle_register_delete_arm(
         let new_arm = syn::parse_str(&format!(
             r#"EntryTypes::{pascal_entry_def_name}(original_{snake_entry_def_name}) => {{
                 validate_delete_{snake_entry_def_name}(
-                    delete_entry.clone().action, 
-                    original_action, 
+                    delete_entry.clone().action,
+                    original_action,
                     original_{snake_entry_def_name}
                 )
             }}"#,
