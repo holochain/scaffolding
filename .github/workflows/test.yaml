@@ -37,13 +37,13 @@ jobs:
         uses: ./.github/actions/extend-space
 
       - name: Install nix
-        uses: cachix/install-nix-action@v25
+        uses: cachix/install-nix-action@v27
         with:
-          install_url: https://releases.nixos.org/nix/nix-2.20.0/install
+          install_url: https://releases.nixos.org/nix/nix-2.23.2/install
           extra_nix_config: |
             experimental-features = flakes nix-command
 
-      - uses: cachix/cachix-action@v14
+      - uses: cachix/cachix-action@v15
         with:
           name: holochain-ci
 
