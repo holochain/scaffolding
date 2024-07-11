@@ -24,22 +24,21 @@ pub fn initial_cargo_toml(zome_name: &str, dependencies: &Option<Vec<String>>) -
 
     format!(
         r#"[package]
-name = "{}"
+name = "{zome_name}"
 version = "0.0.1"
 edition = "2021"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
-name = "{}"
+name = "{zome_name}"
 
 [dependencies]
 hdk = {{ workspace = true }}
 
 serde = {{ workspace = true }}
 
-{} 
+{deps} 
 "#,
-        zome_name, zome_name, deps
     )
 }
 
@@ -186,7 +185,7 @@ pub fn find_extern_function_in_zomes(
 
         if let Some(item_fn) = all_extern_functions
             .iter()
-            .find(|item_fn| item_fn.sig.ident.to_string().eq(fn_name_to_find))
+            .find(|item_fn| item_fn.sig.ident == fn_name_to_find)
         {
             return Ok(Some((coordinator_zome.clone(), item_fn.clone())));
         }
