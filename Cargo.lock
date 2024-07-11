@@ -2818,7 +2818,7 @@ dependencies = [
 
 [[package]]
 name = "holochain_scaffolding_cli"
-version = "0.3000.0"
+version = "0.3000.1"
 dependencies = [
  "anyhow",
  "build-fs-tree",
