@@ -139,9 +139,7 @@ export default {
   emits: ['{{kebab_case entry_type.name}}-deleted'],
   setup() {
     const client = (inject('client') as ComputedRef<AppClient>).value;
-    return {
-      client
-    };
+    return { client };
   },
 };
 </script>

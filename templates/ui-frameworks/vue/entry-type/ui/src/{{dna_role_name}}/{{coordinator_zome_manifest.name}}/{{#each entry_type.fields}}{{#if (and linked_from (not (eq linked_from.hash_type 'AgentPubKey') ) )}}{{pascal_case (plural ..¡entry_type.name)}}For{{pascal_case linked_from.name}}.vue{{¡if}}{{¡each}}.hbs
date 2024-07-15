@@ -71,9 +71,7 @@ export default {
   },
   setup() {
     const client = (inject('client') as ComputedRef<AppClient>).value;
-    return {
-      client,
-    };
+    return { client };
   },
 };
 </script>
