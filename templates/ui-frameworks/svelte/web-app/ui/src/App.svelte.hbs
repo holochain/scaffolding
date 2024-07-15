@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, setContext } from 'svelte';
-  import type { ActionHash, AppClient } from '@holochain/client';
+  import type { ActionHash, AppClient, HolochainError } from '@holochain/client';
   import { AppWebsocket } from '@holochain/client';
 {{#if holo_enabled}}
   import WebSdk from '@holo-host/web-sdk'
@@ -11,7 +11,8 @@
   import './app.css';
 
   let client: AppClient | undefined;
-  let loading = true;
+  let error: HolochainError | undefined;
+  let loading = false;
 {{#if holo_enabled}}
   const IS_HOLO = ['true', '1', 't'].includes(import.meta.env.VITE_APP_IS_HOLO?.toLowerCase())
   const logout = async () => {
@@ -22,29 +23,37 @@
 
   onMount(async () => {
   {{#if holo_enabled}}
-    if (IS_HOLO) {
-      client = await WebSdk.connect({
-        chaperoneUrl: import.meta.env.VITE_APP_CHAPERONE_URL,
-        authFormCustomization: {
-          appName: '{{app_name}}',
-        }
-      });
-
-    (client as WebSdk).on('agent-state', agent_state => {
-      loading = !agent_state.isAvailable || agent_state.isAnonymous
-    });
-
-    (client as WebSdk).signUp({ cancellable: false });
-
-    } else {
-      client = await AppWebsocket.connect();
-
+    try {
+      loading = true;
+      if (IS_HOLO) {
+        client = await WebSdk.connect({
+          chaperoneUrl: import.meta.env.VITE_APP_CHAPERONE_URL,
+          authFormCustomization: {
+            appName: '{{app_name}}',
+          }
+        });
+        (client as WebSdk).on('agent-state', agent_state => {
+          loading = !agent_state.isAvailable || agent_state.isAnonymous
+        });
+        (client as WebSdk).signUp({ cancellable: false });
+      } else {
+        client = await AppWebsocket.connect();
+        loading = false;
+      }
+    } catch (e) {
+      error = e as HolochainError;
+    } finally {
       loading = false;
     }
   {{else}}
-    client = await AppWebsocket.connect();
-
-    loading = false;
+    try {
+      loading = true;
+      client = await AppWebsocket.connect();
+    } catch (e) {
+      error = e as HolochainError;
+    } finally {
+      loading = false;
+    }
   {{/if}}
   });
 
@@ -54,38 +63,25 @@
 </script>
 
 <main>
-  {#if loading}
-    <div style="display: flex; flex: 1; align-items: center; justify-content: center">
-      <mwc-circular-progress indeterminate />
+  <div>
+    <div>
+      <a href="https://developer.holochain.org/get-started/" target="_blank">
+        <img src="./assets/holochainLogo.svg" class="logo holochain" alt="holochain logo" />
+      </a>
     </div>
-  {:else}
-    <div id="content" style="display: flex; flex-direction: column; flex: 1;">
-      <h2>EDIT ME! Add the components of your app here.</h2>
-
-      <span>Look in the <code>ui/src/DNA/ZOME</code> folders for UI elements that are generated with <code>hc scaffold entry-type</code>, <code>hc scaffold collection</code> and <code>hc scaffold link-type</code> and add them here as appropriate.</span>
-
-      <span>For example, if you have scaffolded a "todos" dna, a "todos" zome, a "todo_item" entry type, and a collection called "all_todos", you might want to add an element here to create and list your todo items, with the generated <code>ui/src/todos/todos/AllTodos.svelte</code> and <code>ui/src/todos/todos/CreateTodo.svelte</code> elements.</span>
-
-      <span>So, to use those elements here:</span>
-      <ol>
-        <li>Import the elements with:
-        <pre>
-import AllTodos from './todos/todos/AllTodos.svelte';
-import CreateTodo from './todos/todos/CreateTodo.svelte';
-        </pre>
-        </li>
-        <li>Replace this "EDIT ME!" section with <code>&lt;CreateTodo&gt;&lt;/CreateTodo&gt;&lt;AllTodos&gt;&lt;/AllTodos&gt;</code>.</li>
-        </ol>
+    <h1>Holochain Vue hApp</h1>
+    <div>
+      <div class="card">
+        {#if loading}
+        <p>connecting...</p>
+        {:else if error}
+        <p>{{ error.message }}</p>
+        {:else}
+        <p>Client is connected.</p>
+        {/if}
+      </div>
+      <p>Import scaffolded components into <code>src/App.svelte</code> to use your hApp</p>
+      <p class="read-the-docs">Click on the Holochain logo to learn more</p>
     </div>
-  {{#if holo_enabled}}
-    {#if IS_HOLO}
-      <mwc-button
-        style="margin-top: 16px"
-        raised
-        label="Logout"
-        on:click={() => logout()}
-      />
-    {/if}
-  {{/if}}
-  {/if}
+  </div>
 </main>
