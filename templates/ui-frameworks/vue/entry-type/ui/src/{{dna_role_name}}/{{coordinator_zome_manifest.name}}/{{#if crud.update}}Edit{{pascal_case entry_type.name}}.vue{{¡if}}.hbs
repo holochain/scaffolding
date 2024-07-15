@@ -24,8 +24,9 @@
     </div>
     </section>
 </template>
+
 <script lang="ts">
-import { defineComponent, inject, ComputedRef } from 'vue';
+import { inject, ComputedRef } from 'vue';
 import { AppClient, Record, AgentPubKey, EntryHash, ActionHash, DnaHash } from '@holochain/client';
 import { {{pascal_case entry_type.name}}{{#each entry_type.fields}}{{#if (eq field_type.type "Enum")}}, {{field_type.label}}{{/if}}{{/each}} } from './types';
 import { decode } from '@msgpack/msgpack';
@@ -38,7 +39,7 @@ import { decode } from '@msgpack/msgpack';
   {{/each}}
 {{/uniq_lines}}
 
-export default defineComponent({
+export default {
   data(): {
 {{#each entry_type.fields}}
   {{#if widget}}
@@ -133,5 +134,5 @@ export default defineComponent({
       client,
     };
   },
-})
+};
 </script>

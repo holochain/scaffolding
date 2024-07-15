@@ -19,7 +19,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed } from 'vue';
+import { computed } from 'vue';
 import { AppClient, AppWebsocket, HolochainError } from '@holochain/client';
 {{#if holo_enabled}}
 import WebSdk from '@holo-host/web-sdk';
@@ -28,7 +28,7 @@ import type { AgentState } from '@holo-host/web-sdk';
 
 import "./app.css";
 
-export default defineComponent({
+export default {
   components: {},
   data(): {
     client: AppClient | undefined;
@@ -95,5 +95,5 @@ export default defineComponent({
       client: computed(() => this.client),
     };
   },
-});
+};
 </script>

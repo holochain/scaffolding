@@ -42,7 +42,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, inject, ComputedRef } from 'vue';
+import { inject, ComputedRef } from 'vue';
 import { decode } from '@msgpack/msgpack';
 import { AppClient, Record, AgentPubKey, EntryHash, ActionHash, DnaHash, HolochainError } from '@holochain/client';
 import { {{pascal_case entry_type.name}}{{#each entry_type.fields}}{{#if (eq field_type.type "Enum")}}, {{field_type.label}}{{/if}}{{/each}} } from './types';
@@ -58,7 +58,7 @@ import { {{pascal_case entry_type.name}}{{#each entry_type.fields}}{{#if (eq fie
 import Edit{{pascal_case entry_type.name}} from './Edit{{pascal_case entry_type.name}}.vue';
 {{/if}}
 
-export default defineComponent({
+export default {
 {{#if crud.update}}
   components: {
     Edit{{pascal_case entry_type.name}},
@@ -143,5 +143,5 @@ export default defineComponent({
       client
     };
   },
-})
+};
 </script>
