@@ -123,7 +123,7 @@ export default {
         });
         this.$emit('{{kebab_case entry_type.name}}-updated', updateRecord.signed_action.hashed.hash);
       } catch (e: any) {
-        console.error(e);
+        alert(e);
       }
     },
   },
