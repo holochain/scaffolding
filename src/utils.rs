@@ -1,3 +1,4 @@
+use std::borrow::Cow;
 use std::collections::BTreeMap;
 use std::path::Path;
 use std::{ffi::OsString, path::PathBuf};
@@ -251,9 +252,7 @@ pub fn format_code<P: Into<PathBuf>>(code: &str, file_name: P) -> ScaffoldResult
                     code,
                     markup_fmt::Language::Svelte,
                     &Default::default(),
-                    |path, raw, _| {
-                        format_nested(path, raw, &ts_format_config).map(|value| value.into())
-                    },
+                    |path, raw, _| format_nested(path, raw, &ts_format_config),
                 )
                 .map_err(|e| anyhow::anyhow!("Failed to format Svelte source code: {e:?}"))?;
 
@@ -264,9 +263,7 @@ pub fn format_code<P: Into<PathBuf>>(code: &str, file_name: P) -> ScaffoldResult
                     code,
                     markup_fmt::Language::Vue,
                     &Default::default(),
-                    |path, raw, _| {
-                        format_nested(path, raw, &ts_format_config).map(|value| value.into())
-                    },
+                    |path, raw, _| format_nested(path, raw, &ts_format_config),
                 )
                 .map_err(|e| anyhow::anyhow!("Failed to format Vue source code: {e:?}"))?;
 
@@ -280,11 +277,11 @@ pub fn format_code<P: Into<PathBuf>>(code: &str, file_name: P) -> ScaffoldResult
 }
 
 /// Formats ts/js code nested in markup
-fn format_nested(
+fn format_nested<'a>(
     path: &Path,
-    raw: &str,
+    raw: &'a str,
     ts_format_config: &dprint_plugin_typescript::configuration::Configuration,
-) -> anyhow::Result<String> {
+) -> ScaffoldResult<Cow<'a, str>> {
     if let Some(extension) = path.extension().and_then(|ext| ext.to_str()) {
         match extension {
             "ts" | "js" => {
@@ -293,14 +290,14 @@ fn format_nested(
                         .map_err(|e| anyhow::anyhow!("Failed to format source code: {e:?}"))?;
 
                 if let Some(value) = formatted_code {
-                    return Ok(value);
+                    return Ok(Cow::Owned(value));
                 }
             }
             // Provision to format other nested code i.e css
             _ => {}
         }
     }
-    Ok(raw.into())
+    Ok(Cow::Borrowed(raw))
 }
 
 #[cfg(test)]
