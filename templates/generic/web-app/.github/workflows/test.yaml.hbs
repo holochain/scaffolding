@@ -1,6 +1,6 @@
 name: "test"
 on:
-  push: 
+  push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
@@ -24,4 +24,4 @@ jobs:
 
       - name: Install and test
         run: |
-          nix develop --command bash -c "npm i && npm t"
+          nix develop --command bash -c "{{(package_manager_command package_manager "install" null)}} && {{(package_manager_command package_manager "test" null)}}"
