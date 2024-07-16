@@ -240,14 +240,14 @@ pub fn format_code<P: Into<PathBuf>>(code: &str, file_name: P) -> ScaffoldResult
                     code.to_owned(),
                     &ts_format_config,
                 )
-                .context("Failed to format text ts/js/tsx/jsx code")?;
+                .map_err(|e| anyhow::anyhow!("Failed to format source code: {e:?}"))?;
 
                 if let Some(value) = formatted_code {
                     return Ok(value);
                 }
             }
             "svelte" => {
-                let formatted_code = markup_fmt::format_text::<anyhow::Error, _>(
+                let formatted_code = markup_fmt::format_text(
                     code,
                     markup_fmt::Language::Svelte,
                     &Default::default(),
@@ -255,12 +255,12 @@ pub fn format_code<P: Into<PathBuf>>(code: &str, file_name: P) -> ScaffoldResult
                         format_nested(path, raw, &ts_format_config).map(|value| value.into())
                     },
                 )
-                .map_err(|_| anyhow::anyhow!("Failed to format Svelte code"))?;
+                .map_err(|e| anyhow::anyhow!("Failed to format Svelte source code: {e:?}"))?;
 
                 return Ok(formatted_code);
             }
             "vue" => {
-                let formatted_code = markup_fmt::format_text::<anyhow::Error, _>(
+                let formatted_code = markup_fmt::format_text(
                     code,
                     markup_fmt::Language::Vue,
                     &Default::default(),
@@ -268,7 +268,7 @@ pub fn format_code<P: Into<PathBuf>>(code: &str, file_name: P) -> ScaffoldResult
                         format_nested(path, raw, &ts_format_config).map(|value| value.into())
                     },
                 )
-                .map_err(|_| anyhow::anyhow!("Failed to format Svelte code"))?;
+                .map_err(|e| anyhow::anyhow!("Failed to format Vue source code: {e:?}"))?;
 
                 return Ok(formatted_code);
             }
@@ -279,31 +279,28 @@ pub fn format_code<P: Into<PathBuf>>(code: &str, file_name: P) -> ScaffoldResult
     Ok(code.to_owned())
 }
 
-// Formats ts/js/tsx/jsx code nested in either vue or svelte markup
+/// Formats ts/js/tsx/jsx code nested in markup
 fn format_nested(
     path: &Path,
     raw: &str,
     ts_format_config: &dprint_plugin_typescript::configuration::Configuration,
 ) -> anyhow::Result<String> {
-    let extension = path
-        .extension()
-        .context("Failed to get path extension")?
-        .to_str()
-        .context("Failed to convert extension to string")?;
-    match extension {
-        "ts" | "js" | "tsx" | "jsx" => {
-            let formatted_code =
-                dprint_plugin_typescript::format_text(path, raw.to_owned(), ts_format_config)
-                    .context("Failed to format ts/js/tsx/jsx code")?;
+    if let Some(extension) = path.extension().and_then(|ext| ext.to_str()) {
+        match extension {
+            "ts" | "js" | "tsx" | "jsx" => {
+                let formatted_code =
+                    dprint_plugin_typescript::format_text(path, raw.to_owned(), ts_format_config)
+                        .map_err(|e| anyhow::anyhow!("Failed to format source code: {e:?}"))?;
 
-            if let Some(value) = formatted_code {
-                return Ok(value.into());
+                if let Some(value) = formatted_code {
+                    return Ok(value.into());
+                }
             }
-            Ok(raw.into())
+            // Provision to format other nested code i.e css
+            _ => {}
         }
-        // XXX: Provision to format other nested code i.e css
-        _ => Ok(raw.into()),
     }
+    Ok(raw.into())
 }
 
 #[cfg(test)]
