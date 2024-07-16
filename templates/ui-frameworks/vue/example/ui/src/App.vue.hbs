@@ -6,7 +6,7 @@
     <div v-else>
       <main>
         <h1>Forum</h1>
-      
+
         <div id="content">
           <h2>All Posts</h2>
           <AllPosts></AllPosts>
@@ -17,6 +17,7 @@
     </div>
   </div>
 </template>
+
 <script lang="ts">
 import { defineComponent, computed } from 'vue';
 import { AppWebsocket, AppClient } from '@holochain/client';
@@ -26,7 +27,6 @@ import CreatePost from './forum/posts/CreatePost.vue';
 
 export default defineComponent({
   components: {
-    // Add your subcomponents here
     AllPosts,
     CreatePost
   },
@@ -41,7 +41,6 @@ export default defineComponent({
   },
   async mounted() {
     this.client = await AppWebsocket.connect();
-    
     this.loading = false;
   },
   provide() {

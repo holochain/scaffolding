@@ -25,7 +25,7 @@
         @click="$emit('edit-canceled')"
         style="flex: 1; margin-right: 16px;"
       ></mwc-button>
-      <mwc-button 
+      <mwc-button
         raised
         label="Save"
         :disabled="!is{{pascal_case entry_type.name}}Valid"
@@ -65,7 +65,7 @@ export default defineComponent({
 {{/each}}
   } {
     const current{{pascal_case entry_type.name}} = decode((this.currentRecord.entry as any).Present.entry) as {{pascal_case entry_type.name}};
-    return { 
+    return {
       {{#each entry_type.fields}}
         {{#if widget}}
           {{#if (not (eq cardinality "vector" ) )}}
@@ -110,7 +110,7 @@ export default defineComponent({
   methods: {
     async update{{pascal_case entry_type.name}}() {
 
-      const {{camel_case entry_type.name}}: {{pascal_case entry_type.name}} = { 
+      const {{camel_case entry_type.name}}: {{pascal_case entry_type.name}} = {
 {{#each entry_type.fields}}
   {{#if widget}}
         {{snake_case field_name}}: this.{{camel_case field_name}},
