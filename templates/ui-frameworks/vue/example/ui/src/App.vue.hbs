@@ -41,7 +41,6 @@ export default defineComponent({
   },
   async mounted() {
     this.client = await AppWebsocket.connect();
-
     this.loading = false;
   },
   provide() {
