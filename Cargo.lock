@@ -1280,6 +1280,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "css_dataset"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a0ed4c49b3d82ab5e2a0167f0d24d30872cbd8526b54fb060c84295ad7b6d71d"
+dependencies = [
+ "phf",
+ "phf_codegen",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "curve25519-dalek"
 version = "4.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1668,19 +1680,6 @@ checksum = "1435fa1053d8b2fbbe9be7e97eca7f33d37b28409959813daefc1446a14247f1"
 
 [[package]]
 name = "dprint-core"
-version = "0.59.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3ac133fba3e26a4f8e50d3ab6e3be55da4ae1df34a375d864100b0235bfcfab2"
-dependencies = [
- "anyhow",
- "bumpalo",
- "indexmap 1.9.3",
- "rustc-hash",
- "serde",
-]
-
-[[package]]
-name = "dprint-core"
 version = "0.66.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f3ab0dd2bedc109d25f0d21afb09b7d329f6c6fa83b095daf31d2d967e091548"
@@ -1712,7 +1711,7 @@ checksum = "4170a1aea5c8d899e9fa96be972931b1f0beaf6f6ba2f3f40a48a13071b376ea"
 dependencies = [
  "anyhow",
  "deno_ast",
- "dprint-core 0.66.2",
+ "dprint-core",
  "dprint-core-macros",
  "percent-encoding",
  "rustc-hash",
@@ -1734,20 +1733,6 @@ dependencies = [
  "swc_ecma_ast",
  "swc_ecma_parser",
  "text_lines",
-]
-
-[[package]]
-name = "dprint-vue-plugin"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1139a880cd085315df24192388a42a93df95ab8c76b578384b5c34bc5c7d3083"
-dependencies = [
- "anyhow",
- "dprint-core 0.59.1",
- "nom",
- "serde",
- "serde_json",
- "vue-sfc",
 ]
 
 [[package]]
@@ -3004,7 +2989,6 @@ dependencies = [
  "dialoguer",
  "dirs",
  "dprint-plugin-typescript",
- "dprint-vue-plugin",
  "git2",
  "handlebars",
  "holochain",
@@ -3013,6 +2997,7 @@ dependencies = [
  "ignore",
  "include_dir",
  "itertools 0.13.0",
+ "markup_fmt",
  "mr_bundle",
  "once_cell",
  "path-clean",
@@ -4549,6 +4534,20 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3e2e65a1a2e43cfcb47a895c4c8b10d1f4a61097f9f254f183aee60cad9c651d"
 
 [[package]]
+name = "markup_fmt"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d90c9d06b51c4026ad8b058b379341428d465660a211298c0311751466e562c9"
+dependencies = [
+ "aho-corasick",
+ "css_dataset",
+ "itertools 0.13.0",
+ "memchr",
+ "once_cell",
+ "tiny_pretty",
+]
+
+[[package]]
 name = "match_cfg"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5340,6 +5339,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ade2d8b8f33c7333b51bcf0428d37e217e9f32192ae4772156f65063b8ce03dc"
 dependencies = [
  "phf_macros",
+ "phf_shared",
+]
+
+[[package]]
+name = "phf_codegen"
+version = "0.11.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e8d39688d359e6b34654d328e262234662d16cc0f60ec8dcbe5e718709342a5a"
+dependencies = [
+ "phf_generator",
  "phf_shared",
 ]
 
@@ -7673,6 +7682,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "tiny_pretty"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4b3f46f0549180b9c6f7f76270903f1a06867c43a03998b99dce81aa1760c3b2"
+dependencies = [
+ "unicode-width",
+]
+
+[[package]]
 name = "tinyvec"
 version = "1.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -8357,16 +8375,6 @@ name = "version_check"
 version = "0.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
-
-[[package]]
-name = "vue-sfc"
-version = "0.3.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c8826f26f579a1d6c1de56fc3a1a91fd7c8b5f50386bfe73e099ee86762f754a"
-dependencies = [
- "memchr",
- "nom",
-]
 
 [[package]]
 name = "wait-timeout"

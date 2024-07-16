@@ -3,7 +3,7 @@
 
   <div style="display: flex; flex-direction: column">
     <span style="font-size: 18px">Create {{title_case entry_type.name}}</span>
-  
+
 {{#each entry_type.fields}}
   {{#if widget}}
     <div style="margin-bottom: 16px">
@@ -17,8 +17,8 @@
 
  {{/if}}
 {{/each}}
-  
-    <mwc-button 
+
+    <mwc-button
       raised
       label="Create {{title_case entry_type.name}}"
       :disabled="!is{{pascal_case entry_type.name}}Valid"
@@ -55,7 +55,7 @@ export default defineComponent({
   {{/if}}
 {{/each}}
   } {
-    return { 
+    return {
       {{#each entry_type.fields}}
         {{#if widget}}
           {{#if (not (eq cardinality "vector" ) )}}
@@ -107,13 +107,14 @@ export default defineComponent({
   },
   methods: {
     async create{{pascal_case entry_type.name}}() {
-      const {{camel_case entry_type.name}}: {{pascal_case entry_type.name}} = { {{#each entry_type.fields}}
-        {{#if (eq cardinality "single") }}
+      const {{camel_case entry_type.name}}: {{pascal_case entry_type.name}} = {
+{{#each entry_type.fields}}
+  {{#if (eq cardinality "single") }}
         {{snake_case field_name}}: this.{{camel_case field_name}}!,
-        {{else}}
+  {{else}}
         {{snake_case field_name}}: this.{{camel_case field_name}}{{#if (eq cardinality "vector") }} as Array<{{> (concat field_type.type "/type") }}>{{/if}},
-        {{/if}}
-  {{/each}}
+  {{/if}}
+{{/each}}
       };
 
       try {
