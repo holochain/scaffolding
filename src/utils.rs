@@ -293,7 +293,7 @@ fn format_nested(
                         .map_err(|e| anyhow::anyhow!("Failed to format source code: {e:?}"))?;
 
                 if let Some(value) = formatted_code {
-                    return Ok(value.into());
+                    return Ok(value);
                 }
             }
             // Provision to format other nested code i.e css
