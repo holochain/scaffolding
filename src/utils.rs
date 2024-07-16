@@ -279,7 +279,7 @@ pub fn format_code<P: Into<PathBuf>>(code: &str, file_name: P) -> ScaffoldResult
     Ok(code.to_owned())
 }
 
-/// Formats ts/js/tsx/jsx code nested in markup
+/// Formats ts/js code nested in markup
 fn format_nested(
     path: &Path,
     raw: &str,
@@ -287,7 +287,7 @@ fn format_nested(
 ) -> anyhow::Result<String> {
     if let Some(extension) = path.extension().and_then(|ext| ext.to_str()) {
         match extension {
-            "ts" | "js" | "tsx" | "jsx" => {
+            "ts" | "js" => {
                 let formatted_code =
                     dprint_plugin_typescript::format_text(path, raw.to_owned(), ts_format_config)
                         .map_err(|e| anyhow::anyhow!("Failed to format source code: {e:?}"))?;
