@@ -26,7 +26,7 @@ pub fn scaffold_web_app(
     template_file_tree: &FileTree,
     holo_enabled: bool,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
-    check_for_reserved_words(&app_name)?;
+    check_for_reserved_words(app_name)?;
 
     let mut app_file_tree = dir! {
       ".gitignore" => file!(gitignore())

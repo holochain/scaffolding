@@ -20,7 +20,7 @@ pub fn new_coordinator_zome_manifest(
         hash: None,
         location,
         dependencies: maybe_dependencies.map(|dz| {
-            dz.into_iter()
+            dz.iter()
                 .map(|d| ZomeDependency {
                     name: d.to_owned().into(),
                 })
