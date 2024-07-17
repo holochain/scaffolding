@@ -5,6 +5,7 @@ use serde::Serialize;
 use crate::{
     error::ScaffoldResult,
     file_tree::{file_content, FileTree},
+    scaffold::web_app::package_manager::PackageManager,
     versions,
 };
 
@@ -22,6 +23,7 @@ pub struct ScaffoldWebAppData<'a> {
     pub holochain_playground_cli_version: &'a str,
     pub holo_web_sdk_version: &'a str,
     pub hc_spin_version: &'a str,
+    pub package_manager: PackageManager,
     pub tryorama_version: &'a str,
     pub holo_enabled: bool,
 }
@@ -30,6 +32,7 @@ pub fn scaffold_web_app_template(
     mut app_file_tree: FileTree,
     template_file_tree: &FileTree,
     app_name: &str,
+    package_manager: PackageManager,
     holo_enabled: bool,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     let data = ScaffoldWebAppData {
@@ -41,6 +44,7 @@ pub fn scaffold_web_app_template(
         holo_web_sdk_version: versions::WEB_SDK_VERSION,
         holochain_playground_cli_version: versions::HOLOCHAIN_PLAYGROUND_CLI_VERSION,
         hc_spin_version: versions::HC_SPIN_VERSION,
+        package_manager,
         tryorama_version: versions::TRYORAMA_VERSION,
         holo_enabled,
     };

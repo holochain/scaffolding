@@ -6,11 +6,11 @@
     "build": "vite build",
   {{#if holo_enabled}}
     "build:holo": "VITE_APP_IS_HOLO=true vite build",
-    "package:holo": "npm run build:holo && rimraf dist.zip && cd dist && bestzip ../dist.zip *",
+    "package:holo": "{{(package_manager_command package_manager "build:holo" null)}} && rimraf dist.zip && cd dist && bestzip ../dist.zip *",
   {{/if}}
     "lint": "eslint --ext .ts,.html . --ignore-path .gitignore && prettier \"**/*.ts\" --check --ignore-path .gitignore",
     "format": "eslint --ext .ts,.html . --fix --ignore-path .gitignore && prettier \"**/*.ts\" --write --ignore-path .gitignore",
-    "package": "npm run build && rimraf dist.zip && cd dist && bestzip ../dist.zip *"
+    "package": "{{(package_manager_command package_manager "build" null)}} && rimraf dist.zip && cd dist && bestzip ../dist.zip *"
   },
   "dependencies": {
     "@holochain/client": "{{holochain_client_version}}",
@@ -41,7 +41,7 @@
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.3.2",
-    "rimraf": "^3.0.2",
+    "rimraf": "^5.0.7",
     "vite": "^4.0.0",
     "vite-plugin-checker": "^0.5.3",
     "typescript": "^4.5.5"

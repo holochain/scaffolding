@@ -41,7 +41,9 @@
 //! - Vue (with TypeScript)
 //! - Svelte (with TypeScript)
 //! - Lit (with TypeScript)
+//! - React (with TypeScript)
 //! - Vanilla
+//! - Headless (no ui) - [best for building headless hApps or using a unsupported ui framework without having to create a custom template]
 //!
 //! These templates provide most of the skeleton you need to start your own holochain app.
 //!
@@ -56,7 +58,9 @@
 //!   - "vue"
 //!   - "svelte"
 //!   - "lit"
+//!   - "react"
 //!   - "vanilla"
+//!   - "headless" (no ui)
 //! - Or a path to a custom template.
 //!   - E.g `hc-scaffold --template ./path/to/custom/template/folder web-app`
 //!
@@ -66,7 +70,23 @@
 //!
 //! `hc scaffold --template ./path/to/custom/template web-app forum`
 //!
-//! Notice that you will need to pass the `--template` argument in every command.
+//! ## Template config
+//!
+//! When you run `hc-scaffold --template ./path/to/custom/template/folder web-app` or `hc-scaffold example` for the first time, the root `package.json` file
+//! of the scaffolded project will contain an `"hcScaffold"` field with some configuration about the template used to scaffold
+//! the project:
+//!
+//! ```json
+//! {
+//!   "hcScaffold": {
+//!     "template": "/* template name i.e. react/vue/svelte/lit/vanilla or path to custom template */"
+//!   }
+//! }
+//! ```
+//!
+//! The scaffolding CLI will read from this config for subsequent commands, so you do not need to explicitly
+//! pass the `--template` flag for every command. This also provides a guardrail to prevent mixing up templates
+//! for different `hc-scaffold` commands.
 //!
 //! ## How to create a custom template
 //!

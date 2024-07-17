@@ -1,5 +1,6 @@
 use std::path::Path;
 
+use colored::Colorize;
 use git2::{IndexAddOption, Repository, RepositoryInitOptions};
 
 use crate::error::ScaffoldResult;
@@ -12,7 +13,11 @@ pub fn setup_git_environment<P: AsRef<Path>>(path: P) -> ScaffoldResult<()> {
         index.write()?;
         Ok::<_, git2::Error>(())
     })() {
-        println!("Warning: Failed to set up git repository: {e}");
+        println!(
+            "{}{}",
+            "Warning: Failed to set up git repository: ".yellow(),
+            e.to_string().yellow()
+        );
     }
 
     Ok(())
