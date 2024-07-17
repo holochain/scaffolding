@@ -43,7 +43,7 @@ pub fn get_or_choose_app_manifest_path_for_dna_manifest(
     Ok(path)
 }
 
-pub fn bundled_dnas_paths(
+fn bundled_dnas_paths(
     app_file_tree: &FileTree,
     app_manifest_path: &Path,
 ) -> ScaffoldResult<Vec<PathBuf>> {
@@ -68,7 +68,7 @@ pub fn bundled_dnas_paths(
     Ok(dna_paths)
 }
 
-pub fn read_app_manifest(
+fn read_app_manifest(
     app_file_tree: &FileTree,
     app_manifest_path: &Path,
 ) -> ScaffoldResult<AppManifest> {
