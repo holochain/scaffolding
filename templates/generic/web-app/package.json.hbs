@@ -18,6 +18,9 @@
     "network:holo": "{{(package_manager_command package_manager "build:happ" null)}} && UI_PORT=$(get-port) concurrently \"{{(package_manager_command package_manager "launch:holo-dev-server" null)}}\" \"holochain-playground ws://localhost:4444\" \"concurrently-repeat 'VITE_APP_CHAPERONE_URL=http://localhost:24274 VITE_APP_IS_HOLO=true {{(package_manager_command package_manager "start" "ui")}}' $AGENTS\"",
     "launch:holo-dev-server": "holo-dev-server workdir/{{app_name}}.happ",
   {{/if}}
+  {{#if (eq package_manager "pnpm")}}
+    "postinstall": "node ./node_modules/.pnpm/node_modules/electron/install.js",
+  {{/if}}
     "package": "{{(package_manager_command package_manager "build:happ" null)}} && {{(package_manager_command package_manager "package" "ui")}} && hc web-app pack workdir --recursive",
     "build:happ": "{{(package_manager_command package_manager "build:zomes" null)}} && hc app pack workdir --recursive",
     "build:zomes": "RUSTFLAGS='' CARGO_TARGET_DIR=target cargo build --release --target wasm32-unknown-unknown"
