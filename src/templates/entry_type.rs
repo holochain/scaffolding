@@ -44,7 +44,7 @@ pub fn scaffold_entry_type_templates(
         coordinator_zome_manifest: coordinator_zome.clone(),
         entry_type: entry_type.clone(),
         entry_type_ts_types,
-        crud: crud.clone(),
+        crud: *crud,
         link_from_original_to_each_update,
     };
     let h = build_handlebars(template_file_tree)?;

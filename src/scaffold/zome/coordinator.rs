@@ -12,7 +12,7 @@ use crate::{
 
 use super::ZomeFileTree;
 
-pub fn initial_cargo_toml(zome_name: &str, dependencies: &Option<Vec<String>>) -> String {
+pub fn initial_cargo_toml(zome_name: &str, dependencies: Option<&Vec<String>>) -> String {
     let deps = match dependencies {
         Some(d) => d
             .iter()
@@ -34,7 +34,6 @@ name = "{zome_name}"
 
 [dependencies]
 hdk = {{ workspace = true }}
-
 serde = {{ workspace = true }}
 
 {deps} 
@@ -42,7 +41,7 @@ serde = {{ workspace = true }}
     )
 }
 
-pub fn initial_lib_rs(dependencies: &Option<Vec<String>>) -> String {
+pub fn initial_lib_rs(dependencies: Option<&Vec<String>>) -> String {
     let integrity_imports = match dependencies {
         None => String::from(""),
         Some(deps) => {
@@ -85,7 +84,6 @@ pub fn post_commit(committed_actions: Vec<SignedActionHashed>) {{
 fn signal_action(action: SignedActionHashed) -> ExternResult<()> {{
     Ok(())
 }}
-
 "#
     )
 }

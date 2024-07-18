@@ -2,10 +2,12 @@ use convert_case::{Case, Casing};
 use handlebars::{
     handlebars_helper, Context, Handlebars, Helper, HelperResult, Output, RenderContext,
 };
+use package_manager_command::register_package_manager_command;
 use serde_json::Value;
 
 pub mod filter;
 pub mod merge;
+pub mod package_manager_command;
 pub mod uniq_lines;
 
 use filter::register_filter;
@@ -22,6 +24,7 @@ pub fn register_helpers(h: Handlebars) -> Handlebars {
     let h = register_merge(h);
     let h = register_uniq_lines(h);
     let h = register_filter(h);
+    let h = register_package_manager_command(h);
 
     h
 }

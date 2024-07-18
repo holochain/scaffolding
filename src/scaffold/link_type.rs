@@ -27,34 +27,13 @@ use super::{
 pub mod coordinator;
 pub mod integrity;
 
-pub fn link_type_name(
-    from_referenceable: &Referenceable,
-    to_referenceable: &Referenceable,
-) -> String {
-    format!(
-        "{}To{}",
-        pluralizer::pluralize(
-            from_referenceable.to_string(&Cardinality::Single).as_str(),
-            1,
-            false
-        )
-        .to_case(Case::Pascal),
-        pluralizer::pluralize(
-            to_referenceable.to_string(&Cardinality::Vector).as_str(),
-            2,
-            false
-        )
-        .to_case(Case::Pascal),
-    )
-}
-
 pub fn scaffold_link_type(
     zome_file_tree: ZomeFileTree,
     template_file_tree: &FileTree,
-    from_referenceable: &Option<Referenceable>,
-    to_referenceable: &Option<Referenceable>,
-    delete: &Option<bool>,
-    bidirectional: &Option<bool>,
+    from_referenceable: Option<&Referenceable>,
+    to_referenceable: Option<&Referenceable>,
+    delete: Option<bool>,
+    bidirectional: Option<bool>,
     no_ui: bool,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     let dna_manifest_path = zome_file_tree.dna_file_tree.dna_manifest_path.clone();
@@ -63,13 +42,13 @@ pub fn scaffold_link_type(
     let from_referenceable = get_or_choose_referenceable(
         &zome_file_tree,
         from_referenceable,
-        &String::from("Link from which entry type?"),
+        "Link from which entry type?",
     )?;
 
     let to_referenceable = get_or_choose_optional_reference_type(
         &zome_file_tree,
         to_referenceable,
-        &String::from("Link to which entry type?"),
+        "Link to which entry type?",
     )?;
 
     let link_type = match to_referenceable.clone() {
@@ -79,13 +58,13 @@ pub fn scaffold_link_type(
 
     let bidirectional = match (&to_referenceable, bidirectional) {
         (None, _) => false,
-        (_, Some(b)) => *b,
+        (_, Some(b)) => b,
         (_, None) => Confirm::with_theme(&ColorfulTheme::default())
             .with_prompt("Should the link be bidirectional?")
             .interact()?,
     };
     let delete = match delete {
-        Some(d) => *d,
+        Some(d) => d,
         None => Confirm::with_theme(&ColorfulTheme::default())
             .with_prompt("Can the link be deleted?")
             .interact()?,
@@ -196,8 +175,7 @@ pub use {}::*;
         bidirectional,
     )?;
 
-    let app_file_tree =
-        AppFileTree::get_or_choose(zome_file_tree.dna_file_tree.file_tree(), &None)?;
+    let app_file_tree = AppFileTree::get_or_choose(zome_file_tree.dna_file_tree.file_tree(), None)?;
 
     let app_name = app_file_tree.app_manifest.app_name().to_string();
 
@@ -211,7 +189,28 @@ pub use {}::*;
         &from_referenceable,
         &to_referenceable,
         delete,
-        &inverse_link_type,
+        inverse_link_type.as_deref(),
         no_ui,
+    )
+}
+
+pub fn link_type_name(
+    from_referenceable: &Referenceable,
+    to_referenceable: &Referenceable,
+) -> String {
+    format!(
+        "{}To{}",
+        pluralizer::pluralize(
+            from_referenceable.to_string(&Cardinality::Single).as_str(),
+            1,
+            false
+        )
+        .to_case(Case::Pascal),
+        pluralizer::pluralize(
+            to_referenceable.to_string(&Cardinality::Vector).as_str(),
+            2,
+            false
+        )
+        .to_case(Case::Pascal),
     )
 }

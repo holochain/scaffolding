@@ -14,33 +14,26 @@ use super::{
 };
 
 pub fn choose_reference_entry_hash(prompt: &str, recommended: bool) -> ScaffoldResult<bool> {
-    match recommended {
-        true => {
-            let selection = Select::with_theme(&ColorfulTheme::default())
-                .with_prompt(prompt)
-                .default(0)
-                .item("EntryHash (recommended)")
-                .item("ActionHash")
-                .interact()?;
+    let selection = if recommended {
+        Select::with_theme(&ColorfulTheme::default())
+            .with_prompt(prompt)
+            .default(0)
+            .item("EntryHash (recommended)")
+            .item("ActionHash")
+            .interact()?
+    } else {
+        Select::with_theme(&ColorfulTheme::default())
+            .with_prompt(prompt)
+            .default(0)
+            .item("ActionHash (recommended)")
+            .item("EntryHash")
+            .interact()?
+    };
 
-            match selection {
-                0 => Ok(true),
-                _ => Ok(false),
-            }
-        }
-        false => {
-            let selection = Select::with_theme(&ColorfulTheme::default())
-                .with_prompt(prompt)
-                .default(0)
-                .item("ActionHash (recommended)")
-                .item("EntryHash")
-                .interact()?;
-
-            match selection {
-                0 => Ok(false),
-                _ => Ok(true),
-            }
-        }
+    if recommended {
+        Ok(selection == 0)
+    } else {
+        Ok(selection != 0)
     }
 }
 
@@ -118,7 +111,7 @@ pub fn choose_entry_type_reference(
 
 pub fn get_or_choose_referenceable(
     zome_file_tree: &ZomeFileTree,
-    entry_type: &Option<Referenceable>,
+    entry_type: Option<&Referenceable>,
     prompt: &str,
 ) -> ScaffoldResult<Referenceable> {
     let all_entries = get_all_entry_types(zome_file_tree)?.unwrap_or_else(Vec::new);
@@ -148,14 +141,14 @@ pub fn get_or_choose_referenceable(
 
 pub fn get_or_choose_optional_reference_type(
     zome_file_tree: &ZomeFileTree,
-    entry_type: &Option<Referenceable>,
+    entry_type: Option<&Referenceable>,
     prompt: &str,
 ) -> ScaffoldResult<Option<Referenceable>> {
     let all_entries = get_all_entry_types(zome_file_tree)?.unwrap_or_else(Vec::new);
 
     match entry_type {
         None => choose_optional_referenceable(&all_entries, prompt),
-        Some(Referenceable::Agent { .. }) => Ok(entry_type.clone()),
+        Some(Referenceable::Agent { .. }) => Ok(entry_type.cloned()),
         Some(Referenceable::EntryType(app_entry_reference)) => {
             let all_entries: Vec<String> = all_entries.into_iter().map(|e| e.entry_type).collect();
 
@@ -168,7 +161,7 @@ pub fn get_or_choose_optional_reference_type(
                     zome_file_tree.zome_manifest.name.0.to_string(),
                 ))?;
 
-            Ok(entry_type.clone())
+            Ok(entry_type.cloned())
         }
     }
 }

@@ -1,0 +1,21 @@
+{
+  "name": "ui",
+  "description": "vanilla holochain web-app",
+  "license": "MIT",
+  "version": "0.0.0",
+  "scripts": {
+    "start": "vite --clearScreen false --port $UI_PORT",
+    "build": "vite build",
+    "package": "{{(package_manager_command package_manager "build" null)}} && rimraf dist.zip && cd dist && bestzip ../dist.zip *"
+  },
+  "dependencies": {
+    "@holochain/client": "{{holochain_client_version}}",
+    "@holo-host/identicon": "^0.1.0",
+    "@msgpack/msgpack": "^2.8.0"
+  },
+  "devDependencies": {
+    "bestzip": "^2.2.0",
+    "rimraf": "^5.0.7",
+    "vite": "^4.0.4"
+  }
+}

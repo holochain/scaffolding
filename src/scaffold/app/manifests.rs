@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use holochain_types::prelude::{AppManifest, AppManifestCurrentBuilder};
 use holochain_types::web_app::{
     AppManifestLocation, WebAppManifest, WebAppManifestCurrentBuilder, WebUI,
@@ -7,12 +9,12 @@ use mr_bundle::Location;
 use crate::error::ScaffoldResult;
 
 pub fn empty_happ_manifest(
-    app_name: String,
-    app_description: Option<String>,
+    app_name: &str,
+    app_description: Option<&str>,
 ) -> ScaffoldResult<String> {
     let manifest: AppManifest = AppManifestCurrentBuilder::default()
-        .name(app_name)
-        .description(app_description)
+        .name(app_name.to_owned())
+        .description(app_description.map(String::from))
         .roles(vec![])
         .build()
         .unwrap()
@@ -22,13 +24,13 @@ pub fn empty_happ_manifest(
     Ok(s)
 }
 
-pub fn web_happ_manifest(
-    app_name: String,
-    happ_path: String,
-    ui_zip_path: String,
+pub fn web_happ_manifest<P: Into<PathBuf>>(
+    app_name: &str,
+    happ_path: P,
+    ui_zip_path: P,
 ) -> ScaffoldResult<String> {
     let manifest: WebAppManifest = WebAppManifestCurrentBuilder::default()
-        .name(app_name.clone())
+        .name(app_name.to_owned())
         .happ_manifest(AppManifestLocation {
             location: Location::Bundled(happ_path.into()),
         })

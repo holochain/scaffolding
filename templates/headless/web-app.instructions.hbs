@@ -2,7 +2,9 @@ This is a headless skeleton for a hApp.
 
 To build the app you can run
 
-  npm run build:happ
+  cd {{app_name}}
+  {{(package_manager_command package_manager "install" null)}}
+  {{(package_manager_command package_manager "build:happ" null)}}
 
 The `ui` directory is empty; you are expected to add your frontend there if you still intend to include one.
 
@@ -10,8 +12,7 @@ Note that the scaffolding cli does not generate UI components for this template.
 
 - For setting up a frontend, you can use a build tool such as vite:
 
-  cd {{app_name}}
-  npm create vite@latest ./ui
+  {{(package_manager_command package_manager "create vite@latest ./ui" null)}}
 
 - Ensure your UI's local dev server port is set using the UI_PORT environment variable from the root package.json.
 - Update the "network"{{#if holo_enabled}} and "network:holo"{{/if}} script in the root package.json to include your ui's start script.

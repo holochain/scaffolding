@@ -142,7 +142,7 @@ pub enum ScaffoldError {
     FsBuildError(#[from] build_fs_tree::BuildError<PathBuf, io::Error>),
 
     /// anything else
-    #[error("Unknown error: {0}")]
+    #[error("Unexpected error: {0}")]
     MiscError(#[from] anyhow::Error),
 }
 

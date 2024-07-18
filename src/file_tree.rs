@@ -116,13 +116,13 @@ pub fn find_files<F: Fn(&PathBuf, &String) -> bool>(
     file_tree: &FileTree,
     find_by_path_and_contents: &F,
 ) -> BTreeMap<PathBuf, String> {
-    find_map_files(
-        file_tree,
-        &|file_name, file_contents| match find_by_path_and_contents(file_name, file_contents) {
-            true => Some(file_contents.clone()),
-            false => None,
-        },
-    )
+    find_map_files(file_tree, &|file_name, file_contents| {
+        if find_by_path_and_contents(file_name, file_contents) {
+            Some(file_contents.clone())
+        } else {
+            None
+        }
+    })
 }
 
 pub fn find_map_rust_files<T, F: Fn(&PathBuf, &syn::File) -> Option<T>>(
@@ -305,9 +305,12 @@ pub fn create_dir_all(file_tree: &mut FileTree, path: &Path) -> ScaffoldResult<(
     Ok(())
 }
 
-pub fn dir_to_file_tree(dir: &Dir<'_>) -> ScaffoldResult<FileTree> {
-    let flattened = walk_dir(dir);
-
+pub fn template_dirs_to_file_tree(
+    ui_framework_template_dir: &Dir<'_>,
+    generic_template_dir: &Dir<'_>,
+) -> ScaffoldResult<FileTree> {
+    let mut flattened = walk_dir(ui_framework_template_dir);
+    flattened.extend(walk_dir(generic_template_dir));
     unflatten_file_tree(&flattened)
 }
 

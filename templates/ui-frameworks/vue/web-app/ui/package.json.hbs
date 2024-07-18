@@ -1,0 +1,44 @@
+{
+  "name": "ui",
+  "version": "0.1.0",
+  "scripts": {
+    "start": "vite --port $UI_PORT --clearScreen false",
+    "build": "npm run check && vite build",
+  {{#if holo_enabled}}
+    "build:holo": "VITE_APP_IS_HOLO=true vite build",
+    "package:holo": "{{(package_manager_command package_manager "build:holo" null)}} && rimraf dist.zip && cd dist && bestzip ../dist.zip *",
+  {{/if}}
+    "check": "vue-tsc --noEmit",
+    "preview": "vite preview",
+    "package": "{{(package_manager_command package_manager "build" null)}} && rimraf dist.zip && cd dist && bestzip ../dist.zip *"
+  },
+  "dependencies": {
+    "@holochain/client": "{{holochain_client_version}}",
+  {{#if holo_enabled}}
+    "@holo-host/web-sdk": "{{holo_web_sdk_version}}",
+  {{/if}}
+    "@material/mwc-circular-progress": "^0.27.0",
+    "@material/mwc-button": "^0.27.0",
+    "@material/mwc-textfield": "^0.27.0",
+    "@material/mwc-textarea": "^0.27.0",
+    "@material/mwc-checkbox": "^0.27.0",
+    "@material/mwc-slider": "^0.27.0",
+    "@material/mwc-snackbar": "^0.27.0",
+    "@material/mwc-formfield": "^0.27.0",
+    "@material/mwc-select": "^0.27.0",
+    "@material/mwc-icon-button": "^0.27.0",
+    "@msgpack/msgpack": "^2.8.0",
+    "@vaadin/date-time-picker": "^23.2.8",
+    "vue": "^3.2.25"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.0.0",
+    "bestzip": "^2.2.0",
+    "rimraf": "^5.0.7",
+    "typescript": "^4.9.3",
+    "vite": "^4.0.4",
+    "vite-plugin-checker": "^0.5.1",
+    "vue-tsc": "^1.0.24"
+  },
+  "type": "module"
+}

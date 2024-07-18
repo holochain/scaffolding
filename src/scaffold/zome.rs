@@ -50,7 +50,7 @@ pub struct ZomeFileTree {
 impl ZomeFileTree {
     pub fn get_or_choose_integrity(
         dna_file_tree: DnaFileTree,
-        integrity_zome_name: &Option<String>,
+        integrity_zome_name: Option<&str>,
     ) -> ScaffoldResult<ZomeFileTree> {
         let integrity_zomes = match dna_file_tree.dna_manifest.clone() {
             DnaManifest::V1(v1) => v1.integrity.zomes.clone(),
@@ -75,7 +75,7 @@ impl ZomeFileTree {
                 .into_iter()
                 .find(|zome| zome.name.0.to_string().eq(name))
                 .ok_or(ScaffoldError::IntegrityZomeNotFound(
-                    name.clone(),
+                    name.to_owned(),
                     dna_file_tree.dna_manifest.name(),
                 )),
         }?;
@@ -433,7 +433,7 @@ pub fn scaffold_coordinator_zome_in_path(
     dna_file_tree: DnaFileTree,
     template_file_tree: &FileTree,
     zome_name: &str,
-    dependencies: &Option<Vec<String>>,
+    dependencies: Option<&Vec<String>>,
     path: &Path,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     check_for_reserved_words(zome_name)?;
@@ -473,7 +473,7 @@ pub fn scaffold_coordinator_zome(
     dna_file_tree: DnaFileTree,
     template_file_tree: &FileTree,
     zome_name: &str,
-    dependencies: &Option<Vec<String>>,
+    dependencies: Option<&Vec<String>>,
     path: &Option<PathBuf>,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     let prompt = String::from("Where should the coordinator zome be scaffolded?");
@@ -509,7 +509,7 @@ pub fn scaffold_zome_pair(
     template_file_tree: FileTree,
     dna_name: &str,
 ) -> Result<(), ScaffoldError> {
-    let mut dna_file_tree = DnaFileTree::get_or_choose(app_file_tree, &Some(dna_name.to_string()))?;
+    let mut dna_file_tree = DnaFileTree::get_or_choose(app_file_tree, Some(dna_name))?;
     let dna_manifest_path = dna_file_tree.dna_manifest_path.clone();
 
     let zome_name = input_with_case(
@@ -530,7 +530,7 @@ pub fn scaffold_zome_pair(
         dna_file_tree,
         &template_file_tree,
         &zome_name,
-        &Some(vec![integrity_zome_name]),
+        Some(&vec![integrity_zome_name]),
         &None,
     )?;
 

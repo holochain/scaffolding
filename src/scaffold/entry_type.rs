@@ -7,8 +7,9 @@ use crate::{
 };
 
 use build_fs_tree::dir;
+use colored::Colorize;
 use convert_case::{Case, Casing};
-use dialoguer::{theme::ColorfulTheme, MultiSelect, Select};
+use dialoguer::{theme::ColorfulTheme, Select};
 
 use crate::error::{ScaffoldError, ScaffoldResult};
 
@@ -33,57 +34,28 @@ pub mod fields;
 pub mod integrity;
 pub mod utils;
 
-fn check_field_definitions(
-    entry_type_name: &str,
-    zome_file_tree: &ZomeFileTree,
-    fields: &[FieldDefinition],
-) -> ScaffoldResult<()> {
-    let entry_types = get_all_entry_types(zome_file_tree)?.unwrap_or_else(Vec::new);
-
-    let entry_types_names: Vec<String> = entry_types
-        .clone()
-        .into_iter()
-        .map(|et| et.entry_type.clone())
-        .collect();
-
-    let linked_from_entry_type: Vec<EntryTypeReference> = fields
-        .iter()
-        .filter_map(|f| f.linked_from.clone())
-        .filter_map(|t| match t {
-            Referenceable::Agent { .. } => None,
-            Referenceable::EntryType(et) => Some(et),
-        })
-        .collect();
-
-    match linked_from_entry_type.into_iter().find(|l| {
-        !entry_types_names.contains(&l.entry_type.to_case(Case::Pascal))
-            && !l
-                .entry_type
-                .to_case(Case::Pascal)
-                .eq(&entry_type_name.to_case(Case::Pascal))
-    }) {
-        Some(t) => Err(ScaffoldError::EntryTypeNotFound(
-            t.entry_type.clone(),
-            zome_file_tree.dna_file_tree.dna_manifest.name(),
-            zome_file_tree.zome_manifest.name.0.to_string(),
-        )),
-        None => Ok(()),
-    }
-}
-
 // TODO: group some params into a new-type or prefer builder pattern
 #[allow(clippy::too_many_arguments)]
 pub fn scaffold_entry_type(
     zome_file_tree: ZomeFileTree,
     template_file_tree: &FileTree,
     name: &str,
-    maybe_crud: &Option<Crud>,
+    maybe_crud: Option<Crud>,
     maybe_reference_entry_hash: Option<bool>,
     maybe_link_from_original_to_each_update: Option<bool>,
     maybe_fields: Option<&Vec<FieldDefinition>>,
     no_ui: bool,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     check_for_reserved_words(name)?;
+
+    if no_ui {
+        let warning_text = r#"
+WARNING: Opting out of UI generation for this entry-type but not for other entry-types, link-types or collections associated with it
+may result in potential UI inconsistencies. Specifically, UI elements intended for associated entry-types, link-types or collections could
+inadvertently reference or expect elements from the skipped entry type."#
+            .yellow();
+        println!("{warning_text}");
+    }
 
     let fields = match maybe_fields {
         Some(f) => {
@@ -107,25 +79,27 @@ pub fn scaffold_entry_type(
     let reference_entry_hash = maybe_reference_entry_hash.unwrap_or(false);
 
     let crud = match maybe_crud {
-        Some(c) => c.clone(),
-        None => choose_crud(),
+        Some(c) => c,
+        None => Crud::choose()?,
     };
 
-    let link_from_original_to_each_update = match crud.update {
-        true => match maybe_link_from_original_to_each_update {
-            Some(l) => l,
-            None => {
-                let selection = Select::with_theme(&ColorfulTheme::default())
-                .with_prompt("Should a link from the original entry be created when this entry is updated?")
+    let link_from_original_to_each_update = if crud.update {
+        if let Some(l) = maybe_link_from_original_to_each_update {
+            l
+        } else {
+            let selection = Select::with_theme(&ColorfulTheme::default())
+                .with_prompt(
+                    "Should a link from the original entry be created when this entry is updated?",
+                )
                 .default(0)
                 .item("Yes (more storage cost but better read performance, recommended)")
                 .item("No (less storage cost but worse read performance)")
                 .interact()?;
 
-                selection == 0
-            }
-        },
-        false => false,
+            selection == 0
+        }
+    } else {
+        false
     };
 
     let entry_def = EntryDefinition {
@@ -206,8 +180,7 @@ pub fn scaffold_entry_type(
 
     let dna_manifest = zome_file_tree.dna_file_tree.dna_manifest.clone();
 
-    let app_file_tree =
-        AppFileTree::get_or_choose(zome_file_tree.dna_file_tree.file_tree(), &None)?;
+    let app_file_tree = AppFileTree::get_or_choose(zome_file_tree.dna_file_tree.file_tree(), None)?;
 
     let app_name = app_file_tree.app_manifest.app_name().to_string();
 
@@ -225,28 +198,40 @@ pub fn scaffold_entry_type(
     )
 }
 
-fn choose_crud() -> Crud {
-    let selections = MultiSelect::with_theme(&ColorfulTheme::default())
-        .with_prompt("Which CRUD functions should be scaffolded (SPACE to select/unselect, ENTER to continue)?")
-        .item_checked("Update", true)
-        .item_checked("Delete", true)
-        .interact()
-        .unwrap();
+fn check_field_definitions(
+    entry_type_name: &str,
+    zome_file_tree: &ZomeFileTree,
+    fields: &[FieldDefinition],
+) -> ScaffoldResult<()> {
+    let entry_types = get_all_entry_types(zome_file_tree)?.unwrap_or_else(Vec::new);
 
-    let mut crud = Crud {
-        delete: false,
+    let entry_types_names: Vec<String> = entry_types
+        .clone()
+        .into_iter()
+        .map(|et| et.entry_type.clone())
+        .collect();
 
-        update: false,
-    };
+    let linked_from_entry_type: Vec<EntryTypeReference> = fields
+        .iter()
+        .filter_map(|f| f.linked_from.clone())
+        .filter_map(|t| match t {
+            Referenceable::Agent { .. } => None,
+            Referenceable::EntryType(et) => Some(et),
+        })
+        .collect();
 
-    for selection in selections {
-        if selection == 0 {
-            crud.update = true;
-        }
-        if selection == 1 {
-            crud.delete = true;
-        }
+    match linked_from_entry_type.into_iter().find(|l| {
+        !entry_types_names.contains(&l.entry_type.to_case(Case::Pascal))
+            && !l
+                .entry_type
+                .to_case(Case::Pascal)
+                .eq(&entry_type_name.to_case(Case::Pascal))
+    }) {
+        Some(t) => Err(ScaffoldError::EntryTypeNotFound(
+            t.entry_type.clone(),
+            zome_file_tree.dna_file_tree.dna_manifest.name(),
+            zome_file_tree.zome_manifest.name.0.to_string(),
+        )),
+        None => Ok(()),
     }
-
-    crud
 }

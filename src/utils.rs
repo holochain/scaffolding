@@ -1,11 +1,12 @@
+use std::borrow::Cow;
 use std::collections::BTreeMap;
+use std::path::Path;
 use std::{ffi::OsString, path::PathBuf};
 
 use anyhow::Context;
 use convert_case::{Case, Casing};
 use dialoguer::{theme::ColorfulTheme, Input, Select, Validator};
 use dprint_plugin_typescript::configuration::ConfigurationBuilder;
-use dprint_plugin_vue::configuration::Configuration;
 use regex::Regex;
 
 use crate::error::{ScaffoldError, ScaffoldResult};
@@ -71,6 +72,7 @@ fn get_folder_names(folder: &BTreeMap<OsString, FileTree>) -> Vec<String> {
         .collect()
 }
 
+#[inline]
 /// "yes" or "no" input dialog, with the option to specify a recommended answer (yes = true, no = false)
 pub fn input_yes_or_no(prompt: &str, recommended: Option<bool>) -> ScaffoldResult<bool> {
     let yes_recommended = if recommended == Some(true) {
@@ -98,6 +100,7 @@ pub fn input_yes_or_no(prompt: &str, recommended: Option<bool>) -> ScaffoldResul
     Ok(selection == 0)
 }
 
+#[inline]
 pub fn input_with_custom_validation<'a, V>(prompt: &str, validator: V) -> ScaffoldResult<String>
 where
     V: Validator<String> + 'a,
@@ -111,6 +114,7 @@ where
     Ok(input)
 }
 
+#[inline]
 pub fn input_with_case(prompt: &str, case: Case) -> ScaffoldResult<String> {
     let input: String = Input::with_theme(&ColorfulTheme::default())
         .with_prompt(prompt)
@@ -122,6 +126,7 @@ pub fn input_with_case(prompt: &str, case: Case) -> ScaffoldResult<String> {
     Ok(input)
 }
 
+#[inline]
 pub fn input_with_case_and_initial_text(
     prompt: &str,
     case: Case,
@@ -138,6 +143,7 @@ pub fn input_with_case_and_initial_text(
     Ok(input)
 }
 
+#[inline]
 pub fn input_no_whitespace(prompt: &str) -> ScaffoldResult<String> {
     let input = Input::with_theme(&ColorfulTheme::default())
         .with_prompt(prompt)
@@ -149,6 +155,7 @@ pub fn input_no_whitespace(prompt: &str) -> ScaffoldResult<String> {
     Ok(input)
 }
 
+#[inline]
 /// Raises an error if input is not of the appropriate_case
 pub fn check_case(input: &str, identifier: &str, case: Case) -> ScaffoldResult<()> {
     if !input.is_case(case) {
@@ -159,6 +166,7 @@ pub fn check_case(input: &str, identifier: &str, case: Case) -> ScaffoldResult<(
     Ok(())
 }
 
+#[inline]
 /// Raises an error if input is contains white spaces
 pub fn check_no_whitespace(input: &str, identifier: &str) -> ScaffoldResult<()> {
     if input.contains(char::is_whitespace) {
@@ -169,6 +177,7 @@ pub fn check_no_whitespace(input: &str, identifier: &str) -> ScaffoldResult<()> 
     Ok(())
 }
 
+#[inline]
 /// Unparses a parsed `syn::File` to formatted rust code
 /// as a String. Formatting is handled under the hood by `prettyplease::unparse`
 pub fn unparse_pretty(file: &syn::File) -> String {
@@ -188,6 +197,7 @@ fn add_newlines(input: &str) -> String {
             after_imports = true;
             formatted_code.push('\n');
         }
+
         // Add newlines between #[hdk_extern] annotated functions
         if line.trim().starts_with("#[hdk_extern") && i > 0 {
             formatted_code.push('\n');
@@ -212,9 +222,10 @@ fn add_newlines(input: &str) -> String {
     formatted_code
 }
 
-/// Try to progrmatically format javascript/ typescript/ jsx / tsx code
-/// TODO: Vue: only the <script> portion is formatted, the rest of the sfc blocks are not
-/// TODO: Svelte: formatting is not supported
+/// Tries to progrmatically format generated ui code if the file extension matches
+/// - ts/js/tsx/jsx
+/// - svelte
+/// - vue
 pub fn format_code<P: Into<PathBuf>>(code: &str, file_name: P) -> ScaffoldResult<String> {
     let file_path: PathBuf = file_name.into();
     let ts_format_config = ConfigurationBuilder::new()
@@ -230,36 +241,32 @@ pub fn format_code<P: Into<PathBuf>>(code: &str, file_name: P) -> ScaffoldResult
                     code.to_owned(),
                     &ts_format_config,
                 )
-                .context("Failed to format text")?;
+                .map_err(|e| anyhow::anyhow!("Failed to format source code: {e:?}"))?;
 
                 if let Some(value) = formatted_code {
                     return Ok(value);
                 }
             }
+            "svelte" => {
+                let formatted_code = markup_fmt::format_text(
+                    code,
+                    markup_fmt::Language::Svelte,
+                    &Default::default(),
+                    |path, raw, _| format_nested(path, extension, raw, &ts_format_config),
+                )
+                .map_err(|e| anyhow::anyhow!("Failed to format Svelte source code: {e:?}"))?;
+
+                return Ok(formatted_code);
+            }
             "vue" => {
-                let config = Configuration {
-                    indent_template: true,
-                    use_tabs: false,
-                    indent_width: 2,
-                };
-                let formatted_code =
-                    dprint_plugin_vue::format(&file_path, code, &config, |path, raw, _| {
-                        let extension = path
-                            .extension()
-                            .context("Failed to get path extension")?
-                            .to_str()
-                            .context("Failed to convert extension to string")?;
-                        match extension {
-                            "ts" => Ok(dprint_plugin_typescript::format_text(
-                                path,
-                                raw,
-                                &ts_format_config,
-                            )
-                            .context("Failed to format")?),
-                            // TODO: Implement formatting for the remaining vue sfc blocks
-                            _ => Ok(Some(raw)),
-                        }
-                    })?;
+                let formatted_code = markup_fmt::format_text(
+                    code,
+                    markup_fmt::Language::Vue,
+                    &Default::default(),
+                    |path, raw, _| format_nested(path, extension, raw, &ts_format_config),
+                )
+                .map_err(|e| anyhow::anyhow!("Failed to format Vue source code: {e:?}"))?;
+
                 return Ok(formatted_code);
             }
             _ => {}
@@ -267,6 +274,40 @@ pub fn format_code<P: Into<PathBuf>>(code: &str, file_name: P) -> ScaffoldResult
     }
 
     Ok(code.to_owned())
+}
+
+/// Formats ts/js code nested in markup
+fn format_nested<'a>(
+    path: &Path,
+    root_extension: &str,
+    raw: &'a str,
+    ts_format_config: &dprint_plugin_typescript::configuration::Configuration,
+) -> ScaffoldResult<Cow<'a, str>> {
+    if let Some(nested_extension) = path.extension().and_then(|ext| ext.to_str()) {
+        match (root_extension, nested_extension) {
+            ("vue", "ts" | "js") => {
+                let formatted_code =
+                    dprint_plugin_typescript::format_text(path, raw.to_owned(), ts_format_config)
+                        .map_err(|e| anyhow::anyhow!("Failed to format source code: {e:?}"))?;
+
+                if let Some(value) = formatted_code {
+                    return Ok(Cow::Owned(value));
+                }
+            }
+            ("svelte", "ts" | "js" | "tsx" | "jsx") => {
+                let formatted_code =
+                    dprint_plugin_typescript::format_text(path, raw.to_owned(), ts_format_config)
+                        .map_err(|e| anyhow::anyhow!("Failed to format source code: {e:?}"))?;
+
+                if let Some(value) = formatted_code {
+                    return Ok(Cow::Owned(value));
+                }
+            }
+            // Provision to format other nested code i.e css
+            _ => {}
+        }
+    }
+    Ok(Cow::Borrowed(raw))
 }
 
 #[cfg(test)]
@@ -327,7 +368,11 @@ mod tests {
 
     #[test]
     fn test_format_vue_code() {
-        let code = r#"<template><div>{{ message }}</div></template>
+        let code = r#"<template>
+<div>{{ message }}</div>
+<button>click me</button>
+</template>
+
 <script lang="ts">
 export default {
   data() {
@@ -342,6 +387,7 @@ export default {
         let formatted_code = result.unwrap();
         let expected_output = r#"<template>
   <div>{{ message }}</div>
+  <button>click me</button>
 </template>
 
 <script lang="ts">
@@ -356,12 +402,29 @@ export default {
     }
 
     #[test]
-    fn test_format_svelte() {
-        let code = "function foo() { console.log('Hello, world!'); }";
+    fn test_format_svelte_code() {
+        let code = r#"<script lang="ts">
+  let greeting = {message: 'Hello, world!'}
+</script>
+
+<div>
+<div>{greeting.message}</div>
+<button>click me</button>
+</div>
+"#;
         let file_name = "test.svelte";
         let result = format_code(code, file_name);
         assert!(result.is_ok());
         let formatted_code = result.unwrap();
-        assert_eq!(formatted_code, code); // should return code as is
+        let expected_output = r#"<script lang="ts">
+let greeting = { message: "Hello, world!" };
+</script>
+
+<div>
+  <div>{greeting.message}</div>
+  <button>click me</button>
+</div>
+"#;
+        assert_eq!(formatted_code, expected_output);
     }
 }
