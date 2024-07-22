@@ -59,7 +59,7 @@ setup_and_build_happ() {
 
   nix develop --command bash -c "
     set -e
-    pnpm -r install
+    pnpm install
     pnpm --filter ui build
     pnpm test
     pnpm package
@@ -77,7 +77,7 @@ setup_and_build_hello_world() {
 
   nix develop --command bash -c "
     set -e
-    pnpm -r install
+    pnpm install
     pnpm test
     "
   cd ..
