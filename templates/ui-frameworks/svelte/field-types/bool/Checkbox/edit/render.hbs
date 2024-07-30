@@ -1,3 +1,2 @@
-<mwc-formfield label="{{label}}">
-  <mwc-checkbox {{#if variable_to_read}}checked={ {{variable_to_read}} }{{/if}} on:change={e => { {{variable_to_change}} = e.target.checked;} }></mwc-checkbox>
-</mwc-formfield>
+<label for="{{label}}">{{label}}</label>
+<input type="checkbox" name="{{label}}" bind:value="{{variable_to_read}}" />

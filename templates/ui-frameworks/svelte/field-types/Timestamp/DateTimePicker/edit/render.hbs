@@ -1,2 +1,11 @@
-<vaadin-date-time-picker label="{{label}}" {{#if variable_to_read}}value={new Date({{variable_to_read}} / 1000).toISOString()}{{/if}} on:change={e => { {{variable_to_change}} = new Date(e.target.value).valueOf() * 1000;} } {{#if required}}required{{/if}}></vaadin-date-time-picker>
-
+<input
+  name="{{label}}"
+  type="datetime-local"
+  {{#if variable_to_read}}
+  value={new Date({{variable_to_read}} / 1000 - (new Date({{variable_to_read}}! / 1000).getTimezoneOffset() * 60000)).toISOString().slice(0, 16)}
+  {{/if}}
+  on:input={(e) => {{variable_to_change}} = Math.floor(new Date(e.target.value).getTime() / 1000)}
+  {{#if required}}
+  required
+  {{/if}}
+/>
