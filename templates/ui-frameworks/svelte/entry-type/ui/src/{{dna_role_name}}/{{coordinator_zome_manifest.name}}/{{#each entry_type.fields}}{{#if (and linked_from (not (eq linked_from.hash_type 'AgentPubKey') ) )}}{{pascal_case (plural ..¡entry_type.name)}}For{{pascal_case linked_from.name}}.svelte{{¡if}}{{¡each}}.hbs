@@ -5,7 +5,8 @@ import { clientContext } from '../../contexts';
 import type { {{pascal_case ../entry_type.name}}, {{pascal_case ../coordinator_zome_manifest.name}}Signal } from './types';
 import {{pascal_case ../entry_type.name}}Detail from './{{pascal_case ../entry_type.name}}Detail.svelte';
 
-let client: AppClient = (getContext(clientContext) as any).getClient();
+const client: AppClient = (getContext(clientContext) as any).getClient();
+
 let hashes: Array<ActionHash> | undefined = [];
 let loading: boolean;
 let error: any = undefined;
@@ -42,8 +43,9 @@ async function fetch{{pascal_case (plural ../entry_type.name)}}() {
     hashes = links.map(l => l.target);
   } catch (e) {
     error = e as HolochainError;
+  } finally {
+    loading = false;
   }
-  loading = false;
 }
 </script>
 

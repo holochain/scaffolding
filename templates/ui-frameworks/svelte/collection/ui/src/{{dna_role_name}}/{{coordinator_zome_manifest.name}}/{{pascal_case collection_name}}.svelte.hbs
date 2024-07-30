@@ -1,29 +1,27 @@
 <script lang="ts">
 import { onMount, getContext } from 'svelte';
-import '@material/mwc-circular-progress';
 import type { EntryHash, Record, AgentPubKey, ActionHash, AppClient, NewEntryAction, HolochainError } from '@holochain/client';
 import { clientContext } from '../../contexts';
 import {{pascal_case referenceable.name}}Detail from './{{pascal_case referenceable.name}}Detail.svelte';
 import type { {{pascal_case coordinator_zome_manifest.name}}Signal } from './types';
 
+const client: AppClient = (getContext(clientContext) as any).getClient();
+
+let hashes: Array<{{referenceable.hash_type}}> | undefined;
+let loading = false;
+let error: any = undefined;
+
 {{#if (eq collection_type.type "ByAuthor")}}
 export let author: AgentPubKey;
 {{/if}}
-
-let client: AppClient = (getContext(clientContext) as any).getClient();
-
-let hashes: Array<{{referenceable.hash_type}}> | undefined;
-let loading = true;
-let error: any = undefined;
 
 $: hashes, loading, error;
 
 onMount(async () => {
   {{#if (eq collection_type.type "ByAuthor")}}
-    if (author === undefined) {
+    if (!author) {
       throw new Error(`The author input is required for the {{pascal_case collection_name}} element`);
     }
-
   {{/if}}
 
   await fetch{{pascal_case (plural referenceable.name)}}();
@@ -40,6 +38,7 @@ onMount(async () => {
 });
 
 async function fetch{{pascal_case (plural referenceable.name)}}() {
+  loading = true;
   try {
     const links = await client.callZome({
       cap_secret: null,
@@ -51,10 +50,10 @@ async function fetch{{pascal_case (plural referenceable.name)}}() {
     hashes = links.map(l => l.target);
   } catch (e) {
     error = e as HolochainError;
+  } finally {
+    loading = false;
   }
-  loading = false;
 }
-
 </script>
 
 {#if loading}

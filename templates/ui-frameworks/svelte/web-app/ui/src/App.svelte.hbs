@@ -7,12 +7,8 @@
 {{/if}}
 
   import { clientContext } from './contexts';
-
   import './app.css';
 
-  let client: AppClient | undefined;
-  let error: HolochainError | undefined;
-  let loading = false;
 {{#if holo_enabled}}
   const IS_HOLO = ['true', '1', 't'].includes(import.meta.env.VITE_APP_IS_HOLO?.toLowerCase())
   const logout = async () => {
@@ -20,6 +16,10 @@
     (client as WebSdk).signIn({ cancellable: false })
   }
 {{/if}}
+
+  let client: AppClient | undefined;
+  let error: HolochainError | undefined;
+  let loading = false;
 
   onMount(async () => {
   {{#if holo_enabled}}
@@ -69,7 +69,7 @@
         <img src="./assets/holochainLogo.svg" class="logo holochain" alt="holochain logo" />
       </a>
     </div>
-    <h1>Holochain Vue hApp</h1>
+    <h1>Holochain Svelte hApp</h1>
     <div>
       <div class="card">
         {#if loading}
