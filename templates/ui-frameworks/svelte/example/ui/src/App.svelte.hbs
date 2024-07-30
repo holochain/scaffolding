@@ -8,13 +8,19 @@
   import { clientContext } from './contexts';
 
   let client: AppClient | undefined;
-  let loading = true;
+  let loading = false;
 
   $: client, loading;
 
   onMount(async () => {
-    client = await AppWebsocket.connect();
-    loading = false;
+    loading = true;
+    try {
+      client = await AppWebsocket.connect();
+    } catch(e) {
+      console.error(e)
+    } finally {
+      loading = false;
+    }
   });
 
   setContext(clientContext, {
