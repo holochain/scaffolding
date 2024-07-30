@@ -29,7 +29,7 @@ let {{camel_case entry_type.name}}: {{pascal_case entry_type.name}} | undefined;
 
 export let {{camel_case entry_type.name}}Hash: {{#if entry_type.reference_entry_hash}}EntryHash{{else}}ActionHash{{/if}};
 
-$: {{#if crud.update}}editing, {{/if}} error, loading, record, {{camel_case entry_type.name}};
+$: {{#if crud.update}}editing,{{/if}} error, loading, record, {{camel_case entry_type.name}};
 
 onMount(async () => {
   if ({{camel_case entry_type.name}}Hash === undefined) {
@@ -77,7 +77,7 @@ async function delete{{pascal_case entry_type.name}}() {
 </script>
 
 {#if loading}
-<progress></progress>
+<progress />
 {:else if error}
 <article>Error fetching the {{lower_case entry_type.name}}: {error.message}</article>
 {{#if crud.update}}

@@ -16,6 +16,11 @@ import type { {{pascal_case entry_type.name}}{{#each entry_type.fields}}{{#if (e
 const client: AppClient = (getContext(clientContext) as any).getClient();
 const dispatch = createEventDispatcher();
 
+export let currentRecord!: Record;
+{{#if link_from_original_to_each_update}}
+export let original{{pascal_case entry_type.name}}Hash!: ActionHash;
+{{/if}}
+
 let current{{pascal_case entry_type.name}}: {{pascal_case entry_type.name}} = decode((currentRecord.entry as any).Present.entry) as {{pascal_case entry_type.name}};
 {{#each entry_type.fields}}
   {{#if widget }}
@@ -26,11 +31,6 @@ let {{camel_case field_name}}: Array<{{> (concat field_type.type "/type")}} | un
     {{/if}}
   {{/if}}
 {{/each}}
-
-{{#if link_from_original_to_each_update}}
-export let original{{pascal_case entry_type.name}}Hash!: ActionHash;
-{{/if}}
-export let currentRecord!: Record;
 
 $: {{#each (filter entry_type.fields "widget")}}{{camel_case field_name}}{{#unless @last}}, {{/unless}}{{/each}};
 $: is{{pascal_case entry_type.name}}Valid = true{{#each entry_type.fields}}{{#if widget}}{{#if (eq cardinality "single")}} && {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate=(camel_case field_name) }}{{/if}}{{#if (eq cardinality "vector")}} && {{camel_case field_name}}.every(e => {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate="e" }}){{/if}}{{/if}}{{/each}};

@@ -58,7 +58,7 @@ async function fetch{{pascal_case (plural ../entry_type.name)}}() {
 {:else}
 <div>
   {#each hashes as hash}
-    <{{pascal_case ../entry_type.name}}Detail {{camel_case ../entry_type.name}}Hash={hash} on:{{kebab_case ../entry_type.name}}-deleted={fetch{{pascal_case (plural ../entry_type.name)}}}> />
+    <{{pascal_case ../entry_type.name}}Detail {{camel_case ../entry_type.name}}Hash={hash} on:{{kebab_case ../entry_type.name}}-deleted={fetch{{pascal_case (plural ../entry_type.name)}}} />
   {/each}
 </div>
 {/if}
