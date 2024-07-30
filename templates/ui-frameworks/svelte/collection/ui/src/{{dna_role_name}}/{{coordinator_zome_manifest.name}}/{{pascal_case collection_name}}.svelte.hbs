@@ -58,19 +58,15 @@ async function fetch{{pascal_case (plural referenceable.name)}}() {
 </script>
 
 {#if loading}
-<div style="display: flex; flex: 1; align-items: center; justify-content: center">
-  <mwc-circular-progress indeterminate></mwc-circular-progress>
-</div>
+<progress></progress>
 {:else if error}
-<span>Error fetching the {{lower_case (plural referenceable.name)}}: {error.message}.</span>
+<article>Error fetching the {{lower_case (plural referenceable.name)}}: {error.message}.</article>
 {:else if hashes.length === 0}
-<span>No {{lower_case (plural referenceable.name)}} found{{#if (eq collection_type.type "ByAuthor")}} for this author{{/if}}.</span>
+<article>No {{lower_case (plural referenceable.name)}} found{{#if (eq collection_type.type "ByAuthor")}} for this author{{/if}}.</article>
 {:else}
-<div style="display: flex; flex-direction: column">
+<div>
   {#each hashes as hash}
-    <div style="margin-bottom: 8px;">
-      <{{pascal_case referenceable.name}}Detail {{camel_case referenceable.name}}Hash={hash}  on:{{kebab_case referenceable.name}}-deleted={() => fetch{{pascal_case (plural referenceable.name)}}()}></{{pascal_case referenceable.name}}Detail>
-    </div>
+    <{{pascal_case referenceable.name}}Detail {{camel_case referenceable.name}}Hash={hash}  on:{{kebab_case referenceable.name}}-deleted={() => fetch{{pascal_case (plural referenceable.name)}}()}></{{pascal_case referenceable.name}}Detail>
   {/each}
 </div>
 {/if}
