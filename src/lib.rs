@@ -66,7 +66,7 @@
 //!
 //! If you know of some already existing custom template, look first in the documentation of that template for instructions on how to use it, in case the template offers a nix wrapper command, which is much easier to use.
 //!
-//! Otherwise, you can just clone it and use it like this:  
+//! Otherwise, you can just clone it and use it like this:
 //!
 //! `hc scaffold --template ./path/to/custom/template web-app forum`
 //!
@@ -97,7 +97,7 @@
 //! To create a custom template, execute these steps:
 //!
 //! 1. Run this command:
-//! `nix flake init -t github:holochain/scaffolding`
+//!     `nix flake init -t github:holochain/scaffolding`
 //! 2. A new dir `custom-template` will be created in the current directory. Check this new folder in a version control system like git.
 //! 3. Replace all instances of `<TODO:REPLACE_ME_WITH_THE_APPROPRIATE_GIT_URL>` in its `README.md` file with the appropriate git URL (eg. "github:holochain-open-dev/templates").
 //! 4. Replace all instances of `<TODO:REPLACE_ME_WITH_THE_APPROPRIATE_GIT_URL>` in its `template/web-app/flake.nix.hbs` file with the appropriate git URL (eg. "github:holochain-open-dev/templates").
@@ -131,6 +131,7 @@
 //! 7. It renders the contents of each file using appropriate data from the command.
 //!    - For instance, in `hc scaffold web-app`, one context field is `app_name`, representing the user-input app name.
 //! 8. Finally, it merges the resulting directory structure with the existing repository. If a file already exists, its contents are overwritten.
+//!
 //! You can take a look at [Writing templates](#writing-templates) to learn how to write your own templates.
 //!
 //! This is the list of commands and the templates they use:
