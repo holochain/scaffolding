@@ -1,16 +1,12 @@
 <template>
   <div>
-    <div v-if="loading">
-      <mwc-circular-progress indeterminate></mwc-circular-progress>
-    </div>
+    <progress v-if="loading"></progress>
     <div v-else>
       <main>
         <h1>Forum</h1>
-
         <div id="content">
           <h2>All Posts</h2>
           <AllPosts></AllPosts>
-          <span style="margin-bottom: 16px"></span>
           <CreatePost></CreatePost>
         </div>
       </main>
@@ -21,7 +17,6 @@
 <script lang="ts">
 import { defineComponent, computed } from 'vue';
 import { AppWebsocket, AppClient } from '@holochain/client';
-import '@material/mwc-circular-progress';
 import AllPosts from './forum/posts/AllPosts.vue';
 import CreatePost from './forum/posts/CreatePost.vue';
 
