@@ -1,13 +1,13 @@
 <script lang="ts">
 import { onMount, getContext } from 'svelte';
-import type { EntryHash, Record, AgentPubKey, ActionHash, AppClient, NewEntryAction, HolochainError } from '@holochain/client';
+import type { EntryHash, Record, AgentPubKey, ActionHash, AppClient, NewEntryAction, HolochainError, Link } from '@holochain/client';
 import { clientContext } from '../../contexts';
 import {{pascal_case referenceable.name}}Detail from './{{pascal_case referenceable.name}}Detail.svelte';
 import type { {{pascal_case coordinator_zome_manifest.name}}Signal } from './types';
 
 const client: AppClient = (getContext(clientContext) as any).getClient();
 
-let hashes: Array<{{referenceable.hash_type}}> | undefined;
+let hashes: Array<{{referenceable.hash_type}}> = [];
 let loading = false;
 let error: any = undefined;
 
@@ -38,13 +38,16 @@ onMount(async () => {
 async function fetch{{pascal_case (plural referenceable.name)}}() {
   loading = true;
   try {
-    const links = await client.callZome({
+    const links: Array<Link> = await client.callZome({
       cap_secret: null,
       role_name: '{{dna_role_name}}',
       zome_name: '{{snake_case coordinator_zome_manifest.name}}',
       fn_name: 'get_{{snake_case collection_name}}',
       payload: {{#if (eq collection_type.type "ByAuthor")}}author{{else}}null{{/if}},
     });
+    if (links.length) {
+      hashes = links.map(l => l.target);
+    }
     hashes = links.map(l => l.target);
   } catch (e) {
     error = e as HolochainError;
@@ -58,7 +61,7 @@ async function fetch{{pascal_case (plural referenceable.name)}}() {
 <progress />
 {:else if error}
 <article>Error fetching the {{lower_case (plural referenceable.name)}}: {error.message}.</article>
-{:else if hashes.length === 0}
+{:else if !hashes.length}
 <article>No {{lower_case (plural referenceable.name)}} found{{#if (eq collection_type.type "ByAuthor")}} for this author{{/if}}.</article>
 {:else}
 <div>

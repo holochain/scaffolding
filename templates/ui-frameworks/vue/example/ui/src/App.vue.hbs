@@ -2,7 +2,7 @@
   <div>
     <progress v-if="loading"></progress>
     <div v-else>
-      <h1>Forum</h1>
+      <h2>Welcome to the Forum hApp</h2>
       <AllPosts></AllPosts>
       <CreatePost></CreatePost>
     </div>
@@ -26,12 +26,18 @@ export default {
   } {
     return {
       client: undefined,
-      loading: true,
+      loading: false,
     };
   },
   async mounted() {
-    this.client = await AppWebsocket.connect();
-    this.loading = false;
+    this.loading = true;
+    try {
+      this.client = await AppWebsocket.connect();
+    } catch (e) {
+      console.error(e)
+    } finally {
+      this.loading = false;
+    }
   },
   provide() {
     return {
