@@ -2,7 +2,7 @@
 pub const TRYORAMA_VERSION: &str = "^0.16.0";
 
 /// npm: <https://www.npmjs.com/package/@holochain/client>
-pub const HOLOCHAIN_CLIENT_VERSION: &str = "^0.17.0";
+pub const HOLOCHAIN_CLIENT_VERSION: &str = "^0.17.1";
 
 /// npm: <https://www.npmjs.com/package/@holochain/hc-spin>
 pub const HC_SPIN_VERSION: &str = "0.300.3";
@@ -18,7 +18,7 @@ pub const HDK_VERSION: &str = holochain::HDK_VERSION;
 pub const HOLOCHAIN_VERSION: &str = holochain::HOLOCHAIN_VERSION;
 
 /// <https://github.com/holochain/holochain/tree/develop/versions>
-pub const HOLOCHAIN_NIX_VERSION: &str = "0_3";
+pub const HOLOCHAIN_NIX_VERSION: &str = "0_3_rc";
 
 /// source: <https://github.com/darksoil-studio/holochain-playground/tree/main/packages/cli/server>
 ///
