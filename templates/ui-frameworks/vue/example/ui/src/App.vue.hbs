@@ -2,14 +2,9 @@
   <div>
     <progress v-if="loading"></progress>
     <div v-else>
-      <main>
-        <h1>Forum</h1>
-        <div id="content">
-          <h2>All Posts</h2>
-          <AllPosts></AllPosts>
-          <CreatePost></CreatePost>
-        </div>
-      </main>
+      <h1>Forum</h1>
+      <AllPosts></AllPosts>
+      <CreatePost></CreatePost>
     </div>
   </div>
 </template>
@@ -20,7 +15,7 @@ import { AppWebsocket, AppClient } from '@holochain/client';
 import AllPosts from './forum/posts/AllPosts.vue';
 import CreatePost from './forum/posts/CreatePost.vue';
 
-export default defineComponent({
+export default {
   components: {
     AllPosts,
     CreatePost
@@ -43,5 +38,5 @@ export default defineComponent({
       client: computed(() => this.client),
     };
   },
-});
+};
 </script>
