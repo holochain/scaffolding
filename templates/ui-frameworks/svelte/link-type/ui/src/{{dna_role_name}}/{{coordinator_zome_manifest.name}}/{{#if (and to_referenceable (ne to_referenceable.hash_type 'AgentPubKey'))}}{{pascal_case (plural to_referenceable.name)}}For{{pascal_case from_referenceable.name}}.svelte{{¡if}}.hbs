@@ -48,7 +48,7 @@ onMount(async () => {
 </script>
 
 {#if loading }
-<progress></progress>
+<progress />
 {:else if error}
 <article>Error fetching {{lower_case (plural to_referenceable.name)}}: {error.message}.</article>
 {:else if hashes.length === 0}
@@ -56,7 +56,7 @@ onMount(async () => {
 {:else}
 <div>
   {#each hashes as hash}
-    <{{pascal_case to_referenceable.name}}Detail {{camel_case to_referenceable.name}}Hash={hash}></{{pascal_case to_referenceable.name}}Detail>
+    <{{pascal_case to_referenceable.name}}Detail {{camel_case to_referenceable.name}}Hash={hash} />
   {/each}
 </div>
 {/if}

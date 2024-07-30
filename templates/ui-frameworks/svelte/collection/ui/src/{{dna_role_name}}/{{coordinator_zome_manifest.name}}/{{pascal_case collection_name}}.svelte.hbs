@@ -57,7 +57,7 @@ async function fetch{{pascal_case (plural referenceable.name)}}() {
 </script>
 
 {#if loading}
-<progress></progress>
+<progress />
 {:else if error}
 <article>Error fetching the {{lower_case (plural referenceable.name)}}: {error.message}.</article>
 {:else if hashes.length === 0}
@@ -65,8 +65,7 @@ async function fetch{{pascal_case (plural referenceable.name)}}() {
 {:else}
 <div>
   {#each hashes as hash}
-    <{{pascal_case referenceable.name}}Detail {{camel_case referenceable.name}}Hash={hash}  on:{{kebab_case referenceable.name}}-deleted={() => fetch{{pascal_case (plural referenceable.name)}}()}></{{pascal_case referenceable.name}}Detail>
+    <{{pascal_case referenceable.name}}Detail {{camel_case referenceable.name}}Hash={hash} on:{{kebab_case referenceable.name}}-deleted={() => fetch{{pascal_case (plural referenceable.name)}}()} />
   {/each}
 </div>
 {/if}
-
