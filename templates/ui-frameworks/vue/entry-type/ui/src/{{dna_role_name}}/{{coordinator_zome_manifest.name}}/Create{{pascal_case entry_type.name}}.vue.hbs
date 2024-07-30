@@ -99,13 +99,14 @@ export default {
   },
   methods: {
     async create{{pascal_case entry_type.name}}() {
-      const {{camel_case entry_type.name}}: {{pascal_case entry_type.name}} = { {{#each entry_type.fields}}
-        {{#if (eq cardinality "single") }}
+      const {{camel_case entry_type.name}}: {{pascal_case entry_type.name}} = {
+{{#each entry_type.fields}}
+  {{#if (eq cardinality "single") }}
         {{snake_case field_name}}: this.{{camel_case field_name}}!,
-        {{else}}
+  {{else}}
         {{snake_case field_name}}: this.{{camel_case field_name}}{{#if (eq cardinality "vector") }} as Array<{{> (concat field_type.type "/type") }}>{{/if}},
-        {{/if}}
-  {{/each}}
+  {{/if}}
+{{/each}}
       };
 
       try {

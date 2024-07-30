@@ -20,9 +20,9 @@ pub enum ScaffoldError {
     #[error(transparent)]
     CargoMetadataError(#[from] cargo_metadata::Error),
 
-    /// serde_yaml::Error
+    /// serde_yml::Error
     #[error("YAML serialization error: {0}")]
-    SerdeYamlError(#[from] serde_yaml::Error),
+    SerdeYamlError(#[from] serde_yml::Error),
 
     #[error("JSON serialization error: {0}")]
     SerdeJsonError(#[from] serde_json::Error),

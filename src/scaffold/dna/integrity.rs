@@ -46,7 +46,7 @@ pub fn add_integrity_zome_to_manifest(
     insert_file(
         &mut file_tree,
         &dna_manifest_path,
-        &serde_yaml::to_string(&new_manifest)?,
+        &serde_yml::to_string(&new_manifest)?,
     )?;
 
     let dna_file_tree = DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
