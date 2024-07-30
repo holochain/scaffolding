@@ -3,7 +3,7 @@ name: "test"
 on:
   # Trigger the workflow on push or pull request,
   # but only for the main branch
-  push: 
+  push:
     branches: [ develop, develop-0.1, develop-0.2, develop-0.3 ]
   pull_request:
     branches: [ develop, develop-0.1, develop-0.2, develop-0.3 ]
@@ -24,7 +24,7 @@ jobs:
 
       - name : Lint Rust
         run: cargo clippy --all-targets -- -D warnings
-  
+
   testbuild:
     runs-on: ubuntu-latest
     strategy:
@@ -35,7 +35,7 @@ jobs:
 
       - name: Extend space
         uses: ./.github/actions/extend-space
-  
+
       - name: Install nix
         uses: cachix/install-nix-action@v25
         with:
@@ -64,15 +64,13 @@ jobs:
 
       - name: Extend space
         uses: ./.github/actions/extend-space
-  
-      - name: Install nix
-        uses: cachix/install-nix-action@v25
-        with:
-          install_url: https://releases.nixos.org/nix/nix-2.13.3/install
-          extra_nix_config: |
-            experimental-features = flakes nix-command
 
-      - uses: cachix/cachix-action@v14
+      - name: Install nix
+        uses: cachix/install-nix-action@v27
+        with:
+          install_url: https://releases.nixos.org/nix/nix-2.23.2/install
+
+      - uses: cachix/cachix-action@v15
         with:
           name: holochain-ci
 
