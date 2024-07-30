@@ -18,10 +18,10 @@ name = "holochain_scaffolding_cli"
 path = "src/lib.rs"
 
 [dependencies]
-holochain = { features = ["test_utils"], version = "0.3.2-rc.1"}
-holochain_types = "0.3.2-rc.1"
-holochain_util = { features = ["backtrace"], version = "0.3.1" }
-mr_bundle = "0.3.2-rc.0"
+holochain = { features = ["test_utils"], version = "0.3.2"}
+holochain_types = "0.3.2"
+holochain_util = { features = ["backtrace"], version = "0.3.2" }
+mr_bundle = "0.3.2"
 
 dirs = "4.0.0"
 ignore = "0.4"

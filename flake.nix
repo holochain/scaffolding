@@ -3,7 +3,7 @@
 
   inputs = {
     nixpkgs.follows = "holochain/nixpkgs";
-    versions.url = "github:holochain/holochain?dir=versions/0_3_rc";
+    versions.url = "github:holochain/holochain?dir=versions/0_3";
 
     holochain = {
       url = "github:holochain/holochain";
@@ -22,11 +22,11 @@
           path = ./templates/custom-template;
           description  = "Custom template for the scaffolding tool";
         };
-      
-        lib.wrapCustomTemplate = { system, pkgs, customTemplatePath }: 
-          let 
+
+        lib.wrapCustomTemplate = { system, pkgs, customTemplatePath }:
+          let
         	  scaffolding = inputs.holochain.packages.${system}.hc-scaffold;
-        	in 
+        	in
         		pkgs.runCommand "hc-scaffold" {
         	    buildInputs = [ pkgs.makeWrapper ];
         	    src = customTemplatePath;
@@ -43,7 +43,7 @@
         	      --add-flags "--template $out/template"
         	  '';
       };
-    
+
       systems = builtins.attrNames inputs.holochain.devShells;
       perSystem = {
         self',
