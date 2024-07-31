@@ -23,9 +23,9 @@ pub fn load_directory_into_memory(path: &Path) -> ScaffoldResult<FileTree> {
             .skip(path.components().count())
             .collect::<PathBuf>();
 
-        if fs::metadata(&path.join(&dir_entry))?.is_dir() {
+        if fs::metadata(path.join(&dir_entry))?.is_dir() {
             create_dir_all(&mut file_tree, &dir_entry)?;
-        } else if let Ok(contents) = fs::read_to_string(&path.join(&dir_entry)) {
+        } else if let Ok(contents) = fs::read_to_string(path.join(&dir_entry)) {
             insert_file(&mut file_tree, &dir_entry, &contents)?;
         }
     }
