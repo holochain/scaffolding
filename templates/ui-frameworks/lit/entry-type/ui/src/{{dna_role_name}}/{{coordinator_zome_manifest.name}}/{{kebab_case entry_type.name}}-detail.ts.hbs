@@ -39,8 +39,7 @@ export class {{pascal_case entry_type.name}}Detail extends LitElement {
   }) as Promise<Record | undefined>, () => [this.{{camel_case entry_type.name}}Hash]);
 
   {{#if crud.update}}
-  @state()
-  _editing = false;
+  @state() _editing = false;
   {{/if}}
 
   firstUpdated() {
@@ -88,7 +87,6 @@ export class {{pascal_case entry_type.name}}Detail extends LitElement {
     {{else}}
         {{> Vec/detail/render variable_to_read=(concat (camel_case ../entry_type.name) "." (snake_case field_name) ) field_name=field_name field_type=field_type widget=widget }}
     {{/if}}
-
   {{/if}}
 {{/each}}
 
@@ -106,7 +104,6 @@ export class {{pascal_case entry_type.name}}Detail extends LitElement {
 
   render{{pascal_case entry_type.name}}(maybeRecord: Record | undefined) {
     if (!maybeRecord) return html`<article>The requested {{lower_case entry_type.name}} was not found.</article>`;
-
     {{#if crud.update}}
     if (this._editing) {
     	return html`
@@ -124,7 +121,6 @@ export class {{pascal_case entry_type.name}}Detail extends LitElement {
       `;
     }
     {{/if}}
-
     return this.renderDetail(maybeRecord);
   }
 

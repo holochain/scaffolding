@@ -1,6 +1,6 @@
 import { LitElement, html } from 'lit';
 import { state, customElement, property } from 'lit/decorators.js';
-import { InstalledCell, ActionHash, Record, AgentPubKey, EntryHash, AppClient, DnaHash } from '@holochain/client';
+import { InstalledCell, ActionHash, Record, AgentPubKey, EntryHash, AppClient, DnaHash, HolochainError } from '@holochain/client';
 import { consume } from '@lit-labs/context';
 {{#uniq_lines}}
   {{#each entry_type.fields}}

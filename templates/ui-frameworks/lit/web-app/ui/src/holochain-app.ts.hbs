@@ -9,7 +9,6 @@ import { provide } from '@lit-labs/context';
 
 import { clientContext } from './contexts';
 
-import './app.css';
 import './index.css';
 
 {{#if holo_enabled}}
@@ -100,4 +99,30 @@ export class HolochainApp extends LitElement {
       </div>
     `;
   }
+
+  static styles = css`
+    .logo {
+      height: 15em;
+      padding: 1.5em;
+      will-change: filter;
+      transition: filter 300ms;
+      width: auto;
+    }
+
+    .logo:hover {
+      filter: drop-shadow(0 0 2em #646cffaa);
+    }
+
+    .logo.holochain:hover {
+      filter: drop-shadow(0 0 2em #61dafbaa);
+    }
+
+    .card {
+      padding: 2em;
+    }
+
+    .read-the-docs {
+      color: #888;
+    }
+  `;
 }

@@ -7,7 +7,6 @@
 {{/if}}
 
   import { clientContext } from './contexts';
-  import './app.css';
 
 {{#if holo_enabled}}
   const IS_HOLO = ['true', '1', 't'].includes(import.meta.env.VITE_APP_IS_HOLO?.toLowerCase())
@@ -85,3 +84,29 @@
     </div>
   </div>
 </main>
+
+<style>
+  .logo {
+    height: 15em;
+    padding: 1.5em;
+    will-change: filter;
+    transition: filter 300ms;
+    width: auto;
+  }
+
+  .logo:hover {
+    filter: drop-shadow(0 0 2em #646cffaa);
+  }
+
+  .logo.holochain:hover {
+    filter: drop-shadow(0 0 2em #61dafbaa);
+  }
+
+  .card {
+    padding: 2em;
+  }
+
+  .read-the-docs {
+    color: #888;
+  }
+</style>

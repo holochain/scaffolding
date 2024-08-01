@@ -26,8 +26,6 @@ import WebSdk from '@holo-host/web-sdk';
 import type { AgentState } from '@holo-host/web-sdk';
 {{/if}}
 
-import "./app.css";
-
 export default {
   components: {},
   data(): {
@@ -97,3 +95,29 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+  .logo {
+    height: 15em;
+    padding: 1.5em;
+    will-change: filter;
+    transition: filter 300ms;
+    width: auto;
+  }
+
+  .logo:hover {
+    filter: drop-shadow(0 0 2em #646cffaa);
+  }
+
+  .logo.holochain:hover {
+    filter: drop-shadow(0 0 2em #61dafbaa);
+  }
+
+  .card {
+    padding: 2em;
+  }
+
+  .read-the-docs {
+    color: #888;
+  }
+</style>

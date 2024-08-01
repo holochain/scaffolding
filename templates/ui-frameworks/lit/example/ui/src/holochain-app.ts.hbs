@@ -1,4 +1,4 @@
-import { LitElement, css, html } from 'lit';
+import { LitElement, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { AppClient, AppWebsocket } from '@holochain/client';
 import { provide } from '@lit-labs/context';
@@ -8,7 +8,6 @@ import { clientContext } from './contexts';
 import './forum/posts/all-posts';
 import './forum/posts/create-post';
 
-import './app.css';
 import './index.css';
 
 @customElement('holochain-app')
