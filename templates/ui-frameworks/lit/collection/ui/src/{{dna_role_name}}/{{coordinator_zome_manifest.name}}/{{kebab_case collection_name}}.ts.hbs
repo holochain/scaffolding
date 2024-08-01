@@ -56,9 +56,12 @@ export class {{pascal_case collection_name}} extends LitElement {
 
     return html`
       <div>
-        ${hashes.map(hash =>
-          html`<{{kebab_case referenceable.name}}-detail.{{camel_case referenceable.name}}Hash=${hash} style="margin-bottom: 16px;" @{{kebab_case referenceable.name}}-deleted=${() => { this._fetch{{pascal_case (plural referenceable.name)}}.run(); this.signaledHashes = []; } }></{{kebab_case referenceable.name}}-detail>`
-        )}
+        ${hashes.map(hash => html`
+          <{{kebab_case referenceable.name}}-detail
+            .{{camel_case referenceable.name}}Hash=${hash}
+            @{{kebab_case referenceable.name}}-deleted=${() => { this._fetch{{pascal_case (plural referenceable.name)}}.run(); this.signaledHashes = []; } }
+          ></{{kebab_case referenceable.name}}-detail>
+        `)}
       </div>
     `;
   }

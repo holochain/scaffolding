@@ -48,9 +48,12 @@ export class {{pascal_case (plural ../entry_type.name)}}For{{pascal_case linked_
 
     return html`
       <div>
-        ${hashes.map(hash =>
-          html`<{{kebab_case ../entry_type.name}}-detail .{{camel_case ../entry_type.name}}Hash=${hash} @{{kebab_case ../entry_type.name}}-deleted=${() => { this._fetch{{pascal_case (plural ../entry_type.name)}}.run(); this.hashes = []; } }></{{kebab_case ../entry_type.name}}-detail>`
-        )}
+        ${hashes.map(hash => html`
+          <{{kebab_case ../entry_type.name}}-detail
+            .{{camel_case ../entry_type.name}}Hash=${hash}
+            @{{kebab_case ../entry_type.name}}-deleted=${() => { this._fetch{{pascal_case (plural ../entry_type.name)}}.run(); this.hashes = []; } }
+          ></{{kebab_case ../entry_type.name}}-detail>
+        `)}
       </div>
     `;
   }

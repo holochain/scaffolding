@@ -140,18 +140,14 @@ export class Edit{{pascal_case entry_type.name}} extends LitElement {
 {{/each}}
 
         <div>
-          <button
-            @click=${() => this.dispatchEvent(new CustomEvent('edit-canceled', {
+          <button @click=${() => this.dispatchEvent(new CustomEvent('edit-canceled', {
               bubbles: true,
               composed: true
             }))}
           >
             Cancel
           </button>
-          <button
-            .disabled=${!this.is{{pascal_case entry_type.name}}Valid()}
-            @click=${() => this.update{{pascal_case entry_type.name}}()}
-          >
+          <button .disabled=${!this.is{{pascal_case entry_type.name}}Valid()} @click=${() => this.update{{pascal_case entry_type.name}}()}>
             Save
           </button>
         </div>
