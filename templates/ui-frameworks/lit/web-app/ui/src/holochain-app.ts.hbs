@@ -1,4 +1,4 @@
-import { LitElement, css, html } from 'lit';
+import { LitElement, css, html, unsafeCSS } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { AppWebsocket, ActionHash, AppClient, HolochainError } from '@holochain/client';
 {{#if holo_enabled}}
@@ -8,9 +8,9 @@ import type { AgentState } from '@holo-host/web-sdk';
 import { provide } from '@lit-labs/context';
 
 import HolochainLogo from "./assets/holochainLogo.svg";
-import { clientContext } from './contexts';
+import globalStyles from './index.css'
 
-import './index.css';
+import { clientContext } from './contexts';
 
 {{#if holo_enabled}}
 const IS_HOLO = ['true', '1', 't'].includes(import.meta.env.VITE_APP_IS_HOLO?.toLowerCase())
@@ -98,6 +98,8 @@ export class HolochainApp extends LitElement {
   }
 
   static styles = css`
+    ${unsafeCSS(globalStyles)}
+
     .logo {
       height: 15em;
       padding: 1.5em;

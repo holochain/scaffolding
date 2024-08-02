@@ -1,4 +1,4 @@
-import { LitElement, html } from 'lit';
+import { LitElement, html, css, unsafeCSS } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { AppClient, AppWebsocket } from '@holochain/client';
 import { provide } from '@lit-labs/context';
@@ -39,4 +39,6 @@ export class HolochainApp extends LitElement {
       </div>
     `;
   }
+
+  static styles = css`${unsafeCSS(globalStyles)}`;
 }
