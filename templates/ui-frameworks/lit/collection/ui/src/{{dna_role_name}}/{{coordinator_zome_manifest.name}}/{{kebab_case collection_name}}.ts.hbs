@@ -1,9 +1,10 @@
-import { LitElement, html } from 'lit';
+import { LitElement, html, css, unsafeCSS } from 'lit';
 import { state, customElement, property } from 'lit/decorators.js';
 import { AppClient, AgentPubKey, Link, EntryHash, ActionHash, Record, NewEntryAction } from '@holochain/client';
 import { consume } from '@lit-labs/context';
 import { Task } from '@lit-labs/task';
 
+import globalStyles from '../../index.css';
 import { clientContext } from '../../contexts';
 import { {{pascal_case coordinator_zome_manifest.name}}Signal } from './types';
 
@@ -73,4 +74,6 @@ export class {{pascal_case collection_name}} extends LitElement {
       error: (e: any) => html`<article>Error fetching the {{lower_case (plural referenceable.name)}}: ${e.message}.</article>`
     });
   }
+
+  static styles = css`${unsafeCSS(globalStyles)}`;
 }

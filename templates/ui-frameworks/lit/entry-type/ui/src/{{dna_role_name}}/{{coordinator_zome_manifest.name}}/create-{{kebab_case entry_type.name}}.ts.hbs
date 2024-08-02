@@ -1,4 +1,4 @@
-import { LitElement, html } from 'lit';
+import { LitElement, html, css, unsafeCSS } from 'lit';
 import { state, customElement, property } from 'lit/decorators.js';
 import { InstalledCell, ActionHash, Record, AgentPubKey, EntryHash, AppClient, DnaHash, HolochainError } from '@holochain/client';
 import { consume } from '@lit-labs/context';
@@ -11,6 +11,7 @@ import { consume } from '@lit-labs/context';
   {{/each}}
 {{/uniq_lines}}
 
+import globalStyles from '../../index.css';
 import { clientContext } from '../../contexts';
 import { {{pascal_case entry_type.name}}{{#each entry_type.fields}}{{#if (eq field_type.type "Enum")}}, {{field_type.label}}{{/if}}{{/each}} } from './types';
 
@@ -125,4 +126,6 @@ export class Create{{pascal_case entry_type.name}} extends LitElement {
       </div>
     `;
   }
+
+  static styles = css`${unsafeCSS(globalStyles)}`;
 }

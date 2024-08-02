@@ -7,9 +7,8 @@ import type { AgentState } from '@holo-host/web-sdk';
 {{/if}}
 import { provide } from '@lit-labs/context';
 
-import HolochainLogo from "./assets/holochainLogo.svg";
 import globalStyles from './index.css'
-
+import HolochainLogo from "./assets/holochainLogo.svg";
 import { clientContext } from './contexts';
 
 {{#if holo_enabled}}
@@ -73,7 +72,6 @@ export class HolochainApp extends LitElement {
 
   render() {
     if (this.loading) return html`<progress></progress>`;
-
     return html`
       <div>
         <div>
