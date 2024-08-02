@@ -1,6 +1,8 @@
 <label for="{{label}}">{{label}}:</label>
-<select name="{{label}}" @change=${ (e: CustomEvent) => { {{variable_to_change}} = e.target.value; } }>
+<select name="{{label}}" @change=${ (e: any) => { {{variable_to_change}} = e.target.value; } }>
 {{#each field_type.variants}}
-  <option ?selected=${ {{../variable_to_read}}.type === '{{pascal_case this}}' } value=${ {{this}} }>{{title_case this}}</option>
+  <option ?selected=${ {{../variable_to_read}}.type === '{{pascal_case this}}' } value=${ {{this}} }>
+    {{title_case this}}
+  </option>
 {{/each}}
 </select>
