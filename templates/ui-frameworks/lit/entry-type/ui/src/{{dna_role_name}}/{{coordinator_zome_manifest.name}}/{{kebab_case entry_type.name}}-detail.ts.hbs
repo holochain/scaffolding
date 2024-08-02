@@ -102,8 +102,8 @@ export class {{pascal_case entry_type.name}}Detail extends LitElement {
     `;
   }
 
-  render{{pascal_case entry_type.name}}(maybeRecord: Record | undefined) {
-    if (!maybeRecord) return html`<article>The requested {{lower_case entry_type.name}} was not found.</article>`;
+  render{{pascal_case entry_type.name}}(record: Record | undefined) {
+    if (!record) return html`<article>The requested {{lower_case entry_type.name}} was not found.</article>`;
     {{#if crud.update}}
     if (this._editing) {
     	return html`
@@ -111,7 +111,7 @@ export class {{pascal_case entry_type.name}}Detail extends LitElement {
         {{#if link_from_original_to_each_update}}
           .original{{pascal_case entry_type.name}}Hash=${this.{{camel_case entry_type.name}}Hash}
         {{/if}}
-          .currentRecord=${maybeRecord}
+          .currentRecord=${record}
           @{{kebab_case entry_type.name}}-updated=${async () => {
             this._editing = false;
             await this._fetchRecord.run();
@@ -121,13 +121,13 @@ export class {{pascal_case entry_type.name}}Detail extends LitElement {
       `;
     }
     {{/if}}
-    return this.renderDetail(maybeRecord);
+    return this.renderDetail(record);
   }
 
   render() {
     return this._fetchRecord.render({
       pending: () => html`<progress></progress>`,
-      complete: (maybeRecord) => this.render{{pascal_case entry_type.name}}(maybeRecord),
+      complete: (record) => this.render{{pascal_case entry_type.name}}(record),
       error: (e: any) => html`<article>Error fetching the {{lower_case entry_type.name}}: ${e.message}</article>`
     });
   }

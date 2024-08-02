@@ -46,7 +46,7 @@ export class {{pascal_case entry_type.name}}Detail extends LitElement {
   @state()
   _editing = false;
   {{/if}}
-  
+
   firstUpdated() {
     if (this.{{camel_case entry_type.name}}Hash === undefined) {
       throw new Error(`The {{camel_case entry_type.name}}Hash property is required for the {{kebab_case entry_type.name}}-detail element`);
@@ -90,7 +90,7 @@ export class {{pascal_case entry_type.name}}Detail extends LitElement {
       <div style="display: flex; flex-direction: column">
       	<div style="display: flex; flex-direction: row">
       	  <span style="flex: 1"></span>
-      	
+
           {{#if crud.update}}
           <mwc-icon-button style="margin-left: 8px" icon="edit" @click=${() => { this._editing = true; } }></mwc-icon-button>
           {{/if}}
@@ -100,7 +100,7 @@ export class {{pascal_case entry_type.name}}Detail extends LitElement {
         </div>
 
 {{#each entry_type.fields}}
-  {{#if widget}}	  
+  {{#if widget}}
     {{#if (not (eq cardinality "vector") )}}
         <div style="display: flex; flex-direction: row; margin-bottom: 16px">
 	  <span style="margin-right: 4px"><strong>{{title_case field_name}}: </strong></span>
@@ -115,17 +115,17 @@ export class {{pascal_case entry_type.name}}Detail extends LitElement {
       </div>
     `;
   }
-  
-  render{{pascal_case entry_type.name}}(maybeRecord: Record | undefined) {
-    if (!maybeRecord) return html`<span>The requested {{lower_case entry_type.name}} was not found.</span>`;
-    
+
+  render{{pascal_case entry_type.name}}(record: Record | undefined) {
+    if (!record) return html`<span>The requested {{lower_case entry_type.name}} was not found.</span>`;
+
     {{#if crud.update}}
     if (this._editing) {
     	return html`<edit-{{kebab_case entry_type.name}}
           {{#if link_from_original_to_each_update}}
     	  .original{{pascal_case entry_type.name}}Hash=${this.{{camel_case entry_type.name}}Hash}
     	  {{/if}}
-    	  .currentRecord=${maybeRecord}
+    	  .currentRecord=${record}
     	  @{{kebab_case entry_type.name}}-updated=${async () => {
     	    this._editing = false;
     	    await this._fetchRecord.run();
@@ -136,7 +136,7 @@ export class {{pascal_case entry_type.name}}Detail extends LitElement {
     }
 
     {{/if}}
-    return this.renderDetail(maybeRecord);
+    return this.renderDetail(record);
   }
 
   render() {
@@ -144,7 +144,7 @@ export class {{pascal_case entry_type.name}}Detail extends LitElement {
       pending: () => html`<div style="display: flex; flex: 1; align-items: center; justify-content: center">
         <mwc-circular-progress indeterminate></mwc-circular-progress>
       </div>`,
-      complete: (maybeRecord) => this.render{{pascal_case entry_type.name}}(maybeRecord),
+      complete: (record) => this.render{{pascal_case entry_type.name}}(record),
       error: (e: any) => html`<span>Error fetching the {{lower_case entry_type.name}}: ${e.message}</span>`
     });
   }
