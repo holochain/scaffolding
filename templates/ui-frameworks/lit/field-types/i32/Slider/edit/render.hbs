@@ -1,7 +1,23 @@
 <label for="{{label}}">{{label}}</label>
+{{#if (eq cardinality "vector")}}
+<input
+  .key=${ {{key}} }
+  name="{{label}}"
+  type="range"
+  .value=${ {{variable_to_read}} }
+  @change=${(e: any) => {
+    {{variable_to_change}} = {{variable_to_change}}.map((v, idx) => {
+      if ({{key}} == idx) {
+        v = e.target.value;
+      }
+      return v;
+  } }
+>
+{{else}}
 <input
   name="{{label}}"
   type="range"
   .value=${ {{variable_to_read}} }
   @change=${(e: any) => { {{variable_to_change}} = e.detail.value; } }
 >
+{{/if}}
