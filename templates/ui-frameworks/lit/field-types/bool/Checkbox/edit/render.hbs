@@ -6,8 +6,8 @@
   name="{{label}}"
   .checked=${ {{variable_to_read}} }
   @change=${(e: CustomEvent) => {
-    {{variable_to_change}} = {{variable_to_change}}.map((v, idx) => {
-      if ({{key}} == idx) {
+    this._{{variable_to_change}} = this._{{variable_to_change}}.map((v, idx) => {
+      if ({{key}} === idx) {
         v = (e.target as any).checked;
       }
       return v;

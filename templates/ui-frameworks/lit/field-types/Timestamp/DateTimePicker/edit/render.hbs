@@ -8,8 +8,8 @@
   value=${new Date({{variable_to_read}} / 1000 - (new Date({{variable_to_read}} / 1000).getTimezoneOffset() * 60000)).toISOString().slice(0, 16)}
   {{/if}}
   @change=${(e: any) => {
-     {{variable_to_change}} = {{variable_to_change}}.map((v, idx) => {
-      if ({{key}} == idx) {
+     this._{{variable_to_change}} = this._{{variable_to_change}}.map((v, idx) => {
+      if ({{key}} === idx) {
         v = Math.floor(new Date(e.target.value).getTime() * 1000);
       }
       return v;
