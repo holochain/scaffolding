@@ -26,6 +26,9 @@
   {{#if variable_to_read}}
   value={new Date({{variable_to_read}}! / 1000 - (new Date({{variable_to_read}}! / 1000).getTimezoneOffset() * 60000)).toISOString().slice(0, 16)}
   {{/if}}
-  onChange={(e) => set{{pascal_case variable_to_change}}(Math.floor(new Date(e.target.value).getTime() / 1000))} {{#if required}}required{{/if}}
+  onChange={(e) => set{{pascal_case variable_to_change}}(Math.floor(new Date(e.target.value).getTime() / 1000))}
+  {{#if required}}
+  required
+  {{/if}}
 />
 {{/if}}
