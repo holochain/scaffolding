@@ -26,13 +26,12 @@
 
     <script type="module">
       import { AppWebsocket } from '@holochain/client';
-      
+
       async function connect() {
         const AppWebsocket = await AppWebsocket.connect();
-        
         alert("Connected to holochain!");
       }
-      
+
       connect().catch(console.error);
     </script>
   </body>
