@@ -1,9 +1,0 @@
-<h4>{{title_case field_name}}</h4>
-{ {{camel_case field_name}}?.map((value, i) => (
-  <div key={i}>
-    {{> (concat field_type.type "/" widget "/edit/render") label=(pascal_case field_name) variable_to_read="value" variable_to_change=(camel_case field_name) key="i" }}
-  </div>
-))}
-<button onClick={() => set{{pascal_case field_name}}(prevValues => [...prevValues!, {{> (concat field_type.type "/" widget "/initial-value") field_type=field_type}}])}>
-  Add {{title_case field_name}}
-</button>

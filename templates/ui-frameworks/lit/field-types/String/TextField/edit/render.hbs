@@ -1,24 +1,4 @@
 <label for="{{label}}">{{label}}</label>
-{{#if (eq cardinality "vector")}}
-<input
-  .key=${ {{key}} }
-  name="{{label}}"
-  {{#if variable_to_read}}
-  .value=${ {{variable_to_read}}{{#if (not required)}} || ''{{/if}} }
-  {{/if}}
-  @change=${(e: CustomEvent) => {
-    this._{{variable_to_change}} = this._{{variable_to_change}}.map((v, idx) => {
-      if ({{key}} === idx) {
-        v = (e.target as any).value;
-      }
-      return v;
-    });
-  } }
-  {{#if required}}
-  required
-  {{/if}}
->
-{{else}}
 <input
   name="{{label}}"
   {{#if variable_to_read}}
@@ -29,4 +9,3 @@
   required
   {{/if}}
 >
-{{/if}}

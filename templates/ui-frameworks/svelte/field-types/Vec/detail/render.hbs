@@ -1,6 +1,0 @@
-<div>
-  <h4>{{title_case field_name}}</h4>
-  {#each {{variable_to_read}} as el}
-    <p>{{> (concat field_type.type "/" widget "/detail/render") variable_to_read="el"}}</p>
-  {/each}
-</div>
