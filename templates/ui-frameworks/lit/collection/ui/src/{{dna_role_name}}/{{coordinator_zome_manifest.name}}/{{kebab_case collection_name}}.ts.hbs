@@ -40,7 +40,7 @@ export class {{pascal_case collection_name}} extends LitElement {
     }
 {{/if}}
 
-    this.client.on('signal', signal => {
+    this.client?.on('signal', signal => {
       if (signal.zome_name !== '{{coordinator_zome_manifest.name}}') return;
       const payload = signal.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;
       if (payload.type !== 'EntryCreated') return;

@@ -5,5 +5,5 @@ ${this._{{camel_case field_name}}.map(
 )}
 
 <button  @click=${() => { this._{{camel_case field_name}} = [...this._{{camel_case field_name}}, {{> (concat field_type.type "/" widget "/initial-value") field_type=field_type}}]; } }>
-  {{title_case field_name}}
+  Add {{title_case field_name}}
 </button>
