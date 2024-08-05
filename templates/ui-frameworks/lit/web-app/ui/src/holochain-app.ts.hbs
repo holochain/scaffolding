@@ -7,7 +7,7 @@ import type { AgentState } from '@holo-host/web-sdk';
 {{/if}}
 import { provide } from '@lit-labs/context';
 
-import globalStyles from './index.css'
+import sharedStyles from './index.css'
 import HolochainLogo from "./assets/holochainLogo.svg";
 import { clientContext } from './contexts';
 
@@ -96,7 +96,7 @@ export class HolochainApp extends LitElement {
   }
 
   static styles = css`
-    ${unsafeCSS(globalStyles)}
+    ${unsafeCSS(sharedStyles)}
 
     .logo {
       height: 15em;

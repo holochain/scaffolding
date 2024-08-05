@@ -3,7 +3,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { AppClient, AppWebsocket } from '@holochain/client';
 import { provide } from '@lit-labs/context';
 
-import globalStyles from './index.css';
+import sharedStyles from './index.css';
 import { clientContext } from './contexts';
 
 import './forum/posts/all-posts';
@@ -39,5 +39,5 @@ export class HolochainApp extends LitElement {
     `;
   }
 
-  static styles = css`${unsafeCSS(globalStyles)}`;
+  static styles = css`${unsafeCSS(sharedStyles)}`;
 }

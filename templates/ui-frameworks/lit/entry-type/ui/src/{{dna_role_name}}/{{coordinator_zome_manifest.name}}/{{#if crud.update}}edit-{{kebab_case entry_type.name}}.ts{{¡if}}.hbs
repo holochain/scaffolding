@@ -12,7 +12,7 @@ import { decode } from '@msgpack/msgpack';
   {{/each}}
 {{/uniq_lines}}
 
-import globalStyles from '../../index.css';
+import sharedStyles from '../../index.css';
 import { clientContext } from '../../contexts';
 import { {{pascal_case entry_type.name}}{{#each entry_type.fields}}{{#if (eq field_type.type "Enum")}}, {{field_type.label}}{{/if}}{{/each}} } from './types';
 
@@ -156,5 +156,5 @@ export class Edit{{pascal_case entry_type.name}} extends LitElement {
     `;
   }
 
-  static styles = css`${unsafeCSS(globalStyles)}`;
+  static styles = css`${unsafeCSS(sharedStyles)}`;
 }

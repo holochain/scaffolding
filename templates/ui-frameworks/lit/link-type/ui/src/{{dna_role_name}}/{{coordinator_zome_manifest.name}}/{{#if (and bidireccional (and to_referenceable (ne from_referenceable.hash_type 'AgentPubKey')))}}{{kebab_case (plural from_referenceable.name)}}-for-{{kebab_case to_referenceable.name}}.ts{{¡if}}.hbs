@@ -4,7 +4,7 @@ import { AgentPubKey, Link, EntryHash, ActionHash, Record, AppClient, NewEntryAc
 import { consume } from '@lit-labs/context';
 import { Task } from '@lit-labs/task';
 
-import globalStyles from '../../index.css';
+import sharedStyles from '../../index.css';
 import { clientContext } from '../../contexts';
 import { {{pascal_case coordinator_zome_manifest.name}}Signal } from './types';
 
@@ -66,5 +66,5 @@ export class {{pascal_case (plural from_referenceable.name)}}For{{pascal_case to
     });
   }
 
-  static styles = css`${unsafeCSS(globalStyles)}`;
+  static styles = css`${unsafeCSS(sharedStyles)}`;
 }
