@@ -18,7 +18,7 @@ pub const HDK_VERSION: &str = holochain::HDK_VERSION;
 pub const HOLOCHAIN_VERSION: &str = holochain::HOLOCHAIN_VERSION;
 
 /// <https://github.com/holochain/holochain/tree/develop/versions>
-pub const HOLOCHAIN_NIX_VERSION: &str = "0_3_rc";
+pub const HOLOCHAIN_NIX_VERSION: &str = "0_3";
 
 /// source: <https://github.com/darksoil-studio/holochain-playground/tree/main/packages/cli/server>
 ///
