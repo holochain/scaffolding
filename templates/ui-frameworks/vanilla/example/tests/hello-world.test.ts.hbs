@@ -3,23 +3,23 @@ import { assert, test } from "vitest";
 import { runScenario, dhtSync } from '@holochain/tryorama';
 
 
-test('send hello and retrieve hellos', async () => {
+test.concurrent('send hello and retrieve hellos', async () => {
     await runScenario(async scenario => {
         // Construct proper paths for your app.
         // This assumes app bundle created by the `hc app pack` command.
         const testAppPath = process.cwd() + '/../workdir/hello-world.happ';
-    
-        // Set up the app to be installed 
+
+        // Set up the app to be installed
         const appSource = { appBundleSource: { path: testAppPath } };
-    
+
         // Add 2 players with the test app to the Scenario. The returned players
         // can be destructured.
         const [alice, beto] = await scenario.addPlayersWithApps([appSource, appSource]);
-    
+
         // Shortcut peer discovery through gossip and register all agents in every
         // conductor of the scenario.
         await scenario.shareAllAgents();
-    
+
         // Alice sends a hello
         const aliceCell = alice.cells[0]
         const resultAlice = await aliceCell.callZome({
@@ -39,7 +39,7 @@ test('send hello and retrieve hellos', async () => {
         assert.ok(resultBeto);
 
         await dhtSync([alice, beto], alice.cells[0].cell_id[0]);
-        
+
         // Alice gets all hellos
         const hellosAlice: Array<any> = await aliceCell.callZome({
           zome_name: "hello_world",
