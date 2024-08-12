@@ -1,5 +1,6 @@
 use std::str::FromStr;
 
+use colored::Colorize;
 use structopt::StructOpt;
 
 use crate::{
@@ -9,6 +10,7 @@ use crate::{
         zome::ZomeFileTree,
     },
     templates::ScaffoldedTemplate,
+    utils::run_cargo_fmt_if_available,
 };
 
 #[derive(Debug, StructOpt)]
@@ -66,6 +68,14 @@ impl LinkType {
         )?;
 
         build_file_tree(file_tree, ".")?;
+
+        if let Err(e) = run_cargo_fmt_if_available() {
+            println!(
+                "{}: {}",
+                "rustfmt exec failed: ".yellow(),
+                e.to_string().yellow()
+            );
+        }
 
         println!("\nLink type scaffolded!");
         if let Some(i) = next_instructions {
