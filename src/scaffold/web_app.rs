@@ -45,6 +45,16 @@ pub fn scaffold_web_app(
             .insert("flake.nix".into(), flake_nix(holo_enabled));
     }
 
+    if package_manager == PackageManager::Pnpm {
+        app_file_tree
+            .dir_content_mut()
+            .ok_or(ScaffoldError::PathNotFound(PathBuf::new()))?
+            .insert(
+                "pnpm-workspace.yaml".into(),
+                file!("packages:\n - ui\n - tests"),
+            );
+    }
+
     let scaffold_template_result = scaffold_web_app_template(
         app_file_tree,
         template_file_tree,
