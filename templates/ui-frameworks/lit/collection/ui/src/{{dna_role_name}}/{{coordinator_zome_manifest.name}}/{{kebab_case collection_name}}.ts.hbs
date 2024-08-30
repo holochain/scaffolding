@@ -53,7 +53,7 @@ export class {{pascal_case collection_name}} extends LitElement {
   }
 
   renderList(hashes: Array<{{referenceable.hash_type}}>) {
-    if (!hashes.length) return html`<article>No {{lower_case (plural referenceable.name)}} found{{#if (eq collection_type.type "ByAuthor")}} for this author{{/if}}.</article>`;
+    if (!hashes.length) return html`<div class="alert">No {{lower_case (plural referenceable.name)}} found{{#if (eq collection_type.type "ByAuthor")}} for this author{{/if}}.</div>`;
 
     return html`
       <div>
@@ -71,7 +71,7 @@ export class {{pascal_case collection_name}} extends LitElement {
     return this._fetch{{pascal_case (plural referenceable.name)}}.render({
       pending: () => html`<progress></progress>`,
       complete: (links) => this.renderList([...this.signaledHashes, ...links.map(l => l.target)]),
-      error: (e: any) => html`<article>Error fetching the {{lower_case (plural referenceable.name)}}: ${e.message}.</article>`
+      error: (e: any) => html`<div class="alert">Error fetching the {{lower_case (plural referenceable.name)}}: ${e.message}.</div>`
     });
   }
 

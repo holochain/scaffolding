@@ -60,9 +60,9 @@ async function fetch{{pascal_case (plural referenceable.name)}}() {
 {#if loading}
 <progress />
 {:else if error}
-<article>Error fetching the {{lower_case (plural referenceable.name)}}: {error.message}.</article>
+<div class="alert">Error fetching the {{lower_case (plural referenceable.name)}}: {error.message}.</div>
 {:else if !hashes.length}
-<article>No {{lower_case (plural referenceable.name)}} found{{#if (eq collection_type.type "ByAuthor")}} for this author{{/if}}.</article>
+<div class="alert">No {{lower_case (plural referenceable.name)}} found{{#if (eq collection_type.type "ByAuthor")}} for this author{{/if}}.</div>
 {:else}
 <div>
   {#each hashes as hash}

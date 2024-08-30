@@ -35,10 +35,10 @@
 {{/if}}
      </div>
     </section>
-    <article v-else>The requested {{lower_case entry_type.name}} was not found.</article>
+    <div class="alert" v-else>The requested {{lower_case entry_type.name}} was not found.</div>
   </div>
   <progress v-else></progress>
-  <article v-if="error">Error: {error.message}</article>
+  <div class="alert" v-if="error">Error: {error.message}</div>
 </template>
 
 <script lang="ts">

@@ -52,9 +52,9 @@ async function fetch{{pascal_case (plural ../entry_type.name)}}() {
 {#if loading }
 <progress />
 {:else if error}
-<article>Error fetching {{lower_case (plural ../entry_type.name)}}: ${error.message}.</article>
+<div class="alert">Error fetching {{lower_case (plural ../entry_type.name)}}: ${error.message}.</div>
 {:else if hashes.length === 0}
-<article>No {{lower_case (plural ../entry_type.name)}} found for this {{lower_case linked_from.name}}.</article>
+<div class="alert">No {{lower_case (plural ../entry_type.name)}} found for this {{lower_case linked_from.name}}.</div>
 {:else}
 <div>
   {#each hashes as hash}

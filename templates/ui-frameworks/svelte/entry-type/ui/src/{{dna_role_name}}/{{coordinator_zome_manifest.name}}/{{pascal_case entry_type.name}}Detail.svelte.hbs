@@ -79,7 +79,7 @@ async function delete{{pascal_case entry_type.name}}() {
 {#if loading}
 <progress />
 {:else if error}
-<article>Error fetching the {{lower_case entry_type.name}}: {error.message}</article>
+<div class="alert">Error fetching the {{lower_case entry_type.name}}: {error.message}</div>
 {{#if crud.update}}
 {:else if editing}
 <Edit{{pascal_case entry_type.name}}

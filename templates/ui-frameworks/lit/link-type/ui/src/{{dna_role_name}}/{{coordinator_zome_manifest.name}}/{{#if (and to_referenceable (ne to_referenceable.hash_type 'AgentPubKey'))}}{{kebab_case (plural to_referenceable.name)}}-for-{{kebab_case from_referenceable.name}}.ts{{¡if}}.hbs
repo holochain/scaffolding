@@ -47,7 +47,7 @@ export class {{pascal_case (plural to_referenceable.name)}}For{{pascal_case from
   }
 
   renderList(hashes: Array<{{to_referenceable.hash_type}}>) {
-    if (!hashes.length) return html`<article>No {{lower_case (plural to_referenceable.name)}} found for this {{lower_case from_referenceable.name}}</article>`;
+    if (!hashes.length) return html`<div class="alert">No {{lower_case (plural to_referenceable.name)}} found for this {{lower_case from_referenceable.name}}</div>`;
 
     return html`
       <div>
@@ -62,7 +62,7 @@ export class {{pascal_case (plural to_referenceable.name)}}For{{pascal_case from
     return this._fetch{{pascal_case (plural to_referenceable.name)}}.render({
       pending: () => html`<progress></progress>`,
       complete: (links) => this.renderList([...this.signaledHashes, ...links.map(l => l.target)]),
-      error: (e: any) => html`<article>Error fetching the {{lower_case (plural to_referenceable.name)}}: ${e.message}.</article>`
+      error: (e: any) => html`<div class="alert">Error fetching the {{lower_case (plural to_referenceable.name)}}: ${e.message}.</div>`
     });
   }
 

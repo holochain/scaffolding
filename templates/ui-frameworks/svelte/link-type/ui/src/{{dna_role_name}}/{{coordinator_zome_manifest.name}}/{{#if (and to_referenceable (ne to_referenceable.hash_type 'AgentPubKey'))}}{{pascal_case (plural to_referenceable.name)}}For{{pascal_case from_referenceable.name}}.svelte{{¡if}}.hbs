@@ -50,9 +50,9 @@ onMount(async () => {
 {#if loading }
 <progress />
 {:else if error}
-<article>Error fetching {{lower_case (plural to_referenceable.name)}}: {error.message}.</article>
+<div class="alert">Error fetching {{lower_case (plural to_referenceable.name)}}: {error.message}.</div>
 {:else if hashes.length === 0}
-<article>No {{lower_case (plural to_referenceable.name)}} found for this {{lower_case from_referenceable.name}}.</article>
+<div class="alert">No {{lower_case (plural to_referenceable.name)}} found for this {{lower_case from_referenceable.name}}.</div>
 {:else}
 <div>
   {#each hashes as hash}

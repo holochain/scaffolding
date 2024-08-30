@@ -1,7 +1,7 @@
 <template>
   <progress v-if="loading"></progress>
   <div v-else>
-    <article v-if="error">Error fetching the {{lower_case (plural from_referenceable.name)}}: {{{{raw}}}} {{error.message}}.{{{{/raw}}}}</article>
+    <div class="alert" v-if="error">Error fetching the {{lower_case (plural from_referenceable.name)}}: {{{{raw}}}} {{error.message}}.{{{{/raw}}}}</div>
     <div v-else-if="hashes && hashes.length > 0">
       <{{pascal_case from_referenceable.name}}Detail
         v-for="(hash, i) in hashes"
@@ -10,7 +10,7 @@
       >
       </{{pascal_case from_referenceable.name}}Detail>
     </div>
-    <article v-else>No {{lower_case (plural from_referenceable.name)}} found for this {{lower_case to_referenceable.name}}.</article>
+    <div class="alert" v-else>No {{lower_case (plural from_referenceable.name)}} found for this {{lower_case to_referenceable.name}}.</div>
   </div>
 </template>
 

@@ -104,7 +104,7 @@ export class {{pascal_case entry_type.name}}Detail extends LitElement {
   }
 
   render{{pascal_case entry_type.name}}(record: Record | undefined) {
-    if (!record) return html`<article>The requested {{lower_case entry_type.name}} was not found.</article>`;
+    if (!record) return html`<div class="alert">The requested {{lower_case entry_type.name}} was not found.</div>`;
     {{#if crud.update}}
     if (this._editing) {
     	return html`
@@ -129,7 +129,7 @@ export class {{pascal_case entry_type.name}}Detail extends LitElement {
     return this._fetchRecord.render({
       pending: () => html`<progress></progress>`,
       complete: (record) => this.render{{pascal_case entry_type.name}}(record),
-      error: (e: any) => html`<article>Error fetching the {{lower_case entry_type.name}}: ${e.message}</article>`
+      error: (e: any) => html`<div class="alert">Error fetching the {{lower_case entry_type.name}}: ${e.message}</div>`
     });
   }
 

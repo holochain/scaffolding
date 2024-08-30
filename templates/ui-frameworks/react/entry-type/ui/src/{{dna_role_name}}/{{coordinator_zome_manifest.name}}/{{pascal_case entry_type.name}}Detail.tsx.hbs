@@ -82,7 +82,7 @@ const {{pascal_case entry_type.name}}Detail: FC<{{pascal_case entry_type.name}}D
   }
 
   if (error) {
-    return <article>Error: {error.message}</article>
+    return <div class="alert">Error: {error.message}</div>
   }
 
   return (
@@ -126,7 +126,7 @@ const {{pascal_case entry_type.name}}Detail: FC<{{pascal_case entry_type.name}}D
           </div>
         </section>
       ) : (
-        <article>The requested {{camel_case entry_type.name}} was not found.</article>
+        <div class="alert">The requested {{camel_case entry_type.name}} was not found.</div>
       )}
     </div>
   );

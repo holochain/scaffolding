@@ -1,6 +1,6 @@
 <template>
   <progress v-if="loading"></progress>
-  <article v-if="error">Error fetching the {{lower_case (plural ../entry_type.name)}}: {{{{raw}}}} {{error}}.{{{{/raw}}}}</article>
+  <div class="alert" v-if="error">Error fetching the {{lower_case (plural ../entry_type.name)}}: {{{{raw}}}} {{error}}.{{{{/raw}}}}</div>
   <div v-else-if="hashes && hashes.length > 0">
     <{{pascal_case ../entry_type.name}}Detail
       v-for="(hash, i) in hashes"
@@ -10,7 +10,7 @@
     >
     </{{pascal_case ../entry_type.name}}Detail>
   </div>
-  <article v-else>No {{lower_case (plural ../entry_type.name)}} found for this {{lower_case linked_from.name}}.</article>
+  <div class="alert" v-else>No {{lower_case (plural ../entry_type.name)}} found for this {{lower_case linked_from.name}}.</div>
 </template>
 
 <script lang="ts">
