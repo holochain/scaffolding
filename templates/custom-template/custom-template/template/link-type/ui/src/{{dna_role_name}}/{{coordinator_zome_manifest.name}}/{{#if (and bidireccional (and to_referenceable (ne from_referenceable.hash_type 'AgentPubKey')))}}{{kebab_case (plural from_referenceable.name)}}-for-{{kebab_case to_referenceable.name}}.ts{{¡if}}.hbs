@@ -1,6 +1,6 @@
 import { LitElement, html } from 'lit';
 import { state, property, customElement } from 'lit/decorators.js';
-import { AgentPubKey, Link, EntryHash, ActionHash, Record, AppClient, NewEntryAction } from '@holochain/client';
+import { AgentPubKey, Link, EntryHash, ActionHash, Record, AppClient, NewEntryAction, SignalType } from '@holochain/client';
 import { consume } from '@lit-labs/context';
 import { Task } from '@lit-labs/task';
 import { clientContext } from '../../contexts';
@@ -13,11 +13,11 @@ import './{{kebab_case from_referenceable.name}}-detail';
 export class {{pascal_case (plural from_referenceable.name)}}For{{pascal_case to_referenceable.name}} extends LitElement {
   @consume({ context: clientContext })
   client!: AppClient;
-  
+
   @property({
     hasChanged: (newVal: {{to_referenceable.hash_type}}, oldVal: {{to_referenceable.hash_type}}) => newVal?.toString() !== oldVal?.toString()
   })
-  {{camel_case to_referenceable.singular_arg}}!: {{to_referenceable.hash_type}}; 
+  {{camel_case to_referenceable.singular_arg}}!: {{to_referenceable.hash_type}};
 
   _fetch{{pascal_case (plural from_referenceable.name)}} = new Task(this, ([{{camel_case to_referenceable.singular_arg}}]) => this.client.callZome({
       cap_secret: null,
@@ -36,8 +36,9 @@ export class {{pascal_case (plural from_referenceable.name)}}For{{pascal_case to
     }
 
     this.client.on('signal', signal => {
-      if (signal.zome_name !== '{{coordinator_zome_manifest.name}}') return;
-      const payload = signal.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;
+      if (!(SignalType.App in signal)) return
+      if (signal.App.zome_name !== '{{coordinator_zome_manifest.name}}') return;
+      const payload = signal.App.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;
       if (payload.type !== 'LinkCreated') return;
       if (payload.link_type !== '{{pascal_case bidirectional}}') return;
 
@@ -47,10 +48,10 @@ export class {{pascal_case (plural from_referenceable.name)}}For{{pascal_case to
 
   renderList(hashes: Array<{{to_referenceable.hash_type}}>) {
     if (hashes.length === 0) return html`<span>No {{lower_case (plural from_referenceable.name)}} found for this {{lower_case to_referenceable.name}}</span>`;
-    
+
     return html`
       <div style="display: flex; flex-direction: column">
-        ${hashes.map(hash => 
+        ${hashes.map(hash =>
           html`<{{kebab_case from_referenceable.name}}-detail .{{camel_case from_referenceable.name}}Hash=${hash} style="margin-bottom: 16px;"></{{kebab_case from_referenceable.name}}-detail>`
         )}
       </div>

@@ -1,6 +1,6 @@
 import { LitElement, html } from 'lit';
 import { state, customElement, property } from 'lit/decorators.js';
-import { AppClient, AgentPubKey, Link, EntryHash, ActionHash, Record, NewEntryAction } from '@holochain/client';
+import { AppClient, AgentPubKey, Link, EntryHash, ActionHash, Record, NewEntryAction, SignalType } from '@holochain/client';
 import { consume } from '@lit-labs/context';
 import { Task } from '@lit-labs/task';
 import '@material/mwc-circular-progress';
@@ -14,7 +14,7 @@ import './{{kebab_case referenceable.name}}-detail';
 export class {{pascal_case collection_name}} extends LitElement {
   @consume({ context: clientContext })
   client!: AppClient;
-  
+
 {{#if (eq collection_type.type "ByAuthor")}}
   @property({
     hasChanged: (newVal: AgentPubKey, oldVal: AgentPubKey) => newVal?.toString() !== oldVal?.toString()
@@ -24,7 +24,7 @@ export class {{pascal_case collection_name}} extends LitElement {
 
   @state()
   signaledHashes: Array<{{referenceable.hash_type}}> = [];
-  
+
   _fetch{{pascal_case (plural referenceable.name)}} = new Task(this, ([{{#if (eq collection_type.type "ByAuthor")}}author{{/if}}]) => this.client.callZome({
       cap_secret: null,
       role_name: '{{dna_role_name}}',
@@ -41,8 +41,9 @@ export class {{pascal_case collection_name}} extends LitElement {
 {{/if}}
 
     this.client.on('signal', signal => {
-      if (signal.zome_name !== '{{coordinator_zome_manifest.name}}') return; 
-      const payload = signal.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;
+      if (!(SignalType.App in signal)) return;
+      if (signal.App.zome_name !== '{{coordinator_zome_manifest.name}}') return;
+      const payload = signal.App.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;
       if (payload.type !== 'EntryCreated') return;
       if (payload.app_entry.type !== '{{pascal_case referenceable.name}}') return;
 {{#if (eq collection_type.type "ByAuthor")}}
@@ -51,14 +52,14 @@ export class {{pascal_case collection_name}} extends LitElement {
       this.signaledHashes = [{{#if (eq referenceable.hash_type "ActionHash")}}payload.action.hashed.hash{{else}}(payload.action.hashed.content as NewEntryAction).entry_hash{{/if}}, ...this.signaledHashes];
     });
   }
-  
+
   renderList(hashes: Array<{{referenceable.hash_type}}>) {
     if (hashes.length === 0) return html`<span>No {{lower_case (plural referenceable.name)}} found{{#if (eq collection_type.type "ByAuthor")}} for this author{{/if}}.</span>`;
-    
+
     return html`
 
       <div style="display: flex; flex-direction: column">
-        ${hashes.map(hash => 
+        ${hashes.map(hash =>
           html`<{{kebab_case referenceable.name}}-detail .{{camel_case referenceable.name}}Hash=${hash} style="margin-bottom: 16px;" @{{kebab_case referenceable.name}}-deleted=${() => { this._fetch{{pascal_case (plural referenceable.name)}}.run(); this.signaledHashes = []; } }></{{kebab_case referenceable.name}}-detail>`
         )}
       </div>
