@@ -1,4 +1,4 @@
-import { LitElement, html, css, unsafeCSS } from 'lit';
+import { LitElement, html } from 'lit';
 import { state, customElement, property } from 'lit/decorators.js';
 import { EntryHash, Record, ActionHash, AppClient, DnaHash, HolochainError } from '@holochain/client';
 import { consume } from '@lit-labs/context';
@@ -17,7 +17,7 @@ import { decode } from '@msgpack/msgpack';
 import './edit-{{kebab_case entry_type.name}}';
 {{/if}}
 
-import sharedStyles from '../../index.css';
+import { sharedStyles } from '../../shared-styles';
 import { clientContext } from '../../contexts';
 import { {{pascal_case entry_type.name}}{{#each entry_type.fields}}{{#if (eq field_type.type "Enum")}}, {{field_type.label}}{{/if}}{{/each}} } from './types';
 
@@ -133,5 +133,5 @@ export class {{pascal_case entry_type.name}}Detail extends LitElement {
     });
   }
 
-  static styles = css`${unsafeCSS(sharedStyles)}`;
+  static styles = sharedStyles;
 }

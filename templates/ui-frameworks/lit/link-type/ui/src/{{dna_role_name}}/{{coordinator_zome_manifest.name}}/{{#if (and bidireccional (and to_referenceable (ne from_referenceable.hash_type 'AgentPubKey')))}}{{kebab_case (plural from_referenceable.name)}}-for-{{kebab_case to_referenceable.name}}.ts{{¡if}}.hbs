@@ -1,10 +1,10 @@
-import { LitElement, html, css, unsafeCSS } from 'lit';
+import { LitElement, html } from 'lit';
 import { state, property, customElement } from 'lit/decorators.js';
 import { AgentPubKey, Link, EntryHash, ActionHash, Record, AppClient, NewEntryAction, SignalType } from '@holochain/client';
 import { consume } from '@lit-labs/context';
 import { Task } from '@lit-labs/task';
 
-import sharedStyles from '../../index.css';
+import { sharedStyles } from '../../shared-styles';
 import { clientContext } from '../../contexts';
 import { {{pascal_case coordinator_zome_manifest.name}}Signal } from './types';
 
@@ -67,5 +67,5 @@ export class {{pascal_case (plural from_referenceable.name)}}For{{pascal_case to
     });
   }
 
-  static styles = css`${unsafeCSS(sharedStyles)}`;
+  static styles = sharedStyles;
 }
