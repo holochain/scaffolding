@@ -1,6 +1,6 @@
 import { LitElement, html, css, unsafeCSS } from 'lit';
 import { state, customElement, property } from 'lit/decorators.js';
-import { AppClient, AgentPubKey, Link, EntryHash, ActionHash, Record, NewEntryAction } from '@holochain/client';
+import { AppClient, AgentPubKey, Link, EntryHash, ActionHash, Record, NewEntryAction, SignalType } from '@holochain/client';
 import { consume } from '@lit-labs/context';
 import { Task } from '@lit-labs/task';
 
@@ -40,9 +40,10 @@ export class {{pascal_case collection_name}} extends LitElement {
     }
 {{/if}}
 
-    this.client?.on('signal', signal => {
-      if (signal.zome_name !== '{{coordinator_zome_manifest.name}}') return;
-      const payload = signal.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;
+    this.client.on('signal', signal => {
+      if (!(SignalType.App in signal)) return;
+      if (signal.App.zome_name !== '{{coordinator_zome_manifest.name}}') return;
+      const payload = signal.App.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;
       if (payload.type !== 'EntryCreated') return;
       if (payload.app_entry.type !== '{{pascal_case referenceable.name}}') return;
 {{#if (eq collection_type.type "ByAuthor")}}

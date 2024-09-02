@@ -17,7 +17,8 @@
 <script lang="ts">
 import { toRaw, inject, ComputedRef } from 'vue';
 import { decode } from '@msgpack/msgpack';
-import { AppClient, Record, Link, AgentPubKey, EntryHash, ActionHash, NewEntryAction, HolochainError } from '@holochain/client';
+import { AppClient, Record, Link, AgentPubKey, EntryHash, ActionHash, NewEntryAction, HolochainError, SignalType } from '@holochain/client';
+import '@material/mwc-circular-progress';
 import {{pascal_case to_referenceable.name}}Detail from './{{pascal_case to_referenceable.name}}Detail.vue';
 import { {{pascal_case coordinator_zome_manifest.name}}Signal } from './types';
 
@@ -58,10 +59,12 @@ export default {
     } finally {
       this.loading = false;
     }
+    this.loading = false;
 
     toRaw(this.client).on('signal', signal => {
-      if (signal.zome_name !== '{{coordinator_zome_manifest.name}}') return;
-      const payload = signal.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;
+      if (!(SignalType.App in signal)) return;
+      if (signal.App.zome_name !== '{{coordinator_zome_manifest.name}}') return;
+      const payload = signal.App.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;
       if (payload.type !== 'LinkCreated') return;
       if (payload.link_type !== '{{pascal_case link_type_name}}') return;
       if (this.hashes) this.hashes.push(payload.action.hashed.content.target_address);

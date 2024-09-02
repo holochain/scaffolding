@@ -13,7 +13,7 @@ use crate::{
         zome::ZomeFileTree,
     },
     templates::ScaffoldedTemplate,
-    utils::{check_case, input_with_case},
+    utils::{check_case, input_with_case, run_cargo_fmt_if_available},
 };
 
 #[derive(Debug, StructOpt)]
@@ -75,6 +75,14 @@ impl Collection {
         )?;
 
         build_file_tree(file_tree, ".")?;
+
+        if let Err(e) = run_cargo_fmt_if_available() {
+            println!(
+                "{}: {}",
+                "rustfmt exec failed: ".yellow(),
+                e.to_string().yellow()
+            );
+        }
 
         println!("\nCollection {} scaffolded!", name.italic());
 

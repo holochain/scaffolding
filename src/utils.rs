@@ -1,6 +1,7 @@
 use std::borrow::Cow;
 use std::collections::BTreeMap;
 use std::path::Path;
+use std::process::Command;
 use std::{ffi::OsString, path::PathBuf};
 
 use anyhow::Context;
@@ -308,6 +309,20 @@ fn format_nested<'a>(
         }
     }
     Ok(Cow::Borrowed(raw))
+}
+
+/// Runs `cargo fmt` if it's available in the current Rust toolchain otherwise will exit
+/// gracefully
+pub fn run_cargo_fmt_if_available() -> ScaffoldResult<()> {
+    let cargo_fmt_available = Command::new("cargo").arg("fmt").arg("--version").output();
+
+    match cargo_fmt_available {
+        Ok(output) if output.status.success() => {
+            Command::new("cargo").arg("fmt").status()?;
+        }
+        _ => {}
+    }
+    Ok(())
 }
 
 #[cfg(test)]

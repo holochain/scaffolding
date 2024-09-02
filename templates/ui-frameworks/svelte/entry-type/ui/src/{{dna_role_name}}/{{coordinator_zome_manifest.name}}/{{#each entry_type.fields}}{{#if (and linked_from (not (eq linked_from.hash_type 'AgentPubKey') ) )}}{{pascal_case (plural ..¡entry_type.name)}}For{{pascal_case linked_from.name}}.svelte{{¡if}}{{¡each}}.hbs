@@ -1,6 +1,7 @@
 <script lang="ts">
 import { onMount, getContext } from 'svelte';
-import type { Link, ActionHash, EntryHash, AppClient, Record, AgentPubKey, NewEntryAction, HolochainError } from '@holochain/client';
+import '@material/mwc-circular-progress';
+import type { Link, ActionHash, EntryHash, AppClient, Record, AgentPubKey, NewEntryAction, HolochainError, SignalType } from '@holochain/client';
 import { clientContext } from '../../contexts';
 import type { {{pascal_case ../entry_type.name}}, {{pascal_case ../coordinator_zome_manifest.name}}Signal } from './types';
 import {{pascal_case ../entry_type.name}}Detail from './{{pascal_case ../entry_type.name}}Detail.svelte';
@@ -23,8 +24,9 @@ onMount(async () => {
   await fetch{{pascal_case (plural ../entry_type.name)}}();
 
   client.on('signal', async signal => {
-    if (signal.zome_name !== '{{../coordinator_zome_manifest.name}}') return;
-    const payload = signal.payload as {{pascal_case ../coordinator_zome_manifest.name}}Signal;
+    if (!(SignalType.App in signal)) return;
+    if (signal.App.zome_name !== '{{../coordinator_zome_manifest.name}}') return;
+    const payload = signal.App.payload as {{pascal_case ../coordinator_zome_manifest.name}}Signal;
     if (!(payload.type === 'EntryCreated' && payload.app_entry.type === '{{pascal_case ../entry_type.name}}')) return;
     await fetch{{pascal_case (plural ../entry_type.name)}}();
   });

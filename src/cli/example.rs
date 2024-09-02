@@ -27,6 +27,7 @@ use crate::{
         },
     },
     templates::{example::scaffold_example, ScaffoldedTemplate},
+    utils::run_cargo_fmt_if_available,
 };
 
 #[derive(Debug, StructOpt)]
@@ -262,6 +263,14 @@ impl Example {
         let file_tree = ScaffoldConfig::write_to_package_json(file_tree, template)?;
 
         build_file_tree(file_tree, &app_dir)?;
+
+        if let Err(e) = run_cargo_fmt_if_available() {
+            println!(
+                "{}: {}",
+                "rustfmt exec failed: ".yellow(),
+                e.to_string().yellow()
+            );
+        }
 
         // set up nix
         if let Some(true) | None = self.setup_nix {

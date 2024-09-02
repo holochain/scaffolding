@@ -17,7 +17,7 @@
 <script lang="ts">
 import { toRaw, inject, ComputedRef } from 'vue';
 import { decode } from '@msgpack/msgpack';
-import { Link, AppClient, Record, AgentPubKey, EntryHash, ActionHash, NewEntryAction, HolochainError } from '@holochain/client';
+import { Link, AppClient, Record, AgentPubKey, EntryHash, ActionHash, NewEntryAction, HolochainError, SignalType } from '@holochain/client';
 import {{pascal_case from_referenceable.name}}Detail from './{{pascal_case from_referenceable.name}}Detail.vue';
 import { {{pascal_case coordinator_zome_manifest.name}}Signal } from './types';
 
@@ -60,8 +60,9 @@ export default {
     }
 
     toRaw(this.client).on('signal', signal => {
-      if (signal.zome_name !== '{{coordinator_zome_manifest.name}}') return;
-      const payload = signal.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;
+      if (!(SignalType.App in signal)) return;
+      if (signal.App.zome_name !== '{{coordinator_zome_manifest.name}}') return;
+      const payload = signal.App.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;
       if (payload.type !== 'LinkCreated') return;
       if (payload.link_type !== '{{pascal_case bidirectional}}') return;
 

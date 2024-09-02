@@ -16,7 +16,7 @@ use crate::{
         },
     },
     templates::ScaffoldedTemplate,
-    utils::{check_case, input_with_case},
+    utils::{check_case, input_with_case, run_cargo_fmt_if_available},
 };
 
 #[derive(Debug, StructOpt)]
@@ -130,6 +130,14 @@ impl Zome {
         // FIXME: avoid cloning
         let f = file_tree.clone();
         file_tree.build(&PathBuf::from("."))?;
+
+        if let Err(e) = run_cargo_fmt_if_available() {
+            println!(
+                "{}: {}",
+                "rustfmt exec failed: ".yellow(),
+                e.to_string().yellow()
+            );
+        }
 
         // Execute cargo metadata to set up the cargo workspace in case this zome is the first crate
         exec_metadata(&f)?;

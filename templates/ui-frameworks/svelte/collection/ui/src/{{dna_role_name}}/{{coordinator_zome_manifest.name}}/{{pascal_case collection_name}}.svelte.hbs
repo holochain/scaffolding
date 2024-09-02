@@ -1,6 +1,7 @@
 <script lang="ts">
 import { onMount, getContext } from 'svelte';
-import type { EntryHash, Record, AgentPubKey, ActionHash, AppClient, NewEntryAction, HolochainError, Link } from '@holochain/client';
+import '@material/mwc-circular-progress';
+import type { EntryHash, Record, AgentPubKey, ActionHash, AppClient, NewEntryAction, HolochainError, SignalType } from '@holochain/client';
 import { clientContext } from '../../contexts';
 import {{pascal_case referenceable.name}}Detail from './{{pascal_case referenceable.name}}Detail.svelte';
 import type { {{pascal_case coordinator_zome_manifest.name}}Signal } from './types';
@@ -24,8 +25,9 @@ onMount(async () => {
   {{/if}}
   await fetch{{pascal_case (plural referenceable.name)}}();
   client.on('signal', signal => {
-    if (signal.zome_name !== '{{coordinator_zome_manifest.name}}') return;
-    const payload = signal.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;
+    if (!(SignalType.App in signal)) return;
+    if (signal.App.zome_name !== '{{coordinator_zome_manifest.name}}') return;
+    const payload = signal.App.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;
     if (payload.type !== 'EntryCreated') return;
     if (payload.app_entry.type !== '{{pascal_case referenceable.name}}') return;
 {{#if (eq collection_type.type "ByAuthor")}}
