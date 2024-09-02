@@ -6,6 +6,7 @@
   import WebSdk from '@holo-host/web-sdk'
 {{/if}}
 
+  import logo from './assets/holochainLogo.svg';
   import { clientContext } from './contexts';
 
 {{#if holo_enabled}}
@@ -65,7 +66,7 @@
   <div>
     <div>
       <a href="https://developer.holochain.org/get-started/" target="_blank">
-        <img src="./assets/holochainLogo.svg" class="logo holochain" alt="holochain logo" />
+        <img src={logo} class="logo holochain" alt="holochain logo" />
       </a>
     </div>
     <h1>Holochain Svelte hApp</h1>
