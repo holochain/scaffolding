@@ -1,4 +1,4 @@
-import { Link, AppSignal, HolochainError } from '@holochain/client';
+import { Link, SignalCb, SignalType, HolochainError } from '@holochain/client';
 import  { FC, useCallback, useState, useEffect, useContext } from 'react';
 
 import {{pascal_case ../entry_type.name}}Detail from './{{pascal_case ../entry_type.name}}Detail';
@@ -31,9 +31,10 @@ const {{pascal_case (plural ../entry_type.name)}}For{{pascal_case linked_from.na
     }
   }, [client]);
 
-  const handleSignal = useCallback(async (signal: AppSignal) => {
-    if (signal.zome_name !== '{{../coordinator_zome_manifest.name}}') return;
-    const payload = signal.payload as {{pascal_case ../coordinator_zome_manifest.name}}Signal;
+  const handleSignal: SignalCb  = useCallback(async (signal) => {
+    if (!(SignalType.App in signal)) return
+    if (signal.App.zome_name !== '{{../coordinator_zome_manifest.name}}') return;
+    const payload = signal.App.payload as {{pascal_case ../coordinator_zome_manifest.name}}Signal;
     if (!(payload.type === 'EntryCreated' && payload.app_entry.type === '{{pascal_case ../entry_type.name}}')) return;
     await fetch{{pascal_case (plural ../entry_type.name)}}();
   }, [fetch{{pascal_case (plural ../entry_type.name)}}]);
