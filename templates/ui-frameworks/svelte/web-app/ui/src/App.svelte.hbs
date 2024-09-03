@@ -64,25 +64,23 @@
 
 <main>
   <div>
-    <div>
-      <a href="https://developer.holochain.org/get-started/" target="_blank">
-        <img src={logo} class="logo holochain" alt="holochain logo" />
-      </a>
+    <a href="https://developer.holochain.org/get-started/" target="_blank">
+      <img src={logo} class="logo holochain" alt="holochain logo" />
+    </a>
+  </div>
+  <h1>Holochain Svelte hApp</h1>
+  <div>
+    <div class="card">
+      {#if loading}
+      <p>connecting...</p>
+      {:else if error}
+      <p>{error.message}</p>
+      {:else}
+      <p>Client is connected.</p>
+      {/if}
     </div>
-    <h1>Holochain Svelte hApp</h1>
-    <div>
-      <div class="card">
-        {#if loading}
-        <p>connecting...</p>
-        {:else if error}
-        <p>{{ error.message }}</p>
-        {:else}
-        <p>Client is connected.</p>
-        {/if}
-      </div>
-      <p>Import scaffolded components into <code>src/App.svelte</code> to use your hApp</p>
-      <p class="read-the-docs">Click on the Holochain logo to learn more</p>
-    </div>
+    <p>Import scaffolded components into <code>src/App.svelte</code> to use your hApp</p>
+    <p class="read-the-docs">Click on the Holochain logo to learn more</p>
   </div>
 </main>
 

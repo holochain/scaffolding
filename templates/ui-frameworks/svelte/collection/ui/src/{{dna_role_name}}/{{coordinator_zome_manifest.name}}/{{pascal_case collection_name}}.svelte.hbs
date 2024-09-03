@@ -1,7 +1,16 @@
 <script lang="ts">
 import { onMount, getContext } from 'svelte';
-import '@material/mwc-circular-progress';
-import type { EntryHash, Record, AgentPubKey, ActionHash, AppClient, NewEntryAction, HolochainError, SignalType } from '@holochain/client';
+import {
+  EntryHash,
+  Record,
+  AgentPubKey,
+  ActionHash,
+  Link,
+  AppClient,
+  NewEntryAction,
+  HolochainError,
+  SignalType,
+} from '@holochain/client';
 import { clientContext } from '../../contexts';
 import {{pascal_case referenceable.name}}Detail from './{{pascal_case referenceable.name}}Detail.svelte';
 import type { {{pascal_case coordinator_zome_manifest.name}}Signal } from './types';
