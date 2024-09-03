@@ -52,32 +52,6 @@
         perSystem = { inputs', self', config, system, pkgs, lib, ... }: {
           formatter = pkgs.nixpkgs-fmt;
 
-          devShells.default = pkgs.mkShell {
-            inputsFrom = [ inputs'.holonix.devShells ];
-
-            packages = (with inputs'.holonix.packages; [
-              holochain
-              lair-keystore
-              hc-launch
-              hn-introspect
-              rust # For Rust development, with the WASM target included for zome builds
-            ]) ++ (with pkgs; [
-              nodejs_20
-              binaryen
-            ]);
-
-            shellHook = ''
-              export PS1='\[\033[1;34m\][holonix:\w]\$\[\033[0m\] '
-            '';
-          };
-
-          devShells.ci = pkgs.mkShell {
-            inputsFrom = [ self'.devShells.default ];
-            packages = (with inputs'.holonix.packages; [
-              hc-scaffold
-            ]);
-          };
-
           packages.hc-scaffold =
             let
               pkgs = import nixpkgs {
@@ -87,11 +61,30 @@
               rustToolchain = pkgs.rust-bin.stable."1.79.0".minimal;
               craneLib = (crane.mkLib pkgs).overrideToolchain rustToolchain;
               crateInfo = craneLib.crateNameFromCargoToml { cargoToml = ./Cargo.toml; };
+
+              # source filtering to ensure builds using include_str! or include_bytes! succeed
+              # https://crane.dev/faq/building-with-non-rust-includes.html
+              excludedDirs = [
+                ".git"
+                "target"
+                "result"
+                # Add more directories to exclude here
+              ];
+              scaffoldFilter = path: type:
+                let
+                  baseName = baseNameOf path;
+                  isExcluded = builtins.elem baseName excludedDirs;
+                in
+                  !(type == "directory" && isExcluded);
             in
             craneLib.buildPackage {
               pname = "hc-scaffold";
               version = crateInfo.version;
-              src = craneLib.cleanCargoSource (craneLib.path ./.);
+              src = lib.cleanSourceWith {
+                src = ./.;
+                filter = scaffoldFilter;
+                name = "source";
+              };
               doCheck = false;
 
               buildInputs = [ pkgs.openssl pkgs.go ]
@@ -117,6 +110,34 @@
           checks.custom-template = flake.lib.wrapCustomTemplate {
             inherit pkgs system;
             customTemplatePath = ./templates/custom-template/custom-template;
+          };
+
+          devShells.default = pkgs.mkShell {
+            inputsFrom = [ inputs'.holonix.devShells ];
+
+            packages = (with inputs'.holonix.packages; [
+              holochain
+              lair-keystore
+              hc-launch
+              hn-introspect
+              rust
+            ]) ++ (with pkgs; [
+              nodejs_20
+              binaryen
+            ]) ++ [
+              self'.packages.hc-scaffold
+            ];
+
+            shellHook = ''
+              export PS1='\[\033[1;34m\][holonix:\w]\$\[\033[0m\] '
+            '';
+          };
+
+          devShells.ci = pkgs.mkShell {
+            inputsFrom = [ self'.devShells.default ];
+            packages = [
+              self'.packages.hc-scaffold
+            ];
           };
         };
       };
