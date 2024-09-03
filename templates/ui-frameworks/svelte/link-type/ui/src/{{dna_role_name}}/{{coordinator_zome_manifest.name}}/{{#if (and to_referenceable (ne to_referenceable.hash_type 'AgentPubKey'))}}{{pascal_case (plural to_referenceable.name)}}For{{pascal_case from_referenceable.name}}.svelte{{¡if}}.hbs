@@ -1,6 +1,6 @@
 <script lang="ts">
 import { onMount, getContext } from 'svelte';
-import {
+import type {
   Link,
   Record,
   EntryHash,
@@ -9,8 +9,8 @@ import {
   AppClient,
   NewEntryAction,
   HolochainError,
-  SignalType,
 } from '@holochain/client';
+import { SignalType } from '@holochain/client';
 import { clientContext } from '../../contexts';
 import {{pascal_case to_referenceable.name}}Detail from './{{pascal_case to_referenceable.name}}Detail.svelte';
 import type { {{pascal_case coordinator_zome_manifest.name}}Signal } from './types';
