@@ -2,11 +2,11 @@
   "nodes": {
     "crane": {
       "locked": {
-        "lastModified": 1725125250,
-        "narHash": "sha256-CB20rDD5eHikF6mMTTJdwPP1qvyoiyyw1RDUzwIaIF8=",
+        "lastModified": 1725409566,
+        "narHash": "sha256-PrtLmqhM6UtJP7v7IGyzjBFhbG4eOAHT6LPYOFmYfbk=",
         "owner": "ipetkov",
         "repo": "crane",
-        "rev": "96fd12c7100e9e05fa1a0a5bd108525600ce282f",
+        "rev": "7e4586bad4e3f8f97a9271def747cf58c4b68f3c",
         "type": "github"
       },
       "original": {
@@ -85,16 +85,16 @@
     "holochain": {
       "flake": false,
       "locked": {
-        "lastModified": 1724806844,
-        "narHash": "sha256-O2+EB0mK8MCiM2avQ+dHAA9El4iBjdJ6RTUjK4UWlqU=",
+        "lastModified": 1725412221,
+        "narHash": "sha256-ZCnQPbKLfcPzfuQHKLDKMEMrPJTcXDs+p1ENdNpQhgs=",
         "owner": "holochain",
         "repo": "holochain",
-        "rev": "c5050c4c7b8d2d4015c9ec0c11936f608fdef42d",
+        "rev": "3bfd4b9aaa741c188cb06c257800fa0e0cf5f8e4",
         "type": "github"
       },
       "original": {
         "owner": "holochain",
-        "ref": "holochain-0.4.0-dev.21",
+        "ref": "holochain-0.4.0-dev.22",
         "repo": "holochain",
         "type": "github"
       }
@@ -111,11 +111,11 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "lastModified": 1725284592,
-        "narHash": "sha256-3IxjsTq4Pasy0gt6rtaRfuG0BgZwUnix2cW85EfoEr0=",
+        "lastModified": 1725455839,
+        "narHash": "sha256-KKXP92XRvajV5tdes8fL7nJ7bsxuuX8cBPvoYYtoFhM=",
         "owner": "holochain",
         "repo": "holonix",
-        "rev": "029e93ba2d9e0d3f539e305c55056db8c90c59e4",
+        "rev": "732113eb73cb98f0c08c64d0aa641774dd7ae079",
         "type": "github"
       },
       "original": {
@@ -214,11 +214,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1725330199,
-        "narHash": "sha256-oUkdPJIxP3r3YyVOBLkDVLIJiQV9YlrVqA+jNcdpCvM=",
+        "lastModified": 1725416653,
+        "narHash": "sha256-iNBv7ILlZI6ubhW0ExYy8YgiLKUerudxY7n8R5UQK2E=",
         "owner": "oxalica",
         "repo": "rust-overlay",
-        "rev": "a562172c72d00350f9f2ff830e6515b6e7bee6d5",
+        "rev": "e5d3f9c2f24d852cddc79716daf0f65ce8468b28",
         "type": "github"
       },
       "original": {
