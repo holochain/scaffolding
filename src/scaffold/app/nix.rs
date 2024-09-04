@@ -51,7 +51,7 @@ pub fn flake_nix(holo_enabled: bool) -> FileTree {
         ]) ++ (with pkgs; [
           nodejs_20
           nodePackages.pnpm
-          yarn
+          yarn-berry
           bun
           binaryen
           {}
