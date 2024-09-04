@@ -51,7 +51,7 @@ const {{pascal_case (plural to_referenceable.name)}}For{{pascal_case from_refere
   return (
     <div>
       {error ? (
-        <article>Error fetching {{lower_case (plural to_referenceable.name)}}: {error.message}</article>
+        <div className="alert">Error fetching {{lower_case (plural to_referenceable.name)}}: {error.message}</div>
       ) : hashes.length > 0 ? (
         <div>
           {hashes.map((hash, i) => (
@@ -59,7 +59,7 @@ const {{pascal_case (plural to_referenceable.name)}}For{{pascal_case from_refere
           ))}
         </div>
       ) : (
-        <article>No {{lower_case (plural to_referenceable.name)}} found for this {{lower_case from_referenceable.name}}.</article>
+        <div className="alert">No {{lower_case (plural to_referenceable.name)}} found for this {{lower_case from_referenceable.name}}.</div>
       )}
     </div>
   );

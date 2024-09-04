@@ -1,11 +1,8 @@
 <script lang="ts">
 import { createEventDispatcher, getContext, onMount } from 'svelte';
-import type { AppClient, Record, EntryHash, AgentPubKey, ActionHash, DnaHash } from '@holochain/client';
+import type { AppClient, Record, EntryHash, AgentPubKey, ActionHash, DnaHash, HolochainError } from '@holochain/client';
 import { clientContext } from '../../contexts';
 import type { {{pascal_case entry_type.name}}{{#each entry_type.fields}}{{#if (eq field_type.type "Enum")}}, {{field_type.label}}{{/if}}{{/each}} } from './types';
-import '@material/mwc-button';
-import '@material/mwc-snackbar';
-import type { Snackbar } from '@material/mwc-snackbar';
 {{#uniq_lines}}
   {{#each entry_type.fields}}
     {{#if widget}}
@@ -15,21 +12,8 @@ import type { Snackbar } from '@material/mwc-snackbar';
   {{/each}}
 {{/uniq_lines}}
 
-let client: AppClient = (getContext(clientContext) as any).getClient();
-
 const dispatch = createEventDispatcher();
-
-{{#each entry_type.fields}}
-  {{#if (not widget) }}
-    {{#if (eq cardinality "vector")}}
-export let {{camel_case field_name}}!: Array<{{> (concat field_type.type "/type") }}>;
-
-    {{else}}
-export let {{camel_case field_name}}{{#if (eq cardinality "single")}}!{{/if}}: {{> (concat field_type.type "/type") }}{{#if (eq cardinality "option")}} | undefined{{/if}};
-
-    {{/if}}
-  {{/if}}
-{{/each}}
+const client: AppClient = (getContext(clientContext) as any).getClient();
 
 {{#each entry_type.fields}}
   {{#if widget }}
@@ -41,7 +25,15 @@ let {{camel_case field_name}}: Array<{{> (concat field_type.type "/type")}}> = [
   {{/if}}
 {{/each}}
 
-let errorSnackbar: Snackbar;
+{{#each entry_type.fields}}
+  {{#if (not widget) }}
+    {{#if (eq cardinality "vector")}}
+export let {{camel_case field_name}}!: Array<{{> (concat field_type.type "/type") }}>;
+    {{else}}
+export let {{camel_case field_name}}{{#if (eq cardinality "single")}}!{{/if}}: {{> (concat field_type.type "/type") }}{{#if (eq cardinality "option")}} | undefined{{/if}};
+    {{/if}}
+  {{/if}}
+{{/each}}
 
 $: {{#each entry_type.fields}}{{camel_case field_name}}{{#unless @last}}, {{/unless}}{{/each}};
 $: is{{pascal_case entry_type.name}}Valid = true{{#each entry_type.fields}}{{#if widget}}{{#if (eq cardinality "single")}} && {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate=(camel_case field_name) }}{{/if}}{{#if (eq cardinality "vector")}} && {{camel_case field_name}}.every(e => {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate="e" }}){{/if}}{{/if}}{{/each}};
@@ -58,13 +50,13 @@ onMount(() => {
 {{/each}}
 });
 
-async function create{{pascal_case entry_type.name}}() {  
-  const {{camel_case entry_type.name}}Entry: {{pascal_case entry_type.name}} = { 
+async function create{{pascal_case entry_type.name}}() {
+  const {{camel_case entry_type.name}}Entry: {{pascal_case entry_type.name}} = {
   {{#each entry_type.fields}}
     {{snake_case field_name}}: {{camel_case field_name}}{{#if (eq cardinality "single")}}!{{/if}},
   {{/each}}
   };
-  
+
   try {
     const record: Record = await client.callZome({
       cap_secret: null,
@@ -75,36 +67,28 @@ async function create{{pascal_case entry_type.name}}() {
     });
     dispatch('{{kebab_case entry_type.name}}-created', { {{camel_case entry_type.name}}Hash: record.signed_action.hashed.hash });
   } catch (e) {
-    errorSnackbar.labelText = `Error creating the {{lower_case entry_type.name}}: ${e.message}`;
-    errorSnackbar.show();
+    alert((e as HolochainError).message)
   }
 }
 
 </script>
-<mwc-snackbar bind:this={errorSnackbar} leading>
-</mwc-snackbar>
-<div style="display: flex; flex-direction: column">
-  <span style="font-size: 18px">Create {{pascal_case entry_type.name}}</span>
-  
+
+<div>
+  <h3>Create {{pascal_case entry_type.name}}</h3>
 
 {{#each entry_type.fields}}
   {{#if widget}}
-  <div style="margin-bottom: 16px">
+  <div>
     {{#if (not (eq cardinality "vector") )}}
     {{> (concat field_type.type "/" widget "/edit/render") label=(title_case field_name) variable_to_read=(camel_case field_name) variable_to_change=(camel_case field_name) required=(eq cardinality "single") }}
     {{else}}
     {{> Vec/edit/render field_name=field_name field_type=field_type widget=widget }}
     {{/if}}
-          
   </div>
-            
   {{/if}}
 {{/each}}
 
-  <mwc-button 
-    raised
-    label="Create {{pascal_case entry_type.name}}"
-    disabled={!is{{pascal_case entry_type.name}}Valid}
-    on:click={() => create{{pascal_case entry_type.name}}()}
-  ></mwc-button>
+  <button disabled={!is{{pascal_case entry_type.name}}Valid} on:click={() => create{{pascal_case entry_type.name}}()}>
+    Create {{pascal_case entry_type.name}}
+  </button>
 </div>
