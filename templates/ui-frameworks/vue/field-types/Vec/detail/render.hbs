@@ -1,4 +1,0 @@
-<div style="display: flex; flex-direction: column; margin-bottom: 16px;">
-  <span><strong>{{title_case field_name}}</strong></span>
-  <span v-for="el in {{variable_to_read}}" style="white-space: pre-line">{{> (concat field_type.type "/" widget "/detail/render") variable_to_read="el"}}</span>
-</div>

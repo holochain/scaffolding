@@ -1,5 +1,2 @@
-<div style="display: flex; flex-direction: row">
-  <span style="margin-right: 4px">{{label}}</span>
-
-  <mwc-slider {{#if variable_to_read}}:value="{{variable_to_read}}" {{/if}}@input="{{variable_to_change}} = $event.detail.value" discrete></mwc-slider>
-</div>
+<label for="{{label}}">{{label}}</label>
+<input name=""{{label}} type="range" v-model="{{variable_to_read}}" />
