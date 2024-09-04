@@ -14,8 +14,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Extend space
-        uses: ./.github/actions/extend-space
+      - name: Maximize build space
+        if: runner.os == 'Linux'
+        uses: AdityaGarg8/remove-unwanted-software@v2
+        with:
+          remove-dotnet: 'true'
+          remove-android: 'true'
+          remove-codeql: 'true'
+          remove-docker-images: 'true'
 
       - name: Install nix
         uses: cachix/install-nix-action@v27
@@ -51,8 +57,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Extend space
-        uses: ./.github/actions/extend-space
+      - name: Maximize build space
+        if: runner.os == 'Linux'
+        uses: AdityaGarg8/remove-unwanted-software@v2
+        with:
+          remove-dotnet: 'true'
+          remove-android: 'true'
+          remove-codeql: 'true'
+          remove-docker-images: 'true'
 
       - name: Install nix
         uses: cachix/install-nix-action@v27
@@ -80,8 +92,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Extend space
-        uses: ./.github/actions/extend-space
+      - name: Maximize build space
+        if: runner.os == 'Linux'
+        uses: AdityaGarg8/remove-unwanted-software@v2
+        with:
+          remove-dotnet: 'true'
+          remove-android: 'true'
+          remove-codeql: 'true'
+          remove-docker-images: 'true'
 
       - name: Install nix
         uses: cachix/install-nix-action@v27
