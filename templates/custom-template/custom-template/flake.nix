@@ -6,7 +6,6 @@
 
     nixpkgs.follows = "holonix/nixpkgs";
     flake-parts.follows = "holonix/flake-parts";
-
   };
 
   outputs = inputs@{ flake-parts, ... }: flake-parts.lib.mkFlake { inherit inputs; } {
@@ -30,12 +29,7 @@
           yarn
           bun
           binaryen
-
         ]);
-
-        shellHook = ''
-          export PS1='\[\033[1;34m\][holonix:\w]\$\[\033[0m\] '
-        '';
       };
     };
   };
