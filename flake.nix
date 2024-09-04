@@ -3,14 +3,10 @@
 
   inputs = {
     holonix.url = "github:holochain/holonix?ref=main";
+    crane.url = "github:ipetkov/crane";
 
     nixpkgs.follows = "holonix/nixpkgs";
     flake-parts.follows = "holonix/flake-parts";
-
-    crane = {
-      url = "github:ipetkov/crane";
-      inputs.nixpkgs.follows = "holonix/nixpkgs";
-    };
 
     rust-overlay = {
       url = "github:oxalica/rust-overlay";
@@ -96,15 +92,6 @@
                 ]));
 
               nativeBuildInputs = [ pkgs.perl ];
-              env = {
-                OPENSSL_DIR = "${pkgs.openssl.dev}";
-                OPENSSL_LIB_DIR = "${pkgs.openssl.out}/lib";
-                OPENSSL_INCLUDE_DIR = "${pkgs.openssl.dev}/include";
-                CARGO_TERM_VERBOSE = "true";
-                RUST_BACKTRACE = 1;
-                GOROOT = "${pkgs.go}/share/go";
-                PATH = lib.makeBinPath [ pkgs.go ];
-              };
             };
 
           checks.custom-template = flake.lib.wrapCustomTemplate {
