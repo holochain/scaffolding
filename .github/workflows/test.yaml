@@ -26,9 +26,7 @@ jobs:
       - name: Install nix
         uses: cachix/install-nix-action@v27
         with:
-          install_url: https://releases.nixos.org/nix/nix-2.23.2/install
-          extra_nix_config: |
-            experimental-features = flakes nix-command
+          install_url: https://releases.nixos.org/nix/nix-2.24.4/install
 
       - uses: cachix/cachix-action@v15
         with:
@@ -69,9 +67,7 @@ jobs:
       - name: Install nix
         uses: cachix/install-nix-action@v27
         with:
-          install_url: https://releases.nixos.org/nix/nix-2.23.2/install
-          extra_nix_config: |
-            experimental-features = flakes nix-command
+          install_url: https://releases.nixos.org/nix/nix-2.24.4/install
 
       - uses: cachix/cachix-action@v15
         with:
@@ -104,7 +100,7 @@ jobs:
       - name: Install nix
         uses: cachix/install-nix-action@v27
         with:
-          install_url: https://releases.nixos.org/nix/nix-2.23.2/install
+          install_url: https://releases.nixos.org/nix/nix-2.24.4/install
 
       - uses: cachix/cachix-action@v15
         with:
