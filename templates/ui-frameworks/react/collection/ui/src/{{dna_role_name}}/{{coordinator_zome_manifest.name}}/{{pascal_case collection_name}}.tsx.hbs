@@ -1,4 +1,4 @@
-import { Link, AppSignal, HolochainError{{#if (eq collection_type.type "ByAuthor")}}, AgentPubKey{{/if}}{{#if (eq referenceable.hash_type "EntryHash")}}, NewEntryAction{{/if}} } from '@holochain/client';
+import { Link, SignalCb, SignalType, HolochainError{{#if (eq collection_type.type "ByAuthor")}}, AgentPubKey{{/if}}{{#if (eq referenceable.hash_type "EntryHash")}}, NewEntryAction{{/if}} } from '@holochain/client';
 import  { FC, useCallback, useState, useEffect, useContext } from 'react';
 
 import type { {{pascal_case coordinator_zome_manifest.name}}Signal } from './types';
@@ -31,9 +31,10 @@ const {{pascal_case collection_name}}: FC{{#if (eq collection_type.type "ByAutho
     }
   }, [client{{#if (eq collection_type.type "ByAuthor")}}, author{{/if}}]);
 
-  const handleSignal = useCallback((signal: AppSignal) => {
-    if (signal.zome_name !== '{{coordinator_zome_manifest.name}}') return;
-    const payload = signal.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;
+  const handleSignal: SignalCb = useCallback((signal) => {
+    if (!(SignalType.App in signal)) return
+    if (signal.App.zome_name !== '{{coordinator_zome_manifest.name}}') return;
+    const payload = signal.App.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;
     if (payload.type !== 'EntryCreated') return;
     if (payload.app_entry.type !== '{{pascal_case referenceable.name}}') return;
 {{#if (eq collection_type.type "ByAuthor")}}
@@ -59,7 +60,7 @@ const {{pascal_case collection_name}}: FC{{#if (eq collection_type.type "ByAutho
   return (
     <div>
       {error ? (
-        <span>Error fetching the {{lower_case (plural referenceable.name)}}: {error.message}</span>
+        <div class="alert">Error fetching the {{lower_case (plural referenceable.name)}}: {error.message}</div>
       ) : hashes.length > 0 ? (
         <div>
           {hashes.map((hash, i) => (
@@ -67,7 +68,7 @@ const {{pascal_case collection_name}}: FC{{#if (eq collection_type.type "ByAutho
           ))}
         </div>
       ) : (
-        <article>No {{lower_case (plural referenceable.name)}} found{{#if (eq collection_type.type "ByAuthor")}} for this author{{/if}}.</article>
+        <div class="alert">No {{lower_case (plural referenceable.name)}} found{{#if (eq collection_type.type "ByAuthor")}} for this author{{/if}}.</div>
       )}
     </div>
   );

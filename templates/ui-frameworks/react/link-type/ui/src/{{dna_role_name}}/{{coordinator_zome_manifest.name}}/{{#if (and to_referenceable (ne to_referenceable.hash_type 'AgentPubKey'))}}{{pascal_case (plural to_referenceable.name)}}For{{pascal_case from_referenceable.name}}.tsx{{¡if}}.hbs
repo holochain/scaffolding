@@ -1,4 +1,4 @@
-import { Link, AppSignal, HolochainError } from '@holochain/client';
+import { Link, SignalCb, SignalType, HolochainError } from '@holochain/client';
 import  { FC, useCallback, useState, useEffect, useContext } from 'react';
 
 import {{pascal_case to_referenceable.name}}Detail from './{{pascal_case to_referenceable.name}}Detail';
@@ -31,7 +31,7 @@ const {{pascal_case (plural to_referenceable.name)}}For{{pascal_case from_refere
     }
   }, [client]);
 
-  const handleSignal = useCallback(async (signal: AppSignal) => {
+  const handleSignal: SignalCb = useCallback(async (signal) => {
     if (signal.zome_name !== '{{coordinator_zome_manifest.name}}') return;
     const payload = signal.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;
     if (payload.type !== 'LinkCreated') return;
@@ -51,7 +51,7 @@ const {{pascal_case (plural to_referenceable.name)}}For{{pascal_case from_refere
   return (
     <div>
       {error ? (
-        <article>Error fetching {{lower_case (plural to_referenceable.name)}}: {error.message}</article>
+        <div className="alert">Error fetching {{lower_case (plural to_referenceable.name)}}: {error.message}</div>
       ) : hashes.length > 0 ? (
         <div>
           {hashes.map((hash, i) => (
@@ -59,7 +59,7 @@ const {{pascal_case (plural to_referenceable.name)}}For{{pascal_case from_refere
           ))}
         </div>
       ) : (
-        <article>No {{lower_case (plural to_referenceable.name)}} found for this {{lower_case from_referenceable.name}}.</article>
+        <div className="alert">No {{lower_case (plural to_referenceable.name)}} found for this {{lower_case from_referenceable.name}}.</div>
       )}
     </div>
   );

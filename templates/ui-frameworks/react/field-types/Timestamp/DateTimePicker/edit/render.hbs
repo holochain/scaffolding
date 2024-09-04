@@ -1,31 +1,13 @@
 <label htmlFor="{{label}}">{{label}}</label>
-{{#if (eq cardinality "vector")}}
-<input
-  name="{{label}}"
-  type="datetime-local"
-{{#if variable_to_read}}
-  {{!-- FIXME: This likely doesn't work across the daylight saving time transition --}}
-  value={new Date({{variable_to_read}}! / 1000 - (new Date({{variable_to_read}}! / 1000).getTimezoneOffset() * 60000)).toISOString().slice(0, 16)}
-{{/if}}
-  onChange={(e) => {
-    set{{pascal_case variable_to_change}}(prevValues => prevValues?.map((v, idx) => {
-      if ({{key}} === idx) {
-        v = Math.floor(new Date(e.target.value).getTime() * 1000);
-      }
-      return v;
-    }))
-  }}
-{{#if required}}
-  required
-{{/if}}
-/>
-{{else}}
 <input
   name="{{label}}"
   type="datetime-local"
   {{#if variable_to_read}}
+  {{!-- FIXME: This likely doesn't work across the daylight saving time transition --}}
   value={new Date({{variable_to_read}}! / 1000 - (new Date({{variable_to_read}}! / 1000).getTimezoneOffset() * 60000)).toISOString().slice(0, 16)}
   {{/if}}
-  onChange={(e) => set{{pascal_case variable_to_change}}(Math.floor(new Date(e.target.value).getTime() / 1000))} {{#if required}}required{{/if}}
+  onChange={(e) => set{{pascal_case variable_to_change}}(Math.floor(new Date(e.target.value).getTime() / 1000))}
+  {{#if required}}
+  required
+  {{/if}}
 />
-{{/if}}

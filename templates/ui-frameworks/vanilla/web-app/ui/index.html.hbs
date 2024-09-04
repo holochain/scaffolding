@@ -8,16 +8,6 @@
     />
     <meta name="Description" content="Put your description here." />
     <base href="/" />
-
-    <style>
-      html,
-      body {
-        margin: 0;
-        padding: 0;
-        font-family: sans-serif;
-        background-color: #ededed;
-      }
-    </style>
     <title>Vanilla hApp</title>
   </head>
 
@@ -26,13 +16,12 @@
 
     <script type="module">
       import { AppWebsocket } from '@holochain/client';
-      
+
       async function connect() {
         const AppWebsocket = await AppWebsocket.connect();
-        
         alert("Connected to holochain!");
       }
-      
+
       connect().catch(console.error);
     </script>
   </body>
