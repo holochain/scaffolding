@@ -10,8 +10,9 @@
 /target/
 /.cargo/
 
-# npm 
+# package manager
 /**/node_modules/
+/.yarn
 
 # generated and compiled files
 *.happ
