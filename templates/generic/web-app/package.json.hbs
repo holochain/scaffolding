@@ -23,7 +23,7 @@
   {{/if}}
     "package": "{{(package_manager_command package_manager "build:happ" null)}} && {{(package_manager_command package_manager "package" "ui")}} && hc web-app pack workdir --recursive",
     "build:happ": "{{(package_manager_command package_manager "build:zomes" null)}} && hc app pack workdir --recursive",
-    "build:zomes": "RUSTFLAGS='' CARGO_TARGET_DIR=target cargo build --release --target wasm32-unknown-unknown"
+    "build:zomes": "cargo build --release --target wasm32-unknown-unknown"
   },
   "devDependencies": {
     "@holochain-playground/cli": "{{holochain_playground_cli_version}}",

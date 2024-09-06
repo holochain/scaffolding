@@ -239,6 +239,7 @@ pub fn format_code<P: Into<PathBuf>>(code: &str, file_name: P) -> ScaffoldResult
             "ts" | "js" | "tsx" | "jsx" => {
                 let formatted_code = dprint_plugin_typescript::format_text(
                     &file_path,
+                    None,
                     code.to_owned(),
                     &ts_format_config,
                 )
@@ -287,18 +288,26 @@ fn format_nested<'a>(
     if let Some(nested_extension) = path.extension().and_then(|ext| ext.to_str()) {
         match (root_extension, nested_extension) {
             ("vue", "ts" | "js") => {
-                let formatted_code =
-                    dprint_plugin_typescript::format_text(path, raw.to_owned(), ts_format_config)
-                        .map_err(|e| anyhow::anyhow!("Failed to format source code: {e:?}"))?;
+                let formatted_code = dprint_plugin_typescript::format_text(
+                    path,
+                    None,
+                    raw.to_owned(),
+                    ts_format_config,
+                )
+                .map_err(|e| anyhow::anyhow!("Failed to format source code: {e:?}"))?;
 
                 if let Some(value) = formatted_code {
                     return Ok(Cow::Owned(value));
                 }
             }
             ("svelte", "ts" | "js" | "tsx" | "jsx") => {
-                let formatted_code =
-                    dprint_plugin_typescript::format_text(path, raw.to_owned(), ts_format_config)
-                        .map_err(|e| anyhow::anyhow!("Failed to format source code: {e:?}"))?;
+                let formatted_code = dprint_plugin_typescript::format_text(
+                    path,
+                    None,
+                    raw.to_owned(),
+                    ts_format_config,
+                )
+                .map_err(|e| anyhow::anyhow!("Failed to format source code: {e:?}"))?;
 
                 if let Some(value) = formatted_code {
                     return Ok(Cow::Owned(value));
