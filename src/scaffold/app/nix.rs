@@ -29,6 +29,8 @@ pub fn flake_nix(holo_enabled: bool) -> FileTree {
         holonix = {{
           url = "github:holochain/holonix?ref=main";
           inputs.holochain.url = "github:holochain/holochain/holochain-{}";
+          inputs.lair-keystore.url = "github:holochain/lair/lair_keystore-v0.4.5";
+          inputs.hc-launch.url = "github:holochain/hc-launch/holochain-0.3";
         }};
 
         nixpkgs.follows = "holonix/nixpkgs";

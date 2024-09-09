@@ -5,6 +5,8 @@
     holonix = {
       url = "github:holochain/holonix?ref=main";
       inputs.holochain.url = "github:holochain/holochain/holochain-0.3.2";
+      inputs.lair-keystore.url = "github:holochain/lair/lair_keystore-v0.4.5";
+      inputs.hc-launch.url = "github:holochain/hc-launch/holochain-0.3";
     };
 
     crane.url = "github:ipetkov/crane";
