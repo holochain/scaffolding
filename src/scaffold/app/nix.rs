@@ -6,12 +6,9 @@ use std::path::Path;
 use std::process::{Command, Stdio};
 
 use crate::error::{ScaffoldError, ScaffoldResult};
-use crate::file_tree::*;
-use crate::versions;
+use crate::{file_tree::*, versions};
 
 pub fn flake_nix(holo_enabled: bool) -> FileTree {
-    let holochain_nix_version = versions::HOLOCHAIN_NIX_VERSION;
-
     let holo_inputs = holo_enabled
         .then_some(
             r#"
@@ -26,45 +23,49 @@ pub fn flake_nix(holo_enabled: bool) -> FileTree {
 
     file!(format!(
         r#"{{
-  description = "Template for Holochain app development";
+      description = "Flake for Holochain app development";
 
-  inputs = {{
-    versions.url  = "github:holochain/holochain?dir=versions/{holochain_nix_version}";
+      inputs = {{
+        holonix = {{
+          url = "github:holochain/holonix?ref=main";
+          inputs.holochain.url = "github:holochain/holochain/holochain-{}";
+        }};
 
-    holochain-flake.url = "github:holochain/holochain";
-    holochain-flake.inputs.versions.follows = "versions";
-
-    nixpkgs.follows = "holochain-flake/nixpkgs";
-    flake-parts.follows = "holochain-flake/flake-parts";
-    {holo_inputs}
-  }};
-
-  outputs = inputs:
-    inputs.flake-parts.lib.mkFlake
-      {{
-        inherit inputs;
-      }}
-      {{
-        systems = builtins.attrNames inputs.holochain-flake.devShells;
-        perSystem =
-          {{ inputs'
-          , config
-          , pkgs
-          , system
-          , ...
-          }}: {{
-            devShells.default = pkgs.mkShell {{
-              inputsFrom = [ inputs'.holochain-flake.devShells.holonix ];
-              packages = [
-                pkgs.nodejs_20
-                pkgs.corepack_20
-                pkgs.bun
-                {holo_packages}
-              ];
-            }};
-          }};
+        nixpkgs.follows = "holonix/nixpkgs";
+        flake-parts.follows = "holonix/flake-parts";
+        {}
       }};
-}}"#
+
+      outputs = inputs@{{ flake-parts, ... }}: flake-parts.lib.mkFlake {{ inherit inputs; }} {{
+        systems = builtins.attrNames inputs.holonix.devShells;
+        perSystem = {{ inputs', pkgs, ... }}: {{
+          formatter = pkgs.nixpkgs-fmt;
+
+          devShells.default = pkgs.mkShell {{
+            inputsFrom = [ inputs'.holonix.devShells ];
+
+            packages = (with inputs'.holonix.packages; [
+              holochain
+              lair-keystore
+              hc-launch
+              hc-scaffold
+              hn-introspect
+              rust # For Rust development, with the WASM target included for zome builds
+            ]) ++ (with pkgs; [
+              nodejs_20
+              nodePackages.pnpm
+              yarn-berry
+              bun
+              binaryen
+              {}
+            ]);
+          }};
+        }};
+      }};
+    }}"#,
+        versions::HOLOCHAIN_VERSION,
+        holo_inputs,
+        holo_packages
     ))
 }
 
