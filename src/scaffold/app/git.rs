@@ -23,6 +23,13 @@ pub fn setup_git_environment<P: AsRef<Path>>(path: P) -> ScaffoldResult<()> {
     Ok(())
 }
 
+pub fn is_inside_work_tree<P: AsRef<Path>>(dir: P) -> bool {
+    match Repository::open(dir) {
+        Ok(repo) => repo.is_bare(),
+        Err(_) => false,
+    }
+}
+
 pub fn gitignore() -> &'static str {
     include_str!("./gitignore")
 }
