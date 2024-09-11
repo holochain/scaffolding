@@ -60,7 +60,7 @@
       },
       "original": {
         "owner": "holochain",
-        "ref": "holochain-weekly",
+        "ref": "holochain-0.3",
         "repo": "hc-launch",
         "type": "github"
       }
@@ -68,16 +68,16 @@
     "hc-scaffold": {
       "flake": false,
       "locked": {
-        "lastModified": 1724063689,
-        "narHash": "sha256-OJOf55lwbIYnr1GbMGBYkgYFkNe/Aw4+MchQtos7RcU=",
+        "lastModified": 1724073530,
+        "narHash": "sha256-PUM8otA5F5s8ZHxhjupn7R+RZAjh2rueYIFwu3UkK44=",
         "owner": "holochain",
         "repo": "scaffolding",
-        "rev": "3a9849020d4c525d200cf5675eeb2cb0923edd01",
+        "rev": "8a6d1dab0f1668c2781a46d93a5ad638fcf25598",
         "type": "github"
       },
       "original": {
         "owner": "holochain",
-        "ref": "holochain-weekly",
+        "ref": "holochain-0.3",
         "repo": "scaffolding",
         "type": "github"
       }
@@ -94,7 +94,7 @@
       },
       "original": {
         "owner": "holochain",
-        "ref": "holochain-0.4.0-dev.22",
+        "ref": "holochain-0.3.2",
         "repo": "holochain",
         "type": "github"
       }
@@ -111,16 +111,16 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "lastModified": 1725455839,
-        "narHash": "sha256-KKXP92XRvajV5tdes8fL7nJ7bsxuuX8cBPvoYYtoFhM=",
+        "lastModified": 1725293701,
+        "narHash": "sha256-dwb1tzr7kO8u5LllGqJiIaKe2btsKaMHX1gecgtwruM=",
         "owner": "holochain",
         "repo": "holonix",
-        "rev": "732113eb73cb98f0c08c64d0aa641774dd7ae079",
+        "rev": "fb9e3c067052cf628d1b22a1802f016eaf1d3e3e",
         "type": "github"
       },
       "original": {
         "owner": "holochain",
-        "ref": "main",
+        "ref": "main-0.3",
         "repo": "holonix",
         "type": "github"
       }
@@ -137,7 +137,7 @@
       },
       "original": {
         "owner": "holochain",
-        "ref": "lair_keystore-v0.5.0",
+        "ref": "lair_keystore-v0.4.5",
         "repo": "lair",
         "type": "github"
       }
@@ -214,11 +214,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1725848835,
-        "narHash": "sha256-u4lCr+tOEWhsFiww5G04U5jUNzaQJi0/ZMIDGiLeT14=",
+        "lastModified": 1726107922,
+        "narHash": "sha256-G8P6YT/U55G4YILkL/I0NaEqYYoL05Rfs7y/tI4mqqI=",
         "owner": "oxalica",
         "repo": "rust-overlay",
-        "rev": "2ef910a6276a2f34513d18f2f826a8dea72c3b3f",
+        "rev": "fb1cf4398436a12f1f8b07da08d94fc72fcb1a69",
         "type": "github"
       },
       "original": {
