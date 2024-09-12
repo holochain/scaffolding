@@ -26,7 +26,7 @@
         ]) ++ (with pkgs; [
           nodejs_20
           nodePackages.pnpm
-          yarn
+          yarn-berry
           bun
           binaryen
         ]);

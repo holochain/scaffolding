@@ -6,7 +6,7 @@ use std::path::Path;
 use std::process::{Command, Stdio};
 
 use crate::error::{ScaffoldError, ScaffoldResult};
-use crate::{file_tree::*, versions};
+use crate::file_tree::*;
 
 pub fn flake_nix(holo_enabled: bool) -> FileTree {
     let holo_inputs = holo_enabled
