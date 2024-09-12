@@ -26,13 +26,7 @@ pub fn flake_nix(holo_enabled: bool) -> FileTree {
       description = "Flake for Holochain app development";
 
       inputs = {{
-        holonix = {{
-          url = "github:holochain/holonix?ref=main";
-          inputs.holochain.url = "github:holochain/holochain/holochain-{}";
-          inputs.lair-keystore.url = "github:holochain/lair/lair_keystore-v0.4.5";
-          inputs.hc-launch.url = "github:holochain/hc-launch/holochain-0.3";
-        }};
-
+        holonix.url = "github:holochain/holonix?ref=main-0.3";
         nixpkgs.follows = "holonix/nixpkgs";
         flake-parts.follows = "holonix/flake-parts";
         {}
@@ -65,9 +59,7 @@ pub fn flake_nix(holo_enabled: bool) -> FileTree {
         }};
       }};
     }}"#,
-        versions::HOLOCHAIN_VERSION,
-        holo_inputs,
-        holo_packages
+        holo_inputs, holo_packages
     ))
 }
 
