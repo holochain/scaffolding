@@ -1,4 +1,4 @@
-<div style="display: flex; flex-direction: column" @input=${() => this.requestUpdate()} @input=${() => this.requestUpdate()}>
+<div style="display: flex; flex-direction: column" @input=${() => this.requestUpdate()} @change=${() => this.requestUpdate()}>
   <span>{{title_case field_name}}</span>
 
   ${this._{{camel_case field_name}}.map((el, i) => html`{{> (concat field_type.type "/" widget "/edit/render") label="" variable_to_read="el" variable_to_change=(concat "this._" (camel_case field_name) "[i]" ) }} }`)}
