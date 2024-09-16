@@ -20,6 +20,7 @@ fn metadata_handlers(
     link_type_name: &str,
     from_referenceable: &Referenceable,
 ) -> TokenStream {
+    let integrity_zome_name = format_ident!("{}", integrity_zome_name);
     let snake_from_arg = format_ident!(
         "{}",
         from_referenceable
@@ -77,11 +78,11 @@ fn metadata_handlers(
             let links = get_links(
                 GetLinksInputBuilder::try_new(#snake_from_arg, LinkTypes::#pascal_link_type_name)?.build(),
             )?;
-            let #snake_link_type_name: Vec<String> = links
+            let #snake_link_type_name = links
                 .into_iter()
                 .map(|link|
                     String::from_utf8(link.tag.into_inner())
-                        .map_err(|e| wasm_error!(WasmErrorInner::Guest(format!("Error converting link tag to string: {{:?}}", e))))
+                        .map_err(|e| wasm_error!(WasmErrorInner::Guest(format!("Error converting link tag to string: {:?}", e))))
                 )
                 .collect::<ExternResult<Vec<String>>>()?;
             Ok(#snake_link_type_name)
@@ -474,7 +475,6 @@ pub fn add_link_type_functions_to_coordinator(
     let mut file_tree = coordinator_zome_file_tree.dna_file_tree.file_tree();
 
     let handlers = match to_referenceable {
-        None => metadata_handlers(integrity_zome_name, link_type_name, from_referenceable),
         Some(r) => normal_handlers(
             integrity_zome_name,
             from_referenceable,
@@ -482,7 +482,9 @@ pub fn add_link_type_functions_to_coordinator(
             delete,
             bidirectional,
         ),
+        None => metadata_handlers(integrity_zome_name, link_type_name, from_referenceable),
     };
+
     let file = unparse_pretty(&syn::parse_quote! { #handlers });
 
     insert_file(&mut file_tree, &new_file_path, &file)?;
