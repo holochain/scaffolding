@@ -24,6 +24,7 @@ pub enum FieldType {
     ActionHash,
     EntryHash,
     DnaHash,
+    ExternalHash,
     Enum {
         label: String,
         variants: Vec<String>,
@@ -64,6 +65,7 @@ impl std::fmt::Display for FieldType {
             FieldType::ActionHash => "ActionHash",
             FieldType::EntryHash => "EntryHash",
             FieldType::DnaHash => "DnaHash",
+            FieldType::ExternalHash => "ExternalHash",
             FieldType::AgentPubKey => "AgentPubKey",
             FieldType::Enum { .. } => "Enum",
         };
@@ -83,6 +85,7 @@ impl FieldType {
             FieldType::ActionHash,
             FieldType::EntryHash,
             FieldType::DnaHash,
+            FieldType::ExternalHash,
             FieldType::AgentPubKey,
             FieldType::Enum {
                 label: String::new(),
@@ -104,6 +107,7 @@ impl FieldType {
             ActionHash => quote!(ActionHash),
             DnaHash => quote!(DnaHash),
             EntryHash => quote!(EntryHash),
+            ExternalHash => quote!(ExternalHash),
             AgentPubKey => quote!(AgentPubKey),
             Enum { label, .. } => {
                 let ident = format_ident!("{}", label);
@@ -126,6 +130,7 @@ impl FieldType {
             ActionHash => "ActionHash",
             EntryHash => "EntryHash",
             DnaHash => "DnaHash",
+            ExternalHash => "ExternalHash",
             Enum { label, .. } => label,
         }
     }
@@ -240,7 +245,7 @@ impl EntryTypeReference {
         }
     }
 
-    pub fn to_string(&self, c: &Cardinality) -> String {
+    pub fn name_by_cardinality(&self, c: &Cardinality) -> String {
         match c {
             Cardinality::Vector => pluralizer::pluralize(self.entry_type.as_str(), 2, false),
             _ => pluralizer::pluralize(self.entry_type.as_str(), 1, false),
@@ -273,10 +278,11 @@ impl FromStr for EntryTypeReference {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, PartialOrd)]
 pub enum Referenceable {
     Agent { role: String },
     EntryType(EntryTypeReference),
+    External,
 }
 
 impl Serialize for Referenceable {
@@ -286,7 +292,7 @@ impl Serialize for Referenceable {
     {
         let mut state = serializer.serialize_struct("Referenceable", 3)?;
         state.serialize_field("name", &self.to_string(&Cardinality::Single))?;
-        state.serialize_field("hash_type", &self.hash_type().to_string())?;
+        state.serialize_field("hash_type", &self.field_type().to_string())?;
         state.serialize_field("singular_arg", &self.field_name(&Cardinality::Single))?;
         state.end()
     }
@@ -315,10 +321,11 @@ impl FromStr for Referenceable {
 }
 
 impl Referenceable {
-    pub fn hash_type(&self) -> FieldType {
+    pub fn field_type(&self) -> FieldType {
         match self {
             Referenceable::Agent { .. } => FieldType::AgentPubKey,
             Referenceable::EntryType(r) => r.hash_type(),
+            Referenceable::External => FieldType::ExternalHash,
         }
     }
 
@@ -326,7 +333,7 @@ impl Referenceable {
         let s = self.to_string(c).to_case(Case::Snake);
 
         match self {
-            Referenceable::Agent { .. } => s,
+            Referenceable::Agent { .. } | Referenceable::External => s,
             Referenceable::EntryType(e) => e.field_name(c),
         }
     }
@@ -335,6 +342,7 @@ impl Referenceable {
         let singular = match self {
             Referenceable::Agent { role } => role.clone(),
             Referenceable::EntryType(r) => r.entry_type.clone(),
+            Referenceable::External => "external_hash".to_string(),
         };
 
         match c {

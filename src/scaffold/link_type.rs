@@ -58,6 +58,7 @@ pub fn scaffold_link_type(
 
     let bidirectional = match (&to_referenceable, bidirectional) {
         (None, _) => false,
+        (Some(v), _) if *v == Referenceable::External => false,
         (_, Some(b)) => b,
         (_, None) => Confirm::with_theme(&ColorfulTheme::default())
             .with_prompt("Should the link be bidirectional?")

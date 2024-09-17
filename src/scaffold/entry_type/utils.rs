@@ -14,27 +14,19 @@ use super::{
 };
 
 pub fn choose_reference_entry_hash(prompt: &str, recommended: bool) -> ScaffoldResult<bool> {
-    let selection = if recommended {
-        Select::with_theme(&ColorfulTheme::default())
-            .with_prompt(prompt)
-            .default(0)
-            .item("EntryHash (recommended)")
-            .item("ActionHash")
-            .interact()?
+    let options = if recommended {
+        [("EntryHash", true), ("ActionHash", false)]
     } else {
-        Select::with_theme(&ColorfulTheme::default())
-            .with_prompt(prompt)
-            .default(0)
-            .item("ActionHash (recommended)")
-            .item("EntryHash")
-            .interact()?
+        [("ActionHash", false), ("EntryHash", true)]
     };
 
-    if recommended {
-        Ok(selection == 0)
-    } else {
-        Ok(selection != 0)
-    }
+    let selection = Select::with_theme(&ColorfulTheme::default())
+        .with_prompt(prompt)
+        .default(0)
+        .items(&options.map(|(name, _)| name))
+        .interact()?;
+
+    Ok(options[selection].1)
 }
 
 fn inner_choose_referenceable(
@@ -50,6 +42,7 @@ fn inner_choose_referenceable(
     all_options.push("Agent".to_string());
 
     if optional {
+        all_options.push("External".to_string());
         all_options.push("[None]".to_string());
     }
 
@@ -59,22 +52,24 @@ fn inner_choose_referenceable(
         .items(&all_options[..])
         .interact()?;
 
-    if selection == all_entries.len() {
-        let role = input_with_case(&String::from(
+    match all_options[selection].as_str() {
+        "Agent" => {
+            let role = input_with_case(
             "Which role does this agent play in the relationship ? (eg. \"creator\", \"invitee\")",
-        ), Case::Snake)?;
-        check_for_reserved_words(&role)?;
-        Ok(Some(Referenceable::Agent { role }))
-    } else if selection == all_entries.len() + 1 {
-        Ok(None)
-    } else {
-        Ok(Some(Referenceable::EntryType(EntryTypeReference {
-            entry_type: all_options[selection].clone(),
+            Case::Snake,
+        )?;
+            check_for_reserved_words(&role)?;
+            Ok(Some(Referenceable::Agent { role }))
+        }
+        "External" => Ok(Some(Referenceable::External)),
+        "[None]" => Ok(None),
+        entry_type => Ok(Some(Referenceable::EntryType(EntryTypeReference {
+            entry_type: entry_type.to_owned(),
             reference_entry_hash: choose_reference_entry_hash(
                 &String::from("Reference this entry type with its entry hash or its action hash?"),
                 all_entries[selection].reference_entry_hash,
             )?,
-        })))
+        }))),
     }
 }
 
@@ -117,7 +112,6 @@ pub fn get_or_choose_referenceable(
     let all_entries = get_all_entry_types(zome_file_tree)?.unwrap_or_else(Vec::new);
 
     match &entry_type {
-        None => choose_referenceable(&all_entries, prompt),
         Some(Referenceable::Agent { role }) => {
             check_for_reserved_words(role)?;
             Ok(Referenceable::Agent { role: role.clone() })
@@ -136,6 +130,7 @@ pub fn get_or_choose_referenceable(
 
             Ok(Referenceable::EntryType(app_entry_reference.clone()))
         }
+        _ => choose_referenceable(&all_entries, prompt),
     }
 }
 
@@ -147,7 +142,6 @@ pub fn get_or_choose_optional_reference_type(
     let all_entries = get_all_entry_types(zome_file_tree)?.unwrap_or_else(Vec::new);
 
     match entry_type {
-        None => choose_optional_referenceable(&all_entries, prompt),
         Some(Referenceable::Agent { .. }) => Ok(entry_type.cloned()),
         Some(Referenceable::EntryType(app_entry_reference)) => {
             let all_entries: Vec<String> = all_entries.into_iter().map(|e| e.entry_type).collect();
@@ -163,5 +157,6 @@ pub fn get_or_choose_optional_reference_type(
 
             Ok(entry_type.cloned())
         }
+        _ => choose_optional_referenceable(&all_entries, prompt),
     }
 }

@@ -23,10 +23,10 @@ use super::{
 };
 
 pub fn no_update_read_handler(entry_def: &EntryDefinition) -> TokenStream {
-    let hash_type = entry_def.referenceable().hash_type().to_string();
+    let hash_type = entry_def.referenceable().field_type().to_string();
     let snake_entry_def_name = entry_def.name.to_case(Case::Snake);
 
-    match entry_def.referenceable().hash_type() {
+    match entry_def.referenceable().field_type() {
         FieldType::ActionHash => {
             let get_entry_def_function_name = format_ident!("get_{snake_entry_def_name}");
             let entry_hash_param = format_ident!("{snake_entry_def_name}_hash");

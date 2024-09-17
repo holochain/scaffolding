@@ -27,7 +27,7 @@ fn metadata_handlers(
             .field_name(&Cardinality::Single)
             .to_case(Case::Snake)
     );
-    let from_arg_type = format_ident!("{}", from_referenceable.hash_type().to_string());
+    let from_field_type = format_ident!("{}", from_referenceable.field_type().to_string());
     let snake_from = format_ident!(
         "{}",
         from_referenceable
@@ -53,40 +53,40 @@ fn metadata_handlers(
         format_ident!("get_{plural_snake_link_type_name}_for_{snake_from}");
 
     quote! {
-        use hdk::prelude::*;
-        use #integrity_zome_name::*;
+          use hdk::prelude::*;
+          use #integrity_zome_name::*;
 
-        #[derive(Serialize, Deserialize, Debug)]
-        pub struct #add_link_type_struct_name {
-            pub #snake_from_arg: #from_arg_type,
-            pub #snake_link_type_name: String,
-        }
+          #[derive(Serialize, Deserialize, Debug)]
+          pub struct #add_link_type_struct_name {
+              pub #snake_from_arg: #from_field_type,
+              pub #snake_link_type_name: String,
+          }
 
-        #[hdk_extern]
-        pub fn #add_link_type_function_name(input: #add_link_type_struct_name) -> ExternResult<()> {
-            create_link(
-                input.#snake_from_arg.clone(),
-                input.#snake_from_arg,
-                LinkTypes::#pascal_link_type_name,
-                input.#snake_link_type_name,
-            )?;
-            Ok(())
-        }
+          #[hdk_extern]
+          pub fn #add_link_type_function_name(input: #add_link_type_struct_name) -> ExternResult<()> {
+              create_link(
+                  input.#snake_from_arg.clone(),
+                  input.#snake_from_arg,
+                  LinkTypes::#pascal_link_type_name,
+                  input.#snake_link_type_name,
+              )?;
+              Ok(())
+          }
 
-        #[hdk_extern]
-        pub fn #get_link_type_function_name(#snake_from_arg: #from_arg_type) -> ExternResult<Vec<String>> {
-            let links = get_links(
-                GetLinksInputBuilder::try_new(#snake_from_arg, LinkTypes::#pascal_link_type_name)?.build(),
-            )?;
-            let #snake_link_type_name = links
-                .into_iter()
-                .map(|link|
-                    String::from_utf8(link.tag.into_inner())
-                        .map_err(|e| wasm_error!(WasmErrorInner::Guest(format!("Error converting link tag to string: {:?}", e))))
-                )
-                .collect::<ExternResult<Vec<String>>>()?;
-            Ok(#snake_link_type_name)
-        }
+          #[hdk_extern]
+          pub fn #get_link_type_function_name(#snake_from_arg: #from_field_type) -> ExternResult<Vec<String>> {
+              let links = get_links(
+                  GetLinksInputBuilder::try_new(#snake_from_arg, LinkTypes::#pascal_link_type_name)?.build(),
+              )?;
+              let #snake_link_type_name = links
+                  .into_iter()
+                  .map(|link|
+                      String::from_utf8(link.tag.into_inner())
+                          .map_err(|e| wasm_error!(WasmErrorInner::Guest(format!("Error converting link tag to string: {:?}", e))))
+                  )
+                  .collect::<ExternResult<Vec<String>>>()?;
+              Ok(#snake_link_type_name)
+          }
     }
 }
 
@@ -95,8 +95,8 @@ pub fn add_link_handler(
     to_referenceable: &Referenceable,
     bidirectional: bool,
 ) -> TokenStream {
-    let from_hash_type = format_ident!("{}", from_referenceable.hash_type().to_string());
-    let to_hash_type = format_ident!("{}", to_referenceable.hash_type().to_string());
+    let from_field_type = format_ident!("{}", from_referenceable.field_type().to_string());
+    let to_field_type = format_ident!("{}", to_referenceable.field_type().to_string());
     let target_field_name = format_ident!(
         "target_{}",
         to_referenceable.field_name(&Cardinality::Single)
@@ -143,8 +143,8 @@ pub fn add_link_handler(
     quote! {
         #[derive(Serialize, Deserialize, Debug)]
         pub struct #add_link_input_struct_name {
-            pub #base_field_name: #from_hash_type,
-            pub #target_field_name: #to_hash_type,
+            pub #base_field_name: #from_field_type,
+            pub #target_field_name: #to_field_type,
         }
 
         #[hdk_extern]
@@ -167,19 +167,23 @@ pub fn get_links_handler(
     delete: bool,
 ) -> TokenStream {
     match to_referenceable {
-        Referenceable::Agent { .. } => {
-            get_links_handler_to_agent(from_referenceable, to_referenceable, delete)
+        Referenceable::Agent { .. } | Referenceable::External => {
+            get_links_handler_to_agent_or_external_hash(
+                from_referenceable,
+                to_referenceable,
+                delete,
+            )
         }
         Referenceable::EntryType(e) => get_links_handler_to_entry(from_referenceable, e, delete),
     }
 }
 
-fn get_links_handler_to_agent(
+fn get_links_handler_to_agent_or_external_hash(
     from_referenceable: &Referenceable,
     to_referenceable: &Referenceable,
-    delete: bool,
+    deletable: bool,
 ) -> TokenStream {
-    let from_hash_type = format_ident!("{}", from_referenceable.hash_type().to_string());
+    let from_field_type = format_ident!("{}", from_referenceable.field_type().to_string());
     let from_arg_name = format_ident!("{}", from_referenceable.field_name(&Cardinality::Single));
 
     let pascal_link_type_name =
@@ -201,11 +205,11 @@ fn get_links_handler_to_agent(
         "get_deleted_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}"
     );
 
-    let get_deleted_links_handler = delete
+    let get_deleted_links_handler = deletable
         .then_some(quote::quote! {
             #[hdk_extern]
             pub fn #get_deleted_entry_for_entry_function_name(
-                #from_arg_name: #from_hash_type,
+                #from_arg_name: #from_field_type,
             ) -> ExternResult<Vec<(SignedActionHashed, Vec<SignedActionHashed>)>> {
                 let details = get_link_details(
                     #from_arg_name,
@@ -227,7 +231,7 @@ fn get_links_handler_to_agent(
 
     quote::quote! {
         #[hdk_extern]
-        pub fn #get_entry_for_entry_function_name(#from_arg_name: #from_hash_type) -> ExternResult<Vec<Link>> {
+        pub fn #get_entry_for_entry_function_name(#from_arg_name: #from_field_type) -> ExternResult<Vec<Link>> {
             get_links(
                 GetLinksInputBuilder::try_new(#from_arg_name, LinkTypes::#pascal_link_type_name)?.build(),
             )
@@ -240,9 +244,9 @@ fn get_links_handler_to_agent(
 fn get_links_handler_to_entry(
     from_referenceable: &Referenceable,
     to_entry_type: &EntryTypeReference,
-    delete: bool,
+    deletable: bool,
 ) -> TokenStream {
-    let from_hash_type = format_ident!("{}", from_referenceable.hash_type().to_string());
+    let from_field_type = format_ident!("{}", from_referenceable.field_type().to_string());
     let from_arg_name = format_ident!("{}", from_referenceable.field_name(&Cardinality::Single));
 
     let pascal_link_type_name = format_ident!(
@@ -261,7 +265,7 @@ fn get_links_handler_to_entry(
     let plural_snake_to_entry_type = format_ident!(
         "{}",
         to_entry_type
-            .to_string(&Cardinality::Vector)
+            .name_by_cardinality(&Cardinality::Vector)
             .to_case(Case::Snake)
     );
 
@@ -269,11 +273,11 @@ fn get_links_handler_to_entry(
         "get_deleted_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}"
     );
 
-    let get_deleted_links_handler = delete
+    let get_deleted_links_handler = deletable
         .then_some(quote::quote! {
             #[hdk_extern]
             pub fn #get_deleted_entry_for_entry_function_name(
-                #from_arg_name: #from_hash_type,
+                #from_arg_name: #from_field_type,
             ) -> ExternResult<Vec<(SignedActionHashed, Vec<SignedActionHashed>)>> {
                 let details = get_link_details(
                     #from_arg_name,
@@ -295,7 +299,7 @@ fn get_links_handler_to_entry(
 
     quote::quote! {
         #[hdk_extern]
-        pub fn #get_entry_for_entry_function_name(#from_arg_name: #from_hash_type) -> ExternResult<Vec<Link>> {
+        pub fn #get_entry_for_entry_function_name(#from_arg_name: #from_field_type) -> ExternResult<Vec<Link>> {
             get_links(
                 GetLinksInputBuilder::try_new(#from_arg_name, LinkTypes::#pascal_link_type_name)?.build(),
             )
@@ -335,7 +339,7 @@ fn remove_link_handlers(
     to_referenceable: &Referenceable,
     bidirectional: bool,
 ) -> TokenStream {
-    let from_hash_type = from_referenceable.hash_type().to_string();
+    let from_hash_type = from_referenceable.field_type().to_string();
     let from_arg_name = from_referenceable.field_name(&Cardinality::Single);
 
     let inverse_link_type_name =
@@ -361,7 +365,7 @@ fn remove_link_handlers(
     let base_field_name = format_ident!("base_{from_arg_name}");
     let from_hash_type = format_ident!("{from_hash_type}");
     let target_field_name = format_ident!("target_{to_arg_name}");
-    let to_hash_type = format_ident!("{}", to_referenceable.hash_type().to_string());
+    let to_hash_type = format_ident!("{}", to_referenceable.field_type().to_string());
 
     let remove_entry_for_entry_function_name =
         format_ident!("remove_{singular_snake_to_entry_type}_for_{singular_snake_from_entry_type}");
