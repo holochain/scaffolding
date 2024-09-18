@@ -93,7 +93,8 @@ impl HcScaffold {
                     HcScaffoldCommand::Example(example::Example { ref example, .. }) => {
                         match example {
                             Some(ExampleType::HelloWorld) => TemplateType::Vanilla,
-                            _ => TemplateType::choose_non_headless()?,
+                            Some(ExampleType::Forum) => TemplateType::choose_non_vanilla()?,
+                            None => TemplateType::choose_non_headless()?,
                         }
                     }
                     _ => TemplateType::try_from(&load_directory_into_memory(current_dir)?)?,
