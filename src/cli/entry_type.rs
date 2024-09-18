@@ -5,10 +5,11 @@ use convert_case::Case;
 use structopt::StructOpt;
 
 use crate::{
-    file_tree::{build_file_tree, load_directory_into_memory, FileTree},
+    file_tree::{build_file_tree, load_directory_into_memory},
     scaffold::{
         dna::DnaFileTree,
         entry_type::{crud::Crud, definitions::FieldDefinition, scaffold_entry_type},
+        web_app::template_type::TemplateType,
         zome::ZomeFileTree,
     },
     templates::ScaffoldedTemplate,
@@ -56,7 +57,7 @@ pub struct EntryType {
 }
 
 impl EntryType {
-    pub fn run(self, template_file_tree: FileTree) -> anyhow::Result<()> {
+    pub fn run(self, template_type: &TemplateType) -> anyhow::Result<()> {
         let current_dir = std::env::current_dir()?;
         let file_tree = load_directory_into_memory(&current_dir)?;
         let name = match self.name {
@@ -76,7 +77,7 @@ impl EntryType {
             next_instructions,
         } = scaffold_entry_type(
             zome_file_tree,
-            &template_file_tree,
+            &template_type.file_tree()?,
             &name,
             self.crud,
             self.reference_entry_hash,

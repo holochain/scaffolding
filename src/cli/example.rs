@@ -7,7 +7,7 @@ use tokio::fs;
 
 use crate::{
     error::ScaffoldError,
-    file_tree::{build_file_tree, FileTree},
+    file_tree::build_file_tree,
     scaffold::{
         app::{git::setup_git_environment, nix::setup_nix_developer_environment, AppFileTree},
         collection::{scaffold_collection, CollectionType},
@@ -21,7 +21,7 @@ use crate::{
             scaffold_entry_type,
         },
         example::ExampleType,
-        web_app::{package_manager::PackageManager, scaffold_web_app},
+        web_app::{package_manager::PackageManager, scaffold_web_app, template_type::TemplateType},
         zome::{
             scaffold_coordinator_zome_in_path, scaffold_integrity_zome_with_path, ZomeFileTree,
         },
@@ -52,11 +52,15 @@ pub struct Example {
 }
 
 impl Example {
-    pub async fn run(self, template_file_tree: FileTree, template: &str) -> anyhow::Result<()> {
+    pub async fn run(self, template_type: &TemplateType) -> anyhow::Result<()> {
+        let template_file_tree = template_type.file_tree()?;
+        let template_name = template_type.name();
+        let is_vanilla_template = matches!(template_type, TemplateType::Vanilla);
+
         let example = match self.example {
             Some(e) => e,
             None => {
-                if template == "vanilla" {
+                if is_vanilla_template {
                     println!("Scaffolding the {} example project", "hello-world".italic());
                     ExampleType::HelloWorld
                 } else {
@@ -72,13 +76,13 @@ impl Example {
         }
 
         // Ensure the correct template is used for each example
-        if matches!(example, ExampleType::HelloWorld) && template != "vanilla"
-            || matches!(example, ExampleType::Forum) && template == "vanilla"
+        if matches!(example, ExampleType::HelloWorld) && !is_vanilla_template
+            || matches!(example, ExampleType::Forum) && is_vanilla_template
         {
             return Err(ScaffoldError::InvalidArguments(format!(
                 "{} example cannot be used with the {} template.",
                 example.to_string().italic(),
-                template.italic(),
+                &template_name.italic(),
             ))
             .into());
         }
@@ -267,7 +271,7 @@ impl Example {
             next_instructions,
         } = scaffold_example(file_tree, package_manager, &template_file_tree, &example)?;
 
-        let file_tree = ScaffoldConfig::write_to_package_json(file_tree, template)?;
+        let file_tree = ScaffoldConfig::write_to_package_json(file_tree, template_type)?;
 
         build_file_tree(file_tree, &app_dir)?;
 
