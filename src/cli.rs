@@ -109,7 +109,7 @@ impl HcScaffold {
                     HcScaffoldCommand::Example(example::Example { ref example, .. }) => {
                         match example {
                             Some(ExampleType::HelloWorld) => UiFramework::Vanilla,
-                            _ => UiFramework::choose_non_vanilla()?,
+                            _ => UiFramework::choose_non_headless()?,
                         }
                     }
                     _ => {

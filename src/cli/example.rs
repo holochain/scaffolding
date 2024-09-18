@@ -55,7 +55,14 @@ impl Example {
     pub async fn run(self, template_file_tree: FileTree, template: &str) -> anyhow::Result<()> {
         let example = match self.example {
             Some(e) => e,
-            None => ExampleType::choose()?,
+            None => {
+                if template == "vanilla" {
+                    println!("Scaffolding the {} example project", "hello-world".italic());
+                    ExampleType::HelloWorld
+                } else {
+                    ExampleType::choose_non_vanilla()?
+                }
+            }
         };
         let example_name = example.to_string();
 

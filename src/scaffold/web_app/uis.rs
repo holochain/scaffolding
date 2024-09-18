@@ -89,6 +89,22 @@ impl UiFramework {
             .interact()?;
         Ok(frameworks[selection].clone())
     }
+
+    pub fn choose_non_headless() -> ScaffoldResult<UiFramework> {
+        let frameworks = [
+            UiFramework::Lit,
+            UiFramework::Svelte,
+            UiFramework::React,
+            UiFramework::Vue,
+            UiFramework::Vanilla,
+        ];
+        let selection = Select::with_theme(&ColorfulTheme::default())
+            .with_prompt("Choose UI framework: (Use arrow-keys. Return to submit)")
+            .default(0)
+            .items(&frameworks[..])
+            .interact()?;
+        Ok(frameworks[selection].clone())
+    }
 }
 
 impl TryFrom<&FileTree> for UiFramework {
