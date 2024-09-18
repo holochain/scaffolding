@@ -14,16 +14,38 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: dtolnay/rust-toolchain@stable
+      - name: Maximize build space
+        if: runner.os == 'Linux'
+        uses: AdityaGarg8/remove-unwanted-software@v2
+        with:
+          remove-dotnet: 'true'
+          remove-android: 'true'
+          remove-codeql: 'true'
+          remove-docker-images: 'true'
 
-      - name: Unittests
-        run: cargo test --no-fail-fast
+      - name: Install nix
+        uses: cachix/install-nix-action@v27
+        with:
+          install_url: https://releases.nixos.org/nix/nix-2.24.4/install
 
-      - name: Format Rust
-        run: cargo fmt --all --check
+      - uses: cachix/cachix-action@v15
+        with:
+          name: holochain-ci
 
-      - name : Lint Rust
-        run: cargo clippy --all-targets -- -D warnings
+      - name: rustfmt check
+        run: |
+          cd $GITHUB_WORKSPACE
+          nix develop .#ci --command cargo fmt --all --check
+
+      - name: clippy check
+        run: |
+          cd $GITHUB_WORKSPACE
+          nix develop .#ci --command cargo clippy --all-features --all-targets -- -D warnings
+
+      - name: unittests
+        run: |
+          cd $GITHUB_WORKSPACE
+          nix develop .#ci --command cargo test --no-fail-fast
 
   testbuild:
     runs-on: ubuntu-latest
@@ -33,15 +55,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Extend space
-        uses: ./.github/actions/extend-space
+      - name: Maximize build space
+        if: runner.os == 'Linux'
+        uses: AdityaGarg8/remove-unwanted-software@v2
+        with:
+          remove-dotnet: 'true'
+          remove-android: 'true'
+          remove-codeql: 'true'
+          remove-docker-images: 'true'
 
       - name: Install nix
         uses: cachix/install-nix-action@v27
         with:
-          install_url: https://releases.nixos.org/nix/nix-2.23.2/install
-          extra_nix_config: |
-            experimental-features = flakes nix-command
+          install_url: https://releases.nixos.org/nix/nix-2.24.4/install
 
       - uses: cachix/cachix-action@v15
         with:
@@ -50,7 +76,7 @@ jobs:
       - name: Build and test
         run: |
           cd $GITHUB_WORKSPACE
-          nix develop --override-input "versions/scaffolding" . .#ci --command ./run_test.sh -t ${{ matrix.template }}
+          nix develop .#ci --command ./run_test.sh -t ${{ matrix.template }}
 
   testbuild_by_scope:
     runs-on: ubuntu-latest
@@ -62,13 +88,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Extend space
-        uses: ./.github/actions/extend-space
+      - name: Maximize build space
+        if: runner.os == 'Linux'
+        uses: AdityaGarg8/remove-unwanted-software@v2
+        with:
+          remove-dotnet: 'true'
+          remove-android: 'true'
+          remove-codeql: 'true'
+          remove-docker-images: 'true'
 
       - name: Install nix
         uses: cachix/install-nix-action@v27
         with:
-          install_url: https://releases.nixos.org/nix/nix-2.23.2/install
+          install_url: https://releases.nixos.org/nix/nix-2.24.4/install
 
       - uses: cachix/cachix-action@v15
         with:
@@ -77,4 +109,4 @@ jobs:
       - name: Build and test
         run: |
           cd $GITHUB_WORKSPACE
-          nix develop --override-input "versions/scaffolding" . .#ci --command ./run_test.sh -s ${{ matrix.scope }}
+          nix develop .#ci --command ./run_test.sh -s ${{ matrix.scope }}

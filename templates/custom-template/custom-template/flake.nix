@@ -1,46 +1,37 @@
 {
-  description = "Template for Holochain app development";
+  description = "Flake for Holochain app development";
 
   inputs = {
-    holochain-nix-versions.url  = "github:holochain/holochain?dir=versions/weekly";
+    holonix.url = "github:holochain/holonix?ref=main-0.3";
 
-    holochain-flake = {
-      url = "github:holochain/holochain";
-      inputs.versions.follows = "holochain-nix-versions";
-    };
-
-    nixpkgs.follows = "holochain-flake/nixpkgs";
-    flake-parts.follows = "holochain-flake/flake-parts";
-    scaffolding.url = "github:holochain/scaffolding";
+    nixpkgs.follows = "holonix/nixpkgs";
+    flake-parts.follows = "holonix/flake-parts";
   };
 
-  outputs = inputs @ { flake-parts, holochain-flake, ... }:
-    flake-parts.lib.mkFlake
-      {
-        inherit inputs;
-      }
-      {
-        systems = builtins.attrNames holochain-flake.devShells;
-        perSystem =
-          { config
-          , pkgs
-          , system
-          , inputs'
-          , ...
-          }: {
-            devShells.default = pkgs.mkShell {
-              inputsFrom = [ holochain-flake.devShells.${system}.holonix ];
+  outputs = inputs@{ flake-parts, ... }: flake-parts.lib.mkFlake { inherit inputs; } {
+    systems = builtins.attrNames inputs.holonix.devShells;
+    perSystem = { inputs', pkgs, ... }: {
+      formatter = pkgs.nixpkgs-fmt;
 
-              packages = with pkgs; [
-                nodejs_20
-              ];
-            };
+      devShells.default = pkgs.mkShell {
+        inputsFrom = [ inputs'.holonix.devShells ];
 
-            packages.hc-scaffold-custom-template = inputs.scaffolding.lib.wrapCustomTemplate {
-              inherit pkgs system;
-              customTemplatePath = ./template;
-            };
-
-          };
+        packages = (with inputs'.holonix.packages; [
+          holochain
+          lair-keystore
+          hc-launch
+          hc-scaffold
+          hn-introspect
+          rust # For Rust development, with the WASM target included for zome builds
+        ]) ++ (with pkgs; [
+          nodejs_20
+          binaryen
+          # Unused packages can be removed
+          nodePackages.pnpm
+          yarn-berry
+          bun
+        ]);
       };
+    };
+  };
 }
