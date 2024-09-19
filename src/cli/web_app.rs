@@ -11,7 +11,7 @@ use tokio::fs;
 
 use crate::{
     error::{ScaffoldError, ScaffoldResult},
-    file_tree::{build_file_tree, file_content, load_directory_into_memory, FileTree},
+    file_tree::{build_file_tree, load_directory_into_memory, FileTree},
     scaffold::{
         app::{git::setup_git_environment, nix::setup_nix_developer_environment, AppFileTree},
         config::ScaffoldConfig,
@@ -19,6 +19,7 @@ use crate::{
         web_app::{
             package_manager::{PackageManager, SubCommand},
             scaffold_web_app,
+            template_type::TemplateType,
         },
         zome::scaffold_zome_pair,
     },
@@ -54,7 +55,7 @@ pub struct WebApp {
 }
 
 impl WebApp {
-    pub async fn run(self, template_file_tree: FileTree, template: &str) -> anyhow::Result<()> {
+    pub async fn run(self, template_type: &TemplateType) -> anyhow::Result<()> {
         let current_dir = std::env::current_dir()?;
         let name = match self.name {
             Some(n) => {
@@ -70,7 +71,9 @@ impl WebApp {
             return Err(ScaffoldError::FolderAlreadyExists(app_folder.clone()))?;
         }
 
-        WebApp::is_valid_template(&template_file_tree)?;
+        let template_file_tree = template_type.file_tree()?;
+
+        template_type.check_valid_template()?;
 
         let setup_nix = if self.setup_nix {
             self.setup_nix
@@ -98,7 +101,7 @@ impl WebApp {
             self.holo_enabled,
         )?;
 
-        let file_tree = ScaffoldConfig::write_to_package_json(file_tree, template)?;
+        let file_tree = ScaffoldConfig::write_to_package_json(file_tree, template_type)?;
 
         build_file_tree(file_tree, &app_folder)?;
 
@@ -186,17 +189,6 @@ Here's how you can get started with developing your application:
         } else {
             build_file_tree(file_tree, ".")?;
             println!("DNA scaffolded.");
-        }
-
-        Ok(())
-    }
-
-    fn is_valid_template(template_file_tree: &FileTree) -> ScaffoldResult<()> {
-        if file_content(template_file_tree, &PathBuf::from("web-app/README.md.hbs")).is_err() {
-            return Err(ScaffoldError::MalformedTemplate(
-                "Template does not contain a README.md.hbs file in its \"web-app\" directory"
-                    .to_string(),
-            ))?;
         }
 
         Ok(())

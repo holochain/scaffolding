@@ -16,7 +16,7 @@ use super::app::{
 };
 
 pub mod package_manager;
-pub mod uis;
+pub mod template_type;
 
 pub fn scaffold_web_app(
     app_name: &str,

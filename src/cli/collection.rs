@@ -5,11 +5,12 @@ use convert_case::Case;
 use structopt::StructOpt;
 
 use crate::{
-    file_tree::{build_file_tree, load_directory_into_memory, FileTree},
+    file_tree::{build_file_tree, load_directory_into_memory},
     scaffold::{
         collection::{scaffold_collection, CollectionType},
         dna::DnaFileTree,
         entry_type::definitions::EntryTypeReference,
+        web_app::template_type::TemplateType,
         zome::ZomeFileTree,
     },
     templates::ScaffoldedTemplate,
@@ -43,7 +44,7 @@ pub struct Collection {
 }
 
 impl Collection {
-    pub fn run(self, template_file_tree: FileTree) -> anyhow::Result<()> {
+    pub fn run(self, template_type: &TemplateType) -> anyhow::Result<()> {
         let current_dir = std::env::current_dir()?;
         let file_tree = load_directory_into_memory(&current_dir)?;
 
@@ -67,7 +68,7 @@ impl Collection {
             next_instructions,
         } = scaffold_collection(
             zome_file_tree,
-            &template_file_tree,
+            &template_type.file_tree()?,
             &name,
             self.collection_type,
             self.entry_type,
