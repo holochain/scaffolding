@@ -59,7 +59,7 @@ const {{pascal_case collection_name}}: FC{{#if (eq collection_type.type "ByAutho
   return (
     <div>
       {error ? (
-        <div class="alert">Error fetching the {{lower_case (plural referenceable.name)}}: {error.message}</div>
+        <div className="alert">Error fetching the {{lower_case (plural referenceable.name)}}: {error.message}</div>
       ) : hashes.length > 0 ? (
         <div>
           {hashes.map((hash, i) => (
@@ -67,7 +67,7 @@ const {{pascal_case collection_name}}: FC{{#if (eq collection_type.type "ByAutho
           ))}
         </div>
       ) : (
-        <div class="alert">No {{lower_case (plural referenceable.name)}} found{{#if (eq collection_type.type "ByAuthor")}} for this author{{/if}}.</div>
+        <div className="alert">No {{lower_case (plural referenceable.name)}} found{{#if (eq collection_type.type "ByAuthor")}} for this author{{/if}}.</div>
       )}
     </div>
   );
