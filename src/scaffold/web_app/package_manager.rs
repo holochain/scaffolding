@@ -46,6 +46,18 @@ impl PackageManager {
         Ok(managers[selection])
     }
 
+    /// Get's the the package manager's nixpkg that should be used with the generated
+    /// flake.nix
+    pub fn nixpkg(&self) -> Option<&str> {
+        match self {
+            PackageManager::Bun => Some("bun"),
+            PackageManager::Pnpm => Some("nodePackages.pnpm"),
+            PackageManager::Yarn => Some("yarn-berry"),
+            // npm is already included with nodejs_20
+            PackageManager::Npm => None,
+        }
+    }
+
     /// Checks if the specified lockfile exists in the provided file tree.
     pub fn lockfile_exists(app_file_tree: &FileTree, path: &Path) -> bool {
         let v = path
