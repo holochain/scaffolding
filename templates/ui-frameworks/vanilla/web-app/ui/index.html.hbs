@@ -18,7 +18,7 @@
       import { AppWebsocket } from '@holochain/client';
 
       async function connect() {
-        const AppWebsocket = await AppWebsocket.connect();
+        const client = await AppWebsocket.connect();
         alert("Connected to holochain!");
       }
 
