@@ -211,7 +211,10 @@ impl Serialize for TemplateType {
             TemplateType::Vue => serializer.serialize_str("vue"),
             TemplateType::React => serializer.serialize_str("react"),
             TemplateType::Headless => serializer.serialize_str("headless"),
-            TemplateType::Custom(path) => serializer.serialize_str(path.to_str().unwrap()),
+            TemplateType::Custom(path) => path
+                .to_str()
+                .ok_or_else(|| serde::ser::Error::custom("Invalid UTF-8 in path"))
+                .and_then(|s| serializer.serialize_str(s)),
         }
     }
 }
