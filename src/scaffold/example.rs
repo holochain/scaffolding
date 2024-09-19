@@ -12,17 +12,25 @@ pub enum ExampleType {
 
 impl ExampleType {
     pub fn choose() -> ScaffoldResult<Self> {
+        let examples = [ExampleType::Forum, ExampleType::HelloWorld];
         let selection = Select::with_theme(&ColorfulTheme::default())
             .with_prompt("Choose example:")
-            .item(ExampleType::HelloWorld)
-            .item(ExampleType::Forum)
+            .items(&examples)
             .default(0)
             .interact()?;
 
-        match selection {
-            0 => Ok(ExampleType::HelloWorld),
-            _ => Ok(ExampleType::Forum),
-        }
+        Ok(examples[selection].clone())
+    }
+
+    pub fn choose_non_vanilla() -> ScaffoldResult<Self> {
+        let examples = [ExampleType::Forum];
+        let selection = Select::with_theme(&ColorfulTheme::default())
+            .with_prompt("Choose example:")
+            .items(&examples)
+            .default(0)
+            .interact()?;
+
+        Ok(examples[selection].clone())
     }
 }
 

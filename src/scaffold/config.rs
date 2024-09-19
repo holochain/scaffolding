@@ -1,7 +1,4 @@
-use std::{
-    fs,
-    path::{Path, PathBuf},
-};
+use std::{fs, path::PathBuf};
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -11,9 +8,11 @@ use crate::{
     file_tree::{map_file, FileTree},
 };
 
+use super::web_app::template_type::TemplateType;
+
 #[derive(Debug, Deserialize, Serialize)]
 pub struct ScaffoldConfig {
-    pub template: String,
+    pub template: TemplateType,
 }
 
 impl ScaffoldConfig {
@@ -35,15 +34,13 @@ impl ScaffoldConfig {
 
     pub fn write_to_package_json(
         mut web_app_file_tree: FileTree,
-        template: &str,
+        template_type: &TemplateType,
     ) -> ScaffoldResult<FileTree> {
-        if Path::new(template).exists() {
-            return Ok(web_app_file_tree);
-        }
         let config = ScaffoldConfig {
-            template: template.to_owned(),
+            template: template_type.clone(),
         };
         let package_json_path = PathBuf::from("package.json");
+
         map_file(&mut web_app_file_tree, &package_json_path, |c| {
             let original_content = c.clone();
             let json = serde_json::from_str::<Value>(&c)?;
@@ -61,6 +58,7 @@ impl ScaffoldConfig {
             let json = serde_json::to_string_pretty(&json)?;
             Ok(json)
         })?;
+
         Ok(web_app_file_tree)
     }
 }
