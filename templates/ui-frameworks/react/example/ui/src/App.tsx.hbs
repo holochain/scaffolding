@@ -3,7 +3,7 @@ import { ClientContext } from './ClientContext';
 import AllPosts from './forum/posts/AllPosts';
 import CreatePost from './forum/posts/CreatePost';
 
-import './App.css';
+import './app.css';
 
 const App = () => {
   const { error, loading } = useContext(ClientContext);
@@ -11,7 +11,7 @@ const App = () => {
     return <progress />;
   }
   if (error) {
-    return <article>Error starting app: {error.message}</article>;
+    return <div className="alert">Error starting app: {error.message}</div>;
   }
   return (
     <div>

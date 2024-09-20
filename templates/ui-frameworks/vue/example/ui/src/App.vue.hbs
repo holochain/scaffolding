@@ -1,19 +1,10 @@
 <template>
   <div>
-    <div v-if="loading">
-      <mwc-circular-progress indeterminate></mwc-circular-progress>
-    </div>
+    <progress v-if="loading"></progress>
     <div v-else>
-      <main>
-        <h1>Forum</h1>
-
-        <div id="content">
-          <h2>All Posts</h2>
-          <AllPosts></AllPosts>
-          <span style="margin-bottom: 16px"></span>
-          <CreatePost></CreatePost>
-        </div>
-      </main>
+      <h2>Welcome to the Forum hApp</h2>
+      <AllPosts></AllPosts>
+      <CreatePost></CreatePost>
     </div>
   </div>
 </template>
@@ -21,11 +12,10 @@
 <script lang="ts">
 import { defineComponent, computed } from 'vue';
 import { AppWebsocket, AppClient } from '@holochain/client';
-import '@material/mwc-circular-progress';
 import AllPosts from './forum/posts/AllPosts.vue';
 import CreatePost from './forum/posts/CreatePost.vue';
 
-export default defineComponent({
+export default {
   components: {
     AllPosts,
     CreatePost
@@ -36,17 +26,23 @@ export default defineComponent({
   } {
     return {
       client: undefined,
-      loading: true,
+      loading: false,
     };
   },
   async mounted() {
-    this.client = await AppWebsocket.connect();
-    this.loading = false;
+    this.loading = true;
+    try {
+      this.client = await AppWebsocket.connect();
+    } catch (e) {
+      console.error(e)
+    } finally {
+      this.loading = false;
+    }
   },
   provide() {
     return {
       client: computed(() => this.client),
     };
   },
-});
+};
 </script>

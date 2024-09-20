@@ -2,7 +2,6 @@ import { LitElement, css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { AppClient, AppWebsocket } from '@holochain/client';
 import { provide } from '@lit-labs/context';
-import '@material/mwc-circular-progress';
 
 import { clientContext } from './contexts';
 
@@ -22,10 +21,10 @@ export class HolochainApp extends LitElement {
 
   async firstUpdated() {
     this.client = await AppWebsocket.connect();
-    
+
     this.loading = false;
   }
-  
+
   render() {
     if (this.loading)
       return html`

@@ -1,19 +1,28 @@
 <script lang="ts">
 import { onMount, getContext } from 'svelte';
-import '@material/mwc-circular-progress';
-import type { Link, ActionHash, EntryHash, AppClient, Record, AgentPubKey, NewEntryAction, HolochainError } from '@holochain/client';
+import type {
+  Link,
+  ActionHash,
+  EntryHash,
+  AppClient,
+  Record,
+  AgentPubKey,
+  NewEntryAction,
+  HolochainError,
+  SignalType,
+} from '@holochain/client';
+import { SignalType } from '@holochain/client';
 import { clientContext } from '../../contexts';
 import type { {{pascal_case ../entry_type.name}}, {{pascal_case ../coordinator_zome_manifest.name}}Signal } from './types';
 import {{pascal_case ../entry_type.name}}Detail from './{{pascal_case ../entry_type.name}}Detail.svelte';
 
-export let {{camel_case linked_from.singular_arg}}: {{linked_from.hash_type}};
-
-let client: AppClient = (getContext(clientContext) as any).getClient();
+const client: AppClient = (getContext(clientContext) as any).getClient();
 
 let hashes: Array<ActionHash> | undefined = [];
-
 let loading: boolean;
 let error: any = undefined;
+
+export let {{camel_case linked_from.singular_arg}}: {{linked_from.hash_type}};
 
 $: hashes, loading, error;
 
@@ -45,26 +54,22 @@ async function fetch{{pascal_case (plural ../entry_type.name)}}() {
     hashes = links.map(l => l.target);
   } catch (e) {
     error = e as HolochainError;
+  } finally {
+    loading = false;
   }
-  loading = false;
 }
-
 </script>
 
 {#if loading }
-<div style="display: flex; flex: 1; align-items: center; justify-content: center">
-  <mwc-circular-progress indeterminate></mwc-circular-progress>
-</div>
+<progress />
 {:else if error}
-<span>Error fetching {{lower_case (plural ../entry_type.name)}}: ${error.message}.</span>
+<div class="alert">Error fetching {{lower_case (plural ../entry_type.name)}}: ${error.message}.</div>
 {:else if hashes.length === 0}
-<span>No {{lower_case (plural ../entry_type.name)}} found for this {{lower_case linked_from.name}}.</span>
+<div class="alert">No {{lower_case (plural ../entry_type.name)}} found for this {{lower_case linked_from.name}}.</div>
 {:else}
-<div style="display: flex; flex-direction: column">
+<div>
   {#each hashes as hash}
-    <div style="margin-bottom: 8px;">
-      <{{pascal_case ../entry_type.name}}Detail {{camel_case ../entry_type.name}}Hash={hash} on:{{kebab_case ../entry_type.name}}-deleted={fetch{{pascal_case (plural ../entry_type.name)}}}></{{pascal_case ../entry_type.name}}Detail>
-    </div>
+    <{{pascal_case ../entry_type.name}}Detail {{camel_case ../entry_type.name}}Hash={hash} on:{{kebab_case ../entry_type.name}}-deleted={fetch{{pascal_case (plural ../entry_type.name)}}} />
   {/each}
 </div>
 {/if}

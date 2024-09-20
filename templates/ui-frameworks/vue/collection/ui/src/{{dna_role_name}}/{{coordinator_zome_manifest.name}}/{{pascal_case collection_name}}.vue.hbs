@@ -1,35 +1,30 @@
 <template>
-  <div v-if="loading" style="display: flex; flex: 1; align-items: center; justify-content: center">
-    <mwc-circular-progress indeterminate></mwc-circular-progress>
-  </div>
-
-  <div v-else style="display: flex; flex-direction: column">
-    <span v-if="error">Error fetching the {{lower_case (plural referenceable.name)}}: {{{{raw}}}} {{error.message}}.{{{{/raw}}}}</span>
-    <div v-else-if="hashes && hashes.length > 0" style="margin-bottom: 8px">
-      <{{pascal_case referenceable.name}}Detail 
-        v-for="(hash, i) in hashes" 
+  <progress v-if="loading"></progress>
+  <div v-else>
+    <div class="alert" v-if="error">Error fetching the {{lower_case (plural referenceable.name)}}: {{{{raw}}}} {{error.message}}.{{{{/raw}}}}</div>
+    <div v-else-if="hashes && hashes.length > 0">
+      <{{pascal_case referenceable.name}}Detail
+        v-for="(hash, i) in hashes"
         :key="i"
         :{{kebab_case referenceable.name}}-hash="hash"
         @{{kebab_case referenceable.name}}-deleted="fetch{{pascal_case referenceable.name}}()"
       >
       </{{pascal_case referenceable.name}}Detail>
     </div>
-    <span v-else>No {{lower_case (plural referenceable.name)}} found{{#if (eq collection_type.type "ByAuthor")}} for this author{{/if}}.</span>
+    <div class="alert" v-else>No {{lower_case (plural referenceable.name)}} found{{#if (eq collection_type.type "ByAuthor")}} for this author{{/if}}.</div>
   </div>
-
 </template>
 
 <script lang="ts">
-import { defineComponent, inject, toRaw, ComputedRef } from 'vue';
+import { inject, toRaw, ComputedRef } from 'vue';
 import { decode } from '@msgpack/msgpack';
-import { AppClient, NewEntryAction, Link, Record, AgentPubKey, EntryHash, ActionHash, HolochainError } from '@holochain/client';
-import '@material/mwc-circular-progress';
+import { AppClient, NewEntryAction, Link, Record, AgentPubKey, EntryHash, ActionHash, HolochainError, SignalType } from '@holochain/client';
 import {{pascal_case referenceable.name}}Detail from './{{pascal_case referenceable.name}}Detail.vue';
 import { {{pascal_case coordinator_zome_manifest.name}}Signal } from './types';
 
-export default defineComponent({
+export default {
   components: {
-    {{pascal_case referenceable.name}}Detail
+    {{pascal_case referenceable.name}}Detail,
   },
 {{#if (eq collection_type.type "ByAuthor")}}
   props: {
@@ -42,20 +37,20 @@ export default defineComponent({
   data(): { hashes: Array<{{referenceable.hash_type}}> | undefined; loading: boolean; error: any } {
     return {
       hashes: undefined,
-      loading: true,
+      loading: false,
       error: undefined
     }
   },
   async mounted() {
   {{#if (eq collection_type.type "ByAuthor")}}
-    if (this.author === undefined) {
+    if (!this.author) {
       throw new Error(`The author property is required for the {{pascal_case collection_name}} element`);
     }
 
   {{/if}}
     await this.fetch{{pascal_case referenceable.name}}();
     toRaw(this.client).on('signal', signal => {
-      if (signal.zome_name !== '{{coordinator_zome_manifest.name}}') return; 
+      if (signal.zome_name !== '{{coordinator_zome_manifest.name}}') return;
       const payload = signal.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;
       if (payload.type !== 'EntryCreated') return;
       if (payload.app_entry.type !== '{{pascal_case referenceable.name}}') return;
@@ -68,6 +63,7 @@ export default defineComponent({
   methods: {
     async fetch{{pascal_case referenceable.name}}() {
       try {
+        this.loading = true;
         const links: Array<Link> = await this.client.callZome({
           cap_secret: null,
           role_name: '{{dna_role_name}}',
@@ -78,15 +74,14 @@ export default defineComponent({
         this.hashes = links.map(l => l.target);
       } catch (e) {
         this.error = e as HolochainError;
+      } finally {
+        this.loading = false;
       }
-      this.loading = false;
     }
   },
   setup() {
     const client = (inject('client') as ComputedRef<AppClient>).value;
-    return {
-      client,
-    };
+    return { client };
   },
-})
+};
 </script>
