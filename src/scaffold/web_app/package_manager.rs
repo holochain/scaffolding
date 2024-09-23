@@ -52,7 +52,7 @@ impl PackageManager {
         match self {
             PackageManager::Bun => Some("bun"),
             PackageManager::Pnpm => Some("nodePackages.pnpm"),
-            PackageManager::Yarn => Some("yarn-berry"),
+            PackageManager::Yarn => Some("yarn"),
             // npm is already included with nodejs_20
             PackageManager::Npm => None,
         }
