@@ -40,7 +40,7 @@ impl PackageManager {
         ];
         let selection = Select::with_theme(&ColorfulTheme::default())
             .with_prompt("Choose a package manager: (Use arrow-keys. Return to submit)")
-            .default(0)
+            .default(1)
             .items(&managers)
             .interact()?;
         Ok(managers[selection])
