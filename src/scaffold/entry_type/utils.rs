@@ -40,9 +40,9 @@ fn inner_choose_referenceable(
         .collect();
 
     all_options.push("Agent".to_string());
+    all_options.push("AnyLinkableHash".to_string());
 
     if optional {
-        all_options.push("External".to_string());
         all_options.push("[None]".to_string());
     }
 
@@ -61,7 +61,13 @@ fn inner_choose_referenceable(
             check_for_reserved_words(&role)?;
             Ok(Some(Referenceable::Agent { role }))
         }
-        "External" => Ok(Some(Referenceable::External)),
+        "AnyLinkableHash" => {
+            let name = input_with_case(
+                "What name should be given to the link for this hash?",
+                Case::Snake,
+            )?;
+            Ok(Some(Referenceable::AnyLinkableHash { name }))
+        }
         "[None]" => Ok(None),
         entry_type => Ok(Some(Referenceable::EntryType(EntryTypeReference {
             entry_type: entry_type.to_owned(),

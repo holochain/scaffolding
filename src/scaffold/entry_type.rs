@@ -215,7 +215,7 @@ fn check_field_definitions(
         .iter()
         .filter_map(|f| f.linked_from.clone())
         .filter_map(|t| match t {
-            Referenceable::Agent { .. } | Referenceable::External => None,
+            Referenceable::Agent { .. } | Referenceable::AnyLinkableHash { .. } => None,
             Referenceable::EntryType(et) => Some(et),
         })
         .collect();
