@@ -7,10 +7,11 @@ use std::process::{Command, Stdio};
 
 use crate::error::{ScaffoldError, ScaffoldResult};
 use crate::file_tree::*;
+use crate::scaffold::web_app::package_manager::PackageManager;
 
 use super::git::is_inside_work_tree;
 
-pub fn flake_nix(holo_enabled: bool) -> FileTree {
+pub fn flake_nix(holo_enabled: bool, package_manager: &PackageManager) -> FileTree {
     let holo_inputs = holo_enabled
         .then_some(
             r#"
@@ -52,17 +53,21 @@ pub fn flake_nix(holo_enabled: bool) -> FileTree {
           rust # For Rust development, with the WASM target included for zome builds
         ]) ++ (with pkgs; [
           nodejs_20
-          nodePackages.pnpm
-          yarn-berry
-          bun
           binaryen
           {}
+          {}
         ]);
+
+        shellHook = ''
+          export PS1='\[\033[1;34m\][holonix:\w]\$\[\033[0m\] '
+        '';
       }};
     }};
   }};
 }}"#,
-        holo_inputs, holo_packages
+        holo_inputs,
+        package_manager.nixpkg().unwrap_or_default(),
+        holo_packages
     ))
 }
 

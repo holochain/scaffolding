@@ -2,6 +2,34 @@
 
 A command-line interface for creating and modifying a Holochain application (hApp).
 
+See the full CLI reference [here](/guides/cli.md)
+
+## Getting Started
+
+### holonix
+
+The easiest way to start using the scaffolding tool is through [holonix](https://github.com/holochain/holonix):
+
+```bash
+nix run github:holochain/holonix#hc-scaffold -- --version
+```
+
+### cargo
+
+You can also install the CLI globally via cargo.
+
+```bash
+cargo install holochain_scaffolding_cli
+
+hc-scaffold --version
+```
+
+## Usage
+
+Refer to [the holochain developer instructions](https://developer.holochain.org/get-building/) to know how you can use the scaffolding tool to create your own apps.
+
+These are the commands that you can run with the scaffolding tool inside of a holonix develop shell:
+
 ```
 USAGE:
     hc-scaffold [OPTIONS] <SUBCOMMAND>
@@ -27,49 +55,6 @@ SUBCOMMANDS:
     zome          Scaffold one or multiple zomes into an existing DNA
 ```
 
-See the full CLI reference [here](/guides/cli.md)
-
-## Obtaining the scaffolding tool through holonix
-
-The easiest way to start using the scaffolding tool is through holonix:
-
-```bash
-nix run github:holochain/holochain#hc-scaffold -- --version
-```
-
-Should print the version of the scaffolding tool.
-
-## Usage
-
-Refer to [the holochain developer instructions](https://developer.holochain.org/get-building/) to know how you can use the scaffolding tool to create your own apps.
-
-These are the commands that you can run with the scaffolding tool inside of a holonix develop shell:
-
-```bash
-# Scaffold an example app
-hc scaffold example
-
-# Scaffold an empty web-app
-hc scaffold web-app forum
-
-cd forum
-
-# Scaffold a dna inside the newly scaffolded app
-hc scaffold dna forum
-
-# Scaffold a zome inside the newly scaffolded dna
-hc scaffold zome posts
-
-# Scaffold an entry-type inside the newly scaffolded zome
-hc scaffold entry-type post
-
-# Scaffold a collection for the newly scaffolded entry-type
-hc scaffold collection global all_posts
-
-# Scaffold a new link-type
-hc scaffold link-type
-```
-
 ## Custom Templates
 
 See the [docs.rs documentation](https://docs.rs/holochain_scaffolding_cli) to learn how to use and create custom templates.
@@ -81,11 +66,3 @@ We have a contributing [guide](guides/contributing.md) to help you get started. 
 ## Maintenance
 
 We have a maintenance [guide](guides/maintenance.md) which is mainly aimed at maintainers of the project but may be useful for some contributors or users to read.
-
-## Manual installation
-
-Install the CLI globally with this command.
-
-```bash
-cargo install holochain_scaffolding_cli
-```

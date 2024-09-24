@@ -6,10 +6,11 @@ use convert_case::Case;
 use structopt::StructOpt;
 
 use crate::{
-    file_tree::{load_directory_into_memory, FileTree},
+    file_tree::load_directory_into_memory,
     scaffold::{
         app::cargo::exec_metadata,
         dna::DnaFileTree,
+        web_app::template_type::TemplateType,
         zome::{
             integrity_zome_name, scaffold_coordinator_zome, scaffold_integrity_zome,
             utils::{select_integrity_zomes, select_scaffold_zome_options},
@@ -39,9 +40,10 @@ pub struct Zome {
 }
 
 impl Zome {
-    pub fn run(self, template_file_tree: FileTree) -> anyhow::Result<()> {
+    pub fn run(self, template_type: &TemplateType) -> anyhow::Result<()> {
         let current_dir = std::env::current_dir()?;
         let file_tree = load_directory_into_memory(&current_dir)?;
+        let template_file_tree = template_type.file_tree()?;
 
         if let Some(n) = self.name.clone() {
             check_case(&n, "zome name", Case::Snake)?;
