@@ -4,7 +4,7 @@
   {{#if variable_to_read}}
   .value=${ {{variable_to_read}} }
   {{/if}}
-  @change=${(e: CustomEvent) => { {{variable_to_change}} = (e.target as any).value;} }
+  @input=${(e: CustomEvent) => { {{variable_to_change}} = (e.target as any).value;} }
   {{#if required}}
   required
   {{/if}}

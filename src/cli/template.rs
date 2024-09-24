@@ -4,7 +4,7 @@ use build_fs_tree::{dir, Build, MergeableFileSystemTree};
 use dialoguer::{theme::ColorfulTheme, Input};
 use structopt::StructOpt;
 
-use crate::file_tree::FileTree;
+use crate::scaffold::web_app::template_type::TemplateType;
 
 #[derive(Debug, StructOpt)]
 #[structopt(setting = structopt::clap::AppSettings::InferSubcommands)]
@@ -19,7 +19,7 @@ pub enum Template {
 }
 
 impl Template {
-    pub fn run(self, template_file_tree: FileTree) -> anyhow::Result<()> {
+    pub fn run(self, template_type: &TemplateType) -> anyhow::Result<()> {
         let target_template = match self.target_template() {
             Some(t) => t,
             None => {
@@ -31,7 +31,7 @@ impl Template {
         };
 
         let template_file_tree = dir! {
-            target_template.clone() => template_file_tree
+            target_template.clone() => template_type.file_tree()?
         };
 
         let file_tree = MergeableFileSystemTree::<OsString, String>::from(template_file_tree);

@@ -25,11 +25,12 @@
           rust # For Rust development, with the WASM target included for zome builds
         ]) ++ (with pkgs; [
           nodejs_20
-          nodePackages.pnpm
-          yarn
-          bun
           binaryen
         ]);
+
+        shellHook = ''
+          export PS1='\[\033[1;34m\][holonix:\w]\$\[\033[0m\] '
+        '';
       };
     };
   };
