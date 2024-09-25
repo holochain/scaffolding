@@ -1,6 +1,6 @@
 use crate::error::{ScaffoldError, ScaffoldResult};
 
-const RESERVED_WORDS: [&str; 27] = [
+const RESERVED_WORDS: [&str; 28] = [
     "type",
     "role",
     "enum",
@@ -27,6 +27,7 @@ const RESERVED_WORDS: [&str; 27] = [
     "EntryHash",
     "ActionHash",
     "AgentPubKey",
+    "AnyLinkableHash",
     "Call",
 ];
 
