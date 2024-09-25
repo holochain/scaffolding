@@ -54,7 +54,7 @@
                 inherit system;
                 overlays = [ (import rust-overlay) ];
               };
-              rustToolchain = pkgs.rust-bin.stable."1.79.0".minimal;
+              rustToolchain = pkgs.rust-bin.stable."1.80.0".minimal;
               craneLib = (crane.mkLib pkgs).overrideToolchain rustToolchain;
               crateInfo = craneLib.crateNameFromCargoToml { cargoToml = ./Cargo.toml; };
 
