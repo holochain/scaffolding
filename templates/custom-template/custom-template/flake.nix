@@ -14,14 +14,9 @@
       formatter = pkgs.nixpkgs-fmt;
 
       devShells.default = pkgs.mkShell {
-        packages = (with inputs'.holonix.packages; [
-          holochain
-          lair-keystore
-          hc-launch
-          hc-scaffold
-          hn-introspect
-          rust # For Rust development, with the WASM target included for zome builds
-        ]) ++ (with pkgs; [
+        inputsfrom = [ inputs'.holonix.devshells.default ];
+
+        packages = (with pkgs; [
           nodejs_20
           binaryen
         ]);
