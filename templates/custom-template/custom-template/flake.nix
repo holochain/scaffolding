@@ -14,7 +14,7 @@
       formatter = pkgs.nixpkgs-fmt;
 
       devShells.default = pkgs.mkShell {
-        inputsfrom = [ inputs'.holonix.devshells.default ];
+        inputsFrom = [ inputs'.holonix.devShells.default ];
 
         packages = (with pkgs; [
           nodejs_20
