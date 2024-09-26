@@ -26,7 +26,7 @@ pub fn flake_nix(holo_enabled: bool, package_manager: &PackageManager) -> FileTr
 
     file!(format!(
         r#"{{
-      description = "Flake for Holochain app development";
+  description = "Flake for Holochain app development";
 
   inputs = {{
     holonix.url = "github:holochain/holonix?ref=main";
