@@ -64,31 +64,22 @@
                 inherit system;
                 overlays = [ (import rust-overlay) ];
               };
-              rustToolchain = pkgs.rust-bin.stable."1.79.0".minimal;
+              rustToolchain = pkgs.rust-bin.stable."1.80.0".minimal;
               craneLib = (crane.mkLib pkgs).overrideToolchain rustToolchain;
               crateInfo = craneLib.crateNameFromCargoToml { cargoToml = ./Cargo.toml; };
 
               # source filtering to ensure builds using include_str! or include_bytes! succeed
               # https://crane.dev/faq/building-with-non-rust-includes.html
-              excludedDirs = [
-                ".git"
-                "target"
-                "result"
-                # Add more directories to exclude here
-              ];
-              scaffoldFilter = path: type:
-                let
-                  baseName = baseNameOf path;
-                  isExcluded = builtins.elem baseName excludedDirs;
-                in
-                  !(type == "directory" && isExcluded);
+              nonCargoBuildFiles = path: _type: builtins.match ".*(gitignore|md|hbs)$" path != null;
+              includeFilesFilter = path: type:
+                (craneLib.filterCargoSources path type) || (nonCargoBuildFiles path type);
             in
             craneLib.buildPackage {
               pname = "hc-scaffold";
               version = crateInfo.version;
               src = lib.cleanSourceWith {
                 src = ./.;
-                filter = scaffoldFilter;
+                filter = includeFilesFilter;
                 name = "source";
               };
               doCheck = false;
