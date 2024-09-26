@@ -8,36 +8,39 @@ To test the current local version of the Scaffolding tool:
 
 2. Start the Nix development environment:
 
-   ```shell
-   nix develop
-   ```
-   This shell includes the Scaffolding tool built from your current local repository.
+    ```shell
+    nix develop
+    ```
+
+    This shell includes the Scaffolding tool built from your current local repository.
 
 3. Change to a directory where you want to create your test project, e.g.:
 
-   ```shell
-   cd /tmp
-   ```
+    ```shell
+    cd /tmp
+    ```
 
 4. Scaffold a new app:
 
-   ```shell
-   hc-scaffold web-app
-   ```
+    ```shell
+    hc-scaffold web-app
+    ```
 
-5. Follow the Scaffolding tool's output instructions, but skip the `nix develop` step to ensure you continue using the locally built `hc-scaffold`.
+5. Follow the Scaffolding tool's output instructions, but skip the `nix develop` step to ensure you continue using the locally built `hc-scaffold` instead of that from `holochain/holonix`.
 
-6. Run tests or launch your hApp using `nix develop` as needed.
+6. Run tests or launch your hApp using `nix develop` as needed. This shell contians a `hc-scaffold` built from `holochain/holonix` alongside other nix packages needed for local development of your hApp such as node.js and package managers like pnpm, bun or yarn.
 
 ## Testing with Different Holochain Versions
 
 To test your hApp against a different version of Holochain:
 
 1. Override the Holochain input when entering the Nix shell:
-   ```shell
-   nix develop --override-input holonix/holochain github:holochain/holochain/<tag>
-   ```
-   Replace `<tag>` with the desired Holochain version, e.g., `holochain-0.4.0-dev.22`.
+
+    ```shell
+    nix develop --override-input holonix/holochain github:holochain/holochain/<tag>
+    ```
+
+    Replace `<tag>` with the desired Holochain version, e.g., `holochain-0.4.0-dev.22`.
 
 2. Proceed with scaffolding and testing as described above, skipping the `nix develop` step in the Scaffolding output.
 
@@ -54,6 +57,6 @@ Ensure you're using the correct version tags. Refer to the [parent flake](https:
 
 ## Notes
 
-- Always verify the version of tools you're using with commands like `hc-scaffold --version` or `holochain --version`.
-- Multiple overrides can be combined in a single command if needed.
-- These overrides are temporary and only apply to the current Nix shell session.
+-   Always verify the version of tools you're using with commands like `hc-scaffold --version` or `holochain --version`.
+-   Multiple overrides can be combined in a single command if needed.
+-   These overrides are temporary and only apply to the current Nix shell session.
