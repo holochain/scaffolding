@@ -14,23 +14,16 @@
       formatter = pkgs.nixpkgs-fmt;
 
       devShells.default = pkgs.mkShell {
-        inputsFrom = [ inputs'.holonix.devShells ];
+        inputsFrom = [ inputs'.holonix.devShells.default ];
 
-        packages = (with inputs'.holonix.packages; [
-          holochain
-          lair-keystore
-          hc-launch
-          hc-scaffold
-          hn-introspect
-          rust # For Rust development, with the WASM target included for zome builds
-        ]) ++ (with pkgs; [
+        packages = (with pkgs; [
           nodejs_20
           binaryen
-          # Unused packages can be removed
-          nodePackages.pnpm
-          yarn-berry
-          bun
         ]);
+
+        shellHook = ''
+          export PS1='\[\033[1;34m\][holonix:\w]\$\[\033[0m\] '
+        '';
       };
     };
   };

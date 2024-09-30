@@ -161,7 +161,7 @@ pub fn input_no_whitespace(prompt: &str) -> ScaffoldResult<String> {
 pub fn check_case(input: &str, identifier: &str, case: Case) -> ScaffoldResult<()> {
     if !input.is_case(case) {
         return Err(ScaffoldError::InvalidStringFormat(format!(
-            "{identifier} must be snake_case",
+            "{identifier} must be {case:?} Case",
         )));
     }
     Ok(())

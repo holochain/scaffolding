@@ -7,8 +7,11 @@ use std::process::{Command, Stdio};
 
 use crate::error::{ScaffoldError, ScaffoldResult};
 use crate::file_tree::*;
+use crate::scaffold::web_app::package_manager::PackageManager;
 
-pub fn flake_nix(holo_enabled: bool) -> FileTree {
+use super::git::is_inside_work_tree;
+
+pub fn flake_nix(holo_enabled: bool, package_manager: &PackageManager) -> FileTree {
     let holo_inputs = holo_enabled
         .then_some(
             r#"
@@ -23,44 +26,41 @@ pub fn flake_nix(holo_enabled: bool) -> FileTree {
 
     file!(format!(
         r#"{{
-      description = "Flake for Holochain app development";
+  description = "Flake for Holochain app development";
 
-      inputs = {{
-        holonix.url = "github:holochain/holonix?ref=main-0.3";
-        nixpkgs.follows = "holonix/nixpkgs";
-        flake-parts.follows = "holonix/flake-parts";
-        {}
+  inputs = {{
+    holonix.url = "github:holochain/holonix?ref=main-0.3";
+
+    nixpkgs.follows = "holonix/nixpkgs";
+    flake-parts.follows = "holonix/flake-parts";
+    {}
+  }};
+
+  outputs = inputs@{{ flake-parts, ... }}: flake-parts.lib.mkFlake {{ inherit inputs; }} {{
+    systems = builtins.attrNames inputs.holonix.devShells;
+    perSystem = {{ inputs', pkgs, ... }}: {{
+      formatter = pkgs.nixpkgs-fmt;
+
+      devShells.default = pkgs.mkShell {{
+        inputsFrom = [ inputs'.holonix.devShells.default ];
+
+        packages = (with pkgs; [
+          nodejs_20
+          binaryen
+          {}
+          {}
+        ]);
+
+        shellHook = ''
+          export PS1='\[\033[1;34m\][holonix:\w]\$\[\033[0m\] '
+        '';
       }};
-
-      outputs = inputs@{{ flake-parts, ... }}: flake-parts.lib.mkFlake {{ inherit inputs; }} {{
-        systems = builtins.attrNames inputs.holonix.devShells;
-        perSystem = {{ inputs', pkgs, ... }}: {{
-          formatter = pkgs.nixpkgs-fmt;
-
-          devShells.default = pkgs.mkShell {{
-            inputsFrom = [ inputs'.holonix.devShells ];
-
-            packages = (with inputs'.holonix.packages; [
-              holochain
-              lair-keystore
-              hc-launch
-              hc-scaffold
-              hn-introspect
-              rust # For Rust development, with the WASM target included for zome builds
-            ]) ++ (with pkgs; [
-              nodejs_20
-              binaryen
-              # Unused packages can be removed
-              nodePackages.pnpm
-              yarn-berry
-              bun
-              {}
-            ]);
-          }};
-        }};
-      }};
-    }}"#,
-        holo_inputs, holo_packages
+    }};
+  }};
+}}"#,
+        holo_inputs,
+        package_manager.nixpkg().unwrap_or_default(),
+        holo_packages
     ))
 }
 
@@ -74,16 +74,8 @@ pub fn setup_nix_developer_environment(dir: &Path) -> ScaffoldResult<()> {
     // This is here to catch the issue from this thread https://discourse.nixos.org/t/nix-flakes-nix-store-source-no-such-file-or-directory/17836
     // If you run Scaffolding inside a Git repository when the `nix flake update` will fail. At some point Nix should report this so we don't need
     // to worry about it but for now this helps solve a strange error message.
-    if let Ok(output) = Command::new("git")
-        .stdout(Stdio::piped())
-        .stderr(Stdio::null())
-        .current_dir(dir)
-        .args(["rev-parse", "--is-inside-work-tree"])
-        .output()
-    {
-        if output.status.success() && output.stdout == b"true\n" {
-            return Err(ScaffoldError::NixSetupError("- detected that Scaffolding is running inside an existing Git repository, please choose a different location to scaffold".to_string()));
-        }
+    if is_inside_work_tree(dir) {
+        return Err(ScaffoldError::NixSetupError("- detected that Scaffolding is running inside an existing Git repository, please choose a different location to scaffold".to_string()));
     }
 
     println!("Setting up nix development environment...");

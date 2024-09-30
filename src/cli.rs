@@ -1,14 +1,13 @@
 #![doc = include_str!("../guides/cli.md")]
 
 use crate::error::ScaffoldError;
-use crate::file_tree::{load_directory_into_memory, FileTree};
+use crate::file_tree::load_directory_into_memory;
 use crate::scaffold::config::ScaffoldConfig;
 use crate::scaffold::example::ExampleType;
-use crate::scaffold::web_app::uis::UiFramework;
+use crate::scaffold::web_app::template_type::TemplateType;
 
 use colored::Colorize;
-use std::path::{Path, PathBuf};
-use std::str::FromStr;
+use std::{path::Path, str::FromStr};
 use structopt::StructOpt;
 
 mod collection;
@@ -22,11 +21,11 @@ mod zome;
 
 #[derive(Debug, StructOpt)]
 pub struct HcScaffold {
-    #[structopt(short, long)]
+    #[structopt(short, long, parse(try_from_str = TemplateType::from_str))]
     /// The template to use for the hc-scaffold commands
     /// Can either be an option from the built-in templates: "vanilla", "vue", "lit", "svelte", "react", "headless"
     /// Or a path to a custom template
-    template: Option<String>,
+    template: Option<TemplateType>,
 
     #[structopt(subcommand)]
     command: HcScaffoldCommand,
@@ -50,74 +49,57 @@ impl HcScaffold {
     pub async fn run(self) -> anyhow::Result<()> {
         let current_dir = std::env::current_dir()?;
         let scaffold_config = ScaffoldConfig::from_package_json_path(&current_dir)?;
-        let (template, template_file_tree) =
-            self.get_template(&current_dir, scaffold_config.as_ref())?;
+        let template_type = self.get_template_type(&current_dir, scaffold_config.as_ref())?;
 
         match self.command {
-            HcScaffoldCommand::WebApp(web_app) => {
-                web_app.run(template_file_tree, &template).await?
-            }
-            HcScaffoldCommand::Template(template) => template.run(template_file_tree)?,
-            HcScaffoldCommand::Dna(dna) => dna.run(template_file_tree)?,
-            HcScaffoldCommand::Zome(zome) => zome.run(template_file_tree)?,
-            HcScaffoldCommand::EntryType(entry_type) => entry_type.run(template_file_tree)?,
-            HcScaffoldCommand::LinkType(link_type) => link_type.run(template_file_tree)?,
-            HcScaffoldCommand::Collection(collection) => collection.run(template_file_tree)?,
-            HcScaffoldCommand::Example(example) => {
-                example.run(template_file_tree, &template).await?
-            }
+            HcScaffoldCommand::WebApp(web_app) => web_app.run(&template_type).await?,
+            HcScaffoldCommand::Template(template) => template.run(&template_type)?,
+            HcScaffoldCommand::Dna(dna) => dna.run(&template_type)?,
+            HcScaffoldCommand::Zome(zome) => zome.run(&template_type)?,
+            HcScaffoldCommand::EntryType(entry_type) => entry_type.run(&template_type)?,
+            HcScaffoldCommand::LinkType(link_type) => link_type.run(&template_type)?,
+            HcScaffoldCommand::Collection(collection) => collection.run(&template_type)?,
+            HcScaffoldCommand::Example(example) => example.run(&template_type).await?,
         }
 
         Ok(())
     }
 
-    fn get_template(
+    fn get_template_type(
         &self,
         current_dir: &Path,
         scaffold_config: Option<&ScaffoldConfig>,
-    ) -> Result<(String, FileTree), ScaffoldError> {
+    ) -> Result<TemplateType, ScaffoldError> {
+        // Read template_type config if no `--template` flag is provided and use it or
+        // ensure that if a `--template` is explicity provided, it matches the original
+        // template the app was scaffolded with
         let template = match (scaffold_config, &self.template) {
-            (Some(config), Some(template)) if &config.template != template => {
+            (Some(config), Some(template)) if config.template != *template => {
                 return Err(ScaffoldError::InvalidArguments(format!(
                     "The value {} passed with `--template` does not match the template the web-app was scaffolded with: {}",
-                    template.italic(),
-                    config.template.italic(),
+                    template.name().italic(),
+                    config.template.name().italic(),
                 )));
             }
-            (Some(config), _) if !Path::new(&config.template).exists() => Some(&config.template),
+            (Some(config), _) => Some(&config.template),
             (_, t) => t.as_ref(),
         };
 
         match template {
-            Some(template) => match template.to_lowercase().as_str() {
-                "lit" | "svelte" | "vanilla" | "vue" | "react" | "headless" => {
-                    let ui_framework = UiFramework::from_str(template)?;
-                    Ok((ui_framework.name(), ui_framework.template_filetree()?))
-                }
-                custom_template_path if Path::new(custom_template_path).exists() => {
-                    let templates_dir = current_dir.join(custom_template_path);
-                    Ok((
-                        custom_template_path.to_string(),
-                        load_directory_into_memory(&templates_dir)?,
-                    ))
-                }
-                path => Err(ScaffoldError::PathNotFound(PathBuf::from(path))),
-            },
+            Some(template) => Ok(template.clone()),
             None => {
-                let ui_framework = match &self.command {
-                    HcScaffoldCommand::WebApp { .. } => UiFramework::choose()?,
+                let template_type = match &self.command {
+                    HcScaffoldCommand::WebApp { .. } => TemplateType::choose()?,
                     HcScaffoldCommand::Example(example::Example { ref example, .. }) => {
                         match example {
-                            Some(ExampleType::HelloWorld) => UiFramework::Vanilla,
-                            _ => UiFramework::choose_non_vanilla()?,
+                            Some(ExampleType::HelloWorld) => TemplateType::Vanilla,
+                            Some(ExampleType::Forum) => TemplateType::choose_non_vanilla()?,
+                            None => TemplateType::choose_non_headless()?,
                         }
                     }
-                    _ => {
-                        let file_tree = load_directory_into_memory(current_dir)?;
-                        UiFramework::try_from(&file_tree)?
-                    }
+                    _ => TemplateType::try_from(&load_directory_into_memory(current_dir)?)?,
                 };
-                Ok((ui_framework.name(), ui_framework.template_filetree()?))
+                Ok(template_type)
             }
         }
     }

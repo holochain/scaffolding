@@ -50,7 +50,7 @@ const {{pascal_case (plural ../entry_type.name)}}For{{pascal_case linked_from.na
   return (
     <div>
       {error ? (
-        <article>Error fetching the {{plural ../entry_type.name}}: {error.message}</article>
+        <div className="alert">Error fetching the {{plural ../entry_type.name}}: {error.message}</div>
       ) : hashes.length > 0 ? (
         <div>
           {hashes.map((hash, i) => (
@@ -58,7 +58,7 @@ const {{pascal_case (plural ../entry_type.name)}}For{{pascal_case linked_from.na
           ))}
         </div>
       ) : (
-        <article>No {{plural ../entry_type.name}} found for this {{lower_case linked_from.name}}.</article>
+        <div className="alert">No {{plural ../entry_type.name}} found for this {{lower_case linked_from.name}}.</div>
       )}
     </div>
   );

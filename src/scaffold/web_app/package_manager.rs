@@ -40,10 +40,22 @@ impl PackageManager {
         ];
         let selection = Select::with_theme(&ColorfulTheme::default())
             .with_prompt("Choose a package manager: (Use arrow-keys. Return to submit)")
-            .default(0)
+            .default(1)
             .items(&managers)
             .interact()?;
         Ok(managers[selection])
+    }
+
+    /// Get's the the package manager's nixpkg that should be used with the generated
+    /// flake.nix
+    pub fn nixpkg(&self) -> Option<&str> {
+        match self {
+            PackageManager::Bun => Some("bun"),
+            PackageManager::Pnpm => Some("nodePackages.pnpm"),
+            PackageManager::Yarn => Some("yarn"),
+            // npm is already included with nodejs_20
+            PackageManager::Npm => None,
+        }
     }
 
     /// Checks if the specified lockfile exists in the provided file tree.

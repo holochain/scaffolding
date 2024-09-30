@@ -2,7 +2,6 @@ import { LitElement, html } from 'lit';
 import { state, customElement, property } from 'lit/decorators.js';
 import { InstalledCell, Record, Link, AppClient, EntryHash, ActionHash, AgentPubKey } from '@holochain/client';
 import { consume } from '@lit-labs/context';
-import '@material/mwc-circular-progress';
 import { Task } from '@lit-labs/task';
 
 import { clientContext } from '../../contexts';
@@ -34,7 +33,7 @@ export class {{pascal_case (plural ../entry_type.name)}}For{{pascal_case linked_
 
   renderList(links: Array<Link>) {
     if (links.length === 0) return html`<span>No {{lower_case (plural ../entry_type.name)}} found for this {{lower_case linked_from.name}}.</span>`;
-    
+
     return html`
       <div style="display: flex; flex-direction: column">
         ${links.map(link =>

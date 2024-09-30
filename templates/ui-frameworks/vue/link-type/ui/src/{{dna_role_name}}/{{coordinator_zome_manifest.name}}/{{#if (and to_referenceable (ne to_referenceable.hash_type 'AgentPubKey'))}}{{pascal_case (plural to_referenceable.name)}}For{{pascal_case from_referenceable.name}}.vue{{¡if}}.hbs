@@ -1,34 +1,29 @@
 <template>
-  <div v-if="loading" style="display: flex; flex: 1; align-items: center; justify-content: center">
-    <mwc-circular-progress indeterminate></mwc-circular-progress>
-  </div>
-
-  <div v-else style="display: flex; flex-direction: column">
-    <span v-if="error">Error fetching the {{lower_case (plural to_referenceable.name)}}: {{{{raw}}}} {{error.message}}.{{{{/raw}}}}</span>
-    <div v-else-if="hashes && hashes.length > 0" style="margin-bottom: 8px">
-      <{{pascal_case to_referenceable.name}}Detail 
-        v-for="(hash, i) in hashes" 
+  <progress v-if="loading"></progress>
+  <div v-else>
+    <div class="alert" v-if="error">Error fetching the {{lower_case (plural from_referenceable.name)}}: {{{{raw}}}} {{error.message}}.{{{{/raw}}}}</div>
+    <div v-else-if="hashes && hashes.length > 0">
+      <{{pascal_case to_referenceable.name}}Detail
+        v-for="(hash, i) in hashes"
         :key="i"
-        :{{kebab_case to_referenceable.name}}-hash="hash" 
-      ></{{pascal_case to_referenceable.name}}Detail>
+        :{{kebab_case to_referenceable.name}}-hash="hash"
+      >
+      </{{pascal_case to_referenceable.name}}Detail>
     </div>
-    <span v-else>No {{lower_case (plural to_referenceable.name)}} found for this {{lower_case from_referenceable.name}}.</span>
+    <div class="alert" v-else>No {{lower_case (plural to_referenceable.name)}} found for this {{lower_case from_referenceable.name}}.</div>
   </div>
-
-
 </template>
 
 <script lang="ts">
-import { defineComponent, toRaw, inject, ComputedRef } from 'vue';
+import { toRaw, inject, ComputedRef } from 'vue';
 import { decode } from '@msgpack/msgpack';
-import { AppClient, Record, Link, AgentPubKey, EntryHash, ActionHash, NewEntryAction, HolochainError } from '@holochain/client';
-import '@material/mwc-circular-progress';
+import { AppClient, Record, Link, AgentPubKey, EntryHash, ActionHash, NewEntryAction, HolochainError, SignalType } from '@holochain/client';
 import {{pascal_case to_referenceable.name}}Detail from './{{pascal_case to_referenceable.name}}Detail.vue';
 import { {{pascal_case coordinator_zome_manifest.name}}Signal } from './types';
 
-export default defineComponent({
+export default {
   components: {
-    {{pascal_case to_referenceable.name}}Detail
+    {{pascal_case to_referenceable.name}}Detail,
   },
   props: {
     {{camel_case from_referenceable.singular_arg}}: {
@@ -39,16 +34,17 @@ export default defineComponent({
   data(): { hashes: Array<{{to_referenceable.hash_type}}> | undefined; loading: boolean; error: any } {
     return {
       hashes: undefined,
-      loading: true,
+      loading: false,
       error: undefined
     }
   },
   async mounted() {
-    if (this.{{camel_case from_referenceable.singular_arg}} === undefined) {
+    if (!this.{{camel_case from_referenceable.singular_arg}}) {
       throw new Error(`The {{camel_case from_referenceable.singular_arg}} input is required for the {{pascal_case (plural to_referenceable.name)}}For{{pascal_case from_referenceable.name}} element`);
     }
 
     try {
+      this.loading = true;
       const links: Array<Link> = await this.client.callZome({
         cap_secret: null,
         role_name: '{{dna_role_name}}',
@@ -59,23 +55,22 @@ export default defineComponent({
       this.hashes = links.map(l => l.target);
     } catch (e) {
       this.error = e as HolochainError;
+    } finally {
+      this.loading = false;
     }
     this.loading = false;
-    
+
     toRaw(this.client).on('signal', signal => {
-      if (signal.zome_name !== '{{coordinator_zome_manifest.name}}') return; 
+      if (signal.zome_name !== '{{coordinator_zome_manifest.name}}') return;
       const payload = signal.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;
       if (payload.type !== 'LinkCreated') return;
       if (payload.link_type !== '{{pascal_case link_type_name}}') return;
-
       if (this.hashes) this.hashes.push(payload.action.hashed.content.target_address);
     });
   },
   setup() {
     const client = (inject('client') as ComputedRef<AppClient>).value;
-    return {
-      client,
-    };
+    return { client };
   },
-})
+};
 </script>

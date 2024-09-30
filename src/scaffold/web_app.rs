@@ -16,7 +16,7 @@ use super::app::{
 };
 
 pub mod package_manager;
-pub mod uis;
+pub mod template_type;
 
 pub fn scaffold_web_app(
     app_name: &str,
@@ -42,7 +42,10 @@ pub fn scaffold_web_app(
         app_file_tree
             .dir_content_mut()
             .ok_or(ScaffoldError::PathNotFound(PathBuf::new()))?
-            .insert("flake.nix".into(), flake_nix(holo_enabled));
+            .insert(
+                "flake.nix".into(),
+                flake_nix(holo_enabled, &package_manager),
+            );
     }
 
     if package_manager == PackageManager::Pnpm {
