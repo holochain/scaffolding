@@ -7,7 +7,7 @@ use serde::Serialize;
 use crate::{
     error::{ScaffoldError, ScaffoldResult},
     file_tree::FileTree,
-    reserved_words::check_for_reserved_words,
+    reserved_words::check_for_reserved_keywords,
     templates::{collection::scaffold_collection_templates, ScaffoldedTemplate},
 };
 
@@ -73,7 +73,7 @@ pub fn scaffold_collection(
     maybe_entry_type: Option<EntryTypeReference>,
     no_ui: bool,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
-    check_for_reserved_words(collection_name)?;
+    check_for_reserved_keywords(collection_name)?;
 
     let all_entries = get_all_entry_types(&integrity_zome_file_tree)?.ok_or(
         ScaffoldError::NoEntryTypesDefFoundForIntegrityZome(

@@ -3,7 +3,7 @@ use package_manager::PackageManager;
 use std::path::PathBuf;
 
 use crate::error::ScaffoldResult;
-use crate::reserved_words::check_for_reserved_words;
+use crate::reserved_words::check_for_reserved_keywords;
 use crate::templates::web_app::scaffold_web_app_template;
 use crate::templates::ScaffoldedTemplate;
 use crate::{error::ScaffoldError, file_tree::FileTree};
@@ -26,7 +26,7 @@ pub fn scaffold_web_app(
     template_file_tree: &FileTree,
     holo_enabled: bool,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
-    check_for_reserved_words(app_name)?;
+    check_for_reserved_keywords(app_name)?;
 
     let mut app_file_tree = dir! {
       ".gitignore" => file!(gitignore())

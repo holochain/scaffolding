@@ -54,8 +54,8 @@ pub enum ScaffoldError {
     #[error("Folder already exists: {0}")]
     FolderAlreadyExists(PathBuf),
 
-    #[error("Invalid reserved word: {0}")]
-    InvalidReservedWord(String),
+    #[error("Invalid use of reserved {context} keyword '{word}'.in this context.")]
+    InvalidReservedWord { context: String, word: String },
 
     #[error("Invalid path {0}: {1}")]
     InvalidPath(PathBuf, String),

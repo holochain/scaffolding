@@ -1,16 +1,15 @@
 use convert_case::Case;
 use dialoguer::{theme::ColorfulTheme, Select};
 
-use crate::{
-    error::{ScaffoldError, ScaffoldResult},
-    reserved_words::check_for_reserved_words,
-    scaffold::zome::ZomeFileTree,
-    utils::input_with_case,
-};
-
 use super::{
     definitions::{EntryTypeReference, Referenceable},
     integrity::get_all_entry_types,
+};
+use crate::{
+    error::{ScaffoldError, ScaffoldResult},
+    reserved_words::check_for_reserved_keywords,
+    scaffold::zome::ZomeFileTree,
+    utils::input_with_case,
 };
 
 pub fn choose_reference_entry_hash(prompt: &str, recommended: bool) -> ScaffoldResult<bool> {
@@ -58,7 +57,7 @@ fn inner_choose_referenceable(
             "Which role does this agent play in the relationship ? (eg. \"creator\", \"invitee\")",
             Case::Snake,
         )?;
-            check_for_reserved_words(&role)?;
+            check_for_reserved_keywords(&role)?;
             Ok(Some(Referenceable::Agent { role }))
         }
         "AnyLinkableHash" => {
@@ -119,7 +118,7 @@ pub fn get_or_choose_referenceable(
 
     match &entry_type {
         Some(Referenceable::Agent { role }) => {
-            check_for_reserved_words(role)?;
+            check_for_reserved_keywords(role)?;
             Ok(Referenceable::Agent { role: role.clone() })
         }
         Some(Referenceable::EntryType(app_entry_reference)) => {

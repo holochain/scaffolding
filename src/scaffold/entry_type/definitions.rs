@@ -6,7 +6,7 @@ use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use serde::{ser::SerializeStruct, Deserialize, Serialize, Serializer};
 
-use crate::{error::ScaffoldError, reserved_words::check_for_reserved_words, utils::check_case};
+use crate::{error::ScaffoldError, reserved_words::check_for_reserved_keywords, utils::check_case};
 
 #[derive(Deserialize, Debug, Clone, Serialize)]
 #[serde(tag = "type")]
@@ -192,7 +192,7 @@ impl FieldDefinition {
         cardinality: Cardinality,
         linked_from: Option<Referenceable>,
     ) -> Result<Self, ScaffoldError> {
-        check_for_reserved_words(&field_name)?;
+        check_for_reserved_keywords(&field_name)?;
         Ok(FieldDefinition {
             field_name,
             field_type,

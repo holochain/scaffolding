@@ -2,7 +2,7 @@ use std::{ffi::OsString, path::PathBuf};
 
 use crate::{
     file_tree::FileTree,
-    reserved_words::check_for_reserved_words,
+    reserved_words::check_for_reserved_keywords,
     templates::{entry_type::scaffold_entry_type_templates, ScaffoldedTemplate},
 };
 
@@ -46,7 +46,7 @@ pub fn scaffold_entry_type(
     maybe_fields: Option<&Vec<FieldDefinition>>,
     no_ui: bool,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
-    check_for_reserved_words(name)?;
+    check_for_reserved_keywords(name)?;
 
     if no_ui {
         let warning_text = r#"
