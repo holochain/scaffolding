@@ -19,10 +19,6 @@
         packages = (with pkgs; [
           nodejs_20
           binaryen
-          # Unused packages can be removed
-          nodePackages.pnpm
-          yarn-berry
-          bun
         ]);
 
         shellHook = ''
