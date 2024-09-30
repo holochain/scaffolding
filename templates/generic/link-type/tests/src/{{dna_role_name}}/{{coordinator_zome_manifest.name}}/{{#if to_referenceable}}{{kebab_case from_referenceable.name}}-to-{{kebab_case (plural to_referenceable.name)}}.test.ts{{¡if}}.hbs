@@ -29,7 +29,7 @@ test('link a {{pascal_case from_referenceable.name}} to a {{pascal_case to_refer
     // This assumes app bundle created by the `hc app pack` command.
     const testAppPath = process.cwd() + '/../workdir/{{app_name}}.happ';
 
-    // Set up the app to be installed 
+    // Set up the app to be installed
     const appSource = { appBundleSource: { path: testAppPath } };
 
     // Add 2 players with the test app to the Scenario. The returned players
@@ -78,9 +78,9 @@ test('link a {{pascal_case from_referenceable.name}} to a {{pascal_case to_refer
         target_{{snake_case to_referenceable.singular_arg}}: targetAddress
       }
     });
-    
+
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
-    
+
     // Bob gets the links again
     linksOutput = await bob.cells[0].callZome({
       zome_name: "{{coordinator_zome_manifest.name}}",
@@ -109,13 +109,13 @@ test('link a {{pascal_case from_referenceable.name}} to a {{pascal_case to_refer
 {{#if delete}}
     await alice.cells[0].callZome({
       zome_name: "{{coordinator_zome_manifest.name}}",
-      fn_name: "remove_{{snake_case to_referenceable.name}}_for_{{snake_case from_referenceable.name}}",
+      fn_name: "delete_{{snake_case to_referenceable.name}}_for_{{snake_case from_referenceable.name}}",
       payload: {
         base_{{snake_case from_referenceable.singular_arg}}: baseAddress,
         target_{{snake_case to_referenceable.singular_arg}}: targetAddress
       }
     });
-    
+
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
 
     // Bob gets the links again
