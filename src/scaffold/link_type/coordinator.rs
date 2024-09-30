@@ -507,20 +507,24 @@ fn remove_link_handlers(
 
     let from_link_hash_type = get_hash_type_from_referenceable(to_referenceable);
 
-    let bidirectional_remove = bidirectional.then(|| {
-        let from_inverse_hash_type = get_hash_type_from_referenceable(from_referenceable);
+    let bidirectional_remove = bidirectional
+        .then(|| {
+            let from_inverse_hash_type = get_hash_type_from_referenceable(from_referenceable);
 
-        quote! {
-            let links = get_links(
-                getlinksinputbuilder::try_new(input.#target_field_name.clone(), linktypes::#inverse_link_type_name)?.build(),
-            )?;
-            for link in links {
-                if #from_inverse_hash_type == input.#base_field_name {
-                    delete_link(link.create_link_hash)?;
+            quote! {
+                let links = get_links(
+                    GetLinksInputBuilder::try_new(
+                        input.#target_field_name.clone(),
+                        LinkTypes::#inverse_link_type_name)?.build(),
+                )?;
+                for link in links {
+                    if #from_inverse_hash_type == input.#base_field_name {
+                        delete_link(link.create_link_hash)?;
+                    }
                 }
             }
-        }
-    }).unwrap_or_default();
+        })
+        .unwrap_or_default();
 
     quote! {
         #[derive(Serialize, Deserialize, Debug)]
