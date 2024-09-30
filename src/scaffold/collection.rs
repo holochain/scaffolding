@@ -72,6 +72,7 @@ pub fn scaffold_collection(
     maybe_collection_type: Option<CollectionType>,
     maybe_entry_type: Option<EntryTypeReference>,
     no_ui: bool,
+    no_spec: bool,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     check_for_reserved_words(collection_name)?;
 
@@ -143,5 +144,6 @@ pub fn scaffold_collection(
         &entry_type,
         deletable,
         no_ui,
+        no_spec,
     )
 }
