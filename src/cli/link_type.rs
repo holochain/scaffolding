@@ -43,6 +43,10 @@ pub struct LinkType {
     #[structopt(long)]
     /// Skips UI generation for this link-type.
     pub no_ui: bool,
+    #[structopt(long)]
+
+    /// Skips test generation for this link-type.
+    pub no_spec: bool,
 }
 
 impl LinkType {
@@ -65,6 +69,7 @@ impl LinkType {
             self.delete,
             self.bidirectional,
             self.no_ui,
+            self.no_spec,
         )?;
 
         build_file_tree(file_tree, ".")?;

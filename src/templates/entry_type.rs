@@ -37,6 +37,7 @@ pub fn scaffold_entry_type_templates(
     crud: &Crud,
     link_from_original_to_each_update: bool,
     no_ui: bool,
+    no_spec: bool,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     let data = ScaffoldEntryTypeData {
         app_name: app_name.to_owned(),
@@ -56,7 +57,13 @@ pub fn scaffold_entry_type_templates(
         let mut web_app_template = web_app_template.clone();
         if no_ui {
             web_app_template.dir_content_mut().map(|v| {
-                v.retain(|k, _| k.ne(&OsString::from("ui")));
+                v.retain(|k, _| k != "ui");
+                v
+            });
+        }
+        if no_spec {
+            web_app_template.dir_content_mut().map(|v| {
+                v.retain(|k, _| k != "tests");
                 v
             });
         }
