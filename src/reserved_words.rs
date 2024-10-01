@@ -4,13 +4,8 @@ use crate::error::{ScaffoldError, ScaffoldResult};
 
 /// Returns an error if the given string is invalid due to it being a reserved word
 pub fn check_for_reserved_keywords(string_to_check: &str) -> ScaffoldResult<()> {
-    let mut reserved_holochain_words_set: HashSet<&str> =
-        HashSet::with_capacity(HOLOCHAIN_RESERVED_KEYWORDS.len());
-    reserved_holochain_words_set.extend(HOLOCHAIN_RESERVED_KEYWORDS);
-
-    let mut reserved_rust_words_set: HashSet<&str> =
-        HashSet::with_capacity(RUST_RESERVED_KEYWORDS.len());
-    reserved_rust_words_set.extend(RUST_RESERVED_KEYWORDS);
+    let reserved_holochain_words_set = HashSet::from(HOLOCHAIN_RESERVED_KEYWORDS);
+    let reserved_rust_words_set = HashSet::from(RUST_RESERVED_KEYWORDS);
 
     if reserved_holochain_words_set.contains(string_to_check.to_ascii_lowercase().as_str()) {
         return Err(ScaffoldError::InvalidReservedWord {
