@@ -52,17 +52,15 @@ impl HcScaffold {
         let template_type = self.get_template_type(&current_dir, scaffold_config.as_ref())?;
 
         match self.command {
-            HcScaffoldCommand::WebApp(web_app) => web_app.run(&template_type).await?,
-            HcScaffoldCommand::Template(template) => template.run(&template_type)?,
-            HcScaffoldCommand::Dna(dna) => dna.run(&template_type)?,
-            HcScaffoldCommand::Zome(zome) => zome.run(&template_type)?,
-            HcScaffoldCommand::EntryType(entry_type) => entry_type.run(&template_type)?,
-            HcScaffoldCommand::LinkType(link_type) => link_type.run(&template_type)?,
-            HcScaffoldCommand::Collection(collection) => collection.run(&template_type)?,
-            HcScaffoldCommand::Example(example) => example.run(&template_type).await?,
+            HcScaffoldCommand::WebApp(web_app) => web_app.run(&template_type).await,
+            HcScaffoldCommand::Template(template) => template.run(&template_type),
+            HcScaffoldCommand::Dna(dna) => dna.run(&template_type),
+            HcScaffoldCommand::Zome(zome) => zome.run(&template_type),
+            HcScaffoldCommand::EntryType(entry_type) => entry_type.run(&template_type),
+            HcScaffoldCommand::LinkType(link_type) => link_type.run(&template_type),
+            HcScaffoldCommand::Collection(collection) => collection.run(&template_type),
+            HcScaffoldCommand::Example(example) => example.run(&template_type).await,
         }
-
-        Ok(())
     }
 
     fn get_template_type(
