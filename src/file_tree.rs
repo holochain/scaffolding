@@ -2,6 +2,7 @@ use anyhow::Context;
 use build_fs_tree::{dir, file, Build, FileSystemTree, MergeableFileSystemTree};
 use ignore::WalkBuilder;
 use include_dir::Dir;
+use regex::Regex;
 use std::collections::BTreeMap;
 use std::ffi::OsString;
 use std::fs;
@@ -80,6 +81,19 @@ pub fn insert_file(
 ) -> ScaffoldResult<()> {
     let mut folder_path = file_path.to_path_buf();
     folder_path.pop();
+
+    let content = if folder_path.extension().unwrap_or_default().to_str() == Some("rs") {
+        // replace line comments wiht doc comments which are preserved on calling
+        // `prettyplease::unparse`
+        let re = Regex::new(r"^\/\/[^\/]|[^\/]\/\/[^\/]").unwrap();
+        let content = content.to_string();
+        &content
+            .lines()
+            .map(|line| re.replace_all(line, "/// ").into_owned() + "\n")
+            .collect::<String>()
+    } else {
+        content
+    };
 
     insert_file_tree_in_dir(
         file_tree,
