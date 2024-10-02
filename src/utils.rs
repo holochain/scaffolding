@@ -188,6 +188,7 @@ pub fn unparse_pretty(code: &syn::File) -> String {
     let mut result = String::new();
 
     let mut last_line_was_import = false;
+    let mut last_line_was_comment = false;
     let mut in_attribute = false;
     let mut in_struct = false;
     let mut in_function = false;
@@ -245,11 +246,12 @@ pub fn unparse_pretty(code: &syn::File) -> String {
             result.push('\n');
         }
 
-        if next_line_is_comment {
+        if next_line_is_comment && !last_line_was_comment && !is_comment {
             result.push('\n');
         }
 
         last_line_was_import = is_import;
+        last_line_was_comment = is_comment;
     }
 
     // Final cleanup: remove any triple (or more) newlines
