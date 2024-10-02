@@ -15,6 +15,61 @@ use crate::{
 
 use super::link_type_name;
 
+pub fn add_link_type_functions_to_coordinator(
+    coordinator_zome_file_tree: ZomeFileTree,
+    integrity_zome_name: &str,
+    link_type_name: &str,
+    from_referenceable: &Referenceable,
+    to_referenceable: &Option<Referenceable>,
+    delete: bool,
+    bidirectional: bool,
+) -> ScaffoldResult<ZomeFileTree> {
+    let dna_manifest_path = coordinator_zome_file_tree
+        .dna_file_tree
+        .dna_manifest_path
+        .clone();
+    let zome_manifest = coordinator_zome_file_tree.zome_manifest.clone();
+
+    let snake_link_type_name = link_type_name.to_case(Case::Snake);
+
+    let new_file_path = coordinator_zome_file_tree
+        .zome_crate_path
+        .join("src")
+        .join(format!("{}.rs", &snake_link_type_name));
+    let crate_src_path = coordinator_zome_file_tree.zome_crate_path.join("src");
+
+    let lib_rs_path = crate_src_path.join("lib.rs");
+    let mut file_tree = coordinator_zome_file_tree.dna_file_tree.file_tree();
+
+    let handlers = match to_referenceable {
+        Some(r) => normal_handlers(
+            integrity_zome_name,
+            from_referenceable,
+            r,
+            delete,
+            bidirectional,
+        ),
+        None => metadata_handlers(integrity_zome_name, link_type_name, from_referenceable),
+    };
+
+    let file = unparse_pretty(&syn::parse_quote! { #handlers });
+
+    insert_file(&mut file_tree, &new_file_path, &file)?;
+
+    // 2. Add this file as a module in the entry point for the crate
+    map_file(&mut file_tree, &lib_rs_path, |contents| {
+        Ok(format!(
+            r#"pub mod {snake_link_type_name};
+{contents}"#,
+        ))
+    })?;
+
+    let dna_file_tree = DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
+    let zome_file_tree = ZomeFileTree::from_zome_manifest(dna_file_tree, zome_manifest)?;
+
+    Ok(zome_file_tree)
+}
+
 fn metadata_handlers(
     integrity_zome_name: &str,
     link_type_name: &str,
@@ -446,59 +501,4 @@ fn normal_handlers(
 
         #delete_link_handler
     }
-}
-
-pub fn add_link_type_functions_to_coordinator(
-    coordinator_zome_file_tree: ZomeFileTree,
-    integrity_zome_name: &str,
-    link_type_name: &str,
-    from_referenceable: &Referenceable,
-    to_referenceable: &Option<Referenceable>,
-    delete: bool,
-    bidirectional: bool,
-) -> ScaffoldResult<ZomeFileTree> {
-    let dna_manifest_path = coordinator_zome_file_tree
-        .dna_file_tree
-        .dna_manifest_path
-        .clone();
-    let zome_manifest = coordinator_zome_file_tree.zome_manifest.clone();
-
-    let snake_link_type_name = link_type_name.to_case(Case::Snake);
-
-    let new_file_path = coordinator_zome_file_tree
-        .zome_crate_path
-        .join("src")
-        .join(format!("{}.rs", &snake_link_type_name));
-    let crate_src_path = coordinator_zome_file_tree.zome_crate_path.join("src");
-
-    let lib_rs_path = crate_src_path.join("lib.rs");
-    let mut file_tree = coordinator_zome_file_tree.dna_file_tree.file_tree();
-
-    let handlers = match to_referenceable {
-        Some(r) => normal_handlers(
-            integrity_zome_name,
-            from_referenceable,
-            r,
-            delete,
-            bidirectional,
-        ),
-        None => metadata_handlers(integrity_zome_name, link_type_name, from_referenceable),
-    };
-
-    let file = unparse_pretty(&syn::parse_quote! { #handlers });
-
-    insert_file(&mut file_tree, &new_file_path, &file)?;
-
-    // 2. Add this file as a module in the entry point for the crate
-    map_file(&mut file_tree, &lib_rs_path, |contents| {
-        Ok(format!(
-            r#"pub mod {snake_link_type_name};
-{contents}"#,
-        ))
-    })?;
-
-    let dna_file_tree = DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
-    let zome_file_tree = ZomeFileTree::from_zome_manifest(dna_file_tree, zome_manifest)?;
-
-    Ok(zome_file_tree)
 }
