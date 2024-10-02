@@ -182,9 +182,8 @@ pub fn check_no_whitespace(input: &str, identifier: &str) -> ScaffoldResult<()> 
 /// tokens by `syn`, so this function restores them to improve code readability.
 #[inline]
 pub fn unparse_pretty(code: &syn::File) -> String {
-    let formatted = prettyplease::unparse(code);
+    let formatted = prettyplease::unparse(code).replace("///", "//");
     let lines = formatted.lines().collect::<Vec<&str>>();
-
     let mut result = String::new();
 
     let mut last_line_was_import = false;
@@ -245,7 +244,6 @@ pub fn unparse_pretty(code: &syn::File) -> String {
             result.push('\n');
         }
 
-        // Add an extra newline after before comment
         if next_line_is_comment {
             result.push('\n');
         }
