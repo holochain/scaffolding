@@ -180,7 +180,6 @@ pub fn check_no_whitespace(input: &str, identifier: &str) -> ScaffoldResult<()> 
 /// Inserts new lines that are stripped out by `syn` during programmatic
 /// manipulation of Rust code. Newlines and white spaces are not considered
 /// tokens by `syn`, so this function restores them to improve code readability.
-#[inline]
 pub fn unparse_pretty(code: &syn::File) -> String {
     // replace previously converted line comment to doc comments back to line comments
     let formatted = prettyplease::unparse(code).replace("///", "//");
