@@ -6,6 +6,7 @@ use crate::error::{ScaffoldError, ScaffoldResult};
 pub fn check_for_reserved_keywords(string_to_check: &str) -> ScaffoldResult<()> {
     let reserved_holochain_words_set = HashSet::from(HOLOCHAIN_RESERVED_KEYWORDS);
     let reserved_rust_words_set = HashSet::from(RUST_RESERVED_KEYWORDS);
+    let reserved_javascript_words_set = HashSet::from(JAVASCRIPT_RESERVED_KEYWORDS);
 
     if reserved_holochain_words_set.contains(string_to_check.to_ascii_lowercase().as_str()) {
         return Err(ScaffoldError::InvalidReservedWord {
@@ -17,6 +18,13 @@ pub fn check_for_reserved_keywords(string_to_check: &str) -> ScaffoldResult<()> 
     if reserved_rust_words_set.contains(string_to_check.to_ascii_lowercase().as_str()) {
         return Err(ScaffoldError::InvalidReservedWord {
             context: "rust".to_string(),
+            word: string_to_check.to_string(),
+        });
+    }
+
+    if reserved_javascript_words_set.contains(string_to_check.to_ascii_lowercase().as_str()) {
+        return Err(ScaffoldError::InvalidReservedWord {
+            context: "javascript".to_string(),
             word: string_to_check.to_string(),
         });
     }
@@ -50,6 +58,45 @@ const RUST_RESERVED_KEYWORDS: [&str; 50] = [
     "self", "Self", "static", "struct", "super", "trait", "true", "type", "unsafe", "use", "where",
     "while", "abstract", "async", "await", "become", "box", "do", "final", "macro", "override",
     "priv", "try", "typeof", "unsized", "virtual", "yield",
+];
+
+// <https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Lexical_grammar#reserved_words>
+const JAVASCRIPT_RESERVED_KEYWORDS: [&str; 35] = [
+    "break",
+    "case",
+    "catch",
+    "class",
+    "const",
+    "continue",
+    "debugger",
+    "default",
+    "delete",
+    "do",
+    "else",
+    "export",
+    "extends",
+    "false",
+    "finally",
+    "for",
+    "function",
+    "if",
+    "import",
+    "in",
+    "instanceof",
+    "new",
+    "null",
+    "return",
+    "super",
+    "switch",
+    "this",
+    "throw",
+    "true",
+    "try",
+    "typeof",
+    "var",
+    "void",
+    "while",
+    "with",
 ];
 
 #[cfg(test)]
