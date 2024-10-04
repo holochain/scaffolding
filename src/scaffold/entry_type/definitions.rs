@@ -412,7 +412,7 @@ impl EntryDefinition {
         ts_interface.push('}');
         ts_enums
             .is_empty()
-            .then_some(ts_interface.clone())
+            .then(|| ts_interface.clone())
             .unwrap_or(format!("{ts_enums}\n{}", ts_interface.clone()))
     }
 }

@@ -2,6 +2,8 @@ use std::{collections::BTreeMap, ffi::OsString};
 
 use dialoguer::{theme::ColorfulTheme, Select};
 use holochain_types::prelude::ZomeManifest;
+use proc_macro2::TokenStream;
+use quote::{quote, ToTokens};
 use syn::ItemFn;
 
 use crate::{
@@ -13,14 +15,14 @@ use crate::{
 use super::ZomeFileTree;
 
 pub fn initial_cargo_toml(zome_name: &str, dependencies: Option<&Vec<String>>) -> String {
-    let deps = match dependencies {
-        Some(d) => d
-            .iter()
-            .map(|d| format!(r#"{} = {{ workspace = true }}"#, d))
-            .collect::<Vec<String>>()
-            .join("\n"),
-        None => String::from(""),
-    };
+    let deps = dependencies
+        .map(|d| {
+            d.iter()
+                .map(|d| format!(r#"{} = {{ workspace = true }}"#, d))
+                .collect::<Vec<String>>()
+                .join("\n")
+        })
+        .unwrap_or_default();
 
     format!(
         r#"[package]
@@ -40,51 +42,51 @@ serde = {{ workspace = true }}
     )
 }
 
-pub fn initial_lib_rs(dependencies: Option<&Vec<String>>) -> String {
-    let integrity_imports = match dependencies {
-        None => String::from(""),
-        Some(deps) => {
-            let mut s = String::from("");
-            for d in deps {
-                s.push_str(format!("use {d}::*;\n").as_str());
+pub fn initial_lib_rs(dependencies: Option<&Vec<String>>) -> TokenStream {
+    let integrity_imports = dependencies
+        .map(|deps| {
+            let imports = deps.iter().map(|d| {
+                let path =
+                    syn::parse_str::<syn::Path>(d).expect("Failed to parse dependency as path");
+                path.to_token_stream()
+            });
+            quote! {
+                #(use #imports::*;)*
             }
+        })
+        .unwrap_or_default();
 
-            s
+    quote! {
+        use hdk::prelude::*;
+        #integrity_imports
+
+        /// Called the first time a zome call is made to the cell containing this zome
+        #[hdk_extern]
+        pub fn init() -> ExternResult<InitCallbackResult> {
+            Ok(InitCallbackResult::Pass)
         }
-    };
-    format!(
-        r#"use hdk::prelude::*;
-{integrity_imports}
 
-/// Called the first time a zome call is made to the cell containing this zome
-#[hdk_extern]
-pub fn init() -> ExternResult<InitCallbackResult> {{
-  Ok(InitCallbackResult::Pass)
-}}
+        /// Don't modify this enum if you want the scaffolding tool to generate appropriate signals for your entries and links
+        #[derive(Serialize, Deserialize, Debug)]
+        #[serde(tag = "type")]
+        pub enum Signal {}
 
-/// Don't modify this enum if you want the scaffolding tool to generate appropriate signals for your entries and links
-#[derive(Serialize, Deserialize, Debug)]
-#[serde(tag = "type")]
-pub enum Signal {{
-}}
+        /// Whenever an action is committed, we emit a signal to the UI elements to reactively update them
+        #[hdk_extern(infallible)]
+        pub fn post_commit(committed_actions: Vec<SignedActionHashed>) {
+            /// Don't modify this loop if you want the scaffolding tool to generate appropriate signals for your entries and links
+            for action in committed_actions {
+                if let Err(err) = signal_action(action) {
+                    error!("Error signaling new action: {:?}", err);
+                }
+            }
+        }
 
-/// Whenever an action is committed, we emit a signal to the UI elements to reactively update them
-#[hdk_extern(infallible)]
-pub fn post_commit(committed_actions: Vec<SignedActionHashed>) {{
-    /// Don't modify this loop if you want the scaffolding tool to generate appropriate signals for your entries and links
-    for action in committed_actions {{
-        if let Err(err) = signal_action(action) {{
-            error!("Error signaling new action: {{:?}}", err);
-        }}
-    }}
-}}
-
-/// Don't modify this function if you want the scaffolding tool to generate appropriate signals for your entries and links
-fn signal_action(action: SignedActionHashed) -> ExternResult<()> {{
-    Ok(())
-}}
-"#
-    )
+        /// Don't modify this function if you want the scaffolding tool to generate appropriate signals for your entries and links
+        fn signal_action(action: SignedActionHashed) -> ExternResult<()> {
+            Ok(())
+        }
+    }
 }
 
 fn choose_extern_function(

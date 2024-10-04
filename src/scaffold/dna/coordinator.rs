@@ -9,29 +9,6 @@ use crate::{
 
 use super::{manifest::check_zome_doesnt_exist, zome_wasm_location, DnaFileTree};
 
-pub fn new_coordinator_zome_manifest(
-    dna_file_tree: &DnaFileTree,
-    name: &str,
-    maybe_dependencies: Option<&Vec<String>>,
-) -> ScaffoldResult<ZomeManifest> {
-    let location = zome_wasm_location(dna_file_tree, name);
-    let zome_manifest = ZomeManifest {
-        name: name.into(),
-        hash: None,
-        location,
-        dependencies: maybe_dependencies.map(|dz| {
-            dz.iter()
-                .map(|d| ZomeDependency {
-                    name: d.to_owned().into(),
-                })
-                .collect()
-        }),
-        dylib: None,
-    };
-
-    Ok(zome_manifest)
-}
-
 pub fn add_coordinator_zome_to_manifest(
     mut dna_file_tree: DnaFileTree,
     zome_manifest: ZomeManifest,
@@ -73,4 +50,27 @@ pub fn add_coordinator_zome_to_manifest(
     )?;
 
     Ok(dna_file_tree)
+}
+
+pub fn new_coordinator_zome_manifest(
+    dna_file_tree: &DnaFileTree,
+    name: &str,
+    maybe_dependencies: Option<&Vec<String>>,
+) -> ScaffoldResult<ZomeManifest> {
+    let location = zome_wasm_location(dna_file_tree, name);
+    let zome_manifest = ZomeManifest {
+        name: name.into(),
+        hash: None,
+        location,
+        dependencies: maybe_dependencies.map(|dz| {
+            dz.iter()
+                .map(|d| ZomeDependency {
+                    name: d.to_owned().into(),
+                })
+                .collect()
+        }),
+        dylib: None,
+    };
+
+    Ok(zome_manifest)
 }
