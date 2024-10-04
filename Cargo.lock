@@ -2944,7 +2944,6 @@ dependencies = [
  "itertools 0.10.5",
  "markup_fmt",
  "mr_bundle",
- "once_cell",
  "path-clean",
  "pluralizer",
  "prettyplease",

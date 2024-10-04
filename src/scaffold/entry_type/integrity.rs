@@ -20,24 +20,170 @@ use super::definitions::{
     Cardinality, EntryDefinition, EntryTypeReference, FieldDefinition, Referenceable,
 };
 
-pub fn render_entry_definition_struct(entry_def: &EntryDefinition) -> ScaffoldResult<TokenStream> {
-    let name: syn::Expr = syn::parse_str(entry_def.name.to_case(Case::Pascal).as_str())?;
+pub fn add_entry_type_to_integrity_zome(
+    zome_file_tree: ZomeFileTree,
+    entry_def: &EntryDefinition,
+    crud: &Crud,
+) -> ScaffoldResult<ZomeFileTree> {
+    let dna_manifest_path = zome_file_tree.dna_file_tree.dna_manifest_path.clone();
+    let dna_manifest = zome_file_tree.dna_file_tree.dna_manifest.clone();
+    let zome_manifest = zome_file_tree.zome_manifest.clone();
 
-    let fields: Vec<TokenStream> = entry_def
-        .fields
+    let snake_entry_def_name = entry_def.name.to_case(Case::Snake);
+    let entry_def_file = render_entry_definition_file(entry_def, crud)?;
+
+    let entry_types = get_all_entry_types(&zome_file_tree)?;
+
+    // 1. Create an ENTRY_DEF_NAME.rs in "src/", with the entry definition struct
+    let crate_src_path = zome_file_tree.zome_crate_path.join("src");
+
+    let entry_def_path = crate_src_path.join(format!("{}.rs", snake_entry_def_name));
+
+    let mut file_tree = zome_file_tree.dna_file_tree.file_tree();
+
+    insert_file(
+        &mut file_tree,
+        &entry_def_path,
+        &unparse_pretty(&entry_def_file),
+    )?;
+
+    // 2. Add this file as a module in the entry point for the crate
+
+    let lib_rs_path = crate_src_path.join("lib.rs");
+
+    map_file(&mut file_tree, &lib_rs_path, |contents| {
+        Ok(format!(
+            r#"pub mod {snake_entry_def_name};
+pub use {snake_entry_def_name}::*;
+{contents}"#,
+        ))
+    })?;
+
+    let pascal_entry_def_name = entry_def.name.to_case(Case::Pascal);
+
+    let v: Vec<OsString> = crate_src_path
+        .clone()
         .iter()
-        .map(|field_def| {
-            let name: syn::Expr =
-                syn::parse_str(field_def.field_name.to_case(Case::Snake).as_str())?;
-            let rust_type = field_def.rust_type();
-            Ok(quote! {  #name: #rust_type })
-        })
-        .collect::<ScaffoldResult<Vec<TokenStream>>>()?;
-    Ok(quote! {
-      pub struct #name {
-        #(pub #fields),*
-      }
-    })
+        .map(|s| s.to_os_string())
+        .collect();
+    // 3. Find the #[hdk_entry_types] macro
+    // 3.1 Import the new struct
+    // 3.2 Add a variant for the new entry def with the struct as its payload
+    map_rust_files(
+        file_tree
+            .path_mut(&mut v.iter())
+            .ok_or(ScaffoldError::PathNotFound(crate_src_path.clone()))?,
+        |file_path, mut file| {
+            let mut found = false;
+
+            // If there are no entry types definitions in this zome, first add the empty enum
+            if entry_types.is_none() && file_path == PathBuf::from("lib.rs") {
+                let entry_types_item = syn::parse_quote! {
+                    #[derive(Serialize, Deserialize)]
+                    #[serde(tag = "type")]
+                    #[hdk_entry_types]
+                    #[unit_enum(UnitEntryTypes)]
+                    pub enum EntryTypes {}
+                };
+
+                // Insert the entry types just before LinkTypes or before the first function if LinkTypes doesn't exist
+                match file.items.iter().find_position(|item| {
+                    if let syn::Item::Enum(item_enum) = item {
+                        return item_enum.ident == "LinkTypes";
+                    }
+                    matches!(item, syn::Item::Fn(_))
+                }) {
+                    Some((i, _)) => {
+                        file.items.insert(i, entry_types_item);
+                    }
+                    None => file.items.push(entry_types_item),
+                }
+
+                // update generic parameters
+                for item in &mut file.items {
+                    if let syn::Item::Fn(item_fn) = item {
+                        if item_fn.sig.ident != "validate" {
+                            continue;
+                        }
+                        for stmt in &mut item_fn.block.stmts {
+                            if let syn::Stmt::Expr(syn::Expr::Match(match_expr), _) = stmt {
+                                if let syn::Expr::Try(try_expr) = &mut *match_expr.expr {
+                                    if let syn::Expr::MethodCall(call) = &mut *try_expr.expr {
+                                        if call.method != "flattened" {
+                                            continue;
+                                        }
+                                        if let Some(turbofish) = &mut call.turbofish {
+                                            if let Some(first_arg) = turbofish.args.first_mut() {
+                                                *first_arg = syn::GenericArgument::Type(
+                                                    syn::parse_quote! {EntryTypes},
+                                                );
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            file.items = file
+                .items
+                .into_iter()
+                .map(|mut item| {
+                    if let syn::Item::Enum(mut item_enum) = item.clone() {
+                        if item_enum.attrs.iter().any(|attr| {
+                            attr.path()
+                                .segments
+                                .iter()
+                                .any(|s| s.ident == "hdk_entry_types")
+                        }) {
+                            if item_enum
+                                .variants
+                                .iter()
+                                .any(|v| v.ident == pascal_entry_def_name)
+                            {
+                                return Err(ScaffoldError::EntryTypeAlreadyExists(
+                                    pascal_entry_def_name.clone(),
+                                    dna_manifest.name(),
+                                    zome_file_tree.zome_manifest.name.to_string(),
+                                ));
+                            }
+                            found = true;
+                            let pascal_entry_def_name = format_ident!("{pascal_entry_def_name}");
+                            let new_variant = syn::parse_quote! {
+                                #pascal_entry_def_name(#pascal_entry_def_name)
+                            };
+                            item_enum.variants.push(new_variant);
+                            return Ok(syn::Item::Enum(item_enum));
+                        }
+                    }
+
+                    add_entry_type_to_validation_arms(&mut item, entry_def)?;
+
+                    Ok(item)
+                })
+                .collect::<ScaffoldResult<Vec<syn::Item>>>()?;
+
+            // If the file is lib.rs, we already have the entry struct imported so no need to import it again
+            if found && file_path.file_name() != Some(OsString::from("lib.rs").as_os_str()) {
+                file.items.insert(0, syn::parse_quote! {use crate::*;});
+            }
+
+            Ok(file)
+        },
+    )
+    .map_err(|e| match e {
+        ScaffoldError::MalformedFile(path, error) => {
+            ScaffoldError::MalformedFile(crate_src_path.join(path), error)
+        }
+        _ => e,
+    })?;
+
+    let dna_file_tree = DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
+    let zome_file_tree = ZomeFileTree::from_zome_manifest(dna_file_tree, zome_manifest)?;
+
+    Ok(zome_file_tree)
 }
 
 pub fn render_entry_definition_file(
@@ -205,170 +351,24 @@ pub fn render_entry_definition_file(
     Ok(token_stream)
 }
 
-pub fn add_entry_type_to_integrity_zome(
-    zome_file_tree: ZomeFileTree,
-    entry_def: &EntryDefinition,
-    crud: &Crud,
-) -> ScaffoldResult<ZomeFileTree> {
-    let dna_manifest_path = zome_file_tree.dna_file_tree.dna_manifest_path.clone();
-    let dna_manifest = zome_file_tree.dna_file_tree.dna_manifest.clone();
-    let zome_manifest = zome_file_tree.zome_manifest.clone();
+pub fn render_entry_definition_struct(entry_def: &EntryDefinition) -> ScaffoldResult<TokenStream> {
+    let name: syn::Expr = syn::parse_str(entry_def.name.to_case(Case::Pascal).as_str())?;
 
-    let snake_entry_def_name = entry_def.name.to_case(Case::Snake);
-    let entry_def_file = render_entry_definition_file(entry_def, crud)?;
-
-    let entry_types = get_all_entry_types(&zome_file_tree)?;
-
-    // 1. Create an ENTRY_DEF_NAME.rs in "src/", with the entry definition struct
-    let crate_src_path = zome_file_tree.zome_crate_path.join("src");
-
-    let entry_def_path = crate_src_path.join(format!("{}.rs", snake_entry_def_name));
-
-    let mut file_tree = zome_file_tree.dna_file_tree.file_tree();
-
-    insert_file(
-        &mut file_tree,
-        &entry_def_path,
-        &unparse_pretty(&entry_def_file),
-    )?;
-
-    // 2. Add this file as a module in the entry point for the crate
-
-    let lib_rs_path = crate_src_path.join("lib.rs");
-
-    map_file(&mut file_tree, &lib_rs_path, |contents| {
-        Ok(format!(
-            r#"pub mod {snake_entry_def_name};
-pub use {snake_entry_def_name}::*;
-{contents}"#,
-        ))
-    })?;
-
-    let pascal_entry_def_name = entry_def.name.to_case(Case::Pascal);
-
-    let v: Vec<OsString> = crate_src_path
-        .clone()
+    let fields: Vec<TokenStream> = entry_def
+        .fields
         .iter()
-        .map(|s| s.to_os_string())
-        .collect();
-    // 3. Find the #[hdk_entry_types] macro
-    // 3.1 Import the new struct
-    // 3.2 Add a variant for the new entry def with the struct as its payload
-    map_rust_files(
-        file_tree
-            .path_mut(&mut v.iter())
-            .ok_or(ScaffoldError::PathNotFound(crate_src_path.clone()))?,
-        |file_path, mut file| {
-            let mut found = false;
-
-            // If there are no entry types definitions in this zome, first add the empty enum
-            if entry_types.is_none() && file_path == PathBuf::from("lib.rs") {
-                let entry_types_item = syn::parse_quote! {
-                    #[derive(Serialize, Deserialize)]
-                    #[serde(tag = "type")]
-                    #[hdk_entry_types]
-                    #[unit_enum(UnitEntryTypes)]
-                    pub enum EntryTypes {}
-                };
-
-                // Insert the entry types just before LinkTypes or before the first function if LinkTypes doesn't exist
-                match file.items.iter().find_position(|item| {
-                    if let syn::Item::Enum(item_enum) = item {
-                        return item_enum.ident == "LinkTypes";
-                    }
-                    matches!(item, syn::Item::Fn(_))
-                }) {
-                    Some((i, _)) => {
-                        file.items.insert(i, entry_types_item);
-                    }
-                    None => file.items.push(entry_types_item),
-                }
-
-                // update generic parameters
-                for item in &mut file.items {
-                    if let syn::Item::Fn(item_fn) = item {
-                        if item_fn.sig.ident != "validate" {
-                            continue;
-                        }
-                        for stmt in &mut item_fn.block.stmts {
-                            if let syn::Stmt::Expr(syn::Expr::Match(match_expr), _) = stmt {
-                                if let syn::Expr::Try(try_expr) = &mut *match_expr.expr {
-                                    if let syn::Expr::MethodCall(call) = &mut *try_expr.expr {
-                                        if call.method != "flattened" {
-                                            continue;
-                                        }
-                                        if let Some(turbofish) = &mut call.turbofish {
-                                            if let Some(first_arg) = turbofish.args.first_mut() {
-                                                *first_arg = syn::GenericArgument::Type(
-                                                    syn::parse_quote! {EntryTypes},
-                                                );
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            file.items = file
-                .items
-                .into_iter()
-                .map(|mut item| {
-                    if let syn::Item::Enum(mut item_enum) = item.clone() {
-                        if item_enum.attrs.iter().any(|attr| {
-                            attr.path()
-                                .segments
-                                .iter()
-                                .any(|s| s.ident == "hdk_entry_types")
-                        }) {
-                            if item_enum
-                                .variants
-                                .iter()
-                                .any(|v| v.ident == pascal_entry_def_name)
-                            {
-                                return Err(ScaffoldError::EntryTypeAlreadyExists(
-                                    pascal_entry_def_name.clone(),
-                                    dna_manifest.name(),
-                                    zome_file_tree.zome_manifest.name.to_string(),
-                                ));
-                            }
-                            found = true;
-                            let pascal_entry_def_name = format_ident!("{pascal_entry_def_name}");
-                            let new_variant = syn::parse_quote! {
-                                #pascal_entry_def_name(#pascal_entry_def_name)
-                            };
-                            item_enum.variants.push(new_variant);
-                            return Ok(syn::Item::Enum(item_enum));
-                        }
-                    }
-
-                    add_entry_type_to_validation_arms(&mut item, entry_def)?;
-
-                    Ok(item)
-                })
-                .collect::<ScaffoldResult<Vec<syn::Item>>>()?;
-
-            // If the file is lib.rs, we already have the entry struct imported so no need to import it again
-            if found && file_path.file_name() != Some(OsString::from("lib.rs").as_os_str()) {
-                file.items.insert(0, syn::parse_quote! {use crate::*;});
-            }
-
-            Ok(file)
-        },
-    )
-    .map_err(|e| match e {
-        ScaffoldError::MalformedFile(path, error) => {
-            ScaffoldError::MalformedFile(crate_src_path.join(path), error)
-        }
-        _ => e,
-    })?;
-
-    let dna_file_tree = DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
-    let zome_file_tree = ZomeFileTree::from_zome_manifest(dna_file_tree, zome_manifest)?;
-
-    Ok(zome_file_tree)
+        .map(|field_def| {
+            let name: syn::Expr =
+                syn::parse_str(field_def.field_name.to_case(Case::Snake).as_str())?;
+            let rust_type = field_def.rust_type();
+            Ok(quote! {  #name: #rust_type })
+        })
+        .collect::<ScaffoldResult<Vec<TokenStream>>>()?;
+    Ok(quote! {
+      pub struct #name {
+        #(pub #fields),*
+      }
+    })
 }
 
 pub fn get_all_entry_types(
