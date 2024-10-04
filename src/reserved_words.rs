@@ -113,5 +113,8 @@ mod tests {
 
         let invalid = check_for_reserved_keywords("EntryType");
         assert!(invalid.is_err());
+
+        let invalid = check_for_reserved_keywords("new");
+        assert!(invalid.is_err());
     }
 }
