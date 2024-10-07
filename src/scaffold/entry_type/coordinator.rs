@@ -22,7 +22,129 @@ use super::{
     integrity::find_ending_match_expr_in_block,
 };
 
-pub fn no_update_read_handler(entry_def: &EntryDefinition) -> TokenStream {
+pub fn add_crud_functions_to_coordinator(
+    zome_file_tree: ZomeFileTree,
+    integrity_zome_name: &str,
+    entry_def: &EntryDefinition,
+    crud: &Crud,
+    link_from_original_to_each_update: bool,
+) -> ScaffoldResult<ZomeFileTree> {
+    let dna_manifest_path = zome_file_tree.dna_file_tree.dna_manifest_path.clone();
+    let zome_manifest = zome_file_tree.zome_manifest.clone();
+    let entry_def_snake_case_name = entry_def.snake_case_name();
+
+    // 1. Create an ENTRY_DEF_NAME.rs in "src/", with the appropriate crud functions
+    let crate_src_path = zome_file_tree.zome_crate_path.join("src");
+
+    let mut file_tree = zome_file_tree.dna_file_tree.file_tree();
+
+    let file = unparse_pretty(&initial_crud_handlers(
+        integrity_zome_name,
+        entry_def,
+        crud,
+        link_from_original_to_each_update,
+    ));
+
+    insert_file(
+        &mut file_tree,
+        &crate_src_path.join(format!("{}.rs", &entry_def_snake_case_name)),
+        &file,
+    )?;
+
+    // 2. Add this file as a module in the entry point for the crate
+    let lib_rs_path = crate_src_path.join("lib.rs");
+
+    map_file(&mut file_tree, &lib_rs_path, |contents| {
+        Ok(format!(
+            r#"pub mod {};
+{contents}"#,
+            &entry_def_snake_case_name
+        ))
+    })?;
+
+    let v = crate_src_path
+        .iter()
+        .map(|s| s.to_os_string())
+        .collect::<Vec<OsString>>();
+
+    map_rust_files(
+        file_tree
+            .path_mut(&mut v.iter())
+            .ok_or(ScaffoldError::PathNotFound(crate_src_path.clone()))?,
+        |file_path, mut file| {
+            if file_path == PathBuf::from("lib.rs") {
+                let mut first_entry_type_scaffolded = false;
+
+                for item in &mut file.items {
+                    if let syn::Item::Enum(item_enum) = item {
+                        if item_enum.ident == "Signal" && !signal_has_entry_types(item_enum) {
+                            first_entry_type_scaffolded = true;
+                            for v in signal_entry_types_variants()? {
+                                item_enum.variants.push(v);
+                            }
+                        }
+                    }
+
+                    if let syn::Item::Fn(item_fn) = item {
+                        if item_fn.sig.ident == "signal_action" {
+                            if find_ending_match_expr_in_block(&mut item_fn.block).is_none() {
+                                item_fn.block = Box::new(syn::parse_quote! {
+                                    {
+                                        match action.hashed.content.clone() {
+                                            _ => Ok(())
+                                        }
+                                    }
+                                });
+                            }
+
+                            if let Some(expr_match) =
+                                find_ending_match_expr_in_block(&mut item_fn.block)
+                            {
+                                if !signal_action_has_entry_types(expr_match) {
+                                    for arm in signal_action_match_arms()? {
+                                        expr_match.arms.insert(expr_match.arms.len() - 1, arm);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if first_entry_type_scaffolded {
+                    file.items.push(syn::parse_quote! {
+                        fn get_entry_for_action(action_hash: &ActionHash) -> ExternResult<Option<EntryTypes>> {
+                            let record = match get_details(action_hash.clone(), GetOptions::default())? {
+                                Some(Details::Record(record_details)) => record_details.record,
+                                _ => return Ok(None),
+                            };
+                            let entry = match record.entry().as_option() {
+                                Some(entry) => entry,
+                                None => return Ok(None),
+                            };
+                            let (zome_index, entry_index) = match record.action().entry_type() {
+                                Some(EntryType::App(AppEntryDef {
+                                    zome_index,
+                                    entry_index,
+                                    ..
+                                })) => (zome_index, entry_index),
+                                _ => return Ok(None),
+                            };
+                            EntryTypes::deserialize_from_type(*zome_index, *entry_index, entry)
+                        }
+                    });
+                }
+            }
+            Ok(file)
+        },
+    )?;
+
+    let dna_file_tree = DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
+    let zome_file_tree = ZomeFileTree::from_zome_manifest(dna_file_tree, zome_manifest)?;
+
+    Ok(zome_file_tree)
+}
+
+fn no_update_read_handler(entry_def: &EntryDefinition) -> TokenStream {
     let hash_type = entry_def.referenceable().field_type().to_string();
     let snake_entry_def_name = entry_def.name.to_case(Case::Snake);
 
@@ -67,7 +189,7 @@ pub fn no_update_read_handler(entry_def: &EntryDefinition) -> TokenStream {
     }
 }
 
-pub fn read_handler_without_linking_to_updates(entry_def: &EntryDefinition) -> TokenStream {
+fn read_handler_without_linking_to_updates(entry_def: &EntryDefinition) -> TokenStream {
     let snake_entry_def_name = entry_def.name.clone();
     let original_hash_param_name = format_ident!("original_{snake_entry_def_name}_hash");
 
@@ -141,7 +263,7 @@ pub fn updates_link_name(entry_def_name: &str) -> String {
     format!("{}Updates", entry_def_name.to_case(Case::Pascal))
 }
 
-pub fn read_handler_with_linking_to_updates(entry_def: &EntryDefinition) -> TokenStream {
+fn read_handler_with_linking_to_updates(entry_def: &EntryDefinition) -> TokenStream {
     let snake_entry_def_name = entry_def.snake_case_name();
 
     let updates_link_name = format_ident!("{}", updates_link_name(&entry_def.name));
@@ -225,7 +347,7 @@ pub fn read_handler_with_linking_to_updates(entry_def: &EntryDefinition) -> Toke
     }
 }
 
-pub fn create_link_for_cardinality(
+fn create_link_for_cardinality(
     entry_def: &EntryDefinition,
     field_name: &str,
     link_type_name: &str,
@@ -264,7 +386,7 @@ pub fn create_link_for_cardinality(
     }
 }
 
-pub fn create_handler(entry_def: &EntryDefinition) -> TokenStream {
+fn create_handler(entry_def: &EntryDefinition) -> TokenStream {
     let pascal_entry_def_name = format_ident!("{}", entry_def.pascal_case_name());
     let snake_entry_def_name = format_ident!("{}", entry_def.snake_case_name());
 
@@ -315,7 +437,7 @@ pub fn create_handler(entry_def: &EntryDefinition) -> TokenStream {
     }
 }
 
-pub fn update_handler(
+fn update_handler(
     entry_def: &EntryDefinition,
     link_from_original_to_each_update: bool,
 ) -> TokenStream {
@@ -326,7 +448,7 @@ pub fn update_handler(
     }
 }
 
-pub fn update_handler_without_linking_on_each_update(entry_def: &EntryDefinition) -> TokenStream {
+fn update_handler_without_linking_on_each_update(entry_def: &EntryDefinition) -> TokenStream {
     let snake_entry_def_name = format_ident!("{}", entry_def.snake_case_name());
     let pascal_entry_def_name = format_ident!("{}", entry_def.pascal_case_name());
 
@@ -364,7 +486,7 @@ pub fn update_handler_without_linking_on_each_update(entry_def: &EntryDefinition
     }
 }
 
-pub fn update_handler_linking_on_each_update(entry_def: &EntryDefinition) -> TokenStream {
+fn update_handler_linking_on_each_update(entry_def: &EntryDefinition) -> TokenStream {
     let snake_entry_def_name = entry_def.snake_case_name();
     let pascal_entry_def_name = entry_def.pascal_case_name();
     let link_type_variant_name = updates_link_name(&entry_def.name);
@@ -413,7 +535,7 @@ pub fn update_handler_linking_on_each_update(entry_def: &EntryDefinition) -> Tok
     }
 }
 
-pub fn delete_handler(entry_def: &EntryDefinition) -> TokenStream {
+fn delete_handler(entry_def: &EntryDefinition) -> TokenStream {
     let pascal_entry_def_name = format_ident!("{}", entry_def.name.to_case(Case::Pascal));
     let snake_entry_def_name = format_ident!("{}", entry_def.name.to_case(Case::Snake));
 
@@ -673,126 +795,4 @@ fn signal_action_match_arms() -> ScaffoldResult<Vec<syn::Arm>> {
             }
         },
     ])
-}
-
-pub fn add_crud_functions_to_coordinator(
-    zome_file_tree: ZomeFileTree,
-    integrity_zome_name: &str,
-    entry_def: &EntryDefinition,
-    crud: &Crud,
-    link_from_original_to_each_update: bool,
-) -> ScaffoldResult<ZomeFileTree> {
-    let dna_manifest_path = zome_file_tree.dna_file_tree.dna_manifest_path.clone();
-    let zome_manifest = zome_file_tree.zome_manifest.clone();
-    let entry_def_snake_case_name = entry_def.snake_case_name();
-
-    // 1. Create an ENTRY_DEF_NAME.rs in "src/", with the appropriate crud functions
-    let crate_src_path = zome_file_tree.zome_crate_path.join("src");
-
-    let mut file_tree = zome_file_tree.dna_file_tree.file_tree();
-
-    let file = unparse_pretty(&initial_crud_handlers(
-        integrity_zome_name,
-        entry_def,
-        crud,
-        link_from_original_to_each_update,
-    ));
-
-    insert_file(
-        &mut file_tree,
-        &crate_src_path.join(format!("{}.rs", &entry_def_snake_case_name)),
-        &file,
-    )?;
-
-    // 2. Add this file as a module in the entry point for the crate
-    let lib_rs_path = crate_src_path.join("lib.rs");
-
-    map_file(&mut file_tree, &lib_rs_path, |contents| {
-        Ok(format!(
-            r#"pub mod {};
-{contents}"#,
-            &entry_def_snake_case_name
-        ))
-    })?;
-
-    let v = crate_src_path
-        .iter()
-        .map(|s| s.to_os_string())
-        .collect::<Vec<OsString>>();
-
-    map_rust_files(
-        file_tree
-            .path_mut(&mut v.iter())
-            .ok_or(ScaffoldError::PathNotFound(crate_src_path.clone()))?,
-        |file_path, mut file| {
-            if file_path == PathBuf::from("lib.rs") {
-                let mut first_entry_type_scaffolded = false;
-
-                for item in &mut file.items {
-                    if let syn::Item::Enum(item_enum) = item {
-                        if item_enum.ident == "Signal" && !signal_has_entry_types(item_enum) {
-                            first_entry_type_scaffolded = true;
-                            for v in signal_entry_types_variants()? {
-                                item_enum.variants.push(v);
-                            }
-                        }
-                    }
-
-                    if let syn::Item::Fn(item_fn) = item {
-                        if item_fn.sig.ident == "signal_action" {
-                            if find_ending_match_expr_in_block(&mut item_fn.block).is_none() {
-                                item_fn.block = Box::new(syn::parse_quote! {
-                                    {
-                                        match action.hashed.content.clone() {
-                                            _ => Ok(())
-                                        }
-                                    }
-                                });
-                            }
-
-                            if let Some(expr_match) =
-                                find_ending_match_expr_in_block(&mut item_fn.block)
-                            {
-                                if !signal_action_has_entry_types(expr_match) {
-                                    for arm in signal_action_match_arms()? {
-                                        expr_match.arms.insert(expr_match.arms.len() - 1, arm);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if first_entry_type_scaffolded {
-                    file.items.push(syn::parse_quote! {
-                        fn get_entry_for_action(action_hash: &ActionHash) -> ExternResult<Option<EntryTypes>> {
-                            let record = match get_details(action_hash.clone(), GetOptions::default())? {
-                                Some(Details::Record(record_details)) => record_details.record,
-                                _ => return Ok(None),
-                            };
-                            let entry = match record.entry().as_option() {
-                                Some(entry) => entry,
-                                None => return Ok(None),
-                            };
-                            let (zome_index, entry_index) = match record.action().entry_type() {
-                                Some(EntryType::App(AppEntryDef {
-                                    zome_index,
-                                    entry_index,
-                                    ..
-                                })) => (zome_index, entry_index),
-                                _ => return Ok(None),
-                            };
-                            EntryTypes::deserialize_from_type(*zome_index, *entry_index, entry)
-                        }
-                    });
-                }
-            }
-            Ok(file)
-        },
-    )?;
-
-    let dna_file_tree = DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
-    let zome_file_tree = ZomeFileTree::from_zome_manifest(dna_file_tree, zome_manifest)?;
-
-    Ok(zome_file_tree)
 }

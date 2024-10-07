@@ -40,7 +40,7 @@ impl PackageManager {
         ];
         let selection = Select::with_theme(&ColorfulTheme::default())
             .with_prompt("Choose a package manager: (Use arrow-keys. Return to submit)")
-            .default(0)
+            .default(1)
             .items(&managers)
             .interact()?;
         Ok(managers[selection])
@@ -52,7 +52,7 @@ impl PackageManager {
         match self {
             PackageManager::Bun => Some("bun"),
             PackageManager::Pnpm => Some("nodePackages.pnpm"),
-            PackageManager::Yarn => Some("yarn-berry"),
+            PackageManager::Yarn => Some("yarn"),
             // npm is already included with nodejs_20
             PackageManager::Npm => None,
         }

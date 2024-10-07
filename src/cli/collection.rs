@@ -41,6 +41,10 @@ pub struct Collection {
     #[structopt(long)]
     /// Skips UI generation for this collection.
     pub no_ui: bool,
+
+    #[structopt(long)]
+    /// Skips test generation for this collection.
+    pub no_spec: bool,
 }
 
 impl Collection {
@@ -73,6 +77,7 @@ impl Collection {
             self.collection_type,
             self.entry_type,
             self.no_ui,
+            self.no_spec,
         )?;
 
         build_file_tree(file_tree, ".")?;

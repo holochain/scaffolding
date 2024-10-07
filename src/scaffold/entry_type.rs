@@ -45,6 +45,7 @@ pub fn scaffold_entry_type(
     maybe_link_from_original_to_each_update: Option<bool>,
     maybe_fields: Option<&Vec<FieldDefinition>>,
     no_ui: bool,
+    no_spec: bool,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     check_for_reserved_keywords(name)?;
 
@@ -195,6 +196,7 @@ inadvertently reference or expect elements from the skipped entry type."#
         &crud,
         link_from_original_to_each_update,
         no_ui,
+        no_spec,
     )
 }
 

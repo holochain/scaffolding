@@ -14,7 +14,7 @@ use crate::{
         coordinator::scaffold_coordinator_zome_templates,
         integrity::scaffold_integrity_zome_templates, ScaffoldedTemplate,
     },
-    utils::input_with_case_and_initial_text,
+    utils::{input_with_case_and_initial_text, unparse_pretty},
     versions,
 };
 use build_fs_tree::{dir, file};
@@ -369,11 +369,15 @@ pub fn scaffold_integrity_zome_with_path(
     let mut file_tree =
         add_workspace_path_dependency(file_tree, zome_name, &path.join(&folder_name))?;
 
+    let initial_lib_rs = integrity::initial_lib_rs();
+
     // Add zome to workspace Cargo.toml
     let zome: FileTree = dir! {
         "Cargo.toml" => file!(integrity::initial_cargo_toml(zome_name)),
         "src" => dir! {
-            "lib.rs" => file!(integrity::initial_lib_rs())
+            "lib.rs" => file!(
+                unparse_pretty(&syn::parse_quote!{ #initial_lib_rs })
+            )
         }
     };
     insert_file_tree_in_dir(&mut file_tree, path, (OsString::from(folder_name), zome))?;
@@ -447,15 +451,17 @@ pub fn scaffold_coordinator_zome_in_path(
         add_coordinator_zome_to_manifest(dna_file_tree, coordinator_zome_manifest.clone())?;
 
     // Add zome to workspace Cargo.toml
-
     let file_tree = add_common_zome_dependencies_to_workspace_cargo(dna_file_tree.file_tree())?;
-
     let mut file_tree = add_workspace_path_dependency(file_tree, zome_name, &path.join(zome_name))?;
+
+    let initial_lib_rs = &coordinator::initial_lib_rs(dependencies);
 
     let zome: FileTree = dir! {
         "Cargo.toml" => file!(coordinator::initial_cargo_toml(zome_name, dependencies)),
         "src" => dir! {
-            "lib.rs" => file!(coordinator::initial_lib_rs(dependencies))
+            "lib.rs" => file!(
+                unparse_pretty(&syn::parse_quote!{ #initial_lib_rs })
+            )
         }
     };
 

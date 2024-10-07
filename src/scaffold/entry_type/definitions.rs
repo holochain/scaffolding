@@ -228,7 +228,7 @@ pub struct EntryTypeReference {
 }
 
 impl EntryTypeReference {
-    pub fn hash_type(&self) -> FieldType {
+    pub fn field_type(&self) -> FieldType {
         if self.reference_entry_hash {
             FieldType::EntryHash
         } else {
@@ -332,7 +332,7 @@ impl Referenceable {
     pub fn field_type(&self) -> FieldType {
         match self {
             Referenceable::Agent { .. } => FieldType::AgentPubKey,
-            Referenceable::EntryType(r) => r.hash_type(),
+            Referenceable::EntryType(r) => r.field_type(),
             Referenceable::AnyLinkableHash { .. } => FieldType::AnyLinkableHash,
         }
     }
@@ -428,7 +428,7 @@ impl EntryDefinition {
         ts_interface.push('}');
         ts_enums
             .is_empty()
-            .then_some(ts_interface.clone())
+            .then(|| ts_interface.clone())
             .unwrap_or(format!("{ts_enums}\n{}", ts_interface.clone()))
     }
 }

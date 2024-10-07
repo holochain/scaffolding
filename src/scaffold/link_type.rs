@@ -27,6 +27,7 @@ use super::{
 pub mod coordinator;
 pub mod integrity;
 
+#[allow(clippy::too_many_arguments)]
 pub fn scaffold_link_type(
     zome_file_tree: ZomeFileTree,
     template_file_tree: &FileTree,
@@ -35,6 +36,7 @@ pub fn scaffold_link_type(
     delete: Option<bool>,
     bidirectional: Option<bool>,
     no_ui: bool,
+    no_spec: bool,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     let dna_manifest_path = zome_file_tree.dna_file_tree.dna_manifest_path.clone();
     let zome_manifest = zome_file_tree.zome_manifest.clone();
@@ -192,6 +194,7 @@ pub use {}::*;
         delete,
         inverse_link_type.as_deref(),
         no_ui,
+        no_spec,
     )
 }
 

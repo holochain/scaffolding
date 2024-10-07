@@ -2,15 +2,25 @@
   description = "Flake for Holochain app development";
 
   inputs = {
-    holonix.url = "github:holochain/holonix?ref=main";
-    crane.url = "github:ipetkov/crane";
+    holonix = {
+      url = "github:holochain/holonix?ref=main";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        flake-parts.follows = "flake-parts";
+        crane.follows = "crane";
+        rust-overlay.follows = "rust-overlay";
+      };
+    };
 
-    nixpkgs.follows = "holonix/nixpkgs";
-    flake-parts.follows = "holonix/flake-parts";
+    nixpkgs.url = "github:nixos/nixpkgs?ref=24.05";
+
+    flake-parts.url = "github:hercules-ci/flake-parts";
+
+    crane.url = "github:ipetkov/crane";
 
     rust-overlay = {
       url = "github:oxalica/rust-overlay";
-      inputs.nixpkgs.follows = "holonix/nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
@@ -54,31 +64,22 @@
                 inherit system;
                 overlays = [ (import rust-overlay) ];
               };
-              rustToolchain = pkgs.rust-bin.stable."1.79.0".minimal;
+              rustToolchain = pkgs.rust-bin.stable."1.80.0".minimal;
               craneLib = (crane.mkLib pkgs).overrideToolchain rustToolchain;
               crateInfo = craneLib.crateNameFromCargoToml { cargoToml = ./Cargo.toml; };
 
               # source filtering to ensure builds using include_str! or include_bytes! succeed
               # https://crane.dev/faq/building-with-non-rust-includes.html
-              excludedDirs = [
-                ".git"
-                "target"
-                "result"
-                # Add more directories to exclude here
-              ];
-              scaffoldFilter = path: type:
-                let
-                  baseName = baseNameOf path;
-                  isExcluded = builtins.elem baseName excludedDirs;
-                in
-                  !(type == "directory" && isExcluded);
+              nonCargoBuildFiles = path: _type: builtins.match ".*(gitignore|md|hbs)$" path != null;
+              includeFilesFilter = path: type:
+                (craneLib.filterCargoSources path type) || (nonCargoBuildFiles path type);
             in
             craneLib.buildPackage {
               pname = "hc-scaffold";
               version = crateInfo.version;
               src = lib.cleanSourceWith {
                 src = ./.;
-                filter = scaffoldFilter;
+                filter = includeFilesFilter;
                 name = "source";
               };
               doCheck = false;

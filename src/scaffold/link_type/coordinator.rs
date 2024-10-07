@@ -31,7 +31,6 @@ pub fn add_link_type_functions_to_coordinator(
     let zome_manifest = coordinator_zome_file_tree.zome_manifest.clone();
 
     let snake_link_type_name = link_type_name.to_case(Case::Snake);
-
     let new_file_path = coordinator_zome_file_tree
         .zome_crate_path
         .join("src")
@@ -41,7 +40,7 @@ pub fn add_link_type_functions_to_coordinator(
     let lib_rs_path = crate_src_path.join("lib.rs");
     let mut file_tree = coordinator_zome_file_tree.dna_file_tree.file_tree();
 
-    let handlers = match to_referenceable {
+    let link_type_handlers_file = match to_referenceable {
         Some(r) => normal_handlers(
             integrity_zome_name,
             from_referenceable,
@@ -52,16 +51,14 @@ pub fn add_link_type_functions_to_coordinator(
         None => metadata_handlers(integrity_zome_name, link_type_name, from_referenceable),
     };
 
-    let file = unparse_pretty(&syn::parse_quote! { #handlers });
+    let file = unparse_pretty(&syn::parse_quote! { #link_type_handlers_file });
 
+    // insert handlers file
     insert_file(&mut file_tree, &new_file_path, &file)?;
 
-    // 2. Add this file as a module in the entry point for the crate
+    // add newly created file to lib.rs file
     map_file(&mut file_tree, &lib_rs_path, |contents| {
-        Ok(format!(
-            r#"pub mod {snake_link_type_name};
-{contents}"#,
-        ))
+        Ok(format!("pub mod {snake_link_type_name};\n{contents}",))
     })?;
 
     let dna_file_tree = DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
@@ -78,19 +75,11 @@ fn normal_handlers(
     bidirectional: bool,
 ) -> TokenStream {
     let inverse_get_handler = bidirectional
-        .then_some(get_links_handler(
-            to_referenceable,
-            from_referenceable,
-            delete,
-        ))
+        .then(|| get_links_handler(to_referenceable, from_referenceable, delete))
         .unwrap_or_default();
 
     let delete_link_handler = delete
-        .then_some(remove_link_handlers(
-            from_referenceable,
-            to_referenceable,
-            bidirectional,
-        ))
+        .then(|| remove_link_handlers(from_referenceable, to_referenceable, bidirectional))
         .unwrap_or_default();
 
     let integrity_zome_name = format_ident!("{integrity_zome_name}");
@@ -226,13 +215,15 @@ pub fn add_link_handler(
         format_ident!("{}", link_type_name(to_referenceable, from_referenceable));
 
     let bidirectional_create = bidirectional
-        .then_some(quote! {
-            create_link(
-                input.#target_field_name,
-                input.#base_field_name,
-                LinkTypes::#inverse_link_type_name,
-                (),
-            )?;
+        .then(|| {
+            quote! {
+                create_link(
+                    input.#target_field_name,
+                    input.#base_field_name,
+                    LinkTypes::#inverse_link_type_name,
+                    (),
+                )?;
+            }
         })
         .unwrap_or_default();
 
@@ -273,73 +264,10 @@ pub fn get_links_handler(
     }
 }
 
-fn get_links_to_any_linkable_hash_handler(
-    from_referenceable: &Referenceable,
-    to_referenceable: &Referenceable,
-    deletable: bool,
-) -> TokenStream {
-    let from_field_type = format_ident!("{}", from_referenceable.field_type().to_string());
-    let from_arg_name = format_ident!("{}", from_referenceable.field_name(&Cardinality::Single));
-
-    let pascal_link_type_name =
-        format_ident!("{}", link_type_name(from_referenceable, to_referenceable));
-    let singular_snake_from_entry_type = format_ident!(
-        "{}",
-        from_referenceable
-            .to_string(&Cardinality::Single)
-            .to_case(Case::Snake)
-    );
-    let plural_snake_to_entry_type = format_ident!(
-        "{}",
-        to_referenceable
-            .to_string(&Cardinality::Vector)
-            .to_case(Case::Snake)
-    );
-
-    let get_deleted_entry_for_entry_function_name = format_ident!(
-        "get_deleted_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}"
-    );
-
-    let get_deleted_links_handler = deletable
-        .then_some(quote::quote! {
-            #[hdk_extern]
-            pub fn #get_deleted_entry_for_entry_function_name(
-                #from_arg_name: #from_field_type,
-            ) -> ExternResult<Vec<(SignedActionHashed, Vec<SignedActionHashed>)>> {
-                let details = get_link_details(
-                    #from_arg_name,
-                    LinkTypes::#pascal_link_type_name,
-                    None,
-                    GetOptions::default(),
-                )?;
-                Ok(details
-                    .into_inner()
-                    .into_iter()
-                    .filter(|(_link, deletes)| !deletes.is_empty())
-                    .collect())
-            }
-        })
-        .unwrap_or_default();
-
-    let get_entry_for_entry_function_name =
-        format_ident!("get_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}");
-
-    quote::quote! {
-        #[hdk_extern]
-        pub fn #get_entry_for_entry_function_name(#from_arg_name: #from_field_type) -> ExternResult<Vec<Link>> {
-            get_links(
-                GetLinksInputBuilder::try_new(#from_arg_name, LinkTypes::#pascal_link_type_name)?.build(),
-            )
-        }
-
-        #get_deleted_links_handler
-    }
-}
-
 fn get_links_to_agent_handler(
     from_referenceable: &Referenceable,
     to_referenceable: &Referenceable,
-    deletable: bool,
+    delete: bool,
 ) -> TokenStream {
     let from_field_type = format_ident!("{}", from_referenceable.field_type().to_string());
     let from_arg_name = format_ident!("{}", from_referenceable.field_name(&Cardinality::Single));
@@ -363,23 +291,25 @@ fn get_links_to_agent_handler(
         "get_deleted_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}"
     );
 
-    let get_deleted_links_handler = deletable
-        .then_some(quote::quote! {
-            #[hdk_extern]
-            pub fn #get_deleted_entry_for_entry_function_name(
-                #from_arg_name: #from_field_type,
-            ) -> ExternResult<Vec<(SignedActionHashed, Vec<SignedActionHashed>)>> {
-                let details = get_link_details(
-                    #from_arg_name,
-                    LinkTypes::#pascal_link_type_name,
-                    None,
-                    GetOptions::default(),
-                )?;
-                Ok(details
-                    .into_inner()
-                    .into_iter()
-                    .filter(|(_link, deletes)| !deletes.is_empty())
-                    .collect())
+    let get_deleted_links_handler = delete
+        .then(|| {
+            quote::quote! {
+                #[hdk_extern]
+                pub fn #get_deleted_entry_for_entry_function_name(
+                    #from_arg_name: #from_field_type,
+                ) -> ExternResult<Vec<(SignedActionHashed, Vec<SignedActionHashed>)>> {
+                    let details = get_link_details(
+                        #from_arg_name,
+                        LinkTypes::#pascal_link_type_name,
+                        None,
+                        GetOptions::default(),
+                    )?;
+                    Ok(details
+                        .into_inner()
+                        .into_iter()
+                        .filter(|(_link, deletes)| !deletes.is_empty())
+                        .collect())
+                }
             }
         })
         .unwrap_or_default();
@@ -402,7 +332,7 @@ fn get_links_to_agent_handler(
 fn get_links_to_entry_handler(
     from_referenceable: &Referenceable,
     to_entry_type: &EntryTypeReference,
-    deletable: bool,
+    delete: bool,
 ) -> TokenStream {
     let from_field_type = format_ident!("{}", from_referenceable.field_type().to_string());
     let from_arg_name = format_ident!("{}", from_referenceable.field_name(&Cardinality::Single));
@@ -431,23 +361,90 @@ fn get_links_to_entry_handler(
         "get_deleted_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}"
     );
 
+    let get_deleted_links_handler = delete
+        .then(|| {
+            quote::quote! {
+                #[hdk_extern]
+                pub fn #get_deleted_entry_for_entry_function_name(
+                    #from_arg_name: #from_field_type,
+                ) -> ExternResult<Vec<(SignedActionHashed, Vec<SignedActionHashed>)>> {
+                    let details = get_link_details(
+                        #from_arg_name,
+                        LinkTypes::#pascal_link_type_name,
+                        None,
+                        GetOptions::default(),
+                    )?;
+                    Ok(details
+                        .into_inner()
+                        .into_iter()
+                        .filter(|(_link, deletes)| !deletes.is_empty())
+                        .collect())
+                }
+            }
+        })
+        .unwrap_or_default();
+
+    let get_entry_for_entry_function_name =
+        format_ident!("get_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}");
+
+    quote::quote! {
+        #[hdk_extern]
+        pub fn #get_entry_for_entry_function_name(#from_arg_name: #from_field_type) -> ExternResult<Vec<Link>> {
+            get_links(
+                GetLinksInputBuilder::try_new(#from_arg_name, LinkTypes::#pascal_link_type_name)?.build(),
+            )
+        }
+
+        #get_deleted_links_handler
+    }
+}
+
+fn get_links_to_any_linkable_hash_handler(
+    from_referenceable: &Referenceable,
+    to_referenceable: &Referenceable,
+    deletable: bool,
+) -> TokenStream {
+    let from_field_type = format_ident!("{}", from_referenceable.field_type().to_string());
+    let from_arg_name = format_ident!("{}", from_referenceable.field_name(&Cardinality::Single));
+
+    let pascal_link_type_name =
+        format_ident!("{}", link_type_name(from_referenceable, to_referenceable));
+    let singular_snake_from_entry_type = format_ident!(
+        "{}",
+        from_referenceable
+            .to_string(&Cardinality::Single)
+            .to_case(Case::Snake)
+    );
+    let plural_snake_to_entry_type = format_ident!(
+        "{}",
+        to_referenceable
+            .to_string(&Cardinality::Vector)
+            .to_case(Case::Snake)
+    );
+
+    let get_deleted_entry_for_entry_function_name = format_ident!(
+        "get_deleted_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}"
+    );
+
     let get_deleted_links_handler = deletable
-        .then_some(quote::quote! {
-            #[hdk_extern]
-            pub fn #get_deleted_entry_for_entry_function_name(
-                #from_arg_name: #from_field_type,
-            ) -> ExternResult<Vec<(SignedActionHashed, Vec<SignedActionHashed>)>> {
-                let details = get_link_details(
-                    #from_arg_name,
-                    LinkTypes::#pascal_link_type_name,
-                    None,
-                    GetOptions::default(),
-                )?;
-                Ok(details
-                    .into_inner()
-                    .into_iter()
-                    .filter(|(_link, deletes)| !deletes.is_empty())
-                    .collect())
+        .then(|| {
+            quote::quote! {
+                #[hdk_extern]
+                pub fn #get_deleted_entry_for_entry_function_name(
+                    #from_arg_name: #from_field_type,
+                ) -> ExternResult<Vec<(SignedActionHashed, Vec<SignedActionHashed>)>> {
+                    let details = get_link_details(
+                        #from_arg_name,
+                        LinkTypes::#pascal_link_type_name,
+                        None,
+                        GetOptions::default(),
+                    )?;
+                    Ok(details
+                        .into_inner()
+                        .into_iter()
+                        .filter(|(_link, deletes)| !deletes.is_empty())
+                        .collect())
+                }
             }
         })
         .unwrap_or_default();
@@ -472,7 +469,7 @@ fn remove_link_handlers(
     to_referenceable: &Referenceable,
     bidirectional: bool,
 ) -> TokenStream {
-    let from_hash_type = from_referenceable.field_type().to_string();
+    let from_field_type = from_referenceable.field_type().to_string();
     let from_arg_name = from_referenceable.field_name(&Cardinality::Single);
 
     let inverse_link_type_name =
@@ -496,20 +493,20 @@ fn remove_link_handlers(
         "Remove{singular_pascal_to_entry_type}For{singular_pascal_from_entry_type}Input"
     );
     let base_field_name = format_ident!("base_{from_arg_name}");
-    let from_hash_type = format_ident!("{from_hash_type}");
+    let from_field_type = format_ident!("{from_field_type}");
     let target_field_name = format_ident!("target_{to_arg_name}");
-    let to_hash_type = format_ident!("{}", to_referenceable.field_type().to_string());
+    let to_field_type = format_ident!("{}", to_referenceable.field_type().to_string());
 
     let delete_link_for_link_function_name =
         format_ident!("delete_{singular_snake_to_entry_type}_for_{singular_snake_from_entry_type}");
     let pascal_link_type_name =
         format_ident!("{}", link_type_name(from_referenceable, to_referenceable));
 
-    let from_link_hash_type = get_hash_type_from_referenceable(to_referenceable);
+    let from_link_hash_type_code = hash_type_code_from_referenceable(to_referenceable);
 
     let bidirectional_remove = bidirectional
         .then(|| {
-            let from_inverse_hash_type = get_hash_type_from_referenceable(from_referenceable);
+            let from_inverse_hash_type = hash_type_code_from_referenceable(from_referenceable);
 
             quote! {
                 let links = get_links(
@@ -529,8 +526,8 @@ fn remove_link_handlers(
     quote! {
         #[derive(Serialize, Deserialize, Debug)]
         pub struct #remove_link_for_link_struct_name {
-            pub #base_field_name: #from_hash_type,
-            pub #target_field_name: #to_hash_type,
+            pub #base_field_name: #from_field_type,
+            pub #target_field_name: #to_field_type,
         }
 
         #[hdk_extern]
@@ -539,7 +536,7 @@ fn remove_link_handlers(
                 GetLinksInputBuilder::try_new(input.#base_field_name.clone(), LinkTypes::#pascal_link_type_name)?.build(),
             )?;
             for link in links {
-                if #from_link_hash_type == input.#target_field_name {
+                if #from_link_hash_type_code == input.#target_field_name {
                     delete_link(link.create_link_hash)?;
                 }
             }
@@ -549,7 +546,7 @@ fn remove_link_handlers(
     }
 }
 
-fn get_hash_type_from_referenceable(referenceable: &Referenceable) -> TokenStream {
+fn hash_type_code_from_referenceable(referenceable: &Referenceable) -> TokenStream {
     match referenceable {
         Referenceable::Agent { .. } => quote! {
             AgentPubKey::from(
@@ -564,10 +561,12 @@ fn get_hash_type_from_referenceable(referenceable: &Referenceable) -> TokenStrea
             link.target.clone().into_hash()
         },
         Referenceable::EntryType(_) => {
-            let hash_type = referenceable.field_type().to_string();
-            let into_hash_method_name = format_ident!("into_{}", hash_type.to_case(Case::Snake));
-            let error_message =
-                format!("No {} associated with link", hash_type.to_case(Case::Lower));
+            let field_type = referenceable.field_type().to_string();
+            let into_hash_method_name = format_ident!("into_{}", field_type.to_case(Case::Snake));
+            let error_message = format!(
+                "No {} associated with link",
+                field_type.to_case(Case::Lower)
+            );
 
             quote! {
                 link.target
