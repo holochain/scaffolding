@@ -39,9 +39,9 @@ fn inner_choose_referenceable(
         .collect();
 
     all_options.push("Agent".to_string());
-    all_options.push("AnyLinkableHash".to_string());
 
     if optional {
+        all_options.push("AnyLinkableHash".to_string());
         all_options.push("[None]".to_string());
     }
 
