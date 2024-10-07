@@ -48,11 +48,17 @@ test('link a {{pascal_case from_referenceable.name}} to a {{pascal_case to_refer
 {{#if (eq from_referenceable.hash_type "AgentPubKey")}}
     const baseAddress = alice.agentPubKey;
 {{else}}
+  {{#if (ne from_referenceable.hash_type "AnyLinkableHash")}}
     const baseRecord = await create{{pascal_case from_referenceable.name}}(alice.cells[0]);
+  {{/if}}
   {{#if (eq from_referenceable.hash_type "EntryHash")}}
     const baseAddress = (baseRecord.signed_action.hashed.content as NewEntryAction).entry_hash;
   {{else}}
+    {{#if (eq from_referenceable.hash_type "AnyLinkableHash")}}
+    const baseAddress = hashFrom32AndType(new Uint8Array(39).fill(1), "External");
+    {{else}}
     const baseAddress = baseRecord.signed_action.hashed.hash;
+    {{/if}}
   {{/if}}
 {{/if}}
 {{#if (eq to_referenceable.hash_type "AgentPubKey")}}

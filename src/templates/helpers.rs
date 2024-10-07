@@ -25,8 +25,6 @@ pub fn register_helpers(h: Handlebars) -> Handlebars {
     let h = register_uniq_lines(h);
     let h = register_filter(h);
     let h = register_package_manager_command(h);
-    let h = register_and_helper(h);
-    let h = register_or_helper(h);
 
     h
 }
@@ -54,50 +52,6 @@ pub fn register_concat_helper(mut h: Handlebars) -> Handlebars {
         ),
     );
 
-    h
-}
-
-pub fn register_or_helper(mut h: Handlebars) -> Handlebars {
-    h.register_helper(
-        "or",
-        Box::new(
-            |h: &Helper,
-             _: &Handlebars,
-             _: &Context,
-             _: &mut RenderContext,
-             out: &mut dyn Output|
-             -> HelperResult {
-                let result = h
-                    .params()
-                    .iter()
-                    .any(|param| param.value().as_bool().unwrap_or(false));
-                out.write(if result { "true" } else { "false" })?;
-                Ok(())
-            },
-        ),
-    );
-    h
-}
-
-pub fn register_and_helper(mut h: Handlebars) -> Handlebars {
-    h.register_helper(
-        "and",
-        Box::new(
-            |h: &Helper,
-             _: &Handlebars,
-             _: &Context,
-             _: &mut RenderContext,
-             out: &mut dyn Output|
-             -> HelperResult {
-                let result = h
-                    .params()
-                    .iter()
-                    .all(|param| param.value().as_bool().unwrap_or(false));
-                out.write(if result { "true" } else { "false" })?;
-                Ok(())
-            },
-        ),
-    );
     h
 }
 
@@ -152,4 +106,3 @@ pub fn register_case_helpers(mut h: Handlebars) -> Handlebars {
 
     h
 }
-
