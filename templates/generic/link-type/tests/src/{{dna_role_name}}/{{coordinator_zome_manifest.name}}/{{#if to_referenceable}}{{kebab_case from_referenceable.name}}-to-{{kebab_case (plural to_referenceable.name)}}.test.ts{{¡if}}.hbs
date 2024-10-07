@@ -12,15 +12,20 @@ import {
   AppBundleSource,
   fakeActionHash,
   fakeAgentPubKey,
-  fakeEntryHash
+  fakeEntryHash,
+  hashFrom32AndType
 } from '@holochain/client';
 import { decode } from '@msgpack/msgpack';
 
-{{#if (ne from_referenceable.hash_type "AgentPubKey")}}
+{{#if (ne from_referenceable.hash_type "AgentPubKey") }}
+  {{#if (ne from_referenceable.hash_type "AnyLinkableHash")}}
 import { create{{pascal_case from_referenceable.name}} } from './common.js';
+  {{/if}}
 {{/if}}
-{{#if (ne to_referenceable.hash_type "AgentPubKey")}}
+{{#if (ne to_referenceable.hash_type "AgentPubKey") }}
+  {{#if (ne to_referenceable.hash_type "AnyLinkableHash")}}
 import { create{{pascal_case to_referenceable.name}} } from './common.js';
+  {{/if}}
 {{/if}}
 
 test('link a {{pascal_case from_referenceable.name}} to a {{pascal_case to_referenceable.name}}', async () => {
@@ -53,11 +58,18 @@ test('link a {{pascal_case from_referenceable.name}} to a {{pascal_case to_refer
 {{#if (eq to_referenceable.hash_type "AgentPubKey")}}
     const targetAddress = alice.agentPubKey;
 {{else}}
+  {{#if (ne to_referenceable.hash_type "AnyLinkableHash")}}
     const targetRecord = await create{{pascal_case to_referenceable.name}}(alice.cells[0]);
+  {{else}}
+  {{/if}}
   {{#if (eq to_referenceable.hash_type "EntryHash")}}
     const targetAddress = (targetRecord.signed_action.hashed.content as NewEntryAction).entry_hash;
   {{else}}
+    {{#if (eq to_referenceable.hash_type "AnyLinkableHash")}}
+    const targetAddress = hashFrom32AndType(new Uint8Array(39).fill(1), "External");
+    {{else}}
     const targetAddress = targetRecord.signed_action.hashed.hash;
+    {{/if}}
   {{/if}}
 {{/if}}
 
