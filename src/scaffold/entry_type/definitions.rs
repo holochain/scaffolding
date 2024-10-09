@@ -234,7 +234,9 @@ impl FromStr for FieldDefinition {
     fn from_str(fields_str: &str) -> Result<Self, Self::Err> {
         let mut str_path = fields_str.split(':');
 
-        let field_name = str_path.next().context(format!("field_name is missing from: {}", fields_str))?;
+        let field_name = str_path
+            .next()
+            .context(format!("field_name is missing from: {}", fields_str))?;
         check_case(field_name, "field_name", Case::Snake)?;
 
         let field_type_str = str_path.next().context(format!(
@@ -337,22 +339,19 @@ impl FromStr for EntryTypeReference {
     type Err = ScaffoldError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let sp: Vec<&str> = s.split(':').collect();
-        check_case(sp[0], "entry type reference", Case::Snake)?;
+        let mut str_path = s.split(':');
 
-        let reference_entry_hash = match sp.len() {
-            0 | 1 => false,
-            _ => match sp[1] {
-                "EntryHash" => true,
-                "ActionHash" => false,
-                _ => Err(ScaffoldError::InvalidArguments(String::from(
-                    "second argument for reference type must be \"EntryHash\" or \"ActionHash\"",
-                )))?,
-            },
-        };
+        let entry_type = str_path
+            .next()
+            .context(format!("Failed to parse entry_type from: {}", s))?;
+
+        let reference_entry_hash = str_path
+            .next()
+            .map(|v| matches!(v, "EntryHash"))
+            .unwrap_or_default();
 
         Ok(EntryTypeReference {
-            entry_type: sp[0].to_string().to_case(Case::Pascal),
+            entry_type: entry_type.to_case(Case::Pascal),
             reference_entry_hash,
         })
     }
