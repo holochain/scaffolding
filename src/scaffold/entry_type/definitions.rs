@@ -1,11 +1,16 @@
-use std::str::FromStr;
-
+use anyhow::Context;
 use convert_case::{Case, Casing};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
+use regex::Regex;
 use serde::{ser::SerializeStruct, Deserialize, Serialize, Serializer};
+use std::str::FromStr;
 
-use crate::{error::ScaffoldError, reserved_words::check_for_reserved_words, utils::check_case};
+use crate::{
+    error::{ScaffoldError, ScaffoldResult},
+    reserved_words::check_for_reserved_words,
+    utils::check_case,
+};
 
 #[derive(Deserialize, Debug, Clone, Serialize)]
 #[serde(tag = "type")]
@@ -30,14 +35,14 @@ pub enum FieldType {
     },
 }
 
-impl TryFrom<String> for FieldType {
-    type Error = ScaffoldError;
+impl FromStr for FieldType {
+    type Err = ScaffoldError;
 
-    fn try_from(value: String) -> Result<Self, Self::Error> {
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
         let list = FieldType::list();
 
         for el in list {
-            if value.eq(&el.to_string()) {
+            if s == el.to_string() {
                 return Ok(el);
             }
         }
@@ -89,6 +94,14 @@ impl FieldType {
                 variants: Vec::new(),
             },
         ]
+    }
+
+    pub fn parse_enum(fields_str: &str) -> ScaffoldResult<FieldType> {
+        let sp: Vec<&str> = fields_str.split(':').collect();
+        let label = sp[3].to_string().to_case(Case::Pascal);
+        let variants = sp[4].split('.').map(|v| v.to_case(Case::Pascal)).collect();
+
+        Ok(FieldType::Enum { label, variants })
     }
 
     pub fn rust_type(&self) -> TokenStream {
@@ -212,6 +225,78 @@ impl FieldDefinition {
                 quote! {Vec<#rust_representation_type>}
             }
         }
+    }
+}
+
+impl FromStr for FieldDefinition {
+    type Err = ScaffoldError;
+
+    fn from_str(fields_str: &str) -> Result<Self, Self::Err> {
+        let mut str_path = fields_str.split(':');
+
+        let field_name = str_path.next().context(format!("field_name is missing from: {}", fields_str))?;
+        check_case(field_name, "field_name", Case::Snake)?;
+
+        let field_type_str = str_path.next().context(format!(
+            "{} is missing a field_type, use one of {:?}",
+            field_name,
+            FieldType::list()
+        ))?;
+
+        let vec_regex = Regex::new(r"Vec<(?P<a>(.)*)>\z").unwrap();
+        let option_regex = Regex::new(r"Option<(?P<a>(.)*)>\z").unwrap();
+
+        let (field_type, cardinality) = if vec_regex.is_match(field_type_str) {
+            let field_type = vec_regex.replace(field_type_str, "${a}");
+
+            if field_type == "Enum" {
+                (FieldType::parse_enum(fields_str)?, Cardinality::Vector)
+            } else {
+                (FieldType::from_str(&field_type)?, Cardinality::Vector)
+            }
+        } else if option_regex.is_match(field_type_str) {
+            let field_type = option_regex.replace(field_type_str, "${a}");
+
+            if field_type == "Enum" {
+                (FieldType::parse_enum(fields_str)?, Cardinality::Option)
+            } else {
+                (FieldType::from_str(&field_type)?, Cardinality::Option)
+            }
+        } else if field_type_str == "Enum" {
+            (FieldType::parse_enum(fields_str)?, Cardinality::Single)
+        } else {
+            (FieldType::from_str(field_type_str)?, Cardinality::Single)
+        };
+
+        let widget = str_path
+            .next()
+            .filter(|v| !v.is_empty())
+            .map(|v| v.to_string());
+
+        let linked_from = str_path
+            .next()
+            .filter(|v| !v.is_empty())
+            .map(|v| match field_type {
+                FieldType::AgentPubKey => Some(Referenceable::Agent {
+                    role: v.to_string(),
+                }),
+                FieldType::EntryHash | FieldType::ActionHash => {
+                    Some(Referenceable::EntryType(EntryTypeReference {
+                        entry_type: v.to_string(),
+                        reference_entry_hash: matches!(field_type, FieldType::EntryHash),
+                    }))
+                }
+                _ => None,
+            })
+            .unwrap_or_default();
+
+        FieldDefinition::new(
+            field_name.to_string(),
+            field_type,
+            widget,
+            cardinality,
+            linked_from,
+        )
     }
 }
 
