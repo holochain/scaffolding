@@ -97,9 +97,19 @@ impl FieldType {
     }
 
     pub fn parse_enum(fields_str: &str) -> ScaffoldResult<FieldType> {
-        let sp: Vec<&str> = fields_str.split(':').collect();
-        let label = sp[3].to_string().to_case(Case::Pascal);
-        let variants = sp[4].split('.').map(|v| v.to_case(Case::Pascal)).collect();
+        let mut str_path = fields_str.split(':');
+
+        let variants = str_path
+            .next_back()
+            .context(format!("Enum variants missing from: {}", fields_str))?;
+        let variants = variants
+            .split('.')
+            .map(|v| v.to_case(Case::Pascal))
+            .collect::<Vec<_>>();
+        let label = str_path
+            .next_back()
+            .context(format!("Enum label missing from: {}", fields_str))?
+            .to_string();
 
         Ok(FieldType::Enum { label, variants })
     }
