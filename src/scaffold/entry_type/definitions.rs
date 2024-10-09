@@ -1,5 +1,7 @@
 use anyhow::Context;
+use colored::Colorize;
 use convert_case::{Case, Casing};
+use holochain::test_utils::itertools::Itertools;
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use regex::Regex;
@@ -39,12 +41,8 @@ impl FromStr for FieldType {
     type Err = ScaffoldError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let list = FieldType::list();
-
-        for el in list {
-            if s == el.to_string() {
-                return Ok(el);
-            }
+        if let Some(f) = FieldType::list().iter().find(|v| s == v.to_string()) {
+            return Ok(f.to_owned());
         }
 
         Err(ScaffoldError::InvalidArguments(format!(
@@ -244,15 +242,22 @@ impl FromStr for FieldDefinition {
     fn from_str(fields_str: &str) -> Result<Self, Self::Err> {
         let mut str_path = fields_str.split(':');
 
-        let field_name = str_path
-            .next()
-            .context(format!("field_name is missing from: {}", fields_str))?;
+        let field_name = str_path.next().context(format!(
+            "field_name is missing from: {}\nExample: \"{}\"",
+            fields_str,
+            "title:String".italic()
+        ))?;
         check_case(field_name, "field_name", Case::Snake)?;
 
         let field_type_str = str_path.next().context(format!(
-            "{} is missing a field_type, use one of {:?}",
+            "{} is missing a field_type, use one of: {}\nExample: \"{}\"",
             field_name,
             FieldType::list()
+                .iter()
+                .map(|f| f.to_string())
+                .join(", ")
+                .italic(),
+            "title:String".italic()
         ))?;
 
         let vec_regex = Regex::new(r"Vec<(?P<a>(.)*)>\z").unwrap();
@@ -280,6 +285,8 @@ impl FromStr for FieldDefinition {
             (FieldType::from_str(field_type_str)?, Cardinality::Single)
         };
 
+        // XXX: perhaps widget-types can be validated at this level rather than
+        //      on attemting to render templates
         let widget = str_path
             .next()
             .filter(|v| !v.is_empty())
