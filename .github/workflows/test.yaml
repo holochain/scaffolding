@@ -4,9 +4,9 @@ on:
   # Trigger the workflow on push or pull request,
   # but only for the main branch
   push:
-    branches: [ develop, develop-0.1, develop-0.2 ]
+    branches: [develop, develop-0.1, develop-0.2, develop-0.4]
   pull_request:
-    branches: [ develop, develop-0.1, develop-0.2 ]
+    branches: [develop, develop-0.1, develop-0.2, develop-0.4]
 
 jobs:
   test_fmt_lint:
@@ -18,10 +18,10 @@ jobs:
         if: runner.os == 'Linux'
         uses: AdityaGarg8/remove-unwanted-software@v2
         with:
-          remove-dotnet: 'true'
-          remove-android: 'true'
-          remove-codeql: 'true'
-          remove-docker-images: 'true'
+          remove-dotnet: "true"
+          remove-android: "true"
+          remove-codeql: "true"
+          remove-docker-images: "true"
 
       - name: Install nix
         uses: cachix/install-nix-action@v27
@@ -51,7 +51,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        template: [ svelte, vue, lit, react, vanilla ]
+        template: [svelte, vue, lit, react, vanilla]
     steps:
       - uses: actions/checkout@v4
 
@@ -59,10 +59,10 @@ jobs:
         if: runner.os == 'Linux'
         uses: AdityaGarg8/remove-unwanted-software@v2
         with:
-          remove-dotnet: 'true'
-          remove-android: 'true'
-          remove-codeql: 'true'
-          remove-docker-images: 'true'
+          remove-dotnet: "true"
+          remove-android: "true"
+          remove-codeql: "true"
+          remove-docker-images: "true"
 
       - name: Install nix
         uses: cachix/install-nix-action@v27
@@ -92,10 +92,10 @@ jobs:
         if: runner.os == 'Linux'
         uses: AdityaGarg8/remove-unwanted-software@v2
         with:
-          remove-dotnet: 'true'
-          remove-android: 'true'
-          remove-codeql: 'true'
-          remove-docker-images: 'true'
+          remove-dotnet: "true"
+          remove-android: "true"
+          remove-codeql: "true"
+          remove-docker-images: "true"
 
       - name: Install nix
         uses: cachix/install-nix-action@v27
