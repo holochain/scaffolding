@@ -28,7 +28,7 @@ pub struct ScaffoldCollectionData {
 }
 
 // TODO: group some params into a new-type or prefer builder pattern
-#[allow(clippy::too_many_arguments)]
+#[allow(unknown_lints, clippy::too_many_arguments, clippy::manual_inspect)]
 pub fn scaffold_collection_templates(
     mut app_file_tree: FileTree,
     template_file_tree: &FileTree,
