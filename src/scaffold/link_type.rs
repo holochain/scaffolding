@@ -59,7 +59,7 @@ pub fn scaffold_link_type(
     };
 
     let bidirectional = match (&to_referenceable, bidirectional) {
-        (None, _) | (Some(Referenceable::AnyLinkableHash { .. }), _) => false,
+        (None, _) | (Some(Referenceable::ExternalHash { .. }), _) => false,
         (_, Some(b)) => b,
         _ => Confirm::with_theme(&ColorfulTheme::default())
             .with_prompt("Should the link be bidirectional?")

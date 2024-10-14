@@ -257,7 +257,7 @@ pub fn get_links_handler(
         Referenceable::Agent { .. } => {
             get_links_to_agent_handler(from_referenceable, to_referenceable, delete)
         }
-        Referenceable::AnyLinkableHash { .. } => {
+        Referenceable::ExternalHash { .. } => {
             get_links_to_any_linkable_hash_handler(from_referenceable, to_referenceable, delete)
         }
         Referenceable::EntryType(e) => get_links_to_entry_handler(from_referenceable, e, delete),
@@ -557,7 +557,7 @@ fn hash_type_code_from_referenceable(referenceable: &Referenceable) -> TokenStre
                     ))?
             )
         },
-        Referenceable::AnyLinkableHash { .. } => quote! {
+        Referenceable::ExternalHash { .. } => quote! {
             link.target.clone().into_hash()
         },
         Referenceable::EntryType(_) => {

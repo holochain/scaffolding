@@ -139,13 +139,13 @@ inadvertently reference or expect elements from the skipped entry type."#
     let coordinator_zome = match coordinator_zomes_for_integrity.len() {
         0 => Err(ScaffoldError::NoCoordinatorZomesFoundForIntegrityZome(
             zome_file_tree.dna_file_tree.dna_manifest.name(),
-            zome_file_tree.zome_manifest.name.0.to_string(),
+            zome_file_tree.zome_manifest.name.to_string(),
         )),
         1 => Ok(coordinator_zomes_for_integrity[0].clone()),
         _ => {
             let names: Vec<String> = coordinator_zomes_for_integrity
                 .iter()
-                .map(|z| z.name.0.to_string())
+                .map(|z| z.name.to_string())
                 .collect();
             let selection = Select::with_theme(&ColorfulTheme::default())
                 .with_prompt("Which coordinator zome should the CRUD functions be scaffolded in?")
@@ -217,7 +217,7 @@ fn check_field_definitions(
         .iter()
         .filter_map(|f| f.linked_from.clone())
         .filter_map(|t| match t {
-            Referenceable::Agent { .. } | Referenceable::AnyLinkableHash { .. } => None,
+            Referenceable::Agent { .. } | Referenceable::ExternalHash { .. } => None,
             Referenceable::EntryType(et) => Some(et),
         })
         .collect();

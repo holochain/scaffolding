@@ -25,7 +25,7 @@ pub enum FieldType {
     ActionHash,
     EntryHash,
     DnaHash,
-    AnyLinkableHash,
+    ExternalHash,
     Enum {
         label: String,
         variants: Vec<String>,
@@ -66,7 +66,7 @@ impl std::fmt::Display for FieldType {
             FieldType::ActionHash => "ActionHash",
             FieldType::EntryHash => "EntryHash",
             FieldType::DnaHash => "DnaHash",
-            FieldType::AnyLinkableHash => "AnyLinkableHash",
+            FieldType::ExternalHash => "ExternalHash",
             FieldType::AgentPubKey => "AgentPubKey",
             FieldType::Enum { .. } => "Enum",
         };
@@ -86,7 +86,7 @@ impl FieldType {
             FieldType::ActionHash,
             FieldType::EntryHash,
             FieldType::DnaHash,
-            FieldType::AnyLinkableHash,
+            FieldType::ExternalHash,
             FieldType::AgentPubKey,
             FieldType::Enum {
                 label: String::new(),
@@ -108,7 +108,7 @@ impl FieldType {
             ActionHash => quote!(ActionHash),
             DnaHash => quote!(DnaHash),
             EntryHash => quote!(EntryHash),
-            AnyLinkableHash => quote!(AnyLinkableHash),
+            ExternalHash => quote!(ExternalHash),
             AgentPubKey => quote!(AgentPubKey),
             Enum { label, .. } => {
                 let ident = format_ident!("{}", label);
@@ -131,7 +131,7 @@ impl FieldType {
             ActionHash => "ActionHash",
             EntryHash => "EntryHash",
             DnaHash => "DnaHash",
-            AnyLinkableHash => "AnyLinkableHash",
+            ExternalHash => "ExternalHash",
             Enum { label, .. } => label,
         }
     }
@@ -283,7 +283,7 @@ impl FromStr for EntryTypeReference {
 pub enum Referenceable {
     Agent { role: String },
     EntryType(EntryTypeReference),
-    AnyLinkableHash { name: String },
+    ExternalHash { name: String },
 }
 
 impl Serialize for Referenceable {
@@ -316,8 +316,8 @@ impl FromStr for Referenceable {
                 Ok(Referenceable::Agent { role })
             }
             _ => {
-                if parts.get(1) == Some(&"AnyLinkableHash") {
-                    Ok(Referenceable::AnyLinkableHash {
+                if parts.get(1) == Some(&"ExternalHash") {
+                    Ok(Referenceable::ExternalHash {
                         name: type_name.to_string(),
                     })
                 } else {
@@ -333,7 +333,7 @@ impl Referenceable {
         match self {
             Referenceable::Agent { .. } => FieldType::AgentPubKey,
             Referenceable::EntryType(r) => r.field_type(),
-            Referenceable::AnyLinkableHash { .. } => FieldType::AnyLinkableHash,
+            Referenceable::ExternalHash { .. } => FieldType::ExternalHash,
         }
     }
 
@@ -341,7 +341,7 @@ impl Referenceable {
         let s = self.to_string(c).to_case(Case::Snake);
 
         match self {
-            Referenceable::Agent { .. } | Referenceable::AnyLinkableHash { .. } => s,
+            Referenceable::Agent { .. } | Referenceable::ExternalHash { .. } => s,
             Referenceable::EntryType(e) => e.field_name(c),
         }
     }
@@ -350,7 +350,7 @@ impl Referenceable {
         let singular = match self {
             Referenceable::Agent { role } => role.clone(),
             Referenceable::EntryType(r) => r.entry_type.clone(),
-            Referenceable::AnyLinkableHash { name } => name.clone(),
+            Referenceable::ExternalHash { name } => name.clone(),
         };
 
         match c {
