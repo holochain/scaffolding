@@ -120,12 +120,7 @@
           };
 
           devShells.ci = pkgs.mkShell {
-            packages = (with inputs'.holonix.packages; [
-              holochain
-              lair-keystore
-              hn-introspect
-              rust
-            ]) ++ [ self'.packages.hc-scaffold ];
+            packages = [ inputs'.holonix.packages.rust self'.packages.hc-scaffold ];
           };
         };
       };
