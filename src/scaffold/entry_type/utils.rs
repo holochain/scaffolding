@@ -114,6 +114,9 @@ fn inner_choose_referenceable(
         .map(|r| r.entry_type.to_owned())
         .collect();
 
+    all_options.push("ExternalHash".to_string());
+    all_options.push("Agent".to_string());
+
     if let Some(options) = extra_options {
         all_options.extend(options.into_iter().map(String::from).collect::<Vec<_>>())
     }
@@ -122,8 +125,6 @@ fn inner_choose_referenceable(
         .with_prompt(prompt)
         .default(0)
         .items(&all_options[..])
-        .item("ExternalHash".to_string())
-        .item("Agent".to_string())
         .interact()?;
 
     match all_options[selection].as_str() {
