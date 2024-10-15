@@ -1,10 +1,8 @@
+use anyhow::Context;
 use convert_case::Case;
 use dialoguer::{theme::ColorfulTheme, Select};
 
-use super::{
-    definitions::{EntryTypeReference, Referenceable},
-    integrity::get_all_entry_types,
-};
+use super::definitions::{EntryTypeReference, Referenceable};
 use crate::{
     error::{ScaffoldError, ScaffoldResult},
     reserved_words::check_for_reserved_keywords,
@@ -28,27 +26,98 @@ pub fn choose_reference_entry_hash(prompt: &str, recommended: bool) -> ScaffoldR
     Ok(options[selection].1)
 }
 
+pub fn get_or_choose_referenceable(
+    prompt: &str,
+    zome_file_tree: &ZomeFileTree,
+    entry_type: Option<&Referenceable>,
+    all_entries: &[EntryTypeReference],
+) -> ScaffoldResult<Referenceable> {
+    match &entry_type {
+        Some(Referenceable::Agent { role }) => {
+            check_for_reserved_keywords(role)?;
+            Ok(Referenceable::Agent { role: role.clone() })
+        }
+        Some(Referenceable::EntryType(app_entry_reference)) => {
+            let all_entries: Vec<&str> =
+                all_entries.iter().map(|e| e.entry_type.as_str()).collect();
+
+            all_entries
+                .into_iter()
+                .find(|et| et == &app_entry_reference.entry_type)
+                .ok_or(ScaffoldError::EntryTypeNotFound(
+                    app_entry_reference.entry_type.to_string().clone(),
+                    zome_file_tree.dna_file_tree.dna_manifest.name(),
+                    zome_file_tree.zome_manifest.name.to_string(),
+                ))?;
+
+            Ok(Referenceable::EntryType(app_entry_reference.clone()))
+        }
+        _ => choose_referenceable(all_entries, prompt),
+    }
+}
+
+pub fn get_or_choose_optional_reference_type(
+    prompt: &str,
+    zome_file_tree: &ZomeFileTree,
+    entry_type: Option<&Referenceable>,
+    all_entries: &[EntryTypeReference],
+) -> ScaffoldResult<Option<Referenceable>> {
+    match entry_type {
+        Some(Referenceable::Agent { .. }) => Ok(entry_type.cloned()),
+        Some(Referenceable::EntryType(app_entry_reference)) => {
+            let all_entries: Vec<&str> =
+                all_entries.iter().map(|e| e.entry_type.as_str()).collect();
+
+            all_entries
+                .into_iter()
+                .find(|et| et == &app_entry_reference.entry_type)
+                .ok_or(ScaffoldError::EntryTypeNotFound(
+                    app_entry_reference.entry_type.to_string().clone(),
+                    zome_file_tree.dna_file_tree.dna_manifest.name(),
+                    zome_file_tree.zome_manifest.name.to_string(),
+                ))?;
+
+            Ok(entry_type.cloned())
+        }
+        _ => choose_optional_referenceable(all_entries, prompt),
+    }
+}
+
+pub fn choose_referenceable(
+    all_entries: &[EntryTypeReference],
+    prompt: &str,
+) -> ScaffoldResult<Referenceable> {
+    let maybe_reference_type = inner_choose_referenceable(all_entries, prompt, None)?;
+    Ok(maybe_reference_type.context("Reference type should not be None")?)
+}
+
+pub fn choose_optional_referenceable(
+    all_entries: &[EntryTypeReference],
+    prompt: &str,
+) -> ScaffoldResult<Option<Referenceable>> {
+    inner_choose_referenceable(all_entries, prompt, Some(vec!["[None]"]))
+}
+
 fn inner_choose_referenceable(
     all_entries: &[EntryTypeReference],
     prompt: &str,
-    optional: bool,
+    extra_options: Option<Vec<&str>>,
 ) -> ScaffoldResult<Option<Referenceable>> {
     let mut all_options: Vec<String> = all_entries
         .iter()
         .map(|r| r.entry_type.to_owned())
         .collect();
 
-    all_options.push("Agent".to_string());
-
-    if optional {
-        all_options.push("ExternalHash".to_string());
-        all_options.push("[None]".to_string());
+    if let Some(options) = extra_options {
+        all_options.extend(options.into_iter().map(String::from).collect::<Vec<_>>())
     }
 
     let selection = Select::with_theme(&ColorfulTheme::default())
         .with_prompt(prompt)
         .default(0)
         .items(&all_options[..])
+        .item("ExternalHash".to_string())
+        .item("Agent".to_string())
         .interact()?;
 
     match all_options[selection].as_str() {
@@ -78,22 +147,6 @@ fn inner_choose_referenceable(
     }
 }
 
-pub fn choose_referenceable(
-    all_entries: &[EntryTypeReference],
-    prompt: &str,
-) -> ScaffoldResult<Referenceable> {
-    let maybe_reference_type = inner_choose_referenceable(all_entries, prompt, false)?;
-
-    Ok(maybe_reference_type.expect("reference type should not be None"))
-}
-
-pub fn choose_optional_referenceable(
-    all_entries: &[EntryTypeReference],
-    prompt: &str,
-) -> ScaffoldResult<Option<Referenceable>> {
-    inner_choose_referenceable(all_entries, prompt, true)
-}
-
 pub fn choose_entry_type_reference(
     all_entries: &[EntryTypeReference],
     prompt: &str,
@@ -107,61 +160,4 @@ pub fn choose_entry_type_reference(
         .interact()?;
 
     Ok(all_entries[selection].clone())
-}
-
-pub fn get_or_choose_referenceable(
-    zome_file_tree: &ZomeFileTree,
-    entry_type: Option<&Referenceable>,
-    prompt: &str,
-) -> ScaffoldResult<Referenceable> {
-    let all_entries = get_all_entry_types(zome_file_tree)?.unwrap_or_else(Vec::new);
-
-    match &entry_type {
-        Some(Referenceable::Agent { role }) => {
-            check_for_reserved_keywords(role)?;
-            Ok(Referenceable::Agent { role: role.clone() })
-        }
-        Some(Referenceable::EntryType(app_entry_reference)) => {
-            let all_entries: Vec<String> = all_entries.into_iter().map(|e| e.entry_type).collect();
-
-            all_entries
-                .into_iter()
-                .find(|et| et.eq(&app_entry_reference.entry_type.to_string()))
-                .ok_or(ScaffoldError::EntryTypeNotFound(
-                    app_entry_reference.entry_type.to_string().clone(),
-                    zome_file_tree.dna_file_tree.dna_manifest.name(),
-                    zome_file_tree.zome_manifest.name.0.to_string(),
-                ))?;
-
-            Ok(Referenceable::EntryType(app_entry_reference.clone()))
-        }
-        _ => choose_referenceable(&all_entries, prompt),
-    }
-}
-
-pub fn get_or_choose_optional_reference_type(
-    zome_file_tree: &ZomeFileTree,
-    entry_type: Option<&Referenceable>,
-    prompt: &str,
-) -> ScaffoldResult<Option<Referenceable>> {
-    let all_entries = get_all_entry_types(zome_file_tree)?.unwrap_or_else(Vec::new);
-
-    match entry_type {
-        Some(Referenceable::Agent { .. }) => Ok(entry_type.cloned()),
-        Some(Referenceable::EntryType(app_entry_reference)) => {
-            let all_entries: Vec<String> = all_entries.into_iter().map(|e| e.entry_type).collect();
-
-            all_entries
-                .into_iter()
-                .find(|et| et.eq(&app_entry_reference.entry_type.to_string()))
-                .ok_or(ScaffoldError::EntryTypeNotFound(
-                    app_entry_reference.entry_type.to_string().clone(),
-                    zome_file_tree.dna_file_tree.dna_manifest.name(),
-                    zome_file_tree.zome_manifest.name.0.to_string(),
-                ))?;
-
-            Ok(entry_type.cloned())
-        }
-        _ => choose_optional_referenceable(&all_entries, prompt),
-    }
 }
