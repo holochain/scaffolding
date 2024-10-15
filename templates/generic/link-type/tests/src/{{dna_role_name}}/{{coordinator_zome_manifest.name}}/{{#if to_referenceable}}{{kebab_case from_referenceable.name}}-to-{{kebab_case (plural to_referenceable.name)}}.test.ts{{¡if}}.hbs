@@ -18,12 +18,12 @@ import {
 import { decode } from '@msgpack/msgpack';
 
 {{#if (ne from_referenceable.hash_type "AgentPubKey") }}
-  {{#if (ne from_referenceable.hash_type "AnyLinkableHash")}}
+  {{#if (ne from_referenceable.hash_type "ExternalHash")}}
 import { create{{pascal_case from_referenceable.name}} } from './common.js';
   {{/if}}
 {{/if}}
 {{#if (ne to_referenceable.hash_type "AgentPubKey") }}
-  {{#if (ne to_referenceable.hash_type "AnyLinkableHash")}}
+  {{#if (ne to_referenceable.hash_type "ExternalHash")}}
 import { create{{pascal_case to_referenceable.name}} } from './common.js';
   {{/if}}
 {{/if}}
@@ -48,13 +48,13 @@ test('link a {{pascal_case from_referenceable.name}} to a {{pascal_case to_refer
 {{#if (eq from_referenceable.hash_type "AgentPubKey")}}
     const baseAddress = alice.agentPubKey;
 {{else}}
-  {{#if (ne from_referenceable.hash_type "AnyLinkableHash")}}
+  {{#if (ne from_referenceable.hash_type "ExternalHash")}}
     const baseRecord = await create{{pascal_case from_referenceable.name}}(alice.cells[0]);
   {{/if}}
   {{#if (eq from_referenceable.hash_type "EntryHash")}}
     const baseAddress = (baseRecord.signed_action.hashed.content as NewEntryAction).entry_hash;
   {{else}}
-    {{#if (eq from_referenceable.hash_type "AnyLinkableHash")}}
+    {{#if (eq from_referenceable.hash_type "ExternalHash")}}
     const baseAddress = hashFrom32AndType(new Uint8Array(39).fill(1), "External");
     {{else}}
     const baseAddress = baseRecord.signed_action.hashed.hash;
@@ -64,14 +64,14 @@ test('link a {{pascal_case from_referenceable.name}} to a {{pascal_case to_refer
 {{#if (eq to_referenceable.hash_type "AgentPubKey")}}
     const targetAddress = alice.agentPubKey;
 {{else}}
-  {{#if (ne to_referenceable.hash_type "AnyLinkableHash")}}
+  {{#if (ne to_referenceable.hash_type "ExternalHash")}}
     const targetRecord = await create{{pascal_case to_referenceable.name}}(alice.cells[0]);
   {{else}}
   {{/if}}
   {{#if (eq to_referenceable.hash_type "EntryHash")}}
     const targetAddress = (targetRecord.signed_action.hashed.content as NewEntryAction).entry_hash;
   {{else}}
-    {{#if (eq to_referenceable.hash_type "AnyLinkableHash")}}
+    {{#if (eq to_referenceable.hash_type "ExternalHash")}}
     const targetAddress = hashFrom32AndType(new Uint8Array(39).fill(1), "External");
     {{else}}
     const targetAddress = targetRecord.signed_action.hashed.hash;
