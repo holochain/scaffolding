@@ -8,7 +8,7 @@ use serde::{ser::SerializeStruct, Deserialize, Serialize, Serializer};
 
 use crate::{error::ScaffoldError, reserved_words::check_for_reserved_keywords, utils::check_case};
 
-#[derive(Deserialize, Debug, Clone, Serialize)]
+#[derive(Deserialize, Debug, Clone, Serialize, Eq, PartialEq)]
 #[serde(tag = "type")]
 pub enum FieldType {
     #[serde(rename = "bool")]

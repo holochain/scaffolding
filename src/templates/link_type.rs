@@ -6,7 +6,7 @@ use serde::Serialize;
 use crate::{
     error::ScaffoldResult,
     file_tree::{file_content, FileTree},
-    scaffold::entry_type::definitions::Referenceable,
+    scaffold::entry_type::definitions::{FieldType, Referenceable},
 };
 
 use super::{
@@ -52,6 +52,16 @@ pub fn scaffold_link_type_templates(
         bidirectional,
     };
 
+    // This is a measure to prevent UI from getting scaffolded for link-types where the base
+    // is an ExternalHash since it would expect an <ExternalHash>Detail component to exist
+    // which is not possible
+    let should_skip_ui_gen = no_ui
+        || from_referenceable.field_type() == FieldType::ExternalHash
+        || to_referenceable
+            .as_ref()
+            .map(|r| r.field_type() == FieldType::ExternalHash)
+            .unwrap_or_default();
+
     let h = build_handlebars(template_file_tree)?;
 
     let link_type_path = PathBuf::from("link-type");
@@ -59,7 +69,7 @@ pub fn scaffold_link_type_templates(
 
     if let Some(link_type_template) = template_file_tree.path(&mut v.iter()) {
         let mut link_type_template = link_type_template.clone();
-        if no_ui {
+        if should_skip_ui_gen {
             link_type_template.dir_content_mut().map(|v| {
                 v.retain(|k, _| k != "ui");
                 v
