@@ -23,7 +23,9 @@ pub fn choose_reference_entry_hash(prompt: &str, recommended: bool) -> ScaffoldR
         .items(&options.map(|(name, _)| name))
         .interact()?;
 
-    Ok(options[selection].1)
+    let (_, value) = options[selection];
+
+    Ok(value)
 }
 
 pub fn get_or_choose_referenceable(
@@ -95,7 +97,11 @@ pub fn choose_optional_referenceable(
     all_entries: &[EntryTypeReference],
     prompt: &str,
 ) -> ScaffoldResult<Option<Referenceable>> {
-    inner_choose_referenceable(all_entries, prompt, Some(vec!["[None]"]))
+    inner_choose_referenceable(
+        all_entries,
+        prompt,
+        Some(vec!["[None] (Use this link to attach meta-data only)"]),
+    )
 }
 
 fn inner_choose_referenceable(
@@ -136,11 +142,11 @@ fn inner_choose_referenceable(
             )?;
             Ok(Some(Referenceable::ExternalHash { name }))
         }
-        "[None]" => Ok(None),
+        entry_type if entry_type.starts_with("[None]") => Ok(None),
         entry_type => Ok(Some(Referenceable::EntryType(EntryTypeReference {
             entry_type: entry_type.to_owned(),
             reference_entry_hash: choose_reference_entry_hash(
-                &String::from("Reference this entry type with its entry hash or its action hash?"),
+                "Reference this entry type with its entry hash or its action hash?",
                 all_entries[selection].reference_entry_hash,
             )?,
         }))),
