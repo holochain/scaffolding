@@ -120,7 +120,7 @@
           };
 
           devShells.ci = pkgs.mkShell {
-            packages = [ self'.packages.hc-scaffold ];
+            packages = [ inputs'.holonix.packages.rust self'.packages.hc-scaffold ];
           };
         };
       };
