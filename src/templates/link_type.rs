@@ -56,7 +56,6 @@ pub fn scaffold_link_type_templates(
     // is an ExternalHash since it would expect an <ExternalHash>Detail component to exist
     // which is not possible
     let should_skip_ui_gen = no_ui
-        || from_referenceable.field_type() == FieldType::ExternalHash
         || to_referenceable
             .as_ref()
             .map(|r| r.field_type() == FieldType::ExternalHash)
