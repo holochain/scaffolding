@@ -9,7 +9,7 @@ use std::{
 
 use crate::{
     file_tree::{build_file_tree, file_exists, insert_file_tree_in_dir, FileTree},
-    reserved_words::check_for_reserved_words,
+    reserved_words::check_for_reserved_keywords,
     templates::{
         coordinator::scaffold_coordinator_zome_templates,
         integrity::scaffold_integrity_zome_templates, ScaffoldedTemplate,
@@ -354,7 +354,7 @@ pub fn scaffold_integrity_zome_with_path(
     zome_name: &str,
     path: &Path,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
-    check_for_reserved_words(zome_name)?;
+    check_for_reserved_keywords(zome_name)?;
 
     let dna_manifest_path = dna_file_tree.dna_manifest_path.clone();
     let dna_manifest = dna_file_tree.dna_manifest.clone();
@@ -440,7 +440,7 @@ pub fn scaffold_coordinator_zome_in_path(
     dependencies: Option<&Vec<String>>,
     path: &Path,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
-    check_for_reserved_words(zome_name)?;
+    check_for_reserved_keywords(zome_name)?;
 
     let dna_manifest = dna_file_tree.dna_manifest.clone();
 

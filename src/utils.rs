@@ -5,8 +5,9 @@ use std::process::Command;
 use std::{ffi::OsString, path::PathBuf};
 
 use anyhow::Context;
+use colored::Colorize;
 use convert_case::{Case, Casing};
-use dialoguer::{theme::ColorfulTheme, Input, Select, Validator};
+use dialoguer::{theme::ColorfulTheme, Input, Select};
 use dprint_plugin_typescript::configuration::ConfigurationBuilder;
 
 use crate::error::{ScaffoldError, ScaffoldResult};
@@ -101,15 +102,20 @@ pub fn input_yes_or_no(prompt: &str, recommended: Option<bool>) -> ScaffoldResul
 }
 
 #[inline]
-pub fn input_with_custom_validation<'a, V>(prompt: &str, validator: V) -> ScaffoldResult<String>
+pub fn input_with_custom_validation<V>(prompt: &str, validator: V) -> ScaffoldResult<String>
 where
-    V: Validator<String> + 'a,
-    V::Err: ToString,
+    V: Fn(String) -> Result<(), String>,
 {
-    let input: String = Input::with_theme(&ColorfulTheme::default())
+    let mut input: String = Input::with_theme(&ColorfulTheme::default())
         .with_prompt(prompt)
-        .validate_with(validator)
         .interact_text()?;
+
+    while let Err(e) = validator(input.clone()) {
+        println!("{}", e.red());
+        input = Input::with_theme(&ColorfulTheme::default())
+            .with_prompt(prompt)
+            .interact_text()?;
+    }
 
     Ok(input)
 }

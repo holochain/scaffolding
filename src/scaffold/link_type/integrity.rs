@@ -202,12 +202,12 @@ pub fn add_link_type_to_integrity_zome(
 
                 let validate_delete_result: TokenStream = if delete {
                     quote! {
-                        /// TODO: add the appropriate validation rules
+                        // TODO: add the appropriate validation rules
                         Ok(ValidateCallbackResult::Valid)
                     }
                 } else {
                     quote! {
-                        Ok(ValidateCallbackResult::Invalid(String::from(#deleted_invalid_reason)))
+                        Ok(ValidateCallbackResult::Invalid(#deleted_invalid_reason.to_string()))
                     }
                 };
 
@@ -240,7 +240,7 @@ pub fn add_link_type_to_integrity_zome(
 
                         #validate_create_to
 
-                        /// TODO: add the appropriate validation rules
+                        // TODO: add the appropriate validation rules
                         Ok(ValidateCallbackResult::Valid)
                   }
                 };
