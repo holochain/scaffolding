@@ -6,7 +6,7 @@ use crate::{
         dir_exists, file_content, find_files_by_name, insert_file, insert_file_tree_in_dir,
         FileTree,
     },
-    reserved_words::check_for_reserved_words,
+    reserved_words::check_for_reserved_keywords,
     templates::{dna::scaffold_dna_templates, ScaffoldedTemplate},
     utils::choose_directory_path,
 };
@@ -168,7 +168,7 @@ pub fn scaffold_dna(
     template_file_tree: &FileTree,
     dna_name: &str,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
-    check_for_reserved_words(dna_name)?;
+    check_for_reserved_keywords(dna_name)?;
 
     let new_dna_file_tree: FileTree = dir! {
         "zomes" => dir! {
