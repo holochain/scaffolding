@@ -101,8 +101,6 @@
           };
 
           devShells.default = pkgs.mkShell {
-            inputsFrom = [ inputs'.holonix.devShells ];
-
             packages = (with inputs'.holonix.packages; [
               holochain
               lair-keystore
@@ -122,10 +120,7 @@
           };
 
           devShells.ci = pkgs.mkShell {
-            inputsFrom = [ self'.devShells.default ];
-            packages = [
-              self'.packages.hc-scaffold
-            ];
+            packages = [ inputs'.holonix.packages.rust self'.packages.hc-scaffold ];
           };
         };
       };

@@ -7,7 +7,7 @@ use dialoguer::{theme::ColorfulTheme, Confirm, Select};
 use crate::{
     error::{ScaffoldError, ScaffoldResult},
     file_tree::{dir_content, FileTree},
-    reserved_words::check_for_reserved_words,
+    reserved_words::check_for_reserved_keywords,
     scaffold::zome::ZomeFileTree,
     utils::{check_case, input_with_case, input_with_custom_validation},
 };
@@ -92,7 +92,7 @@ fn choose_field(
         if let Err(e) = check_case(&input, "field_name", Case::Snake) {
             return Err(e.to_string());
         }
-        if let Err(e) = check_for_reserved_words(&input) {
+        if let Err(e) = check_for_reserved_keywords(&input) {
             return Err(e.to_string());
         }
         Ok(())
