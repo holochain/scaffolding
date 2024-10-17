@@ -1,13 +1,14 @@
 use std::str::FromStr;
 
+use anyhow::Context;
 use convert_case::{Case, Casing};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use serde::{ser::SerializeStruct, Deserialize, Serialize, Serializer};
 
-use crate::{error::ScaffoldError, reserved_words::check_for_reserved_words, utils::check_case};
+use crate::{error::ScaffoldError, reserved_words::check_for_reserved_keywords, utils::check_case};
 
-#[derive(Deserialize, Debug, Clone, Serialize)]
+#[derive(Deserialize, Debug, Clone, Serialize, Eq, PartialEq)]
 #[serde(tag = "type")]
 pub enum FieldType {
     #[serde(rename = "bool")]
@@ -24,6 +25,7 @@ pub enum FieldType {
     ActionHash,
     EntryHash,
     DnaHash,
+    ExternalHash,
     Enum {
         label: String,
         variants: Vec<String>,
@@ -64,6 +66,7 @@ impl std::fmt::Display for FieldType {
             FieldType::ActionHash => "ActionHash",
             FieldType::EntryHash => "EntryHash",
             FieldType::DnaHash => "DnaHash",
+            FieldType::ExternalHash => "ExternalHash",
             FieldType::AgentPubKey => "AgentPubKey",
             FieldType::Enum { .. } => "Enum",
         };
@@ -83,6 +86,7 @@ impl FieldType {
             FieldType::ActionHash,
             FieldType::EntryHash,
             FieldType::DnaHash,
+            FieldType::ExternalHash,
             FieldType::AgentPubKey,
             FieldType::Enum {
                 label: String::new(),
@@ -104,6 +108,7 @@ impl FieldType {
             ActionHash => quote!(ActionHash),
             DnaHash => quote!(DnaHash),
             EntryHash => quote!(EntryHash),
+            ExternalHash => quote!(ExternalHash),
             AgentPubKey => quote!(AgentPubKey),
             Enum { label, .. } => {
                 let ident = format_ident!("{}", label);
@@ -126,6 +131,7 @@ impl FieldType {
             ActionHash => "ActionHash",
             EntryHash => "EntryHash",
             DnaHash => "DnaHash",
+            ExternalHash => "ExternalHash",
             Enum { label, .. } => label,
         }
     }
@@ -186,7 +192,7 @@ impl FieldDefinition {
         cardinality: Cardinality,
         linked_from: Option<Referenceable>,
     ) -> Result<Self, ScaffoldError> {
-        check_for_reserved_words(&field_name)?;
+        check_for_reserved_keywords(&field_name)?;
         Ok(FieldDefinition {
             field_name,
             field_type,
@@ -222,7 +228,7 @@ pub struct EntryTypeReference {
 }
 
 impl EntryTypeReference {
-    pub fn hash_type(&self) -> FieldType {
+    pub fn field_type(&self) -> FieldType {
         if self.reference_entry_hash {
             FieldType::EntryHash
         } else {
@@ -240,7 +246,7 @@ impl EntryTypeReference {
         }
     }
 
-    pub fn to_string(&self, c: &Cardinality) -> String {
+    pub fn name_by_cardinality(&self, c: &Cardinality) -> String {
         match c {
             Cardinality::Vector => pluralizer::pluralize(self.entry_type.as_str(), 2, false),
             _ => pluralizer::pluralize(self.entry_type.as_str(), 1, false),
@@ -273,10 +279,11 @@ impl FromStr for EntryTypeReference {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, PartialOrd)]
 pub enum Referenceable {
     Agent { role: String },
     EntryType(EntryTypeReference),
+    ExternalHash { name: String },
 }
 
 impl Serialize for Referenceable {
@@ -286,7 +293,7 @@ impl Serialize for Referenceable {
     {
         let mut state = serializer.serialize_struct("Referenceable", 3)?;
         state.serialize_field("name", &self.to_string(&Cardinality::Single))?;
-        state.serialize_field("hash_type", &self.hash_type().to_string())?;
+        state.serialize_field("hash_type", &self.field_type().to_string())?;
         state.serialize_field("singular_arg", &self.field_name(&Cardinality::Single))?;
         state.end()
     }
@@ -296,29 +303,37 @@ impl FromStr for Referenceable {
     type Err = ScaffoldError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let sp: Vec<&str> = s.split(':').collect();
+        let parts: Vec<&str> = s.split(':').collect();
+        let type_name = parts
+            .first()
+            .context(format!("The first argument in '{}' is invalid", s))?;
 
-        check_case(sp[0], "referenceable", Case::Snake)?;
+        check_case(type_name, "referenceable", Case::Snake)?;
 
-        Ok(match sp[0] {
-            "agent" => match sp.len() {
-                0 | 1 => Referenceable::Agent {
-                    role: String::from("agent"),
-                },
-                _ => Referenceable::Agent {
-                    role: sp[1].to_string(),
-                },
-            },
-            _ => Referenceable::EntryType(EntryTypeReference::from_str(s)?),
-        })
+        match *type_name {
+            "agent" => {
+                let role = parts.get(1).unwrap_or(&"agent").to_string();
+                Ok(Referenceable::Agent { role })
+            }
+            _ => {
+                if parts.get(1) == Some(&"ExternalHash") {
+                    Ok(Referenceable::ExternalHash {
+                        name: type_name.to_string(),
+                    })
+                } else {
+                    EntryTypeReference::from_str(s).map(Referenceable::EntryType)
+                }
+            }
+        }
     }
 }
 
 impl Referenceable {
-    pub fn hash_type(&self) -> FieldType {
+    pub fn field_type(&self) -> FieldType {
         match self {
             Referenceable::Agent { .. } => FieldType::AgentPubKey,
-            Referenceable::EntryType(r) => r.hash_type(),
+            Referenceable::EntryType(r) => r.field_type(),
+            Referenceable::ExternalHash { .. } => FieldType::ExternalHash,
         }
     }
 
@@ -326,7 +341,7 @@ impl Referenceable {
         let s = self.to_string(c).to_case(Case::Snake);
 
         match self {
-            Referenceable::Agent { .. } => s,
+            Referenceable::Agent { .. } | Referenceable::ExternalHash { .. } => s,
             Referenceable::EntryType(e) => e.field_name(c),
         }
     }
@@ -335,6 +350,7 @@ impl Referenceable {
         let singular = match self {
             Referenceable::Agent { role } => role.clone(),
             Referenceable::EntryType(r) => r.entry_type.clone(),
+            Referenceable::ExternalHash { name } => name.clone(),
         };
 
         match c {

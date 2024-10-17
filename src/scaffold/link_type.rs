@@ -19,6 +19,7 @@ use super::{
     dna::DnaFileTree,
     entry_type::{
         definitions::{Cardinality, Referenceable},
+        integrity::get_all_entry_types,
         utils::{get_or_choose_optional_reference_type, get_or_choose_referenceable},
     },
     zome::{utils::get_coordinator_zomes_for_integrity, ZomeFileTree},
@@ -40,31 +41,35 @@ pub fn scaffold_link_type(
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     let dna_manifest_path = zome_file_tree.dna_file_tree.dna_manifest_path.clone();
     let zome_manifest = zome_file_tree.zome_manifest.clone();
+    let all_entry_types = get_all_entry_types(&zome_file_tree)?.unwrap_or_default();
 
     let from_referenceable = get_or_choose_referenceable(
+        "Link from which entry type?",
         &zome_file_tree,
         from_referenceable,
-        "Link from which entry type?",
+        &all_entry_types,
     )?;
 
     let to_referenceable = get_or_choose_optional_reference_type(
+        "Link to which entry type?",
         &zome_file_tree,
         to_referenceable,
-        "Link to which entry type?",
+        &all_entry_types,
     )?;
 
-    let link_type = match to_referenceable.clone() {
-        Some(to_referenceable) => link_type_name(&from_referenceable, &to_referenceable),
+    let link_type = match &to_referenceable {
+        Some(to_referenceable) => link_type_name(&from_referenceable, to_referenceable),
         None => input_with_case("Enter link type name:", Case::Pascal)?,
     };
 
     let bidirectional = match (&to_referenceable, bidirectional) {
         (None, _) => false,
         (_, Some(b)) => b,
-        (_, None) => Confirm::with_theme(&ColorfulTheme::default())
+        _ => Confirm::with_theme(&ColorfulTheme::default())
             .with_prompt("Should the link be bidirectional?")
             .interact()?,
     };
+
     let delete = match delete {
         Some(d) => d,
         None => Confirm::with_theme(&ColorfulTheme::default())
@@ -142,13 +147,13 @@ pub use {}::*;
     let coordinator_zome = match coordinator_zomes_for_integrity.len() {
         0 => Err(ScaffoldError::NoCoordinatorZomesFoundForIntegrityZome(
             zome_file_tree.dna_file_tree.dna_manifest.name(),
-            zome_file_tree.zome_manifest.name.0.to_string(),
+            zome_file_tree.zome_manifest.name.to_string(),
         )),
         1 => Ok(coordinator_zomes_for_integrity[0].clone()),
         _ => {
             let names: Vec<String> = coordinator_zomes_for_integrity
                 .iter()
-                .map(|z| z.name.0.to_string())
+                .map(|z| z.name.to_string())
                 .collect();
             let selection = Select::with_theme(&ColorfulTheme::default())
                 .with_prompt(
