@@ -21,41 +21,6 @@ use crate::{
     },
 };
 
-fn validate_referenceable(
-    referenceable: &Referenceable,
-    address_ident: &syn::Ident,
-) -> TokenStream {
-    match referenceable {
-        Referenceable::EntryType(entry_type) => {
-            let entry_type_snake = format_ident!("_{}", entry_type.entry_type.to_case(Case::Snake));
-            let entry_type_pascal =
-                format_ident!("{}", entry_type.entry_type.to_case(Case::Pascal));
-
-            if entry_type.reference_entry_hash {
-                quote! {
-                    /// Check the entry type for the given entry hash
-                    let entry_hash = #address_ident.into_entry_hash().ok_or(wasm_error!(WasmErrorInner::Guest("No entry hash associated with link".to_string())))?;
-                    let entry = must_get_entry(entry_hash)?.content;
-
-                    let #entry_type_snake = crate::#entry_type_pascal::try_from(entry)?;
-                }
-            } else {
-                quote! {
-                    /// Check the entry type for the given action hash
-                    let action_hash = #address_ident.into_action_hash().ok_or(wasm_error!(
-                        WasmErrorInner::Guest("No action hash associated with link".to_string())
-                    ))?;
-                    let record = must_get_valid_record(action_hash)?;
-
-                    let #entry_type_snake: crate::#entry_type_pascal = record.entry().to_app_option()
-                      .map_err(|e| wasm_error!(e))?.ok_or(wasm_error!(WasmErrorInner::Guest("Linked action must reference an entry".to_string())))?;
-                }
-            }
-        }
-        _ => quote! {},
-    }
-}
-
 pub fn add_link_type_to_integrity_zome(
     zome_file_tree: ZomeFileTree,
     link_type_name: &str,
@@ -326,6 +291,41 @@ pub fn add_link_type_to_integrity_zome(
     let zome_file_tree = ZomeFileTree::from_zome_manifest(dna_file_tree, zome_manifest)?;
 
     Ok(zome_file_tree)
+}
+
+fn validate_referenceable(
+    referenceable: &Referenceable,
+    address_ident: &syn::Ident,
+) -> TokenStream {
+    match referenceable {
+        Referenceable::EntryType(entry_type) => {
+            let entry_type_snake = format_ident!("_{}", entry_type.entry_type.to_case(Case::Snake));
+            let entry_type_pascal =
+                format_ident!("{}", entry_type.entry_type.to_case(Case::Pascal));
+
+            if entry_type.reference_entry_hash {
+                quote! {
+                    /// Check the entry type for the given entry hash
+                    let entry_hash = #address_ident.into_entry_hash().ok_or(wasm_error!(WasmErrorInner::Guest("No entry hash associated with link".to_string())))?;
+                    let entry = must_get_entry(entry_hash)?.content;
+
+                    let #entry_type_snake = crate::#entry_type_pascal::try_from(entry)?;
+                }
+            } else {
+                quote! {
+                    /// Check the entry type for the given action hash
+                    let action_hash = #address_ident.into_action_hash().ok_or(wasm_error!(
+                        WasmErrorInner::Guest("No action hash associated with link".to_string())
+                    ))?;
+                    let record = must_get_valid_record(action_hash)?;
+
+                    let #entry_type_snake: crate::#entry_type_pascal = record.entry().to_app_option()
+                      .map_err(|e| wasm_error!(e))?.ok_or(wasm_error!(WasmErrorInner::Guest("Linked action must reference an entry".to_string())))?;
+                }
+            }
+        }
+        _ => quote! {},
+    }
 }
 
 fn add_link_type_signals(

@@ -2924,7 +2924,7 @@ dependencies = [
 
 [[package]]
 name = "holochain_scaffolding_cli"
-version = "0.3000.6"
+version = "0.3000.7"
 dependencies = [
  "anyhow",
  "build-fs-tree",
@@ -2944,7 +2944,6 @@ dependencies = [
  "itertools 0.10.5",
  "markup_fmt",
  "mr_bundle",
- "once_cell",
  "path-clean",
  "pluralizer",
  "prettyplease",
