@@ -1,12 +1,18 @@
-use std::str::FromStr;
-
 use anyhow::Context;
+use colored::Colorize;
 use convert_case::{Case, Casing};
+use holochain::test_utils::itertools::Itertools;
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
+use regex::Regex;
 use serde::{ser::SerializeStruct, Deserialize, Serialize, Serializer};
+use std::str::FromStr;
 
-use crate::{error::ScaffoldError, reserved_words::check_for_reserved_keywords, utils::check_case};
+use crate::{
+    error::{ScaffoldError, ScaffoldResult},
+    reserved_words::check_for_reserved_keywords,
+    utils::check_case,
+};
 
 #[derive(Deserialize, Debug, Clone, Serialize, Eq, PartialEq)]
 #[serde(tag = "type")]
@@ -32,16 +38,12 @@ pub enum FieldType {
     },
 }
 
-impl TryFrom<String> for FieldType {
-    type Error = ScaffoldError;
+impl FromStr for FieldType {
+    type Err = ScaffoldError;
 
-    fn try_from(value: String) -> Result<Self, Self::Error> {
-        let list = FieldType::list();
-
-        for el in list {
-            if value.eq(&el.to_string()) {
-                return Ok(el);
-            }
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if let Some(f) = FieldType::list().iter().find(|v| s == v.to_string()) {
+            return Ok(f.to_owned());
         }
 
         Err(ScaffoldError::InvalidArguments(format!(
@@ -93,6 +95,24 @@ impl FieldType {
                 variants: Vec::new(),
             },
         ]
+    }
+
+    pub fn parse_enum(fields_str: &str) -> ScaffoldResult<FieldType> {
+        let mut str_path = fields_str.split(':');
+
+        let variants = str_path
+            .next_back()
+            .context(format!("Enum variants missing from: {}", fields_str))?;
+        let variants = variants
+            .split('.')
+            .map(|v| v.to_case(Case::Pascal))
+            .collect::<Vec<_>>();
+        let label = str_path
+            .next_back()
+            .context(format!("Enum label missing from: {}", fields_str))?
+            .to_string();
+
+        Ok(FieldType::Enum { label, variants })
     }
 
     pub fn rust_type(&self) -> TokenStream {
@@ -221,6 +241,89 @@ impl FieldDefinition {
     }
 }
 
+impl FromStr for FieldDefinition {
+    type Err = ScaffoldError;
+
+    fn from_str(fields_str: &str) -> Result<Self, Self::Err> {
+        let mut str_path = fields_str.split(':');
+
+        let field_name = str_path.next().context(format!(
+            "field_name is missing from: {}\nExample: \"{}\"",
+            fields_str,
+            "title:String".italic()
+        ))?;
+        check_case(field_name, "field_name", Case::Snake)?;
+
+        let field_type_str = str_path.next().context(format!(
+            "{} is missing a field_type, use one of: {}\nExample: \"{}\"",
+            field_name,
+            FieldType::list()
+                .iter()
+                .map(|f| f.to_string())
+                .join(", ")
+                .italic(),
+            "title:String".italic()
+        ))?;
+
+        let vec_regex = Regex::new(r"Vec<(?P<a>(.)*)>\z").unwrap();
+        let option_regex = Regex::new(r"Option<(?P<a>(.)*)>\z").unwrap();
+
+        let (field_type, cardinality) = if vec_regex.is_match(field_type_str) {
+            let field_type = vec_regex.replace(field_type_str, "${a}");
+
+            if field_type == "Enum" {
+                (FieldType::parse_enum(fields_str)?, Cardinality::Vector)
+            } else {
+                (FieldType::from_str(&field_type)?, Cardinality::Vector)
+            }
+        } else if option_regex.is_match(field_type_str) {
+            let field_type = option_regex.replace(field_type_str, "${a}");
+
+            if field_type == "Enum" {
+                (FieldType::parse_enum(fields_str)?, Cardinality::Option)
+            } else {
+                (FieldType::from_str(&field_type)?, Cardinality::Option)
+            }
+        } else if field_type_str == "Enum" {
+            (FieldType::parse_enum(fields_str)?, Cardinality::Single)
+        } else {
+            (FieldType::from_str(field_type_str)?, Cardinality::Single)
+        };
+
+        // XXX: perhaps widget-types can be validated at this level rather than
+        //      on attemting to render templates
+        let widget = str_path
+            .next()
+            .filter(|v| !v.is_empty())
+            .map(|v| v.to_string());
+
+        let linked_from = str_path
+            .next()
+            .filter(|v| !v.is_empty())
+            .map(|v| match field_type {
+                FieldType::AgentPubKey => Some(Referenceable::Agent {
+                    role: v.to_string(),
+                }),
+                FieldType::EntryHash | FieldType::ActionHash => {
+                    Some(Referenceable::EntryType(EntryTypeReference {
+                        entry_type: v.to_string(),
+                        reference_entry_hash: matches!(field_type, FieldType::EntryHash),
+                    }))
+                }
+                _ => None,
+            })
+            .unwrap_or_default();
+
+        FieldDefinition::new(
+            field_name.to_string(),
+            field_type,
+            widget,
+            cardinality,
+            linked_from,
+        )
+    }
+}
+
 #[derive(Serialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct EntryTypeReference {
     pub entry_type: String,
@@ -258,22 +361,19 @@ impl FromStr for EntryTypeReference {
     type Err = ScaffoldError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let sp: Vec<&str> = s.split(':').collect();
-        check_case(sp[0], "entry type reference", Case::Snake)?;
+        let mut str_path = s.split(':');
 
-        let reference_entry_hash = match sp.len() {
-            0 | 1 => false,
-            _ => match sp[1] {
-                "EntryHash" => true,
-                "ActionHash" => false,
-                _ => Err(ScaffoldError::InvalidArguments(String::from(
-                    "second argument for reference type must be \"EntryHash\" or \"ActionHash\"",
-                )))?,
-            },
-        };
+        let entry_type = str_path
+            .next()
+            .context(format!("Failed to parse entry_type from: {}", s))?;
+
+        let reference_entry_hash = str_path
+            .next()
+            .map(|v| matches!(v, "EntryHash"))
+            .unwrap_or_default();
 
         Ok(EntryTypeReference {
-            entry_type: sp[0].to_string().to_case(Case::Pascal),
+            entry_type: entry_type.to_case(Case::Pascal),
             reference_entry_hash,
         })
     }
