@@ -35,7 +35,7 @@
 
           lib.wrapCustomTemplate = { system, pkgs, customTemplatePath }:
             let
-              scaffolding = inputs.holochain.packages.${system}.hc-scaffold;
+              scaffolding = inputs.holonix.packages.${system}.hc-scaffold;
             in
             pkgs.runCommand "hc-scaffold"
               {

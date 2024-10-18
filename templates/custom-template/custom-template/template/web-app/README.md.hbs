@@ -8,7 +8,7 @@ Enter the nix shell by running this in the root folder of the repository:
 
 ```bash
 nix develop
-npm install
+{{(package_manager_command package_manager "install" null)}}
 ```
 
 **Run all the other instructions in this README from inside this nix shell, otherwise they won't work**.
@@ -16,7 +16,7 @@ npm install
 ## Running 2 agents
  
 ```bash
-npm start
+{{(package_manager_command package_manager "start" null)}}
 ```
 
 This will create a network of 2 nodes connected to each other and their respective UIs.
@@ -25,7 +25,7 @@ It will also bring up the Holochain Playground for advanced introspection of the
 ## Running the backend tests
 
 ```bash
-npm test
+{{(package_manager_command package_manager "test" null)}}
 ```
 
 ## Bootstrapping a network
@@ -33,7 +33,7 @@ npm test
 Create a custom network of nodes connected to each other and their respective UIs with:
 
 ```bash
-AGENTS=3 npm run network
+AGENTS=3 {{(package_manager_command package_manager "network" null)}}
 ```
 
 Substitute the "3" for the number of nodes that you want to bootstrap in your network.
@@ -43,7 +43,7 @@ This will also bring up the Holochain Playground for advanced introspection of t
 
 To package the web happ:
 ``` bash
-npm run package
+{{(package_manager_command package_manager "package" null)}}
 ```
 
 You'll have the `{{app_name}}.webhapp` in `workdir`. This is what you should distribute so that the Holochain Launcher can install it.

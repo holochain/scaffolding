@@ -6,11 +6,11 @@
     "build": "vite build",
   {{#if holo_enabled}}
     "build:holo": "VITE_APP_IS_HOLO=true vite build",
-    "package:holo": "npm run build:holo && rimraf dist.zip && cd dist && bestzip ../dist.zip *",
+    "package:holo": "{{(package_manager_command package_manager "build:holo" null)}} && rimraf dist.zip && cd dist && bestzip ../dist.zip *",
   {{/if}}
     "lint": "eslint --ext .ts,.html . --ignore-path .gitignore && prettier \"**/*.ts\" --check --ignore-path .gitignore",
     "format": "eslint --ext .ts,.html . --fix --ignore-path .gitignore && prettier \"**/*.ts\" --write --ignore-path .gitignore",
-    "package": "npm run build && rimraf dist.zip && cd dist && bestzip ../dist.zip *"
+    "package": "{{(package_manager_command package_manager "build" null)}} && rimraf dist.zip && cd dist && bestzip ../dist.zip *"
   },
   "dependencies": {
     "@holochain/client": "{{holochain_client_version}}",
@@ -19,18 +19,7 @@
   {{/if}}
     "@lit-labs/context": "^0.2.0",
     "@lit-labs/task": "^2.0.0",
-    "@material/mwc-circular-progress": "^0.27.0",
-    "@material/mwc-button": "^0.27.0",
-    "@material/mwc-textfield": "^0.27.0",
-    "@material/mwc-textarea": "^0.27.0",
-    "@material/mwc-checkbox": "^0.27.0",
-    "@material/mwc-slider": "^0.27.0",
-    "@material/mwc-icon-button": "^0.27.0",
-    "@material/mwc-select": "^0.27.0",
-    "@material/mwc-snackbar": "^0.27.0",
-    "@material/mwc-formfield": "^0.27.0",
     "@msgpack/msgpack": "^2.8.0",
-    "@vaadin/date-time-picker": "^23.2.8",
     "lit": "^2.6.1"
   },
   "devDependencies": {
@@ -44,7 +33,8 @@
     "rimraf": "^5.0.7",
     "vite": "^4.0.0",
     "vite-plugin-checker": "^0.5.3",
-    "typescript": "^4.5.5"
+    "typescript": "^4.5.5",
+    "tslib": "^2.6.3"
   },
   "eslintConfig": {
     "parser": "@typescript-eslint/parser",
@@ -60,7 +50,11 @@
       "prefer-destructuring": "off",
       "no-useless-constructor": "off",
       "no-empty-function": "off",
+      "no-nested-ternary": "off",
       "no-empty-pattern": "off",
+      "no-console": "off",
+      "no-alert": "off",
+      "no-param-reassign": "off",
       "camelcase": "off",
       "import/no-duplicates": "off",
       "no-unused-vars": "off",
