@@ -8,7 +8,6 @@ use anyhow::Context;
 use convert_case::{Case, Casing};
 use dialoguer::{theme::ColorfulTheme, Input, Select, Validator};
 use dprint_plugin_typescript::configuration::ConfigurationBuilder;
-use regex::Regex;
 
 use crate::error::{ScaffoldError, ScaffoldResult};
 use crate::file_tree::{dir_content, FileTree};
@@ -178,49 +177,104 @@ pub fn check_no_whitespace(input: &str, identifier: &str) -> ScaffoldResult<()> 
     Ok(())
 }
 
-#[inline]
-/// Unparses a parsed `syn::File` to formatted rust code
-/// as a String. Formatting is handled under the hood by `prettyplease::unparse`
-pub fn unparse_pretty(file: &syn::File) -> String {
-    add_newlines(&prettyplease::unparse(file).replace("///", "//"))
-}
-
 /// Inserts new lines that are stripped out by `syn` during programmatic
 /// manipulation of Rust code. Newlines and white spaces are not considered
 /// tokens by `syn`, so this function restores them to improve code readability.
-fn add_newlines(input: &str) -> String {
-    let mut formatted_code = String::new();
-    let lines: Vec<&str> = input.lines().collect();
-    let mut after_imports = false;
+pub fn unparse_pretty(code: &syn::File) -> String {
+    // replace previously converted line comment to doc comments back to line comments
+    let formatted = prettyplease::unparse(code).replace("///", "//");
+    let lines = formatted.lines().collect::<Vec<&str>>();
+    let mut result = String::new();
+
+    let mut last_line_was_import = false;
+    let mut last_line_was_comment = false;
+    let mut in_attribute = false;
+    let mut in_struct = false;
+    let mut in_function = false;
+    let mut brace_count = 0;
+
+    // Iterate through the lines, adding extra newlines where needed
     for (i, line) in lines.iter().enumerate() {
-        // Add a newline after the imports block
-        if !after_imports && line.trim().is_empty() {
-            after_imports = true;
-            formatted_code.push('\n');
+        let trimmed_line = line.trim();
+
+        // Check if this line is an import
+        let is_import = trimmed_line.starts_with("use ");
+        let next_line_is_comment = lines.get(i + 1).unwrap_or(&"").starts_with("//");
+        let is_comment = trimmed_line.starts_with("//");
+
+        // Check if we're entering or exiting an attribute
+        if trimmed_line.starts_with("#[") {
+            in_attribute = true;
+        } else if in_attribute && !trimmed_line.ends_with(']') {
+            in_attribute = false;
         }
 
-        // Add newlines between #[hdk_extern] annotated functions
-        if line.trim().starts_with("#[hdk_extern") && i > 0 {
-            formatted_code.push('\n');
+        // Check if we're entering or exiting a struct or function
+        if trimmed_line.starts_with("pub struct ") || trimmed_line.starts_with("struct ") {
+            in_struct = true;
+        } else if trimmed_line.starts_with("pub fn ") || trimmed_line.starts_with("fn ") {
+            in_function = true;
         }
 
-        // Add newlines between non #[hdk_extern] annoteted functions
-        let functon_regex =
-            Regex::new(r"(?m)^\s*(pub\s+fn|fn)\s+\w+\s*\(").expect("functon_regex is invalid");
-        if (functon_regex.is_match(line.trim()) && i > 0)
-            && (!lines[i - 1].starts_with("#[hdk_extern"))
+        // Count braces to determine when we exit a struct or function
+        brace_count += trimmed_line.chars().filter(|&c| c == '{').count() as i32;
+        brace_count -= trimmed_line.chars().filter(|&c| c == '}').count() as i32;
+
+        if brace_count == 0 {
+            in_struct = false;
+            in_function = false;
+        }
+
+        // Add an extra newline after the imports section
+        if last_line_was_import && !is_import && !in_attribute {
+            result.push('\n');
+        }
+
+        // Add the current line
+        result.push_str(line);
+        result.push('\n');
+
+        // Add an extra newline between major items, but not after attributes or within structs/functions
+        if !in_attribute
+            && !in_struct
+            && !in_function
+            && !is_comment
+            && i + 1 < lines.len()
+            && should_add_newline(trimmed_line, lines[i + 1].trim())
         {
-            formatted_code.push('\n');
+            result.push('\n');
         }
 
-        // Add newlines between #[derive] annotated structs/enums
-        if line.trim().starts_with("#[derive") && i > 0 {
-            formatted_code.push('\n');
+        if next_line_is_comment && !last_line_was_comment && !is_comment {
+            result.push('\n');
         }
-        formatted_code.push_str(line);
-        formatted_code.push('\n');
+
+        last_line_was_import = is_import;
+        last_line_was_comment = is_comment;
     }
-    formatted_code
+
+    // Final cleanup: remove any triple (or more) newlines
+    while result.contains("\n\n\n") {
+        result = result.replace("\n\n\n", "\n\n");
+    }
+
+    result
+}
+
+fn should_add_newline(current: &str, next: &str) -> bool {
+    let major_items = [
+        "pub struct ",
+        "struct ",
+        "pub enum ",
+        "enum ",
+        "pub fn ",
+        "fn ",
+        "#[",
+    ];
+
+    major_items
+        .iter()
+        .any(|&item| current.starts_with(item) || next.starts_with(item))
 }
 
 /// Tries to progrmatically format generated ui code if the file extension matches

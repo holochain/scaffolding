@@ -54,6 +54,10 @@ pub struct EntryType {
     #[structopt(long)]
     /// Skips UI generation for this entry-type, overriding any specified widgets in the --fields option.
     pub no_ui: bool,
+
+    #[structopt(long)]
+    /// Skips test generation for this entry-type
+    pub no_spec: bool,
 }
 
 impl EntryType {
@@ -84,6 +88,7 @@ impl EntryType {
             self.link_from_original_to_each_update,
             self.fields.as_ref(),
             self.no_ui,
+            self.no_spec,
         )?;
 
         build_file_tree(file_tree, ".")?;

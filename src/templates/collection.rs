@@ -28,7 +28,7 @@ pub struct ScaffoldCollectionData {
 }
 
 // TODO: group some params into a new-type or prefer builder pattern
-#[allow(clippy::too_many_arguments)]
+#[allow(unknown_lints, clippy::too_many_arguments, clippy::manual_inspect)]
 pub fn scaffold_collection_templates(
     mut app_file_tree: FileTree,
     template_file_tree: &FileTree,
@@ -40,6 +40,7 @@ pub fn scaffold_collection_templates(
     entry_type_reference: &EntryTypeReference,
     deletable: bool,
     no_ui: bool,
+    no_spec: bool,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     let data = ScaffoldCollectionData {
         app_name: app_name.to_owned(),
@@ -60,7 +61,13 @@ pub fn scaffold_collection_templates(
         let mut web_app_template = web_app_template.clone();
         if no_ui {
             web_app_template.dir_content_mut().map(|v| {
-                v.retain(|k, _| k.ne(&OsString::from("ui")));
+                v.retain(|k, _| k != "ui");
+                v
+            });
+        }
+        if no_spec {
+            web_app_template.dir_content_mut().map(|v| {
+                v.retain(|k, _| k != "tests");
                 v
             });
         }
