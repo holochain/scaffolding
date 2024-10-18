@@ -1,11 +1,11 @@
 use anyhow::Context;
 use build_fs_tree::serde::Serialize;
 use handlebars::Handlebars;
+use once_cell::sync::Lazy;
 use regex::Regex;
 use std::collections::BTreeMap;
 use std::ffi::OsString;
 use std::path::{Path, PathBuf};
-use std::sync::LazyLock;
 
 use crate::error::{ScaffoldError, ScaffoldResult};
 use crate::file_tree::{
@@ -13,26 +13,25 @@ use crate::file_tree::{
 };
 use crate::utils::format_code;
 
-pub mod helpers;
-
 pub mod collection;
 pub mod coordinator;
 pub mod dna;
 pub mod entry_type;
 pub mod example;
+pub mod helpers;
 pub mod integrity;
 pub mod link_type;
 pub mod web_app;
 
-static EACH_TEMPLATE_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+static EACH_TEMPLATE_REGEX: Lazy<Regex> = Lazy::new(|| {
     Regex::new(r"(?P<c>(.)*)/\{\{#each (?P<b>([^\{\}])*)\}\}(?P<a>(.)*)\{\{/each\}\}.hbs\z")
         .expect("EACH_TEMPLATE_REGEX is invalid")
 });
-static EACH_IF_TEMPLATE_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+static EACH_IF_TEMPLATE_REGEX: Lazy<Regex> = Lazy::new(|| {
     Regex::new(r"(?P<c>(.)*)/\{\{#each (?P<b>([^\{\}])*)\}\}\{\{#if (?P<d>([^\{\}])*)\}\}(?P<a>(.)*)\{\{/if\}\}\{\{/each\}\}.hbs\z")
         .expect("EACH_IF_TEMPLATE_REGEX is invalid")
 });
-static IF_TEMPLATE_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+static IF_TEMPLATE_REGEX: Lazy<Regex> = Lazy::new(|| {
     Regex::new(r"(?P<c>(.)*)/\{\{#if (?P<b>([^\{\}])*)\}\}(?P<a>(.)*)\{\{/if\}\}.hbs\z")
         .expect("IF_TEMPLATE_REGEX is invalid")
 });
