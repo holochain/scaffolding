@@ -36,7 +36,7 @@ const {{pascal_case (plural from_referenceable.name)}}For{{pascal_case to_refere
     if (signal.App.zome_name !== '{{coordinator_zome_manifest.name}}') return;
     const payload = signal.App.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;
     if (payload.type !== 'LinkCreated') return;
-    if (payload.link_type !== '{{pascal_case bidirectional}}') return;
+    if (payload.link_type !== '{{pascal_case link_type_name}}') return;
     await fetch{{pascal_case (plural from_referenceable.name)}}();
   }, [fetch{{pascal_case (plural from_referenceable.name)}}]);
 
