@@ -2952,7 +2952,6 @@ dependencies = [
  "handlebars",
  "holochain",
  "holochain_types",
- "holochain_util",
  "ignore",
  "include_dir",
  "itertools 0.13.0",
