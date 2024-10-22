@@ -26,7 +26,7 @@ pub struct ScaffoldLinkTypeData<'a> {
 }
 
 // TODO: group some params into a new-type or prefer builder pattern
-#[allow(clippy::too_many_arguments)]
+#[allow(unknown_lints, clippy::too_many_arguments, clippy::manual_inspect)]
 pub fn scaffold_link_type_templates(
     mut app_file_tree: FileTree,
     template_file_tree: &FileTree,
@@ -39,6 +39,7 @@ pub fn scaffold_link_type_templates(
     delete: bool,
     bidirectional: Option<&str>,
     no_ui: bool,
+    no_spec: bool,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     let data = ScaffoldLinkTypeData {
         app_name,
@@ -60,7 +61,13 @@ pub fn scaffold_link_type_templates(
         let mut link_type_template = link_type_template.clone();
         if no_ui {
             link_type_template.dir_content_mut().map(|v| {
-                v.retain(|k, _| k.ne(&OsString::from("ui")));
+                v.retain(|k, _| k != "ui");
+                v
+            });
+        }
+        if no_spec {
+            link_type_template.dir_content_mut().map(|v| {
+                v.retain(|k, _| k != "tests");
                 v
             });
         }

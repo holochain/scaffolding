@@ -202,6 +202,7 @@ impl Example {
                         },
                     ]),
                     false,
+                    false,
                 )?;
 
                 let dna_file_tree =
@@ -240,6 +241,7 @@ impl Example {
                         },
                     ]),
                     false,
+                    false,
                 )?;
 
                 let dna_file_tree =
@@ -259,6 +261,7 @@ impl Example {
                         entry_type: "post".to_string(),
                         reference_entry_hash: false,
                     }),
+                    false,
                     false,
                 )?;
 

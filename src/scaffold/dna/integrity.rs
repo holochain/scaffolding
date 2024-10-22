@@ -4,22 +4,6 @@ use crate::{error::ScaffoldResult, file_tree::insert_file};
 
 use super::{manifest::check_zome_doesnt_exist, zome_wasm_location, DnaFileTree};
 
-pub fn new_integrity_zome_manifest(
-    dna_file_tree: &DnaFileTree,
-    name: &str,
-) -> ScaffoldResult<ZomeManifest> {
-    let location = zome_wasm_location(dna_file_tree, name);
-    let zome_manifest = ZomeManifest {
-        name: name.into(),
-        hash: None,
-        location,
-        dependencies: None,
-        dylib: None,
-    };
-
-    Ok(zome_manifest)
-}
-
 pub fn add_integrity_zome_to_manifest(
     dna_file_tree: DnaFileTree,
     zome_manifest: ZomeManifest,
@@ -51,4 +35,20 @@ pub fn add_integrity_zome_to_manifest(
     let dna_file_tree = DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
 
     Ok(dna_file_tree)
+}
+
+pub fn new_integrity_zome_manifest(
+    dna_file_tree: &DnaFileTree,
+    name: &str,
+) -> ScaffoldResult<ZomeManifest> {
+    let location = zome_wasm_location(dna_file_tree, name);
+    let zome_manifest = ZomeManifest {
+        name: name.into(),
+        hash: None,
+        location,
+        dependencies: None,
+        dylib: None,
+    };
+
+    Ok(zome_manifest)
 }

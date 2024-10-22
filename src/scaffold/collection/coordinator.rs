@@ -24,6 +24,106 @@ use crate::{
 
 use super::CollectionType;
 
+pub fn add_collection_to_coordinators(
+    integrity_zome_file_tree: ZomeFileTree,
+    collection_name: &str,
+    link_type_name: &str,
+    collection_type: &CollectionType,
+    entry_type: &EntryTypeReference,
+) -> ScaffoldResult<(DnaFileTree, ZomeManifest, bool)> {
+    let integrity_zome_name = integrity_zome_file_tree.zome_manifest.name.0.to_string();
+    let dna_manifest_path = integrity_zome_file_tree
+        .dna_file_tree
+        .dna_manifest_path
+        .clone();
+
+    let coordinator_zomes_for_integrity = get_coordinator_zomes_for_integrity(
+        &integrity_zome_file_tree.dna_file_tree.dna_manifest,
+        &integrity_zome_name,
+    );
+
+    let coordinator_zome = match coordinator_zomes_for_integrity.len() {
+        0 => Err(ScaffoldError::NoCoordinatorZomesFoundForIntegrityZome(
+            integrity_zome_file_tree.dna_file_tree.dna_manifest.name(),
+            integrity_zome_file_tree.zome_manifest.name.0.to_string(),
+        )),
+        1 => Ok(coordinator_zomes_for_integrity[0].clone()),
+        _ => {
+            let names: Vec<String> = coordinator_zomes_for_integrity
+                .iter()
+                .map(|z| z.name.0.to_string())
+                .collect();
+            let selection = Select::with_theme(&ColorfulTheme::default())
+                .with_prompt(
+                    "Which coordinator zome should the collection getter functions be scaffolded in?",
+                )
+                .default(0)
+                .items(&names[..])
+                .interact()?;
+
+            Ok(coordinator_zomes_for_integrity[selection].clone())
+        }
+    }?;
+
+    // 1. Create an INDEX_NAME.rs in "src/", with the appropriate zome functions
+    let zome_file_tree = ZomeFileTree::from_zome_manifest(
+        integrity_zome_file_tree.dna_file_tree,
+        coordinator_zome.clone(),
+    )?;
+
+    let snake_link_type_name = collection_name.to_case(Case::Snake);
+
+    let getter = match collection_type {
+        CollectionType::Global => {
+            global_collection_getter(&integrity_zome_name, collection_name, link_type_name)
+        }
+        CollectionType::ByAuthor => {
+            by_author_collection_getter(&integrity_zome_name, collection_name, link_type_name)
+        }
+    };
+
+    let mut file_tree = zome_file_tree.dna_file_tree.file_tree();
+
+    let crate_src_path = zome_file_tree.zome_crate_path.join("src");
+    let collection_path = crate_src_path.join(format!("{}.rs", snake_link_type_name.clone()));
+
+    let file = unparse_pretty(&syn::parse_quote! { #getter });
+
+    insert_file(&mut file_tree, &collection_path, &file)?;
+
+    // 2. Add this file as a module in the entry point for the crate
+    let lib_rs_path = crate_src_path.join("lib.rs");
+
+    map_file(&mut file_tree, &lib_rs_path, |contents| {
+        Ok(format!(
+            r#"pub mod {snake_link_type_name};
+{contents}"#,
+        ))
+    })?;
+
+    let mut dna_file_tree = DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
+
+    dna_file_tree = add_create_link_in_create_function(
+        dna_file_tree,
+        &coordinator_zomes_for_integrity,
+        collection_name,
+        link_type_name,
+        collection_type,
+        entry_type,
+    )?;
+
+    let (dna_file_tree, deletable) = add_delete_link_in_delete_function(
+        dna_file_tree,
+        &coordinator_zomes_for_integrity,
+        collection_name,
+        link_type_name,
+        collection_type,
+        entry_type,
+    )?;
+
+    Ok((dna_file_tree, coordinator_zome, deletable))
+}
+
 fn global_collection_getter(
     integrity_zome_name: &str,
     collection_name: &str,
@@ -327,104 +427,4 @@ fn add_delete_link_in_delete_function(
     let dna_file_tree = DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
 
     Ok((dna_file_tree, true))
-}
-
-pub fn add_collection_to_coordinators(
-    integrity_zome_file_tree: ZomeFileTree,
-    collection_name: &str,
-    link_type_name: &str,
-    collection_type: &CollectionType,
-    entry_type: &EntryTypeReference,
-) -> ScaffoldResult<(DnaFileTree, ZomeManifest, bool)> {
-    let integrity_zome_name = integrity_zome_file_tree.zome_manifest.name.0.to_string();
-    let dna_manifest_path = integrity_zome_file_tree
-        .dna_file_tree
-        .dna_manifest_path
-        .clone();
-
-    let coordinator_zomes_for_integrity = get_coordinator_zomes_for_integrity(
-        &integrity_zome_file_tree.dna_file_tree.dna_manifest,
-        &integrity_zome_name,
-    );
-
-    let coordinator_zome = match coordinator_zomes_for_integrity.len() {
-        0 => Err(ScaffoldError::NoCoordinatorZomesFoundForIntegrityZome(
-            integrity_zome_file_tree.dna_file_tree.dna_manifest.name(),
-            integrity_zome_file_tree.zome_manifest.name.0.to_string(),
-        )),
-        1 => Ok(coordinator_zomes_for_integrity[0].clone()),
-        _ => {
-            let names: Vec<String> = coordinator_zomes_for_integrity
-                .iter()
-                .map(|z| z.name.0.to_string())
-                .collect();
-            let selection = Select::with_theme(&ColorfulTheme::default())
-                .with_prompt(
-                    "Which coordinator zome should the collection getter functions be scaffolded in?",
-                )
-                .default(0)
-                .items(&names[..])
-                .interact()?;
-
-            Ok(coordinator_zomes_for_integrity[selection].clone())
-        }
-    }?;
-
-    // 1. Create an INDEX_NAME.rs in "src/", with the appropriate zome functions
-    let zome_file_tree = ZomeFileTree::from_zome_manifest(
-        integrity_zome_file_tree.dna_file_tree,
-        coordinator_zome.clone(),
-    )?;
-
-    let snake_link_type_name = collection_name.to_case(Case::Snake);
-
-    let getter = match collection_type {
-        CollectionType::Global => {
-            global_collection_getter(&integrity_zome_name, collection_name, link_type_name)
-        }
-        CollectionType::ByAuthor => {
-            by_author_collection_getter(&integrity_zome_name, collection_name, link_type_name)
-        }
-    };
-
-    let mut file_tree = zome_file_tree.dna_file_tree.file_tree();
-
-    let crate_src_path = zome_file_tree.zome_crate_path.join("src");
-    let collection_path = crate_src_path.join(format!("{}.rs", snake_link_type_name.clone()));
-
-    let file = unparse_pretty(&syn::parse_quote! { #getter });
-
-    insert_file(&mut file_tree, &collection_path, &file)?;
-
-    // 2. Add this file as a module in the entry point for the crate
-    let lib_rs_path = crate_src_path.join("lib.rs");
-
-    map_file(&mut file_tree, &lib_rs_path, |contents| {
-        Ok(format!(
-            r#"pub mod {snake_link_type_name};
-{contents}"#,
-        ))
-    })?;
-
-    let mut dna_file_tree = DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
-
-    dna_file_tree = add_create_link_in_create_function(
-        dna_file_tree,
-        &coordinator_zomes_for_integrity,
-        collection_name,
-        link_type_name,
-        collection_type,
-        entry_type,
-    )?;
-
-    let (dna_file_tree, deletable) = add_delete_link_in_delete_function(
-        dna_file_tree,
-        &coordinator_zomes_for_integrity,
-        collection_name,
-        link_type_name,
-        collection_type,
-        entry_type,
-    )?;
-
-    Ok((dna_file_tree, coordinator_zome, deletable))
 }

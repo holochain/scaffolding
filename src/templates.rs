@@ -13,13 +13,12 @@ use crate::file_tree::{
 };
 use crate::utils::format_code;
 
-pub mod helpers;
-
 pub mod collection;
 pub mod coordinator;
 pub mod dna;
 pub mod entry_type;
 pub mod example;
+pub mod helpers;
 pub mod integrity;
 pub mod link_type;
 pub mod web_app;

@@ -2,6 +2,7 @@ use anyhow::Context;
 use build_fs_tree::{dir, file, Build, FileSystemTree, MergeableFileSystemTree};
 use ignore::WalkBuilder;
 use include_dir::Dir;
+use regex::Regex;
 use std::collections::BTreeMap;
 use std::ffi::OsString;
 use std::fs;
@@ -80,6 +81,8 @@ pub fn insert_file(
 ) -> ScaffoldResult<()> {
     let mut folder_path = file_path.to_path_buf();
     folder_path.pop();
+
+    let content = convert_rust_line_to_doc_comments(file_path, content);
 
     insert_file_tree_in_dir(
         file_tree,
@@ -191,8 +194,11 @@ pub fn map_rust_files<F: Fn(PathBuf, syn::File) -> ScaffoldResult<syn::File> + C
     map_all_files(file_tree, |file_path, contents| {
         if let Some(extension) = file_path.extension() {
             if extension == "rs" {
-                let original_file: syn::File = syn::parse_str(&contents)
-                    .map_err(|e| ScaffoldError::MalformedFile(file_path.clone(), e.to_string()))?;
+                let original_file: syn::File =
+                    syn::parse_str(&convert_rust_line_to_doc_comments(&file_path, &contents))
+                        .map_err(|e| {
+                            ScaffoldError::MalformedFile(file_path.clone(), e.to_string())
+                        })?;
                 let new_file = map_fn(file_path, original_file.clone())?;
                 // Only reformat the file via unparse_pretty if the contents of the newly modified
                 // file are different from the original
@@ -203,6 +209,37 @@ pub fn map_rust_files<F: Fn(PathBuf, syn::File) -> ScaffoldResult<syn::File> + C
         }
         Ok(contents)
     })
+}
+
+/// Converts line comments to doc comments in Rust files
+///
+/// This function is a workaround for a limitation in the `prettyplease::unparse` function,
+/// which is used to pretty-print Rust syntax trees. The `unparse` function discards line
+/// comments but preserves doc comments. To maintain all comments in the code, this function
+/// converts line comments to doc comments before parsing, allowing them to be preserved
+/// during the pretty-printing process.
+///
+/// After pretty-printing, these doc comments can be converted back to line comments if needed.
+///
+/// # Arguments
+///
+/// * `file_path` - A reference to the Path of the file being processed
+/// * `content` - A string slice containing the content of the file
+///
+/// # Returns
+///
+/// A String with line comments converted to doc comments if the file is a Rust file,
+/// otherwise returns the original content unchanged.
+fn convert_rust_line_to_doc_comments(file_path: &Path, content: &str) -> String {
+    if file_path.extension().and_then(|ext| ext.to_str()) == Some("rs") {
+        let re = Regex::new(r"^\/\/[^\/]|[^\/]\/\/[^\/]").expect("Failed to create regex");
+        content
+            .lines()
+            .map(|line| re.replace_all(line, "/// ").into_owned() + "\n")
+            .collect()
+    } else {
+        content.to_string()
+    }
 }
 
 pub fn flatten_file_tree(file_tree: &FileTree) -> BTreeMap<PathBuf, Option<String>> {

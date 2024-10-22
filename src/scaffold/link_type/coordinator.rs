@@ -15,6 +15,61 @@ use crate::{
 
 use super::link_type_name;
 
+pub fn add_link_type_functions_to_coordinator(
+    coordinator_zome_file_tree: ZomeFileTree,
+    integrity_zome_name: &str,
+    link_type_name: &str,
+    from_referenceable: &Referenceable,
+    to_referenceable: &Option<Referenceable>,
+    delete: bool,
+    bidirectional: bool,
+) -> ScaffoldResult<ZomeFileTree> {
+    let dna_manifest_path = coordinator_zome_file_tree
+        .dna_file_tree
+        .dna_manifest_path
+        .clone();
+    let zome_manifest = coordinator_zome_file_tree.zome_manifest.clone();
+
+    let snake_link_type_name = link_type_name.to_case(Case::Snake);
+
+    let new_file_path = coordinator_zome_file_tree
+        .zome_crate_path
+        .join("src")
+        .join(format!("{}.rs", &snake_link_type_name));
+    let crate_src_path = coordinator_zome_file_tree.zome_crate_path.join("src");
+
+    let lib_rs_path = crate_src_path.join("lib.rs");
+    let mut file_tree = coordinator_zome_file_tree.dna_file_tree.file_tree();
+
+    let handlers = match to_referenceable {
+        Some(r) => normal_handlers(
+            integrity_zome_name,
+            from_referenceable,
+            r,
+            delete,
+            bidirectional,
+        ),
+        None => metadata_handlers(integrity_zome_name, link_type_name, from_referenceable),
+    };
+
+    let file = unparse_pretty(&syn::parse_quote! { #handlers });
+
+    insert_file(&mut file_tree, &new_file_path, &file)?;
+
+    // 2. Add this file as a module in the entry point for the crate
+    map_file(&mut file_tree, &lib_rs_path, |contents| {
+        Ok(format!(
+            r#"pub mod {snake_link_type_name};
+{contents}"#,
+        ))
+    })?;
+
+    let dna_file_tree = DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
+    let zome_file_tree = ZomeFileTree::from_zome_manifest(dna_file_tree, zome_manifest)?;
+
+    Ok(zome_file_tree)
+}
+
 fn metadata_handlers(
     integrity_zome_name: &str,
     link_type_name: &str,
@@ -130,13 +185,15 @@ pub fn add_link_handler(
         format_ident!("{}", link_type_name(to_referenceable, from_referenceable));
 
     let bidirectional_create = bidirectional
-        .then_some(quote! {
-            create_link(
-                input.#target_field_name,
-                input.#base_field_name,
-                LinkTypes::#inverse_link_type_name,
-                (),
-            )?;
+        .then(|| {
+            quote! {
+                create_link(
+                    input.#target_field_name,
+                    input.#base_field_name,
+                    LinkTypes::#inverse_link_type_name,
+                    (),
+                )?;
+            }
         })
         .unwrap_or_default();
 
@@ -202,22 +259,24 @@ fn get_links_handler_to_agent(
     );
 
     let get_deleted_links_handler = delete
-        .then_some(quote::quote! {
-            #[hdk_extern]
-            pub fn #get_deleted_entry_for_entry_function_name(
-                #from_arg_name: #from_hash_type,
-            ) -> ExternResult<Vec<(SignedActionHashed, Vec<SignedActionHashed>)>> {
-                let details = get_link_details(
-                    #from_arg_name,
-                    LinkTypes::#pascal_link_type_name,
-                    None,
-                    GetOptions::default(),
-                )?;
-                Ok(details
-                    .into_inner()
-                    .into_iter()
-                    .filter(|(_link, deletes)| !deletes.is_empty())
-                    .collect())
+        .then(|| {
+            quote::quote! {
+                #[hdk_extern]
+                pub fn #get_deleted_entry_for_entry_function_name(
+                    #from_arg_name: #from_hash_type,
+                ) -> ExternResult<Vec<(SignedActionHashed, Vec<SignedActionHashed>)>> {
+                    let details = get_link_details(
+                        #from_arg_name,
+                        LinkTypes::#pascal_link_type_name,
+                        None,
+                        GetOptions::default(),
+                    )?;
+                    Ok(details
+                        .into_inner()
+                        .into_iter()
+                        .filter(|(_link, deletes)| !deletes.is_empty())
+                        .collect())
+                }
             }
         })
         .unwrap_or_default();
@@ -270,22 +329,24 @@ fn get_links_handler_to_entry(
     );
 
     let get_deleted_links_handler = delete
-        .then_some(quote::quote! {
-            #[hdk_extern]
-            pub fn #get_deleted_entry_for_entry_function_name(
-                #from_arg_name: #from_hash_type,
-            ) -> ExternResult<Vec<(SignedActionHashed, Vec<SignedActionHashed>)>> {
-                let details = get_link_details(
-                    #from_arg_name,
-                    LinkTypes::#pascal_link_type_name,
-                    None,
-                    GetOptions::default(),
-                )?;
-                Ok(details
-                    .into_inner()
-                    .into_iter()
-                    .filter(|(_link, deletes)| !deletes.is_empty())
-                    .collect())
+        .then(|| {
+            quote::quote! {
+                #[hdk_extern]
+                pub fn #get_deleted_entry_for_entry_function_name(
+                    #from_arg_name: #from_hash_type,
+                ) -> ExternResult<Vec<(SignedActionHashed, Vec<SignedActionHashed>)>> {
+                    let details = get_link_details(
+                        #from_arg_name,
+                        LinkTypes::#pascal_link_type_name,
+                        None,
+                        GetOptions::default(),
+                    )?;
+                    Ok(details
+                        .into_inner()
+                        .into_iter()
+                        .filter(|(_link, deletes)| !deletes.is_empty())
+                        .collect())
+                }
             }
         })
         .unwrap_or_default();
@@ -371,7 +432,7 @@ fn remove_link_handlers(
     let from_link = from_link_hash_type(&to_hash_type.to_string());
     let from_inverse = from_link_hash_type(&from_hash_type.to_string());
 
-    let bidirectional_remove = bidirectional.then_some(
+    let bidirectional_remove = bidirectional.then(||
         quote! {
             let links = get_links(
                 GetLinksInputBuilder::try_new(input.#target_field_name.clone(), LinkTypes::#inverse_link_type_name)?.build(),
@@ -415,19 +476,11 @@ fn normal_handlers(
     bidirectional: bool,
 ) -> TokenStream {
     let inverse_get = bidirectional
-        .then_some(get_links_handler(
-            to_referenceable,
-            from_referenceable,
-            delete,
-        ))
+        .then(|| get_links_handler(to_referenceable, from_referenceable, delete))
         .unwrap_or_default();
 
     let delete_link_handler = delete
-        .then_some(remove_link_handlers(
-            from_referenceable,
-            to_referenceable,
-            bidirectional,
-        ))
+        .then(|| remove_link_handlers(from_referenceable, to_referenceable, bidirectional))
         .unwrap_or_default();
 
     let integrity_zome_name = format_ident!("{integrity_zome_name}");
@@ -446,59 +499,4 @@ fn normal_handlers(
 
         #delete_link_handler
     }
-}
-
-pub fn add_link_type_functions_to_coordinator(
-    coordinator_zome_file_tree: ZomeFileTree,
-    integrity_zome_name: &str,
-    link_type_name: &str,
-    from_referenceable: &Referenceable,
-    to_referenceable: &Option<Referenceable>,
-    delete: bool,
-    bidirectional: bool,
-) -> ScaffoldResult<ZomeFileTree> {
-    let dna_manifest_path = coordinator_zome_file_tree
-        .dna_file_tree
-        .dna_manifest_path
-        .clone();
-    let zome_manifest = coordinator_zome_file_tree.zome_manifest.clone();
-
-    let snake_link_type_name = link_type_name.to_case(Case::Snake);
-
-    let new_file_path = coordinator_zome_file_tree
-        .zome_crate_path
-        .join("src")
-        .join(format!("{}.rs", &snake_link_type_name));
-    let crate_src_path = coordinator_zome_file_tree.zome_crate_path.join("src");
-
-    let lib_rs_path = crate_src_path.join("lib.rs");
-    let mut file_tree = coordinator_zome_file_tree.dna_file_tree.file_tree();
-
-    let handlers = match to_referenceable {
-        Some(r) => normal_handlers(
-            integrity_zome_name,
-            from_referenceable,
-            r,
-            delete,
-            bidirectional,
-        ),
-        None => metadata_handlers(integrity_zome_name, link_type_name, from_referenceable),
-    };
-
-    let file = unparse_pretty(&syn::parse_quote! { #handlers });
-
-    insert_file(&mut file_tree, &new_file_path, &file)?;
-
-    // 2. Add this file as a module in the entry point for the crate
-    map_file(&mut file_tree, &lib_rs_path, |contents| {
-        Ok(format!(
-            r#"pub mod {snake_link_type_name};
-{contents}"#,
-        ))
-    })?;
-
-    let dna_file_tree = DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
-    let zome_file_tree = ZomeFileTree::from_zome_manifest(dna_file_tree, zome_manifest)?;
-
-    Ok(zome_file_tree)
 }
