@@ -1,10 +1,7 @@
 import { LitElement, html } from 'lit';
 import { state, customElement, property } from 'lit/decorators.js';
-import { InstalledCell, ActionHash, Record, AgentPubKey, EntryHash, AppClient, DnaHash } from '@holochain/client';
+import { InstalledCell, ActionHash, Record, AgentPubKey, EntryHash, AppClient, DnaHash, HolochainError } from '@holochain/client';
 import { consume } from '@lit-labs/context';
-import '@material/mwc-button';
-import '@material/mwc-snackbar';
-import { Snackbar } from '@material/mwc-snackbar';
 {{#uniq_lines}}
   {{#each entry_type.fields}}
     {{#if widget}}
@@ -14,6 +11,7 @@ import { Snackbar } from '@material/mwc-snackbar';
   {{/each}}
 {{/uniq_lines}}
 
+import { sharedStyles } from '../../shared-styles';
 import { clientContext } from '../../contexts';
 import { {{pascal_case entry_type.name}}{{#each entry_type.fields}}{{#if (eq field_type.type "Enum")}}, {{field_type.label}}{{/if}}{{/each}} } from './types';
 
@@ -53,7 +51,7 @@ export class Create{{pascal_case entry_type.name}} extends LitElement {
       {{/if}}
     {{/if}}
   {{/each}}
-  
+
   firstUpdated() {
 {{#each entry_type.fields}}
   {{#if (not widget) }}
@@ -71,7 +69,7 @@ export class Create{{pascal_case entry_type.name}} extends LitElement {
   }
 
   async create{{pascal_case entry_type.name}}() {
-    const {{camel_case entry_type.name}}: {{pascal_case entry_type.name}} = { 
+    const {{camel_case entry_type.name}}: {{pascal_case entry_type.name}} = {
     {{#each entry_type.fields}}
       {{#if widget}}
         {{snake_case field_name}}: this._{{camel_case field_name}},
@@ -97,41 +95,37 @@ export class Create{{pascal_case entry_type.name}} extends LitElement {
           {{camel_case entry_type.name}}Hash: record.signed_action.hashed.hash
         }
       }));
-    } catch (e: any) {
-      const errorSnackbar = this.shadowRoot?.getElementById('create-error') as Snackbar;
-      errorSnackbar.labelText = `Error creating the {{lower_case entry_type.name}}: ${e.message}`;
-      errorSnackbar.show();
+    } catch (e) {
+      alert((e as HolochainError).message);
     }
   }
 
   render() {
     return html`
-      <mwc-snackbar id="create-error" leading>
-      </mwc-snackbar>
-
-      <div style="display: flex; flex-direction: column">
-        <span style="font-size: 18px">Create {{title_case entry_type.name}}</span>
-
+      <div>
+        <h3>Create {{pascal_case entry_type.name}}</h3>
 {{#each entry_type.fields}}
   {{#if widget}}
-          <div style="margin-bottom: 16px">
+        <div>
     {{#if (not (eq cardinality "vector") )}}
-            {{> (concat field_type.type "/" widget "/edit/render") label=(title_case field_name) variable_to_read=(concat "this._" (camel_case field_name) ) variable_to_change=(concat "this._" (camel_case field_name) ) required=(eq cardinality "single") }}
+          {{> (concat field_type.type "/" widget "/edit/render") label=(title_case field_name) variable_to_read=(concat "this._" (camel_case field_name) ) variable_to_change=(concat "this._" (camel_case field_name) ) required=(eq cardinality "single") }}
     {{else}}
-            {{> Vec/edit/render field_name=field_name field_type=field_type widget=widget }}
+          {{> Vec/edit/render field_name=field_name field_type=field_type widget=widget }}
     {{/if}}
-          
-          </div>
-            
+
+        </div>
   {{/if}}
 {{/each}}
 
-        <mwc-button 
-          raised
-          label="Create {{title_case entry_type.name}}"
+        <button
           .disabled=${!this.is{{pascal_case entry_type.name}}Valid()}
           @click=${() => this.create{{pascal_case entry_type.name}}()}
-        ></mwc-button>
-    </div>`;
+        >
+          Create {{title_case entry_type.name}}
+        </button>
+      </div>
+    `;
   }
+
+  static styles = sharedStyles;
 }
