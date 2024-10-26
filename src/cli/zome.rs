@@ -63,7 +63,7 @@ impl Zome {
 
         let name = match self.name {
             Some(n) => n,
-            None => input_with_case(name_prompt, Case::Snake)?,
+            None => input_with_case(name_prompt, None, Case::Snake)?,
         };
 
         let mut dna_file_tree = DnaFileTree::get_or_choose(file_tree, self.dna.as_deref())?;
