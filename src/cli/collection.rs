@@ -63,6 +63,7 @@ impl Collection {
             }
             None => input_with_case(
                 "Collection name (snake_case, eg. \"all_posts\"):",
+                None,
                 Case::Snake,
             )?,
         };

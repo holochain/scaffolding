@@ -131,6 +131,7 @@ fn inner_choose_referenceable(
         "Agent" => {
             let role = input_with_case(
             "Which role does this agent play in the relationship ? (eg. \"creator\", \"invitee\")",
+            None,
             Case::Snake,
         )?;
             check_for_reserved_keywords(&role)?;
@@ -139,6 +140,7 @@ fn inner_choose_referenceable(
         "ExternalHash" => {
             let name = input_with_case(
                 "What name should be given to the link for this hash?",
+                None,
                 Case::Snake,
             )?;
             Ok(Some(Referenceable::ExternalHash { name }))
