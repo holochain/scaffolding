@@ -59,7 +59,7 @@ pub fn scaffold_link_type(
 
     let link_type = match &to_referenceable {
         Some(to_referenceable) => link_type_name(&from_referenceable, to_referenceable),
-        None => input_with_case("Enter link type name:", Case::Pascal)?,
+        None => input_with_case("Enter link type name:", None, Case::Pascal)?,
     };
 
     let bidirectional = match (&to_referenceable, bidirectional) {

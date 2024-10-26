@@ -14,7 +14,7 @@ use crate::{
         coordinator::scaffold_coordinator_zome_templates,
         integrity::scaffold_integrity_zome_templates, ScaffoldedTemplate,
     },
-    utils::{input_with_case_and_initial_text, unparse_pretty},
+    utils::{input_with_case, unparse_pretty},
     versions,
 };
 use build_fs_tree::{dir, file};
@@ -518,10 +518,10 @@ pub fn scaffold_zome_pair(
     let mut dna_file_tree = DnaFileTree::get_or_choose(app_file_tree, Some(dna_name))?;
     let dna_manifest_path = dna_file_tree.dna_manifest_path.clone();
 
-    let zome_name = input_with_case_and_initial_text(
+    let zome_name = input_with_case(
             "Enter coordinator zome name (snake_case):\n(The integrity zome will automatically be named '{name of coordinator zome}_integrity')\n",
+            Some( dna_name ),
             Case::Snake,
-            dna_name
         )?;
 
     let integrity_zome_name = integrity_zome_name(&zome_name);

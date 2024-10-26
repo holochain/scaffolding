@@ -24,9 +24,7 @@ use crate::{
         zome::scaffold_zome_pair,
     },
     templates::ScaffoldedTemplate,
-    utils::{
-        check_no_whitespace, input_no_whitespace, input_with_case_and_initial_text, input_yes_or_no,
-    },
+    utils::{check_no_whitespace, input_no_whitespace, input_with_case, input_yes_or_no},
 };
 
 #[derive(Debug, StructOpt)]
@@ -171,10 +169,10 @@ Here's how you can get started with developing your application:
         path: &Path,
     ) -> ScaffoldResult<()> {
         env::set_current_dir(PathBuf::from(&name))?;
-        let dna_name = input_with_case_and_initial_text(
+        let dna_name = input_with_case(
             "Initial DNA name (snake_case):",
+            Some(&name.to_case(Case::Snake)),
             Case::Snake,
-            &name.to_case(Case::Snake),
         )?;
 
         let file_tree = load_directory_into_memory(&path.join(name))?;
