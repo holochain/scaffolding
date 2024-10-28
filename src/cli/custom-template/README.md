@@ -6,24 +6,22 @@ Custom template for the [scaffolding tool](https://github.com/holochain/scaffold
 
 1. To scaffold a new project with this template, run this:
 
-`nix run github:<TODO:REPLACE_ME_WITH_THE_APPROPRIATE_GIT_URL>#hc-scaffold-custom-template -- web-app`
+```bash
+nix run github:<TODO:REPLACE_ME_WITH_CUSTOM_TEMPLATE_GIT_URL>#app -- web-app
+```
 
-2. If you already have an existing project, add the `<TODO:REPLACE_ME_WITH_THE_APPROPRIATE_GIT_URL>` repository as input to your flake, and use it in the packages or your `devShell`:
+2. If you already have an existing project, add the `<TODO:REPLACE_ME_WITH_CUSTOM_TEMPLATE_GIT_URL>` repository as input to your flake, and use it in the packages or your `devShell`:
 
 ```diff
 {
-  description = "Template for Holochain app development";
+  description = "Flake for Holochain app development";
 
   inputs = {
-    versions.url  = "github:holochain/holochain?dir=versions/weekly";
+    holonix.url = "github:holochain/holonix?ref=main";
+    nixpkgs.follows = "holonix/nixpkgs";
+    flake-parts.follows = "holonix/flake-parts";
 
-    holochain-flake.url = "github:holochain/holochain";
-    holochain-flake.inputs.versions.follows = "versions";
-
-    nixpkgs.follows = "holochain-flake/nixpkgs";
-    flake-parts.follows = "holochain-flake/flake-parts";
-
-+   scaffolding.url = "github:<TODO:REPLACE_ME_WITH_THE_APPROPRIATE_GIT_URL>";
++   scaffolding.url = "github:<TODO:REPLACE_ME_WITH_CUSTOM_TEMPLATE_GIT_URL>";
   };
 
   outputs = inputs:
@@ -32,7 +30,7 @@ Custom template for the [scaffolding tool](https://github.com/holochain/scaffold
         inherit inputs;
       }
       {
-        systems = builtins.attrNames inputs.holochain-flake.devShells;
+        systems = builtins.attrNames inputs.holonix.devShells;
         perSystem =
           { inputs'
           , config
@@ -41,24 +39,24 @@ Custom template for the [scaffolding tool](https://github.com/holochain/scaffold
           , ...
           }: {
             devShells.default = pkgs.mkShell {
-              inputsFrom = [ inputs'.holochain-flake.devShells.holonix ];
+              inputsFrom = [ inputs'.holonix.devShells.default ];
               packages = [
                 pkgs.nodejs_20
                 # more packages go here
 +             ] ++ [
-+                inputs'.scaffolding.packages.hc-scaffold-custom-template
++                inputs'.scaffolding.packages.app
               ];
             };
           };
       };
-}  
+}
 ```
 
 ---
 
 After this set up, you will be able to `nix develop` from inside your repository, and use the scaffolding tool as normal:
 
-```
+```bash
 hc scaffold dna
 hc scaffold zome
 ...
@@ -72,4 +70,4 @@ To run the tests for this custom template, simply run the `run_test.sh` script:
 
 ```bash
 sh run_test.sh
-``` 
+```
