@@ -70,7 +70,7 @@
 
               # source filtering to ensure builds using include_str! or include_bytes! succeed
               # https://crane.dev/faq/building-with-non-rust-includes.html
-              nonCargoBuildFiles = path: _type: builtins.match ".*(gitignore|md|hbs)$" path != null;
+              nonCargoBuildFiles = path: _type: builtins.match ".*(gitignore|md|hbs|nix|sh)$" path != null;
               includeFilesFilter = path: type:
                 (craneLib.filterCargoSources path type) || (nonCargoBuildFiles path type);
             in
