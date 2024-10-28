@@ -28,11 +28,6 @@
     flake-parts.lib.mkFlake { inherit inputs; }
       rec {
         flake = {
-          templates.default = {
-            path = ./templates/custom-template;
-            description = "Custom template for the scaffolding tool";
-          };
-
           lib.wrapCustomTemplate = { system, pkgs, customTemplatePath }:
             let
               scaffolding = inputs.holonix.packages.${system}.hc-scaffold;
@@ -94,11 +89,6 @@
 
               nativeBuildInputs = [ pkgs.perl ];
             };
-
-          checks.custom-template = flake.lib.wrapCustomTemplate {
-            inherit pkgs system;
-            customTemplatePath = ./templates/custom-template/custom-template;
-          };
 
           devShells.default = pkgs.mkShell {
             packages = (with inputs'.holonix.packages; [
