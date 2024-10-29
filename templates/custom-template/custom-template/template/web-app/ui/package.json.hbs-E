@@ -18,7 +18,7 @@
     "@holo-host/web-sdk": "{{holo_web_sdk_version}}",
   {{/if}}
     "@lit-labs/context": "^0.2.0",
-    "@lit/task": "^2.0.0",
+    "@lit-labs/task": "^2.0.0",
     "@msgpack/msgpack": "^2.8.0",
     "lit": "^2.6.1"
   },

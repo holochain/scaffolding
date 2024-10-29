@@ -1,7 +1,7 @@
 import { LitElement, html } from 'lit';
 import { state, customElement, property } from 'lit/decorators.js';
 import { ActionHash, EntryHash, AgentPubKey, Record, AppClient, DnaHash, HolochainError } from '@holochain/client';
-import { consume } from '@lit-labs/context';
+import { consume } from '@lit/context';
 import { decode } from '@msgpack/msgpack';
 {{#uniq_lines}}
   {{#each entry_type.fields}}
@@ -12,7 +12,6 @@ import { decode } from '@msgpack/msgpack';
   {{/each}}
 {{/uniq_lines}}
 
-import { sharedStyles } from '../../shared-styles';
 import { clientContext } from '../../contexts';
 import { {{pascal_case entry_type.name}}{{#each entry_type.fields}}{{#if (eq field_type.type "Enum")}}, {{field_type.label}}{{/if}}{{/each}} } from './types';
 
@@ -155,6 +154,4 @@ export class Edit{{pascal_case entry_type.name}} extends LitElement {
       </section>
     `;
   }
-
-  static styles = sharedStyles;
 }

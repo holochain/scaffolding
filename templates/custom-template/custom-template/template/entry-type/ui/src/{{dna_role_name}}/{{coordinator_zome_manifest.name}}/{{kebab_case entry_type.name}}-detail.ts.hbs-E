@@ -1,8 +1,8 @@
 import { LitElement, html } from 'lit';
 import { state, customElement, property } from 'lit/decorators.js';
 import { EntryHash, Record, ActionHash, AppClient, DnaHash, HolochainError } from '@holochain/client';
-import { consume } from '@lit/context';
-import { Task } from '@lit/task';
+import { consume } from '@lit-labs/context';
+import { Task } from '@lit-labs/task';
 import { decode } from '@msgpack/msgpack';
 {{#uniq_lines}}
   {{#each entry_type.fields}}
@@ -17,6 +17,7 @@ import { decode } from '@msgpack/msgpack';
 import './edit-{{kebab_case entry_type.name}}';
 {{/if}}
 
+import { sharedStyles } from '../../shared-styles';
 import { clientContext } from '../../contexts';
 import { {{pascal_case entry_type.name}}{{#each entry_type.fields}}{{#if (eq field_type.type "Enum")}}, {{field_type.label}}{{/if}}{{/each}} } from './types';
 
@@ -131,4 +132,6 @@ export class {{pascal_case entry_type.name}}Detail extends LitElement {
       error: (e: any) => html`<div class="alert">Error fetching the {{lower_case entry_type.name}}: ${e.message}</div>`
     });
   }
+
+  static styles = sharedStyles;
 }
