@@ -113,7 +113,7 @@ impl WebApp {
             nix_instructions = "\n  nix develop";
         }
 
-        println!("Your Web hApp {} has been scaffolded!", name.italic());
+        println!("Your Web hApp {} has been scaffolded!\n", name.italic());
 
         let mut disable_fast_track = self.disable_fast_track;
 
@@ -128,11 +128,10 @@ impl WebApp {
         setup_git_environment(&app_folder)?;
 
         if let Some(instructions) = next_instructions {
-            println!("\n{instructions}");
+            println!("{instructions}");
         } else {
             let dna_instructions = disable_fast_track.then_some(
                 r#"
-
 - Get your project to compile by adding a DNA and then following the next insturctions to add a zome to that DNA:
 
   hc scaffold dna"#).unwrap_or_default();
@@ -154,7 +153,8 @@ Here's how you can get started with developing your application:
 
 - Then, at any point in time you can start your application with:
 
-  {}"#,
+  {}
+                "#,
                 package_manager.run_command_string(SubCommand::Install, None),
                 package_manager.run_command_string(SubCommand::Run("start".to_string()), None)
             );
