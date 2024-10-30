@@ -28,11 +28,6 @@
     flake-parts.lib.mkFlake { inherit inputs; }
       rec {
         flake = {
-          templates.default = {
-            path = ./templates/custom-template;
-            description = "Custom template for the scaffolding tool";
-          };
-
           lib.wrapCustomTemplate = { system, pkgs, customTemplatePath }:
             let
               scaffolding = inputs.holochain.packages.${system}.hc-scaffold;
@@ -70,7 +65,7 @@
 
               # source filtering to ensure builds using include_str! or include_bytes! succeed
               # https://crane.dev/faq/building-with-non-rust-includes.html
-              nonCargoBuildFiles = path: _type: builtins.match ".*(gitignore|md|hbs)$" path != null;
+              nonCargoBuildFiles = path: _type: builtins.match ".*(gitignore|md|hbs|nix|sh)$" path != null;
               includeFilesFilter = path: type:
                 (craneLib.filterCargoSources path type) || (nonCargoBuildFiles path type);
 
@@ -106,11 +101,6 @@
 
               inherit cargoArtifacts buildInputs nativeBuildInputs;
             };
-
-          checks.custom-template = flake.lib.wrapCustomTemplate {
-            inherit pkgs system;
-            customTemplatePath = ./templates/custom-template/custom-template;
-          };
 
           devShells.default = pkgs.mkShell {
             packages = (with inputs'.holonix.packages; [
