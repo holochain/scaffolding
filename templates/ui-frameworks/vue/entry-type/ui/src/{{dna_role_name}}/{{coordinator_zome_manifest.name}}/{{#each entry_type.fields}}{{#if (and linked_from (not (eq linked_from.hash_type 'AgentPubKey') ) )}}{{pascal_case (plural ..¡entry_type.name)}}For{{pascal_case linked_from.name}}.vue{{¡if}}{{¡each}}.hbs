@@ -14,13 +14,13 @@
 </template>
 
 <script lang="ts">
-import { inject, ComputedRef, toRaw } from 'vue';
+import { inject, ComputedRef, toRaw, defineComponent } from 'vue';
 import { decode } from '@msgpack/msgpack';
 import { AppClient, Link, Record, ActionHash, AgentPubKey, HolochainError, SignalType } from '@holochain/client';
 import {{pascal_case ../entry_type.name}}Detail from './{{pascal_case ../entry_type.name}}Detail.vue';
 import { {{pascal_case ../coordinator_zome_manifest.name}}Signal } from './types';
 
-export default {
+export default defineComponent({
   components: {
     {{pascal_case ../entry_type.name}}Detail,
   },
@@ -74,5 +74,5 @@ export default {
     const client = (inject('client') as ComputedRef<AppClient>).value;
     return { client };
   },
-};
+});
 </script>
