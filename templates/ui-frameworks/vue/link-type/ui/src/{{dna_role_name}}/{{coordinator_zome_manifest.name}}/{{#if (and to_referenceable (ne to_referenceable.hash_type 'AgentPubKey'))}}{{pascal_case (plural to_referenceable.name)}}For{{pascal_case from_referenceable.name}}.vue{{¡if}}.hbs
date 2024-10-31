@@ -15,13 +15,13 @@
 </template>
 
 <script lang="ts">
-import { toRaw, inject, ComputedRef } from 'vue';
+import { toRaw, inject, ComputedRef, defineComponent } from 'vue';
 import { decode } from '@msgpack/msgpack';
 import { AppClient, Record, Link, AgentPubKey, EntryHash, ActionHash, NewEntryAction, HolochainError, SignalType } from '@holochain/client';
 import {{pascal_case to_referenceable.name}}Detail from './{{pascal_case to_referenceable.name}}Detail.vue';
 import { {{pascal_case coordinator_zome_manifest.name}}Signal } from './types';
 
-export default {
+export default defineComponent({
   components: {
     {{pascal_case to_referenceable.name}}Detail,
   },
@@ -73,5 +73,5 @@ export default {
     const client = (inject('client') as ComputedRef<AppClient>).value;
     return { client };
   },
-};
+});
 </script>

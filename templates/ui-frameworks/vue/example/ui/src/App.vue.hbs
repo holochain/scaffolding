@@ -15,7 +15,7 @@ import { AppWebsocket, AppClient } from '@holochain/client';
 import AllPosts from './forum/posts/AllPosts.vue';
 import CreatePost from './forum/posts/CreatePost.vue';
 
-export default {
+export default defineComponent({
   components: {
     AllPosts,
     CreatePost
@@ -44,5 +44,5 @@ export default {
       client: computed(() => this.client),
     };
   },
-};
+});
 </script>
