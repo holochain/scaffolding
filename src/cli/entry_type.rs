@@ -110,7 +110,8 @@ impl EntryType {
                 r#"
 Add new collections for that entry type with:
 
-  hc scaffold collection"#,
+  hc scaffold collection
+                "#,
             );
         }
 
