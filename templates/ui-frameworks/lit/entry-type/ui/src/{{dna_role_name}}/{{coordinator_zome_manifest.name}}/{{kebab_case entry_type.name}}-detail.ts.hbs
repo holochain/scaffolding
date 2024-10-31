@@ -17,6 +17,7 @@ import { decode } from '@msgpack/msgpack';
 import './edit-{{kebab_case entry_type.name}}';
 {{/if}}
 
+import { sharedStyles } from '../../shared-styles';
 import { clientContext } from '../../contexts';
 import { {{pascal_case entry_type.name}}{{#each entry_type.fields}}{{#if (eq field_type.type "Enum")}}, {{field_type.label}}{{/if}}{{/each}} } from './types';
 
@@ -131,4 +132,6 @@ export class {{pascal_case entry_type.name}}Detail extends LitElement {
       error: (e: any) => html`<div class="alert">Error fetching the {{lower_case entry_type.name}}: ${e.message}</div>`
     });
   }
+
+  static styles = sharedStyles;
 }
