@@ -1,7 +1,7 @@
 import { LitElement, html } from 'lit';
 import { state, customElement, property } from 'lit/decorators.js';
 import { ActionHash, EntryHash, AgentPubKey, Record, AppClient, DnaHash, HolochainError } from '@holochain/client';
-import { consume } from '@lit-labs/context';
+import { consume } from '@lit/context';
 import { decode } from '@msgpack/msgpack';
 {{#uniq_lines}}
   {{#each entry_type.fields}}

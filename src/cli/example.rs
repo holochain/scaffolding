@@ -296,10 +296,10 @@ impl Example {
 
         setup_git_environment(&app_dir)?;
 
-        println!("\nExample {} scaffolded!", example.to_string().italic());
+        println!("\nExample {} scaffolded!\n", example.to_string().italic());
 
         if let Some(i) = next_instructions {
-            println!("\n{}", i);
+            println!("{}", i);
         }
 
         Ok(())
