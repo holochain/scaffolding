@@ -209,7 +209,7 @@ pub fn render_entry_definition_file(
 
     let validate_update_result = if crud.update {
         quote! {
-            // TODO: add the appropriate validation rules
+            /// TODO: add the appropriate validation rules
             Ok(ValidateCallbackResult::Valid)
         }
     } else {
@@ -236,7 +236,7 @@ pub fn render_entry_definition_file(
 
     let validate_delete_result = if crud.delete {
         quote! {
-            // TODO: add the appropriate validation rules
+            /// TODO: add the appropriate validation rules
             Ok(ValidateCallbackResult::Valid)
         }
     } else {
@@ -339,7 +339,7 @@ pub fn render_entry_definition_file(
         ) -> ExternResult<ValidateCallbackResult> {
             #(#deps_validation)*
 
-            // TODO: add the appropriate validation rules
+            /// TODO: add the appropriate validation rules
             Ok(ValidateCallbackResult::Valid)
         }
 

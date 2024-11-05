@@ -82,8 +82,6 @@ pub fn insert_file(
     let mut folder_path = file_path.to_path_buf();
     folder_path.pop();
 
-    let content = convert_rust_line_to_doc_comments(file_path, content);
-
     insert_file_tree_in_dir(
         file_tree,
         &folder_path,
@@ -232,7 +230,7 @@ pub fn map_rust_files<F: Fn(PathBuf, syn::File) -> ScaffoldResult<syn::File> + C
 /// otherwise returns the original content unchanged.
 fn convert_rust_line_to_doc_comments(file_path: &Path, content: &str) -> String {
     if file_path.extension().and_then(|ext| ext.to_str()) == Some("rs") {
-        let re = Regex::new(r"^\/\/[^\/]|[^\/]\/\/[^\/]").expect("Failed to create regex");
+        let re = Regex::new(r"(?:^|[^:])/(/[^/])").expect("Failed to create regex");
         content
             .lines()
             .map(|line| re.replace_all(line, "/// ").into_owned() + "\n")

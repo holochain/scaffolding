@@ -72,9 +72,9 @@ pub fn initial_lib_rs(dependencies: Option<&Vec<String>>) -> TokenStream {
         pub enum Signal {}
 
         /// Whenever an action is committed, we emit a signal to the UI elements to reactively update them
-        /// Don't modify the for loop if you want the scaffolding tool to generate appropriate signals for your entries and links
         #[hdk_extern(infallible)]
         pub fn post_commit(committed_actions: Vec<SignedActionHashed>) {
+            /// Don't modify the for loop if you want the scaffolding tool to generate appropriate signals for your entries and links
             for action in committed_actions {
                 if let Err(err) = signal_action(action) {
                     error!("Error signaling new action: {:?}", err);
