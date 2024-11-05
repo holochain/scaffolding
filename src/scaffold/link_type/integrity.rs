@@ -305,7 +305,7 @@ fn validate_referenceable(
 
             if entry_type.reference_entry_hash {
                 quote! {
-                    /// Check the entry type for the given entry hash
+                    // Check the entry type for the given entry hash
                     let entry_hash = #address_ident.into_entry_hash().ok_or(wasm_error!(WasmErrorInner::Guest("No entry hash associated with link".to_string())))?;
                     let entry = must_get_entry(entry_hash)?.content;
 
@@ -313,7 +313,7 @@ fn validate_referenceable(
                 }
             } else {
                 quote! {
-                    /// Check the entry type for the given action hash
+                    // Check the entry type for the given action hash
                     let action_hash = #address_ident.into_action_hash().ok_or(wasm_error!(
                         WasmErrorInner::Guest("No action hash associated with link".to_string())
                     ))?;
