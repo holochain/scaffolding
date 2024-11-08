@@ -454,7 +454,7 @@ pub fn scaffold_coordinator_zome_in_path(
     let file_tree = add_common_zome_dependencies_to_workspace_cargo(dna_file_tree.file_tree())?;
     let mut file_tree = add_workspace_path_dependency(file_tree, zome_name, &path.join(zome_name))?;
 
-    let initial_lib_rs = &coordinator::initial_lib_rs(dependencies);
+    let initial_lib_rs = coordinator::initial_lib_rs(dependencies);
 
     let zome: FileTree = dir! {
         "Cargo.toml" => file!(coordinator::initial_cargo_toml(zome_name, dependencies)),
