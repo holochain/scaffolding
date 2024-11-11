@@ -117,13 +117,7 @@
 
 
   nixConfig = {
-    extra-substituters = [
-      "https://cache.nixos.org"
-      "https://holochain-ci.cachix.org"
-    ];
-    extra-trusted-public-keys = [
-      "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-      "holochain-ci.cachix.org-1:5IUSkZc0aoRS53rfkvH9Kid40NpyjwCMCzwRTXy+QN8="
-    ];
+    extra-substituters = [ "https://holochain-scaffolding-cli.cachix.org" ];
+    extra-trusted-public-keys = [ "holochain-scaffolding-cli.cachix.org-1:DznpFcPqqPqiP05k/0lT6qeQ/N3KOvKQW/EP4Pf3A2E=" ];
   };
 }
