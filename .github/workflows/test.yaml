@@ -8,6 +8,10 @@ on:
   pull_request:
     branches: [ develop, develop-0.1, develop-0.2 ]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: true
+
 jobs:
   test_fmt_lint:
     runs-on: ubuntu-latest
