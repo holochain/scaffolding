@@ -32,6 +32,8 @@ jobs:
         with:
           name: holochain-ci
 
+      - uses: Swatinem/rust-cache@v2
+
       - name: rustfmt check
         run: |
           cd $GITHUB_WORKSPACE
@@ -73,6 +75,8 @@ jobs:
         with:
           name: holochain-ci
 
+      - uses: Swatinem/rust-cache@v2
+
       - name: Build and test
         run: |
           cd $GITHUB_WORKSPACE
@@ -105,6 +109,8 @@ jobs:
       - uses: cachix/cachix-action@v15
         with:
           name: holochain-ci
+
+      - uses: Swatinem/rust-cache@v2
 
       - name: Build and test
         run: |
