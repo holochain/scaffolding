@@ -1,4 +1,4 @@
-name: "test"
+name: "scaffolding-ci"
 
 on:
   # Trigger the workflow on push or pull request,
@@ -13,46 +13,35 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test_fmt_lint:
+  cargo_test:
+    name: cargo_test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Maximize build space
-        if: runner.os == 'Linux'
-        uses: AdityaGarg8/remove-unwanted-software@v2
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          remove-dotnet: "true"
-          remove-android: "true"
-          remove-codeql: "true"
-          remove-docker-images: "true"
+          toolchain: 1.80.0
+      - run: cargo test --no-fail-fast
 
-      - name: Install nix
-        uses: cachix/install-nix-action@v27
+  rustfmt:
+    name: rustfmt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          install_url: https://releases.nixos.org/nix/nix-2.24.4/install
+          toolchain: 1.80.0
+      - run: cargo fmt --all -- --check
 
-      - uses: cachix/cachix-action@v15
+  clippy:
+    name: clippy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          name: holochain-scaffolding-cli
-          authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
-
-      - uses: Swatinem/rust-cache@v2
-
-      - name: rustfmt check
-        run: |
-          cd $GITHUB_WORKSPACE
-          nix develop .#ci --command cargo fmt --all --check
-
-      - name: clippy check
-        run: |
-          cd $GITHUB_WORKSPACE
-          nix develop .#ci --command cargo clippy --all-features --all-targets -- -D warnings
-
-      - name: unittests
-        run: |
-          cd $GITHUB_WORKSPACE
-          nix develop .#ci --command cargo test --no-fail-fast
+          toolchain: 1.80.0
+      - run: cargo clippy -- -D warnings
 
   testbuild:
     runs-on: ubuntu-latest
@@ -72,7 +61,7 @@ jobs:
           remove-docker-images: "true"
 
       - name: Install nix
-        uses: cachix/install-nix-action@v27
+        uses: cachix/install-nix-action@v30
         with:
           install_url: https://releases.nixos.org/nix/nix-2.24.4/install
 
@@ -80,8 +69,6 @@ jobs:
         with:
           name: holochain-scaffolding-cli
           authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
-
-      - uses: Swatinem/rust-cache@v2
 
       - name: Build and test
         run: |
@@ -108,7 +95,7 @@ jobs:
           remove-docker-images: "true"
 
       - name: Install nix
-        uses: cachix/install-nix-action@v27
+        uses: cachix/install-nix-action@v30
         with:
           install_url: https://releases.nixos.org/nix/nix-2.24.4/install
 
@@ -116,8 +103,6 @@ jobs:
         with:
           name: holochain-scaffolding-cli
           authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
-
-      - uses: Swatinem/rust-cache@v2
 
       - name: Build and test
         run: |
