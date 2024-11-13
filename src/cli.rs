@@ -27,6 +27,11 @@ pub struct HcScaffold {
     /// Or a path to a custom template
     template: Option<TemplateType>,
 
+    #[structopt(long)]
+    /// Skip reading from `hcScaffold` configurations. Largely useful for hApps built with
+    /// nix-wrapper based custom templates
+    skip_config_check: bool,
+
     #[structopt(subcommand)]
     command: HcScaffoldCommand,
 }
@@ -48,7 +53,11 @@ pub enum HcScaffoldCommand {
 impl HcScaffold {
     pub async fn run(self) -> anyhow::Result<()> {
         let current_dir = std::env::current_dir()?;
-        let scaffold_config = ScaffoldConfig::from_package_json_path(&current_dir)?;
+        let scaffold_config = if !self.skip_config_check {
+            ScaffoldConfig::from_package_json_path(&current_dir)?
+        } else {
+            None
+        };
         let template_type = self.get_template_type(&current_dir, scaffold_config.as_ref())?;
 
         match self.command {
