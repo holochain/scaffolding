@@ -1,11 +1,3 @@
-use anyhow::Context;
-use colored::Colorize;
-use convert_case::{Case, Casing};
-use itertools::Itertools;
-use proc_macro2::TokenStream;
-use quote::{format_ident, quote};
-use regex::Regex;
-use serde::{ser::SerializeStruct, Deserialize, Serialize, Serializer};
 use std::str::FromStr;
 
 use convert_case::{Case, Casing};
