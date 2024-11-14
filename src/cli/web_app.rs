@@ -100,7 +100,7 @@ impl WebApp {
         )?;
 
         if !template_type.is_nixified_custom_template() {
-             ScaffoldConfig::write_to_package_json(&mut file_tree, template_type)?;
+            ScaffoldConfig::write_to_package_json(&mut file_tree, template_type)?;
         }
 
         build_file_tree(file_tree, &app_folder)?;
