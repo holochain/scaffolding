@@ -123,6 +123,14 @@ impl TemplateType {
             .interact()?;
         Ok(frameworks[selection].clone())
     }
+
+    /// Checks whether the custom template'path is a path to a nix store
+    pub fn is_nixified_custom_template(&self) -> bool {
+        if let TemplateType::Custom(path) = self {
+            return path.starts_with("/nix/store/");
+        }
+        false
+    }
 }
 
 impl From<PathBuf> for TemplateType {
