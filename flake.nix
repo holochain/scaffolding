@@ -68,6 +68,27 @@
               nonCargoBuildFiles = path: _type: builtins.match ".*(gitignore|md|hbs|nix|sh)$" path != null;
               includeFilesFilter = path: type:
                 (craneLib.filterCargoSources path type) || (nonCargoBuildFiles path type);
+
+              commonBuildInputs = [ pkgs.openssl pkgs.go ]
+                ++ (lib.optionals pkgs.stdenv.isDarwin
+                (with pkgs.darwin.apple_sdk.frameworks; [
+                  CoreFoundation
+                  SystemConfiguration
+                  Security
+                ]));
+
+              commonNativeBuildInputs = [ pkgs.perl ];
+
+              cargoArtifacts = craneLib.buildDepsOnly {
+                pname = "hc-scaffold-deps";
+                src = lib.cleanSourceWith {
+                  src = ./.;
+                  filter = includeFilesFilter;
+                  name = "source";
+                };
+                buildInputs = commonBuildInputs;
+                nativeBuildInputs = commonNativeBuildInputs;
+              };
             in
             craneLib.buildPackage {
               pname = "hc-scaffold";
@@ -78,6 +99,8 @@
                 name = "source";
               };
               doCheck = false;
+
+              inherit cargoArtifacts;
 
               buildInputs = [ pkgs.openssl pkgs.go ]
                 ++ (lib.optionals pkgs.stdenv.isDarwin
