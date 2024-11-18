@@ -69,7 +69,7 @@
               includeFilesFilter = path: type:
                 (craneLib.filterCargoSources path type) || (nonCargoBuildFiles path type);
 
-              commonBuildInputs = [ pkgs.openssl pkgs.go ]
+              buildInputs = [ pkgs.openssl pkgs.go ]
                 ++ (lib.optionals pkgs.stdenv.isDarwin
                 (with pkgs.darwin.apple_sdk.frameworks; [
                   CoreFoundation
@@ -77,7 +77,7 @@
                   Security
                 ]));
 
-              commonNativeBuildInputs = [ pkgs.perl ];
+              nativeBuildInputs = [ pkgs.perl ];
 
               cargoArtifacts = craneLib.buildDepsOnly {
                 pname = "hc-scaffold-deps";
@@ -86,8 +86,7 @@
                   filter = includeFilesFilter;
                   name = "source";
                 };
-                buildInputs = commonBuildInputs;
-                nativeBuildInputs = commonNativeBuildInputs;
+                inherit buildInputs nativeBuildInputs;
               };
             in
             craneLib.buildPackage {
@@ -100,17 +99,7 @@
               };
               doCheck = false;
 
-              inherit cargoArtifacts;
-
-              buildInputs = [ pkgs.openssl pkgs.go ]
-                ++ (lib.optionals pkgs.stdenv.isDarwin
-                (with pkgs.darwin.apple_sdk.frameworks; [
-                  CoreFoundation
-                  SystemConfiguration
-                  Security
-                ]));
-
-              nativeBuildInputs = [ pkgs.perl ];
+              inherit cargoArtifacts buildInputs nativeBuildInputs;
             };
 
           devShells.default = pkgs.mkShell {
