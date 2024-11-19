@@ -20,4 +20,4 @@ pub const HOLOCHAIN_VERSION: &str = holochain::HOLOCHAIN_VERSION;
 /// source: <https://github.com/darksoil-studio/holochain-playground/tree/main/packages/cli/server>
 ///
 /// npm: <https://www.npmjs.com/package/@holochain-playground/cli>
-pub const HOLOCHAIN_PLAYGROUND_CLI_VERSION: &str = "^0.300.0-rc.0";
+pub const HOLOCHAIN_PLAYGROUND_CLI_VERSION: &str = "^0.300.1";
