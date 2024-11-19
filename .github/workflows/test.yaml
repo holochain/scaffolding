@@ -73,6 +73,7 @@ jobs:
         with:
           name: holochain-scaffolding-cli
           authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
+          extraPullNames: holochain-ci
 
       - name: Build and test
         run: |
@@ -107,6 +108,7 @@ jobs:
         with:
           name: holochain-scaffolding-cli
           authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
+          extraPullNames: holochain-ci
 
       - name: Build and test
         run: |
