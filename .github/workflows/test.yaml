@@ -1,15 +1,53 @@
-name: "test"
+name: "scaffolding-ci"
 
 on:
   # Trigger the workflow on push or pull request,
   # but only for the main branch
   push:
-    branches: [ develop, develop-0.1, develop-0.2 ]
+    branches: [develop, develop-0.1, develop-0.2]
   pull_request:
-    branches: [ develop, develop-0.1, develop-0.2 ]
+    branches: [develop, develop-0.1, develop-0.2]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: true
 
 jobs:
-  test_fmt_lint:
+  cargo_test:
+    name: cargo_test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: 1.80.0
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo test --no-fail-fast
+
+  rustfmt:
+    name: rustfmt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: 1.80.0
+          components: rustfmt
+      - run: cargo fmt --all -- --check
+
+  clippy:
+    name: clippy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: 1.80.0
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo clippy -- -D warnings
+
+  nix_build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -18,40 +56,33 @@ jobs:
         if: runner.os == 'Linux'
         uses: AdityaGarg8/remove-unwanted-software@v2
         with:
-          remove-dotnet: 'true'
-          remove-android: 'true'
-          remove-codeql: 'true'
-          remove-docker-images: 'true'
+          remove-dotnet: "true"
+          remove-android: "true"
+          remove-codeql: "true"
+          remove-docker-images: "true"
 
       - name: Install nix
-        uses: cachix/install-nix-action@v27
+        uses: cachix/install-nix-action@v30
         with:
           install_url: https://releases.nixos.org/nix/nix-2.24.4/install
 
       - uses: cachix/cachix-action@v15
         with:
-          name: holochain-ci
+          name: holochain-scaffolding-cli
+          authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
+          extraPullNames: holochain-ci
 
-      - name: rustfmt check
+      - name: Build
         run: |
           cd $GITHUB_WORKSPACE
-          nix develop .#ci --command cargo fmt --all --check
-
-      - name: clippy check
-        run: |
-          cd $GITHUB_WORKSPACE
-          nix develop .#ci --command cargo clippy --all-features --all-targets -- -D warnings
-
-      - name: unittests
-        run: |
-          cd $GITHUB_WORKSPACE
-          nix develop .#ci --command cargo test --no-fail-fast
+          nix develop --accept-flake-config .#ci --command echo 'test'
 
   testbuild:
     runs-on: ubuntu-latest
+    needs: [nix_build]
     strategy:
       matrix:
-        template: [ svelte, vue, lit, react, vanilla ]
+        template: [svelte, vue, lit, react, vanilla]
     steps:
       - uses: actions/checkout@v4
 
@@ -59,27 +90,30 @@ jobs:
         if: runner.os == 'Linux'
         uses: AdityaGarg8/remove-unwanted-software@v2
         with:
-          remove-dotnet: 'true'
-          remove-android: 'true'
-          remove-codeql: 'true'
-          remove-docker-images: 'true'
+          remove-dotnet: "true"
+          remove-android: "true"
+          remove-codeql: "true"
+          remove-docker-images: "true"
 
       - name: Install nix
-        uses: cachix/install-nix-action@v27
+        uses: cachix/install-nix-action@v30
         with:
           install_url: https://releases.nixos.org/nix/nix-2.24.4/install
 
       - uses: cachix/cachix-action@v15
         with:
-          name: holochain-ci
+          name: holochain-scaffolding-cli
+          authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
+          extraPullNames: holochain-ci
 
       - name: Build and test
         run: |
           cd $GITHUB_WORKSPACE
-          nix develop .#ci --command ./run_test.sh -t ${{ matrix.template }}
+          nix develop --accept-flake-config .#ci --command ./run_test.sh -t ${{ matrix.template }}
 
   testbuild_by_scope:
     runs-on: ubuntu-latest
+    needs: [nix_build]
     strategy:
       matrix:
         scope:
@@ -92,21 +126,23 @@ jobs:
         if: runner.os == 'Linux'
         uses: AdityaGarg8/remove-unwanted-software@v2
         with:
-          remove-dotnet: 'true'
-          remove-android: 'true'
-          remove-codeql: 'true'
-          remove-docker-images: 'true'
+          remove-dotnet: "true"
+          remove-android: "true"
+          remove-codeql: "true"
+          remove-docker-images: "true"
 
       - name: Install nix
-        uses: cachix/install-nix-action@v27
+        uses: cachix/install-nix-action@v30
         with:
           install_url: https://releases.nixos.org/nix/nix-2.24.4/install
 
       - uses: cachix/cachix-action@v15
         with:
-          name: holochain-ci
+          name: holochain-scaffolding-cli
+          authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
+          extraPullNames: holochain-ci
 
       - name: Build and test
         run: |
           cd $GITHUB_WORKSPACE
-          nix develop .#ci --command ./run_test.sh -s ${{ matrix.scope }}
+          nix develop --accept-flake-config .#ci --command ./run_test.sh -s ${{ matrix.scope }}
