@@ -18,9 +18,7 @@ name = "holochain_scaffolding_cli"
 path = "src/lib.rs"
 
 [dependencies]
-holochain = { features = ["test_utils"], version = "0.4.0-rc.2" }
 holochain_types = "0.4.0-rc.2"
-holochain_util = { features = ["backtrace"], version = "0.4.0-rc.0" }
 mr_bundle = "0.4.0-rc.1"
 
 dirs = "5.0.1"
@@ -51,4 +49,9 @@ itertools = "0.13.0"
 colored = "2.1.0"
 dprint-plugin-typescript = "0.91.1"
 markup_fmt = "0.10.0"
-git2 = { version = "0.19.0", default-features = false, features = ["https", "ssh_key_from_memory", "vendored-libgit2", "vendored-openssl"] }
+git2 = { version = "0.19.0", default-features = false, features = [
+  "https",
+  "ssh_key_from_memory",
+  "vendored-libgit2",
+  "vendored-openssl",
+] }

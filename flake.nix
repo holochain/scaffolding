@@ -73,6 +73,26 @@
               nonCargoBuildFiles = path: _type: builtins.match ".*(gitignore|md|hbs)$" path != null;
               includeFilesFilter = path: type:
                 (craneLib.filterCargoSources path type) || (nonCargoBuildFiles path type);
+
+              buildInputs = [ pkgs.openssl pkgs.go ]
+                ++ (lib.optionals pkgs.stdenv.isDarwin
+                (with pkgs.darwin.apple_sdk.frameworks; [
+                  CoreFoundation
+                  SystemConfiguration
+                  Security
+                ]));
+
+              nativeBuildInputs = [ pkgs.perl ];
+
+              cargoArtifacts = craneLib.buildDepsOnly {
+                pname = "hc-scaffold-deps";
+                src = lib.cleanSourceWith {
+                  src = ./.;
+                  filter = includeFilesFilter;
+                  name = "source";
+                };
+                inherit buildInputs nativeBuildInputs;
+              };
             in
             craneLib.buildPackage {
               pname = "hc-scaffold";
@@ -84,15 +104,7 @@
               };
               doCheck = false;
 
-              buildInputs = [ pkgs.openssl pkgs.go ]
-                ++ (lib.optionals pkgs.stdenv.isDarwin
-                (with pkgs.darwin.apple_sdk.frameworks; [
-                  CoreFoundation
-                  SystemConfiguration
-                  Security
-                ]));
-
-              nativeBuildInputs = [ pkgs.perl ];
+              inherit cargoArtifacts buildInputs nativeBuildInputs;
             };
 
           checks.custom-template = flake.lib.wrapCustomTemplate {
@@ -124,4 +136,10 @@
           };
         };
       };
+
+
+  nixConfig = {
+    extra-substituters = [ "https://holochain-ci.cachix.org" "https://holochain-scaffolding-cli.cachix.org" ];
+    extra-trusted-public-keys = [ "holochain-ci.cachix.org-1:5IUSkZc0aoRS53rfkvH9Kid40NpyjwCMCzwRTXy+QN8=" "holochain-scaffolding-cli.cachix.org-1:DznpFcPqqPqiP05k/0lT6qeQ/N3KOvKQW/EP4Pf3A2E=" ];
+  };
 }
