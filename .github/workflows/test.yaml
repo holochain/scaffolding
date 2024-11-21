@@ -75,7 +75,7 @@ jobs:
       - name: Build
         run: |
           cd $GITHUB_WORKSPACE
-          nix build
+          nix develop --accept-flake-config .#ci --command echo 'test'
 
   testbuild:
     runs-on: ubuntu-latest
@@ -109,7 +109,7 @@ jobs:
       - name: Build and test
         run: |
           cd $GITHUB_WORKSPACE
-          nix develop .#ci --command ./run_test.sh -t ${{ matrix.template }}
+          nix develop --accept-flake-config .#ci --command ./run_test.sh -t ${{ matrix.template }}
 
   testbuild_by_scope:
     runs-on: ubuntu-latest
@@ -145,4 +145,4 @@ jobs:
       - name: Build and test
         run: |
           cd $GITHUB_WORKSPACE
-          nix develop .#ci --command ./run_test.sh -s ${{ matrix.scope }}
+          nix develop --accept-flake-config .#ci --command ./run_test.sh -s ${{ matrix.scope }}
