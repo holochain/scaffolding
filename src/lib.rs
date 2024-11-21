@@ -36,7 +36,7 @@
 //!
 //! # Custom Templates
 //!
-//! The scaffolding tool comes with 4 built-in templates:
+//! The scaffolding tool comes with 6 built-in templates:
 //!
 //! - Vue (with TypeScript)
 //! - Svelte (with TypeScript)
