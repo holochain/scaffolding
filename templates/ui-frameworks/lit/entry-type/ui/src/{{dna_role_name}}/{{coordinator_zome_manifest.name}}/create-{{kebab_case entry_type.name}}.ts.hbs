@@ -81,7 +81,6 @@ export class Create{{pascal_case entry_type.name}} extends LitElement {
 
     try {
       const record: Record = await this.client.callZome({
-        cap_secret: null,
         role_name: '{{dna_role_name}}',
         zome_name: '{{coordinator_zome_manifest.name}}',
         fn_name: 'create_{{snake_case entry_type.name}}',

@@ -30,7 +30,6 @@ const {{pascal_case entry_type.name}}Detail: FC<{{pascal_case entry_type.name}}D
     setRecord(undefined);
     try {
       const result = await client?.callZome({
-        cap_secret: null,
         role_name: '{{dna_role_name}}',
         zome_name: '{{coordinator_zome_manifest.name}}',
         fn_name: '{{#if crud.update}}get_latest_{{snake_case entry_type.name}}{{else}}get_{{snake_case entry_type.name}}{{/if}}',
@@ -50,7 +49,6 @@ const {{pascal_case entry_type.name}}Detail: FC<{{pascal_case entry_type.name}}D
     setLoading(true)
     try {
       await client?.callZome({
-        cap_secret: null,
         role_name: '{{dna_role_name}}',
         zome_name: '{{coordinator_zome_manifest.name}}',
         fn_name: 'delete_{{snake_case entry_type.name}}',

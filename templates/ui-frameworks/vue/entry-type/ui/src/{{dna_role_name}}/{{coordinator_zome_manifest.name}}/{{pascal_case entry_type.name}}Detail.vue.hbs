@@ -104,7 +104,6 @@ export default defineComponent({
       try {
         this.loading = true;
         this.record = await this.client.callZome({
-          cap_secret: null,
           role_name: '{{dna_role_name}}',
           zome_name: '{{coordinator_zome_manifest.name}}',
           fn_name: '{{#if crud.update}}get_latest_{{snake_case entry_type.name}}{{else}}get_{{snake_case entry_type.name}}{{/if}}',
@@ -121,7 +120,6 @@ export default defineComponent({
       try {
         this.loading = true
         await this.client.callZome({
-          cap_secret: null,
           role_name: '{{dna_role_name}}',
           zome_name: '{{coordinator_zome_manifest.name}}',
           fn_name: 'delete_{{snake_case entry_type.name}}',
