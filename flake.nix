@@ -129,7 +129,7 @@
 
 
   nixConfig = {
-    extra-substituters = [ "https://holochain-scaffolding-cli.cachix.org" ];
-    extra-trusted-public-keys = [ "holochain-scaffolding-cli.cachix.org-1:DznpFcPqqPqiP05k/0lT6qeQ/N3KOvKQW/EP4Pf3A2E=" ];
+    extra-substituters = [ "https://holochain-ci.cachix.org" "https://holochain-scaffolding-cli.cachix.org" ];
+    extra-trusted-public-keys = [ "holochain-ci.cachix.org-1:5IUSkZc0aoRS53rfkvH9Kid40NpyjwCMCzwRTXy+QN8=" "holochain-scaffolding-cli.cachix.org-1:DznpFcPqqPqiP05k/0lT6qeQ/N3KOvKQW/EP4Pf3A2E=" ];
   };
 }
