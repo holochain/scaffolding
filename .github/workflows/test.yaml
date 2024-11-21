@@ -47,8 +47,39 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - run: cargo clippy -- -D warnings
 
+  nix_build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Maximize build space
+        if: runner.os == 'Linux'
+        uses: AdityaGarg8/remove-unwanted-software@v2
+        with:
+          remove-dotnet: "true"
+          remove-android: "true"
+          remove-codeql: "true"
+          remove-docker-images: "true"
+
+      - name: Install nix
+        uses: cachix/install-nix-action@v30
+        with:
+          install_url: https://releases.nixos.org/nix/nix-2.24.4/install
+
+      - uses: cachix/cachix-action@v15
+        with:
+          name: holochain-scaffolding-cli
+          authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
+          extraPullNames: holochain-ci
+
+      - name: Build
+        run: |
+          cd $GITHUB_WORKSPACE
+          nix build
+
   testbuild:
     runs-on: ubuntu-latest
+    needs: [nix_build]
     strategy:
       matrix:
         template: [svelte, vue, lit, react, vanilla]
@@ -82,6 +113,7 @@ jobs:
 
   testbuild_by_scope:
     runs-on: ubuntu-latest
+    needs: [nix_build]
     strategy:
       matrix:
         scope:
