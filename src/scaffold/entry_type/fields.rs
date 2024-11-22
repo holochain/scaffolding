@@ -69,30 +69,34 @@ pub fn choose_fields(
         loop {
             let action = Select::with_theme(&ColorfulTheme::default())
                 .with_prompt("What would you like to do?")
-                .items(&["Modify Field", "Add Field", "Remove Field", "Done"])
+                .items(&["Change Field", "Add Field", "Remove Field", "Done"])
                 .interact()?;
 
             match action {
                 0 => {
-                    // Modify field
-                    let field_to_modify = Select::with_theme(&ColorfulTheme::default())
-                        .with_prompt("Select field to modify")
-                        .items(
-                            &fields
-                                .iter()
-                                .map(|f| format!("{}: {}", f.field_name, f.field_type).italic())
-                                .collect::<Vec<_>>(),
-                        )
-                        .interact()?;
+                    // Change field
+                    if !fields.is_empty() {
+                        let field_to_change = Select::with_theme(&ColorfulTheme::default())
+                            .with_prompt("Select field to change")
+                            .items(
+                                &fields
+                                    .iter()
+                                    .map(|f| format!("{}: {}", f.field_name, f.field_type).italic())
+                                    .collect::<Vec<_>>(),
+                            )
+                            .interact()?;
 
-                    let new_field = choose_field(
-                        entry_type_name,
-                        zome_file_tree,
-                        field_types_templates,
-                        no_ui,
-                        Some(&fields[field_to_modify].field_name),
-                    )?;
-                    fields[field_to_modify] = new_field;
+                        let new_field = choose_field(
+                            entry_type_name,
+                            zome_file_tree,
+                            field_types_templates,
+                            no_ui,
+                            Some(&fields[field_to_change].field_name),
+                        )?;
+                        fields[field_to_change] = new_field;
+                    } else {
+                        println!("{}", "No fields left to change".yellow())
+                    }
                 }
                 1 => {
                     // Add field
