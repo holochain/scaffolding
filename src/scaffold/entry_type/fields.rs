@@ -46,7 +46,7 @@ pub fn choose_fields(
     }
 
     println!(
-        "Current fields:\n{}",
+        "Current fields:\n{}\n",
         fields
             .iter()
             .map(|f| format!(" {}: {}", f.field_name.clone(), f.field_type))
@@ -132,7 +132,7 @@ pub fn choose_fields(
 
             if !fields.is_empty() {
                 println!(
-                    "\nCurrent fields:\n{}",
+                    "\nCurrent fields:\n{}\n",
                     fields
                         .iter()
                         .map(|f| format!(" {}: {}", f.field_name, f.field_type))
