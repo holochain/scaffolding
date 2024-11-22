@@ -49,9 +49,9 @@ pub fn choose_fields(
         "Current fields:\n{}",
         fields
             .iter()
-            .map(|f| format!(" {}: {}\n", f.field_name.clone(), f.field_type))
+            .map(|f| format!(" {}: {}", f.field_name.clone(), f.field_type))
             .collect::<Vec<String>>()
-            .join("")
+            .join("\n")
             .italic()
     );
 
@@ -118,21 +118,25 @@ pub fn choose_fields(
                             )
                             .interact()?;
                         fields.remove(field_to_remove);
+                    } else {
+                        println!("{}", "All fields have been removed".yellow())
                     }
                 }
                 3 => break, // Done
                 _ => unreachable!(),
             }
 
-            println!(
-                "\nCurrent fields:\n{}",
-                fields
-                    .iter()
-                    .map(|f| format!(" {}: {}\n", f.field_name, f.field_type))
-                    .collect::<Vec<String>>()
-                    .join("")
-                    .italic()
-            );
+            if !fields.is_empty() {
+                println!(
+                    "\nCurrent fields:\n{}",
+                    fields
+                        .iter()
+                        .map(|f| format!(" {}: {}", f.field_name, f.field_type))
+                        .collect::<Vec<String>>()
+                        .join("\n")
+                        .italic()
+                );
+            }
         }
     } else if selection == 2 {
         return choose_fields(
