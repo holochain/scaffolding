@@ -56,12 +56,8 @@ pub fn choose_fields(
     );
 
     let selection = Select::with_theme(&ColorfulTheme::default())
-        .with_prompt(
-            "Do you want to proceed with the current entry type, modify or start again from the beginning?",
-        )
-        .item("Confirm")
-        .item("Modify")
-        .item("Restart")
+        .with_prompt("Do you want to proceed with the current entry type?")
+        .items(&["Confirm", "Modify", "Restart"])
         .default(0)
         .interact()?;
 
