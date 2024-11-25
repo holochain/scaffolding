@@ -24,7 +24,6 @@ export class {{pascal_case (plural ../entry_type.name)}}For{{pascal_case linked_
   hashes: Array<ActionHash> = [];
 
   _fetch{{pascal_case (plural ../entry_type.name)}} = new Task(this, ([{{camel_case linked_from.singular_arg}}]: Array<{{linked_from.hash_type}}>) => this.client.callZome({
-      cap_secret: null,
       role_name: '{{../dna_role_name}}',
       zome_name: '{{../coordinator_zome_manifest.name}}',
       fn_name: 'get_{{snake_case (plural ../entry_type.name)}}_for_{{snake_case linked_from.name}}',

@@ -46,7 +46,6 @@ export default defineComponent({
     try {
       this.loading = true;
       const links: Array<Link> = await this.client.callZome({
-        cap_secret: null,
         role_name: '{{dna_role_name}}',
         zome_name: '{{coordinator_zome_manifest.name}}',
         fn_name: 'get_{{snake_case (plural to_referenceable.name)}}_for_{{snake_case from_referenceable.name}}',
@@ -60,7 +59,7 @@ export default defineComponent({
     }
     this.loading = false;
 
-    toRaw(this.client).on('signal', signal => {
+    toRaw(this.client)?.on('signal', signal => {
       if (!(SignalType.App in signal)) return;
       if (signal.App.zome_name !== '{{coordinator_zome_manifest.name}}') return;
       const payload = signal.App.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;

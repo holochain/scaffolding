@@ -32,7 +32,6 @@ export class {{pascal_case entry_type.name}}Detail extends LitElement {
   {{camel_case entry_type.name}}Hash!: {{#if entry_type.reference_entry_hash}}EntryHash{{else}}ActionHash{{/if}};
 
   _fetchRecord = new Task(this, ([{{camel_case entry_type.name}}Hash]: Array<{{#if entry_type.reference_entry_hash}}EntryHash{{else}}ActionHash{{/if}}>) => this.client.callZome({
-      cap_secret: null,
       role_name: '{{dna_role_name}}',
       zome_name: '{{coordinator_zome_manifest.name}}',
       fn_name: '{{#if crud.update}}get_latest_{{snake_case entry_type.name}}{{else}}get_{{snake_case entry_type.name}}{{/if}}',
@@ -53,7 +52,6 @@ export class {{pascal_case entry_type.name}}Detail extends LitElement {
   async delete{{pascal_case entry_type.name}}() {
     try {
       await this.client.callZome({
-        cap_secret: null,
         role_name: '{{dna_role_name}}',
         zome_name: '{{coordinator_zome_manifest.name}}',
         fn_name: 'delete_{{snake_case entry_type.name}}',
