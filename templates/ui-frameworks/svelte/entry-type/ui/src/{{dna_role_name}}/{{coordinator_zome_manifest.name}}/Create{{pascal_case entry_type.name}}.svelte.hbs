@@ -59,7 +59,6 @@ async function create{{pascal_case entry_type.name}}() {
 
   try {
     const record: Record = await client.callZome({
-      cap_secret: null,
       role_name: '{{dna_role_name}}',
       zome_name: '{{coordinator_zome_manifest.name}}',
       fn_name: 'create_{{snake_case entry_type.name}}',

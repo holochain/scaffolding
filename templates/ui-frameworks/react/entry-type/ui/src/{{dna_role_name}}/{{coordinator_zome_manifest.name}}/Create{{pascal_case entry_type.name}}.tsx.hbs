@@ -26,14 +26,13 @@ const Create{{pascal_case entry_type.name}}: FC<Create{{pascal_case entry_type.n
   const [is{{pascal_case entry_type.name}}Valid, setIs{{pascal_case entry_type.name}}Valid] = useState(false);
 
   const create{{pascal_case entry_type.name}} = async () => {
-    const {{camel_case entry_type.name}}Entry: {{pascal_case entry_type.name}} = { 
+    const {{camel_case entry_type.name}}Entry: {{pascal_case entry_type.name}} = {
 {{#each entry_type.fields}}
       {{snake_case field_name}}: {{camel_case field_name}}{{#if (eq cardinality "single")}}!{{/if}},
 {{/each}}
     };
     try {
       const record = await client?.callZome({
-        cap_secret: null,
         role_name: '{{dna_role_name}}',
         zome_name: '{{coordinator_zome_manifest.name}}',
         fn_name: 'create_{{snake_case entry_type.name}}',

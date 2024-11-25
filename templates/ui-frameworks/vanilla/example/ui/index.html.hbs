@@ -56,7 +56,6 @@
         const hellos = ["hello world","hola mundo","bonjur monde","guten Tag Welt","salve mondo","你好世界","مرحبا بالعالم","こんにちは 世界","olá mundo","Привет, мир","Selam Dünya","Witaj świecie"];
         const message = hellos[getRandomInt(hellos.length)];
         const result = await client.callZome({
-          cap_secret: null,
           role_name: 'hello_world',
           zome_name: 'hello_world',
           fn_name: 'hello_world',
@@ -66,7 +65,6 @@
 
       async function getHellos() {
         const result = await client.callZome({
-          cap_secret: null,
           role_name: 'hello_world',
           zome_name: 'hello_world',
           fn_name: 'get_hellos',

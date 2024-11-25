@@ -46,7 +46,6 @@ async function fetch{{pascal_case (plural ../entry_type.name)}}() {
   loading = true;
   try {
     const links: Array<Link> = await client.callZome({
-      cap_secret: null,
       role_name: '{{../dna_role_name}}',
       zome_name: '{{../coordinator_zome_manifest.name}}',
       fn_name: 'get_{{snake_case (plural ../entry_type.name)}}_for_{{snake_case linked_from.name}}',
