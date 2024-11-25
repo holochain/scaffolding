@@ -44,7 +44,7 @@ export default defineComponent({
 
     await this.fetch{{pascal_case (plural ../entry_type.name)}}();
 
-    toRaw(this.client).on('signal', async signal => {
+    toRaw(this.client)?.on('signal', async signal => {
       if (!(SignalType.App in signal)) return;
       if (signal.App.zome_name !== '{{../coordinator_zome_manifest.name}}') return;
       const payload = signal.App.payload as {{pascal_case ../coordinator_zome_manifest.name}}Signal;
