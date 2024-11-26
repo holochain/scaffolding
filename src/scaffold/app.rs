@@ -1,7 +1,7 @@
 use std::{collections::BTreeMap, path::PathBuf};
 
 use dialoguer::{theme::ColorfulTheme, Select};
-use holochain::prelude::AppManifest;
+use holochain_types::prelude::AppManifest;
 use mr_bundle::Manifest;
 
 use crate::{

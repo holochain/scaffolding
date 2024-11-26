@@ -90,7 +90,7 @@ impl WebApp {
         };
 
         let ScaffoldedTemplate {
-            file_tree,
+            mut file_tree,
             next_instructions,
         } = scaffold_web_app(
             &name,
@@ -101,7 +101,9 @@ impl WebApp {
             self.holo_enabled,
         )?;
 
-        let file_tree = ScaffoldConfig::write_to_package_json(file_tree, template_type)?;
+        if !template_type.is_nixified_custom_template() {
+            ScaffoldConfig::write_to_package_json(&mut file_tree, template_type)?;
+        }
 
         build_file_tree(file_tree, &app_folder)?;
 

@@ -3,6 +3,8 @@ import { state, property, customElement } from 'lit/decorators.js';
 import { AgentPubKey, Link, EntryHash, ActionHash, Record, AppClient, NewEntryAction } from '@holochain/client';
 import { consume } from '@lit-labs/context';
 import { Task } from '@lit-labs/task';
+
+import { sharedStyles } from '../../shared-styles';
 import { clientContext } from '../../contexts';
 import { {{pascal_case coordinator_zome_manifest.name}}Signal } from './types';
 
@@ -12,13 +14,13 @@ import './{{kebab_case from_referenceable.name}}-detail';
 export class {{pascal_case (plural from_referenceable.name)}}For{{pascal_case to_referenceable.name}} extends LitElement {
   @consume({ context: clientContext })
   client!: AppClient;
-  
+
   @property({
     hasChanged: (newVal: {{to_referenceable.hash_type}}, oldVal: {{to_referenceable.hash_type}}) => newVal?.toString() !== oldVal?.toString()
   })
-  {{camel_case to_referenceable.singular_arg}}!: {{to_referenceable.hash_type}}; 
+  {{camel_case to_referenceable.singular_arg}}!: {{to_referenceable.hash_type}};
 
-  _fetch{{pascal_case (plural from_referenceable.name)}} = new Task(this, ([{{camel_case to_referenceable.singular_arg}}]) => this.client.callZome({
+  _fetch{{pascal_case (plural from_referenceable.name)}} = new Task(this, ([{{camel_case to_referenceable.singular_arg}}]: Array<{{to_referenceable.hash_type}}>) => this.client.callZome({
       cap_secret: null,
       role_name: '{{dna_role_name}}',
       zome_name: '{{coordinator_zome_manifest.name}}',
@@ -30,7 +32,7 @@ export class {{pascal_case (plural from_referenceable.name)}}For{{pascal_case to
   signaledHashes: Array<{{from_referenceable.hash_type}}> = [];
 
   firstUpdated() {
-    if (this.{{camel_case to_referenceable.singular_arg}} === undefined) {
+    if (!this.{{camel_case to_referenceable.singular_arg}}) {
       throw new Error(`The {{camel_case to_referenceable.singular_arg}} property is required for the {{kebab_case (plural from_referenceable.name)}}-for-{{kebab_case to_referenceable.name}} element`);
     }
 
@@ -45,11 +47,11 @@ export class {{pascal_case (plural from_referenceable.name)}}For{{pascal_case to
   }
 
   renderList(hashes: Array<{{to_referenceable.hash_type}}>) {
-    if (hashes.length === 0) return html`<span>No {{lower_case (plural from_referenceable.name)}} found for this {{lower_case to_referenceable.name}}</span>`;
-    
+    if (!hashes.length) return html`<div class="alert">No {{lower_case (plural from_referenceable.name)}} found for this {{lower_case to_referenceable.name}}</div>`;
+
     return html`
-      <div style="display: flex; flex-direction: column">
-        ${hashes.map(hash => 
+      <div>
+        ${hashes.map(hash =>
           html`<{{kebab_case from_referenceable.name}}-detail .{{camel_case from_referenceable.name}}Hash=${hash} style="margin-bottom: 16px;"></{{kebab_case from_referenceable.name}}-detail>`
         )}
       </div>
@@ -58,11 +60,11 @@ export class {{pascal_case (plural from_referenceable.name)}}For{{pascal_case to
 
   render() {
     return this._fetch{{pascal_case (plural from_referenceable.name)}}.render({
-      pending: () => html`<div style="display: flex; flex: 1; align-items: center; justify-content: center">
-        <mwc-circular-progress indeterminate></mwc-circular-progress>
-      </div>`,
+      pending: () => html`<progress></progress>`,
       complete: (links) => this.renderList([...this.signaledHashes, ...links.map(l => l.target)]),
-      error: (e: any) => html`<span>Error fetching the {{lower_case (plural from_referenceable.name)}}: ${e.message}.</span>`
+      error: (e: any) => html`<div class="alert">Error fetching the {{lower_case (plural from_referenceable.name)}}: ${e.message}.</div>`
     });
   }
+
+  static styles = sharedStyles;
 }

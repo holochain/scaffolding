@@ -270,11 +270,11 @@ impl Example {
         };
 
         let ScaffoldedTemplate {
-            file_tree,
+            mut file_tree,
             next_instructions,
         } = scaffold_example(file_tree, package_manager, &template_file_tree, &example)?;
 
-        let file_tree = ScaffoldConfig::write_to_package_json(file_tree, template_type)?;
+        ScaffoldConfig::write_to_package_json(&mut file_tree, template_type)?;
 
         build_file_tree(file_tree, &app_dir)?;
 

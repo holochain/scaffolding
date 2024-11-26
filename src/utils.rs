@@ -75,20 +75,16 @@ fn get_folder_names(folder: &BTreeMap<OsString, FileTree>) -> Vec<String> {
 #[inline]
 /// "yes" or "no" input dialog, with the option to specify a recommended answer (yes = true, no = false)
 pub fn input_yes_or_no(prompt: &str, recommended: Option<bool>) -> ScaffoldResult<bool> {
-    let yes_recommended = if recommended == Some(true) {
-        " (recommended)"
-    } else {
-        ""
-    };
-    let no_recommended = if recommended == Some(false) {
-        " (recommended)"
-    } else {
-        ""
-    };
+    let yes_recommended = (recommended == Some(true))
+        .then_some("(recommended)")
+        .unwrap_or_default();
+    let no_recommended = (recommended == Some(false))
+        .then_some("(recommended)")
+        .unwrap_or_default();
 
     let items = [
-        format!("Yes{}", yes_recommended),
-        format!("No{}", no_recommended),
+        format!("Yes {}", yes_recommended),
+        format!("No {}", no_recommended),
     ];
 
     let selection = Select::with_theme(&ColorfulTheme::default())

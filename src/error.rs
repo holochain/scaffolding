@@ -1,6 +1,5 @@
 use std::{io, path::PathBuf};
 
-use holochain_util::ffs;
 use thiserror;
 
 #[derive(Debug, thiserror::Error)]
@@ -8,9 +7,6 @@ pub enum ScaffoldError {
     /// std::io::Error
     #[error("IO error: {0}")]
     StdIoError(#[from] std::io::Error),
-
-    #[error("ffs::IoError: {0}")]
-    FfsIoError(#[from] ffs::IoError),
 
     /// MrBundleError
     #[error(transparent)]
