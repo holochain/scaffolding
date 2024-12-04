@@ -2,7 +2,7 @@
 import { createEventDispatcher, getContext, onMount } from 'svelte';
 import type { AppClient, Record, EntryHash, AgentPubKey, DnaHash, ActionHash, HolochainError } from '@holochain/client';
 import { decode } from '@msgpack/msgpack';
-import { clientContext } from '../../contexts';
+import { type ClientContext, clientContext } from '../../contexts';
 import type { {{pascal_case entry_type.name}}{{#each entry_type.fields}}{{#if (eq field_type.type "Enum")}}, {{field_type.label}}{{/if}}{{/each}} } from './types';
 {{#uniq_lines}}
   {{#each entry_type.fields}}
@@ -13,7 +13,8 @@ import type { {{pascal_case entry_type.name}}{{#each entry_type.fields}}{{#if (e
   {{/each}}
 {{/uniq_lines}}
 
-const client: AppClient = (getContext(clientContext) as any).getClient();
+let client: AppClient;
+const appClientContext = getContext<ClientContext>(clientContext);
 const dispatch = createEventDispatcher();
 
 export let currentRecord!: Record;
@@ -44,6 +45,7 @@ onMount(() => {
     throw new Error(`The original{{pascal_case entry_type.name}}Hash input is required for the Edit{{pascal_case entry_type.name}} element`);
   }
 {{/if}}
+client = await appClientContext.getClient();
 });
 
 async function update{{pascal_case entry_type.name}}() {
