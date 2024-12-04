@@ -39,7 +39,7 @@ export let {{camel_case field_name}}{{#if (eq cardinality "single")}}!{{/if}}: {
 $: {{#each entry_type.fields}}{{camel_case field_name}}{{#unless @last}}, {{/unless}}{{/each}};
 $: is{{pascal_case entry_type.name}}Valid = true{{#each entry_type.fields}}{{#if widget}}{{#if (eq cardinality "single")}} && {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate=(camel_case field_name) }}{{/if}}{{#if (eq cardinality "vector")}} && {{camel_case field_name}}.every(e => {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate="e" }}){{/if}}{{/if}}{{/each}};
 
-onMount(() => {
+onMount(async () => {
 {{#each entry_type.fields}}
   {{#if (not widget) }}
     {{#if (ne cardinality "option")}}
