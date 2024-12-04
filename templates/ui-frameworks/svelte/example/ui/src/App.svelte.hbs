@@ -5,17 +5,24 @@
   import AllPosts from './forum/posts/AllPosts.svelte';
   import CreatePost from './forum/posts/CreatePost.svelte';
 
-  import { clientContext } from './contexts';
+  import { type ClientContext, clientContext } from './contexts';
 
   let client: AppClient | undefined;
   let loading = false;
 
-  $: client, loading;
+  const appClientContext = {
+    getClient: async () => {
+      if (!client) {
+        client = await AppWebsocket.connect();
+      }
+      return client;
+    },
+  };
 
   onMount(async () => {
     loading = true;
     try {
-      client = await AppWebsocket.connect();
+      client = await appClientContext.getClient();
     } catch(e) {
       console.error(e)
     } finally {
@@ -23,9 +30,7 @@
     }
   });
 
-  setContext(clientContext, {
-    getClient: () => client,
-  });
+  setContext<ClientContext>(clientContext, appClientContext);
 </script>
 
 <main>
