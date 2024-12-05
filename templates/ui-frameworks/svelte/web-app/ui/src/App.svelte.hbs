@@ -7,7 +7,7 @@
 {{/if}}
 
   import logo from './assets/holochainLogo.svg';
-  import { clientContext } from './contexts';
+  import { type ClientContext, clientContext } from './contexts';
 
 {{#if holo_enabled}}
   const IS_HOLO = ['true', '1', 't'].includes(import.meta.env.VITE_APP_IS_HOLO?.toLowerCase())
@@ -20,6 +20,15 @@
   let client: AppClient | undefined;
   let error: HolochainError | undefined;
   let loading = false;
+
+  const appClientContext = {
+    getClient: async () => {
+      if (!client) {
+        client = await AppWebsocket.connect();
+      }
+      return client;
+    },
+  };
 
   onMount(async () => {
   {{#if holo_enabled}}
@@ -37,7 +46,7 @@
         });
         (client as WebSdk).signUp({ cancellable: false });
       } else {
-        client = await AppWebsocket.connect();
+        client = await appClientContext.getClient();
         loading = false;
       }
     } catch (e) {
@@ -48,7 +57,7 @@
   {{else}}
     try {
       loading = true;
-      client = await AppWebsocket.connect();
+      client = await appClientContext.getClient();
     } catch (e) {
       error = e as HolochainError;
     } finally {
@@ -57,9 +66,7 @@
   {{/if}}
   });
 
-  setContext(clientContext, {
-    getClient: () => client,
-  });
+  setContext<ClientContext>(clientContext, appClientContext);
 </script>
 
 <main>
