@@ -10,11 +10,12 @@ import type {
   NewEntryAction,
   HolochainError,
 } from '@holochain/client';
-import { clientContext } from '../../contexts';
+import { type ClientContext, clientContext } from '../../contexts';
 import type { {{pascal_case ../entry_type.name}}, {{pascal_case ../coordinator_zome_manifest.name}}Signal } from './types';
 import {{pascal_case ../entry_type.name}}Detail from './{{pascal_case ../entry_type.name}}Detail.svelte';
 
-const client: AppClient = (getContext(clientContext) as any).getClient();
+let client: AppClient;
+const appClientContext = getContext<ClientContext>(clientContext);
 
 let hashes: Array<ActionHash> | undefined = [];
 let loading: boolean;
@@ -28,7 +29,7 @@ onMount(async () => {
   if ({{camel_case linked_from.singular_arg}} === undefined) {
     throw new Error(`The {{camel_case linked_from.singular_arg}} input is required for the {{pascal_case (plural ../entry_type.name)}}For{{pascal_case linked_from.name}} element`);
   }
-
+  client = await appClientContext.getClient();
   await fetch{{pascal_case (plural ../entry_type.name)}}();
 
   client.on('signal', async signal => {
