@@ -1,1 +1,1 @@
-Array<{{field_type.type}}>
+{{#if (eq field_type.type "u8")}}Uint8Array{{else}}Array<{{field_type.type}}>{{/if}}

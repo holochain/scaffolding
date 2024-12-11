@@ -521,11 +521,15 @@ impl EntryDefinition {
                     ts_type
                 ),
                 Cardinality::Vector => {
-                    format!(
-                        "  {}: Array<{}>;",
-                        &field.field_name.to_case(Case::Snake),
-                        ts_type
-                    )
+                    if matches!(field.field_type, FieldType::U8) {
+                        format!("  {}: Uint8Array;", &field.field_name.to_case(Case::Snake),)
+                    } else {
+                        format!(
+                            "  {}: Array<{}>;",
+                            &field.field_name.to_case(Case::Snake),
+                            ts_type
+                        )
+                    }
                 }
             };
             ts_interface.push_str(&ts_field);

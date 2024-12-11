@@ -102,7 +102,7 @@ export default defineComponent({
   {{#if (eq cardinality "single") }}
         {{snake_case field_name}}: this.{{camel_case field_name}}!,
   {{else}}
-        {{snake_case field_name}}: this.{{camel_case field_name}}{{#if (eq cardinality "vector") }} as Array<{{> (concat field_type.type "/type") }}>{{/if}},
+        {{snake_case field_name}}: this.{{camel_case field_name}}{{#if (eq cardinality "vector") }}{{#if field_type.type "u8"}} as Uint8Array{{else}}as Array<{{> (concat field_type.type "/type") }}>{{/if}}{{/if}},
   {{/if}}
 {{/each}}
       };
