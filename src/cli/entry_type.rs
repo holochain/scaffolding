@@ -69,7 +69,7 @@ impl EntryType {
                 check_case(&n, "entry type name", Case::Snake)?;
                 n
             }
-            None => input_with_case("Entry type name (snake_case):", Case::Snake)?,
+            None => input_with_case("Entry type name (snake_case):", None, Case::Snake)?,
         };
 
         let dna_file_tree = DnaFileTree::get_or_choose(file_tree, self.dna.as_deref())?;
@@ -110,7 +110,8 @@ impl EntryType {
                 r#"
 Add new collections for that entry type with:
 
-  hc scaffold collection"#,
+  hc scaffold collection
+                "#,
             );
         }
 

@@ -63,6 +63,7 @@ impl Collection {
             }
             None => input_with_case(
                 "Collection name (snake_case, eg. \"all_posts\"):",
+                None,
                 Case::Snake,
             )?,
         };
@@ -90,10 +91,10 @@ impl Collection {
             );
         }
 
-        println!("\nCollection {} scaffolded!", name.italic());
+        println!("\nCollection {} scaffolded!\n", name.italic());
 
         if let Some(i) = next_instructions {
-            println!("\n{}", i);
+            println!("{}", i);
         }
 
         Ok(())

@@ -34,6 +34,7 @@ pub fn choose_fields(
             zome_file_tree,
             field_types_templates,
             no_ui,
+            None,
         )?;
         println!();
 
@@ -45,25 +46,99 @@ pub fn choose_fields(
     }
 
     println!(
-        "Chosen fields:\n {}",
+        "Current fields:\n{}\n",
         fields
             .iter()
-            .map(|f| format!("{}: {}", f.field_name.clone(), f.field_type))
+            .map(|f| format!(" {}: {}", f.field_name.clone(), f.field_type))
             .collect::<Vec<String>>()
-            .join(", ")
+            .join("\n")
             .italic()
     );
 
     let selection = Select::with_theme(&ColorfulTheme::default())
-        .with_prompt(
-            "Do you want to proceed with the current entry type or restart from the beginning?",
-        )
-        .item("Confirm")
-        .item("Restart")
+        .with_prompt("Do you want to proceed with the current entry type?")
+        .items(&["Confirm", "Modify", "Restart"])
         .default(0)
         .interact()?;
 
     if selection == 1 {
+        loop {
+            let action = Select::with_theme(&ColorfulTheme::default())
+                .with_prompt("What would you like to do?")
+                .items(&["Change Field", "Add Field", "Remove Field", "Done"])
+                .interact()?;
+
+            match action {
+                0 => {
+                    // Change field
+                    if !fields.is_empty() {
+                        let field_to_change = Select::with_theme(&ColorfulTheme::default())
+                            .with_prompt("Select field to change")
+                            .items(
+                                &fields
+                                    .iter()
+                                    .map(|f| format!("{}: {}", f.field_name, f.field_type).italic())
+                                    .collect::<Vec<_>>(),
+                            )
+                            .interact()?;
+
+                        let new_field = choose_field(
+                            entry_type_name,
+                            zome_file_tree,
+                            field_types_templates,
+                            no_ui,
+                            Some(&fields[field_to_change].field_name),
+                        )?;
+                        fields[field_to_change] = new_field;
+                    } else {
+                        println!("{}", "No fields left to change".yellow())
+                    }
+                }
+                1 => {
+                    // Add field
+                    let new_field = choose_field(
+                        entry_type_name,
+                        zome_file_tree,
+                        field_types_templates,
+                        no_ui,
+                        None,
+                    )?;
+                    fields.push(new_field);
+                }
+                2 => {
+                    // Remove field
+                    if !fields.is_empty() {
+                        let field_to_remove = Select::with_theme(&ColorfulTheme::default())
+                            .with_prompt("Select field to remove")
+                            .items(
+                                &fields
+                                    .iter()
+                                    .map(|f| format!("{}: {}", f.field_name, f.field_type).italic())
+                                    .collect::<Vec<_>>(),
+                            )
+                            .interact()?;
+                        fields.remove(field_to_remove);
+                    } else {
+                        println!("{}", "All fields have been removed".yellow())
+                    }
+                }
+                3 => break, // Done
+                _ => unreachable!(),
+            }
+
+            if !fields.is_empty() {
+                println!(
+                    "\nCurrent fields:\n{}\n",
+                    fields
+                        .iter()
+                        .map(|f| format!(" {}: {}", f.field_name, f.field_type))
+                        .collect::<Vec<String>>()
+                        .join("\n")
+                        .italic()
+                );
+            }
+        }
+    } else if selection == 2 {
         return choose_fields(
             entry_type_name,
             zome_file_tree,
@@ -80,6 +155,7 @@ fn choose_field(
     zome_file_tree: &ZomeFileTree,
     field_types_templates: &FileTree,
     no_ui: bool,
+    initial_field_name: Option<&str>,
 ) -> ScaffoldResult<FieldDefinition> {
     let field_types = FieldType::list();
     let field_type_names: Vec<String> = field_types
@@ -88,15 +164,16 @@ fn choose_field(
         .map(|s| s.to_string())
         .collect();
 
-    let field_name = input_with_custom_validation("Field name:", |input| {
-        if let Err(e) = check_case(&input, "field_name", Case::Snake) {
-            return Err(e.to_string());
-        }
-        if let Err(e) = check_for_reserved_keywords(&input) {
-            return Err(e.to_string());
-        }
-        Ok(())
-    })?;
+    let field_name =
+        input_with_custom_validation("Field name (snake_case):", initial_field_name, |input| {
+            if let Err(e) = check_case(&input, "field_name", Case::Snake) {
+                return Err(e.to_string());
+            }
+            if let Err(e) = check_for_reserved_keywords(&input) {
+                return Err(e.to_string());
+            }
+            Ok(())
+        })?;
 
     let selection = Select::with_theme(&ColorfulTheme::default())
         .with_prompt("Choose field type:")
@@ -129,8 +206,10 @@ fn choose_field(
     };
 
     if let FieldType::Enum { .. } = field_type {
-        let label =
-            input_with_custom_validation("Enter the name of the enum:", |input: String| {
+        let label = input_with_custom_validation(
+            "Enter the name of the enum (PascalCase):",
+            None,
+            |input: String| {
                 if !input.is_case(Case::Pascal) {
                     return Err(format!("Input must be {:?} case.", Case::Pascal));
                 }
@@ -140,14 +219,16 @@ fn choose_field(
                     ));
                 }
                 Ok(())
-            })?;
+            },
+        )?;
 
         let mut variants = Vec::new();
         let mut another_variant = true;
 
         while another_variant {
             let variant = input_with_custom_validation(
-                "Enter the name of the next variant:",
+                "Enter the name of the next variant (PascalCase):",
+                None,
                 |input: String| {
                     if !input.is_case(Case::Pascal) {
                         return Err(format!("Input must be {:?} case.", Case::Pascal));
@@ -190,6 +271,7 @@ fn choose_field(
             if should_link_from_agent_pubkey {
                 let role = input_with_case(
                     "Which role does this agent play in the relationship ? (eg. \"creator\", \"invitee\")",
+                    None,
                     Case::Snake
                 )?;
                 Some(Referenceable::Agent { role })

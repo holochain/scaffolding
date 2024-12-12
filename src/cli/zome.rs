@@ -63,7 +63,7 @@ impl Zome {
 
         let name = match self.name {
             Some(n) => n,
-            None => input_with_case(name_prompt, Case::Snake)?,
+            None => input_with_case(name_prompt, None, Case::Snake)?,
         };
 
         let mut dna_file_tree = DnaFileTree::get_or_choose(file_tree, self.dna.as_deref())?;
@@ -90,7 +90,7 @@ impl Zome {
             zome_next_instructions.0 = next_instructions;
 
             println!(
-                "\nIntegrity zome {} scaffolded!",
+                "Integrity zome {} scaffolded!\n",
                 integrity_zome_name.italic(),
             );
 
@@ -120,7 +120,7 @@ impl Zome {
             )?;
             zome_next_instructions.1 = next_instructions;
 
-            println!("\nCoordinator zome {} scaffolded!", name.italic());
+            println!("Coordinator zome {} scaffolded!\n", name.italic());
 
             dna_file_tree = DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
         }

@@ -30,7 +30,7 @@ impl Dna {
                 check_case(&n, "dna name", Case::Snake)?;
                 n
             }
-            None => input_with_case("DNA name (snake_case):", Case::Snake)?,
+            None => input_with_case("DNA name (snake_case):", None, Case::Snake)?,
         };
 
         let app_file_tree = AppFileTree::get_or_choose(file_tree, self.app.as_deref())?;
@@ -51,7 +51,8 @@ impl Dna {
                 r#"
 Add new zomes to your DNA with:
 
-  hc scaffold zome"#,
+  hc scaffold zome
+                "#,
             );
         }
 

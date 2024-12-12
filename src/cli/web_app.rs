@@ -24,9 +24,7 @@ use crate::{
         zome::scaffold_zome_pair,
     },
     templates::ScaffoldedTemplate,
-    utils::{
-        check_no_whitespace, input_no_whitespace, input_with_case_and_initial_text, input_yes_or_no,
-    },
+    utils::{check_no_whitespace, input_no_whitespace, input_with_case, input_yes_or_no},
 };
 
 #[derive(Debug, StructOpt)]
@@ -90,7 +88,7 @@ impl WebApp {
         };
 
         let ScaffoldedTemplate {
-            file_tree,
+            mut file_tree,
             next_instructions,
         } = scaffold_web_app(
             &name,
@@ -101,7 +99,9 @@ impl WebApp {
             self.holo_enabled,
         )?;
 
-        let file_tree = ScaffoldConfig::write_to_package_json(file_tree, template_type)?;
+        if !template_type.is_nixified_custom_template() {
+            ScaffoldConfig::write_to_package_json(&mut file_tree, template_type)?;
+        }
 
         build_file_tree(file_tree, &app_folder)?;
 
@@ -115,7 +115,7 @@ impl WebApp {
             nix_instructions = "\n  nix develop";
         }
 
-        println!("Your Web hApp {} has been scaffolded!", name.italic());
+        println!("Your Web hApp {} has been scaffolded!\n", name.italic());
 
         let mut disable_fast_track = self.disable_fast_track;
 
@@ -130,11 +130,10 @@ impl WebApp {
         setup_git_environment(&app_folder)?;
 
         if let Some(instructions) = next_instructions {
-            println!("\n{instructions}");
+            println!("{instructions}");
         } else {
             let dna_instructions = disable_fast_track.then_some(
                 r#"
-
 - Get your project to compile by adding a DNA and then following the next insturctions to add a zome to that DNA:
 
   hc scaffold dna"#).unwrap_or_default();
@@ -156,7 +155,8 @@ Here's how you can get started with developing your application:
 
 - Then, at any point in time you can start your application with:
 
-  {}"#,
+  {}
+                "#,
                 package_manager.run_command_string(SubCommand::Install, None),
                 package_manager.run_command_string(SubCommand::Run("start".to_string()), None)
             );
@@ -171,10 +171,10 @@ Here's how you can get started with developing your application:
         path: &Path,
     ) -> ScaffoldResult<()> {
         env::set_current_dir(PathBuf::from(&name))?;
-        let dna_name = input_with_case_and_initial_text(
+        let dna_name = input_with_case(
             "Initial DNA name (snake_case):",
+            Some(&name.to_case(Case::Snake)),
             Case::Snake,
-            &name.to_case(Case::Snake),
         )?;
 
         let file_tree = load_directory_into_memory(&path.join(name))?;

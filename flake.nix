@@ -28,11 +28,6 @@
     flake-parts.lib.mkFlake { inherit inputs; }
       rec {
         flake = {
-          templates.default = {
-            path = ./templates/custom-template;
-            description = "Custom template for the scaffolding tool";
-          };
-
           lib.wrapCustomTemplate = { system, pkgs, customTemplatePath }:
             let
               scaffolding = inputs.holochain.packages.${system}.hc-scaffold;
@@ -70,9 +65,29 @@
 
               # source filtering to ensure builds using include_str! or include_bytes! succeed
               # https://crane.dev/faq/building-with-non-rust-includes.html
-              nonCargoBuildFiles = path: _type: builtins.match ".*(gitignore|md|hbs)$" path != null;
+              nonCargoBuildFiles = path: _type: builtins.match ".*(gitignore|md|hbs|nix|sh)$" path != null;
               includeFilesFilter = path: type:
                 (craneLib.filterCargoSources path type) || (nonCargoBuildFiles path type);
+
+              buildInputs = [ pkgs.openssl pkgs.go ]
+                ++ (lib.optionals pkgs.stdenv.isDarwin
+                (with pkgs.darwin.apple_sdk.frameworks; [
+                  CoreFoundation
+                  SystemConfiguration
+                  Security
+                ]));
+
+              nativeBuildInputs = [ pkgs.perl ];
+
+              cargoArtifacts = craneLib.buildDepsOnly {
+                pname = "hc-scaffold-deps";
+                src = lib.cleanSourceWith {
+                  src = ./.;
+                  filter = includeFilesFilter;
+                  name = "source";
+                };
+                inherit buildInputs nativeBuildInputs;
+              };
             in
             craneLib.buildPackage {
               pname = "hc-scaffold";
@@ -84,21 +99,8 @@
               };
               doCheck = false;
 
-              buildInputs = [ pkgs.openssl pkgs.go ]
-                ++ (lib.optionals pkgs.stdenv.isDarwin
-                (with pkgs.darwin.apple_sdk.frameworks; [
-                  CoreFoundation
-                  SystemConfiguration
-                  Security
-                ]));
-
-              nativeBuildInputs = [ pkgs.perl ];
+              inherit cargoArtifacts buildInputs nativeBuildInputs;
             };
-
-          checks.custom-template = flake.lib.wrapCustomTemplate {
-            inherit pkgs system;
-            customTemplatePath = ./templates/custom-template/custom-template;
-          };
 
           devShells.default = pkgs.mkShell {
             packages = (with inputs'.holonix.packages; [
@@ -124,4 +126,10 @@
           };
         };
       };
+
+
+  nixConfig = {
+    extra-substituters = [ "https://holochain-ci.cachix.org" "https://holochain-scaffolding-cli.cachix.org" ];
+    extra-trusted-public-keys = [ "holochain-ci.cachix.org-1:5IUSkZc0aoRS53rfkvH9Kid40NpyjwCMCzwRTXy+QN8=" "holochain-scaffolding-cli.cachix.org-1:DznpFcPqqPqiP05k/0lT6qeQ/N3KOvKQW/EP4Pf3A2E=" ];
+  };
 }

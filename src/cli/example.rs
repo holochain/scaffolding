@@ -270,11 +270,11 @@ impl Example {
         };
 
         let ScaffoldedTemplate {
-            file_tree,
+            mut file_tree,
             next_instructions,
         } = scaffold_example(file_tree, package_manager, &template_file_tree, &example)?;
 
-        let file_tree = ScaffoldConfig::write_to_package_json(file_tree, template_type)?;
+        ScaffoldConfig::write_to_package_json(&mut file_tree, template_type)?;
 
         build_file_tree(file_tree, &app_dir)?;
 
@@ -296,10 +296,10 @@ impl Example {
 
         setup_git_environment(&app_dir)?;
 
-        println!("\nExample {} scaffolded!", example.to_string().italic());
+        println!("\nExample {} scaffolded!\n", example.to_string().italic());
 
         if let Some(i) = next_instructions {
-            println!("\n{}", i);
+            println!("{}", i);
         }
 
         Ok(())

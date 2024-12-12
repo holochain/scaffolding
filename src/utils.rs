@@ -76,20 +76,16 @@ fn get_folder_names(folder: &BTreeMap<OsString, FileTree>) -> Vec<String> {
 #[inline]
 /// "yes" or "no" input dialog, with the option to specify a recommended answer (yes = true, no = false)
 pub fn input_yes_or_no(prompt: &str, recommended: Option<bool>) -> ScaffoldResult<bool> {
-    let yes_recommended = if recommended == Some(true) {
-        " (recommended)"
-    } else {
-        ""
-    };
-    let no_recommended = if recommended == Some(false) {
-        " (recommended)"
-    } else {
-        ""
-    };
+    let yes_recommended = (recommended == Some(true))
+        .then_some("(recommended)")
+        .unwrap_or_default();
+    let no_recommended = (recommended == Some(false))
+        .then_some("(recommended)")
+        .unwrap_or_default();
 
     let items = [
-        format!("Yes{}", yes_recommended),
-        format!("No{}", no_recommended),
+        format!("Yes {}", yes_recommended),
+        format!("No {}", no_recommended),
     ];
 
     let selection = Select::with_theme(&ColorfulTheme::default())
@@ -102,16 +98,43 @@ pub fn input_yes_or_no(prompt: &str, recommended: Option<bool>) -> ScaffoldResul
 }
 
 #[inline]
-pub fn input_with_custom_validation<V>(prompt: &str, validator: V) -> ScaffoldResult<String>
+pub fn input_with_custom_validation<V>(
+    prompt: &str,
+    initial_text: Option<&str>,
+    validator: V,
+) -> ScaffoldResult<String>
 where
     V: Fn(String) -> Result<(), String>,
 {
     let mut input: String = Input::with_theme(&ColorfulTheme::default())
         .with_prompt(prompt)
+        .with_initial_text(initial_text.unwrap_or_default())
         .interact_text()?;
 
     while let Err(e) = validator(input.clone()) {
         println!("{}", e.red());
+        input = Input::with_theme(&ColorfulTheme::default())
+            .with_prompt(prompt)
+            .with_initial_text(initial_text.unwrap_or_default())
+            .interact_text()?;
+    }
+
+    Ok(input)
+}
+
+#[inline]
+pub fn input_with_case(
+    prompt: &str,
+    initial_text: Option<&str>,
+    case: Case,
+) -> ScaffoldResult<String> {
+    let mut input: String = Input::with_theme(&ColorfulTheme::default())
+        .with_prompt(prompt)
+        .with_initial_text(initial_text.unwrap_or_default())
+        .interact_text()?;
+
+    while let Err(e) = check_case(&input, "Input", case) {
+        println!("{}", e.to_string().red());
         input = Input::with_theme(&ColorfulTheme::default())
             .with_prompt(prompt)
             .interact_text()?;
@@ -121,42 +144,17 @@ where
 }
 
 #[inline]
-pub fn input_with_case(prompt: &str, case: Case) -> ScaffoldResult<String> {
-    let input: String = Input::with_theme(&ColorfulTheme::default())
-        .with_prompt(prompt)
-        .validate_with(|input: &String| -> Result<(), String> {
-            check_case(input, "Input", case).map_err(|e| e.to_string())
-        })
-        .interact_text()?;
-
-    Ok(input)
-}
-
-#[inline]
-pub fn input_with_case_and_initial_text(
-    prompt: &str,
-    case: Case,
-    initial_text: &str,
-) -> ScaffoldResult<String> {
-    let input: String = Input::with_theme(&ColorfulTheme::default())
-        .with_prompt(prompt)
-        .with_initial_text(initial_text)
-        .validate_with(|input: &String| -> Result<(), String> {
-            check_case(input, "Input", case).map_err(|e| e.to_string())
-        })
-        .interact_text()?;
-
-    Ok(input)
-}
-
-#[inline]
 pub fn input_no_whitespace(prompt: &str) -> ScaffoldResult<String> {
-    let input = Input::with_theme(&ColorfulTheme::default())
+    let mut input: String = Input::with_theme(&ColorfulTheme::default())
         .with_prompt(prompt)
-        .validate_with(|input: &String| -> Result<(), String> {
-            check_no_whitespace(input, "Input").map_err(|e| e.to_string())
-        })
         .interact_text()?;
+
+    while let Err(e) = check_no_whitespace(&input, "Input") {
+        println!("{}", e.to_string().red());
+        input = Input::with_theme(&ColorfulTheme::default())
+            .with_prompt(prompt)
+            .interact_text()?;
+    }
 
     Ok(input)
 }

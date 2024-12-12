@@ -33,15 +33,15 @@ impl ScaffoldConfig {
     }
 
     pub fn write_to_package_json(
-        mut web_app_file_tree: FileTree,
+        web_app_file_tree: &mut FileTree,
         template_type: &TemplateType,
-    ) -> ScaffoldResult<FileTree> {
+    ) -> ScaffoldResult<()> {
         let config = ScaffoldConfig {
             template: template_type.clone(),
         };
         let package_json_path = PathBuf::from("package.json");
 
-        map_file(&mut web_app_file_tree, &package_json_path, |c| {
+        map_file(web_app_file_tree, &package_json_path, |c| {
             let original_content = c.clone();
             let json = serde_json::from_str::<Value>(&c)?;
             let json = match json {
@@ -59,6 +59,6 @@ impl ScaffoldConfig {
             Ok(json)
         })?;
 
-        Ok(web_app_file_tree)
+        Ok(())
     }
 }
