@@ -247,7 +247,7 @@ fn choose_field(
         }
 
         let widget = (!no_ui)
-            .then(|| choose_widget(&field_type, field_types_templates))
+            .then(|| choose_widget(&field_type, &cardinality, field_types_templates))
             .transpose()?
             .flatten();
 
@@ -338,7 +338,7 @@ fn choose_field(
     };
 
     let widget = (!no_ui)
-        .then(|| choose_widget(&field_type, field_types_templates))
+        .then(|| choose_widget(&field_type, &cardinality, field_types_templates))
         .transpose()?
         .flatten();
 
@@ -347,6 +347,7 @@ fn choose_field(
 
 fn choose_widget(
     field_type: &FieldType,
+    cardinality: &Cardinality,
     field_types_templates: &FileTree,
 ) -> ScaffoldResult<Option<String>> {
     let path = PathBuf::new().join(field_type.to_string());
@@ -364,9 +365,17 @@ fn choose_widget(
                 return Ok(None);
             }
 
-            let should_scaffold_ui = Confirm::with_theme(&ColorfulTheme::default())
-                .with_prompt("Should UI be generated for this field?")
-                .interact()?;
+            let should_scaffold_ui = {
+                // Skip widget prompt for Vec<u8> field types
+                if matches!(field_type, FieldType::U8) && matches!(cardinality, Cardinality::Vector)
+                {
+                    false
+                } else {
+                    Confirm::with_theme(&ColorfulTheme::default())
+                        .with_prompt("Should UI be generated for this field?")
+                        .interact()?
+                }
+            };
 
             if !should_scaffold_ui {
                 return Ok(None);
