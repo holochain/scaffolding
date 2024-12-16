@@ -20,6 +20,8 @@ pub enum FieldType {
     #[serde(rename = "bool")]
     Bool,
     String,
+    #[serde(rename = "u8")]
+    U8,
     #[serde(rename = "u32")]
     U32,
     #[serde(rename = "i32")]
@@ -61,6 +63,7 @@ impl std::fmt::Display for FieldType {
         let str = match self {
             FieldType::Bool => "bool",
             FieldType::String => "String",
+            FieldType::U8 => "u8",
             FieldType::U32 => "u32",
             FieldType::I32 => "i32",
             FieldType::F32 => "f32",
@@ -81,6 +84,7 @@ impl FieldType {
         vec![
             FieldType::String,
             FieldType::Bool,
+            FieldType::U8,
             FieldType::U32,
             FieldType::I32,
             FieldType::F32,
@@ -121,6 +125,7 @@ impl FieldType {
         match self {
             Bool => quote!(bool),
             String => quote!(String),
+            U8 => quote!(u8),
             U32 => quote!(u32),
             I32 => quote!(i32),
             F32 => quote!(f32),
@@ -143,6 +148,7 @@ impl FieldType {
         match self {
             Bool => "boolean",
             String => "string",
+            U8 => "number",
             U32 => "number",
             I32 => "number",
             F32 => "number",
@@ -515,11 +521,15 @@ impl EntryDefinition {
                     ts_type
                 ),
                 Cardinality::Vector => {
-                    format!(
-                        "  {}: Array<{}>;",
-                        &field.field_name.to_case(Case::Snake),
-                        ts_type
-                    )
+                    if matches!(field.field_type, FieldType::U8) {
+                        format!("  {}: Uint8Array;", &field.field_name.to_case(Case::Snake),)
+                    } else {
+                        format!(
+                            "  {}: Array<{}>;",
+                            &field.field_name.to_case(Case::Snake),
+                            ts_type
+                        )
+                    }
                 }
             };
             ts_interface.push_str(&ts_field);

@@ -29,10 +29,13 @@ export class Create{{pascal_case entry_type.name}} extends LitElement {
         {{#if (eq cardinality "option")}}
   @property()
   {{camel_case field_name}}: {{> (concat field_type.type "/type") }} | undefined;
-        {{else}}
   @property()
+        {{else}}
+          {{#if (eq field_type.type "u8")}}
+  {{camel_case field_name}}!: Uint8Array;
+          {{else}}
   {{camel_case field_name}}!: Array<{{> (concat field_type.type "/type") }}>;
-
+          {{/if}}
         {{/if}}
       {{/if}}
     {{/if}}
@@ -46,8 +49,11 @@ export class Create{{pascal_case entry_type.name}} extends LitElement {
 
       {{else}}
   @state()
+        {{#if (eq field_type.type "u8")}}
+  _{{camel_case field_name}}: Uint8Array = [{{> (concat field_type.type "/" widget "/initial-value") field_type=field_type}}];
+        {{else}}
   _{{camel_case field_name}}: Array<{{> (concat field_type.type "/type") }}> = [{{> (concat field_type.type "/" widget "/initial-value") field_type=field_type}}];
-
+        {{/if}}
       {{/if}}
     {{/if}}
   {{/each}}
