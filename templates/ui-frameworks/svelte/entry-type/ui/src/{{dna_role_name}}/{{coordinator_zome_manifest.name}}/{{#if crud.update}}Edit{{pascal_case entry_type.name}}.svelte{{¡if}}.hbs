@@ -28,7 +28,11 @@ let current{{pascal_case entry_type.name}}: {{pascal_case entry_type.name}} = de
     {{#if (not (eq cardinality "vector" ) )}}
 let {{camel_case field_name}}: {{> (concat field_type.type "/type")}} | undefined = current{{pascal_case ../entry_type.name}}.{{snake_case field_name}};
     {{else}}
+      {{#if (eq field_type.type "u8")}}
+let {{camel_case field_name}}: Uint8Array | undefined> = current{{pascal_case ../entry_type.name}}.{{snake_case field_name}};
+      {{else}}
 let {{camel_case field_name}}: Array<{{> (concat field_type.type "/type")}} | undefined> = current{{pascal_case ../entry_type.name}}.{{snake_case field_name}};
+      {{/if}}
     {{/if}}
   {{/if}}
 {{/each}}
