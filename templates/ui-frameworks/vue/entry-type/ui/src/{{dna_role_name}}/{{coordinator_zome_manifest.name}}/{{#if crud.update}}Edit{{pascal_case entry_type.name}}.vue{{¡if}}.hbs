@@ -43,7 +43,11 @@ export default defineComponent({
     {{#if (not (eq cardinality "vector" ) )}}
     {{camel_case field_name}}: {{> (concat field_type.type "/type")}};
     {{else}}
+      {{#if (eq field_type.type "u8")}}
+    {{camel_case field_name}}: Uint8Array;
+      {{else}}
     {{camel_case field_name}}: Array<{{> (concat field_type.type "/type")}}>;
+      {{/if}}
     {{/if}}
   {{/if}}
 {{/each}}

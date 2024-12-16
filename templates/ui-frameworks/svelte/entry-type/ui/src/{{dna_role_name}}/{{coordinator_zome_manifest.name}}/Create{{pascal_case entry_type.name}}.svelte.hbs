@@ -21,7 +21,11 @@ const appClientContext = getContext<ClientContext>(clientContext);
     {{#if (not (eq cardinality "vector" ) )}}
 let {{camel_case field_name}}: {{> (concat field_type.type "/type") }}{{#if (eq cardinality "option")}} | undefined{{/if}} = {{> (concat field_type.type "/" widget "/initial-value") field_type=field_type}};
     {{else}}
+      {{#if (eq field_type.type "u8")}}
+let {{camel_case field_name}}: Uint8Array = [{{> (concat field_type.type "/" widget "/initial-value") field_type=field_type}}];
+      {{else}}
 let {{camel_case field_name}}: Array<{{> (concat field_type.type "/type")}}> = [{{> (concat field_type.type "/" widget "/initial-value") field_type=field_type}}];
+      {{/if}}
     {{/if}}
   {{/if}}
 {{/each}}
@@ -29,7 +33,11 @@ let {{camel_case field_name}}: Array<{{> (concat field_type.type "/type")}}> = [
 {{#each entry_type.fields}}
   {{#if (not widget) }}
     {{#if (eq cardinality "vector")}}
+      {{#if (eq field_type.type "u8")}}
+export let {{camel_case field_name}}!: Uint8Array;
+      {{else}}
 export let {{camel_case field_name}}!: Array<{{> (concat field_type.type "/type") }}>;
+      {{/if}}
     {{else}}
 export let {{camel_case field_name}}{{#if (eq cardinality "single")}}!{{/if}}: {{> (concat field_type.type "/type") }}{{#if (eq cardinality "option")}} | undefined{{/if}};
     {{/if}}
