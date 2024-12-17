@@ -5,7 +5,7 @@ pub const TRYORAMA_VERSION: &str = "^0.17.0-rc.0";
 pub const HOLOCHAIN_CLIENT_VERSION: &str = "^0.18.0-rc.1";
 
 /// npm: <https://www.npmjs.com/package/@holochain/hc-spin>
-pub const HC_SPIN_VERSION: &str = "^0.400.0-dev.3";
+pub const HC_SPIN_VERSION: &str = "^0.400.0-rc.0";
 
 /// npm: <https://www.npmjs.com/package/@holo-host/web-sdk>
 pub const WEB_SDK_VERSION: &str = "^0.6.20-prerelease";
