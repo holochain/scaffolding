@@ -24,7 +24,7 @@ use crate::{
         zome::scaffold_zome_pair,
     },
     templates::ScaffoldedTemplate,
-    utils::{check_no_whitespace, input_no_whitespace, input_with_case, input_yes_or_no},
+    utils::{input_no_whitespace, input_with_case, input_yes_or_no, validate_input},
 };
 
 #[derive(Debug, StructOpt)]
@@ -57,7 +57,7 @@ impl WebApp {
         let current_dir = std::env::current_dir()?;
         let name = match self.name {
             Some(n) => {
-                check_no_whitespace(&n, "app name")?;
+                validate_input(&n, "app name")?;
                 n
             }
             None => input_no_whitespace("App name (no whitespaces):")?,

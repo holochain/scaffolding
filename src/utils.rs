@@ -149,7 +149,7 @@ pub fn input_no_whitespace(prompt: &str) -> ScaffoldResult<String> {
         .with_prompt(prompt)
         .interact_text()?;
 
-    while let Err(e) = check_no_whitespace(&input, "Input") {
+    while let Err(e) = validate_input(&input, "Input") {
         println!("{}", e.to_string().red());
         input = Input::with_theme(&ColorfulTheme::default())
             .with_prompt(prompt)
@@ -167,15 +167,25 @@ pub fn check_case(input: &str, identifier: &str, case: Case) -> ScaffoldResult<(
             "{identifier} must be {case:?} Case",
         )));
     }
+    if input.chars().next().map_or(false, char::is_numeric) {
+        return Err(ScaffoldError::InvalidStringFormat(format!(
+            "{identifier} must not start with a numeric"
+        )));
+    }
     Ok(())
 }
 
 #[inline]
-/// Raises an error if input is contains white spaces
-pub fn check_no_whitespace(input: &str, identifier: &str) -> ScaffoldResult<()> {
+/// Raises an error if input is contains white spaces or starts with a numeric
+pub fn validate_input(input: &str, identifier: &str) -> ScaffoldResult<()> {
     if input.contains(char::is_whitespace) {
         return Err(ScaffoldError::InvalidStringFormat(format!(
             "{identifier} must *not* contain whitespaces.",
+        )));
+    }
+    if input.chars().next().map_or(false, char::is_numeric) {
+        return Err(ScaffoldError::InvalidStringFormat(format!(
+            "{identifier} must not start with a numeric"
         )));
     }
     Ok(())
