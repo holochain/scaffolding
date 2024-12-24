@@ -169,7 +169,7 @@ pub fn check_case(input: &str, identifier: &str, case: Case) -> ScaffoldResult<(
     }
     if input.chars().next().map_or(false, char::is_numeric) {
         return Err(ScaffoldError::InvalidStringFormat(format!(
-            "{identifier} must not start with a numeric"
+            "{identifier} must not start with a number"
         )));
     }
     Ok(())
