@@ -43,8 +43,8 @@ pub struct LinkType {
     #[structopt(long)]
     /// Skips UI generation for this link-type.
     pub no_ui: bool,
-    #[structopt(long)]
 
+    #[structopt(long)]
     /// Skips test generation for this link-type.
     pub no_spec: bool,
 }
