@@ -345,6 +345,7 @@ pub fn add_common_zome_dependencies_to_workspace_cargo(
         &format!("={}", versions::HDK_VERSION),
     )?;
     let file_tree = add_workspace_external_dependency(file_tree, "serde", "1.0")?;
+    let file_tree = add_workspace_external_dependency(file_tree, "home", "=0.5.9")?;
     Ok(file_tree)
 }
 
