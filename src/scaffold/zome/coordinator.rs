@@ -38,7 +38,11 @@ name = "{zome_name}"
 hdk = {{ workspace = true }}
 serde = {{ workspace = true }}
 
-{deps} 
+{deps}
+
+# The following two lines should be removed when upgrading to Holochain 0.4
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+home = {{ workspace = true }}
 "#,
     )
 }
