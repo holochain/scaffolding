@@ -1,8 +1,8 @@
 /// npm: <https://www.npmjs.com/package/@holochain/tryorama>
-pub const TRYORAMA_VERSION: &str = "^0.18.0-dev.1";
+pub const TRYORAMA_VERSION: &str = "^0.18.0-dev.3";
 
 /// npm: <https://www.npmjs.com/package/@holochain/client>
-pub const HOLOCHAIN_CLIENT_VERSION: &str = "^0.19.0-dev.5";
+pub const HOLOCHAIN_CLIENT_VERSION: &str = "^0.19.0-dev.6";
 
 /// npm: <https://www.npmjs.com/package/@holochain/hc-spin>
 pub const HC_SPIN_VERSION: &str = "^0.500.0-dev.0";
@@ -11,13 +11,13 @@ pub const HC_SPIN_VERSION: &str = "^0.500.0-dev.0";
 pub const WEB_SDK_VERSION: &str = "^0.6.20-prerelease";
 
 /// crates.io <https://crates.io/crates/hdi/versions>
-pub const HDI_VERSION: &str = "0.6.0-dev.4";
+pub const HDI_VERSION: &str = "0.6.0-dev.8";
 
 /// crates.io <https://crates.io/crates/hdk/versions>
-pub const HDK_VERSION: &str = "0.5.0-dev.6";
+pub const HDK_VERSION: &str = "0.5.0-dev.11";
 
 /// crates.io <https://crates.io/crates/holochain/versions>
-pub const HOLOCHAIN_VERSION: &str = "0.5.0-dev.6";
+pub const HOLOCHAIN_VERSION: &str = "0.5.0-dev.12";
 
 /// source: <https://github.com/darksoil-studio/holochain-playground/tree/main/packages/cli/server>
 ///
