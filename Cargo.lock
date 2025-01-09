@@ -1432,9 +1432,9 @@ dependencies = [
 
 [[package]]
 name = "holochain_integrity_types"
-version = "0.5.0-dev.6"
+version = "0.5.0-dev.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bf58653e896d28f0e8a16b0520595ff677b0a1595d145284fcffdb36f66dc93a"
+checksum = "1f4685dacfebc5baa4692b7ac526e341c60ed8834d411365303be95cf59da455"
 dependencies = [
  "derive_builder",
  "holo_hash",
@@ -1451,9 +1451,9 @@ dependencies = [
 
 [[package]]
 name = "holochain_keystore"
-version = "0.5.0-dev.11"
+version = "0.5.0-dev.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a72ed37aaa206646f724a15d1292233e298280837b0fb6fe310343e0e68e36cf"
+checksum = "fa6cde5f26e5a9c1e0b66c4248cb924b65cb1f392eeeb7197327c3cc3ba46267"
 dependencies = [
  "base64 0.22.1",
  "derive_more",
@@ -1564,9 +1564,9 @@ dependencies = [
 
 [[package]]
 name = "holochain_sqlite"
-version = "0.5.0-dev.11"
+version = "0.5.0-dev.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2c7cd265b4495c6bb6e425d0f3d8700fc4322bf5f158662b02aef64d53922c66"
+checksum = "a8b422d87bf69230a90001e174bedd4e37c26504e862c1611a18c367b3506c58"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -1627,9 +1627,9 @@ dependencies = [
 
 [[package]]
 name = "holochain_types"
-version = "0.5.0-dev.12"
+version = "0.5.0-dev.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5c6e28b9162bbae726991f35f61c37f3455d476ed4d10968c9d91c700cb5e6f0"
+checksum = "5e1989b9fa6038cab1071318f2a0e896fa3c3a28dc8e875cc9bbe552eed14213"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -1710,9 +1710,9 @@ dependencies = [
 
 [[package]]
 name = "holochain_zome_types"
-version = "0.5.0-dev.10"
+version = "0.5.0-dev.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4050368431ec1d6db8d510f40413115755e0efa1c5809430f245860ef175daac"
+checksum = "83185babddadd94093c1c16d6bc94b3eeb336703121b0f21f02f6c80b82db0ad"
 dependencies = [
  "derive_builder",
  "derive_more",
