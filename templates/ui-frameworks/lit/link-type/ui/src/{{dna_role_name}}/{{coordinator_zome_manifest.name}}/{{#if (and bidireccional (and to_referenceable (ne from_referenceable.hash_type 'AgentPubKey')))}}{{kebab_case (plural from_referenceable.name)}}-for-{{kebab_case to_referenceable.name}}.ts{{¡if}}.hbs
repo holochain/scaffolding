@@ -20,7 +20,7 @@ export class {{pascal_case (plural from_referenceable.name)}}For{{pascal_case to
   })
   {{camel_case to_referenceable.singular_arg}}!: {{to_referenceable.hash_type}};
 
-  _fetch{{pascal_case (plural from_referenceable.name)}} = new Task(this, ([{{camel_case to_referenceable.singular_arg}}]: Array<{{to_referenceable.hash_type}}>) => this.client.callZome({
+  _fetch{{pascal_case (plural from_referenceable.name)}} = new Task(this, ([{{camel_case to_referenceable.singular_arg}}]: readonly {{to_referenceable.hash_type}}[]) => this.client.callZome({
       cap_secret: null,
       role_name: '{{dna_role_name}}',
       zome_name: '{{coordinator_zome_manifest.name}}',
