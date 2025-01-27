@@ -1441,9 +1441,9 @@ dependencies = [
 
 [[package]]
 name = "holochain_keystore"
-version = "0.4.1-rc.1"
+version = "0.4.1-rc.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2b002358b77af730acabac14b5a3400496670a32d55a3aafd0b85c4e0ac03c49"
+checksum = "c7f3b9d37c962e38600a78dbe2b7e0fc652f3c7ef4086490ef5dc192903b0217"
 dependencies = [
  "base64 0.22.1",
  "derive_more",
@@ -1554,9 +1554,9 @@ dependencies = [
 
 [[package]]
 name = "holochain_sqlite"
-version = "0.4.1-rc.1"
+version = "0.4.1-rc.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3a579230232b29a44733bfe1d889cc3080bf982344c4cfc1313d9a1106ce3d11"
+checksum = "563a141e4a42fc8af6edd3ce68958e401ab1a9fd0ec6eefcd98627917bc41a9e"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -1617,9 +1617,9 @@ dependencies = [
 
 [[package]]
 name = "holochain_types"
-version = "0.4.1-rc.1"
+version = "0.4.1-rc.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c2fb8d4ed204e4ac7994c937731b162c669665370442bd5c92a5ce764616ca08"
+checksum = "20a3280a9a2d0913e47fd9c652f968547a7e6357212da8be9019c268c240afe0"
 dependencies = [
  "anyhow",
  "async-trait",
