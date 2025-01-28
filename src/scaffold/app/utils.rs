@@ -73,6 +73,6 @@ fn read_app_manifest(
     app_manifest_path: &Path,
 ) -> ScaffoldResult<AppManifest> {
     let content = file_content(app_file_tree, app_manifest_path)?;
-    let manifest: AppManifest = serde_yml::from_str(content.as_str())?;
+    let manifest: AppManifest = serde_yaml::from_str(content.as_str())?;
     Ok(manifest)
 }
