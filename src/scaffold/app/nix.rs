@@ -12,10 +12,13 @@ use crate::scaffold::web_app::package_manager::PackageManager;
 use super::git::is_inside_work_tree;
 
 pub fn flake_nix(holo_enabled: bool, package_manager: &PackageManager) -> FileTree {
+    // TODO: hds-releases version pinned to most recent working version until latest
+    //       release issue is resolved
+    //       https://github.com/Holo-Host/hds-releases/issues/14
     let holo_inputs = holo_enabled
         .then_some(
             r#"
-    hds-releases.url = "github:holo-host/hds-releases";
+    hds-releases.url = "github:holo-host/hds-releases?rev=d692073bdf12f7e91cce468bfee02a46084dbd2b";
     "#,
         )
         .unwrap_or_default();
