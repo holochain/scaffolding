@@ -26,7 +26,7 @@
 
   outputs = inputs @ { flake-parts, nixpkgs, crane, rust-overlay, ... }:
     flake-parts.lib.mkFlake { inherit inputs; }
-      rec {
+      {
         flake = {
           lib.wrapCustomTemplate = { system, pkgs, customTemplatePath }:
             let
