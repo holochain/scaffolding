@@ -12,7 +12,7 @@
       />
     </div>
 {{/if}}
-    <section v-else-if="record">
+    <section v-if="record">
 {{#each entry_type.fields}}
   {{#if widget}}
     {{#if (not (eq cardinality "vector") )}}
