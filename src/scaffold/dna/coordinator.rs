@@ -46,7 +46,7 @@ pub fn add_coordinator_zome_to_manifest(
     insert_file(
         &mut dna_file_tree.file_tree,
         &dna_file_tree.dna_manifest_path,
-        &serde_yml::to_string(&new_manifest)?,
+        &serde_yaml::to_string(&new_manifest)?,
     )?;
 
     Ok(dna_file_tree)
