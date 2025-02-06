@@ -1,18 +1,18 @@
 <template>
   <div v-if="!loading">
 {{#if crud.update}}
-    <div v-if="editing">
+    <div v-if="editing && record">
       <Edit{{pascal_case entry_type.name}}
   {{#if link_from_original_to_each_update}}
         :original-{{kebab_case entry_type.name}}-hash="{{camel_case entry_type.name}}Hash"
   {{/if}}
-        :current-record="record"
+        :current-record="record as Record"
         @{{kebab_case entry_type.name}}-updated="editing = false; fetch{{pascal_case entry_type.name}}();"
         @edit-canceled="editing = false"
       />
     </div>
 {{/if}}
-    <section v-else-if="record">
+    <section v-if="record">
 {{#each entry_type.fields}}
   {{#if widget}}
     {{#if (not (eq cardinality "vector") )}}
