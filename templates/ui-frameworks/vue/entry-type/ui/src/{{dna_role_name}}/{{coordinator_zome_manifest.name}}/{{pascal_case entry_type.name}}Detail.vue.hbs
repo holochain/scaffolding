@@ -1,7 +1,7 @@
 <template>
   <div v-if="!loading">
 {{#if crud.update}}
-    <div v-if="editing">
+    <div v-if="editing && record">
       <Edit{{pascal_case entry_type.name}}
   {{#if link_from_original_to_each_update}}
         :original-{{kebab_case entry_type.name}}-hash="{{camel_case entry_type.name}}Hash"
