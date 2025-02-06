@@ -115,10 +115,10 @@ pub fn find_dna_manifests(
     let manifests: BTreeMap<PathBuf, DnaManifest> = files
         .into_iter()
         .map(|(key, manifest_str)| {
-            let manifest: DnaManifest = serde_yml::from_str(manifest_str.as_str())?;
+            let manifest: DnaManifest = serde_yaml::from_str(manifest_str.as_str())?;
             Ok((key, manifest))
         })
-        .collect::<serde_yml::Result<Vec<(PathBuf, DnaManifest)>>>()?
+        .collect::<serde_yaml::Result<Vec<(PathBuf, DnaManifest)>>>()?
         .into_iter()
         .collect();
 
@@ -147,7 +147,7 @@ pub fn read_dna_manifest(
     dna_manifest_path: &Path,
 ) -> ScaffoldResult<DnaManifest> {
     let contents = file_content(app_file_tree, dna_manifest_path)?;
-    let manifest: DnaManifest = serde_yml::from_str(contents.as_str())?;
+    let manifest: DnaManifest = serde_yaml::from_str(contents.as_str())?;
     Ok(manifest)
 }
 
@@ -240,7 +240,7 @@ pub fn scaffold_dna(
     insert_file(
         &mut file_tree,
         &app_manifest_path,
-        &serde_yml::to_string(&new_manifest)?,
+        &serde_yaml::to_string(&new_manifest)?,
     )?;
 
     insert_file_tree_in_dir(
