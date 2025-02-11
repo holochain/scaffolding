@@ -1429,9 +1429,9 @@ dependencies = [
 
 [[package]]
 name = "holochain_integrity_types"
-version = "0.5.0-dev.10"
+version = "0.5.0-dev.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "48e595589843162df72bcb6d5c8ddc014b1fb36930f544ee5e4e729da8c89c18"
+checksum = "59d63f3bb21276bb3c7d386d58521714e15227a4bd0434e21998b07c24f505b2"
 dependencies = [
  "derive_builder",
  "holo_hash",
@@ -1448,9 +1448,9 @@ dependencies = [
 
 [[package]]
 name = "holochain_keystore"
-version = "0.5.0-dev.15"
+version = "0.5.0-dev.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c3c5d94caffb316f7c4bdf55e22ff2b6e6a3591d74fc87576b6b189c9af9852e"
+checksum = "a434b7a7d9a5d09499d94de0e635c16d3ce44fd4880562cbe18334783059deea"
 dependencies = [
  "base64 0.22.1",
  "derive_more",
@@ -1562,9 +1562,9 @@ dependencies = [
 
 [[package]]
 name = "holochain_sqlite"
-version = "0.5.0-dev.15"
+version = "0.5.0-dev.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9dd0a6233cc1ce08ef9de3720ed33acdd74b8baa314e4e2aba9e84a204b120fc"
+checksum = "ef1254ab940e78bfa47e2301ad1873480759f794a671efa8be081b636f341af5"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -1626,9 +1626,9 @@ dependencies = [
 
 [[package]]
 name = "holochain_types"
-version = "0.5.0-dev.16"
+version = "0.5.0-dev.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "41369c1b4ffba0a9ee1186f09e0e4d066174bba05f87415b7bf25f7a3a5e7965"
+checksum = "8d3ee5e278e8565c1dfaf49aac903e67b06cdff9fa3a52a5d6466ae439ee2176"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -1709,9 +1709,9 @@ dependencies = [
 
 [[package]]
 name = "holochain_zome_types"
-version = "0.5.0-dev.14"
+version = "0.5.0-dev.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "87b102731da86c78c37ad1d24254da8ec360f56b00e79e17118bc932dcd4e849"
+checksum = "0b5cdc725bdf1c2cc15c71b73360c43dd01f196933b9f1acbdc3fbd4ef3d07c5"
 dependencies = [
  "derive_builder",
  "derive_more",
