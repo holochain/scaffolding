@@ -84,10 +84,10 @@ pub fn find_app_manifests(
     let manifests: BTreeMap<PathBuf, AppManifest> = files
         .into_iter()
         .map(|(key, manifest_str)| {
-            let manifest: AppManifest = serde_yml::from_str(manifest_str.as_str())?;
+            let manifest: AppManifest = serde_yaml::from_str(manifest_str.as_str())?;
             Ok((key, manifest))
         })
-        .collect::<serde_yml::Result<Vec<(PathBuf, AppManifest)>>>()?
+        .collect::<serde_yaml::Result<Vec<(PathBuf, AppManifest)>>>()?
         .into_iter()
         .collect();
 
