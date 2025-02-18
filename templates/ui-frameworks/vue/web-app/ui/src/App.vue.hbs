@@ -19,7 +19,11 @@
 </template>
 
 <script setup lang="ts">
+import { inject } from "vue";
 import ClientProvider from "./ClientProvider.vue";
+import { ClientKey } from "./clientProvider";
+
+const {loading, error} = inject(ClientKey)!;
 </script>
 
 <style scoped>
