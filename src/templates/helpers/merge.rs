@@ -165,9 +165,9 @@ impl HelperDef for MatchScope {
         rc: &mut RenderContext<'reg, 'rc>,
         _out: &mut dyn Output,
     ) -> HelperResult {
-        let t = h
-            .template()
-            .ok_or(RenderError::new("match_scope helper cannot have empty content"))?;
+        let t = h.template().ok_or(RenderError::new(
+            "match_scope helper cannot have empty content",
+        ))?;
 
         let mut data = rc
             .context()
