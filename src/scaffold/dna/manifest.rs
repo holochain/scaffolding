@@ -21,7 +21,7 @@ pub fn empty_dna_manifest(dna_name: &str) -> ScaffoldResult<String> {
         .context("Failed to build DnaManifest")?
         .into();
 
-    let s = serde_yml::to_string(&manifest)?;
+    let s = serde_yaml::to_string(&manifest)?;
     Ok(s)
 }
 
