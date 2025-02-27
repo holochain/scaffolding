@@ -14,10 +14,10 @@ pub const WEB_SDK_VERSION: &str = "^0.6.20-prerelease";
 pub const HDI_VERSION: &str = "0.6.0-dev.15";
 
 /// crates.io <https://crates.io/crates/hdk/versions>
-pub const HDK_VERSION: &str = "0.5.0-dev.18";
+pub const HDK_VERSION: &str = "0.5.0-dev.19";
 
 /// crates.io <https://crates.io/crates/holochain/versions>
-pub const HOLOCHAIN_VERSION: &str = "0.5.0-dev.19";
+pub const HOLOCHAIN_VERSION: &str = "0.5.0-dev.20";
 
 /// source: <https://github.com/darksoil-studio/holochain-playground/tree/main/packages/cli/server>
 ///
