@@ -4,7 +4,7 @@ export default defineConfig({
   test: {
     testTimeout: 60*1000*4, // 4 mins
     poolOptions: {
-      threads: { singleThread: true },
+      forks: { singleFork: true }, 
     },
   },
 })
