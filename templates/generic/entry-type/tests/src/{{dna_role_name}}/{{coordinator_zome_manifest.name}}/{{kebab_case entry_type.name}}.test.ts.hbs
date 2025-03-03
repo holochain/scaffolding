@@ -24,8 +24,9 @@ test('create {{pascal_case entry_type.name}}', async () => {
     // This assumes app bundle created by the `hc app pack` command.
     const testAppPath = process.cwd() + '/../workdir/{{app_name}}.happ';
 
-    // Set up the app to be installed 
-    const appSource = { appBundleSource: { path: testAppPath } };
+    // Set up the app to be installed
+    const appBundleSource: AppBundleSource = { type: "path", value: testAppPath };
+    const appSource = { appBundleSource };
 
     // Add 2 players with the test app to the Scenario. The returned players
     // can be destructured.
@@ -47,8 +48,9 @@ test('create and read {{pascal_case entry_type.name}}', async () => {
     // This assumes app bundle created by the `hc app pack` command.
     const testAppPath = process.cwd() + '/../workdir/{{app_name}}.happ';
 
-    // Set up the app to be installed 
-    const appSource = { appBundleSource: { path: testAppPath } };
+    // Set up the app to be installed
+    const appBundleSource: AppBundleSource = { type: "path", value: testAppPath };
+    const appSource = { appBundleSource };
 
     // Add 2 players with the test app to the Scenario. The returned players
     // can be destructured.
@@ -99,8 +101,9 @@ test('create and update {{pascal_case entry_type.name}}', async () => {
     // This assumes app bundle created by the `hc app pack` command.
     const testAppPath = process.cwd() + '/../workdir/{{app_name}}.happ';
 
-    // Set up the app to be installed 
-    const appSource = { appBundleSource: { path: testAppPath } };
+    // Set up the app to be installed
+    const appBundleSource: AppBundleSource = { type: "path", value: testAppPath };
+    const appSource = { appBundleSource };
 
     // Add 2 players with the test app to the Scenario. The returned players
     // can be destructured.
@@ -113,9 +116,9 @@ test('create and update {{pascal_case entry_type.name}}', async () => {
     // Alice creates a {{pascal_case entry_type.name}}
     const record: Record = await create{{pascal_case entry_type.name}}(alice.cells[0]);
     assert.ok(record);
-        
+
     const originalActionHash = record.signed_action.hashed.hash;
- 
+
     // Alice updates the {{pascal_case entry_type.name}}
     let contentUpdate: any = await sample{{pascal_case entry_type.name}}(alice.cells[0]);
     let updateInput = {
@@ -135,7 +138,7 @@ test('create and update {{pascal_case entry_type.name}}', async () => {
 
     // Wait for the updated entry to be propagated to the other node.
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
-        
+
     // Bob gets the updated {{pascal_case entry_type.name}}
     const readUpdatedOutput0: Record = await bob.cells[0].callZome({
       zome_name: "{{coordinator_zome_manifest.name}}",
@@ -146,7 +149,7 @@ test('create and update {{pascal_case entry_type.name}}', async () => {
 
     // Alice updates the {{pascal_case entry_type.name}} again
     contentUpdate = await sample{{pascal_case entry_type.name}}(alice.cells[0]);
-    updateInput = { 
+    updateInput = {
 {{#if link_from_original_to_each_update}}
       original_{{snake_case entry_type.name}}_hash: originalActionHash,
 {{/if}}
@@ -163,7 +166,7 @@ test('create and update {{pascal_case entry_type.name}}', async () => {
 
     // Wait for the updated entry to be propagated to the other node.
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
-        
+
     // Bob gets the updated {{pascal_case entry_type.name}}
     const readUpdatedOutput1: Record = await bob.cells[0].callZome({
       zome_name: "{{coordinator_zome_manifest.name}}",
@@ -191,8 +194,9 @@ test('create and delete {{pascal_case entry_type.name}}', async () => {
     // This assumes app bundle created by the `hc app pack` command.
     const testAppPath = process.cwd() + '/../workdir/{{app_name}}.happ';
 
-    // Set up the app to be installed 
-    const appSource = { appBundleSource: { path: testAppPath } };
+    // Set up the app to be installed
+    const appBundleSource: AppBundleSource = { type: "path", value: testAppPath };
+    const appSource = { appBundleSource };
 
     // Add 2 players with the test app to the Scenario. The returned players
     // can be destructured.
@@ -235,7 +239,7 @@ test('create and delete {{pascal_case entry_type.name}}', async () => {
 
     // Wait for the entry deletion to be propagated to the other node.
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
-        
+
     // Bob gets the oldest delete for the {{pascal_case entry_type.name}}
     const oldestDeleteFor{{pascal_case entry_type.name}}: SignedActionHashed = await bob.cells[0].callZome({
       zome_name: "{{coordinator_zome_manifest.name}}",
@@ -243,7 +247,7 @@ test('create and delete {{pascal_case entry_type.name}}', async () => {
       payload: record.signed_action.hashed.hash,
     });
     assert.ok(oldestDeleteFor{{pascal_case entry_type.name}});
-        
+
     // Bob gets the deletions for the {{pascal_case entry_type.name}}
     const deletesFor{{pascal_case entry_type.name}}: SignedActionHashed[] = await bob.cells[0].callZome({
       zome_name: "{{coordinator_zome_manifest.name}}",
@@ -263,7 +267,7 @@ test('create and delete {{pascal_case entry_type.name}}', async () => {
     });
     assert.equal(linksTo{{pascal_case (plural linked_from.name)}}.length, 0);
 
-    // Bob gets the deleted {{pascal_case (plural linked_from.name)}} for the {{pascal_case ../entry_type.name}} 
+    // Bob gets the deleted {{pascal_case (plural linked_from.name)}} for the {{pascal_case ../entry_type.name}}
     const deletedLinksTo{{pascal_case (plural linked_from.name)}}: Array<[SignedActionHashed<CreateLink>, SignedActionHashed<DeleteLink>[]]> = await bob.cells[0].callZome({
       zome_name: "{{../coordinator_zome_manifest.name}}",
       fn_name: "get_deleted_{{snake_case (plural ../entry_type.name)}}_for_{{snake_case linked_from.name}}",

@@ -10,7 +10,6 @@ import type {
   NewEntryAction,
   HolochainError,
 } from '@holochain/client';
-import { SignalType } from '@holochain/client';
 import { type ClientContext, clientContext } from '../../contexts';
 import {{pascal_case to_referenceable.name}}Detail from './{{pascal_case to_referenceable.name}}Detail.svelte';
 import type { {{pascal_case coordinator_zome_manifest.name}}Signal } from './types';
@@ -47,9 +46,9 @@ onMount(async () => {
   }
 
   client.on('signal', signal => {
-    if (!(SignalType.App in signal)) return;
-    if (signal.App.zome_name !== '{{coordinator_zome_manifest.name}}') return;
-    const payload = signal.App.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;
+    if (signal.type !== "app") return;
+    if (signal.value.zome_name !== '{{coordinator_zome_manifest.name}}') return;
+    const payload = signal.value.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;
     if (payload.type !== 'LinkCreated') return;
     if (payload.link_type !== '{{pascal_case link_type_name}}') return;
 
