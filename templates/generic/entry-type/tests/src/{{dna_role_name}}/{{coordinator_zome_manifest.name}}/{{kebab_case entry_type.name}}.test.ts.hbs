@@ -25,7 +25,8 @@ test('create {{pascal_case entry_type.name}}', async () => {
     const testAppPath = process.cwd() + '/../workdir/{{app_name}}.happ';
 
     // Set up the app to be installed
-    const appSource = { appBundleSource: { type: "path", value: testAppPath } as AppBundleSource };
+    const appBundleSource: AppBundleSource = { type: "path", value: testAppPath };
+    const appSource = { appBundleSource };
 
     // Add 2 players with the test app to the Scenario. The returned players
     // can be destructured.
@@ -48,7 +49,8 @@ test('create and read {{pascal_case entry_type.name}}', async () => {
     const testAppPath = process.cwd() + '/../workdir/{{app_name}}.happ';
 
     // Set up the app to be installed
-    const appSource = { appBundleSource: { type: "path", value: testAppPath } as AppBundleSource };
+    const appBundleSource: AppBundleSource = { type: "path", value: testAppPath };
+    const appSource = { appBundleSource };
 
     // Add 2 players with the test app to the Scenario. The returned players
     // can be destructured.
@@ -100,7 +102,8 @@ test('create and update {{pascal_case entry_type.name}}', async () => {
     const testAppPath = process.cwd() + '/../workdir/{{app_name}}.happ';
 
     // Set up the app to be installed
-    const appSource = { appBundleSource: { type: "path", value: testAppPath } as AppBundleSource };
+    const appBundleSource: AppBundleSource = { type: "path", value: testAppPath };
+    const appSource = { appBundleSource };
 
     // Add 2 players with the test app to the Scenario. The returned players
     // can be destructured.
@@ -192,7 +195,8 @@ test('create and delete {{pascal_case entry_type.name}}', async () => {
     const testAppPath = process.cwd() + '/../workdir/{{app_name}}.happ';
 
     // Set up the app to be installed
-    const appSource = { appBundleSource: { type: "path", value: testAppPath } as AppBundleSource };
+    const appBundleSource: AppBundleSource = { type: "path", value: testAppPath };
+    const appSource = { appBundleSource };
 
     // Add 2 players with the test app to the Scenario. The returned players
     // can be destructured.
