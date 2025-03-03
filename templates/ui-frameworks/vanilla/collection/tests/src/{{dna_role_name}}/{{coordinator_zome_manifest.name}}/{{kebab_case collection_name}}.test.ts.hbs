@@ -21,8 +21,9 @@ test('create a {{pascal_case referenceable.name}} and get {{lower_case collectio
     // This assumes app bundle created by the `hc app pack` command.
     const testAppPath = process.cwd() + '/../workdir/{{app_name}}.happ';
 
-    // Set up the app to be installed 
-    const appSource = { appBundleSource: { path: testAppPath } };
+    // Set up the app to be installed
+    const appBundleSource: AppBundleSource = { type: "path", value: testAppPath };
+    const appSource = { appBundleSource };
 
     // Add 2 players with the test app to the Scenario. The returned players
     // can be destructured.
@@ -43,9 +44,9 @@ test('create a {{pascal_case referenceable.name}} and get {{lower_case collectio
     // Alice creates a {{pascal_case referenceable.name}}
     const createRecord: Record = await create{{pascal_case referenceable.name}}(alice.cells[0]);
     assert.ok(createRecord);
-    
+
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
-    
+
     // Bob gets {{lower_case collection_name}} again
     collectionOutput = await bob.cells[0].callZome({
       zome_name: "{{coordinator_zome_manifest.name}}",
@@ -75,4 +76,3 @@ test('create a {{pascal_case referenceable.name}} and get {{lower_case collectio
 {{/if}}
   });
 });
-
