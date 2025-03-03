@@ -35,7 +35,8 @@ test('link a {{pascal_case from_referenceable.name}} to a {{pascal_case to_refer
     const testAppPath = process.cwd() + '/../workdir/{{app_name}}.happ';
 
     // Set up the app to be installed
-    const appSource = { appBundleSource: { path: testAppPath } };
+    const appBundleSource: AppBundleSource = { type: "path", value: testAppPath };
+    const appSource = { appBundleSource };
 
     // Add 2 players with the test app to the Scenario. The returned players
     // can be destructured.
