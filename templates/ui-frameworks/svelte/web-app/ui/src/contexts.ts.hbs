@@ -1,5 +1,5 @@
-import { writable, type Writable } from 'svelte/store';
-import { getContext, setContext } from 'svelte';
+import { writable, get } from 'svelte/store';
+import { getContext } from 'svelte';
 import type { AppClient, HolochainError } from '@holochain/client';
 import { AppWebsocket } from '@holochain/client';
 {{#if holo_enabled}}
@@ -56,6 +56,7 @@ export function createClientStore() {
         update(s => ({ ...s, client }));
         {{/if}}
       } catch (e) {
+        console.error(e);
         update(s => ({ ...s, error: e as HolochainError }));
       } finally {
         update(s => ({ ...s, loading: false }));
