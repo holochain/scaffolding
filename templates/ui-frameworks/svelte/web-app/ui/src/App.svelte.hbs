@@ -2,7 +2,7 @@
 import { onMount } from 'svelte';
 import { setContext } from 'svelte';
 import logo from './assets/holochainLogo.svg';
-import { CLIENT_CONTEXT_KEY, createClientStore } from './contexts';
+import ClientProvider from './ClientProvider.svelte';
 
 const clientStore = createClientStore();
 setContext(CLIENT_CONTEXT_KEY, clientStore);
@@ -14,7 +14,7 @@ onMount(() => {
 });
 </script>
 
-<main>
+<ClientProvider>
   <div>
     <a href="https://developer.holochain.org/get-started/" target="_blank">
       <img src={logo} class="logo holochain" alt="holochain logo" />
@@ -34,7 +34,7 @@ onMount(() => {
     <p>Import scaffolded components into <code>src/App.svelte</code> to use your hApp</p>
     <p class="read-the-docs">Click on the Holochain logo to learn more</p>
   </div>
-</main>
+</ClientProvider>
 
 <style>
   .logo {

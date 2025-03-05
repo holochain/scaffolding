@@ -4,25 +4,20 @@ import CreatePost from "./forum/posts/CreatePost.svelte";
 import { onMount } from "svelte";
 import { createClientStore, CLIENT_CONTEXT_KEY } from './contexts';
 import { setContext } from 'svelte';
+import ClientProvider from './ClientProvider.svelte';
 
 const clientStore = createClientStore();
 setContext(CLIENT_CONTEXT_KEY, clientStore);
-
-$: ({ loading } = $clientStore);
 
 onMount(() => {
   clientStore.connect();
 });
 </script>
 
-<main>
-  {#if loading}
-    <progress />
-  {:else}
-    <div>
-      <h2>Welcome to the Forum hApp</h2>
-      <AllPosts />
-      <CreatePost />
-    </div>
-  {/if}
-</main>
+<ClientProvider>
+  <div>
+    <h2>Welcome to the Forum hApp</h2>
+    <AllPosts />
+    <CreatePost />
+  </div>
+</ClientProvider>
