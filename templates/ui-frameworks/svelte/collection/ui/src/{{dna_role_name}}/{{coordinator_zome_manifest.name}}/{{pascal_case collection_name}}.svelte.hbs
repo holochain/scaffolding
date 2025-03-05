@@ -1,7 +1,6 @@
 <script lang="ts">
 import { onMount } from 'svelte';
 import type { EntryHash, Record, AgentPubKey, ActionHash, Link, NewEntryAction, HolochainError } from '@holochain/client';
-import { SignalType } from '@holochain/client';
 import { getClient } from "../../contexts";
 import {{pascal_case referenceable.name}}Detail from './{{pascal_case referenceable.name}}Detail.svelte';
 import type { {{pascal_case coordinator_zome_manifest.name}}Signal } from './types';
@@ -39,23 +38,15 @@ async function fetch{{pascal_case (plural referenceable.name)}}() {
 }
 
 function handleSignal(signal: any) {
-  if (!(SignalType.App in signal)) return;
-  if (signal.App.zome_name !== '{{coordinator_zome_manifest.name}}') return;
-  const payload = signal.App.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;
+  if (signal.type !== "app") return;
+  if (signal.value.zome_name !== '{{coordinator_zome_manifest.name}}') return;
+  const payload = signal.value.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;
   if (payload.type !== 'EntryCreated') return;
   if (payload.app_entry.type !== '{{pascal_case referenceable.name}}') return;
-
-  {{#if (eq collection_type.type "ByAuthor")}}
-  if (author.toString() !== $clientStore.client?.myPubKey.toString()) return;
-  {{/if}}
-
-  const newHash = {{#if (eq referenceable.hash_type "ActionHash")}}
-    payload.action.hashed.hash
-  {{else}}
-    (payload.action.hashed.content as NewEntryAction).entry_hash
-  {{/if}};
-
-  hashes = [...hashes, newHash];
+{{#if (eq collection_type.type "ByAuthor")}}
+  if (author.toString() !== client.myPubKey.toString()) return;
+{{/if}}
+  hashes = [...hashes, {{#if (eq referenceable.hash_type "ActionHash")}}payload.action.hashed.hash{{else}}(payload.action.hashed.content as NewEntryAction).entry_hash{{/if}}];
 }
 
 onMount(async () => {
