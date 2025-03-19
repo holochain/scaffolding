@@ -4,10 +4,22 @@
     Error connecting to Holochain: {{{{raw}}}} {{error.message}}.{{{{/raw}}}}
   </div>
   <slot v-else-if="client"></slot>
+
+  <button v-if="client && IS_HOLO" @click="signOut">Sign Out</button>
 </template>
 
 <script setup lang="ts">
-import { useClientProvider } from './clientProvider';
+{{#if holo_enabled}}
+import WebSdk from "@holo-host/web-sdk"
+{{/if}}
+import { useClientProvider{{#if holo_enabled}}, IS_HOLO{{/if}} } from './clientProvider';
 
 const { client, error, loading } = useClientProvider();
+
+{{#if holo_enabled}}
+const signOut = async () => {
+  await (client.value as WebSdk).signOut();
+  await (client.value as WebSdk).signIn({ cancellable: false });
+};
+{{/if}}
 </script>
