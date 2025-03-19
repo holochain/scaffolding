@@ -17,7 +17,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, toRaw, inject, defineProps } from 'vue';
-import { Link, ActionHash, EntryHash, HolochainError, SignalType } from '@holochain/client';
+import { Link, ActionHash, EntryHash, HolochainError } from '@holochain/client';
 import {{pascal_case ../entry_type.name}}Detail from './{{pascal_case ../entry_type.name}}Detail.vue';
 import { {{pascal_case ../coordinator_zome_manifest.name}}Signal } from './types';
 import { ClientKey } from '../../clientProvider';
@@ -55,9 +55,9 @@ onMounted(async () => {
   await fetch{{pascal_case (plural ../entry_type.name)}}();
 
   toRaw(client.value)?.on('signal', async signal => {
-    if (!(SignalType.App in signal)) return;
-    if (signal.App.zome_name !== '{{../coordinator_zome_manifest.name}}') return;
-    const payload = signal.App.payload as {{pascal_case ../coordinator_zome_manifest.name}}Signal;
+    if (signal.type !== "app") return;
+    if (signal.value.zome_name !== '{{../coordinator_zome_manifest.name}}') return;
+    const payload = signal.value.payload as {{pascal_case ../coordinator_zome_manifest.name}}Signal;
     if (!(payload.type === 'EntryCreated' && payload.app_entry.type === '{{pascal_case ../entry_type.name}}')) return;
     await fetch{{pascal_case (plural ../entry_type.name)}}();
   });

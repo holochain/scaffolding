@@ -20,7 +20,7 @@
 <script setup lang="ts">
 import { ref, onMounted, toRaw, inject } from 'vue';
 import { decode } from '@msgpack/msgpack';
-import { Link, HolochainError, SignalType, ActionHash, EntryHash } from '@holochain/client';
+import { Link, HolochainError, ActionHash, EntryHash } from '@holochain/client';
 import { ClientKey } from './clientProvider';
 import {{pascal_case to_referenceable.name}}Detail from './{{pascal_case to_referenceable.name}}Detail.vue';
 import type { {{pascal_case coordinator_zome_manifest.name}}Signal } from './types';
@@ -60,9 +60,9 @@ onMounted(async () => {
   await fetchData();
 
   toRaw(client.value)?.on('signal', signal => {
-    if (!(SignalType.App in signal)) return;
-    if (signal.App.zome_name !== '{{coordinator_zome_manifest.name}}') return;
-    const payload = signal.App.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;
+    if (signal.type !== "app") return;
+    if (signal.value.zome_name !== '{{coordinator_zome_manifest.name}}') return;
+    const payload = signal.value.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;
     if (payload.type !== 'LinkCreated') return;
     if (payload.link_type !== '{{pascal_case link_type_name}}') return;
     if (hashes.value) hashes.value.push(payload.action.hashed.content.target_address);

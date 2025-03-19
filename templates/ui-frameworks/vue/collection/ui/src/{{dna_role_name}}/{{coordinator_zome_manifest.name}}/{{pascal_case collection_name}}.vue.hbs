@@ -17,7 +17,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, toRaw, inject{{#if (eq collection_type.type "ByAuthor")}}, defineProps{{/if}} } from 'vue';
-import { NewEntryAction, Link, AgentPubKey, ActionHash, HolochainError, SignalType } from '@holochain/client';
+import { NewEntryAction, Link, AgentPubKey, ActionHash, HolochainError } from '@holochain/client';
 import {{pascal_case referenceable.name}}Detail from './{{pascal_case referenceable.name}}Detail.vue';
 import { {{pascal_case coordinator_zome_manifest.name}}Signal } from './types';
 import { ClientKey } from '../../clientProvider';
@@ -53,13 +53,13 @@ onMounted(async () => {
   await fetch{{pascal_case referenceable.name}}();
 
   toRaw(client.value)?.on('signal', signal => {
-    if (!(SignalType.App in signal)) return;
-    if (signal.App.zome_name !== '{{coordinator_zome_manifest.name}}') return;
-    const payload = signal.App.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;
+    if (signal.type !== "app") return;
+    if (signal.value.zome_name !== '{{coordinator_zome_manifest.name}}') return;
+    const payload = signal.value.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;
     if (payload.type !== 'EntryCreated') return;
     if (payload.app_entry.type !== '{{pascal_case referenceable.name}}') return;
   {{#if (eq collection_type.type "ByAuthor")}}
-    if (author.toString() !== client.value?.myPubKey.toString()) return;
+    if (author.toString() !== this.client.myPubKey.toString()) return;
   {{/if}}
     if (hashes.value) hashes.value.push({{#if (eq referenceable.hash_type "ActionHash")}}payload.action.hashed.hash{{else}}(payload.action.hashed.content as NewEntryAction).entry_hash{{/if}});
   });
