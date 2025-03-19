@@ -1,7 +1,6 @@
 <script lang="ts">
 import { onMount } from 'svelte';
-import type { Link, Record, ActionHash, EntryHash, AgentPubKey, NewEntryAction, HolochainError } from '@holochain/client';
-import { SignalType } from '@holochain/client';
+import type { Link, Record, ActionHash, EntryHash, AgentPubKey, NewEntryAction, ExternalHash, HolochainError } from '@holochain/client';
 import { getClient } from "../../contexts";
 from_referenceable.name}}Detail from './{{pascal_case from_referenceable.name}}Detail.svelte';
 import type { {{pascal_case coordinator_zome_manifest.name}}Signal } from './types';
@@ -15,10 +14,9 @@ let loading = false;
 let error: HolochainError | undefined = undefined;
 
 function handleSignal(signal: any) {
-  if (!(SignalType.App in signal)) return;
-  if (signal.App.zome_name !== '{{coordinator_zome_manifest.name}}') return;
-
-  const payload = signal.App.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;
+  if (signal.type !== "app") return;
+  if (signal.value.zome_name !== '{{coordinator_zome_manifest.name}}') return;
+  const payload = signal.value.payload as {{pascal_case coordinator_zome_manifest.name}}Signal;
   if (payload.type !== 'LinkCreated') return;
   if (payload.link_type !== '{{pascal_case bidirectional}}') return;
 

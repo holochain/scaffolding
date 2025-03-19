@@ -1,7 +1,6 @@
 <script lang="ts">
 import { onMount } from 'svelte';
 import type { Link, ActionHash, EntryHash, Record, AgentPubKey, NewEntryAction, HolochainError } from '@holochain/client';
-import { SignalType } from '@holochain/client';
 import { getClient } from '../../contexts';
 import type { {{pascal_case ../entry_type.name}}, {{pascal_case ../coordinator_zome_manifest.name}}Signal } from './types';
 import {{pascal_case ../entry_type.name}}Detail from './{{pascal_case ../entry_type.name}}Detail.svelte';
@@ -32,9 +31,9 @@ async function fetch{{pascal_case (plural ../entry_type.name)}}() {
 }
 
 function handleSignal(signal: any) {
-  if (!(SignalType.App in signal)) return;
-  if (signal.App.zome_name !== '{{../coordinator_zome_manifest.name}}') return;
-  const payload = signal.App.payload as {{pascal_case ../coordinator_zome_manifest.name}}Signal;
+  if (signal.type !== "app") return;
+  if (signal.value.zome_name !== '{{../coordinator_zome_manifest.name}}') return;
+  const payload = signal.value.payload as {{pascal_case ../coordinator_zome_manifest.name}}Signal;
   if (!(payload.type === 'EntryCreated' && payload.app_entry.type === '{{pascal_case ../entry_type.name}}')) return;
 
   fetch{{pascal_case (plural ../entry_type.name)}}();
