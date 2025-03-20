@@ -37,10 +37,16 @@ import { ClientKey } from "../../clientProvider";
   {{/each}}
 {{/uniq_lines}}
 
+const current{{pascal_case entry_type.name}} = computed(() => {
+  return decode((props.currentRecord.entry as any).Present.entry) as {{pascal_case entry_type.name}};
+});
+
 {{#each entry_type.fields}}
   {{#if widget}}
     {{#if (not (eq cardinality "vector" ) )}}
-const {{camel_case field_name}} = ref<{{> (concat field_type.type "/type")}}>();
+const {{camel_case field_name}} = ref<{{> (concat field_type.type "/type")}}>(
+  current{{pascal_case ../entry_type.name}}.value.{{snake_case field_name}}
+);
     {{else}}
       {{#if (eq field_type.type "u8")}}
 const {{camel_case field_name}} = ref<Uint8Array>();
@@ -65,9 +71,6 @@ const emit = defineEmits<{
 
 const is{{pascal_case entry_type.name}}Valid = computed(() => {
   return true{{#each entry_type.fields}}{{#if widget}}{{#if (eq cardinality "single")}} && {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate=(camel_case field_name) }}{{/if}}{{#if (eq cardinality "vector")}} && {{camel_case field_name}}.value.every(e => {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate="e" }}){{/if}}{{/if}}{{/each}};
-});
-const current{{pascal_case entry_type.name}} = computed(() => {
-  return decode((props.currentRecord.entry as any).Present.entry) as {{pascal_case entry_type.name}};
 });
 
 const { client } = inject(ClientKey)!;
