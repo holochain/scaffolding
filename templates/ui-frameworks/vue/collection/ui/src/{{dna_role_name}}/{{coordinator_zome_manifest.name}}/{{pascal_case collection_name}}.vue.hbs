@@ -39,7 +39,7 @@ const fetch{{pascal_case referenceable.name}} = async () => {
       role_name: '{{dna_role_name}}',
       zome_name: '{{snake_case coordinator_zome_manifest.name}}',
       fn_name: 'get_{{snake_case collection_name}}',
-      {{#if (eq collection_type.type "ByAuthor")}}payload: author.value,{{/if}}
+      {{#if (eq collection_type.type "ByAuthor")}}payload: props.author,{{/if}}
     });
     hashes.value = links.map(l => l.target);
   } catch(e) {
