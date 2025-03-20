@@ -59,7 +59,7 @@ onMounted(async () => {
     if (payload.type !== 'EntryCreated') return;
     if (payload.app_entry.type !== '{{pascal_case referenceable.name}}') return;
   {{#if (eq collection_type.type "ByAuthor")}}
-    if (author.toString() !== this.client.myPubKey.toString()) return;
+    if (props.author.toString() !== client.value?.myPubKey.toString()) return;
   {{/if}}
     if (hashes.value) hashes.value.push({{#if (eq referenceable.hash_type "ActionHash")}}payload.action.hashed.hash{{else}}(payload.action.hashed.content as NewEntryAction).entry_hash{{/if}});
   });
