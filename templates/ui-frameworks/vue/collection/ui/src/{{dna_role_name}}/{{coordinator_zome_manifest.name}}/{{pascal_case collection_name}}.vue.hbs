@@ -27,7 +27,7 @@ const loading = ref(false);
 const error = ref<HolochainError | undefined>(undefined);
 
 {{#if (eq collection_type.type "ByAuthor")}}
-defineProps<{author: AgentPubKey}>();
+const props = defineProps<{author: AgentPubKey}>();
 {{/if}}
 
 const { client } = inject(ClientKey)!;
