@@ -89,7 +89,7 @@ const fetch{{pascal_case entry_type.name}} = async () => {
       payload: props.{{camel_case entry_type.name}}Hash,
     });
   } catch(e) {
-    error.value = e as HolochainError;
+    error.value = e;
   } finally {
     loading.value = false;
   }
@@ -107,7 +107,7 @@ const delete{{pascal_case entry_type.name}} = async () => {
     });
     emit('{{kebab_case entry_type.name}}-deleted', props.{{camel_case entry_type.name}}Hash);
   } catch(e) {
-    error.value = e as HolochainError;
+    error.value = e;
   } finally {
     loading.value = false;
   }

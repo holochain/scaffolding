@@ -22,7 +22,7 @@
 
 <script setup lang="ts">
 import { inject, ref, computed, defineProps } from 'vue';
-import { Record, HolochainError, ActionHash, EntryHash, DnaHash } from '@holochain/client';
+import { Record, ActionHash, EntryHash, DnaHash } from '@holochain/client';
 import { {{pascal_case entry_type.name}}{{#each entry_type.fields}}{{#if (eq field_type.type "Enum")}}, {{field_type.label}}{{/if}}{{/each}} } from './types';
 import { ClientKey } from "../../clientProvider";
 {{#uniq_lines}}
@@ -88,7 +88,7 @@ const create{{pascal_case entry_type.name}} = async () => {
     });
     emit('{{kebab_case entry_type.name}}-created', record.signed_action.hashed.hash);
   } catch(e) {
-    alert((e as HolochainError).message);
+    alert(e.message);
   }
 }
 </script>

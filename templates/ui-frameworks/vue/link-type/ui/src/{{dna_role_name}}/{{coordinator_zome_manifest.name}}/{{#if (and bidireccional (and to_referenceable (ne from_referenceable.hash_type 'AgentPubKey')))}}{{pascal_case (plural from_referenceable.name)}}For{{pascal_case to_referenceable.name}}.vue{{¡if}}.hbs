@@ -44,7 +44,7 @@ const fetchData = async () => {
     });
     hashes.value = links.map(l => l.target);
   } catch(e) {
-    error.value = e as HolochainError;
+    error.value = e;
   } finally {
     loading.value = false;
   }
