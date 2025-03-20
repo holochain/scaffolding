@@ -24,7 +24,9 @@ export function useClientProvider() {
   const loading = ref(false);
   const error = ref<HolochainError>();
   const client = ref<AppClient>();
+{{#if holo_enabled}}
   const holoClient = ref<WebSdk>();
+{{/if}}
 
 {{#if holo_enabled}}
   const connectClient = async () => {
