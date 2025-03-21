@@ -37,6 +37,13 @@ import { ClientKey } from "../../clientProvider";
   {{/each}}
 {{/uniq_lines}}
 
+const props = defineProps<{
+{{#if link_from_original_to_each_update}}
+  original{{pascal_case entry_type.name}}Hash: ActionHash | EntryHash,
+{{/if}}
+  currentRecord: Record
+}>();
+
 const current{{pascal_case entry_type.name}} = computed(() => {
   return decode((props.currentRecord.entry as any).Present.entry) as {{pascal_case entry_type.name}};
 });
@@ -56,13 +63,6 @@ const {{camel_case field_name}} = ref<Array<{{> (concat field_type.type "/type")
     {{/if}}
   {{/if}}
 {{/each}}
-
-const props = defineProps<{
-{{#if link_from_original_to_each_update}}
-  original{{pascal_case entry_type.name}}Hash: ActionHash | EntryHash,
-{{/if}}
-  currentRecord: Record
-}>();
 
 const emit = defineEmits<{
   '{{kebab_case entry_type.name}}-updated': [hash: Uint8Array],
