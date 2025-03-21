@@ -1,0 +1,78 @@
+import {
+  type AppClient,
+  AppWebsocket,
+  HolochainError,
+} from "@holochain/client";
+{{#if holo_enabled}}
+import WebSdk from "@holo-host/web-sdk"
+{{/if}}
+import { ref, provide, InjectionKey, onMounted, Ref } from "vue";
+
+{{#if holo_enabled}}
+export const IS_HOLO = ['true', '1', 't'].includes(import.meta.env.VITE_APP_IS_HOLO?.toLowerCase());
+{{/if}}
+
+export interface ClientContextValues {
+  client: Ref<AppClient{{#if holo_enabled}} | WebSdk{{/if}} | undefined>;
+  error: Ref<HolochainError | undefined>;
+  loading: Ref<boolean>;
+}
+
+export const ClientKey = Symbol() as InjectionKey<ClientContextValues>;
+
+export function useClientProvider() {
+  const loading = ref(false);
+  const error = ref<HolochainError>();
+  const client = ref<AppClient>();
+{{#if holo_enabled}}
+  const holoClient = ref<WebSdk>();
+{{/if}}
+
+{{#if holo_enabled}}
+  const connectClient = async () => {
+    loading.value = true;
+    try {
+      if (IS_HOLO) {
+        holoClient.value = await WebSdk.connect({
+          chaperoneUrl: import.meta.env.VITE_APP_CHAPERONE_URL,
+          authFormCustomization: {appName: "{{app_name}}"}
+        });
+        (holoClient.value as WebSdk).signUp({ cancellable: false });
+      } else {
+        client.value = await AppWebsocket.connect();
+      }
+    } catch(e) {
+      error.value = e as HolochainError;
+      console.error("Failed to establish websocket connection:", e);
+    } finally {
+      loading.value = false;
+    }
+  };
+{{else}}
+  const connectClient = async () => {
+    loading.value = true;
+    try {
+      client.value = await AppWebsocket.connect();
+    } catch(e) {
+      error.value = e as HolochainError;
+      console.error("Failed to establish websocket connection:", e);
+    } finally {
+      loading.value = false;
+    }
+  };
+{{/if}}
+
+  onMounted(() => {
+    connectClient();
+  });
+
+  const value = {
+    client: {{#if holo_enabled}}IS_HOLO ? holoClient : client{{else}}client{{/if}},
+    error,
+    loading,
+  };
+
+  provide(ClientKey, value);
+
+  return value;
+}
