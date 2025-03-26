@@ -1400,9 +1400,9 @@ dependencies = [
 
 [[package]]
 name = "holochain_keystore"
-version = "0.5.0-dev.19"
+version = "0.5.0-dev.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2916796631ea045ee914fd0dfde35016291992095f8d0675e07d4bd2528114cb"
+checksum = "10a4751f46dd6108fa9652a2143c3b12d8a49b68743ce212229ea0aa2d048593"
 dependencies = [
  "base64 0.22.1",
  "derive_more",
@@ -1441,7 +1441,7 @@ dependencies = [
 
 [[package]]
 name = "holochain_scaffolding_cli"
-version = "0.500.0-dev.6"
+version = "0.500.0-dev.7"
 dependencies = [
  "anyhow",
  "build-fs-tree",
@@ -1591,9 +1591,9 @@ dependencies = [
 
 [[package]]
 name = "holochain_types"
-version = "0.5.0-dev.20"
+version = "0.5.0-dev.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "68edc54a3c117a7be51b26ac068573cbcca080f7bc7417eb71e3475802e38113"
+checksum = "1cf822010fb058936f7ec712e686121891b87871861c5bb6713afbff675f145b"
 dependencies = [
  "anyhow",
  "async-trait",

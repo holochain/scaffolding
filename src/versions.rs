@@ -17,7 +17,7 @@ pub const HDI_VERSION: &str = "0.6.0-dev.15";
 pub const HDK_VERSION: &str = "0.5.0-dev.19";
 
 /// crates.io <https://crates.io/crates/holochain/versions>
-pub const HOLOCHAIN_VERSION: &str = "0.5.0-dev.20";
+pub const HOLOCHAIN_VERSION: &str = "0.5.0-dev.21";
 
 /// source: <https://github.com/darksoil-studio/holochain-playground/tree/main/packages/cli/server>
 ///
