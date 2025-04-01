@@ -6,7 +6,12 @@ import {{pascal_case referenceable.name}}Detail from './{{pascal_case referencea
 import type { {{pascal_case coordinator_zome_manifest.name}}Signal } from './types';
 
 {{#if (eq collection_type.type "ByAuthor")}}
-export let author: AgentPubKey;
+interface Props {
+  author: AgentPubKey;
+}
+
+let { author }: Props = $props();
+
 {{/if}}
 
 const clientStore = getClient();
