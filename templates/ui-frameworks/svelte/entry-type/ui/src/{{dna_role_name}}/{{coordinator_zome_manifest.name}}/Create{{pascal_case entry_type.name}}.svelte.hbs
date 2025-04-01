@@ -1,5 +1,5 @@
 <script lang="ts">
-import { createEventDispatcher, onMount } from 'svelte';
+import { onMount } from 'svelte';
 import type { Record, EntryHash, AgentPubKey, ActionHash, DnaHash, HolochainError } from '@holochain/client';
 import { getClient } from '../../contexts';
 import type { {{pascal_case entry_type.name}}{{#each entry_type.fields}}{{#if (eq field_type.type "Enum")}}, {{field_type.label}}{{/if}}{{/each}} } from './types';
@@ -11,39 +11,41 @@ import type { {{pascal_case entry_type.name}}{{#each entry_type.fields}}{{#if (e
   {{/each}}
 {{/uniq_lines}}
 
-const dispatch = createEventDispatcher();
 const clientStore = getClient();
 
 {{#each entry_type.fields}}
   {{#if widget }}
     {{#if (not (eq cardinality "vector" ) )}}
-let {{camel_case field_name}}: {{> (concat field_type.type "/type") }}{{#if (eq cardinality "option")}} | undefined{{/if}} = {{> (concat field_type.type "/" widget "/initial-value") field_type=field_type}};
+let {{camel_case field_name}}: {{> (concat field_type.type "/type") }}{{#if (eq cardinality "option")}} | undefined{{/if}} = $state({{> (concat field_type.type "/" widget "/initial-value") field_type=field_type}});
     {{else}}
       {{#if (eq field_type.type "u8")}}
-let {{camel_case field_name}}: Uint8Array = new Uint8Array([{{> (concat field_type.type "/" widget "/initial-value") field_type=field_type}}]);
+let {{camel_case field_name}}: Uint8Array = $state(new Uint8Array([{{> (concat field_type.type "/" widget "/initial-value") field_type=field_type}}]));
       {{else}}
-let {{camel_case field_name}}: Array<{{> (concat field_type.type "/type")}}> = [{{> (concat field_type.type "/" widget "/initial-value") field_type=field_type}}];
+let {{camel_case field_name}}: Array<{{> (concat field_type.type "/type")}}> = $state([{{> (concat field_type.type "/" widget "/initial-value") field_type=field_type}}]);
       {{/if}}
     {{/if}}
   {{/if}}
 {{/each}}
 
+interface Props {
 {{#each entry_type.fields}}
   {{#if (not widget) }}
     {{#if (eq cardinality "vector")}}
       {{#if (eq field_type.type "u8")}}
-export let {{camel_case field_name}}: Uint8Array;
+  {{camel_case field_name}}: Uint8Array;
       {{else}}
-export let {{camel_case field_name}}: Array<{{> (concat field_type.type "/type") }}>;
+  {{camel_case field_name}}: Array<{{> (concat field_type.type "/type") }}>;
       {{/if}}
     {{else}}
-export let {{camel_case field_name}}{{#if (eq cardinality "single")}}{{/if}}: {{> (concat field_type.type "/type") }}{{#if (eq cardinality "option")}} | undefined{{/if}};
+  {{camel_case field_name}}{{#if (eq cardinality "single")}}{{/if}}: {{> (concat field_type.type "/type") }}{{#if (eq cardinality "option")}} | undefined{{/if}};
     {{/if}}
   {{/if}}
 {{/each}}
+  {{kebab_case entry_type.name}}Created?: ({{camel_case entry_type.name}}Hash: ActionHash) => any;
+}
 
-$: {{#each entry_type.fields}}{{camel_case field_name}}{{#unless @last}}, {{/unless}}{{/each}};
-$: is{{pascal_case entry_type.name}}Valid = true{{#each entry_type.fields}}{{#if widget}}{{#if (eq cardinality "single")}} && {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate=(camel_case field_name) }}{{/if}}{{#if (eq cardinality "vector")}} && {{camel_case field_name}}.every(e => {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate="e" }}){{/if}}{{/if}}{{/each}};
+let { {{#each entry_type.fields}}{{camel_case field_name}},{{/each}} {{kebab_case entry_type.name}}Created }: Props = $props();
+let is{{pascal_case entry_type.name}}Valid = $derived(true{{#each entry_type.fields}}{{#if widget}}{{#if (eq cardinality "single")}} && {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate=(camel_case field_name) }}{{/if}}{{#if (eq cardinality "vector")}} && {{camel_case field_name}}.every(e => {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate="e" }}){{/if}}{{/if}}{{/each}});
 
 onMount(() => {
   {{#each entry_type.fields}}
@@ -73,10 +75,8 @@ async function create{{pascal_case entry_type.name}}() {
       fn_name: 'create_{{snake_case entry_type.name}}',
       payload: {{camel_case entry_type.name}}Entry,
     });
-    
-    dispatch('{{kebab_case entry_type.name}}-created', { 
-      {{camel_case entry_type.name}}Hash: record.signed_action.hashed.hash 
-    });
+
+    if ({{kebab_case entry_type.name}}Created) {{kebab_case entry_type.name}}Created(record.signed_action.hashed.hash);
   } catch (e) {
     alert((e as HolochainError).message);
   }
@@ -98,7 +98,7 @@ async function create{{pascal_case entry_type.name}}() {
   {{/if}}
 {{/each}}
 
-  <button disabled={!is{{pascal_case entry_type.name}}Valid} on:click={() => create{{pascal_case entry_type.name}}()}>
+  <button disabled={!is{{pascal_case entry_type.name}}Valid} onclick={() => create{{pascal_case entry_type.name}}()}>
     Create {{pascal_case entry_type.name}}
   </button>
 </div>

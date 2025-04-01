@@ -1,5 +1,5 @@
 <script lang="ts">
-import { createEventDispatcher, onMount } from 'svelte';
+import { onMount } from 'svelte';
 import type { Record, EntryHash, AgentPubKey, DnaHash, ActionHash, HolochainError } from '@holochain/client';
 import { decode } from '@msgpack/msgpack';
 import { getClient } from '../../contexts';
@@ -12,32 +12,36 @@ import type { {{pascal_case entry_type.name}}{{#each entry_type.fields}}{{#if (e
   {{/each}}
 {{/uniq_lines}}
 
-const dispatch = createEventDispatcher();
 const clientStore = getClient();
 
-export let currentRecord: Record;
+interface Props {
+  currentRecord: Record;
 {{#if link_from_original_to_each_update}}
-export let original{{pascal_case entry_type.name}}Hash: ActionHash;
+  original{{pascal_case entry_type.name}}Hash: ActionHash;
 {{/if}}
+  {{kebab_case entry_type.name}}Updated: ({{kebab_case entry_type.name}}Hash: ActionHash) => any;
+  editCanceled: () => any;
+}
+
+let { currentRecord, {{#if link_from_original_to_each_update}}original{{pascal_case entry_type.name}}Hash, {{/if}}{{kebab_case entry_type.name}}Updated, editCanceled }: Props = $props();
 
 let current{{pascal_case entry_type.name}}: {{pascal_case entry_type.name}} = decode((currentRecord.entry as any).Present.entry) as {{pascal_case entry_type.name}};
 
 {{#each entry_type.fields}}
   {{#if widget }}
     {{#if (not (eq cardinality "vector" ) )}}
-let {{camel_case field_name}}: {{> (concat field_type.type "/type")}} | undefined = current{{pascal_case ../entry_type.name}}.{{snake_case field_name}};
+let {{camel_case field_name}}: {{> (concat field_type.type "/type")}} | undefined = $state(current{{pascal_case ../entry_type.name}}.{{snake_case field_name}});
     {{else}}
       {{#if (eq field_type.type "u8")}}
-let {{camel_case field_name}}: Uint8Array | undefined = current{{pascal_case ../entry_type.name}}.{{snake_case field_name}};
+let {{camel_case field_name}}: Uint8Array | undefined = $state(current{{pascal_case ../entry_type.name}}.{{snake_case field_name}});
       {{else}}
-let {{camel_case field_name}}: Array<{{> (concat field_type.type "/type")}} | undefined> = current{{pascal_case ../entry_type.name}}.{{snake_case field_name}};
+let {{camel_case field_name}}: Array<{{> (concat field_type.type "/type")}} | undefined> = $state(current{{pascal_case ../entry_type.name}}.{{snake_case field_name}});
       {{/if}}
     {{/if}}
   {{/if}}
 {{/each}}
 
-$: {{#each (filter entry_type.fields "widget")}}{{camel_case field_name}}{{#unless @last}}, {{/unless}}{{/each}};
-$: is{{pascal_case entry_type.name}}Valid = true{{#each entry_type.fields}}{{#if widget}}{{#if (eq cardinality "single")}} && {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate=(camel_case field_name) }}{{/if}}{{#if (eq cardinality "vector")}} && {{camel_case field_name}}.every(e => {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate="e" }}){{/if}}{{/if}}{{/each}};
+let is{{pascal_case entry_type.name}}Valid = $derived(true{{#each entry_type.fields}}{{#if widget}}{{#if (eq cardinality "single")}} && {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate=(camel_case field_name) }}{{/if}}{{#if (eq cardinality "vector")}} && {{camel_case field_name}}.every(e => {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate="e" }}){{/if}}{{/if}}{{/each}});
 
 onMount(() => {
   if (!currentRecord) {
@@ -84,9 +88,7 @@ async function update{{pascal_case entry_type.name}}() {
       }
     });
 
-    dispatch('{{kebab_case entry_type.name}}-updated', {
-      actionHash: updateRecord.signed_action.hashed.hash
-    });
+    {{kebab_case entry_type.name}}Updated(updateRecord.signed_action.hashed.hash);
   } catch (e) {
     alert((e as HolochainError).message);
   }
@@ -107,8 +109,8 @@ async function update{{pascal_case entry_type.name}}() {
 {{/each}}
 
   <div>
-    <button on:click={() => dispatch('edit-canceled')}>Cancel</button>
-    <button disabled={!is{{pascal_case entry_type.name}}Valid} on:click={() => update{{pascal_case entry_type.name}}()}>
+    <button onclick={() => editCanceled()}>Cancel</button>
+    <button disabled={!is{{pascal_case entry_type.name}}Valid} onclick={() => update{{pascal_case entry_type.name}}()}>
       Edit {{pascal_case entry_type.name}}
     </button>
   </div>

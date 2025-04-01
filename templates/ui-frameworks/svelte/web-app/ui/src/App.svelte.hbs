@@ -7,7 +7,7 @@ import ClientProvider from './ClientProvider.svelte';
 const clientStore = createClientStore();
 setContext(CLIENT_CONTEXT_KEY, clientStore);
 
-$: ({ error, loading } = $clientStore);
+let { error, loading } = $derived($clientStore);
 
 onMount(() => {
   clientStore.connect();

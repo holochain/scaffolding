@@ -5,13 +5,17 @@ import { getClient } from '../../contexts';
 import type { {{pascal_case ../entry_type.name}}, {{pascal_case ../coordinator_zome_manifest.name}}Signal } from './types';
 import {{pascal_case ../entry_type.name}}Detail from './{{pascal_case ../entry_type.name}}Detail.svelte';
 
-export let {{camel_case linked_from.singular_arg}}: {{linked_from.hash_type}};
+interface Props {
+  {{camel_case linked_from.singular_arg}}: {{linked_from.hash_type}};
+}
+
+let { {{camel_case linked_from.singular_arg}} }: Props = $props();
 
 const clientStore = getClient();
 
-let hashes: Array<ActionHash> = [];
-let loading = false;
-let error: HolochainError | undefined = undefined;
+let hashes: Array<ActionHash> = $state([]);
+let loading = $state(false);
+let error: HolochainError | undefined = $state(undefined);
 
 async function fetch{{pascal_case (plural ../entry_type.name)}}() {
   loading = true;
@@ -54,7 +58,7 @@ onMount(async () => {
 </script>
 
 {#if loading }
-<progress />
+<progress></progress>
 {:else if error}
 <div class="alert">Error fetching {{lower_case (plural ../entry_type.name)}}: ${error.message}.</div>
 {:else if hashes.length === 0}
@@ -62,7 +66,7 @@ onMount(async () => {
 {:else}
 <div>
   {#each hashes as hash}
-    <{{pascal_case ../entry_type.name}}Detail {{camel_case ../entry_type.name}}Hash={hash} on:{{kebab_case ../entry_type.name}}-deleted={fetch{{pascal_case (plural ../entry_type.name)}}} />
+    <{{pascal_case ../entry_type.name}}Detail {{camel_case ../entry_type.name}}Hash={hash} {{kebab_case ../entry_type.name}}Deleted={fetch{{pascal_case (plural ../entry_type.name)}}} />
   {/each}
 </div>
 {/if}

@@ -11,9 +11,9 @@ export let author: AgentPubKey;
 
 const clientStore = getClient();
 
-let hashes: Array<{{referenceable.hash_type}}> = [];
-let loading = false;
-let error: HolochainError | undefined = undefined;
+let hashes: Array<{{referenceable.hash_type}}> = $state([]);
+let loading = $state(false);
+let error: HolochainError | undefined = $state(undefined);
 
 async function fetch{{pascal_case (plural referenceable.name)}}() {
   loading = true;
@@ -27,9 +27,7 @@ async function fetch{{pascal_case (plural referenceable.name)}}() {
       {{/if}}
     });
 
-    if (links?.length) {
-      hashes = links.map(l => l.target);
-    }
+    hashes = links?.map(l => l.target) || [];
   } catch (e) {
     error = e as HolochainError;
   } finally {
@@ -62,12 +60,14 @@ onMount(async () => {
   }
 });
 
-$: ({ client } = $clientStore);
-$: if (client) fetch{{pascal_case (plural referenceable.name)}}();
+let { client } = $derived($clientStore);
+$effect(() => {
+  if (client) fetch{{pascal_case (plural referenceable.name)}}();
+});
 </script>
 
 {#if loading}
-<progress />
+<progress></progress>
 {:else if error}
 <div class="alert">Error fetching the {{lower_case (plural referenceable.name)}}: {error.message}.</div>
 {:else if !hashes.length}
@@ -75,7 +75,7 @@ $: if (client) fetch{{pascal_case (plural referenceable.name)}}();
 {:else}
 <div>
   {#each hashes as hash}
-    <{{pascal_case referenceable.name}}Detail {{camel_case referenceable.name}}Hash={hash} on:{{kebab_case referenceable.name}}-deleted={() => fetch{{pascal_case (plural referenceable.name)}}()} />
+    <{{pascal_case referenceable.name}}Detail {{camel_case referenceable.name}}Hash={hash} {{kebab_case referenceable.name}}Deleted={() => fetch{{pascal_case (plural referenceable.name)}}()} />
   {/each}
 </div>
 {/if}
