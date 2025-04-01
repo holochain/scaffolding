@@ -44,7 +44,7 @@ interface Props {
   {{kebab_case entry_type.name}}Created?: ({{camel_case entry_type.name}}Hash: ActionHash) => any;
 }
 
-let { {{#each entry_type.fields}}{{camel_case field_name}},{{/each}} {{kebab_case entry_type.name}}Created }: Props = $props();
+let { {{#each entry_type.fields}}{{#if (not widget) }}{{camel_case field_name}},{{/if}}{{/each}} {{kebab_case entry_type.name}}Created }: Props = $props();
 let is{{pascal_case entry_type.name}}Valid = $derived(true{{#each entry_type.fields}}{{#if widget}}{{#if (eq cardinality "single")}} && {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate=(camel_case field_name) }}{{/if}}{{#if (eq cardinality "vector")}} && {{camel_case field_name}}.every(e => {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate="e" }}){{/if}}{{/if}}{{/each}});
 
 onMount(() => {
