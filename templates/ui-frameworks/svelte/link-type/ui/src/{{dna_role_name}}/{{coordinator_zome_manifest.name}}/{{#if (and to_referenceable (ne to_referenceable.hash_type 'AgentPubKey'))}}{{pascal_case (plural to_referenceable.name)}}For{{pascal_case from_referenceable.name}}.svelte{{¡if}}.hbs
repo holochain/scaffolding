@@ -68,7 +68,7 @@ onMount(async () => {
 {:else}
 <div>
   {#each hashes as hash}
-    <{{pascal_case to_referenceable.name}}Detail {{camel_case to_referenceable.name}}Hash={hash} />
+    <{{pascal_case to_referenceable.name}}Detail {{camel_case to_referenceable.name}}Hash={hash} {{camel_case to_referenceable.name}}Deleted={() => fetchLinks()} />
   {/each}
 </div>
 {/if}
