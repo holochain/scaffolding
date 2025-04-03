@@ -221,7 +221,7 @@ fn add_create_link_in_create_function(
         }
         CollectionType::ByAuthor => {
             create_link_stmts.push(parse_quote! {
-                let my_agent_pub_key = agent_info()?.agent_latest_pubkey;
+                let my_agent_pub_key = agent_info()?.agent_initial_pubkey;
             });
             create_link_stmts.push(parse_quote! {
                 create_link(my_agent_pub_key, #link_to_variable.clone(), LinkTypes::#link_type_name, ())?;
