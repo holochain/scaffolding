@@ -98,7 +98,7 @@ onMount(async () => {
 {:else if error}
 <div class="alert">Error fetching the {{lower_case entry_type.name}}: {error.message}</div>
 {{#if crud.update}}
-{:else if editing}
+{:else if record && editing}
 <Edit{{pascal_case entry_type.name}}
   {{#if link_from_original_to_each_update}}
   original{{pascal_case entry_type.name}}Hash={ {{camel_case entry_type.name}}Hash}
@@ -128,7 +128,10 @@ onMount(async () => {
 
   <div>
 {{#if crud.update}}
-    <button onclick={ () => { editing = true; } }>edit</button>
+    <button
+      disabled={!record}
+      onclick={ () => { editing = true; } }
+    >edit</button>
 {{/if}}
 {{#if crud.delete}}
     <button onclick={ () => delete{{pascal_case entry_type.name}}() }>delete</button>
