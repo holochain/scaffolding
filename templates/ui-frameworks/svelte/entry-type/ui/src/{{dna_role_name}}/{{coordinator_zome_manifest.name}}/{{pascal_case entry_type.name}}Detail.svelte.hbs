@@ -1,7 +1,14 @@
 <script lang="ts">
-import { createEventDispatcher, onMount } from 'svelte';
+import type {
+  ActionHash,
+  AgentPubKey,
+  DnaHash,
+  EntryHash,
+  HolochainError,
+  Record,
+} from '@holochain/client';
 import { decode } from '@msgpack/msgpack';
-import type { Record, ActionHash, EntryHash, AgentPubKey, DnaHash, HolochainError } from '@holochain/client';
+import { onMount } from 'svelte';
 import { getClient } from "../../contexts";
 import type { {{pascal_case entry_type.name}}{{#each entry_type.fields}}{{#if (eq field_type.type "Enum")}}, {{field_type.label}}{{/if}}{{/each}} } from './types';
 {{#if crud.update}}
@@ -15,22 +22,26 @@ import Edit{{pascal_case entry_type.name}} from './Edit{{pascal_case entry_type.
   {{/each}}
 {{/uniq_lines}}
 
-const dispatch = createEventDispatcher();
 const clientStore = getClient();
 
-export let {{camel_case entry_type.name}}Hash: {{#if entry_type.reference_entry_hash}}EntryHash{{else}}ActionHash{{/if}};
+interface Props {
+  {{camel_case entry_type.name}}Hash: {{#if entry_type.reference_entry_hash}}EntryHash{{else}}ActionHash{{/if}};
+  {{camel_case entry_type.name}}Deleted: ({{camel_case entry_type.name}}Hash: {{#if entry_type.reference_entry_hash}}EntryHash{{else}}ActionHash{{/if}}) => any;
+}
+let { {{camel_case entry_type.name}}Hash, {{camel_case entry_type.name}}Deleted }: Props = $props();
 
-let loading = false;
+
+let loading = $state(false);
 {{#if crud.update}}
-let editing = false;
+let editing = $state(false);
 {{/if}}
-let error: HolochainError | undefined;
-let record: Record | undefined;
-let {{camel_case entry_type.name}}: {{pascal_case entry_type.name}} | undefined;
+let error: HolochainError | undefined = $state();
+let record: Record | undefined = $state();
+let {{camel_case entry_type.name}}: {{pascal_case entry_type.name}} | undefined = $state();
 
 async function fetch{{pascal_case entry_type.name}}() {
   if (!$clientStore.client) return;
-  
+
   loading = true;
   try {
     record = await $clientStore.client.callZome({
@@ -39,7 +50,7 @@ async function fetch{{pascal_case entry_type.name}}() {
       fn_name: '{{#if crud.update}}get_latest_{{snake_case entry_type.name}}{{else}}get_{{snake_case entry_type.name}}{{/if}}',
       payload: {{camel_case entry_type.name}}Hash,
     });
-    
+
     if (record) {
       {{camel_case entry_type.name}} = decode((record.entry as any).Present.entry) as {{pascal_case entry_type.name}};
     }
@@ -61,10 +72,8 @@ async function delete{{pascal_case entry_type.name}}() {
       fn_name: 'delete_{{snake_case entry_type.name}}',
       payload: {{camel_case entry_type.name}}Hash,
     });
-    
-    dispatch('{{kebab_case entry_type.name}}-deleted', { 
-      {{camel_case entry_type.name}}Hash 
-    });
+
+    {{camel_case entry_type.name}}Deleted({{camel_case entry_type.name}}Hash);
   } catch (e) {
     alert((e as HolochainError).message);
   }
@@ -85,21 +94,21 @@ onMount(async () => {
 </script>
 
 {#if loading}
-<progress />
+<progress></progress>
 {:else if error}
 <div class="alert">Error fetching the {{lower_case entry_type.name}}: {error.message}</div>
 {{#if crud.update}}
-{:else if editing}
+{:else if record && editing}
 <Edit{{pascal_case entry_type.name}}
   {{#if link_from_original_to_each_update}}
   original{{pascal_case entry_type.name}}Hash={ {{camel_case entry_type.name}}Hash}
   {{/if}}
   currentRecord={record}
-  on:{{kebab_case entry_type.name}}-updated={async () => {
+  {{kebab_case entry_type.name}}Updated={async () => {
     editing = false;
     await fetch{{pascal_case entry_type.name}}()
   } }
-  on:edit-canceled={() => { editing = false; } }
+  editCanceled={ () => { editing = false; } }
 />
 {{/if}}
 {:else}
@@ -119,10 +128,13 @@ onMount(async () => {
 
   <div>
 {{#if crud.update}}
-    <button on:click={() => { editing = true; } }>edit</button>
+    <button
+      disabled={!record}
+      onclick={ () => { editing = true; } }
+    >edit</button>
 {{/if}}
 {{#if crud.delete}}
-    <button on:click={() => delete{{pascal_case entry_type.name}}()}>delete</button>
+    <button onclick={ () => delete{{pascal_case entry_type.name}}() }>delete</button>
 {{/if}}
   </div>
 </section>

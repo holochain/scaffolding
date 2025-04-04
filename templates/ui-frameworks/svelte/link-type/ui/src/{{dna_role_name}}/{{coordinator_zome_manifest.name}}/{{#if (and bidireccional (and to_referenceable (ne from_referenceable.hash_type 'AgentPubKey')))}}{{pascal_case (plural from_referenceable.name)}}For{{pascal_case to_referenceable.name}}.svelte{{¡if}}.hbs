@@ -2,16 +2,20 @@
 import { onMount } from 'svelte';
 import type { Link, Record, ActionHash, EntryHash, AgentPubKey, NewEntryAction, ExternalHash, HolochainError } from '@holochain/client';
 import { getClient } from "../../contexts";
-from_referenceable.name}}Detail from './{{pascal_case from_referenceable.name}}Detail.svelte';
+import {{pascal_case to_referenceable.name}}Detail from './{{pascal_case from_referenceable.name}}Detail.svelte';
 import type { {{pascal_case coordinator_zome_manifest.name}}Signal } from './types';
 
-export let {{camel_case to_referenceable.singular_arg}}: {{to_referenceable.hash_type}};
+interface Props {
+  {{camel_case from_referenceable.singular_arg}}: {{from_referenceable.hash_type}};
+}
+
+let { {{camel_case from_referenceable.singular_arg}} }: Props = $props();
 
 const clientStore = getClient();
 
-let hashes: Array<{{from_referenceable.hash_type}}> = [];
-let loading = false;
-let error: HolochainError | undefined = undefined;
+let hashes: Array<{{from_referenceable.hash_type}}> = $state([]);
+let loading = $state(false);
+let error: HolochainError | undefined = $state(undefined);
 
 function handleSignal(signal: any) {
   if (signal.type !== "app") return;
@@ -28,13 +32,13 @@ async function fetchLinks() {
 
   loading = true;
   try {
-    const links: Array<Link> = await $clientStore.client.callZome({
+    const links: Array<Link> = await $clientStore.client?.callZome({
       role_name: '{{dna_role_name}}',
       zome_name: '{{snake_case coordinator_zome_manifest.name}}',
       fn_name: 'get_{{snake_case (plural from_referenceable.name)}}_for_{{snake_case to_referenceable.name}}',
       payload: {{camel_case to_referenceable.singular_arg}},
     });
-    hashes = links.map(l => l.target);
+    hashes = links?.map(l => l.target) || [];
   } catch (e) {
     error = e as HolochainError;
   } finally {
@@ -57,7 +61,7 @@ onMount(async () => {
 </script>
 
 {#if loading }
-<progress />
+<progress></progress>
 {:else if error}
 <div class="alert">Error fetching {{lower_case (plural from_referenceable.name)}}: {error.message}.</div>
 {:else if hashes.length === 0}
@@ -65,7 +69,7 @@ onMount(async () => {
 {:else}
 <div>
   {#each hashes as hash}
-    <{{pascal_case from_referenceable.name}}Detail{{camel_case from_referenceable.name}}Hash={hash} />
+    <{{pascal_case from_referenceable.name}}Detail{{camel_case from_referenceable.name}}Hash={hash} {{camel_case from_referenceable.name}}Deleted={() => fetchLinks()} />
   {/each}
 </div>
 {/if}

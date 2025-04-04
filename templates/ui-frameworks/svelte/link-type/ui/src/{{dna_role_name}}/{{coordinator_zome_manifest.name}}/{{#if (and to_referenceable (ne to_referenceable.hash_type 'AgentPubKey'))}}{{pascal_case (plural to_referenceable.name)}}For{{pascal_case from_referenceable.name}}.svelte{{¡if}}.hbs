@@ -5,13 +5,17 @@ import { getClient } from "../../contexts";
 import {{pascal_case to_referenceable.name}}Detail from './{{pascal_case to_referenceable.name}}Detail.svelte';
 import type { {{pascal_case coordinator_zome_manifest.name}}Signal } from './types';
 
-export let {{camel_case from_referenceable.singular_arg}}: {{from_referenceable.hash_type}};
+interface Props {
+  {{camel_case from_referenceable.singular_arg}}: {{from_referenceable.hash_type}};
+}
+
+let { {{camel_case from_referenceable.singular_arg}} }: Props = $props();
 
 const clientStore = getClient();
 
-let hashes: Array<{{to_referenceable.hash_type}}> = [];
-let loading = false;
-let error: HolochainError | undefined = undefined;
+let hashes: Array<{{to_referenceable.hash_type}}> = $state([]);
+let loading = $state(false);
+let error: HolochainError | undefined = $state(undefined);
 
 function handleSignal(signal: any) {
   if (signal.type !== "app") return;
@@ -56,7 +60,7 @@ onMount(async () => {
 </script>
 
 {#if loading }
-<progress />
+<progress></progress>
 {:else if error}
 <div class="alert">Error fetching {{lower_case (plural to_referenceable.name)}}: {error.message}.</div>
 {:else if hashes.length === 0}
@@ -64,7 +68,7 @@ onMount(async () => {
 {:else}
 <div>
   {#each hashes as hash}
-    <{{pascal_case to_referenceable.name}}Detail {{camel_case to_referenceable.name}}Hash={hash} />
+    <{{pascal_case to_referenceable.name}}Detail {{camel_case to_referenceable.name}}Hash={hash} {{camel_case to_referenceable.name}}Deleted={() => fetchLinks()} />
   {/each}
 </div>
 {/if}
