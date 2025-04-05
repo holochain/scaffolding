@@ -38,7 +38,6 @@ pub fn add_coordinator_zome_to_manifest(
         .coordinator(coordinator_manifest)
         .integrity(integrity_manifest)
         .name(dna_file_tree.dna_manifest.name())
-        .lineage(vec![])
         .build()
         .unwrap()
         .into();

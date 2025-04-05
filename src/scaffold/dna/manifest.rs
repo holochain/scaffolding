@@ -1,7 +1,6 @@
 use anyhow::Context;
 use holochain_types::prelude::{
-    CoordinatorManifest, DnaManifest, DnaManifestCurrentBuilder, HumanTimestamp, IntegrityManifest,
-    Timestamp, ZomeManifest,
+    CoordinatorManifest, DnaManifest, DnaManifestCurrentBuilder, IntegrityManifest, ZomeManifest,
 };
 
 use crate::error::{ScaffoldError, ScaffoldResult};
@@ -11,12 +10,10 @@ pub fn empty_dna_manifest(dna_name: &str) -> ScaffoldResult<String> {
         .name(dna_name.to_owned())
         .integrity(IntegrityManifest {
             network_seed: None,
-            origin_time: HumanTimestamp::Micros(Timestamp::now()),
             properties: None,
             zomes: vec![],
         })
         .coordinator(CoordinatorManifest { zomes: vec![] })
-        .lineage(vec![])
         .build()
         .context("Failed to build DnaManifest")?
         .into();

@@ -213,9 +213,7 @@ pub fn scaffold_dna(
             location: Some(Location::Bundled(dna_bundle_path)),
             modifiers: DnaModifiersOpt {
                 network_seed: None,
-                origin_time: None,
                 properties: None,
-                quantum_time: None,
             },
             installed_hash: None,
             clone_limit: 0,
