@@ -2,7 +2,7 @@
 pub const TRYORAMA_VERSION: &str = "^0.18.0-dev.5";
 
 /// npm: <https://www.npmjs.com/package/@holochain/client>
-pub const HOLOCHAIN_CLIENT_VERSION: &str = "^0.19.0-dev.7";
+pub const HOLOCHAIN_CLIENT_VERSION: &str = "^0.19.0-rc.0";
 
 /// npm: <https://www.npmjs.com/package/@holochain/hc-spin>
 pub const HC_SPIN_VERSION: &str = "^0.500.0-dev.1";
