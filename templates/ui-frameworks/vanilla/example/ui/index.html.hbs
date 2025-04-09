@@ -13,7 +13,7 @@
       html,
       body {
         margin: 0;
-        padding: 0;
+        padding: 20px;
         font-family: sans-serif;
         background-color: #ededed;
       }
@@ -25,14 +25,13 @@
     <title>Example hApp</title>
   </head>
 
-  <body style="padding: 20px">
+  <body>
     <div id="content">
       <div>My AgentPubKey: <canvas style="border-radius:50%" id="pubkey" width="1" height="1"></canvas></div>
       <div>Greeting sent!  Click the button to see all hellos.</div>
     </div>
     <button onclick="getHellos()">Look for Hellos</button>
-    <div id="hellos">
-    </div>
+    <div id="hellos"></div>
 
     <script type="module">
       import { AppWebsocket, encodeHashToBase64 } from '@holochain/client';

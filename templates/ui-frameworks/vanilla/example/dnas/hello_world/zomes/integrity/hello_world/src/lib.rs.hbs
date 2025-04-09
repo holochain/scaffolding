@@ -40,8 +40,6 @@ pub fn validate_agent_joining(_agent_pub_key: AgentPubKey, _membrane_proof: &Opt
 /// In this example app we leave validation aside, please look at the Forum example for validation samples
 ///
 /// You can read more about validation here: https://docs.rs/hdi/latest/hdi/index.html#data-validation
-/// 
-/// 
 #[hdk_extern]
 pub fn validate(_op: Op) -> ExternResult<ValidateCallbackResult> {
     Ok(ValidateCallbackResult::Valid)
