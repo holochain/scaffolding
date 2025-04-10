@@ -60,9 +60,10 @@ setup_and_build_happ() {
   nix develop --command bash -c "
     set -e
     pnpm install
-    pnpm --filter ui build
     pnpm test
     pnpm package
+
+    cargo clippy --all -- -D warnings
     "
   cd ..
 }
@@ -79,6 +80,9 @@ setup_and_build_hello_world() {
     set -e
     pnpm install
     pnpm test
+    pnpm package
+
+    cargo clippy --all -- -D warnings
     "
   cd ..
 }
