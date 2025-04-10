@@ -515,7 +515,7 @@ fn remove_link_handlers(
                         LinkTypes::#inverse_link_type_name)?.build(),
                 )?;
                 for link in links {
-                    if #from_inverse_hash_type == input.#base_field_name.clone().into_hash().into() {
+                    if #from_inverse_hash_type == input.#base_field_name.clone().into_hash() {
                         delete_link(link.create_link_hash)?;
                     }
                 }
@@ -536,7 +536,7 @@ fn remove_link_handlers(
                 GetLinksInputBuilder::try_new(input.#base_field_name.clone(), LinkTypes::#pascal_link_type_name)?.build(),
             )?;
             for link in links {
-                if #from_link_hash_type_code == input.#target_field_name.clone().into_hash().into() {
+                if #from_link_hash_type_code == input.#target_field_name.clone().into_hash() {
                     delete_link(link.create_link_hash)?;
                 }
             }
