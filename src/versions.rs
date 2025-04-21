@@ -11,13 +11,13 @@ pub const HC_SPIN_VERSION: &str = "^0.500.0-rc.1";
 pub const WEB_SDK_VERSION: &str = "^0.6.20-prerelease";
 
 /// crates.io <https://crates.io/crates/hdi/versions>
-pub const HDI_VERSION: &str = "0.6.0-rc.1";
+pub const HDI_VERSION: &str = "0.6.0-rc.2";
 
 /// crates.io <https://crates.io/crates/hdk/versions>
-pub const HDK_VERSION: &str = "0.5.0-rc.1";
+pub const HDK_VERSION: &str = "0.5.0-rc.2";
 
 /// crates.io <https://crates.io/crates/holochain/versions>
-pub const HOLOCHAIN_VERSION: &str = "0.5.0-rc.3";
+pub const HOLOCHAIN_VERSION: &str = "0.5.0-rc.4";
 
 /// source: <https://github.com/darksoil-studio/holochain-playground/tree/main/packages/cli/server>
 ///

@@ -2,11 +2,11 @@
   "nodes": {
     "crane": {
       "locked": {
-        "lastModified": 1744386647,
-        "narHash": "sha256-DXwQEJllxpYeVOiSlBhQuGjfvkoGHTtILLYO2FvcyzQ=",
+        "lastModified": 1745022865,
+        "narHash": "sha256-tXL4qUlyYZEGOHUKUWjmmcvJjjLQ+4U38lPWSc8Cgdo=",
         "owner": "ipetkov",
         "repo": "crane",
-        "rev": "d02c1cdd7ec539699aa44e6ff912e15535969803",
+        "rev": "25ca4c50039d91ad88cc0b8feacb9ad7f748dedf",
         "type": "github"
       },
       "original": {
@@ -105,11 +105,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1744227047,
-        "narHash": "sha256-v4ND6UmvqpfC2VbWwz/+TjwxMoYnieuj/muTL7Na3sc=",
+        "lastModified": 1744807380,
+        "narHash": "sha256-aWkvxjLaWEf5UNQSWEZhmvDEyF1G0ZtjrxU8WJxsH7s=",
         "owner": "holochain",
         "repo": "holonix",
-        "rev": "7c58103520babb993b9a9e4c2df6252768e25717",
+        "rev": "365d036b93bc185162f92ed3cb79145b46bc1149",
         "type": "github"
       },
       "original": {
@@ -200,11 +200,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1744684506,
-        "narHash": "sha256-pDPDMT1rdkTWi8MIoZ67gT3L817R7P0Jo+PP+BrnyJI=",
+        "lastModified": 1745207416,
+        "narHash": "sha256-2g2TnXgJEvSvpk7ujY69pSplmM3oShhoOidZf1iHTHU=",
         "owner": "oxalica",
         "repo": "rust-overlay",
-        "rev": "47beae969336c05e892e1e4a9dbaac9593de34ab",
+        "rev": "68a0ff1a43d08aa1ec3730e7e7d06f6da0ba630a",
         "type": "github"
       },
       "original": {
