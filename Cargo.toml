@@ -18,8 +18,8 @@ name = "holochain_scaffolding_cli"
 path = "src/lib.rs"
 
 [dependencies]
-holochain_types = "0.5.0"
-mr_bundle = "0.5.0"
+holochain_types = "0.5.1"
+mr_bundle = "0.5.1"
 
 dirs = "5.0.1"
 ignore = "0.4"
