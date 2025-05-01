@@ -6,13 +6,13 @@
     "tests"
   ],
   "scripts": {
-    "start": "AGENTS=${AGENTS:-2} BOOTSTRAP_PORT=$(get-port) SIGNAL_PORT=$(get-port) {{(package_manager_command package_manager "network" null)}}",
+    "start": "AGENTS=${AGENTS:-2} BOOTSTRAP_PORT=$(get-port) {{(package_manager_command package_manager "network" null)}}",
     "network": "hc sandbox clean && {{(package_manager_command package_manager "build:happ" null)}} && UI_PORT=$(get-port) concurrently \"{{(package_manager_command package_manager "start" "ui")}}\" \"{{(package_manager_command package_manager "launch:happ" null)}}\" \"hc playground\"",
     "test": "{{(package_manager_command package_manager "build:zomes" null)}} && hc app pack workdir --recursive && {{(package_manager_command package_manager "test" "tests")}}",
     "launch:happ": "hc-spin -n $AGENTS --ui-port $UI_PORT workdir/{{app_name}}.happ",
-    "start:tauri": "AGENTS=${AGENTS:-2} BOOTSTRAP_PORT=$(get-port) SIGNAL_PORT=$(get-port) {{(package_manager_command package_manager "network:tauri" null)}}",
+    "start:tauri": "AGENTS=${AGENTS:-2} BOOTSTRAP_PORT=$(get-port) {{(package_manager_command package_manager "network:tauri" null)}}",
     "network:tauri": "hc sandbox clean && {{(package_manager_command package_manager "build:happ" null)}} && UI_PORT=$(get-port) concurrently \"{{(package_manager_command package_manager "start" "ui")}}\" \"{{(package_manager_command package_manager "launch:tauri" null)}}\" \"hc playground\"",
-    "launch:tauri": "concurrently \"kitsune2-bootstrap-srv --listen \"127.0.0.1:$BOOTSTRAP_PORT\"\" \"echo pass | RUST_LOG=warn hc launch --piped -n $AGENTS workdir/{{app_name}}.happ --ui-port $UI_PORT network --bootstrap http://127.0.0.1:\"$BOOTSTRAP_PORT\" webrtc ws://127.0.0.1:\"$SIGNAL_PORT\"\"",
+    "launch:tauri": "concurrently \"kitsune2-bootstrap-srv --listen \"127.0.0.1:$BOOTSTRAP_PORT\"\" \"echo pass | RUST_LOG=warn hc launch --piped -n $AGENTS workdir/{{app_name}}.happ --ui-port $UI_PORT network --bootstrap http://127.0.0.1:\"$BOOTSTRAP_PORT\" webrtc ws://127.0.0.1:\"$BOOTSTRAP_PORT\"\"",
   {{#if holo_enabled}}
     "start:holo": "AGENTS=${AGENTS:-2} {{(package_manager_command package_manager "network:holo" null)}}",
     "network:holo": "{{(package_manager_command package_manager "build:happ" null)}} && UI_PORT=$(get-port) concurrently \"{{(package_manager_command package_manager "launch:holo-dev-server" null)}}\" \"hc playground ws://localhost:4444\" \"concurrently-repeat 'VITE_APP_CHAPERONE_URL=http://localhost:24274 VITE_APP_IS_HOLO=true {{(package_manager_command package_manager "start" "ui")}}' $AGENTS\"",
