@@ -34,7 +34,6 @@ pub fn flake_nix(holo_enabled: bool, package_manager: &PackageManager) -> FileTr
     nixpkgs.follows = "holonix/nixpkgs";
     flake-parts.follows = "holonix/flake-parts";
 
-    playground.url = "github:darksoil-studio/holochain-playground?ref=main-0.4";
     {}
   }};
 
@@ -49,7 +48,6 @@ pub fn flake_nix(holo_enabled: bool, package_manager: &PackageManager) -> FileTr
         packages = (with pkgs; [
           nodejs_20
           binaryen
-          inputs'.playground.packages.hc-playground
           {}
           {}
         ]);
