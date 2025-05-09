@@ -3,7 +3,7 @@
 
   inputs = {
     holonix = {
-      url = "github:holochain/holonix?ref=main";
+      url = "github:holochain/holonix?ref=main-0.5";
       inputs = {
         nixpkgs.follows = "nixpkgs";
         flake-parts.follows = "flake-parts";
@@ -59,7 +59,7 @@
                 inherit system;
                 overlays = [ (import rust-overlay) ];
               };
-              rustToolchain = pkgs.rust-bin.stable."1.80.0".minimal;
+              rustToolchain = pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
               craneLib = (crane.mkLib pkgs).overrideToolchain rustToolchain;
               crateInfo = craneLib.crateNameFromCargoToml { cargoToml = ./Cargo.toml; };
 
