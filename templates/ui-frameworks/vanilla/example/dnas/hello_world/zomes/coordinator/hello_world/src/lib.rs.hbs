@@ -40,7 +40,7 @@ pub fn get_hellos() -> ExternResult<Vec<HelloOutput>> {
 
     // load the records for all the links
     let records = HDK.with(|hdk| hdk.borrow().get(get_input))?;
-    let records: Vec<Record> = records.into_iter().filter_map(|r| r).collect();
+    let records: Vec<Record> = records.into_iter().flatten().collect();
 
     // convert the records into a usefull struct for the UI
     let mut hellos = Vec::new();
