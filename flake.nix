@@ -110,7 +110,7 @@
               hn-introspect
               rust
             ]) ++ (with pkgs; [
-              nodejs_20
+              nodejs_22
               binaryen
             ]) ++ [
               self'.packages.hc-scaffold
