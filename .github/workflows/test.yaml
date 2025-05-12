@@ -4,9 +4,9 @@ on:
   # Trigger the workflow on push or pull request,
   # but only for the main branch
   push:
-    branches: [main, main-0.1, main-0.2, main-0.3, main-0.4]
+    branches: [main, main-0.1, main-0.2, main-0.3, main-0.4, main-0.5]
   pull_request:
-    branches: [main, main-0.1, main-0.2, main-0.3, main-0.4]
+    branches: [main, main-0.1, main-0.2, main-0.3, main-0.4, main-0.5]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
