@@ -41,7 +41,7 @@ nix run github:<TODO:REPLACE_ME_WITH_CUSTOM_TEMPLATE_GIT_URL>#app -- web-app
             devShells.default = pkgs.mkShell {
               inputsFrom = [ inputs'.holonix.devShells.default ];
               packages = [
-                pkgs.nodejs_20
+                pkgs.nodejs_22
                 # more packages go here
 +             ] ++ [
 +                inputs'.scaffolding.packages.app

@@ -46,7 +46,7 @@ pub fn flake_nix(holo_enabled: bool, package_manager: &PackageManager) -> FileTr
         inputsFrom = [ inputs'.holonix.devShells.default ];
 
         packages = (with pkgs; [
-          nodejs_20
+          nodejs_22
           binaryen
           {}
           {}
