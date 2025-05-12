@@ -53,7 +53,7 @@ impl PackageManager {
             PackageManager::Bun => Some("bun"),
             PackageManager::Pnpm => Some("nodePackages.pnpm"),
             PackageManager::Yarn => Some("yarn"),
-            // npm is already included with nodejs_20
+            // npm is already included with nodejs_22
             PackageManager::Npm => None,
         }
     }
