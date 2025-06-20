@@ -167,7 +167,7 @@ pub fn check_case(input: &str, identifier: &str, case: Case) -> ScaffoldResult<(
             "{identifier} must be {case:?} Case",
         )));
     }
-    if input.chars().next().map_or(false, char::is_numeric) {
+    if input.chars().next().is_some_and(char::is_numeric) {
         return Err(ScaffoldError::InvalidStringFormat(format!(
             "{identifier} must not start with a number"
         )));
@@ -183,7 +183,7 @@ pub fn validate_input(input: &str, identifier: &str) -> ScaffoldResult<()> {
             "{identifier} must *not* contain whitespaces.",
         )));
     }
-    if input.chars().next().map_or(false, char::is_numeric) {
+    if input.chars().next().is_some_and(char::is_numeric) {
         return Err(ScaffoldError::InvalidStringFormat(format!(
             "{identifier} must not start with a numeric"
         )));

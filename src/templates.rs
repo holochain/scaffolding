@@ -63,9 +63,7 @@ pub fn register_all_partials_in_dir<'a>(
     file_tree: &FileTree,
 ) -> ScaffoldResult<Handlebars<'a>> {
     let partials = find_files(file_tree, &|path, _contents| {
-        PathBuf::from(path)
-            .extension()
-            .map_or(false, |e| e == "hbs")
+        PathBuf::from(path).extension().is_some_and(|e| e == "hbs")
     });
 
     for (path, content) in partials {
