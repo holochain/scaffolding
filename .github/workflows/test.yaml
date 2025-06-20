@@ -1,12 +1,7 @@
 name: "scaffolding-ci"
 
 on:
-  # Trigger the workflow on push or pull request,
-  # but only for the main branch
-  push:
-    branches: [main, main-0.1, main-0.2, main-0.3, main-0.4, main-0.5]
-  pull_request:
-    branches: [main, main-0.1, main-0.2, main-0.3, main-0.4, main-0.5]
+  pull_request: {}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
@@ -51,11 +46,11 @@ jobs:
           remove-docker-images: "true"
 
       - name: Install nix
-        uses: cachix/install-nix-action@v30
+        uses: cachix/install-nix-action@v31
         with:
-          install_url: https://releases.nixos.org/nix/nix-2.24.4/install
+          install_url: https://releases.nixos.org/nix/nix-2.28.3/install
 
-      - uses: cachix/cachix-action@v15
+      - uses: cachix/cachix-action@v16
         with:
           name: holochain-scaffolding-cli
           authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
@@ -86,11 +81,11 @@ jobs:
           remove-docker-images: "true"
 
       - name: Install nix
-        uses: cachix/install-nix-action@v30
+        uses: cachix/install-nix-action@v31
         with:
-          install_url: https://releases.nixos.org/nix/nix-2.24.4/install
+          install_url: https://releases.nixos.org/nix/nix-2.28.3/install
 
-      - uses: cachix/cachix-action@v15
+      - uses: cachix/cachix-action@v16
         with:
           name: holochain-scaffolding-cli
           authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
@@ -122,11 +117,11 @@ jobs:
           remove-docker-images: "true"
 
       - name: Install nix
-        uses: cachix/install-nix-action@v30
+        uses: cachix/install-nix-action@v31
         with:
-          install_url: https://releases.nixos.org/nix/nix-2.24.4/install
+          install_url: https://releases.nixos.org/nix/nix-2.28.3/install
 
-      - uses: cachix/cachix-action@v15
+      - uses: cachix/cachix-action@v16
         with:
           name: holochain-scaffolding-cli
           authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
