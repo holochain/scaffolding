@@ -56,29 +56,25 @@ impl ZomeFileTree {
             DnaManifest::V1(v1) => v1.integrity.zomes.clone(),
         };
 
-        let zome_manifest = match (integrity_zomes.len(), integrity_zome_name) {
-            (0, None) => Err(ScaffoldError::NoIntegrityZomesFound(
-                dna_file_tree.dna_manifest.name(),
-            )),
-            (1, None) => {
-                integrity_zomes
-                    .into_iter()
-                    .last()
-                    .ok_or(ScaffoldError::NoIntegrityZomesFound(
-                        dna_file_tree.dna_manifest.name(),
-                    ))
-            }
-            (_, None) => {
-                choose_integrity_zome(&dna_file_tree.dna_manifest.name(), &integrity_zomes)
-            }
-            (_, Some(name)) => integrity_zomes
-                .into_iter()
-                .find(|zome| zome.name.0.to_string().eq(name))
-                .ok_or(ScaffoldError::IntegrityZomeNotFound(
-                    name.to_owned(),
+        let zome_manifest =
+            match (integrity_zomes.len(), integrity_zome_name) {
+                (0, None) => Err(ScaffoldError::NoIntegrityZomesFound(
                     dna_file_tree.dna_manifest.name(),
                 )),
-        }?;
+                (1, None) => integrity_zomes.into_iter().next_back().ok_or(
+                    ScaffoldError::NoIntegrityZomesFound(dna_file_tree.dna_manifest.name()),
+                ),
+                (_, None) => {
+                    choose_integrity_zome(&dna_file_tree.dna_manifest.name(), &integrity_zomes)
+                }
+                (_, Some(name)) => integrity_zomes
+                    .into_iter()
+                    .find(|zome| zome.name.0.to_string().eq(name))
+                    .ok_or(ScaffoldError::IntegrityZomeNotFound(
+                        name.to_owned(),
+                        dna_file_tree.dna_manifest.name(),
+                    )),
+            }?;
         ZomeFileTree::from_zome_manifest(dna_file_tree, zome_manifest)
     }
 

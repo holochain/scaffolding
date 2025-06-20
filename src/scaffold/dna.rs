@@ -46,7 +46,7 @@ impl DnaFileTree {
             (0, None) => Err(ScaffoldError::NoDnasFound),
             (1, None) => dna_manifests
                 .into_iter()
-                .last()
+                .next_back()
                 .ok_or(ScaffoldError::NoDnasFound),
             (_, None) => choose_dna(dna_manifests.into_iter().collect()),
             (_, Some(name)) => dna_manifests
