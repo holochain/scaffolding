@@ -35,7 +35,7 @@ pub fn get_or_choose_app_manifest_path_for_dna_manifest(
         0 => Err(ScaffoldError::NoAppsFoundForDna(dna_manifest.name())),
         1 => app_manifests
             .into_iter()
-            .last()
+            .next_back()
             .ok_or(ScaffoldError::NoAppsFoundForDna(dna_manifest.name())),
         _ => choose_app(apps_for_dna),
     }?;

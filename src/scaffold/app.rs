@@ -40,7 +40,7 @@ impl AppFileTree {
             (0, _) => Err(ScaffoldError::AppManifestNotFound),
             (1, None) => app_manifests
                 .into_iter()
-                .last()
+                .next_back()
                 .ok_or(ScaffoldError::AppManifestNotFound),
             (_, None) => choose_app(app_manifests),
             (_, Some(name)) => app_manifests
