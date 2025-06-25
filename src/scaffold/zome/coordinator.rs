@@ -37,6 +37,7 @@ name = "{zome_name}"
 [dependencies]
 hdk = {{ workspace = true }}
 serde = {{ workspace = true }}
+holochain_serialized_bytes = {{ workspace = true }}
 {deps}
 "#,
     )
