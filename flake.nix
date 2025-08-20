@@ -2,26 +2,12 @@
   description = "Flake for Holochain app development";
 
   inputs = {
-    holonix = {
-      url = "github:holochain/holonix?ref=main-0.5";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-        flake-parts.follows = "flake-parts";
-        crane.follows = "crane";
-        rust-overlay.follows = "rust-overlay";
-      };
-    };
+    holonix.url = "github:holochain/holonix?ref=main-0.5";
 
-    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-25.05";
-
-    flake-parts.url = "github:hercules-ci/flake-parts";
-
-    crane.url = "github:ipetkov/crane";
-
-    rust-overlay = {
-      url = "github:oxalica/rust-overlay";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    nixpkgs.follows = "holonix/nixpkgs";
+    flake-parts.follows = "holonix/flake-parts";
+    crane.follows = "holonix/crane";
+    rust-overlay.follows = "holonix/rust-overlay";
   };
 
   outputs = inputs @ { flake-parts, nixpkgs, crane, rust-overlay, ... }:
