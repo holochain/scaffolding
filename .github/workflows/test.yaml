@@ -12,7 +12,7 @@ jobs:
     name: cargo_test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: Swatinem/rust-cache@v2
       - run: cargo test --no-fail-fast
 
@@ -20,21 +20,21 @@ jobs:
     name: rustfmt
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - run: cargo fmt --all -- --check
 
   clippy:
     name: clippy
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: Swatinem/rust-cache@v2
       - run: cargo clippy -- -D warnings
 
   nix_build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Maximize build space
         if: runner.os == 'Linux'
@@ -48,7 +48,7 @@ jobs:
       - name: Install nix
         uses: cachix/install-nix-action@v31
         with:
-          install_url: https://releases.nixos.org/nix/nix-2.28.3/install
+          install_url: https://releases.nixos.org/nix/nix-2.30.2/install
 
       - uses: cachix/cachix-action@v16
         with:
@@ -69,7 +69,7 @@ jobs:
       matrix:
         template: [svelte, vue, lit, react, vanilla]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Maximize build space
         if: runner.os == 'Linux'
@@ -83,7 +83,7 @@ jobs:
       - name: Install nix
         uses: cachix/install-nix-action@v31
         with:
-          install_url: https://releases.nixos.org/nix/nix-2.28.3/install
+          install_url: https://releases.nixos.org/nix/nix-2.30.2/install
 
       - uses: cachix/cachix-action@v16
         with:
@@ -105,7 +105,7 @@ jobs:
           - hello_world
           - holo_integration
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Maximize build space
         if: runner.os == 'Linux'
@@ -119,7 +119,7 @@ jobs:
       - name: Install nix
         uses: cachix/install-nix-action@v31
         with:
-          install_url: https://releases.nixos.org/nix/nix-2.28.3/install
+          install_url: https://releases.nixos.org/nix/nix-2.30.2/install
 
       - uses: cachix/cachix-action@v16
         with:
