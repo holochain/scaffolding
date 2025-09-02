@@ -46,7 +46,7 @@ impl PackageManager {
         Ok(managers[selection])
     }
 
-    /// Get's the the package manager's nixpkg that should be used with the generated
+    /// Get's the package manager's nixpkg that should be used with the generated
     /// flake.nix
     pub fn nixpkg(&self) -> Option<&str> {
         match self {
