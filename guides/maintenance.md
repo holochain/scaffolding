@@ -25,7 +25,7 @@ This applies to anybody reviewing PRs on the Scaffolding repository whether thos
 
 ### Back-porting and releasing
 
-For changes that get merged to `develop` with the back-port labels it is then the maintainers responsibility to to the back-porting. This can be done as a batch to each relevant maintenance branch. Please mention the #xxx PR number of each original PR in the back-port PR description. Once the back-port PR has merged for a given PR, the corresponding label should be removed. This denotes the completion of the back-port so that it's easy to keep track of outstanding work to be done.
+For changes that get merged to `develop` with the back-port labels it is then the maintainers responsibility to the back-porting. This can be done as a batch to each relevant maintenance branch. Please mention the #xxx PR number of each original PR in the back-port PR description. Once the back-port PR has merged for a given PR, the corresponding label should be removed. This denotes the completion of the back-port so that it's easy to keep track of outstanding work to be done.
 
 Releases can be done as needed. This may be a single PR back-port, a batch of changes, or something as small as pinning a version in the `Cargo.toml`. The release process should follow these steps:
 
