@@ -106,14 +106,14 @@ impl FieldType {
 
         let variants = str_path
             .next_back()
-            .context(format!("Enum variants missing from: {}", fields_str))?;
+            .context(format!("Enum variants missing from: {fields_str}"))?;
         let variants = variants
             .split('.')
             .map(|v| v.to_case(Case::Pascal))
             .collect::<Vec<_>>();
         let label = str_path
             .next_back()
-            .context(format!("Enum label missing from: {}", fields_str))?
+            .context(format!("Enum label missing from: {fields_str}"))?
             .to_string();
 
         Ok(FieldType::Enum { label, variants })
@@ -371,7 +371,7 @@ impl FromStr for EntryTypeReference {
 
         let entry_type = str_path
             .next()
-            .context(format!("Failed to parse entry_type from: {}", s))?;
+            .context(format!("Failed to parse entry_type from: {s}"))?;
 
         let reference_entry_hash = str_path
             .next()
@@ -412,7 +412,7 @@ impl FromStr for Referenceable {
         let parts: Vec<&str> = s.split(':').collect();
         let type_name = parts
             .first()
-            .context(format!("The first argument in '{}' is invalid", s))?;
+            .context(format!("The first argument in '{s}' is invalid"))?;
 
         check_case(type_name, "referenceable", Case::Snake)?;
 
@@ -505,7 +505,7 @@ impl EntryDefinition {
                     "export type {label} = {};\n",
                     variants
                         .iter()
-                        .map(|v| format!("{{type: '{}'}}", v))
+                        .map(|v| format!("{{type: '{v}'}}"))
                         .collect::<Vec<_>>()
                         .join(" | ")
                 );

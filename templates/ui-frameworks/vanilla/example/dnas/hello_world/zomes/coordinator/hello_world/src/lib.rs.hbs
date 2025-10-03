@@ -28,7 +28,8 @@ pub fn get_hellos() -> ExternResult<Vec<HelloOutput>> {
     // get all of the hellos linked to the anchor
     let path = Path::from("hellos");
     let links = get_links(
-        GetLinksInputBuilder::try_new(path.path_entry_hash()?, LinkTypes::AllHellos)?.build(),
+        LinkQuery::try_new(path.path_entry_hash()?, LinkTypes::AllHellos)?,
+        GetStrategy::default(),
     )?;
     let get_input: Vec<GetInput> = links
         .into_iter()

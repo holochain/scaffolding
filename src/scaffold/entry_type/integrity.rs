@@ -37,7 +37,7 @@ pub fn add_entry_type_to_integrity_zome(
     // 1. Create an ENTRY_DEF_NAME.rs in "src/", with the entry definition struct
     let crate_src_path = zome_file_tree.zome_crate_path.join("src");
 
-    let entry_def_path = crate_src_path.join(format!("{}.rs", snake_entry_def_name));
+    let entry_def_path = crate_src_path.join(format!("{snake_entry_def_name}.rs"));
 
     let mut file_tree = zome_file_tree.dna_file_tree.file_tree();
 

@@ -12,24 +12,26 @@ use crate::scaffold::web_app::package_manager::PackageManager;
 use super::git::is_inside_work_tree;
 
 pub fn flake_nix(holo_enabled: bool, package_manager: &PackageManager) -> FileTree {
-    let holo_inputs = holo_enabled
-        .then_some(
-            r#"
+    let holo_inputs = if holo_enabled {
+        r#"
     hds-releases.url = "github:holo-host/hds-releases";
-    "#,
-        )
-        .unwrap_or_default();
+    "#
+    } else {
+        Default::default()
+    };
 
-    let holo_packages = holo_enabled
-        .then_some("inputs'.hds-releases.packages.holo-dev-server-bin")
-        .unwrap_or_default();
+    let holo_packages = if holo_enabled {
+        "inputs'.hds-releases.packages.holo-dev-server-bin"
+    } else {
+        Default::default()
+    };
 
     file!(format!(
         r#"{{
   description = "Flake for Holochain app development";
 
   inputs = {{
-    holonix.url = "github:holochain/holonix?ref=main-0.5";
+    holonix.url = "github:holochain/holonix?ref=main";
 
     nixpkgs.follows = "holonix/nixpkgs";
     flake-parts.follows = "holonix/flake-parts";

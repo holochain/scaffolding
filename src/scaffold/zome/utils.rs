@@ -11,7 +11,7 @@ pub fn select_integrity_zomes(
     prompt: Option<&str>,
 ) -> ScaffoldResult<Vec<String>> {
     let integrity_zomes: Vec<String> = match dna_manifest {
-        DnaManifest::V1(v1) => v1
+        DnaManifest::V0(v0) => v0
             .integrity
             .zomes
             .clone()
@@ -44,7 +44,7 @@ pub fn get_coordinator_zomes_for_integrity(
     integrity_zome_name: &str,
 ) -> Vec<ZomeManifest> {
     match dna_manifest {
-        DnaManifest::V1(v1) => v1
+        DnaManifest::V0(v0) => v0
             .coordinator
             .zomes
             .clone()

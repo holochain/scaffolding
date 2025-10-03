@@ -74,13 +74,17 @@ fn normal_handlers(
     delete: bool,
     bidirectional: bool,
 ) -> TokenStream {
-    let inverse_get_handler = bidirectional
-        .then(|| get_links_handler(to_referenceable, from_referenceable, delete))
-        .unwrap_or_default();
+    let inverse_get_handler = if bidirectional {
+        get_links_handler(to_referenceable, from_referenceable, delete)
+    } else {
+        Default::default()
+    };
 
-    let delete_link_handler = delete
-        .then(|| remove_link_handlers(from_referenceable, to_referenceable, bidirectional))
-        .unwrap_or_default();
+    let delete_link_handler = if delete {
+        remove_link_handlers(from_referenceable, to_referenceable, bidirectional)
+    } else {
+        Default::default()
+    };
 
     let integrity_zome_name = format_ident!("{integrity_zome_name}");
     let add_links_handler = add_link_handler(from_referenceable, to_referenceable, bidirectional);
@@ -161,7 +165,8 @@ fn metadata_handlers(
           #[hdk_extern]
           pub fn #get_link_type_function_name(#snake_from_arg: #from_field_type) -> ExternResult<Vec<String>> {
               let links = get_links(
-                  GetLinksInputBuilder::try_new(#snake_from_arg, LinkTypes::#pascal_link_type_name)?.build(),
+                  LinkQuery::try_new(#snake_from_arg, LinkTypes::#pascal_link_type_name)?,
+                  GetStrategy::default(),
               )?;
               let #snake_link_type_name = links
                   .into_iter()
@@ -214,8 +219,8 @@ pub fn add_link_handler(
     let inverse_link_type_name =
         format_ident!("{}", link_type_name(to_referenceable, from_referenceable));
 
-    let bidirectional_create = bidirectional
-        .then(|| {
+    let bidirectional_create = if bidirectional {
+        {
             quote! {
                 create_link(
                     input.#target_field_name,
@@ -224,8 +229,10 @@ pub fn add_link_handler(
                     (),
                 )?;
             }
-        })
-        .unwrap_or_default();
+        }
+    } else {
+        Default::default()
+    };
 
     quote! {
         #[derive(Serialize, Deserialize, Debug)]
@@ -291,18 +298,19 @@ fn get_links_to_agent_handler(
         "get_deleted_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}"
     );
 
-    let get_deleted_links_handler = delete
-        .then(|| {
+    let get_deleted_links_handler = if delete {
+        {
             quote::quote! {
                 #[hdk_extern]
                 pub fn #get_deleted_entry_for_entry_function_name(
                     #from_arg_name: #from_field_type,
                 ) -> ExternResult<Vec<(SignedActionHashed, Vec<SignedActionHashed>)>> {
-                    let details = get_link_details(
-                        #from_arg_name,
-                        LinkTypes::#pascal_link_type_name,
-                        None,
-                        GetOptions::default(),
+                    let details = get_links_details(
+                        LinkQuery::try_new(
+                            #from_arg_name,
+                            LinkTypes::#pascal_link_type_name,
+                        )?,
+                        GetStrategy::default(),
                     )?;
                     Ok(details
                         .into_inner()
@@ -311,8 +319,10 @@ fn get_links_to_agent_handler(
                         .collect())
                 }
             }
-        })
-        .unwrap_or_default();
+        }
+    } else {
+        Default::default()
+    };
 
     let get_entry_for_entry_function_name =
         format_ident!("get_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}");
@@ -321,7 +331,8 @@ fn get_links_to_agent_handler(
         #[hdk_extern]
         pub fn #get_entry_for_entry_function_name(#from_arg_name: #from_field_type) -> ExternResult<Vec<Link>> {
             get_links(
-                GetLinksInputBuilder::try_new(#from_arg_name, LinkTypes::#pascal_link_type_name)?.build(),
+                LinkQuery::try_new(#from_arg_name, LinkTypes::#pascal_link_type_name)?,
+                GetStrategy::default(),
             )
         }
 
@@ -361,18 +372,19 @@ fn get_links_to_entry_handler(
         "get_deleted_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}"
     );
 
-    let get_deleted_links_handler = delete
-        .then(|| {
+    let get_deleted_links_handler = if delete {
+        {
             quote::quote! {
                 #[hdk_extern]
                 pub fn #get_deleted_entry_for_entry_function_name(
                     #from_arg_name: #from_field_type,
                 ) -> ExternResult<Vec<(SignedActionHashed, Vec<SignedActionHashed>)>> {
-                    let details = get_link_details(
-                        #from_arg_name,
-                        LinkTypes::#pascal_link_type_name,
-                        None,
-                        GetOptions::default(),
+                    let details = get_links_details(
+                        LinkQuery::try_new(
+                            #from_arg_name,
+                            LinkTypes::#pascal_link_type_name,
+                        )?,
+                        GetStrategy::default(),
                     )?;
                     Ok(details
                         .into_inner()
@@ -381,8 +393,10 @@ fn get_links_to_entry_handler(
                         .collect())
                 }
             }
-        })
-        .unwrap_or_default();
+        }
+    } else {
+        Default::default()
+    };
 
     let get_entry_for_entry_function_name =
         format_ident!("get_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}");
@@ -391,7 +405,8 @@ fn get_links_to_entry_handler(
         #[hdk_extern]
         pub fn #get_entry_for_entry_function_name(#from_arg_name: #from_field_type) -> ExternResult<Vec<Link>> {
             get_links(
-                GetLinksInputBuilder::try_new(#from_arg_name, LinkTypes::#pascal_link_type_name)?.build(),
+                LinkQuery::try_new(#from_arg_name, LinkTypes::#pascal_link_type_name)?,
+                GetStrategy::default(),
             )
         }
 
@@ -426,18 +441,19 @@ fn get_links_to_any_linkable_hash_handler(
         "get_deleted_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}"
     );
 
-    let get_deleted_links_handler = deletable
-        .then(|| {
+    let get_deleted_links_handler = if deletable {
+        {
             quote::quote! {
                 #[hdk_extern]
                 pub fn #get_deleted_entry_for_entry_function_name(
                     #from_arg_name: #from_field_type,
                 ) -> ExternResult<Vec<(SignedActionHashed, Vec<SignedActionHashed>)>> {
-                    let details = get_link_details(
-                        #from_arg_name,
-                        LinkTypes::#pascal_link_type_name,
-                        None,
-                        GetOptions::default(),
+                    let details = get_links_details(
+                        LinkQuery::try_new(
+                            #from_arg_name,
+                            LinkTypes::#pascal_link_type_name,
+                        )?,
+                        GetStrategy::default(),
                     )?;
                     Ok(details
                         .into_inner()
@@ -446,8 +462,10 @@ fn get_links_to_any_linkable_hash_handler(
                         .collect())
                 }
             }
-        })
-        .unwrap_or_default();
+        }
+    } else {
+        Default::default()
+    };
 
     let get_entry_for_entry_function_name =
         format_ident!("get_{plural_snake_to_entry_type}_for_{singular_snake_from_entry_type}");
@@ -456,7 +474,8 @@ fn get_links_to_any_linkable_hash_handler(
         #[hdk_extern]
         pub fn #get_entry_for_entry_function_name(#from_arg_name: #from_field_type) -> ExternResult<Vec<Link>> {
             get_links(
-                GetLinksInputBuilder::try_new(#from_arg_name, LinkTypes::#pascal_link_type_name)?.build(),
+                LinkQuery::try_new(#from_arg_name, LinkTypes::#pascal_link_type_name)?,
+                GetStrategy::default(),
             )
         }
 
@@ -504,24 +523,27 @@ fn remove_link_handlers(
 
     let from_link_hash_type_code = hash_type_code_from_referenceable(to_referenceable);
 
-    let bidirectional_remove = bidirectional
-        .then(|| {
+    let bidirectional_remove = if bidirectional {
+        {
             let from_inverse_hash_type = hash_type_code_from_referenceable(from_referenceable);
 
             quote! {
                 let links = get_links(
-                    GetLinksInputBuilder::try_new(
+                    LinkQuery::try_new(
                         input.#target_field_name.clone(),
-                        LinkTypes::#inverse_link_type_name)?.build(),
+                        LinkTypes::#inverse_link_type_name)?,
+                    GetStrategy::default(),
                 )?;
                 for link in links {
                     if #from_inverse_hash_type == input.#base_field_name.clone().into_hash() {
-                        delete_link(link.create_link_hash)?;
+                        delete_link(link.create_link_hash, GetOptions::default())?;
                     }
                 }
             }
-        })
-        .unwrap_or_default();
+        }
+    } else {
+        Default::default()
+    };
 
     quote! {
         #[derive(Serialize, Deserialize, Debug)]
@@ -533,11 +555,12 @@ fn remove_link_handlers(
         #[hdk_extern]
         pub fn #delete_link_for_link_function_name(input: #remove_link_for_link_struct_name) -> ExternResult<()> {
             let links = get_links(
-                GetLinksInputBuilder::try_new(input.#base_field_name.clone(), LinkTypes::#pascal_link_type_name)?.build(),
+                LinkQuery::try_new(input.#base_field_name.clone(), LinkTypes::#pascal_link_type_name)?,
+                GetStrategy::default(),
             )?;
             for link in links {
                 if #from_link_hash_type_code == input.#target_field_name.clone().into_hash() {
-                    delete_link(link.create_link_hash)?;
+                    delete_link(link.create_link_hash, GetOptions::default())?;
                 }
             }
             #bidirectional_remove

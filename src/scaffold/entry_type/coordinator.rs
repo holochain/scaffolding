@@ -276,7 +276,8 @@ fn read_handler_with_linking_to_updates(entry_def: &EntryDefinition) -> TokenStr
         #[hdk_extern]
         pub fn #get_latest_function_name(#original_hash_param_name: ActionHash) -> ExternResult<Option<Record>> {
             let links = get_links(
-                GetLinksInputBuilder::try_new(#original_hash_param_name.clone(), LinkTypes::#updates_link_name)?.build(),
+                LinkQuery::try_new(#original_hash_param_name.clone(), LinkTypes::#updates_link_name)?,
+                GetStrategy::default(),
             )?;
 
             let latest_link = links.into_iter().max_by(|link_a, link_b| link_a.timestamp.cmp(&link_b.timestamp));
@@ -318,7 +319,8 @@ fn read_handler_with_linking_to_updates(entry_def: &EntryDefinition) -> TokenStr
             };
 
             let links = get_links(
-                GetLinksInputBuilder::try_new(#original_hash_param_name.clone(), LinkTypes::#updates_link_name)?.build(),
+                LinkQuery::try_new(#original_hash_param_name.clone(), LinkTypes::#updates_link_name)?,
+                GetStrategy::default(),
             )?;
 
             let get_input: Vec<GetInput> = links
@@ -562,12 +564,13 @@ fn delete_handler(entry_def: &EntryDefinition) -> TokenStream {
             let delete_this_link = match linked_from_field.cardinality {
                 Cardinality::Single => quote! {
                     let links = get_links(
-                        GetLinksInputBuilder::try_new(#snake_entry_def_name.#field_name.clone(), LinkTypes::#link_type)?.build(),
+                        LinkQuery::try_new(#snake_entry_def_name.#field_name.clone(), LinkTypes::#link_type)?,
+                        GetStrategy::default(),
                     )?;
                     for link in links {
                         if let Some(action_hash) = link.target.into_action_hash() {
                             if action_hash == #original_entry_hash {
-                                delete_link(link.create_link_hash)?;
+                                delete_link(link.create_link_hash, GetOptions::default())?;
                             }
                         }
                     }
@@ -575,12 +578,13 @@ fn delete_handler(entry_def: &EntryDefinition) -> TokenStream {
                 Cardinality::Option => quote! {
                     if let Some(base_address) = #snake_entry_def_name.#field_name.clone() {
                         let links = get_links(
-                            GetLinksInputBuilder::try_new(base_address, LinkTypes::#link_type)?.build(),
+                            LinkQuery::try_new(base_address, LinkTypes::#link_type)?,
+                            GetStrategy::default(),
                         )?;
                         for link in links {
                             if let Some(action_hash) = link.target.into_action_hash() {
                                 if action_hash == #original_entry_hash {
-                                    delete_link(link.create_link_hash)?;
+                                    delete_link(link.create_link_hash, GetOptions::default())?;
                                 }
                             }
                         }
@@ -589,12 +593,13 @@ fn delete_handler(entry_def: &EntryDefinition) -> TokenStream {
                 Cardinality::Vector => quote! {
                     for base_address in #snake_entry_def_name.#field_name {
                         let links = get_links(
-                            GetLinksInputBuilder::try_new(base_address.clone(), LinkTypes::#link_type)?.build(),
+                            LinkQuery::try_new(base_address.clone(), LinkTypes::#link_type)?,
+                            GetStrategy::default(),
                         )?;
                         for link in links {
                             if let Some(action_hash) = link.target.into_action_hash() {
                                 if action_hash == #original_entry_hash {
-                                    delete_link(link.create_link_hash)?;
+                                    delete_link(link.create_link_hash, GetOptions::default())?;
                                 }
                             }
                         }

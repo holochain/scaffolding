@@ -43,9 +43,11 @@ impl HelperDef for FilterHelper {
             "{}{}{}{}",
             "{{#if ",
             condition,
-            include_zero
-                .then_some(" includeZero=true")
-                .unwrap_or_default(),
+            if include_zero {
+                " includeZero=true"
+            } else {
+                Default::default()
+            },
             "}}true{{else}}false{{/if}}"
         );
 

@@ -47,7 +47,7 @@ impl TemplateType {
             TemplateType::Vue => "vue",
             TemplateType::React => "react",
             TemplateType::Headless => "headless",
-            TemplateType::Custom(path) => return format!("{:?}", path),
+            TemplateType::Custom(path) => return format!("{path:?}"),
         };
         name.to_string()
     }
