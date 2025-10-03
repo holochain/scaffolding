@@ -142,7 +142,10 @@ fn global_collection_getter(
         #[hdk_extern]
         pub fn #get_collection_function_name() -> ExternResult<Vec<Link>> {
             let path = Path::from(#snake_collection_name);
-            get_links(GetLinksInputBuilder::try_new(path.path_entry_hash()?, LinkTypes::#link_type_name)?.build())
+            get_links(
+                LinkQuery::try_new(path.path_entry_hash()?, LinkTypes::#link_type_name)?,
+                GetStrategy::default(),
+            )
         }
     }
 }
@@ -163,7 +166,10 @@ fn by_author_collection_getter(
 
         #[hdk_extern]
         pub fn #get_collection_function_name(author: AgentPubKey) -> ExternResult<Vec<Link>> {
-            get_links(GetLinksInputBuilder::try_new(author, LinkTypes::#link_type_name)?.build())
+            get_links(
+                LinkQuery::try_new(author, LinkTypes::#link_type_name)?,
+                GetStrategy::default(),
+            )
         }
     }
 }
@@ -331,14 +337,15 @@ fn add_delete_link_in_delete_function(
                 parse_quote! {let path = Path::from(#collection_name);},
                 parse_quote! {
                     let links = get_links(
-                        GetLinksInputBuilder::try_new(path.path_entry_hash()?, LinkTypes::#link_type_name)?.build(),
+                        LinkQuery::try_new(path.path_entry_hash()?, LinkTypes::#link_type_name)?,
+                        GetStrategy::default(),
                     )?;
                 },
                 parse_quote! {
                     for link in links {
                         if let Some(hash) = link.target.#into_hash_fn() {
                            if hash == #target_hash_variable {
-                                delete_link(link.create_link_hash)?;
+                                delete_link(link.create_link_hash, GetOptions::default())?;
                             }
                         }
                     }
@@ -364,14 +371,15 @@ fn add_delete_link_in_delete_function(
                 },
                 parse_quote! {
                     let links = get_links(
-                        GetLinksInputBuilder::try_new(record.action().author().clone(), LinkTypes::#link_type_name)?.build()
+                        LinkQuery::try_new(record.action().author().clone(), LinkTypes::#link_type_name)?,
+                        GetStrategy::default(),
                     )?;
                 },
                 parse_quote! {
                     for link in links {
                         if let Some(hash) = link.target.#into_hash_fn() {
                            if hash == #target_hash_variable {
-                                delete_link(link.create_link_hash)?;
+                                delete_link(link.create_link_hash, GetOptions::default())?;
                             }
                         }
                     }

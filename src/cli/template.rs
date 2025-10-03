@@ -47,7 +47,7 @@ impl Template {
 
         file_tree.build(&PathBuf::from("."))?;
 
-        println!(r#"Template initialized in path: ./{} "#, name);
+        println!(r#"Template initialized in path: ./{name} "#);
 
         Ok(())
     }
@@ -69,7 +69,7 @@ impl Template {
 
         file_tree.build(&PathBuf::from("."))?;
 
-        println!(r#"Template initialized in path: ./{} "#, target_template);
+        println!(r#"Template initialized in path: ./{target_template} "#);
 
         Ok(())
     }

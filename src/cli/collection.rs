@@ -94,7 +94,7 @@ impl Collection {
         println!("\nCollection {} scaffolded!\n", name.italic());
 
         if let Some(i) = next_instructions {
-            println!("{}", i);
+            println!("{i}");
         }
 
         Ok(())

@@ -299,7 +299,7 @@ impl Example {
         println!("\nExample {} scaffolded!\n", example.to_string().italic());
 
         if let Some(i) = next_instructions {
-            println!("{}", i);
+            println!("{i}");
         }
 
         Ok(())

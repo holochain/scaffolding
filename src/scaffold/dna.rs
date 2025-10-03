@@ -16,7 +16,7 @@ use holochain_types::prelude::{
     AppManifest, AppManifestCurrentBuilder, AppRoleDnaManifest, AppRoleManifest, CellProvisioning,
     DnaManifest, DnaModifiersOpt, ValidatedDnaManifest,
 };
-use mr_bundle::{Location, Manifest};
+use mr_bundle::Manifest;
 
 pub mod coordinator;
 pub mod integrity;
@@ -88,29 +88,29 @@ fn default_dnas_dir_path() -> PathBuf {
     PathBuf::new().join("dnas")
 }
 
-fn zome_wasm_location(dna_file_tree: &DnaFileTree, zome_name: &str) -> Location {
-    let mut zome_wasm_location = PathBuf::new();
+fn zome_wasm_path(dna_file_tree: &DnaFileTree, zome_name: &str) -> PathBuf {
+    let mut zome_wasm_path = PathBuf::new();
 
     let mut dna_workdir_path = dna_file_tree.dna_manifest_path.clone();
     dna_workdir_path.pop();
 
     for _c in dna_workdir_path.components() {
-        zome_wasm_location = zome_wasm_location.join("..");
+        zome_wasm_path = zome_wasm_path.join("..");
     }
-    zome_wasm_location = zome_wasm_location
+    zome_wasm_path = zome_wasm_path
         .join("target")
         .join("wasm32-unknown-unknown")
         .join("release")
-        .join(format!("{}.wasm", zome_name));
+        .join(format!("{zome_name}.wasm"));
 
-    Location::Bundled(zome_wasm_location)
+    zome_wasm_path
 }
 
 /// Returns the path to the existing app manifests in the given project structure
 pub fn find_dna_manifests(
     app_file_tree: &FileTree,
 ) -> ScaffoldResult<BTreeMap<PathBuf, DnaManifest>> {
-    let files = find_files_by_name(app_file_tree, &ValidatedDnaManifest::path());
+    let files = find_files_by_name(app_file_tree, ValidatedDnaManifest::file_name());
 
     let manifests: BTreeMap<PathBuf, DnaManifest> = files
         .into_iter()
@@ -199,7 +199,7 @@ pub fn scaffold_dna(
     dna_workdir_relative_to_app_manifest =
         dna_workdir_relative_to_app_manifest.join(dna_workdir_path);
 
-    let dna_bundle_path = dna_workdir_relative_to_app_manifest.join(format!("{}.dna", dna_name));
+    let dna_bundle_path = dna_workdir_relative_to_app_manifest.join(format!("{dna_name}.dna"));
 
     let mut roles = app_file_tree.app_manifest.app_roles();
 
@@ -210,7 +210,7 @@ pub fn scaffold_dna(
     roles.push(AppRoleManifest {
         name: dna_name.to_owned(),
         dna: AppRoleDnaManifest {
-            location: Some(Location::Bundled(dna_bundle_path)),
+            path: dna_bundle_path.to_str().map(ToOwned::to_owned),
             modifiers: DnaModifiersOpt {
                 network_seed: None,
                 properties: None,

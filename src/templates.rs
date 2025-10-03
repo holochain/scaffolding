@@ -216,15 +216,9 @@ fn handle_each_regex_template<T: Serialize>(
     let b = EACH_TEMPLATE_REGEX.replace(path_str, "${b}");
     let new_all_contents = if EACH_IF_TEMPLATE_REGEX.is_match(path_str) {
         let d = EACH_IF_TEMPLATE_REGEX.replace(path_str, "${d}");
-        format!(
-            "{{{{#each {} }}}}{{{{#if {} }}}}\n{}{}{{{{/if}}}}{{{{/each}}}}",
-            b, d, contents, delimiter
-        )
+        format!("{{{{#each {b} }}}}{{{{#if {d} }}}}\n{contents}{delimiter}{{{{/if}}}}{{{{/each}}}}",)
     } else {
-        format!(
-            "{{{{#each {} }}}}\n{}{}{{{{/each}}}}",
-            b, contents, delimiter
-        )
+        format!("{{{{#each {b} }}}}\n{contents}{delimiter}{{{{/each}}}}",)
     };
     let new_contents = render_template_file(
         h,

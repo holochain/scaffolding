@@ -104,7 +104,7 @@ impl EntryType {
         println!("\nEntry type {} scaffolded!", name.italic());
 
         if let Some(i) = next_instructions {
-            println!("\n{}", i);
+            println!("\n{i}");
         } else {
             println!(
                 r#"

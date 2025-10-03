@@ -18,7 +18,7 @@ pub fn initial_cargo_toml(zome_name: &str, dependencies: Option<&Vec<String>>) -
     let deps = dependencies
         .map(|d| {
             d.iter()
-                .map(|d| format!(r#"{} = {{ workspace = true }}"#, d))
+                .map(|d| format!(r#"{d} = {{ workspace = true }}"#))
                 .collect::<Vec<String>>()
                 .join("\n")
         })

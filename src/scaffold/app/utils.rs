@@ -3,7 +3,6 @@ use crate::{
     scaffold::dna::read_dna_manifest,
 };
 use holochain_types::prelude::AppManifest;
-use mr_bundle::Location;
 use path_clean::PathClean;
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
@@ -55,7 +54,8 @@ fn bundled_dnas_paths(
     app_workdir_location.pop();
 
     for app_role in app_manifest.app_roles() {
-        if let Some(Location::Bundled(mut bundled_location)) = app_role.dna.location {
+        if let Some(path) = app_role.dna.path {
+            let mut bundled_location = PathBuf::from(path);
             bundled_location.pop();
             bundled_location = PathBuf::new()
                 .join(&app_workdir_location)

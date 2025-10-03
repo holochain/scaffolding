@@ -27,10 +27,10 @@ pub fn check_zome_doesnt_exist(
     zome_manifest: &ZomeManifest,
 ) -> ScaffoldResult<()> {
     let integrity_manifest = match dna_manifest.clone() {
-        DnaManifest::V1(m) => m.integrity,
+        DnaManifest::V0(m) => m.integrity,
     };
     let coordinator_manifest = match dna_manifest.clone() {
-        DnaManifest::V1(m) => m.coordinator,
+        DnaManifest::V0(m) => m.coordinator,
     };
 
     if coordinator_manifest

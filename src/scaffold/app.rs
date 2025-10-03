@@ -1,13 +1,12 @@
 use std::{collections::BTreeMap, path::PathBuf};
 
-use dialoguer::{theme::ColorfulTheme, Select};
-use holochain_types::prelude::AppManifest;
-use mr_bundle::Manifest;
-
 use crate::{
     error::{ScaffoldError, ScaffoldResult},
     file_tree::{find_files_by_name, FileTree},
 };
+use dialoguer::{theme::ColorfulTheme, Select};
+use holochain_types::prelude::AppManifest;
+use mr_bundle::Manifest;
 
 pub mod cargo;
 pub mod git;
@@ -79,7 +78,7 @@ pub fn choose_app(
 pub fn find_app_manifests(
     app_file_tree: &FileTree,
 ) -> ScaffoldResult<BTreeMap<PathBuf, AppManifest>> {
-    let files = find_files_by_name(app_file_tree, &AppManifest::path());
+    let files = find_files_by_name(app_file_tree, AppManifest::file_name());
 
     let manifests: BTreeMap<PathBuf, AppManifest> = files
         .into_iter()

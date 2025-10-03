@@ -132,11 +132,14 @@ impl WebApp {
         if let Some(instructions) = next_instructions {
             println!("{instructions}");
         } else {
-            let dna_instructions = disable_fast_track.then_some(
+            let dna_instructions = if disable_fast_track {
                 r#"
-- Get your project to compile by adding a DNA and then following the next insturctions to add a zome to that DNA:
+- Get your project to compile by adding a DNA and then following the next instructions to add a zome to that DNA:
 
-  hc scaffold dna"#).unwrap_or_default();
+  hc scaffold dna"#
+            } else {
+                Default::default()
+            };
             println!(
                 r#"
 This skeleton provides the basic structure for your Holochain web application.

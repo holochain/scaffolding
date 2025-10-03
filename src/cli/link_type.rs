@@ -84,7 +84,7 @@ impl LinkType {
 
         println!("\nLink type scaffolded!\n");
         if let Some(i) = next_instructions {
-            println!("{}", i);
+            println!("{i}");
         }
 
         Ok(())

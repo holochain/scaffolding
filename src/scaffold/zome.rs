@@ -1,6 +1,5 @@
 use convert_case::Case;
 use dialoguer::{theme::ColorfulTheme, Confirm, Select};
-use mr_bundle::Location;
 use regex::Regex;
 use std::{
     ffi::OsString,
@@ -53,7 +52,7 @@ impl ZomeFileTree {
         integrity_zome_name: Option<&str>,
     ) -> ScaffoldResult<ZomeFileTree> {
         let integrity_zomes = match dna_file_tree.dna_manifest.clone() {
-            DnaManifest::V1(v1) => v1.integrity.zomes.clone(),
+            DnaManifest::V0(v0) => v0.integrity.zomes.clone(),
         };
 
         let zome_manifest =
@@ -102,38 +101,28 @@ fn zome_crate_path(
     dna_file_tree: &DnaFileTree,
     zome_manifest: &ZomeManifest,
 ) -> ScaffoldResult<PathBuf> {
-    match zome_manifest.location.clone() {
-        Location::Bundled(bundled_path) => {
-            let file_name_os_str = bundled_path.file_name().unwrap();
-            let file_name = file_name_os_str
-                .to_os_string()
-                .to_str()
-                .unwrap()
-                .to_string();
+    let file_name = PathBuf::from(&zome_manifest.path)
+        .file_name()
+        .ok_or_else(|| anyhow::anyhow!("Invalid zome wasm path: {:?}", zome_manifest.path))?
+        .to_os_string()
+        .into_string()
+        .map_err(|str| anyhow::anyhow!("Invalid zome wasm path: {str:?}"))?;
 
-            let crate_name = file_name.split(".wasm").next().unwrap().to_string();
+    let crate_name = file_name.split(".wasm").next().unwrap().to_string();
 
-            let mut manifest_path =
-                workspace_package_path(dna_file_tree.file_tree_ref(), &crate_name)?.ok_or(
-                    ScaffoldError::IntegrityZomeNotFound(
-                        zome_manifest.name.0.to_string(),
-                        dna_file_tree.dna_manifest.name(),
-                    ),
-                )?;
-
-            manifest_path.pop();
-
-            Ok(manifest_path)
-        }
-        _ => Err(ScaffoldError::IntegrityZomeNotFound(
+    let mut manifest_path = workspace_package_path(dna_file_tree.file_tree_ref(), &crate_name)?
+        .ok_or(ScaffoldError::IntegrityZomeNotFound(
             zome_manifest.name.0.to_string(),
             dna_file_tree.dna_manifest.name(),
-        )),
-    }
+        ))?;
+
+    manifest_path.pop();
+
+    Ok(manifest_path)
 }
 
 pub fn integrity_zome_name(coordinator_zome_name: &str) -> String {
-    format!("{}_integrity", coordinator_zome_name)
+    format!("{coordinator_zome_name}_integrity")
 }
 
 pub fn iter_all_eq<T: PartialEq>(iter: impl IntoIterator<Item = T>) -> Option<T> {
@@ -153,8 +142,7 @@ fn choose_integrity_zome(
 
     let selection = Select::with_theme(&ColorfulTheme::default())
         .with_prompt(format!(
-            "Multiple integrity zomes were found in DNA {}, choose one:",
-            dna_name
+            "Multiple integrity zomes were found in DNA {dna_name}, choose one:",
         ))
         .default(0)
         .items(&integrity_zome_names[..])
@@ -405,7 +393,7 @@ pub fn scaffold_integrity_zome(
         None => match try_to_guess_integrity_zomes_location(&dna_file_tree)? {
             Some(p) => {
                 if Confirm::with_theme(&ColorfulTheme::default())
-                    .with_prompt(format!("Scaffold integrity zome in folder {:?}?", p))
+                    .with_prompt(format!("Scaffold integrity zome in folder {p:?}?"))
                     .interact()?
                 {
                     p
@@ -487,7 +475,7 @@ pub fn scaffold_coordinator_zome(
         None => match try_to_guess_coordinator_zomes_location(&dna_file_tree)? {
             Some(p) => {
                 if Confirm::with_theme(&ColorfulTheme::default())
-                    .with_prompt(format!("Scaffold coordinator zome in {:?}?", p))
+                    .with_prompt(format!("Scaffold coordinator zome in {p:?}?"))
                     .interact()?
                 {
                     p

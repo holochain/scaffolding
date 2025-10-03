@@ -74,11 +74,11 @@ impl PackageManager {
             SubCommand::Run(script) => match self {
                 PackageManager::Bun => match workspace {
                     Some(workspace) => format!("bun run --filter {workspace} {script}"),
-                    None => format!("bun run {}", script),
+                    None => format!("bun run {script}"),
                 },
                 PackageManager::Npm => match workspace {
                     Some(workspace) => format!("npm run {script} --workspace {workspace}"),
-                    None => format!("npm run {}", script),
+                    None => format!("npm run {script}"),
                 },
                 PackageManager::Pnpm => match workspace {
                     Some(workspace) => format!("pnpm --filter {workspace} {script}"),

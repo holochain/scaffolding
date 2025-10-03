@@ -23,7 +23,7 @@ pub fn choose_directory_path(prompt: &str, app_file_tree: &FileTree) -> Scaffold
         folders = folders
             .clone()
             .into_iter()
-            .map(|s| format!("{}/", s))
+            .map(|s| format!("{s}/"))
             .collect();
         let mut default = 0;
 
@@ -35,7 +35,7 @@ pub fn choose_directory_path(prompt: &str, app_file_tree: &FileTree) -> Scaffold
         }
 
         let selection = Select::with_theme(&ColorfulTheme::default())
-            .with_prompt(format!("{} Current path: {:?}", prompt, current_path))
+            .with_prompt(format!("{prompt} Current path: {current_path:?}"))
             .default(default)
             .items(&folders[..])
             .item("[Select this folder]")
@@ -76,16 +76,20 @@ fn get_folder_names(folder: &BTreeMap<OsString, FileTree>) -> Vec<String> {
 #[inline]
 /// "yes" or "no" input dialog, with the option to specify a recommended answer (yes = true, no = false)
 pub fn input_yes_or_no(prompt: &str, recommended: Option<bool>) -> ScaffoldResult<bool> {
-    let yes_recommended = (recommended == Some(true))
-        .then_some("(recommended)")
-        .unwrap_or_default();
-    let no_recommended = (recommended == Some(false))
-        .then_some("(recommended)")
-        .unwrap_or_default();
+    let yes_recommended = if recommended == Some(true) {
+        "(recommended)"
+    } else {
+        Default::default()
+    };
+    let no_recommended = if recommended == Some(false) {
+        "(recommended)"
+    } else {
+        Default::default()
+    };
 
     let items = [
-        format!("Yes {}", yes_recommended),
-        format!("No {}", no_recommended),
+        format!("Yes {yes_recommended}"),
+        format!("No {no_recommended}"),
     ];
 
     let selection = Select::with_theme(&ColorfulTheme::default())
