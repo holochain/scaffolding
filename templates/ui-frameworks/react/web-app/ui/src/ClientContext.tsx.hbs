@@ -1,12 +1,5 @@
 import { AppWebsocket, HolochainError, type AppClient } from '@holochain/client';
-{{#if holo_enabled}}
-import WebSdk from '@holo-host/web-sdk'
-{{/if}}
 import { createContext, FC, useEffect, useRef, useState } from 'react';
-
-{{#if holo_enabled}}
-const IS_HOLO = ['true', '1', 't'].includes(import.meta.env.VITE_APP_IS_HOLO?.toLowerCase());
-{{/if}}
 
 export const ClientContext = createContext<ClientContextValues>({
   client: undefined,
@@ -18,45 +11,13 @@ const ClientProvider: FC<ClientProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<HolochainError | undefined>();
   const holochainClient = useRef<AppClient>();
-{{#if holo_enabled}}
-  const holoClient = useRef<WebSdk>();
-{{/if}}
   
   const value = {
-    client: {{#if holo_enabled}}IS_HOLO ? holoClient.current as WebSdk : holochainClient.current as AppClient{{else}}holochainClient.current{{/if}},
+    client: holochainClient.current,
     error,
     loading
   };
 
-{{#if holo_enabled}}
-  const signOut = async () => {
-    await holoClient.current.signOut();
-    await holoClient.current.signIn({ cancellable: false });
-  }
-
-  useEffect(() => {
-    const connectClient = async () => {
-      setLoading(true);
-      try {
-        if (IS_HOLO) {
-          holoClient.current = await WebSdk.connect({
-            chaperoneUrl: import.meta.env.VITE_APP_CHAPERONE_URL,
-            authFormCustomization: { appName: '{{app_name}}' }
-          });
-          (holoClient.current as WebSdk).signUp({ cancellable: false });
-        } else {
-          holochainClient.current = await AppWebsocket.connect();
-        }
-      } catch (error) {
-        setError(error as HolochainError)
-        console.error('Failed to establish websocket connection:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    connectClient();
-  }, []);
-{{else}}
   useEffect(() => {
     const connectClient = async () => {
       setLoading(true);
@@ -71,22 +32,16 @@ const ClientProvider: FC<ClientProviderProps> = ({ children }) => {
     };
     connectClient();
   }, []);
-{{/if}}
 
   return (
     <ClientContext.Provider value={value}>
       {children}
-{{#if holo_enabled}}
-    {IS_HOLO && holoClient.current && (
-      <button onClick={() => signOut()}>Sign Out</button>
-    )}
-{{/if}}
     </ClientContext.Provider>
   );
 };
 
 interface ClientContextValues {
-  client: AppClient{{#if holo_enabled}} | WebSdk{{/if}} | undefined,
+  client: AppClient | undefined,
   error: HolochainError | undefined,
   loading: boolean,
 }
