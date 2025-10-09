@@ -7,7 +7,7 @@
 </template>
 
 <script setup lang="ts">
-import { useClientProvider{{#if holo_enabled}}, IS_HOLO{{/if}} } from './clientProvider';
+import { useClientProvider } from './clientProvider';
 
 const { client, error, loading } = useClientProvider();
 </script>

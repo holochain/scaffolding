@@ -4,10 +4,6 @@
   "scripts": {
     "start": "vite --port $UI_PORT --clearScreen false",
     "build": "vite build",
-  {{#if holo_enabled}}
-    "build:holo": "VITE_APP_IS_HOLO=true vite build",
-    "package:holo": "{{(package_manager_command package_manager "build:holo" null)}} && rimraf dist.zip && cd dist && bestzip ../dist.zip *",
-  {{/if}}
     "format": "prettier \"**/*.ts\" --write --ignore-path .gitignore",
     "package": "{{(package_manager_command package_manager "build" null)}} && rimraf dist.zip && cd dist && bestzip ../dist.zip *"
   },

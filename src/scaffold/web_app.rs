@@ -24,7 +24,6 @@ pub fn scaffold_web_app(
     package_manager: PackageManager,
     skip_nix: bool,
     template_file_tree: &FileTree,
-    holo_enabled: bool,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     check_for_reserved_keywords(app_name)?;
 
@@ -42,10 +41,7 @@ pub fn scaffold_web_app(
         app_file_tree
             .dir_content_mut()
             .ok_or(ScaffoldError::PathNotFound(PathBuf::new()))?
-            .insert(
-                "flake.nix".into(),
-                flake_nix(holo_enabled, &package_manager),
-            );
+            .insert("flake.nix".into(), flake_nix(&package_manager));
     }
 
     if package_manager == PackageManager::Pnpm {
@@ -58,13 +54,8 @@ pub fn scaffold_web_app(
             );
     }
 
-    let scaffold_template_result = scaffold_web_app_template(
-        app_file_tree,
-        template_file_tree,
-        app_name,
-        package_manager,
-        holo_enabled,
-    )?;
+    let scaffold_template_result =
+        scaffold_web_app_template(app_file_tree, template_file_tree, app_name, package_manager)?;
 
     Ok(scaffold_template_result)
 }

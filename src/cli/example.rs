@@ -46,9 +46,6 @@ pub struct Example {
     /// When a lockfile is detected, the respective package manager will be used as the default value;
     /// otherwise, npm will be set as the default.
     pub package_manager: Option<PackageManager>,
-
-    #[structopt(long = "holo", hidden = true)]
-    pub holo_enabled: bool,
 }
 
 impl Example {
@@ -102,7 +99,6 @@ impl Example {
                     package_manager,
                     false,
                     &template_file_tree,
-                    self.holo_enabled,
                 )?;
 
                 file_tree
@@ -115,7 +111,6 @@ impl Example {
                     package_manager,
                     false,
                     &template_file_tree,
-                    self.holo_enabled,
                 )?;
 
                 // scaffold dna hello_world

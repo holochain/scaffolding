@@ -11,21 +11,7 @@ use crate::scaffold::web_app::package_manager::PackageManager;
 
 use super::git::is_inside_work_tree;
 
-pub fn flake_nix(holo_enabled: bool, package_manager: &PackageManager) -> FileTree {
-    let holo_inputs = if holo_enabled {
-        r#"
-    hds-releases.url = "github:holo-host/hds-releases";
-    "#
-    } else {
-        Default::default()
-    };
-
-    let holo_packages = if holo_enabled {
-        "inputs'.hds-releases.packages.holo-dev-server-bin"
-    } else {
-        Default::default()
-    };
-
+pub fn flake_nix(package_manager: &PackageManager) -> FileTree {
     file!(format!(
         r#"{{
   description = "Flake for Holochain app development";
@@ -35,8 +21,6 @@ pub fn flake_nix(holo_enabled: bool, package_manager: &PackageManager) -> FileTr
 
     nixpkgs.follows = "holonix/nixpkgs";
     flake-parts.follows = "holonix/flake-parts";
-
-    {}
   }};
 
   outputs = inputs@{{ flake-parts, ... }}: flake-parts.lib.mkFlake {{ inherit inputs; }} {{
@@ -51,7 +35,6 @@ pub fn flake_nix(holo_enabled: bool, package_manager: &PackageManager) -> FileTr
           nodejs_22
           binaryen
           {}
-          {}
         ]);
 
         shellHook = ''
@@ -61,9 +44,7 @@ pub fn flake_nix(holo_enabled: bool, package_manager: &PackageManager) -> FileTr
     }};
   }};
 }}"#,
-        holo_inputs,
         package_manager.nixpkg().unwrap_or_default(),
-        holo_packages
     ))
 }
 

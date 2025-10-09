@@ -103,7 +103,6 @@ jobs:
       matrix:
         scope:
           - hello_world
-          - holo_integration
     steps:
       - uses: actions/checkout@v5
 
