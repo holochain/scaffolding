@@ -15,6 +15,6 @@ Note that the scaffolding cli does not generate ui components for this template.
   {{(package_manager_command package_manager "create vite@latest ./ui" null)}}
 
 - Ensure your ui's local dev server port is set using the UI_PORT environment variable from the root package.json.
-- Update the "network"{{#if holo_enabled}} and "network:holo"{{/if}} script in the root package.json to include your ui's start script.
+- Update the "network" script in the root package.json to include your ui's start script.
 - Update the "package" script in the root package.json to include a script that builds your ui and creates a zip archive of the build artifacts.
 - Set the ./workdir/web-happ.yaml file's "ui.bundled" field to the zip archive path

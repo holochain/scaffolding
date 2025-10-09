@@ -23,7 +23,6 @@ pub struct ScaffoldWebAppData<'a> {
     pub hc_spin_version: &'a str,
     pub package_manager: PackageManager,
     pub tryorama_version: &'a str,
-    pub holo_enabled: bool,
 }
 
 pub fn scaffold_web_app_template(
@@ -31,7 +30,6 @@ pub fn scaffold_web_app_template(
     template_file_tree: &FileTree,
     app_name: &str,
     package_manager: PackageManager,
-    holo_enabled: bool,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     let data = ScaffoldWebAppData {
         app_name,
@@ -42,7 +40,6 @@ pub fn scaffold_web_app_template(
         hc_spin_version: versions::HC_SPIN_VERSION,
         package_manager,
         tryorama_version: versions::TRYORAMA_VERSION,
-        holo_enabled,
     };
 
     let h = build_handlebars(template_file_tree)?;

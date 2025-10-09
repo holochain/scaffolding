@@ -44,9 +44,6 @@ pub struct WebApp {
     /// The package manager to use for the hc-scaffold commands.
     pub package_manager: Option<PackageManager>,
 
-    #[structopt(long = "holo", hidden = true)]
-    pub holo_enabled: bool,
-
     #[structopt(long, short = "F")]
     /// Whether to skip setting up an initial DNA and it's zome(s) after the web app is scaffolded
     pub disable_fast_track: bool,
@@ -96,7 +93,6 @@ impl WebApp {
             package_manager,
             !setup_nix,
             &template_file_tree,
-            self.holo_enabled,
         )?;
 
         if !template_type.is_nixified_custom_template() {
