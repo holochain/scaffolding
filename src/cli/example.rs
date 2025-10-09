@@ -278,6 +278,9 @@ impl Example {
 
         build_file_tree(file_tree, &app_dir)?;
 
+        // cargo fmt needs to be run inside the Rust project folder
+        std::env::set_current_dir(&app_dir)?;
+
         if let Err(e) = run_cargo_fmt_if_available() {
             println!(
                 "{}: {}",
