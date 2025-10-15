@@ -53,6 +53,7 @@ pub struct Example {
 
 impl Example {
     pub async fn run(self, template_type: &TemplateType) -> anyhow::Result<()> {
+        let command_root_dir = std::env::current_dir()?;
         let template_file_tree = template_type.file_tree()?;
         let template_name = template_type.name();
         let is_vanilla_template = matches!(template_type, TemplateType::Vanilla);
@@ -70,7 +71,7 @@ impl Example {
         };
         let example_name = example.to_string();
 
-        let app_dir = std::env::current_dir()?.join(&example_name);
+        let app_dir = command_root_dir.join(&example_name);
         if app_dir.as_path().exists() {
             return Err(ScaffoldError::FolderAlreadyExists(app_dir.clone()))?;
         }
@@ -291,7 +292,7 @@ impl Example {
 
         // set up nix
         if let Some(true) | None = self.setup_nix {
-            if let Err(err) = setup_nix_developer_environment(&app_dir) {
+            if let Err(err) = setup_nix_developer_environment(&command_root_dir, &app_dir) {
                 fs::remove_dir_all(&app_dir).await?;
                 return Err(err)?;
             }
