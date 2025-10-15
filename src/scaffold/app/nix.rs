@@ -9,7 +9,7 @@ use crate::error::{ScaffoldError, ScaffoldResult};
 use crate::file_tree::*;
 use crate::scaffold::web_app::package_manager::PackageManager;
 
-use super::git::is_inside_work_tree;
+use super::git::is_inside_git_repo;
 
 pub fn flake_nix(package_manager: &PackageManager) -> FileTree {
     file!(format!(
@@ -48,7 +48,10 @@ pub fn flake_nix(package_manager: &PackageManager) -> FileTree {
     ))
 }
 
-pub fn setup_nix_developer_environment(dir: &Path) -> ScaffoldResult<()> {
+pub fn setup_nix_developer_environment(
+    command_root_dir: &Path,
+    app_dir: &Path,
+) -> ScaffoldResult<()> {
     if cfg!(target_os = "windows") {
         return Err(ScaffoldError::NixSetupError(
             "Windows doesn't support nix".to_string(),
@@ -58,8 +61,8 @@ pub fn setup_nix_developer_environment(dir: &Path) -> ScaffoldResult<()> {
     // This is here to catch the issue from this thread https://discourse.nixos.org/t/nix-flakes-nix-store-source-no-such-file-or-directory/17836
     // If you run Scaffolding inside a Git repository when the `nix flake update` will fail. At some point Nix should report this so we don't need
     // to worry about it but for now this helps solve a strange error message.
-    if is_inside_work_tree(dir) {
-        return Err(ScaffoldError::NixSetupError("- detected that Scaffolding is running inside an existing Git repository, please choose a different location to scaffold".to_string()));
+    if is_inside_git_repo(command_root_dir) {
+        return Err(ScaffoldError::NixSetupError("- detected that Scaffolding is running inside an existing Git repository. Nix cannot be set up in an existing Git repository. Please choose a different location to scaffold or use --setup-nix=false".to_string()));
     }
 
     println!("Setting up nix development environment...");
@@ -69,7 +72,7 @@ pub fn setup_nix_developer_environment(dir: &Path) -> ScaffoldResult<()> {
     let output = Command::new("nix")
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
-        .current_dir(dir)
+        .current_dir(app_dir)
         .args(["flake", "update"])
         .output()?;
 

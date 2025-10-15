@@ -51,7 +51,7 @@ pub struct WebApp {
 
 impl WebApp {
     pub async fn run(self, template_type: &TemplateType) -> anyhow::Result<()> {
-        let current_dir = std::env::current_dir()?;
+        let command_root_dir = std::env::current_dir()?;
         let name = match self.name {
             Some(n) => {
                 validate_input(&n, "app name")?;
@@ -60,7 +60,7 @@ impl WebApp {
             None => input_no_whitespace("App name (no whitespaces):")?,
         };
 
-        let app_folder = current_dir.join(&name);
+        let app_folder = command_root_dir.join(&name);
 
         if app_folder.as_path().exists() {
             return Err(ScaffoldError::FolderAlreadyExists(app_folder.clone()))?;
@@ -104,7 +104,7 @@ impl WebApp {
         let mut nix_instructions = "";
 
         if setup_nix {
-            if let Err(err) = setup_nix_developer_environment(&app_folder) {
+            if let Err(err) = setup_nix_developer_environment(&command_root_dir, &app_folder) {
                 fs::remove_dir_all(&app_folder).await?;
                 return Err(err)?;
             }
@@ -118,7 +118,7 @@ impl WebApp {
         if !disable_fast_track
             && input_yes_or_no("Do you want to scaffold an initial DNA? (y/n)", None)?
         {
-            WebApp::scaffold_initial_dna_and_zomes(&name, template_file_tree, &current_dir)?;
+            WebApp::scaffold_initial_dna_and_zomes(&name, template_file_tree, &command_root_dir)?;
         } else {
             disable_fast_track = true;
         }
