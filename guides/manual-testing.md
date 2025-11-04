@@ -28,7 +28,7 @@ To test the current local version of the Scaffolding tool:
 
 5. Follow the Scaffolding tool's output instructions, but skip the `nix develop` step to ensure you continue using the locally built `hc-scaffold` instead of that from `holochain/holonix`.
 
-6. Run tests or launch your hApp using `nix develop` as needed. This shell contians a `hc-scaffold` built from `holochain/holonix` alongside other nix packages needed for local development of your hApp such as node.js and package managers like pnpm, bun or yarn.
+6. Run tests or launch your hApp using `nix develop` as needed. This shell contains a `hc-scaffold` built from `holochain/holonix` alongside other nix packages needed for local development of your hApp such as node.js and package managers like pnpm, bun or yarn.
 
 ## Testing with Different Holochain Versions
 
