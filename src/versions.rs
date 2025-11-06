@@ -8,10 +8,10 @@ pub const HOLOCHAIN_CLIENT_VERSION: &str = "^0.20.0-dev.2";
 pub const HC_SPIN_VERSION: &str = "^0.500.3";
 
 /// crates.io <https://crates.io/crates/hdi/versions>
-pub const HDI_VERSION: &str = "0.7.0-dev.17";
+pub const HDI_VERSION: &str = "0.7.0-rc.0";
 
 /// crates.io <https://crates.io/crates/hdk/versions>
-pub const HDK_VERSION: &str = "0.6.0-dev.20";
+pub const HDK_VERSION: &str = "0.6.0-rc.0";
 
 /// crates.io <https://crates.io/crates/holochain/versions>
-pub const HOLOCHAIN_VERSION: &str = "0.6.0-dev.27";
+pub const HOLOCHAIN_VERSION: &str = "0.6.0-rc.0";
