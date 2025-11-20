@@ -46,11 +46,10 @@ To test your hApp against a different version of Holochain:
 
 ## Overriding Other Inputs
 
-You can override other inputs like `lair-keystore` and `hc-launch` similarly:
+You can override other inputs like `lair-keystore` similarly:
 
 ```shell
 nix develop --override-input holonix/lair-keystore github:holochain/lair/<tag>
-nix develop --override-input holonix/hc-launch github:holochain/hc-launch/<tag>
 ```
 
 Ensure you're using the correct version tags. Refer to the [parent flake](https://github.com/holochain/holonix/blob/main/flake.nix) for the latest input versions.
