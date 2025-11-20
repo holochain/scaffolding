@@ -52,9 +52,8 @@ jobs:
 
       - uses: cachix/cachix-action@v16
         with:
-          name: holochain-scaffolding-cli
+          name: holochain-ci
           authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
-          extraPullNames: holochain-ci
 
       - name: Build
         run: |
@@ -87,9 +86,8 @@ jobs:
 
       - uses: cachix/cachix-action@v16
         with:
-          name: holochain-scaffolding-cli
+          name: holochain-ci
           authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
-          extraPullNames: holochain-ci
 
       - name: Build and test
         run: |
@@ -122,9 +120,8 @@ jobs:
 
       - uses: cachix/cachix-action@v16
         with:
-          name: holochain-scaffolding-cli
+          name: holochain-ci
           authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
-          extraPullNames: holochain-ci
 
       - name: Build and test
         run: |
