@@ -92,7 +92,6 @@
             packages = (with inputs'.holonix.packages; [
               holochain
               lair-keystore
-              hc-launch
               hn-introspect
               rust
             ]) ++ (with pkgs; [

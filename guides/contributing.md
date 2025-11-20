@@ -41,13 +41,13 @@ and see a version number like `holochain_scaffolding_cli 0.1.11`.
 To run the tests, run the provided script for a either a given template by passing a `-t` option, specifying one of the supported templates (`lit`, `svelte`, `vue`, or `vanilla`).
 
 ```bash
-./run_tests.sh -t "lit"
+./run_test.sh -t "lit"
 ```
 
 or employ the `-s` option with a designated scope, such as `hello_world`, to execute tests specifically for the hello world example
 
 ```bash
-./run_tests.sh -s "hello_world"
+./run_test.sh -s "hello_world"
 ```
 
 To run unit tests in Rust using Cargo, use the following command:
