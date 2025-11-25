@@ -17,7 +17,7 @@ pub fn flake_nix(package_manager: &PackageManager) -> FileTree {
   description = "Flake for Holochain app development";
 
   inputs = {{
-    holonix.url = "github:holochain/holonix?ref=main";
+    holonix.url = "github:holochain/holonix?ref=main-0.6";
 
     nixpkgs.follows = "holonix/nixpkgs";
     flake-parts.follows = "holonix/flake-parts";
