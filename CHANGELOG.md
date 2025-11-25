@@ -1,8 +1,13 @@
 # Changelog
 
-All notable changes to this project will be documented in this file. 
+All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## \[[0.600.0](https://github.com/holochain/scaffolding/commits/v0.600.0)\] - 2025-11-20
+
+### Features
+- Upgrade to holochain 0.6.0 by @mattyg in [#522](https://github.com/holochain/scaffolding/pull/522)
 
 ## \[[0.600.0-dev.0](https://github.com/holochain/scaffolding/compare/v0.500.0...v0.600.0-dev.0)\] - 2025-10-16
 
