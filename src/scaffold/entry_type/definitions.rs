@@ -297,7 +297,7 @@ impl FromStr for FieldDefinition {
         };
 
         // XXX: perhaps widget-types can be validated at this level rather than
-        //      on attemting to render templates
+        //      on attempting to render templates
         let widget = str_path
             .next()
             .filter(|v| !v.is_empty())

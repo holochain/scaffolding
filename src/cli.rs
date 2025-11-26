@@ -69,7 +69,7 @@ impl HcScaffold {
         scaffold_config: Option<&ScaffoldConfig>,
     ) -> Result<TemplateType, ScaffoldError> {
         // Read template_type config if no `--template` flag is provided and use it or
-        // ensure that if a `--template` is explicity provided, it matches the original
+        // ensure that if a `--template` is explicitly provided, it matches the original
         // template the app was scaffolded with
         let template = match (scaffold_config, &self.template) {
             (Some(config), Some(template)) if config.template != *template => {
