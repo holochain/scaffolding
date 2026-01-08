@@ -1,10 +1,8 @@
-use std::str::FromStr;
-
 use handlebars::{
     Context, Handlebars, Helper, HelperDef, HelperResult, Output, RenderContext, RenderError,
 };
 
-use crate::scaffold::web_app::package_manager::{PackageManager, SubCommand};
+use crate::scaffold::web_app::npm::{Npm, SubCommand};
 
 #[derive(Clone, Copy)]
 pub struct PackageManagerCommandHelper;
@@ -19,23 +17,11 @@ impl HelperDef for PackageManagerCommandHelper {
         out: &mut dyn Output,
     ) -> HelperResult {
         let mut params = h.params().iter();
-        let package_manager = params
-            .next()
-            .ok_or(RenderError::new(
-                "PackageManagerCommand helper: Param not found for index 0; must be the package manager",
-            ))?
-            .value()
-            .as_str()
-            .ok_or(RenderError::new(
-                "PackageManagerCommand helper: failed to convert value to &str",
-            ))?;
-        let package_manager = PackageManager::from_str(package_manager)
-            .map_err(|e| RenderError::new(format!("Invalid package manager: {e}")))?;
 
         let sub_command = params
             .next()
             .ok_or(RenderError::new(
-                "PackageManagerCommand helper: Param not found for index 1; must be subcommand",
+                "PackageManagerCommand helper: Param not found for index 0; must be subcommand",
             ))?
             .value()
             .as_str()
@@ -47,12 +33,12 @@ impl HelperDef for PackageManagerCommandHelper {
         let workspace = params
             .next()
             .ok_or(RenderError::new(
-                "PackageManagerCommand helper: Param not found for index 3; must be workspace",
+                "PackageManagerCommand helper: Param not found for index 2; must be workspace",
             ))?
             .value()
             .as_str();
 
-        let command_string = package_manager.run_command_string(sub_command, workspace);
+        let command_string = Npm::run_command_string(sub_command, workspace);
         out.write(&command_string)?;
         Ok(())
     }
@@ -74,29 +60,19 @@ mod tests {
     use serde_json::json;
 
     #[test]
-    fn test_package_manager_command_helper_yarn() {
+    fn test_package_manager_command_helper() {
         let hbs = setup_handlebars();
-        let template = r#"{{(package_manager_command "yarn" "install" null)}}"#;
+        let template = r#"{{(package_manager_command "install" null)}}"#;
         let s = hbs.render_template(template, &json!(null)).unwrap();
-        assert_eq!("yarn install", s);
+        assert_eq!("npm install", s);
 
-        let template = r#"{{package_manager_command "yarn" "package" "ui"}}"#;
+        let template = r#"{{package_manager_command "package" "ui"}}"#;
         let s = hbs.render_template(template, &json!(null)).unwrap();
-        assert_eq!("yarn workspace ui package", s);
+        assert_eq!("npm run package --workspace ui", s);
 
-        let template = r#"{{package_manager_command "yarn" "build:happ" null}}"#;
+        let template = r#"{{package_manager_command "build:happ" null}}"#;
         let s = hbs.render_template(template, &json!(null)).unwrap();
-        assert_eq!("yarn build:happ", s);
-    }
-
-    #[test]
-    fn test_package_manager_command_helper_with_invalid_package_manager() {
-        let hbs = setup_handlebars();
-        // invalid/ unsupported package manager
-        let template = r#"{{(package_manager_command "unknown" "install" null)}}"#;
-        if let Err(e) = hbs.render_template(template, &json!(null)) {
-            assert!(e.to_string().contains("Invalid package manager"));
-        };
+        assert_eq!("npm run build:happ", s);
     }
 
     fn setup_handlebars<'a>() -> Handlebars<'a> {

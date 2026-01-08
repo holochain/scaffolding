@@ -1,7 +1,6 @@
 use std::{
     env,
     path::{Path, PathBuf},
-    str::FromStr,
 };
 
 use colored::Colorize;
@@ -17,7 +16,7 @@ use crate::{
         config::ScaffoldConfig,
         dna::scaffold_dna,
         web_app::{
-            package_manager::{PackageManager, SubCommand},
+            npm::{Npm, SubCommand},
             scaffold_web_app,
             template_type::TemplateType,
         },
@@ -39,10 +38,6 @@ pub struct WebApp {
     #[structopt(long)]
     /// Whether to setup the holonix development environment for this web-app
     pub setup_nix: bool,
-
-    #[structopt(short, long, parse(try_from_str = PackageManager::from_str))]
-    /// The package manager to use for the hc-scaffold commands.
-    pub package_manager: Option<PackageManager>,
 
     #[structopt(long, short = "F")]
     /// Whether to skip setting up an initial DNA and it's zome(s) after the web app is scaffolded
@@ -79,18 +74,12 @@ impl WebApp {
             )?
         };
 
-        let package_manager = match self.package_manager {
-            Some(p) => p,
-            None => PackageManager::choose()?,
-        };
-
         let ScaffoldedTemplate {
             mut file_tree,
             next_instructions,
         } = scaffold_web_app(
             &name,
             self.description.as_deref(),
-            package_manager,
             !setup_nix,
             &template_file_tree,
         )?;
@@ -156,8 +145,8 @@ Here's how you can get started with developing your application:
 
   {}
                 "#,
-                package_manager.run_command_string(SubCommand::Install, None),
-                package_manager.run_command_string(SubCommand::Run("start".to_string()), None)
+                Npm::run_command_string(SubCommand::Install, None),
+                Npm::run_command_string(SubCommand::Run("start".to_string()), None)
             );
         }
 

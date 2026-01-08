@@ -289,11 +289,6 @@ hc-scaffold web-app [FLAGS] [OPTIONS] [ARGS]
 - `-h`, `--help`  
   Prints help information.
 
-#### Options
-
-- `-p`, `--package-manager <package-manager>`  
-  The package manager to use for scaffolding the web app. Can be one of the following: "bun", "npm", "pnpm", or "yarn".
-
 #### Arguments
 
 - `<name>`  
@@ -356,9 +351,6 @@ hc-scaffold example [FLAGS] [OPTIONS] [ARGS]
 
 
 ### Options
-
-- `-p`, `--package-manager <package-manager>`  
-  The package manager to use for scaffolding the example. Can be one of the following: "bun", "npm", "pnpm", or "yarn".
 
 - `--setup-nix <setup-nix>`
   Whether to setup the holonix development environment for the example hApp
