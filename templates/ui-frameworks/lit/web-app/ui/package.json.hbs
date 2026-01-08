@@ -5,7 +5,7 @@
     "start": "vite --port $UI_PORT --clearScreen false",
     "build": "vite build",
     "format": "prettier \"**/*.ts\" --write --ignore-path .gitignore",
-    "package": "{{(package_manager_command package_manager "build" null)}} && rimraf dist.zip && cd dist && bestzip ../dist.zip *"
+    "package": "{{(package_manager_command "build" null)}} && rimraf dist.zip && cd dist && bestzip ../dist.zip *"
   },
   "dependencies": {
     "@holochain/client": "{{holochain_client_version}}",
