@@ -6,5 +6,8 @@ resolve: {
     alias: {
       "libsodium-wrappers": "libsodium-wrappers/dist/modules/libsodium-wrappers.js",
     },
+    optimizeDeps: {
+        include: ["libsodium-wrappers"],
+    },
   },
 });
