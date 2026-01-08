@@ -10,7 +10,7 @@ pub struct Npm;
 
 /// Represents sub-commands that can be executed by [`Npm`].
 #[derive(Debug, Clone, Eq, PartialEq, Serialize)]
-#[serde(rename_all(serialize = "snake_case"))]
+#[serde(rename_all = "snake_case")]
 pub enum SubCommand {
     /// Represents the install command.
     Install,

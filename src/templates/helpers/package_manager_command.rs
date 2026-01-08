@@ -33,7 +33,7 @@ impl HelperDef for PackageManagerCommandHelper {
         let workspace = params
             .next()
             .ok_or(RenderError::new(
-                "PackageManagerCommand helper: Param not found for index 2; must be workspace",
+                "PackageManagerCommand helper: Param not found for index 1; must be workspace",
             ))?
             .value()
             .as_str();
