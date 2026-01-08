@@ -36,7 +36,6 @@ setup_and_build_happ() {
   cleanup_tmp "$1"
 
   cd $TEMPLATE_PATH
-  set -x
   hc-scaffold --template="$2" web-app "$1" --setup-nix true -F
   cd "$1"
 
