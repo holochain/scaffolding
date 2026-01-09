@@ -29,7 +29,7 @@ impl Npm {
     }
 
     /// Generates the command string for a given sub-command and optional workspace.
-    pub fn run_command_string(sub_command: SubCommand, workspace: Option<&str>) -> String {
+    pub fn generate_run_command_string(sub_command: SubCommand, workspace: Option<&str>) -> String {
         match sub_command {
             SubCommand::Install => "npm install".to_string(),
             SubCommand::Run(script) => match workspace {
@@ -63,12 +63,12 @@ mod tests {
     #[test]
     fn test_run() {
         let expected_command = "npm install";
-        let actual_command = Npm::run_command_string(SubCommand::Install, None);
+        let actual_command = Npm::generate_run_command_string(SubCommand::Install, None);
         assert_eq!(expected_command, actual_command);
 
         let expected_command = "npm run package --workspace ui";
         let actual_command =
-            Npm::run_command_string(SubCommand::Run("package".to_string()), Some("ui"));
+            Npm::generate_run_command_string(SubCommand::Run("package".to_string()), Some("ui"));
         assert_eq!(expected_command, actual_command);
     }
 }

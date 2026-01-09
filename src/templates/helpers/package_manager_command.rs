@@ -38,7 +38,7 @@ impl HelperDef for PackageManagerCommandHelper {
             .value()
             .as_str();
 
-        let command_string = Npm::run_command_string(sub_command, workspace);
+        let command_string = Npm::generate_run_command_string(sub_command, workspace);
         out.write(&command_string)?;
         Ok(())
     }

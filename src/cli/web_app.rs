@@ -145,8 +145,8 @@ Here's how you can get started with developing your application:
 
   {}
                 "#,
-                Npm::run_command_string(SubCommand::Install, None),
-                Npm::run_command_string(SubCommand::Run("start".to_string()), None)
+                Npm::generate_run_command_string(SubCommand::Install, None),
+                Npm::generate_run_command_string(SubCommand::Run("start".to_string()), None)
             );
         }
 
