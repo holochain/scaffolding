@@ -3,8 +3,8 @@ This is a headless skeleton for a hApp.
 To build the app you can run
 
   cd {{app_name}}
-  {{(package_manager_command package_manager "install" null)}}
-  {{(package_manager_command package_manager "build:happ" null)}}
+  {{(package_manager_command "install" null)}}
+  {{(package_manager_command "build:happ" null)}}
 
 The ui directory is empty; you are expected to add your frontend there if you still intend to include one.
 
@@ -12,7 +12,7 @@ Note that the scaffolding cli does not generate ui components for this template.
 
 - To set up your frontend, you can use a build tool such as vite:
 
-  {{(package_manager_command package_manager "create vite@latest ./ui" null)}}
+  {{(package_manager_command "create vite@latest ./ui" null)}}
 
 - Ensure your ui's local dev server port is set using the UI_PORT environment variable from the root package.json.
 - Update the "network" script in the root package.json to include your ui's start script.

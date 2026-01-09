@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "scripts": {
     "start": "vite --port $UI_PORT --clearScreen false",
-    "build": "{{(package_manager_command package_manager "check" null)}} && vite build",
+    "build": "{{(package_manager_command "check" null)}} && vite build",
     "check": "vue-tsc --noEmit",
     "preview": "vite preview",
-    "package": "{{(package_manager_command package_manager "build" null)}} && rimraf dist.zip && cd dist && bestzip ../dist.zip *"
+    "package": "{{(package_manager_command "build" null)}} && rimraf dist.zip && cd dist && bestzip ../dist.zip *"
   },
   "dependencies": {
     "@holochain/client": "{{holochain_client_version}}",
