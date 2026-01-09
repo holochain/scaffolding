@@ -2,9 +2,9 @@ Run the example app with:
 
   cd {{example}}
   nix develop
-  {{(package_manager_command package_manager "install" null)}}
-  {{(package_manager_command package_manager "start" null)}}
+  {{(package_manager_command "install" null)}}
+  {{(package_manager_command "start" null)}}
 
 Generated ui code might also need to be reformatted:
 
-  {{(package_manager_command package_manager "format" "ui")}}
+  {{(package_manager_command "format" "ui")}}

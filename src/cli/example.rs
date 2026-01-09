@@ -1,4 +1,4 @@
-use std::{ffi::OsString, path::PathBuf, str::FromStr};
+use std::{ffi::OsString, path::PathBuf};
 
 use build_fs_tree::{Build, MergeableFileSystemTree};
 use colored::Colorize;
@@ -21,7 +21,7 @@ use crate::{
             scaffold_entry_type,
         },
         example::ExampleType,
-        web_app::{package_manager::PackageManager, scaffold_web_app, template_type::TemplateType},
+        web_app::{scaffold_web_app, template_type::TemplateType},
         zome::{
             scaffold_coordinator_zome_in_path, scaffold_integrity_zome_with_path, ZomeFileTree,
         },
@@ -39,13 +39,6 @@ pub struct Example {
     #[structopt(long)]
     /// Whether to setup the holonix development environment for the example hApp
     pub setup_nix: Option<bool>,
-
-    #[structopt(short, long, parse(try_from_str = PackageManager::from_str))]
-    /// The package manager to use with the example
-    /// Can be one of the following: "bun", "npm", "pnpm", or "yarn".
-    /// When a lockfile is detected, the respective package manager will be used as the default value;
-    /// otherwise, npm will be set as the default.
-    pub package_manager: Option<PackageManager>,
 }
 
 impl Example {
@@ -85,11 +78,6 @@ impl Example {
             .into());
         }
 
-        let package_manager = match self.package_manager {
-            Some(p) => p,
-            None => PackageManager::choose()?,
-        };
-
         // Match on example types
         let file_tree = match example {
             ExampleType::HelloWorld => {
@@ -97,7 +85,6 @@ impl Example {
                 let ScaffoldedTemplate { file_tree, .. } = scaffold_web_app(
                     &example_name,
                     Some("A simple 'hello world' application."),
-                    package_manager,
                     false,
                     &template_file_tree,
                 )?;
@@ -109,7 +96,6 @@ impl Example {
                 let ScaffoldedTemplate { file_tree, .. } = scaffold_web_app(
                     &example_name,
                     Some("A simple 'forum' application."),
-                    package_manager,
                     false,
                     &template_file_tree,
                 )?;
@@ -268,7 +254,7 @@ impl Example {
         let ScaffoldedTemplate {
             mut file_tree,
             next_instructions,
-        } = scaffold_example(file_tree, package_manager, &template_file_tree, &example)?;
+        } = scaffold_example(file_tree, &template_file_tree, &example)?;
 
         ScaffoldConfig::write_to_package_json(&mut file_tree, template_type)?;
 

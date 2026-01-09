@@ -7,13 +7,12 @@ use std::process::{Command, Stdio};
 
 use crate::error::{ScaffoldError, ScaffoldResult};
 use crate::file_tree::*;
-use crate::scaffold::web_app::package_manager::PackageManager;
 
 use super::git::is_inside_git_repo;
 
-pub fn flake_nix(package_manager: &PackageManager) -> FileTree {
-    file!(format!(
-        r#"{{
+pub fn flake_nix() -> FileTree {
+    file!(
+        r#"{
   description = "Flake for Holochain app development";
 
   inputs = {{
@@ -21,31 +20,29 @@ pub fn flake_nix(package_manager: &PackageManager) -> FileTree {
 
     nixpkgs.follows = "holonix/nixpkgs";
     flake-parts.follows = "holonix/flake-parts";
-  }};
+  };
 
-  outputs = inputs@{{ flake-parts, ... }}: flake-parts.lib.mkFlake {{ inherit inputs; }} {{
+  outputs = inputs@{ flake-parts, ... }: flake-parts.lib.mkFlake { inherit inputs; } {
     systems = builtins.attrNames inputs.holonix.devShells;
-    perSystem = {{ inputs', pkgs, ... }}: {{
+    perSystem = { inputs', pkgs, ... }: {
       formatter = pkgs.nixpkgs-fmt;
 
-      devShells.default = pkgs.mkShell {{
+      devShells.default = pkgs.mkShell {
         inputsFrom = [ inputs'.holonix.devShells.default ];
 
         packages = (with pkgs; [
           nodejs_22
           binaryen
-          {}
         ]);
 
         shellHook = ''
           export PS1='\[\033[1;34m\][holonix:\w]\$\[\033[0m\] '
         '';
-      }};
-    }};
-  }};
-}}"#,
-        package_manager.nixpkg().unwrap_or_default(),
-    ))
+      };
+    };
+  };
+}"#
+    )
 }
 
 pub fn setup_nix_developer_environment(
