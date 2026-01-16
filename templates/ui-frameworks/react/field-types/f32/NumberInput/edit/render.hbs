@@ -1,2 +1,0 @@
-<label htmlFor="{{label}}">{{label}}</label>
-<input type="number" name="{{label}}" {{#if variable_to_read}}value={ {{variable_to_read}} }{{/if}} onChange={e => set{{pascal_case variable_to_change}}(parseFloat(e.target.value))} />
