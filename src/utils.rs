@@ -295,10 +295,9 @@ fn should_add_newline(current: &str, next: &str) -> bool {
         .any(|&item| current.starts_with(item) || next.starts_with(item))
 }
 
-/// Tries to progrmatically format generated ui code if the file extension matches
+/// Tries to programmatically format generated ui code if the file extension matches
 /// - ts/js/tsx/jsx
 /// - svelte
-/// - vue
 pub fn format_code<P: Into<PathBuf>>(code: &str, file_name: P) -> ScaffoldResult<String> {
     let file_path: PathBuf = file_name.into();
     let ts_format_config = ConfigurationBuilder::new()
@@ -332,17 +331,6 @@ pub fn format_code<P: Into<PathBuf>>(code: &str, file_name: P) -> ScaffoldResult
 
                 return Ok(formatted_code);
             }
-            "vue" => {
-                let formatted_code = markup_fmt::format_text(
-                    code,
-                    markup_fmt::Language::Vue,
-                    &Default::default(),
-                    |path, raw, _| format_nested(path, extension, raw, &ts_format_config),
-                )
-                .map_err(|e| anyhow::anyhow!("Failed to format Vue source code: {e:?}"))?;
-
-                return Ok(formatted_code);
-            }
             _ => {}
         }
     }
@@ -358,35 +346,14 @@ fn format_nested<'a>(
     ts_format_config: &dprint_plugin_typescript::configuration::Configuration,
 ) -> ScaffoldResult<Cow<'a, str>> {
     if let Some(nested_extension) = path.extension().and_then(|ext| ext.to_str()) {
-        match (root_extension, nested_extension) {
-            ("vue", "ts" | "js") => {
-                let formatted_code = dprint_plugin_typescript::format_text(
-                    path,
-                    None,
-                    raw.to_owned(),
-                    ts_format_config,
-                )
-                .map_err(|e| anyhow::anyhow!("Failed to format source code: {e:?}"))?;
+        if let ("svelte", "ts" | "js" | "tsx" | "jsx") = (root_extension, nested_extension) {
+            let formatted_code =
+                dprint_plugin_typescript::format_text(path, None, raw.to_owned(), ts_format_config)
+                    .map_err(|e| anyhow::anyhow!("Failed to format source code: {e:?}"))?;
 
-                if let Some(value) = formatted_code {
-                    return Ok(Cow::Owned(value));
-                }
+            if let Some(value) = formatted_code {
+                return Ok(Cow::Owned(value));
             }
-            ("svelte", "ts" | "js" | "tsx" | "jsx") => {
-                let formatted_code = dprint_plugin_typescript::format_text(
-                    path,
-                    None,
-                    raw.to_owned(),
-                    ts_format_config,
-                )
-                .map_err(|e| anyhow::anyhow!("Failed to format source code: {e:?}"))?;
-
-                if let Some(value) = formatted_code {
-                    return Ok(Cow::Owned(value));
-                }
-            }
-            // Provision to format other nested code i.e css
-            _ => {}
         }
     }
     Ok(Cow::Borrowed(raw))
@@ -460,41 +427,6 @@ mod tests {
             formatted_code,
             "const foo = () => <div>Hello, world!</div>;\n"
         );
-    }
-
-    #[test]
-    fn test_format_vue_code() {
-        let code = r#"<template>
-<div>{{ message }}</div>
-<button>click me</button>
-</template>
-
-<script lang="ts">
-export default {
-  data() {
-    return {message: 'Hello, world!'}
-  }
-};
-</script>
-"#;
-        let file_name = "test.vue";
-        let result = format_code(code, file_name);
-        assert!(result.is_ok());
-        let formatted_code = result.unwrap();
-        let expected_output = r#"<template>
-  <div>{{ message }}</div>
-  <button>click me</button>
-</template>
-
-<script lang="ts">
-export default {
-  data() {
-    return { message: "Hello, world!" };
-  },
-};
-</script>
-"#;
-        assert_eq!(formatted_code, expected_output);
     }
 
     #[test]

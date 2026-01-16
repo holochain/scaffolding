@@ -22,9 +22,9 @@ mod zome;
 #[derive(Debug, StructOpt)]
 pub struct HcScaffold {
     #[structopt(short, long, parse(try_from_str = TemplateType::from_str))]
-    /// The template to use for the hc-scaffold commands
-    /// Can either be an option from the built-in templates: "vanilla", "vue", "lit", "svelte", "react", "headless"
-    /// Or a path to a custom template
+    /// The template to use for the hc-scaffold commands.
+    /// Can either be an option from the built-in templates: "vanilla", "svelte", "headless",
+    /// or a path to a custom template.
     template: Option<TemplateType>,
 
     #[structopt(subcommand)]
@@ -91,7 +91,7 @@ impl HcScaffold {
                     HcScaffoldCommand::Example(example::Example { ref example, .. }) => {
                         match example {
                             Some(ExampleType::HelloWorld) => TemplateType::Vanilla,
-                            Some(ExampleType::Forum) => TemplateType::choose_non_vanilla()?,
+                            Some(ExampleType::Forum) => TemplateType::Svelte,
                             None => TemplateType::choose_non_headless()?,
                         }
                     }

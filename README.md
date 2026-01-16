@@ -26,7 +26,8 @@ hc-scaffold --version
 
 ## Usage
 
-Refer to [the holochain developer instructions](https://developer.holochain.org/get-building/) to know how you can use the scaffolding tool to create your own apps.
+Refer to [the holochain developer instructions](https://developer.holochain.org/get-building/) to learn how you can use
+the scaffolding tool to create your own apps.
 
 These are the commands that you can run with the scaffolding tool inside of a holonix develop shell:
 
@@ -39,9 +40,9 @@ FLAGS:
     -V, --version    Prints version information
 
 OPTIONS:
-    -t, --template <template>    The template to use for the hc-scaffold commands Can either be an option from the
-                                 built-in templates: "vanilla", "vue", "lit", "svelte", "react", "headless" Or a path to
-                                 a custom template
+    -t, --template <template>    The template to use for the hc-scaffold commands. Can either be an option from the
+                                 built-in templates: "vanilla", "svelte", "headless", or a path to
+                                 a custom template.
 
 SUBCOMMANDS:
     collection    Scaffold a collection of entries in an existing zome
@@ -57,12 +58,15 @@ SUBCOMMANDS:
 
 ## Custom Templates
 
-See the [docs.rs documentation](https://docs.rs/holochain_scaffolding_cli) to learn how to use and create custom templates.
+See the [docs.rs documentation](https://docs.rs/holochain_scaffolding_cli) to learn how to use and create custom
+templates.
 
 ## Contributing
 
-We have a contributing [guide](guides/contributing.md) to help you get started. If you need anything else to get started please reach out on [Discord](https://discord.gg/k55DS5dmPH)!
+We have a contributing [guide](guides/contributing.md) to help you get started. If you need anything else to get started
+please reach out on [Discord](https://discord.gg/k55DS5dmPH)!
 
 ## Maintenance
 
-We have a maintenance [guide](guides/maintenance.md) which is mainly aimed at maintainers of the project but may be useful for some contributors or users to read.
+We have a maintenance [guide](guides/maintenance.md) which is mainly aimed at maintainers of the project but may be
+useful for some contributors or users to read.

@@ -21,7 +21,7 @@ hc-scaffold [OPTIONS] <SUBCOMMAND>
 ### Options
 
 - `-t`, `--template <template>`  
-  The template to use for the `hc-scaffold` commands. Can either be an option from the built-in templates: "vanilla", "vue", "lit", "svelte", "react", "headless" or a path to a custom template.
+  The template to use for the `hc-scaffold` commands. Can either be an option from the built-in templates: "vanilla", "svelte", "headless", or a path to a custom template.
 
 ### Subcommands
 

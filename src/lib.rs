@@ -38,14 +38,11 @@
 //!
 //! The scaffolding tool comes with 6 built-in templates:
 //!
-//! - Vue (with TypeScript)
 //! - Svelte (with TypeScript)
-//! - Lit (with TypeScript)
-//! - React (with TypeScript)
 //! - Vanilla
 //! - Headless (no ui) - [best for building headless hApps or using a unsupported ui framework without having to create a custom template]
 //!
-//! These templates provide most of the skeleton you need to start your own holochain app.
+//! These templates provide most of the skeleton you need to start your own Holochain app.
 //!
 //! But! They are not complete, nor provide good design from the UI/UX perspective. They are trying to be unopinionated in that regard, so that you as the developer can apply your own style of building frontend apps.
 //!
@@ -55,10 +52,7 @@
 //!
 //! All `hc scaffold` commands accept an optional `--template` argument. This argument can be:
 //! - Either one of the built-in templates:
-//!   - "vue"
 //!   - "svelte"
-//!   - "lit"
-//!   - "react"
 //!   - "vanilla"
 //!   - "headless" (no ui)
 //! - Or a path to a custom template.
@@ -79,7 +73,7 @@
 //! ```json
 //! {
 //!   "hcScaffold": {
-//!     "template": "/* template name i.e. react/vue/svelte/lit/vanilla or path to custom template */"
+//!     "template": "/* template name i.e. svelte/vanilla or path to custom template */"
 //!   }
 //! }
 //! ```

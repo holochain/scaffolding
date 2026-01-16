@@ -21,17 +21,6 @@ impl ExampleType {
 
         Ok(examples[selection].clone())
     }
-
-    pub fn choose_non_vanilla() -> ScaffoldResult<Self> {
-        let examples = [ExampleType::Forum];
-        let selection = Select::with_theme(&ColorfulTheme::default())
-            .with_prompt("Choose example:")
-            .items(&examples)
-            .default(0)
-            .interact()?;
-
-        Ok(examples[selection].clone())
-    }
 }
 
 impl std::fmt::Display for ExampleType {
