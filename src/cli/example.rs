@@ -55,7 +55,7 @@ impl Example {
                     println!("Scaffolding the {} example project", "hello-world".italic());
                     ExampleType::HelloWorld
                 } else {
-                    ExampleType::choose_non_vanilla()?
+                    ExampleType::Forum
                 }
             }
         };

@@ -107,11 +107,11 @@ if [[ -z "$APP_NAME" || -z "$TEMPLATE_NAME" ]]; then
 fi
 
 case "$TEMPLATE_NAME" in
-"svelte" | "lit" | "vue" | "react" | "vanilla")
+"svelte" | "vanilla")
   # Valid template name, proceed
   ;;
 *)
-  echo "Error: TEMPLATE_NAME must be one of 'svelte', 'lit', 'vue', 'react' or 'vanilla'."
+  echo "Error: TEMPLATE_NAME must be 'svelte' or 'vanilla'."
   exit 1
   ;;
 esac
