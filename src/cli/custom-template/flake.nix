@@ -3,7 +3,7 @@
 
   inputs = {
     holonix.url = "github:holochain/holonix?ref=main-0.6";
-    scaffolding.url = "github:holochain/scaffolding/holochain-weekly";
+    scaffolding.url = "github:holochain/scaffolding/holochain-0.6";
     nixpkgs.follows = "holonix/nixpkgs";
     flake-parts.follows = "holonix/flake-parts";
   };
