@@ -8,7 +8,7 @@ on:
 
 jobs:
   call:
-    uses: holochain/actions/.github/workflows/publish-release.yml@v1.3.0
+    uses: holochain/actions/.github/workflows/publish-release.yml@v1.4.0
     secrets:
       HRA2_GITHUB_TOKEN: ${{ secrets.HRA2_GITHUB_TOKEN }}
       HRA2_CRATES_IO_TOKEN: ${{ secrets.HRA2_CRATES_IO_TOKEN }}
