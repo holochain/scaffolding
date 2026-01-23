@@ -22,4 +22,4 @@ jobs:
 
       - name: Install and test
         run: |
-          nix develop --command bash -c "{{(package_manager_command package_manager "install" null)}} && {{(package_manager_command package_manager "test" null)}}"
+          nix develop --command bash -c "{{(package_manager_command "install" null)}} && {{(package_manager_command "test" null)}}"
