@@ -8,7 +8,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Build System
 
-- Bump holochain 0.6.2-rc.0 (#539)
+- Bump holochain 0.6.1-rc.0 (#539)
 
 ## \[[0.600.1](https://github.com/holochain/scaffolding/compare/v0.600.0...v0.600.1)\] - 2025-11-26
 
