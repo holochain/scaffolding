@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -e
+set -xe
 
 TEMPLATE_PATH="/tmp"
 
@@ -79,7 +79,6 @@ setup_and_build_hello_world() {
   nix develop --command bash -c "
     set -e
     npm install
-    npm run test
     npm run package
 
     cargo clippy --all -- -D warnings

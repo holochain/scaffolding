@@ -1,0 +1,74 @@
+use holochain::prelude::*;
+use holochain::sweettest::*;
+use std::path::Path;
+
+mod common;
+use common::*;
+
+#[tokio::test(flavor = "multi_thread")]
+async fn create_a_{{snake_case referenceable.name}}_and_get_{{snake_case collection_name}}() {
+    // Create conductors with the standard config
+    let mut conductors = SweetConductorBatch::from_standard_config_rendezvous(2).await;
+    let dna_path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../workdir/{{dna_role_name}}.dna");
+    let dna_file = SweetDnaFile::from_bundle(&dna_path).await.unwrap();
+    let apps = conductors.setup_app("test-app", &[dna_file]).await.unwrap();
+    let cells = apps.cells_flattened();
+    let alice_conductor = conductors.get(0).unwrap();
+    let alice_zome = cells[0].zome("{{coordinator_zome_manifest.name}}");
+    let bob_conductor = conductors.get(1).unwrap();
+    let bob_zome = cells[1].zome("{{coordinator_zome_manifest.name}}");
+
+    // Bob gets {{lower_case collection_name}}
+    let collection_output: Vec<Link> = bob_conductor
+        .call(
+            &bob_zome,
+            "get_{{snake_case collection_name}}",
+            {{#if (eq collection_type.type "ByAuthor")}}alice_zome.cell_id().agent_pubkey().clone(){{else}}(){{/if}},
+        )
+        .await;
+    assert_eq!(collection_output.len(), 0);
+
+    // Alice creates a {{pascal_case referenceable.name}}
+    let create_record: Record = create_{{snake_case referenceable.name}}(&alice_conductor, &alice_zome).await;
+
+    // Wait for the created entry to be propagated to the other node.
+    await_consistency(&cells).await.unwrap();
+
+    // Bob gets {{lower_case collection_name}} again
+    let collection_output: Vec<Link> = bob_conductor
+        .call(
+            &bob_zome,
+            "get_{{snake_case collection_name}}",
+            {{#if (eq collection_type.type "ByAuthor")}}alice_zome.cell_id().agent_pubkey().clone(){{else}}(){{/if}},
+        )
+        .await;
+    assert_eq!(collection_output.len(), 1);
+    assert_eq!(
+        collection_output[0].target,
+        {{#if (eq referenceable.hash_type "EntryHash")}}create_record.signed_action.hashed.content.entry_hash().unwrap().clone().into(){{else}}create_record.signed_action.hashed.hash.clone().into(){{/if}}
+    );
+{{#if (and deletable (eq referenceable.hash_type "ActionHash"))}}
+
+    // Alice deletes the {{pascal_case referenceable.name}}
+    let _delete_action_hash: ActionHash = alice_conductor
+        .call(
+            &alice_zome,
+            "delete_{{snake_case referenceable.name}}",
+            create_record.signed_action.hashed.hash.clone(),
+        )
+        .await;
+
+    // Wait for the entry deletion to be propagated to the other node.
+    await_consistency(&cells).await.unwrap();
+
+    // Bob gets {{lower_case collection_name}} again
+    let collection_output: Vec<Link> = bob_conductor
+        .call(
+            &bob_zome,
+            "get_{{snake_case collection_name}}",
+            {{#if (eq collection_type.type "ByAuthor")}}alice_zome.cell_id().agent_pubkey().clone(){{else}}(){{/if}},
+        )
+        .await;
+    assert_eq!(collection_output.len(), 0);
+{{/if}}
+}

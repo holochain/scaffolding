@@ -16,7 +16,7 @@
       devShells.default = pkgs.mkShell {
         inputsFrom = [ inputs'.holonix.devShells.default ];
 
-        packages = (with pkgs; [ nodejs_22 binaryen ]);
+        packages = (with pkgs; [ nodejs_24 binaryen ]);
 
         shellHook = ''
           export PS1='\[\033[1;34m\][holonix:\w]\$\[\033[0m\] '

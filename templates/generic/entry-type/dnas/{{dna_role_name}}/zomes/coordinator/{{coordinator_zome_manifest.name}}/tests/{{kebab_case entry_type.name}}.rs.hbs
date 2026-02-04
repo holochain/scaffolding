@@ -1,0 +1,274 @@
+use holochain::prelude::*;
+use holochain::sweettest::*;
+use std::path::Path;
+use {{coordinator_zome_manifest.name}}::{{snake_case entry_type.name}}::*;
+use {{integrity_zome_manifest.name}}::*;
+
+mod common;
+use common::*;
+
+#[tokio::test(flavor = "multi_thread")]
+async fn create_{{snake_case entry_type.name}}() {
+    // Create a conductor with the standard config
+    let mut conductor = SweetConductor::from_standard_config().await;
+    let dna_path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../workdir/{{dna_role_name}}.dna");
+    let dna_file = SweetDnaFile::from_bundle(&dna_path).await.unwrap();
+    let app = conductor.setup_app("test-app", &[dna_file]).await.unwrap();
+    let zome = app.cells()[0].zome("{{coordinator_zome_manifest.name}}");
+
+    let {{snake_case entry_type.name}} = sample_{{snake_case entry_type.name}}(&conductor, &zome).await;
+
+    // Agent creates a {{pascal_case entry_type.name}}
+    let _: Record = conductor.call(&zome, "create_{{snake_case entry_type.name}}", {{snake_case entry_type.name}}.clone()).await;
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn create_and_read_{{snake_case entry_type.name}}() {
+    // Create conductors with the standard config
+    let mut conductors = SweetConductorBatch::from_standard_config_rendezvous(2).await;
+    let dna_path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../workdir/{{dna_role_name}}.dna");
+    let dna_file = SweetDnaFile::from_bundle(&dna_path).await.unwrap();
+    let apps = conductors.setup_app("test-app", &[dna_file]).await.unwrap();
+    let cells = apps.cells_flattened();
+    let alice_conductor = conductors.get(0).unwrap();
+    let alice_zome = cells[0].zome("{{coordinator_zome_manifest.name}}");
+    let bob_conductor = conductors.get(1).unwrap();
+    let bob_zome = cells[1].zome("{{coordinator_zome_manifest.name}}");
+
+    let {{snake_case entry_type.name}} = sample_{{snake_case entry_type.name}}(&alice_conductor, &alice_zome).await;
+
+    // Alice creates a {{pascal_case entry_type.name}}
+    let record: Record = alice_conductor
+        .call(&alice_zome, "create_{{snake_case entry_type.name}}", {{snake_case entry_type.name}}.clone())
+        .await;
+
+    // Wait for the created entry to be propagated to the other node.
+    await_consistency(&cells).await.unwrap();
+
+    // Bob gets the created {{pascal_case entry_type.name}}
+    let propagated_record: Record = bob_conductor
+        .call(
+            &bob_zome,
+            "{{#if crud.update}}get_original_{{snake_case entry_type.name}}{{else}}get_{{snake_case entry_type.name}}{{/if}}",
+            {{#if entry_type.reference_entry_hash}}record.signed_action.hashed.content.entry_hash().unwrap().clone(){{else}}record.signed_action.hashed.hash.clone(){{/if}},
+        )
+        .await;
+    assert_eq!(record, propagated_record);
+    {{#each entry_type.fields}}
+        {{#if linked_from}}
+
+            {{#if (ne (pascal_case linked_from.name) (pascal_case ../entry_type.name))}}
+    // Bob gets the {{pascal_case (plural ../entry_type.name)}} for the new {{pascal_case linked_from.name}}
+    let links_to_{{snake_case (plural linked_from.name)}}: Vec<Link> = bob_conductor
+        .call(
+            &bob_zome,
+            "get_{{snake_case (plural ../entry_type.name)}}_for_{{snake_case linked_from.name}}",
+            {{pascal_case ../entry_type.name}}::try_from({{snake_case ../entry_type.name}}.clone()).unwrap().{{field_name}}{{#if (eq cardinality "vector")}}[0]{{/if}},
+        )
+        .await;
+    assert_eq!(links_to_{{snake_case (plural linked_from.name)}}.len(), 1);
+    assert_eq!(
+        links_to_{{snake_case (plural linked_from.name)}}[0].target,
+        {{#if ../entry_type.reference_entry_hash}}record.signed_action.hashed.content.entry_hash().unwrap().clone().into(){{else}}record.signed_action.hashed.hash.clone().into(){{/if}}
+    );
+            {{/if}}
+        {{/if}}
+    {{/each}}
+}
+{{#if crud.update}}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn create_and_update_{{snake_case entry_type.name}}() {
+    // Create conductors with the standard config
+    let mut conductors = SweetConductorBatch::from_standard_config_rendezvous(2).await;
+    let dna_path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../workdir/{{dna_role_name}}.dna");
+    let dna_file = SweetDnaFile::from_bundle(&dna_path).await.unwrap();
+    let apps = conductors.setup_app("test-app", &[dna_file]).await.unwrap();
+    let cells = apps.cells_flattened();
+    let alice_conductor = conductors.get(0).unwrap();
+    let alice_zome = cells[0].zome("{{coordinator_zome_manifest.name}}");
+    let bob_conductor = conductors.get(1).unwrap();
+    let bob_zome = cells[1].zome("{{coordinator_zome_manifest.name}}");
+
+    let {{snake_case entry_type.name}} = sample_{{snake_case entry_type.name}}(&alice_conductor, &alice_zome).await;
+
+    // Alice creates a {{pascal_case entry_type.name}}
+    let record: Record = alice_conductor
+        .call(&alice_zome, "create_{{snake_case entry_type.name}}", {{snake_case entry_type.name}}.clone())
+        .await;
+
+    let original_action_hash = record.signed_action.hashed.hash.clone();
+
+    // Alice updates the {{pascal_case entry_type.name}}
+    let content_update = sample_{{snake_case entry_type.name}}(&alice_conductor, &alice_zome).await;
+    let update_input = Update{{pascal_case entry_type.name}}Input {
+{{#if link_from_original_to_each_update}}
+        original_{{snake_case entry_type.name}}_hash: original_action_hash.clone(),
+{{/if}}
+        previous_{{snake_case entry_type.name}}_hash: original_action_hash.clone(),
+        updated_{{snake_case entry_type.name}}: content_update.clone(),
+    };
+    let updated_record: Record = alice_conductor
+        .call(&alice_zome, "update_{{snake_case entry_type.name}}", update_input)
+        .await;
+
+    // Wait for the updated entry to be propagated to the other node.
+    await_consistency(&cells).await.unwrap();
+
+    // Bob gets the updated {{pascal_case entry_type.name}}
+    let read_updated_record_1: Record = bob_conductor
+        .call(
+            &bob_zome,
+            "get_latest_{{snake_case entry_type.name}}",
+            updated_record.signed_action.hashed.hash.clone(),
+        )
+        .await;
+    assert_eq!(updated_record, read_updated_record_1);
+
+    // Alice updates the {{pascal_case entry_type.name}} again
+    let content_update = sample_{{snake_case entry_type.name}}(&alice_conductor, &alice_zome).await;
+    let update_input = Update{{pascal_case entry_type.name}}Input {
+{{#if link_from_original_to_each_update}}
+        original_{{snake_case entry_type.name}}_hash: original_action_hash.clone(),
+{{/if}}
+        previous_{{snake_case entry_type.name}}_hash: updated_record.signed_action.hashed.hash.clone(),
+        updated_{{snake_case entry_type.name}}: content_update.clone(),
+    };
+    let updated_record: Record = alice_conductor
+        .call(&alice_zome, "update_{{snake_case entry_type.name}}", update_input)
+        .await;
+
+    // Wait for the updated entry to be propagated to the other node.
+    await_consistency(&cells).await.unwrap();
+
+    // Bob gets the updated {{pascal_case entry_type.name}}
+    let read_updated_record_2: Record = bob_conductor
+        .call(
+            &bob_zome,
+            "get_latest_{{snake_case entry_type.name}}",
+            updated_record.signed_action.hashed.hash.clone(),
+        )
+        .await;
+    let RecordEntry::Present(entry) = read_updated_record_2.entry else {
+        panic!(
+            "Expected Present entry, got {:?}",
+            read_updated_record_2.entry
+        );
+    };
+    assert_eq!({{pascal_case entry_type.name}}::try_from(entry.clone()).unwrap(), content_update);
+
+    // Bob gets all the revisions for {{pascal_case entry_type.name}}
+    let revisions: Vec<Record> = bob_conductor
+        .call(&bob_zome, "get_all_revisions_for_{{snake_case entry_type.name}}", original_action_hash)
+        .await;
+    assert_eq!(revisions.len(), 3);
+    let RecordEntry::Present(ref entry) = revisions[2].entry else {
+        panic!("Expected Present entry, got {:?}", revisions[2].entry);
+    };
+    assert_eq!({{pascal_case entry_type.name}}::try_from(entry).unwrap(), content_update);
+}
+{{/if}}
+{{#if crud.delete}}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn create_and_delete_{{snake_case entry_type.name}}() {
+    // Create conductors with the standard config
+    let mut conductors = SweetConductorBatch::from_standard_config_rendezvous(2).await;
+    let dna_path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../workdir/{{dna_role_name}}.dna");
+    let dna_file = SweetDnaFile::from_bundle(&dna_path).await.unwrap();
+    let apps = conductors.setup_app("test-app", &[dna_file]).await.unwrap();
+    let cells = apps.cells_flattened();
+    let alice_conductor = conductors.get(0).unwrap();
+    let alice_zome = cells[0].zome("{{coordinator_zome_manifest.name}}");
+    let bob_conductor = conductors.get(1).unwrap();
+    let bob_zome = cells[1].zome("{{coordinator_zome_manifest.name}}");
+
+    let {{snake_case entry_type.name}} = sample_{{snake_case entry_type.name}}(&alice_conductor, &alice_zome).await;
+
+    // Alice creates a {{pascal_case entry_type.name}}
+    let record: Record = alice_conductor
+        .call(&alice_zome, "create_{{snake_case entry_type.name}}", {{snake_case entry_type.name}}.clone())
+        .await;
+
+    // Wait for the created entry to be propagated to the other node.
+    await_consistency(&cells).await.unwrap();
+  {{#each entry_type.fields}}
+    {{#if linked_from}}
+
+      {{#if (ne (pascal_case linked_from.name) (pascal_case ../entry_type.name))}}
+    // Bob gets the {{pascal_case (plural ../entry_type.name)}} for the new {{pascal_case linked_from.name}}
+    let links_to_{{snake_case (plural linked_from.name)}}: Vec<Link> = bob_conductor
+        .call(
+            &bob_zome,
+            "get_{{snake_case (plural ../entry_type.name)}}_for_{{snake_case linked_from.name}}",
+            {{pascal_case ../entry_type.name}}::try_from({{snake_case ../entry_type.name}}.clone()).unwrap().{{field_name}}{{#if (eq cardinality "vector")}}[0]{{/if}},
+        )
+        .await;
+    assert_eq!(links_to_{{snake_case (plural linked_from.name)}}.len(), 1);
+    assert_eq!(
+        links_to_{{snake_case (plural linked_from.name)}}[0].target,
+        {{#if ../entry_type.reference_entry_hash}}record.signed_action.hashed.content.entry_hash().unwrap().clone().into(){{else}}record.signed_action.hashed.hash.clone().into(){{/if}}
+    );
+      {{/if}}
+    {{/if}}
+  {{/each}}
+
+    // Alice deletes the {{pascal_case entry_type.name}}
+    let _delete_action_hash: ActionHash = alice_conductor
+        .call(
+            &alice_zome,
+            "delete_{{snake_case entry_type.name}}",
+            record.signed_action.hashed.hash.clone(),
+        )
+        .await;
+
+    // Wait for the entry deletion to be propagated to the other node.
+    await_consistency(&cells).await.unwrap();
+
+    // Bob gets the oldest delete for the {{pascal_case entry_type.name}}
+    let oldest_delete_for_{{snake_case entry_type.name}}: Option<SignedActionHashed> = bob_conductor
+        .call(
+            &bob_zome,
+            "get_oldest_delete_for_{{snake_case entry_type.name}}",
+            record.signed_action.hashed.hash.clone(),
+        )
+        .await;
+    assert!(oldest_delete_for_{{snake_case entry_type.name}}.is_some());
+
+    // Bob gets the deletions for the {{pascal_case entry_type.name}}
+    let deletes_for_{{snake_case entry_type.name}}: Option<Vec<SignedActionHashed>> = bob_conductor
+        .call(
+            &bob_zome,
+            "get_all_deletes_for_{{snake_case entry_type.name}}",
+            record.signed_action.hashed.hash.clone(),
+        )
+        .await;
+    assert_eq!(deletes_for_{{snake_case entry_type.name}}.unwrap().len(), 1);
+  {{#each entry_type.fields}}
+    {{#if linked_from}}
+
+      {{#if (ne (pascal_case linked_from.name) (pascal_case ../entry_type.name))}}
+    // Bob gets the {{pascal_case (plural ../entry_type.name)}} for the {{pascal_case linked_from.name}} again
+    let links_to_{{snake_case (plural linked_from.name)}}: Vec<Link> = bob_conductor
+        .call(
+            &bob_zome,
+            "get_{{snake_case (plural ../entry_type.name)}}_for_{{snake_case linked_from.name}}",
+            {{pascal_case ../entry_type.name}}::try_from({{snake_case ../entry_type.name}}.clone()).unwrap().{{field_name}}{{#if (eq cardinality "vector")}}[0]{{/if}},
+        )
+        .await;
+    assert_eq!(links_to_{{snake_case (plural linked_from.name)}}.len(), 0);
+
+    // Bob gets the deleted {{pascal_case ../entry_type.name}} for the {{pascal_case (plural linked_from.name)}}
+    let deleted_links_to_{{snake_case (plural linked_from.name)}}: Vec<(SignedActionHashed, Vec<SignedActionHashed>)> = bob_conductor
+        .call(
+            &bob_zome,
+            "get_deleted_{{snake_case (plural ../entry_type.name)}}_for_{{snake_case linked_from.name}}",
+            {{pascal_case ../entry_type.name}}::try_from({{snake_case ../entry_type.name}}.clone()).unwrap().{{field_name}}{{#if (eq cardinality "vector")}}[0]{{/if}},
+        )
+        .await;
+    assert_eq!(deleted_links_to_{{snake_case (plural linked_from.name)}}.len(), 1);
+      {{/if}}
+    {{/if}}
+  {{/each}}
+}
+{{/if}}
