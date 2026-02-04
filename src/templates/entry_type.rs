@@ -13,10 +13,14 @@ use super::{
     build_handlebars, render_template_file_tree_and_merge_with_existing, ScaffoldedTemplate,
 };
 
+#[cfg(test)]
+mod tests;
+
 #[derive(Serialize, Debug)]
 pub struct ScaffoldEntryTypeData<'a> {
     pub app_name: String,
     pub dna_role_name: String,
+    pub integrity_zome_manifest: ZomeManifest,
     pub coordinator_zome_manifest: ZomeManifest,
     pub entry_type: EntryDefinition,
     pub entry_type_ts_types: &'a str,
@@ -31,6 +35,7 @@ pub fn scaffold_entry_type_templates(
     template_file_tree: &FileTree,
     app_name: &str,
     dna_role_name: &str,
+    integrity_zome: &ZomeManifest,
     coordinator_zome: &ZomeManifest,
     entry_type: &EntryDefinition,
     entry_type_ts_types: &str,
@@ -42,6 +47,7 @@ pub fn scaffold_entry_type_templates(
     let data = ScaffoldEntryTypeData {
         app_name: app_name.to_owned(),
         dna_role_name: dna_role_name.to_owned(),
+        integrity_zome_manifest: integrity_zome.clone(),
         coordinator_zome_manifest: coordinator_zome.clone(),
         entry_type: entry_type.clone(),
         entry_type_ts_types,
@@ -63,7 +69,7 @@ pub fn scaffold_entry_type_templates(
         }
         if no_spec {
             web_app_template.dir_content_mut().map(|v| {
-                v.retain(|k, _| k != "tests");
+                v.retain(|k, _| k != "tests" && k != "dnas");
                 v
             });
         }

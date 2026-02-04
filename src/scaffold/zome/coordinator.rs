@@ -38,7 +38,12 @@ name = "{zome_name}"
 hdk = {{ workspace = true }}
 serde = {{ workspace = true }}
 holochain_serialized_bytes = {{ workspace = true }}
+
 {deps}
+
+[dev-dependencies]
+holochain = {{ workspace = true, features = ["wasmer_sys", "transport-iroh", "test_utils"] }}
+tokio = {{ workspace = true }}
 "#,
     )
 }
@@ -229,4 +234,37 @@ pub fn find_all_extern_functions(zome_file_tree: &ZomeFileTree) -> ScaffoldResul
     );
 
     Ok(hdk_extern_instances.values().flatten().cloned().collect())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn initial_cargo_toml_contains_test_dependencies() {
+        let toml = initial_cargo_toml("test_zome", None);
+        let cargo_toml = toml::from_str::<toml::Value>(&toml).unwrap();
+
+        let dep_holochain = cargo_toml
+            .get("dev-dependencies")
+            .unwrap()
+            .get("holochain")
+            .unwrap();
+        assert!(dep_holochain.get("workspace").unwrap().as_bool().unwrap());
+        assert_eq!(
+            *dep_holochain.get("features").unwrap().as_array().unwrap(),
+            [
+                toml::Value::String("wasmer_sys".to_string()),
+                toml::Value::String("transport-iroh".to_string()),
+                toml::Value::String("test_utils".to_string())
+            ]
+        );
+
+        let dep_tokio = cargo_toml
+            .get("dev-dependencies")
+            .unwrap()
+            .get("tokio")
+            .unwrap();
+        assert!(dep_tokio.get("workspace").unwrap().as_bool().unwrap());
+    }
 }

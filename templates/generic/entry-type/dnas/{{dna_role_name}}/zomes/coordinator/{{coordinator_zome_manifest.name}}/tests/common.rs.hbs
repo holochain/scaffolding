@@ -1,0 +1,101 @@
+{{#if previous_file_content}}{{previous_file_content}}
+
+{{else}}use hdk::prelude::*;
+use holochain::sweettest::{SweetConductor, SweetZome};
+use {{snake_case coordinator_zome_manifest.name}}_integrity::*;
+
+{{/if}}pub async fn sample_{{snake_case entry_type.name}}(conductor: &SweetConductor, zome: &SweetZome) -> {{pascal_case entry_type.name}} {
+    {{pascal_case entry_type.name}} {
+{{#each entry_type.fields}}
+  {{#if linked_from}}
+    {{#if (eq cardinality "vector")}}
+      {{#if (eq (pascal_case linked_from.name) (pascal_case ../entry_type.name))}}
+        {{!-- Self-reference --}}
+        {{field_name}}: Vec::new(),
+      {{else}}
+        {{#if (eq linked_from.hash_type "ActionHash")}}
+        {{field_name}}: vec![create_{{snake_case linked_from.name}}(conductor, zome).await.signed_action.hashed.hash],
+        {{else}}
+        {{!-- EntryHash --}}
+        {{field_name}}: vec![create_{{snake_case linked_from.name}}(conductor, zome).await.signed_action.hashed.content.entry_hash().unwrap().clone()],
+        {{/if}}
+      {{/if}}
+    {{else}}
+      {{#if (eq cardinality "option")}}
+        {{!-- Self-reference --}}
+        {{#if (eq (pascal_case linked_from.name) (pascal_case ../entry_type.name))}}
+        {{field_name}}: None,
+        {{else}}
+          {{#if (eq linked_from.hash_type "AgentPubKey")}}
+        {{field_name}}: Some(zome.cell_id().agent_pubkey().clone()),
+          {{else}}
+            {{#if (eq linked_from.hash_type "ActionHash")}}
+        {{field_name}}: Some(create_{{snake_case linked_from.name}}(conductor, zome).await.signed_action.hashed.hash),
+            {{else}}
+            {{!-- EntryHash --}}
+        {{field_name}}: Some(create_{{snake_case linked_from.name}}(conductor, zome).await.signed_action.hashed.content.entry_hash().unwrap().clone()),
+            {{/if}}
+          {{/if}}
+        {{/if}}
+      {{else}}
+        {{!-- Cardinality::Single --}}
+        {{#if (eq linked_from.hash_type "AgentPubKey")}}
+        {{field_name}}: zome.cell_id().agent_pubkey().clone(),
+        {{else}}
+          {{#if (eq linked_from.hash_type "ActionHash")}}
+        {{field_name}}: create_{{snake_case linked_from.name}}(conductor, zome).await.signed_action.hashed.hash,
+          {{else}}
+        {{field_name}}: create_{{snake_case linked_from.name}}(conductor, zome).await.signed_action.hashed.content.entry_hash().unwrap().clone(),
+          {{/if}}
+        {{/if}}
+      {{/if}}
+    {{/if}}
+  {{else}}
+    {{#if (eq cardinality "vector")}}
+        {{field_name}}: Vec::new(),
+    {{else}}
+      {{#if (eq cardinality "option")}}
+        {{field_name}}: None,
+      {{else}}
+        {{!-- Cardinality::Single --}}
+        {{#if (eq field_type.type "ActionHash")}}
+        {{field_name}}: ActionHash::from_raw_36(vec![0; 36]),
+        {{else}}
+          {{#if (eq field_type.type "EntryHash")}}
+        {{field_name}}: EntryHash::from_raw_36(vec![0; 36]),
+          {{else}}
+            {{#if (eq field_type.type "AgentPubKey")}}
+        {{field_name}}: AgentPubKey::from_raw_36(vec![0; 36]),
+            {{else}}
+              {{#if (eq field_type.type "DnaHash")}}
+        {{field_name}}: DnaHash::from_raw_36(vec![0; 36]),
+              {{else}}
+                {{#if (eq field_type.type "ExternalHash")}}
+        {{field_name}}: ExternalHash::from_raw_36(vec![0; 36]),
+                {{else}}
+                  {{#if (eq field_type.type "Timestamp")}}
+        {{field_name}}: Timestamp::now(),
+                  {{else}}
+                    {{#if (eq field_type.type "Enum")}}
+        {{field_name}}: {{pascal_case field_type.label}}::{{lookup field_type.variants 0}},
+                    {{else}}
+        {{field_name}}: Default::default(),
+                    {{/if}}
+                  {{/if}}
+                {{/if}}
+              {{/if}}
+            {{/if}}
+          {{/if}}
+        {{/if}}
+      {{/if}}
+    {{/if}}
+  {{/if}}
+{{/each}}
+    }
+}
+
+pub async fn create_{{snake_case entry_type.name}}(conductor: &SweetConductor, zome: &SweetZome) -> Record {
+    conductor
+        .call(&zome, "create_{{snake_case entry_type.name}}", sample_{{snake_case entry_type.name}}(conductor, zome).await)
+        .await
+}

@@ -58,6 +58,55 @@ pub fn add_workspace_path_dependency(
     add_workspace_dependency(app_file_tree, crate_name, &toml::Value::Table(table))
 }
 
+pub fn add_workspace_dependency(
+    mut app_file_tree: FileTree,
+    crate_name: &str,
+    crate_location: &toml::Value,
+) -> ScaffoldResult<FileTree> {
+    let mut workspace_cargo_toml = get_workspace_cargo_toml(&app_file_tree)?;
+    let workspace_table = workspace_cargo_toml
+        .as_table_mut()
+        .ok_or(ScaffoldError::MalformedFile(
+            workspace_cargo_toml_path(&app_file_tree),
+            String::from("file does not conform to toml"),
+        ))?
+        .get_mut("workspace")
+        .ok_or(ScaffoldError::MalformedFile(
+            workspace_cargo_toml_path(&app_file_tree),
+            String::from("no workspace table found in workspace root"),
+        ))?
+        .as_table_mut()
+        .ok_or(ScaffoldError::MalformedFile(
+            workspace_cargo_toml_path(&app_file_tree),
+            String::from("workspace key is not a table"),
+        ))?;
+
+    let mut dependencies = match workspace_table.get("dependencies") {
+        Some(d) => d
+            .as_table()
+            .ok_or(ScaffoldError::MalformedFile(
+                workspace_cargo_toml_path(&app_file_tree),
+                String::from("workspace.dependencies is not a table"),
+            ))?
+            .clone(),
+        None => toml::map::Map::new(),
+    };
+
+    dependencies.insert(crate_name.to_owned(), crate_location.clone());
+    workspace_table.insert(
+        String::from("dependencies"),
+        toml::Value::Table(dependencies),
+    );
+
+    let path = workspace_cargo_toml_path(&app_file_tree);
+
+    let cargo_toml_str = toml::to_string(&workspace_cargo_toml)?;
+
+    insert_file(&mut app_file_tree, &path, &cargo_toml_str)?;
+
+    Ok(app_file_tree)
+}
+
 pub fn get_workspace_packages_locations(
     app_file_tree: &FileTree,
 ) -> ScaffoldResult<Option<Vec<PathBuf>>> {
@@ -178,56 +227,69 @@ pub fn exec_metadata(app_file_tree: &FileTree) -> Result<Metadata, cargo_metadat
     MetadataCommand::parse(stdout)
 }
 
-fn add_workspace_dependency(
-    mut app_file_tree: FileTree,
-    crate_name: &str,
-    crate_location: &toml::Value,
-) -> ScaffoldResult<FileTree> {
-    let mut workspace_cargo_toml = get_workspace_cargo_toml(&app_file_tree)?;
-    let workspace_table = workspace_cargo_toml
-        .as_table_mut()
-        .ok_or(ScaffoldError::MalformedFile(
-            workspace_cargo_toml_path(&app_file_tree),
-            String::from("file does not conform to toml"),
-        ))?
-        .get_mut("workspace")
-        .ok_or(ScaffoldError::MalformedFile(
-            workspace_cargo_toml_path(&app_file_tree),
-            String::from("no workspace table found in workspace root"),
-        ))?
-        .as_table_mut()
-        .ok_or(ScaffoldError::MalformedFile(
-            workspace_cargo_toml_path(&app_file_tree),
-            String::from("workspace key is not a table"),
-        ))?;
-
-    let mut dependencies = match workspace_table.get("dependencies") {
-        Some(d) => d
-            .as_table()
-            .ok_or(ScaffoldError::MalformedFile(
-                workspace_cargo_toml_path(&app_file_tree),
-                String::from("workspace.dependencies is not a table"),
-            ))?
-            .clone(),
-        None => toml::map::Map::new(),
-    };
-
-    dependencies.insert(crate_name.to_owned(), crate_location.clone());
-    workspace_table.insert(
-        String::from("dependencies"),
-        toml::Value::Table(dependencies),
-    );
-
-    let path = workspace_cargo_toml_path(&app_file_tree);
-
-    let cargo_toml_str = toml::to_string(&workspace_cargo_toml)?;
-
-    insert_file(&mut app_file_tree, &path, &cargo_toml_str)?;
-
-    Ok(app_file_tree)
-}
-
 #[inline]
 fn workspace_cargo_toml_path(_app_file_tree: &FileTree) -> PathBuf {
     PathBuf::new().join("Cargo.toml")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use build_fs_tree::{dir, file};
+
+    #[test]
+    fn get_workspace_cargo_toml_from_app_file_tree() {
+        let workspace_cargo_toml_string = workspace_cargo_toml();
+        // Create a basic app file tree with workspace Cargo.toml
+        let app_file_tree = dir! {
+            "Cargo.toml" => file!(workspace_cargo_toml_string.clone())
+        };
+        let cargo_toml = get_workspace_cargo_toml(&app_file_tree).unwrap();
+        assert_eq!(
+            cargo_toml,
+            toml::from_str(&workspace_cargo_toml_string).unwrap()
+        );
+    }
+
+    #[test]
+    fn workspace_cargo_toml_contains_integrity_and_coordinator_zomes_as_members() {
+        let cargo_toml = toml::from_str::<toml::Value>(&workspace_cargo_toml()).unwrap();
+
+        let members = cargo_toml
+            .get("workspace")
+            .unwrap()
+            .get("members")
+            .unwrap()
+            .as_array()
+            .unwrap();
+
+        assert!(members.contains(&toml::Value::String("dnas/*/zomes/integrity/*".to_string())));
+        assert!(members.contains(&toml::Value::String(
+            "dnas/*/zomes/coordinator/*".to_string()
+        )));
+    }
+
+    #[test]
+    fn add_dependency_to_workspace() {
+        let app_file_tree = dir! {
+            "Cargo.toml" => file!(workspace_cargo_toml())
+        };
+
+        let crate_name = "test-crate";
+        let crate_version = toml::Value::String("1.0.0".to_string());
+        let updated_tree =
+            add_workspace_dependency(app_file_tree, crate_name, &crate_version).unwrap();
+
+        // Verify the dependency was added
+        let cargo_toml = get_workspace_cargo_toml(&updated_tree).unwrap();
+        let dependencies = cargo_toml
+            .get("workspace")
+            .unwrap()
+            .get("dependencies")
+            .unwrap()
+            .as_table()
+            .unwrap();
+
+        assert_eq!(dependencies.get(crate_name).unwrap(), &crate_version);
+    }
 }
