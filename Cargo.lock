@@ -1434,6 +1434,7 @@ dependencies = [
  "mr_bundle",
  "path-clean",
  "pluralizer",
+ "pretty_assertions",
  "prettyplease",
  "proc-macro2",
  "quote",

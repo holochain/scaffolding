@@ -9,12 +9,13 @@ use std::{
 use crate::{
     file_tree::{build_file_tree, file_exists, insert_file_tree_in_dir, FileTree},
     reserved_words::check_for_reserved_keywords,
+    scaffold::app::cargo::add_workspace_dependency,
     templates::{
         coordinator::scaffold_coordinator_zome_templates,
         integrity::scaffold_integrity_zome_templates, ScaffoldedTemplate,
     },
     utils::{input_with_case, unparse_pretty},
-    versions,
+    versions::{self, HOLOCHAIN_VERSION},
 };
 use build_fs_tree::{dir, file};
 use holochain_types::prelude::{DnaManifest, ZomeManifest};
@@ -331,6 +332,15 @@ pub fn add_common_zome_dependencies_to_workspace_cargo(
     let file_tree = add_workspace_external_dependency(file_tree, "serde", "1.0")?;
     let file_tree =
         add_workspace_external_dependency(file_tree, "holochain_serialized_bytes", "*")?;
+    let mut dep_holochain = toml::Table::new();
+    dep_holochain.insert(
+        "version".to_string(),
+        toml::Value::String(HOLOCHAIN_VERSION.to_string()),
+    );
+    dep_holochain.insert("default-features".to_string(), toml::Value::Boolean(false));
+    let file_tree =
+        add_workspace_dependency(file_tree, "holochain", &toml::Value::Table(dep_holochain))?;
+    let file_tree = add_workspace_external_dependency(file_tree, "tokio", "1.49")?;
     Ok(file_tree)
 }
 
@@ -529,4 +539,52 @@ pub fn scaffold_zome_pair(
 
     build_file_tree(file_tree, ".")?;
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::scaffold::app::cargo::{get_workspace_cargo_toml, workspace_cargo_toml};
+    use crate::scaffold::dna::manifest::empty_dna_manifest;
+    use crate::scaffold::web_app::template_type::TemplateType;
+    use build_fs_tree::file;
+
+    #[test]
+    fn workspace_dependencies_contain_test_dependencies() {
+        let app_file_tree: FileTree = dir! {
+            "Cargo.toml" => file!(workspace_cargo_toml()),
+            "workdir" => dir! {
+                "dna.yaml" => file!(empty_dna_manifest("test_dna").unwrap())
+            }
+        };
+        let dna_file_tree = DnaFileTree::get_or_choose(app_file_tree, None).unwrap();
+        let template_file_tree = TemplateType::Svelte.file_tree().unwrap();
+
+        let scaffolded_zome = scaffold_coordinator_zome_in_path(
+            dna_file_tree,
+            &template_file_tree,
+            "test_zome",
+            None,
+            PathBuf::new().as_path(),
+        )
+        .unwrap();
+
+        let cargo_toml = get_workspace_cargo_toml(&scaffolded_zome.file_tree).unwrap();
+        let dependencies = cargo_toml
+            .get("workspace")
+            .expect("cargo toml does not contain workspace")
+            .get("dependencies")
+            .expect("workspace does not contain dependencies");
+        let holochain_dep = dependencies
+            .get("holochain")
+            .expect("dependencies do not contain holochain");
+        assert_eq!(
+            *holochain_dep.get("default-features").unwrap(),
+            toml::Value::Boolean(false)
+        );
+        assert_eq!(
+            *holochain_dep.get("version").unwrap(),
+            toml::Value::String(HOLOCHAIN_VERSION.to_string())
+        );
+    }
 }
