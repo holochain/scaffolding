@@ -168,6 +168,9 @@ inadvertently reference or expect elements from the skipped entry type."#
         )?;
     }
 
+    // Save the integrity zome manifest before switching to coordinator zome
+    let integrity_zome_manifest = zome_file_tree.zome_manifest.clone();
+
     let mut zome_file_tree =
         ZomeFileTree::from_zome_manifest(zome_file_tree.dna_file_tree, coordinator_zome.clone())?;
 
@@ -190,6 +193,7 @@ inadvertently reference or expect elements from the skipped entry type."#
         template_file_tree,
         &app_name,
         &dna_manifest.name(),
+        &integrity_zome_manifest,
         &coordinator_zome,
         &entry_def,
         &entry_def_ts_types,
