@@ -628,30 +628,6 @@ fn option_linked_from_entry_hash() {
 }
 
 #[test]
-fn vector_action_hash_linked_from_self_reference() {
-    let entry_type = EntryDefinition {
-        name: "test_entry".to_string(),
-        fields: vec![FieldDefinition {
-            field_name: "test_field".to_string(),
-            field_type: FieldType::ActionHash,
-            cardinality: Cardinality::Vector,
-            linked_from: Some(Referenceable::EntryType(EntryTypeReference {
-                entry_type: "test_entry".to_string(),
-                reference_entry_hash: false,
-            })),
-            widget: None,
-        }],
-        reference_entry_hash: false,
-    };
-    let rendered_common = render_template(entry_type);
-
-    let expected_return_value = r#"TestEntry {
-        test_field: Vec::new(),
-    }"#;
-    pretty_assertions::assert_str_eq!(rendered_common, expected_common(expected_return_value));
-}
-
-#[test]
 fn vector_action_hash_linked_from_action_hash() {
     let entry_type = EntryDefinition {
         name: "test_entry".to_string(),

@@ -13,6 +13,9 @@ use super::{
     build_handlebars, render_template_file_tree_and_merge_with_existing, ScaffoldedTemplate,
 };
 
+#[cfg(test)]
+mod tests;
+
 #[derive(Serialize)]
 pub struct ScaffoldLinkTypeData<'a> {
     pub app_name: &'a str,
@@ -76,7 +79,7 @@ pub fn scaffold_link_type_templates(
         }
         if no_spec {
             link_type_template.dir_content_mut().map(|v| {
-                v.retain(|k, _| k != "tests");
+                v.retain(|k, _| k != "tests" && k != "dnas");
                 v
             });
         }

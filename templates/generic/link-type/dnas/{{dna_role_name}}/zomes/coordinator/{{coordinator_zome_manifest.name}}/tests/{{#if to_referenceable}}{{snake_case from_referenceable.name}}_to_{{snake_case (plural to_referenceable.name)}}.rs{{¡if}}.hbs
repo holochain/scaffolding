@@ -1,0 +1,171 @@
+use holochain::prelude::*;
+use holochain::sweettest::*;
+use std::path::Path;
+use {{coordinator_zome_manifest.name}}::{{snake_case from_referenceable.name}}_to_{{snake_case (plural to_referenceable.name)}}::*;
+
+mod common;
+use common::*;
+
+#[tokio::test(flavor = "multi_thread")]
+async fn link_a_{{snake_case from_referenceable.name}}_to_a_{{snake_case to_referenceable.name}}() {
+    // Create conductors with the standard config
+    let mut conductors = SweetConductorBatch::standard(2).await;
+    let dna_path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../workdir/{{dna_role_name}}.dna");
+    let dna_file = SweetDnaFile::from_bundle(&dna_path).await.unwrap();
+    let apps = conductors.setup_app("test-app", &[dna_file]).await.unwrap();
+    let cells = apps.cells_flattened();
+    let alice_conductor = conductors.get(0).unwrap();
+    let alice_zome = cells[0].zome("{{coordinator_zome_manifest.name}}");
+    let bob_conductor = conductors.get(1).unwrap();
+    let bob_zome = cells[1].zome("{{coordinator_zome_manifest.name}}");
+
+{{#if (eq from_referenceable.hash_type "AgentPubKey")}}
+    let base_address = alice_zome.cell_id().agent_pubkey().clone();
+{{else}}
+  {{#if (ne from_referenceable.hash_type "ExternalHash")}}
+    let base_record = create_{{snake_case from_referenceable.name}}(&alice_conductor, &alice_zome).await;
+  {{/if}}
+  {{#if (eq from_referenceable.hash_type "EntryHash")}}
+    let base_address = base_record.signed_action.hashed.content.entry_hash().unwrap().clone();
+  {{else}}
+    {{#if (eq from_referenceable.hash_type "ExternalHash")}}
+    let base_address = ExternalHash::from_raw_36(vec![0; 36]);
+    {{else}}
+    let base_address = base_record.signed_action.hashed.hash.clone();
+    {{/if}}
+  {{/if}}
+{{/if}}
+{{#if (eq to_referenceable.hash_type "AgentPubKey")}}
+    let target_address = alice_zome.cell_id().agent_pubkey().clone();
+{{else}}
+  {{#if (ne to_referenceable.hash_type "ExternalHash")}}
+    let target_record = create_{{snake_case to_referenceable.name}}(&alice_conductor, &alice_zome).await;
+  {{else}}
+  {{/if}}
+  {{#if (eq to_referenceable.hash_type "EntryHash")}}
+    let target_address = target_record.signed_action.hashed.content.entry_hash().unwrap().clone();
+  {{else}}
+    {{#if (eq to_referenceable.hash_type "ExternalHash")}}
+    let target_address = ExternalHash::from_raw_36(vec![0; 36]);
+    {{else}}
+    let target_address = target_record.signed_action.hashed.hash.clone();
+    {{/if}}
+  {{/if}}
+{{/if}}
+
+    // Bob gets the links, should be empty
+    let links_output: Vec<Link> = bob_conductor
+        .call(
+            &bob_zome,
+            "get_{{plural (snake_case to_referenceable.name)}}_for_{{snake_case from_referenceable.name}}",
+            base_address.clone()
+        )
+        .await;
+    assert!(links_output.is_empty());
+
+    // Alice creates a link from {{pascal_case from_referenceable.name}} to {{pascal_case to_referenceable.name}}
+    let _: () = alice_conductor
+        .call(
+            &alice_zome,
+            "add_{{snake_case to_referenceable.name}}_for_{{snake_case from_referenceable.name}}",
+            Add{{pascal_case to_referenceable.name}}For{{pascal_case from_referenceable.name}}Input {
+                base_{{snake_case from_referenceable.singular_arg}}: base_address.clone(),
+                target_{{snake_case to_referenceable.singular_arg}}: target_address.clone(),
+            },
+        )
+        .await;
+
+    await_consistency(&cells).await.unwrap();
+
+    // Bob gets the links again
+    let links_output: Vec<Link> = bob_conductor
+        .call(
+            &bob_zome,
+            "get_{{plural (snake_case to_referenceable.name)}}_for_{{snake_case from_referenceable.name}}",
+            base_address.clone()
+        )
+        .await;
+    assert_eq!(links_output.len(), 1);
+{{#if (ne to_referenceable.hash_type "AgentPubKey")}}
+    assert_eq!(
+        links_output[0].target,
+        target_address.clone().into()
+    );
+{{/if}}
+{{#if bidirectional}}
+
+    // Bob gets the links in the inverse direction
+    let links_output: Vec<Link> = bob_conductor
+        .call(
+            &bob_zome,
+            "get_{{plural (snake_case from_referenceable.name)}}_for_{{snake_case to_referenceable.name}}",
+            target_address.clone()
+        )
+        .await;
+    assert_eq!(links_output.len(), 1);
+  {{#if (ne from_referenceable.hash_type "AgentPubKey")}}
+    assert_eq!(
+        links_output[0].target,
+        base_address.clone().into()
+    );
+  {{/if}}
+{{/if}}
+{{#if delete}}
+
+    // Alice deletes the link
+    let _: () = alice_conductor
+        .call(
+            &alice_zome,
+            "delete_{{snake_case to_referenceable.name}}_for_{{snake_case from_referenceable.name}}",
+            Remove{{pascal_case to_referenceable.name}}For{{pascal_case from_referenceable.name}}Input {
+                base_{{snake_case from_referenceable.singular_arg}}: base_address.clone(),
+                target_{{snake_case to_referenceable.singular_arg}}: target_address.clone(),
+            },
+        )
+        .await;
+
+    await_consistency(&cells).await.unwrap();
+
+    // Bob gets the links again
+    let links_output: Vec<Link> = bob_conductor
+        .call(   
+            &bob_zome,
+            "get_{{plural (snake_case to_referenceable.name)}}_for_{{snake_case from_referenceable.name}}",
+            base_address.clone()
+        )
+        .await;
+    assert!(links_output.is_empty());
+
+    // Bob gets the deleted links
+    let deleted_links_output: Vec<(SignedActionHashed, Vec<SignedActionHashed>)> = bob_conductor
+        .call(
+            &bob_zome,
+            "get_deleted_{{plural (snake_case to_referenceable.name)}}_for_{{snake_case from_referenceable.name}}",
+            base_address.clone(),
+        )
+        .await;
+    assert_eq!(deleted_links_output.len(), 1);
+  {{#if bidirectional}}
+
+    // Bob gets the links in the inverse direction
+    let links_output: Vec<Link> = bob_conductor
+        .call(
+            &bob_zome,
+            "get_{{plural (snake_case from_referenceable.name)}}_for_{{snake_case to_referenceable.name}}",
+            target_address.clone()
+        )
+        .await;
+    assert!(links_output.is_empty());
+
+    // Bob gets the deleted links in the inverse direction
+    let deleted_links_output: Vec<(SignedActionHashed, Vec<SignedActionHashed>)> = bob_conductor
+        .call(
+            &bob_zome,
+            "get_deleted_{{plural (snake_case from_referenceable.name)}}_for_{{snake_case to_referenceable.name}}",
+            target_address.clone(),
+        )
+        .await;
+    assert_eq!(deleted_links_output.len(), 1);
+  {{/if}}
+{{/if}}
+}
