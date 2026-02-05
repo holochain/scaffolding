@@ -1,7 +1,3 @@
-/// npm: <https://www.npmjs.com/package/@holochain/tryorama>
-/// Note: Tryorama is no longer maintained. This version is outdated.
-pub const TRYORAMA_VERSION: &str = "^0.19.0";
-
 /// npm: <https://www.npmjs.com/package/@holochain/client>
 pub const HOLOCHAIN_CLIENT_VERSION: &str = "^0.20.3-rc.0";
 
