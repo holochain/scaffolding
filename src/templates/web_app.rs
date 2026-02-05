@@ -20,7 +20,6 @@ pub struct ScaffoldWebAppData<'a> {
     pub hdi_version: &'a str,
     pub holochain_client_version: &'a str,
     pub hc_spin_version: &'a str,
-    pub tryorama_version: &'a str,
 }
 
 pub fn scaffold_web_app_template(
@@ -35,7 +34,6 @@ pub fn scaffold_web_app_template(
         hdi_version: versions::HDI_VERSION,
         holochain_client_version: versions::HOLOCHAIN_CLIENT_VERSION,
         hc_spin_version: versions::HC_SPIN_VERSION,
-        tryorama_version: versions::TRYORAMA_VERSION,
     };
 
     let h = build_handlebars(template_file_tree)?;
