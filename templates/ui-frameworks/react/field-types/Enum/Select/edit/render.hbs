@@ -1,6 +1,0 @@
-<label htmlFor="{{label}}">{{label}}:</label>
-<select name="{{label}}" defaultValue={ {{../variable_to_read}}?.type } onChange={ (e) => set{{pascal_case ../variable_to_change}}({type: e.target.value as any}) }>
-{{#each field_type.variants}}
-  <option value="{{this}}">{{title_case this}}</option>
-{{/each}}
-</select>

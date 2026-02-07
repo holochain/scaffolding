@@ -12,16 +12,10 @@ use crate::{
     },
 };
 
-static LIT_TEMPLATES: Dir<'static> =
-    include_dir!("$CARGO_MANIFEST_DIR/templates/ui-frameworks/lit");
 static SVELTE_TEMPLATES: Dir<'static> =
     include_dir!("$CARGO_MANIFEST_DIR/templates/ui-frameworks/svelte");
-static VUE_TEMPLATES: Dir<'static> =
-    include_dir!("$CARGO_MANIFEST_DIR/templates/ui-frameworks/vue");
 static VANILLA_TEMPLATES: Dir<'static> =
     include_dir!("$CARGO_MANIFEST_DIR/templates/ui-frameworks/vanilla");
-static REACT_TEMPLATES: Dir<'static> =
-    include_dir!("$CARGO_MANIFEST_DIR/templates/ui-frameworks/react");
 
 static HEADLESS_TEMPLATE: Dir<'static> = include_dir!("$CARGO_MANIFEST_DIR/templates/headless");
 static GENERIC_TEMPLATES: Dir<'static> = include_dir!("$CARGO_MANIFEST_DIR/templates/generic");
@@ -29,10 +23,7 @@ static GENERIC_TEMPLATES: Dir<'static> = include_dir!("$CARGO_MANIFEST_DIR/templ
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum TemplateType {
     Vanilla,
-    Lit,
     Svelte,
-    Vue,
-    React,
     Headless,
     Custom(PathBuf),
 }
@@ -42,10 +33,7 @@ impl TemplateType {
     pub fn name(&self) -> String {
         let name = match self {
             TemplateType::Vanilla => "vanilla",
-            TemplateType::Lit => "lit",
             TemplateType::Svelte => "svelte",
-            TemplateType::Vue => "vue",
-            TemplateType::React => "react",
             TemplateType::Headless => "headless",
             TemplateType::Custom(path) => return format!("{path:?}"),
         };
@@ -65,11 +53,8 @@ impl TemplateType {
 
     pub fn file_tree(&self) -> ScaffoldResult<FileTree> {
         let ui_framework_dir = match self {
-            TemplateType::Lit => &LIT_TEMPLATES,
             TemplateType::Vanilla => &VANILLA_TEMPLATES,
             TemplateType::Svelte => &SVELTE_TEMPLATES,
-            TemplateType::Vue => &VUE_TEMPLATES,
-            TemplateType::React => &REACT_TEMPLATES,
             TemplateType::Headless => &HEADLESS_TEMPLATE,
             TemplateType::Custom(path) => return load_directory_into_memory(path),
         };
@@ -78,10 +63,7 @@ impl TemplateType {
 
     pub fn choose() -> ScaffoldResult<TemplateType> {
         let frameworks = [
-            TemplateType::Lit,
             TemplateType::Svelte,
-            TemplateType::Vue,
-            TemplateType::React,
             TemplateType::Vanilla,
             TemplateType::Headless,
         ];
@@ -93,29 +75,8 @@ impl TemplateType {
         Ok(frameworks[selection].clone())
     }
 
-    pub fn choose_non_vanilla() -> ScaffoldResult<TemplateType> {
-        let frameworks = [
-            TemplateType::Lit,
-            TemplateType::Svelte,
-            TemplateType::React,
-            TemplateType::Vue,
-        ];
-        let selection = Select::with_theme(&ColorfulTheme::default())
-            .with_prompt("Choose UI framework: (Use arrow-keys. Return to submit)")
-            .default(0)
-            .items(&frameworks[..])
-            .interact()?;
-        Ok(frameworks[selection].clone())
-    }
-
     pub fn choose_non_headless() -> ScaffoldResult<TemplateType> {
-        let frameworks = [
-            TemplateType::Lit,
-            TemplateType::Svelte,
-            TemplateType::React,
-            TemplateType::Vue,
-            TemplateType::Vanilla,
-        ];
+        let frameworks = [TemplateType::Svelte, TemplateType::Vanilla];
         let selection = Select::with_theme(&ColorfulTheme::default())
             .with_prompt("Choose UI framework: (Use arrow-keys. Return to submit)")
             .default(0)
@@ -157,14 +118,8 @@ impl TryFrom<&FileTree> for TemplateType {
                 .file_content()
                 .map(|c| c.to_owned())
                 .ok_or(ScaffoldError::PathNotFound(ui_package_json_path.clone()))?;
-            if ui_package_json.contains("lit") {
-                return Ok(TemplateType::Lit);
-            } else if ui_package_json.contains("svelte") {
+            if ui_package_json.contains("svelte") {
                 return Ok(TemplateType::Svelte);
-            } else if ui_package_json.contains("vue") {
-                return Ok(TemplateType::Vue);
-            } else if ui_package_json.contains("react") {
-                return Ok(TemplateType::React);
             } else if !dir_exists(app_file_tree, &PathBuf::from("ui/src")) {
                 return Ok(TemplateType::Vanilla);
             }
@@ -177,10 +132,7 @@ impl std::fmt::Display for TemplateType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let str = match self {
             TemplateType::Vanilla => "vanilla".yellow(),
-            TemplateType::Lit => "lit".bright_blue(),
             TemplateType::Svelte => "svelte".bright_red(),
-            TemplateType::React => "react".cyan(),
-            TemplateType::Vue => "vue".green(),
             TemplateType::Headless => "headless (no ui)".italic(),
             TemplateType::Custom(path) => format!("{path:?}").white(),
         };
@@ -195,13 +147,10 @@ impl FromStr for TemplateType {
         match s.to_ascii_lowercase().as_str() {
             "vanilla" => Ok(TemplateType::Vanilla),
             "svelte" => Ok(TemplateType::Svelte),
-            "vue" => Ok(TemplateType::Vue),
-            "react" => Ok(TemplateType::React),
-            "lit" => Ok(TemplateType::Lit),
             "headless" => Ok(TemplateType::Headless),
             path_str if PathBuf::from(path_str).exists() => Ok(TemplateType::Custom(path_str.into())),
             value => Err(ScaffoldError::MalformedTemplate(format!(
-                "Invalid value: {value}, expected vanilla, svelte, vue, lit, headless or a valid/ existing file path"
+                "Invalid value: {value}, expected vanilla, svelte, headless or a valid/ existing file path"
             ))),
         }
     }
@@ -214,10 +163,7 @@ impl Serialize for TemplateType {
     {
         match self {
             TemplateType::Vanilla => serializer.serialize_str("vanilla"),
-            TemplateType::Lit => serializer.serialize_str("lit"),
             TemplateType::Svelte => serializer.serialize_str("svelte"),
-            TemplateType::Vue => serializer.serialize_str("vue"),
-            TemplateType::React => serializer.serialize_str("react"),
             TemplateType::Headless => serializer.serialize_str("headless"),
             TemplateType::Custom(path) => path
                 .to_str()
@@ -235,14 +181,11 @@ impl<'de> Deserialize<'de> for TemplateType {
         let s = String::deserialize(deserializer)?;
         match s.as_str() {
             "vanilla" => Ok(TemplateType::Vanilla),
-            "lit" => Ok(TemplateType::Lit),
             "svelte" => Ok(TemplateType::Svelte),
-            "vue" => Ok(TemplateType::Vue),
-            "react" => Ok(TemplateType::React),
             "headless" => Ok(TemplateType::Headless),
             path_str if PathBuf::from(path_str).exists() => Ok(TemplateType::Custom(path_str.into())),
             value => Err(serde::de::Error::custom(format!(
-                "Invalid value: {value}, expected vanilla, svelte, vue, lit, headless or a valid/ existing file path"
+                "Invalid value: {value}, expected vanilla, svelte, headless or a valid/ existing file path"
             ))),
         }
     }

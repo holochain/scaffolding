@@ -1,7 +1,7 @@
 name: "scaffolding-ci"
 
 on:
-  pull_request: {}
+  pull_request: { }
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
@@ -62,11 +62,11 @@ jobs:
 
   testbuild:
     runs-on: ubuntu-latest
-    needs: [nix_build]
+    needs: [ nix_build ]
     strategy:
       fail-fast: false
       matrix:
-        template: [svelte, vue, lit, react, vanilla]
+        template: [ svelte, vanilla ]
     steps:
       - uses: actions/checkout@v5
 
@@ -96,7 +96,7 @@ jobs:
 
   testbuild_by_scope:
     runs-on: ubuntu-latest
-    needs: [nix_build]
+    needs: [ nix_build ]
     strategy:
       matrix:
         scope:
