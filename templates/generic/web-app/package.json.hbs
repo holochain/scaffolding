@@ -3,8 +3,8 @@
   "private": true,
   "workspaces": ["ui"],
   "scripts": {
-    "start": "AGENTS=${AGENTS:-2} BOOTSTRAP_PORT=$(get-port) {{(package_manager_command "network" null)}}",
-    "network": "hc sandbox clean && {{(package_manager_command "build:happ" null)}} && UI_PORT=$(get-port) concurrently \"{{(package_manager_command "start" "ui")}}\" \"{{(package_manager_command "launch:happ" null)}}\" \"hc playground\"",
+    "start": "AGENTS=${AGENTS:-2} {{(package_manager_command "network" null)}}",
+    "network": "hc sandbox clean && {{(package_manager_command "build:happ" null)}} && UI_PORT=$(get-port) concurrently \"{{(package_manager_command "start" "ui")}}\" \"{{(package_manager_command "launch:happ" null)}}\"",
     "test": "{{(package_manager_command "build:happ" null)}} && cargo test",
     "launch:happ": "hc-spin -n $AGENTS --ui-port $UI_PORT workdir/{{app_name}}.happ",
     "package": "{{(package_manager_command "build:happ" null)}} && {{(package_manager_command "package" "ui")}} && hc web-app pack workdir --recursive",
