@@ -20,7 +20,6 @@ nix develop
 ```
 
 This will create a network of 2 nodes connected to each other and their respective UIs.
-It will also bring up the Holochain Playground for advanced introspection of the conductors.
 
 ## Running the backend tests
 
@@ -37,7 +36,6 @@ AGENTS=3 {{(package_manager_command "network" null)}}
 ```
 
 Substitute the "3" for the number of nodes that you want to bootstrap in your network.
-This will also bring up the Holochain Playground for advanced introspection of the conductors.
 
 ## Packaging
 
@@ -55,4 +53,3 @@ This repository is using these tools:
 - [NPM Workspaces](https://docs.npmjs.com/cli/v7/using-npm/workspaces/): npm v7's built-in monorepo capabilities.
 - [hc](https://github.com/holochain/holochain/tree/develop/crates/hc): Holochain CLI to easily manage Holochain development instances.
 - [@holochain/client](https://www.npmjs.com/package/@holochain/client): client library to connect to Holochain from the UI.
-- [hc playground](https://github.com/darksoil-studio/holochain-playground): introspection tooling to understand what's going on in the Holochain nodes.
