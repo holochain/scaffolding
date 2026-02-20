@@ -15,7 +15,7 @@ pub fn flake_nix() -> FileTree {
         r#"{
   description = "Flake for Holochain app development";
 
-  inputs = {{
+  inputs = {
     holonix.url = "github:holochain/holonix?ref=main-0.6";
 
     nixpkgs.follows = "holonix/nixpkgs";
