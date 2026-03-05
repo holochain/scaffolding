@@ -1,8 +1,8 @@
 use std::str::FromStr;
 
+use clap::Parser;
 use colored::Colorize;
 use convert_case::Case;
-use clap::Parser;
 
 use crate::{
     file_tree::{build_file_tree, load_directory_into_memory},
