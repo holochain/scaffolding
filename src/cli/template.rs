@@ -1,19 +1,19 @@
 use std::{ffi::OsString, path::PathBuf};
 
 use build_fs_tree::{dir, file, Build, MergeableFileSystemTree};
-use structopt::StructOpt;
+use clap::Subcommand;
 
 use crate::{scaffold::web_app::template_type::TemplateType, utils::input_with_case};
 
-#[derive(Debug, StructOpt)]
-#[structopt(setting = structopt::clap::AppSettings::InferSubcommands)]
+#[derive(Debug, Subcommand)]
+#[command(infer_subcommands = true)]
 /// Manage custom templates
 pub enum Template {
     /// Create a new template from an existing scaffolding template
     New,
     /// Clone the template in use into a new custom template
     Clone {
-        #[structopt(long)]
+        #[arg(long)]
         /// The folder to initialize the template into, will end up at "<TO TEMPLATE>"
         to_template: Option<String>,
     },

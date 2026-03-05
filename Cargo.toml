@@ -31,7 +31,7 @@ path-clean = "1.0.1"
 regex = "1.6.0"
 serde_yaml = "0.9.34"
 serde_json = "1"
-structopt = "0.3.11"
+clap = { version = "4", features = ["derive"] }
 thiserror = "2.0"
 tokio = { version = "1.11", features = ["full"] }
 toml = "0.8.14"

@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
+use clap::Parser;
 use colored::Colorize;
-use structopt::StructOpt;
 
 use crate::{
     file_tree::{build_file_tree, load_directory_into_memory},
@@ -13,38 +13,38 @@ use crate::{
     utils::run_cargo_fmt_if_available,
 };
 
-#[derive(Debug, StructOpt)]
+#[derive(Debug, Parser)]
 /// Scaffold a link type and its appropriate zome functions into an existing zome
 pub struct LinkType {
-    #[structopt(long)]
+    #[arg(long)]
     /// Name of the dna in which you want to scaffold the zome
     pub dna: Option<String>,
 
-    #[structopt(long)]
+    #[arg(long)]
     /// Name of the integrity zome in which you want to scaffold the link type
     pub zome: Option<String>,
 
-    #[structopt(parse(try_from_str = Referenceable::from_str))]
+    #[arg(value_parser = Referenceable::from_str)]
     /// Entry type (or agent role) used as the base for the links
     pub from_referenceable: Option<Referenceable>,
 
-    #[structopt(parse(try_from_str = Referenceable::from_str))]
+    #[arg(value_parser = Referenceable::from_str)]
     /// Entry type (or agent role) used as the target for the links
     pub to_referenceable: Option<Referenceable>,
 
-    #[structopt(long)]
+    #[arg(long)]
     /// Whether to create the inverse link, from the "--to-referenceable" entry type to the "--from-referenceable" entry type
     pub bidirectional: Option<bool>,
 
-    #[structopt(long)]
+    #[arg(long)]
     /// Whether this link type can be deleted
     pub delete: Option<bool>,
 
-    #[structopt(long)]
+    #[arg(long)]
     /// Skips UI generation for this link-type.
     pub no_ui: bool,
 
-    #[structopt(long)]
+    #[arg(long)]
     /// Skips test generation for this link-type.
     pub no_spec: bool,
 }

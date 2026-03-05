@@ -1,8 +1,8 @@
 use std::{ffi::OsString, path::PathBuf};
 
 use build_fs_tree::{Build, MergeableFileSystemTree};
+use clap::Parser;
 use colored::Colorize;
-use structopt::StructOpt;
 use tokio::fs;
 
 use crate::{
@@ -30,13 +30,13 @@ use crate::{
     utils::run_cargo_fmt_if_available,
 };
 
-#[derive(Debug, StructOpt)]
+#[derive(Debug, Parser)]
 /// Scaffold an example hApp
 pub struct Example {
     /// Name of the example to scaffold. One of ['hello-world', 'forum'].
     pub example: Option<ExampleType>,
 
-    #[structopt(long)]
+    #[arg(long)]
     /// Whether to setup the holonix development environment for the example hApp
     pub setup_nix: Option<bool>,
 }

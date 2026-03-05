@@ -1,8 +1,8 @@
 use std::str::FromStr;
 
+use clap::Parser;
 use colored::Colorize;
 use convert_case::Case;
-use structopt::StructOpt;
 
 use crate::{
     file_tree::{build_file_tree, load_directory_into_memory},
@@ -16,46 +16,46 @@ use crate::{
     utils::{check_case, input_with_case, run_cargo_fmt_if_available},
 };
 
-#[derive(Debug, StructOpt)]
+#[derive(Debug, Parser)]
 /// Scaffold an entry type and CRUD functions into an existing zome
 pub struct EntryType {
-    #[structopt(long)]
+    #[arg(long)]
     /// Name of the dna in which you want to scaffold the entry type
     pub dna: Option<String>,
 
-    #[structopt(long)]
+    #[arg(long)]
     /// Name of the integrity zome in which you want to scaffold the entry definition
     pub zome: Option<String>,
 
     /// Name of the entry type being scaffolded
     pub name: Option<String>,
 
-    #[structopt(long)]
+    #[arg(long)]
     /// Whether this entry type should be referenced with its "EntryHash" or its "ActionHash"
     /// If referred to by "EntryHash", the entries can't be updated or deleted
     pub reference_entry_hash: Option<bool>,
 
-    #[structopt(long, parse(try_from_str = Crud::from_str))]
+    #[arg(long, value_parser = Crud::from_str)]
     /// The Create, "Read", "Update", and "Delete" zome call functions that should be scaffolded for this entry type
     /// If "--reference-entry-hash" is "true", only "Create" and "Read" will be scaffolded
     pub crud: Option<Crud>,
 
-    #[structopt(long)]
+    #[arg(long)]
     /// Whether to create a link from the original entry to each update action
     /// Only applies if update is selected in the "crud" argument
     pub link_from_original_to_each_update: Option<bool>,
 
-    #[structopt(long, value_delimiter = ",", parse(try_from_str = FieldDefinition::from_str))]
+    #[arg(long, value_delimiter = ',', value_parser = FieldDefinition::from_str)]
     /// The fields that the entry type struct should contain
     /// Syntax: <FIELD_NAME>:<FIELD_TYPE>:<WIDGET>:<LINKED_FROM> , (widget and linked_from are optional)
     /// Eg. "title:String:TextField" , "posts_hashes:Vec\<ActionHash\>::Post"
     pub fields: Option<Vec<FieldDefinition>>,
 
-    #[structopt(long)]
+    #[arg(long)]
     /// Skips UI generation for this entry-type, overriding any specified widgets in the --fields option.
     pub no_ui: bool,
 
-    #[structopt(long)]
+    #[arg(long)]
     /// Skips test generation for this entry-type
     pub no_spec: bool,
 }
