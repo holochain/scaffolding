@@ -6,9 +6,9 @@ use crate::scaffold::config::ScaffoldConfig;
 use crate::scaffold::example::ExampleType;
 use crate::scaffold::web_app::template_type::TemplateType;
 
+use clap::Parser;
 use colored::Colorize;
 use std::{path::Path, str::FromStr};
-use structopt::StructOpt;
 
 mod collection;
 mod dna;
@@ -19,24 +19,27 @@ mod template;
 mod web_app;
 mod zome;
 
-#[derive(Debug, StructOpt)]
+#[derive(Debug, Parser)]
 pub struct HcScaffold {
-    #[structopt(short, long, parse(try_from_str = TemplateType::from_str))]
+    #[arg(short, long, value_parser = TemplateType::from_str)]
     /// The template to use for the hc-scaffold commands.
     /// Can either be an option from the built-in templates: "vanilla", "svelte", "headless",
     /// or a path to a custom template.
     template: Option<TemplateType>,
 
-    #[structopt(subcommand)]
+    #[command(subcommand)]
     command: HcScaffoldCommand,
 }
 
 /// A command-line interface for creating and modifying a Holochain application (hApp).
-#[derive(Debug, StructOpt)]
-#[structopt(setting = structopt::clap::AppSettings::InferSubcommands)]
+#[derive(Debug, clap::Subcommand)]
+#[command(infer_subcommands = true)]
 pub enum HcScaffoldCommand {
     WebApp(web_app::WebApp),
-    Template(template::Template),
+    Template {
+        #[command(subcommand)]
+        command: template::Template,
+    },
     Dna(dna::Dna),
     Zome(zome::Zome),
     EntryType(entry_type::EntryType),
@@ -53,7 +56,7 @@ impl HcScaffold {
 
         match self.command {
             HcScaffoldCommand::WebApp(web_app) => web_app.run(&template_type).await,
-            HcScaffoldCommand::Template(template) => template.run(&template_type),
+            HcScaffoldCommand::Template { command } => command.run(&template_type),
             HcScaffoldCommand::Dna(dna) => dna.run(&template_type),
             HcScaffoldCommand::Zome(zome) => zome.run(&template_type),
             HcScaffoldCommand::EntryType(entry_type) => entry_type.run(&template_type),

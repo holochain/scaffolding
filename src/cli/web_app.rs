@@ -3,9 +3,9 @@ use std::{
     path::{Path, PathBuf},
 };
 
+use clap::Parser;
 use colored::Colorize;
 use convert_case::{Case, Casing};
-use structopt::StructOpt;
 use tokio::fs;
 
 use crate::{
@@ -26,7 +26,7 @@ use crate::{
     utils::{input_no_whitespace, input_with_case, input_yes_or_no, validate_input},
 };
 
-#[derive(Debug, StructOpt)]
+#[derive(Debug, Parser)]
 /// Scaffold a new, empty web app
 pub struct WebApp {
     /// Name of the app to scaffold
@@ -35,11 +35,11 @@ pub struct WebApp {
     /// Description of the app to scaffold
     pub description: Option<String>,
 
-    #[structopt(long)]
+    #[arg(long)]
     /// Whether to setup the holonix development environment for this web-app
     pub setup_nix: bool,
 
-    #[structopt(long, short = "F")]
+    #[arg(long, short = 'F')]
     /// Whether to skip setting up an initial DNA and it's zome(s) after the web app is scaffolded
     pub disable_fast_track: bool,
 }

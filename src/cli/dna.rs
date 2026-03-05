@@ -1,6 +1,6 @@
+use clap::Parser;
 use colored::Colorize;
 use convert_case::Case;
-use structopt::StructOpt;
 
 use crate::{
     file_tree::{build_file_tree, load_directory_into_memory},
@@ -9,10 +9,10 @@ use crate::{
     utils::{check_case, input_with_case},
 };
 
-#[derive(Debug, StructOpt)]
+#[derive(Debug, Parser)]
 /// Scaffold a DNA into an existing app
 pub struct Dna {
-    #[structopt(long)]
+    #[arg(long)]
     /// Name of the app in which you want to scaffold the DNA
     pub app: Option<String>,
 
