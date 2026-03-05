@@ -20,6 +20,7 @@ mod web_app;
 mod zome;
 
 #[derive(Debug, Parser)]
+#[command(version)]
 pub struct HcScaffold {
     #[arg(short, long, value_parser = TemplateType::from_str)]
     /// The template to use for the hc-scaffold commands.
