@@ -36,16 +36,20 @@
               	'';
         };
         systems = builtins.attrNames inputs.holonix.devShells;
-        perSystem = { inputs', self', config, system, pkgs, lib, ... }: {
+        perSystem = { inputs', self', config, system, pkgs, lib, ... }:
+          let
+            pkgsWithRust = import nixpkgs {
+              inherit system;
+              overlays = [ (import rust-overlay) ];
+            };
+            rustToolchain = pkgsWithRust.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
+          in
+          {
           formatter = pkgs.nixpkgs-fmt;
 
           packages.hc-scaffold =
             let
-              pkgs = import nixpkgs {
-                inherit system;
-                overlays = [ (import rust-overlay) ];
-              };
-              rustToolchain = pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
+              pkgs = pkgsWithRust;
               craneLib = (crane.mkLib pkgs).overrideToolchain rustToolchain;
               crateInfo = craneLib.crateNameFromCargoToml { cargoToml = ./Cargo.toml; };
 
@@ -107,7 +111,7 @@
           };
 
           devShells.ci = pkgs.mkShell {
-            packages = [ inputs'.holonix.packages.rust self'.packages.hc-scaffold ];
+            packages = [ rustToolchain self'.packages.hc-scaffold ];
           };
         };
       };
