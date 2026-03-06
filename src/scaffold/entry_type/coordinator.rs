@@ -1,4 +1,4 @@
-use std::{ffi::OsString, path::PathBuf};
+use std::ffi::OsString;
 
 use convert_case::{Case, Casing};
 use proc_macro2::TokenStream;
@@ -72,7 +72,7 @@ pub fn add_crud_functions_to_coordinator(
             .path_mut(&mut v.iter())
             .ok_or(ScaffoldError::PathNotFound(crate_src_path.clone()))?,
         |file_path, mut file| {
-            if file_path == PathBuf::from("lib.rs") {
+            if *file_path == *"lib.rs" {
                 let mut first_entry_type_scaffolded = false;
 
                 for item in &mut file.items {
@@ -88,13 +88,13 @@ pub fn add_crud_functions_to_coordinator(
                     if let syn::Item::Fn(item_fn) = item {
                         if item_fn.sig.ident == "signal_action" {
                             if find_ending_match_expr_in_block(&mut item_fn.block).is_none() {
-                                item_fn.block = Box::new(syn::parse_quote! {
+                                *item_fn.block = syn::parse_quote! {
                                     {
                                         match action.hashed.content.clone() {
                                             _ => Ok(())
                                         }
                                     }
-                                });
+                                };
                             }
 
                             if let Some(expr_match) =

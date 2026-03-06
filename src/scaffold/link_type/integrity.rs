@@ -1,7 +1,4 @@
-use std::{
-    ffi::OsString,
-    path::{Path, PathBuf},
-};
+use std::{ffi::OsString, path::Path};
 
 use convert_case::{Case, Casing};
 use itertools::Itertools;
@@ -78,7 +75,7 @@ pub fn add_link_type_to_integrity_zome(
             .ok_or(ScaffoldError::PathNotFound(crate_src_path.clone()))?,
         |file_path, mut file| {
             // If there are no link types in this zome, first add the empty enum
-            if hdk_link_types_instances.is_empty() && file_path == PathBuf::from("lib.rs") {
+            if hdk_link_types_instances.is_empty() && *file_path == *"lib.rs" {
                 let link_types_item = syn::parse_quote! {
                     #[derive(Serialize, Deserialize)]
                     #[hdk_link_types]
@@ -338,7 +335,7 @@ fn add_link_type_signals(
             .path_mut(&mut v.iter())
             .ok_or(ScaffoldError::PathNotFound(crate_src_path.clone()))?,
         |file_path, mut file| {
-            if file_path == PathBuf::from("lib.rs") {
+            if *file_path == *"lib.rs" {
                 for item in &mut file.items {
                     if let syn::Item::Enum(item_enum) = item {
                         if item_enum.ident.to_string().eq(&String::from("Signal"))
@@ -353,9 +350,9 @@ fn add_link_type_signals(
                     if let syn::Item::Fn(item_fn) = item {
                         if item_fn.sig.ident == "signal_action" {
                             if find_ending_match_expr_in_block(&mut item_fn.block).is_none() {
-                                item_fn.block = Box::new(syn::parse_str::<syn::Block>(
+                                *item_fn.block = syn::parse_str::<syn::Block>(
                                     "{ match action.hashed.content.clone() { _ => Ok(()) } }",
-                                )?);
+                                )?;
                             }
 
                             if let Some(expr_match) =
