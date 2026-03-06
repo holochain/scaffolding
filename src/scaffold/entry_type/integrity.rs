@@ -2,7 +2,7 @@ use convert_case::{Case, Casing};
 use itertools::Itertools;
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
-use std::{ffi::OsString, path::PathBuf};
+use std::ffi::OsString;
 
 use crate::error::{ScaffoldError, ScaffoldResult};
 use crate::file_tree::insert_file;
@@ -77,7 +77,7 @@ pub use {snake_entry_def_name}::*;
             let mut found = false;
 
             // If there are no entry types definitions in this zome, first add the empty enum
-            if entry_types.is_none() && file_path == PathBuf::from("lib.rs") {
+            if entry_types.is_none() && *file_path == *"lib.rs" {
                 let entry_types_item = syn::parse_quote! {
                     #[derive(Serialize, Deserialize)]
                     #[serde(tag = "type")]
