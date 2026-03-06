@@ -168,7 +168,6 @@ impl FieldType {
             FieldType::Enum { label, variants } => {
                 let variants_expressions: Vec<syn::Expr> = variants
                     .iter()
-                    .cloned()
                     .map(|variant| {
                         let e: syn::Expr = syn::parse_str(variant.to_case(Case::Pascal).as_str())
                             .expect("Unable to parse");
