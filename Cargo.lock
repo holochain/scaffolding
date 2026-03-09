@@ -1324,9 +1324,9 @@ checksum = "7f24254aa9a54b5c858eaee2f5bccdb46aaf0e486a595ed5fd8f86ba55232a70"
 
 [[package]]
 name = "holo_hash"
-version = "0.7.0-dev.3"
+version = "0.7.0-dev.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d36c4e3f378c453360851a8db26e66a008bb0108e8c85371350204e0d60b2048"
+checksum = "a78590c426b0fe657aa1e9b9de2e63b77bd163f61ef9fcc766fe707e7eb48971"
 dependencies = [
  "base64",
  "blake2b_simd",
@@ -1348,9 +1348,9 @@ dependencies = [
 
 [[package]]
 name = "holochain_integrity_types"
-version = "0.7.0-dev.4"
+version = "0.7.0-dev.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7894780e10cddca13821c7a5f6846b44d76d7020945229582afae53c32604b91"
+checksum = "65aed6a225b78d3f9bd80b3496ae54e70b660d2ba143dbd8f4dc1d83a7ac4436"
 dependencies = [
  "derive_builder",
  "holo_hash",
@@ -1368,9 +1368,9 @@ dependencies = [
 
 [[package]]
 name = "holochain_keystore"
-version = "0.7.0-dev.5"
+version = "0.7.0-dev.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "66db5cabe958e921b89d93a2296e085d3aa1da46d688991e05de88a59fde6e09"
+checksum = "f679aedac0cb431df6cd5e86b3982dac27d85d65f66f6b3d6f2e3b1621af9a0d"
 dependencies = [
  "base64",
  "derive_more 2.0.1",
@@ -1384,6 +1384,7 @@ dependencies = [
  "must_future",
  "nanoid",
  "one_err",
+ "opentelemetry",
  "parking_lot",
  "schemars 0.9.0",
  "serde",
@@ -1397,9 +1398,9 @@ dependencies = [
 
 [[package]]
 name = "holochain_nonce"
-version = "0.7.0-dev.0"
+version = "0.7.0-dev.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "715d0dae744ec354efa59e651da01efe7fd566d8f31662d40d5e90c020f267cd"
+checksum = "ed390f9d4c3ff706fe2dffb01570e2d04ce3cb1adaa70cbf2071a94b85b2f7a4"
 dependencies = [
  "getrandom 0.3.4",
  "holochain_secure_primitive",
@@ -1445,9 +1446,9 @@ dependencies = [
 
 [[package]]
 name = "holochain_secure_primitive"
-version = "0.7.0-dev.0"
+version = "0.7.0-dev.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "de8645a93a6840b41441742e5a03fae18399dd1336c07f18f12d3ad27c8da266"
+checksum = "fbd050f4f632cf4a0276a983b6f5b6223fc728ec1f328840954338d4c2052a99"
 dependencies = [
  "paste",
  "serde",
@@ -1481,9 +1482,9 @@ dependencies = [
 
 [[package]]
 name = "holochain_sqlite"
-version = "0.7.0-dev.8"
+version = "0.7.0-dev.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4ea64b00c63c43e3ed242db333f1106eab68a31f25a5d21ac4b459336490a92b"
+checksum = "90dbb8a0766e73561230df9a8fdfafd9c00182b8cccb75d4723d6546380a60c4"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -1502,7 +1503,7 @@ dependencies = [
  "kitsune2_api",
  "nanoid",
  "once_cell",
- "opentelemetry_api",
+ "opentelemetry",
  "parking_lot",
  "pretty_assertions",
  "r2d2",
@@ -1534,9 +1535,9 @@ dependencies = [
 
 [[package]]
 name = "holochain_trace"
-version = "0.7.0-dev.0"
+version = "0.7.0-dev.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f76435f822489224bae55c20b65b230d8d877d22b911e425ad7f8c6606535fe6"
+checksum = "6e4a990c92061d77f6e89bf4490e5664a5a6fa0c1ec6b99fa222684e52a4b04b"
 dependencies = [
  "chrono",
  "derive_more 2.0.1",
@@ -1551,9 +1552,9 @@ dependencies = [
 
 [[package]]
 name = "holochain_types"
-version = "0.7.0-dev.11"
+version = "0.7.0-dev.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7cfe5112d214c6f24d818143228781d825c577d07f7de2524cc4957bda68a25b"
+checksum = "232bc1e302a401d650aa596997af2ab4b950f2771e5f9903be6c275321f80a69"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -1599,9 +1600,9 @@ dependencies = [
 
 [[package]]
 name = "holochain_util"
-version = "0.7.0-dev.0"
+version = "0.7.0-dev.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c96d1a2e73cf4344650b63a0cbda9f86a04599bc8c16822df834f5bb697c3eba"
+checksum = "f7bc417ce1361ded4dbaf7b2dd602309670bafb4929b7ae8451268e653f198aa"
 dependencies = [
  "backtrace",
  "cfg-if",
@@ -1629,9 +1630,9 @@ dependencies = [
 
 [[package]]
 name = "holochain_zome_types"
-version = "0.7.0-dev.5"
+version = "0.7.0-dev.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d35c3ccfef22cff7077f64fe26abcd36458a0361f923c91b7e299f6690a228fe"
+checksum = "7db2378314a0cc3c6619d001f0f01c9a49cfb902d0cda00010a06342deca744b"
 dependencies = [
  "derive_builder",
  "derive_more 2.0.1",
@@ -1976,9 +1977,9 @@ dependencies = [
 
 [[package]]
 name = "kitsune2_api"
-version = "0.4.0-dev.2"
+version = "0.4.0-dev.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d238cf93e1df4e89016ed527cc7f5cb0e3394c6a6a125d2057aa6b3561d084b3"
+checksum = "f520eb0c66a79ea8f1112ee2b062ae423e5cb9399b05eb26bb3bedcd81172664"
 dependencies = [
  "base64",
  "bytes",
@@ -2235,9 +2236,9 @@ dependencies = [
 
 [[package]]
 name = "mr_bundle"
-version = "0.7.0-dev.0"
+version = "0.7.0-dev.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2076127e22dbe301f29ee68fcd7c14f210335a15b7fafaec7910522508b92712"
+checksum = "bb4998a171946c591e822000303ad53b5abf15de515d15f27d6659e2e63c5d00"
 dependencies = [
  "bytes",
  "dunce",
@@ -2442,19 +2443,17 @@ dependencies = [
 ]
 
 [[package]]
-name = "opentelemetry_api"
-version = "0.20.0"
+name = "opentelemetry"
+version = "0.31.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8a81f725323db1b1206ca3da8bb19874bbd3f57c3bcd59471bfb04525b265b9b"
+checksum = "b84bcd6ae87133e903af7ef497404dda70c60d0ea14895fc8a5e6722754fc2a0"
 dependencies = [
- "futures-channel",
- "futures-util",
- "indexmap 1.9.3",
+ "futures-core",
+ "futures-sink",
  "js-sys",
- "once_cell",
  "pin-project-lite",
- "thiserror 1.0.69",
- "urlencoding",
+ "thiserror 2.0.17",
+ "tracing",
 ]
 
 [[package]]
@@ -4220,12 +4219,6 @@ dependencies = [
  "serde",
  "url",
 ]
-
-[[package]]
-name = "urlencoding"
-version = "2.1.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "daf8dba3b7eb870caf1ddeed7bc9d2a049f3cfdfae7cb521b087cc33ae4c49da"
 
 [[package]]
 name = "utf-8"
