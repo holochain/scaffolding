@@ -62,7 +62,7 @@ fn no_link_type_test_file_is_generated_without_link_target() {
     let scaffolded_template = scaffold_link_template("frommer", &None);
     assert!(dir_content(
         &scaffolded_template.file_tree,
-        PathBuf::from_str(&format!("dnas/test-dna/zomes/coordinator/test-zome/tests/"))
+        PathBuf::from_str("dnas/test-dna/zomes/coordinator/test-zome/tests/")
             .unwrap()
             .as_path()
     )
@@ -327,11 +327,11 @@ fn render_and_assert_eq(
     delete: bool,
     bidirectional: bool,
 ) {
-    let rendered_test = render_template(&from, &to, delete, bidirectional);
+    let rendered_test = render_template(from, to, delete, bidirectional);
 
-    let mut expected_test = test_header(&from, &to);
+    let mut expected_test = test_header(from, to);
     expected_test.push_str(expected_addresses);
-    expected_test.push_str(&test_body(&from, &to, delete, bidirectional));
+    expected_test.push_str(&test_body(from, to, delete, bidirectional));
 
     pretty_assertions::assert_str_eq!(rendered_test, expected_test);
 }
