@@ -107,7 +107,12 @@
           };
 
           devShells.ci = pkgs.mkShell {
-            packages = [ inputs'.holonix.packages.rust self'.packages.hc-scaffold ];
+            packages = [ 
+              inputs'.holonix.packages.rust
+              self'.packages.hc-scaffold
+              pkgs.openssl
+              pkgs.pkg-config
+            ];
           };
         };
       };
