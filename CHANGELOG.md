@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## \[[0.600.3-rc.0](https://github.com/holochain/scaffolding/compare/v0.600.2-rc.0...v0.600.3-rc.0)\] - 2026-03-23
+
+### Features
+
+- **BREAKING CHANGE** Tests are now scaffolded in rust using the sweettest crate. Support for tryorama tests has been removed. (#553)
+- **BREAKING CHANGE** Removed support for any package manager except npm. (#538)
+- **BREAKING CHANGE** Removed holochain playground, which is no longer supported. (#551)
+
+### Bug Fixes
+
+- Builds were failing due to a mistake in previous backport. (#553)
+
+### Build System
+
+- Bump rust, flake lock, holochain, hdk, hdi, hc-spin. (#557)
+
+### CI
+
+- Bump release workflows
+
 ## \[[0.600.2-rc.0](https://github.com///compare/v0.600.1...v0.600.2-rc.0)\] - 2026-01-22
 
 ### Build System
@@ -15,12 +35,6 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Build System
 
 - Pin holonix to main-0.6
-
-# Changelog
-
-All notable changes to this project will be documented in this file.
-
-This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## \[[0.600.0](https://github.com/holochain/scaffolding/commits/v0.600.0)\] - 2025-11-20
 
