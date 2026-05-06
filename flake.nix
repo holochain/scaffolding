@@ -98,6 +98,7 @@
             ]) ++ (with pkgs; [
               nodejs_24
               binaryen
+              perl
             ]) ++ [
               self'.packages.hc-scaffold
             ];
