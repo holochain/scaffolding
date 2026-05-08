@@ -37,81 +37,85 @@
               '';
         };
         systems = builtins.attrNames inputs.holonix.devShells;
-        perSystem = { inputs', self', system, pkgs, lib, ... }: {
-          formatter = pkgs.nixpkgs-fmt;
+        perSystem = { inputs', self', system, pkgs, lib, ... }:
+          let
+            rustToolchain = pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
+          in
+          {
+            _module.args.pkgs = import nixpkgs {
+              inherit system;
+              overlays = [ (import rust-overlay) ];
+            };
 
-          packages.hc-scaffold =
-            let
-              pkgs = import nixpkgs {
-                inherit system;
-                overlays = [ (import rust-overlay) ];
-              };
-              rustToolchain = pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
-              craneLib = (crane.mkLib pkgs).overrideToolchain rustToolchain;
-              crateInfo = craneLib.crateNameFromCargoToml { cargoToml = ./Cargo.toml; };
+            formatter = pkgs.nixpkgs-fmt;
 
-              # source filtering to ensure builds using include_str! or include_bytes! succeed
-              # https://crane.dev/faq/building-with-non-rust-includes.html
-              nonCargoBuildFiles = path: _type: builtins.match ".*(gitignore|md|hbs|nix|sh)$" path != null;
-              includeFilesFilter = path: type:
-                (craneLib.filterCargoSources path type) || (nonCargoBuildFiles path type);
+            packages.hc-scaffold =
+              let
+                craneLib = (crane.mkLib pkgs).overrideToolchain rustToolchain;
+                crateInfo = craneLib.crateNameFromCargoToml { cargoToml = ./Cargo.toml; };
 
-              buildInputs = [ pkgs.openssl pkgs.go ]
-                ++ (lib.optionals pkgs.stdenv.isDarwin
-                (with pkgs.darwin.apple_sdk.frameworks; [
-                  CoreFoundation
-                  SystemConfiguration
-                  Security
-                ]));
+                # source filtering to ensure builds using include_str! or include_bytes! succeed
+                # https://crane.dev/faq/building-with-non-rust-includes.html
+                nonCargoBuildFiles = path: _type: builtins.match ".*(gitignore|md|hbs|nix|sh)$" path != null;
+                includeFilesFilter = path: type:
+                  (craneLib.filterCargoSources path type) || (nonCargoBuildFiles path type);
 
-              nativeBuildInputs = [ pkgs.perl ];
+                buildInputs = [ pkgs.openssl pkgs.go ]
+                  ++ (lib.optionals pkgs.stdenv.isDarwin
+                  (with pkgs.darwin.apple_sdk.frameworks; [
+                    CoreFoundation
+                    SystemConfiguration
+                    Security
+                  ]));
 
-              cargoArtifacts = craneLib.buildDepsOnly {
-                pname = "hc-scaffold-deps";
+                nativeBuildInputs = [ pkgs.perl ];
+
+                cargoArtifacts = craneLib.buildDepsOnly {
+                  pname = "hc-scaffold-deps";
+                  src = lib.cleanSourceWith {
+                    src = ./.;
+                    filter = includeFilesFilter;
+                    name = "source";
+                  };
+                  inherit buildInputs nativeBuildInputs;
+                };
+              in
+              craneLib.buildPackage {
+                pname = "hc-scaffold";
+                version = crateInfo.version;
                 src = lib.cleanSourceWith {
                   src = ./.;
                   filter = includeFilesFilter;
                   name = "source";
                 };
-                inherit buildInputs nativeBuildInputs;
-              };
-            in
-            craneLib.buildPackage {
-              pname = "hc-scaffold";
-              version = crateInfo.version;
-              src = lib.cleanSourceWith {
-                src = ./.;
-                filter = includeFilesFilter;
-                name = "source";
-              };
-              doCheck = false;
+                doCheck = false;
 
-              inherit cargoArtifacts buildInputs nativeBuildInputs;
+                inherit cargoArtifacts buildInputs nativeBuildInputs;
+              };
+
+            devShells.default = pkgs.mkShell {
+              packages = (with inputs'.holonix.packages; [
+                holochain
+                lair-keystore
+                hn-introspect
+              ]) ++ (with pkgs; [
+                nodejs_24
+                binaryen
+                perl
+              ]) ++ [
+                self'.packages.hc-scaffold
+                rustToolchain
+              ];
+
+              shellHook = ''
+                export PS1='\[\033[1;34m\][holonix:\w]\$\[\033[0m\] '
+              '';
             };
 
-          devShells.default = pkgs.mkShell {
-            packages = (with inputs'.holonix.packages; [
-              holochain
-              lair-keystore
-              hn-introspect
-              rust
-            ]) ++ (with pkgs; [
-              nodejs_24
-              binaryen
-              perl
-            ]) ++ [
-              self'.packages.hc-scaffold
-            ];
-
-            shellHook = ''
-              export PS1='\[\033[1;34m\][holonix:\w]\$\[\033[0m\] '
-            '';
+            devShells.ci = pkgs.mkShell {
+              packages = [ rustToolchain self'.packages.hc-scaffold ];
+            };
           };
-
-          devShells.ci = pkgs.mkShell {
-            packages = [ inputs'.holonix.packages.rust self'.packages.hc-scaffold ];
-          };
-        };
       };
 
 
