@@ -42,7 +42,7 @@ holochain_serialized_bytes = {{ workspace = true }}
 {deps}
 
 [dev-dependencies]
-holochain = {{ workspace = true, features = ["wasmer_sys", "transport-iroh", "test_utils"] }}
+holochain = {{ workspace = true, features = ["wasmer-sys-cranelift", "transport-iroh", "test_utils"] }}
 tokio = {{ workspace = true }}
 "#,
     )
@@ -254,7 +254,7 @@ mod tests {
         assert_eq!(
             *dep_holochain.get("features").unwrap().as_array().unwrap(),
             [
-                toml::Value::String("wasmer_sys".to_string()),
+                toml::Value::String("wasmer-sys-cranelift".to_string()),
                 toml::Value::String("transport-iroh".to_string()),
                 toml::Value::String("test_utils".to_string())
             ]
