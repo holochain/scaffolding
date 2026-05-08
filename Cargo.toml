@@ -18,7 +18,7 @@ name = "holochain_scaffolding_cli"
 path = "src/lib.rs"
 
 [dependencies]
-holochain_types = "0.7.0-dev.15"
+holochain_types = "0.7.0-dev.22"
 mr_bundle = "0.7.0-dev.1"
 
 dirs = "6.0"
@@ -46,7 +46,7 @@ include_dir = "0.7.3"
 serde = "1"
 itertools = "0.14"
 colored = "3.0"
-dprint-plugin-typescript = "0.91.1"
+dprint-plugin-typescript = "0.96.0"
 markup_fmt = "0.10.0"
 git2 = { version = "0.19.0", default-features = false, features = [
   "https",
