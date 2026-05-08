@@ -22,7 +22,8 @@
               {
                 buildInputs = [ pkgs.makeWrapper ];
                 src = customTemplatePath;
-              } ''
+              }
+              ''
                 mkdir $out
                 mkdir $out/bin
                 # We create the bin folder ourselves and link every binary in it
@@ -33,10 +34,10 @@
                 # Because we create this ourself, by creating a wrapper
                 makeWrapper ${scaffolding}/bin/hc-scaffold $out/bin/hc-scaffold \
                   --add-flags "--template $out/template"
-              	'';
+              '';
         };
         systems = builtins.attrNames inputs.holonix.devShells;
-        perSystem = { inputs', self', config, system, pkgs, lib, ... }: {
+        perSystem = { inputs', self', system, pkgs, lib, ... }: {
           formatter = pkgs.nixpkgs-fmt;
 
           packages.hc-scaffold =
