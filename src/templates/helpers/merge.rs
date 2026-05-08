@@ -113,7 +113,7 @@ impl HelperDef for Merge {
                     .filter_map(|ms| serde_json::from_value::<MatchedScopedData>(ms.clone()).ok())
                     .collect();
 
-                matched_scopes.sort_by(|a, b| b.__starting_index.cmp(&a.__starting_index));
+                matched_scopes.sort_by_key(|b| std::cmp::Reverse(b.__starting_index));
 
                 let mut full_merge_content = String::from("");
                 for matched_scope in matched_scopes {
