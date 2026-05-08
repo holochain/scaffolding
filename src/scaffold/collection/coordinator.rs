@@ -257,10 +257,7 @@ fn add_create_link_in_create_function(
                             && item_fn.sig.ident == fn_name.sig.ident
                         {
                             if let Some(return_stmt) = item_fn.block.stmts.pop() {
-                                item_fn
-                                    .block
-                                    .stmts
-                                    .extend(create_link_stmts.clone().into_iter());
+                                item_fn.block.stmts.extend(create_link_stmts.clone());
                                 item_fn.block.stmts.push(return_stmt);
                             }
                             return syn::Item::Fn(item_fn);
@@ -410,10 +407,7 @@ fn add_delete_link_in_delete_function(
                             && item_fn.sig.ident == fn_name.sig.ident
                         {
                             if let Some(delete_stmt) = item_fn.block.stmts.pop() {
-                                item_fn
-                                    .block
-                                    .stmts
-                                    .extend(delete_link_stmts.clone().into_iter());
+                                item_fn.block.stmts.extend(delete_link_stmts.clone());
                                 item_fn.block.stmts.push(delete_stmt);
                             }
                             return syn::Item::Fn(item_fn);
