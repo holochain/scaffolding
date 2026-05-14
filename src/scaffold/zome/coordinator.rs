@@ -44,6 +44,10 @@ holochain_serialized_bytes = {{ workspace = true }}
 [dev-dependencies]
 holochain = {{ workspace = true, features = ["wasmer_sys", "transport-iroh", "test_utils"] }}
 tokio = {{ workspace = true }}
+
+# Temporarily pinned, remove when upgrading to Holochain 0.7
+pkcs8 = "=0.11.0-rc.11"
+
 "#,
     )
 }
