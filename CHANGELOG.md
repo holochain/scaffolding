@@ -4,6 +4,49 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## \[[0.601.0](https://github.com/holochain/scaffolding/compare/v0.600.1...v0.601.0)\] - 2026-05-14
+
+### Features
+
+- Update to Holochain 0.6.1
+- Add sweettest for scaffolded link-types
+- Add rust integration test generation for entry types and collections
+- \[**BREAKING**\] Removed support for any package manager except npm (#534) (#538)
+  - Feat!: removed support for any package manager except npm
+  - **Breaking Change**: Remove any -p option
+
+### Bug Fixes
+
+- Templates need a pinned pkcs8 to avoid picking up an incompatible library
+- Ci builds
+- Bump holochain, hdk, hdi, ensure test app builds again
+- Mistake from past backport #538
+
+### Miscellaneous Tasks
+
+- Bump flake lock
+- Clippy
+- Rm playground
+- Delete tryorama related code
+- Changelog typo (#541)
+- Prepare release (#540)
+
+### Build System
+
+- Bump rust
+- Bump flake lock
+- Bump hc-spin
+- Bump holochain 0.6.1-rc.0 (#539)
+
+### CI
+
+- Bump release workflows
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
 ## \[[0.600.3-rc.0](https://github.com/holochain/scaffolding/compare/v0.600.2-rc.0...v0.600.3-rc.0)\] - 2026-03-23
 
 ### Features
