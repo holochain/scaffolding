@@ -4,14 +4,14 @@ use std::path::Path;
 use std::process::Command;
 use std::{ffi::OsString, path::PathBuf};
 
+use crate::error::{ScaffoldError, ScaffoldResult};
+use crate::file_tree::{dir_content, FileTree};
 use anyhow::Context;
 use colored::Colorize;
 use convert_case::{Case, Casing};
 use dialoguer::{theme::ColorfulTheme, Input, Select};
 use dprint_plugin_typescript::configuration::ConfigurationBuilder;
-
-use crate::error::{ScaffoldError, ScaffoldResult};
-use crate::file_tree::{dir_content, FileTree};
+use dprint_plugin_typescript::FormatTextOptions;
 
 pub fn choose_directory_path(prompt: &str, app_file_tree: &FileTree) -> ScaffoldResult<PathBuf> {
     let mut chosen_directory: Option<PathBuf> = None;
@@ -309,12 +309,13 @@ pub fn format_code<P: Into<PathBuf>>(code: &str, file_name: P) -> ScaffoldResult
     if let Some(extension) = file_path.extension().and_then(|ext| ext.to_str()) {
         match extension {
             "ts" | "js" | "tsx" | "jsx" => {
-                let formatted_code = dprint_plugin_typescript::format_text(
-                    &file_path,
-                    None,
-                    code.to_owned(),
-                    &ts_format_config,
-                )
+                let formatted_code = dprint_plugin_typescript::format_text(FormatTextOptions {
+                    path: &file_path,
+                    extension: None,
+                    text: code.to_owned(),
+                    config: &ts_format_config,
+                    external_formatter: None,
+                })
                 .map_err(|e| anyhow::anyhow!("Failed to format source code: {e:?}"))?;
 
                 if let Some(value) = formatted_code {
@@ -360,12 +361,13 @@ fn format_nested<'a>(
     if let Some(nested_extension) = path.extension().and_then(|ext| ext.to_str()) {
         match (root_extension, nested_extension) {
             ("vue", "ts" | "js") => {
-                let formatted_code = dprint_plugin_typescript::format_text(
+                let formatted_code = dprint_plugin_typescript::format_text(FormatTextOptions {
                     path,
-                    None,
-                    raw.to_owned(),
-                    ts_format_config,
-                )
+                    extension: None,
+                    text: raw.to_owned(),
+                    config: ts_format_config,
+                    external_formatter: None,
+                })
                 .map_err(|e| anyhow::anyhow!("Failed to format source code: {e:?}"))?;
 
                 if let Some(value) = formatted_code {
@@ -373,12 +375,13 @@ fn format_nested<'a>(
                 }
             }
             ("svelte", "ts" | "js" | "tsx" | "jsx") => {
-                let formatted_code = dprint_plugin_typescript::format_text(
+                let formatted_code = dprint_plugin_typescript::format_text(FormatTextOptions {
                     path,
-                    None,
-                    raw.to_owned(),
-                    ts_format_config,
-                )
+                    extension: None,
+                    text: raw.to_owned(),
+                    config: ts_format_config,
+                    external_formatter: None,
+                })
                 .map_err(|e| anyhow::anyhow!("Failed to format source code: {e:?}"))?;
 
                 if let Some(value) = formatted_code {
