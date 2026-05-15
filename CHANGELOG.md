@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## \[[0.601.1](https://github.com/holochain/scaffolding/compare/v0.601.0...v0.601.1)\] - 2026-05-15
+
+### Miscellaneous Tasks
+
+- Update `hc-spin` and `holochain-client-js`
+
 ## \[[0.601.0](https://github.com/holochain/scaffolding/compare/v0.600.1...v0.601.0)\] - 2026-05-14
 
 ### Features
