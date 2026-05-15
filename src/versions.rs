@@ -1,8 +1,8 @@
 /// npm: <https://www.npmjs.com/package/@holochain/client>
-pub const HOLOCHAIN_CLIENT_VERSION: &str = "^0.20.4";
+pub const HOLOCHAIN_CLIENT_VERSION: &str = "^0.20.5";
 
 /// npm: <https://www.npmjs.com/package/@holochain/hc-spin>
-pub const HC_SPIN_VERSION: &str = "^0.601.0";
+pub const HC_SPIN_VERSION: &str = "^0.601.3";
 
 /// crates.io <https://crates.io/crates/hdi/versions>
 pub const HDI_VERSION: &str = "0.7.1";
