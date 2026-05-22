@@ -122,7 +122,7 @@ mod tests {
                 }
             }
         };
-        let template_file_tree = TemplateType::Vanilla.file_tree().unwrap();
+        let template_file_tree = TemplateType::Svelte.file_tree().unwrap();
         let coordinator_zome_manifest = ZomeManifest {
             name: "test_zome".into(),
             hash: None,

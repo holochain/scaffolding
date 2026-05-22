@@ -4,7 +4,6 @@ use std::{ffi::OsString, path::PathBuf};
 use crate::{
     error::ScaffoldResult,
     file_tree::{file_content, FileTree},
-    scaffold::example::ExampleType,
     versions,
 };
 
@@ -23,10 +22,10 @@ pub struct ScaffoldExampleData<'a> {
 pub fn scaffold_example(
     mut app_file_tree: FileTree,
     template_file_tree: &FileTree,
-    example: &ExampleType,
+    example_name: &str,
 ) -> ScaffoldResult<ScaffoldedTemplate> {
     let data = ScaffoldExampleData {
-        example: &example.to_string(),
+        example: example_name,
         holochain_client_version: versions::HOLOCHAIN_CLIENT_VERSION,
         hdk_version: versions::HDK_VERSION,
         hdi_version: versions::HDI_VERSION,

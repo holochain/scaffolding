@@ -41,7 +41,7 @@ FLAGS:
 
 OPTIONS:
     -t, --template <template>    The template to use for the hc-scaffold commands. Can either be an option from the
-                                 built-in templates: "vanilla", "svelte", "headless", or a path to
+                                 built-in templates: "svelte", "headless", or a path to
                                  a custom template.
 
 SUBCOMMANDS:

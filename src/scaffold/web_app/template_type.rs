@@ -7,22 +7,18 @@ use std::{ffi::OsString, path::PathBuf, str::FromStr};
 use crate::{
     error::{ScaffoldError, ScaffoldResult},
     file_tree::{
-        dir_exists, file_content, file_exists, load_directory_into_memory,
-        template_dirs_to_file_tree, FileTree,
+        file_content, file_exists, load_directory_into_memory, template_dirs_to_file_tree, FileTree,
     },
 };
 
 static SVELTE_TEMPLATES: Dir<'static> =
     include_dir!("$CARGO_MANIFEST_DIR/templates/ui-frameworks/svelte");
-static VANILLA_TEMPLATES: Dir<'static> =
-    include_dir!("$CARGO_MANIFEST_DIR/templates/ui-frameworks/vanilla");
 
 static HEADLESS_TEMPLATE: Dir<'static> = include_dir!("$CARGO_MANIFEST_DIR/templates/headless");
 static GENERIC_TEMPLATES: Dir<'static> = include_dir!("$CARGO_MANIFEST_DIR/templates/generic");
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum TemplateType {
-    Vanilla,
     Svelte,
     Headless,
     Custom(PathBuf),
@@ -32,7 +28,6 @@ impl TemplateType {
     /// Gets the non-ANSI escaped name or path of the ui framework
     pub fn name(&self) -> String {
         let name = match self {
-            TemplateType::Vanilla => "vanilla",
             TemplateType::Svelte => "svelte",
             TemplateType::Headless => "headless",
             TemplateType::Custom(path) => return format!("{path:?}"),
@@ -53,7 +48,6 @@ impl TemplateType {
 
     pub fn file_tree(&self) -> ScaffoldResult<FileTree> {
         let ui_framework_dir = match self {
-            TemplateType::Vanilla => &VANILLA_TEMPLATES,
             TemplateType::Svelte => &SVELTE_TEMPLATES,
             TemplateType::Headless => &HEADLESS_TEMPLATE,
             TemplateType::Custom(path) => return load_directory_into_memory(path),
@@ -62,21 +56,7 @@ impl TemplateType {
     }
 
     pub fn choose() -> ScaffoldResult<TemplateType> {
-        let frameworks = [
-            TemplateType::Svelte,
-            TemplateType::Vanilla,
-            TemplateType::Headless,
-        ];
-        let selection = Select::with_theme(&ColorfulTheme::default())
-            .with_prompt("Choose UI framework: (Use arrow-keys. Return to submit)")
-            .default(0)
-            .items(&frameworks[..])
-            .interact()?;
-        Ok(frameworks[selection].clone())
-    }
-
-    pub fn choose_non_headless() -> ScaffoldResult<TemplateType> {
-        let frameworks = [TemplateType::Svelte, TemplateType::Vanilla];
+        let frameworks = [TemplateType::Svelte, TemplateType::Headless];
         let selection = Select::with_theme(&ColorfulTheme::default())
             .with_prompt("Choose UI framework: (Use arrow-keys. Return to submit)")
             .default(0)
@@ -120,8 +100,6 @@ impl TryFrom<&FileTree> for TemplateType {
                 .ok_or(ScaffoldError::PathNotFound(ui_package_json_path.clone()))?;
             if ui_package_json.contains("svelte") {
                 return Ok(TemplateType::Svelte);
-            } else if !dir_exists(app_file_tree, &PathBuf::from("ui/src")) {
-                return Ok(TemplateType::Vanilla);
             }
         }
         TemplateType::choose()
@@ -131,7 +109,6 @@ impl TryFrom<&FileTree> for TemplateType {
 impl std::fmt::Display for TemplateType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let str = match self {
-            TemplateType::Vanilla => "vanilla".yellow(),
             TemplateType::Svelte => "svelte".bright_red(),
             TemplateType::Headless => "headless (no ui)".italic(),
             TemplateType::Custom(path) => format!("{path:?}").white(),
@@ -145,12 +122,13 @@ impl FromStr for TemplateType {
 
     fn from_str(s: &str) -> ScaffoldResult<TemplateType> {
         match s.to_ascii_lowercase().as_str() {
-            "vanilla" => Ok(TemplateType::Vanilla),
             "svelte" => Ok(TemplateType::Svelte),
             "headless" => Ok(TemplateType::Headless),
-            path_str if PathBuf::from(path_str).exists() => Ok(TemplateType::Custom(path_str.into())),
+            path_str if PathBuf::from(path_str).exists() => {
+                Ok(TemplateType::Custom(path_str.into()))
+            }
             value => Err(ScaffoldError::MalformedTemplate(format!(
-                "Invalid value: {value}, expected vanilla, svelte, headless or a valid/ existing file path"
+                "Invalid value: {value}, expected svelte, headless or a valid/ existing file path"
             ))),
         }
     }
@@ -162,7 +140,6 @@ impl Serialize for TemplateType {
         S: Serializer,
     {
         match self {
-            TemplateType::Vanilla => serializer.serialize_str("vanilla"),
             TemplateType::Svelte => serializer.serialize_str("svelte"),
             TemplateType::Headless => serializer.serialize_str("headless"),
             TemplateType::Custom(path) => path
@@ -180,12 +157,13 @@ impl<'de> Deserialize<'de> for TemplateType {
     {
         let s = String::deserialize(deserializer)?;
         match s.as_str() {
-            "vanilla" => Ok(TemplateType::Vanilla),
             "svelte" => Ok(TemplateType::Svelte),
             "headless" => Ok(TemplateType::Headless),
-            path_str if PathBuf::from(path_str).exists() => Ok(TemplateType::Custom(path_str.into())),
+            path_str if PathBuf::from(path_str).exists() => {
+                Ok(TemplateType::Custom(path_str.into()))
+            }
             value => Err(serde::de::Error::custom(format!(
-                "Invalid value: {value}, expected vanilla, svelte, headless or a valid/ existing file path"
+                "Invalid value: {value}, expected svelte, headless or a valid/ existing file path"
             ))),
         }
     }

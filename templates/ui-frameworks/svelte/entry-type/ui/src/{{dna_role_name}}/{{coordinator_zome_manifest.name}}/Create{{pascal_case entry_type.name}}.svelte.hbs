@@ -41,10 +41,10 @@ interface Props {
     {{/if}}
   {{/if}}
 {{/each}}
-  {{kebab_case entry_type.name}}Created?: ({{camel_case entry_type.name}}Hash: ActionHash) => any;
+  {{camel_case entry_type.name}}Created?: ({{camel_case entry_type.name}}Hash: ActionHash) => any;
 }
 
-let { {{#each entry_type.fields}}{{#if (not widget) }}{{camel_case field_name}},{{/if}}{{/each}} {{kebab_case entry_type.name}}Created }: Props = $props();
+let { {{#each entry_type.fields}}{{#if (not widget) }}{{camel_case field_name}},{{/if}}{{/each}} {{camel_case entry_type.name}}Created }: Props = $props();
 let is{{pascal_case entry_type.name}}Valid = $derived(true{{#each entry_type.fields}}{{#if widget}}{{#if (eq cardinality "single")}} && {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate=(camel_case field_name) }}{{/if}}{{#if (eq cardinality "vector")}} && {{camel_case field_name}}.every(e => {{> (concat field_type.type "/" widget "/is-valid") variable_to_validate="e" }}){{/if}}{{/if}}{{/each}});
 
 onMount(() => {
@@ -76,7 +76,7 @@ async function create{{pascal_case entry_type.name}}() {
       payload: {{camel_case entry_type.name}}Entry,
     });
 
-    if ({{kebab_case entry_type.name}}Created) {{kebab_case entry_type.name}}Created(record.signed_action.hashed.hash);
+    if ({{camel_case entry_type.name}}Created) {{camel_case entry_type.name}}Created(record.signed_action.hashed.hash);
   } catch (e) {
     alert((e as HolochainError).message);
   }

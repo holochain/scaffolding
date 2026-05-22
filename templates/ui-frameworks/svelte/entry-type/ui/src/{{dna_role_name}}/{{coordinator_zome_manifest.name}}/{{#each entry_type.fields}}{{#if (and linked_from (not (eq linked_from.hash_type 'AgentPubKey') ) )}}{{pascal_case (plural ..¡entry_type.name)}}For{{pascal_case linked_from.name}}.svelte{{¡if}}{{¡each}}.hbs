@@ -66,7 +66,7 @@ onMount(async () => {
 {:else}
 <div>
   {#each hashes as hash}
-    <{{pascal_case ../entry_type.name}}Detail {{camel_case ../entry_type.name}}Hash={hash} {{kebab_case ../entry_type.name}}Deleted={fetch{{pascal_case (plural ../entry_type.name)}}} />
+    <{{pascal_case ../entry_type.name}}Detail {{camel_case ../entry_type.name}}Hash={hash} {{camel_case ../entry_type.name}}Deleted={fetch{{pascal_case (plural ../entry_type.name)}}} />
   {/each}
 </div>
 {/if}

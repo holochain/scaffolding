@@ -60,13 +60,7 @@
                 includeFilesFilter = path: type:
                   (craneLib.filterCargoSources path type) || (nonCargoBuildFiles path type);
 
-                buildInputs = [ pkgs.openssl pkgs.go ]
-                  ++ (lib.optionals pkgs.stdenv.isDarwin
-                  (with pkgs.darwin.apple_sdk.frameworks; [
-                    CoreFoundation
-                    SystemConfiguration
-                    Security
-                  ]));
+                buildInputs = [ pkgs.openssl pkgs.go ];
 
                 nativeBuildInputs = [ pkgs.perl ];
 

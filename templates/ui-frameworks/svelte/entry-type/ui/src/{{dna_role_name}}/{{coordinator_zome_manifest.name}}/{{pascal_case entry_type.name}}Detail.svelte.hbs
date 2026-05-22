@@ -104,7 +104,7 @@ onMount(async () => {
   original{{pascal_case entry_type.name}}Hash={ {{camel_case entry_type.name}}Hash}
   {{/if}}
   currentRecord={record}
-  {{kebab_case entry_type.name}}Updated={async () => {
+  {{camel_case entry_type.name}}Updated={async () => {
     editing = false;
     await fetch{{pascal_case entry_type.name}}()
   } }

@@ -21,7 +21,7 @@ hc-scaffold [OPTIONS] <SUBCOMMAND>
 ### Options
 
 - `-t`, `--template <template>`  
-  The template to use for the `hc-scaffold` commands. Can either be an option from the built-in templates: "vanilla", "svelte", "headless", or a path to a custom template.
+  The template to use for the `hc-scaffold` commands. Can either be an option from the built-in templates: "svelte", "headless", or a path to a custom template.
 
 ### Subcommands
 
@@ -338,7 +338,7 @@ Scaffolds an example Holochain application to help you get started quickly
 **Usage**
 
 ```bash
-hc-scaffold example [FLAGS] [OPTIONS] [ARGS]
+hc-scaffold example [FLAGS] [OPTIONS]
 ```
 
 #### Flags
@@ -354,10 +354,3 @@ hc-scaffold example [FLAGS] [OPTIONS] [ARGS]
 
 - `--setup-nix <setup-nix>`
   Whether to setup the holonix development environment for the example hApp
-
-#### Arguments
-
-- `<example>`
-  The name of the example to scaffold. Available options are:
-  - `hello-world`
-  - `forum`

@@ -454,7 +454,8 @@ struct TestCase {
 }
 
 fn scaffold_test_entry_type() -> TestCase {
-    // Create an app file tree with the coordinator zome directory already present
+    // Create an app file tree with the coordinator zome directory already present,
+    // plus the UI files that coordinator-zome scaffolding would have created
     let app_file_tree: FileTree = dir! {
         "dnas" => dir! {
             "test_dna" => dir! {
@@ -468,9 +469,18 @@ fn scaffold_test_entry_type() -> TestCase {
                     }
                 }
             }
+        },
+        "ui" => dir! {
+            "src" => dir! {
+                "test_dna" => dir! {
+                    "test_zome" => dir! {
+                        "types.ts" => file!("export type EntryTypes = {};")
+                    }
+                }
+            }
         }
     };
-    let template_file_tree = TemplateType::Vanilla.file_tree().unwrap();
+    let template_file_tree = TemplateType::Svelte.file_tree().unwrap();
     let integrity_zome_manifest = ZomeManifest {
         name: "test_zome_integrity".into(),
         hash: None,
