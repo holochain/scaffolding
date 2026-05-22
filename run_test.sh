@@ -4,24 +4,6 @@ set -xe
 TEMPLATE_PATH="/tmp"
 
 APP_NAME="forum"
-TEMPLATE_NAME=
-SCOPE=
-
-# parse args
-while getopts ":t:s:" opt; do
-  case $opt in
-  t) TEMPLATE_NAME="$OPTARG" ;;
-  s) SCOPE="$OPTARG" ;;
-  \?)
-    echo "Invalid option: -$OPTARG" >&2
-    exit 1
-    ;;
-  :)
-    echo "Option -$OPTARG requires an argument." >&2
-    exit 1
-    ;;
-  esac
-done
 
 cleanup_tmp() {
   rm -rf "${TEMPLATE_PATH:?}/$1"
@@ -36,7 +18,7 @@ setup_and_build_happ() {
   cleanup_tmp "$1"
 
   cd $TEMPLATE_PATH
-  hc-scaffold --template="$2" web-app "$1" --setup-nix true -F
+  hc-scaffold --template svelte web-app "$1" --setup-nix true -F
   cd "$1"
 
   hc-scaffold dna forum
@@ -68,53 +50,5 @@ setup_and_build_happ() {
   cd ..
 }
 
-setup_and_build_hello_world() {
-  print_version
-  cleanup_tmp hello-world
-
-  cd $TEMPLATE_PATH
-  hc-scaffold example hello-world
-  cd hello-world
-
-  nix develop --command bash -c "
-    set -e
-    npm install
-    npm run package
-
-    cargo clippy --all -- -D warnings
-    "
-  cd ..
-}
-
-if [[ -n "$SCOPE" ]]; then
-
-  case "$SCOPE" in
-  "hello_world")
-    setup_and_build_hello_world
-    ;;
-  *)
-    echo "Error: SCOPE must be 'hello_world' but got $SCOPE."
-    exit 1
-    ;;
-  esac
-
-  exit 0 # Exit early
-fi
-
-if [[ -z "$APP_NAME" || -z "$TEMPLATE_NAME" ]]; then
-  echo "Error: APP_NAME and TEMPLATE_NAME environment variables must be set."
-  exit 1
-fi
-
-case "$TEMPLATE_NAME" in
-"svelte" | "vanilla")
-  # Valid template name, proceed
-  ;;
-*)
-  echo "Error: TEMPLATE_NAME must be 'svelte' or 'vanilla'."
-  exit 1
-  ;;
-esac
-
 cleanup_tmp "$APP_NAME"
-setup_and_build_happ "$APP_NAME" "$TEMPLATE_NAME"
+setup_and_build_happ "$APP_NAME"

@@ -80,7 +80,7 @@ $effect(() => {
 {:else}
 <div>
   {#each hashes as hash}
-    <{{pascal_case referenceable.name}}Detail {{camel_case referenceable.name}}Hash={hash} {{kebab_case referenceable.name}}Deleted={() => fetch{{pascal_case (plural referenceable.name)}}()} />
+    <{{pascal_case referenceable.name}}Detail {{camel_case referenceable.name}}Hash={hash} {{camel_case referenceable.name}}Deleted={() => fetch{{pascal_case (plural referenceable.name)}}()} />
   {/each}
 </div>
 {/if}

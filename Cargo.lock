@@ -1462,9 +1462,9 @@ dependencies = [
 
 [[package]]
 name = "holochain_integrity_types"
-version = "0.7.0-dev.11"
+version = "0.7.0-dev.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8626c81613af7caece9ae68eeedd2c1bd658e50ed8a253051e06ccf469c16541"
+checksum = "d3ba7aa06156044c7fbf05374586f4fd22cf2184e888560b4e64b3c022cc6719"
 dependencies = [
  "derive_builder",
  "holo_hash",
@@ -1482,9 +1482,9 @@ dependencies = [
 
 [[package]]
 name = "holochain_keystore"
-version = "0.7.0-dev.14"
+version = "0.7.0-dev.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3c0f9f1eb106bdf4c92676500fc6321136d30ca63b0be3ecf94e2f4743c6e052"
+checksum = "41ab635c78be97939d8d13d45eff69e12ca0fa25502002325ddbfb8af9e7ae27"
 dependencies = [
  "base64",
  "derive_more 2.0.1",
@@ -1596,9 +1596,9 @@ dependencies = [
 
 [[package]]
 name = "holochain_sqlite"
-version = "0.7.0-dev.18"
+version = "0.7.0-dev.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d658fb6d1283686328b2714e63cc60265064370b6feb54d996d0c9bc65f50d91"
+checksum = "95406f120b4859bd419622c8a1a1523c45044933ee756f7c54c80ec91ef40668"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -1666,9 +1666,9 @@ dependencies = [
 
 [[package]]
 name = "holochain_types"
-version = "0.7.0-dev.22"
+version = "0.7.0-dev.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e8d0b428f395a76f01958d917b998fcf589d2f56301eea053fa5b6152f0a275e"
+checksum = "a59c86eb5258b96120d306ce3188466d13cfdcb875b5160737f255182e44a8eb"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -1702,7 +1702,6 @@ dependencies = [
  "serde_derive",
  "serde_json",
  "serde_with",
- "serde_yaml",
  "shrinkwraprs",
  "strum",
  "strum_macros",
@@ -1710,6 +1709,7 @@ dependencies = [
  "thiserror 2.0.17",
  "tokio",
  "tracing",
+ "yaml_serde",
 ]
 
 [[package]]
@@ -1744,9 +1744,9 @@ dependencies = [
 
 [[package]]
 name = "holochain_zome_types"
-version = "0.7.0-dev.14"
+version = "0.7.0-dev.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4c98fdc2fd55863c8b49e49379139b0a0bf1d633c23b64d63cef84f755915ac4"
+checksum = "5472fa9d252babf44a880f3c36dfe9c36b0415d11bb0e99cc2ccbc848b902fe1"
 dependencies = [
  "derive_builder",
  "derive_more 2.0.1",
@@ -1761,7 +1761,6 @@ dependencies = [
  "schemars 0.9.0",
  "serde",
  "serde_bytes",
- "serde_yaml",
  "shrinkwraprs",
  "strum",
  "strum_macros",
@@ -1769,6 +1768,7 @@ dependencies = [
  "thiserror 2.0.17",
  "tracing",
  "uuid",
+ "yaml_serde",
 ]
 
 [[package]]
@@ -2363,9 +2363,9 @@ dependencies = [
 
 [[package]]
 name = "mr_bundle"
-version = "0.7.0-dev.1"
+version = "0.7.0-dev.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bb4998a171946c591e822000303ad53b5abf15de515d15f27d6659e2e63c5d00"
+checksum = "6c1b29e9a7a3159170e027b4882748227ed22e67f784b8965f3f9207258e66b0"
 dependencies = [
  "bytes",
  "dunce",
@@ -2374,9 +2374,9 @@ dependencies = [
  "holochain_util",
  "rmp-serde",
  "serde",
- "serde_yaml",
  "thiserror 2.0.17",
  "tokio",
+ "yaml_serde",
 ]
 
 [[package]]

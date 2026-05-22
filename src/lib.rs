@@ -39,7 +39,6 @@
 //! The scaffolding tool comes with built-in templates:
 //!
 //! - Svelte (with TypeScript)
-//! - Vanilla
 //! - Headless (no ui) - [best for building headless hApps or using a unsupported ui framework without having to create a custom template]
 //!
 //! These templates provide most of the skeleton you need to start your own Holochain app.
@@ -53,7 +52,6 @@
 //! All `hc scaffold` commands accept an optional `--template` argument. This argument can be:
 //! - Either one of the built-in templates:
 //!   - "svelte"
-//!   - "vanilla"
 //!   - "headless" (no ui)
 //! - Or a path to a custom template.
 //!   - E.g `hc-scaffold --template ./path/to/custom/template/folder web-app`
@@ -73,7 +71,7 @@
 //! ```json
 //! {
 //!   "hcScaffold": {
-//!     "template": "/* template name i.e. svelte/vanilla or path to custom template */"
+//!     "template": "/* template name i.e. svelte or path to custom template */"
 //!   }
 //! }
 //! ```

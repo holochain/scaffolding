@@ -19,11 +19,11 @@ interface Props {
 {{#if link_from_original_to_each_update}}
   original{{pascal_case entry_type.name}}Hash: ActionHash;
 {{/if}}
-  {{kebab_case entry_type.name}}Updated: ({{kebab_case entry_type.name}}Hash: ActionHash) => any;
+  {{camel_case entry_type.name}}Updated: ({{camel_case entry_type.name}}Hash: ActionHash) => any;
   editCanceled: () => any;
 }
 
-let { currentRecord, {{#if link_from_original_to_each_update}}original{{pascal_case entry_type.name}}Hash, {{/if}}{{kebab_case entry_type.name}}Updated, editCanceled }: Props = $props();
+let { currentRecord, {{#if link_from_original_to_each_update}}original{{pascal_case entry_type.name}}Hash, {{/if}}{{camel_case entry_type.name}}Updated, editCanceled }: Props = $props();
 
 let current{{pascal_case entry_type.name}}: {{pascal_case entry_type.name}} = decode((currentRecord.entry as any).Present.entry) as {{pascal_case entry_type.name}};
 
@@ -88,7 +88,7 @@ async function update{{pascal_case entry_type.name}}() {
       }
     });
 
-    {{kebab_case entry_type.name}}Updated(updateRecord.signed_action.hashed.hash);
+    {{camel_case entry_type.name}}Updated(updateRecord.signed_action.hashed.hash);
   } catch (e) {
     alert((e as HolochainError).message);
   }

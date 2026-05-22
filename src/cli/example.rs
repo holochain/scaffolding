@@ -20,7 +20,6 @@ use crate::{
             },
             scaffold_entry_type,
         },
-        example::ExampleType,
         web_app::{scaffold_web_app, template_type::TemplateType},
         zome::{
             scaffold_coordinator_zome_in_path, scaffold_integrity_zome_with_path, ZomeFileTree,
@@ -30,12 +29,11 @@ use crate::{
     utils::run_cargo_fmt_if_available,
 };
 
+const FORUM: &str = "forum";
+
 #[derive(Debug, StructOpt)]
 /// Scaffold an example hApp
 pub struct Example {
-    /// Name of the example to scaffold. One of ['hello-world', 'forum'].
-    pub example: Option<ExampleType>,
-
     #[structopt(long)]
     /// Whether to setup the holonix development environment for the example hApp
     pub setup_nix: Option<bool>,
@@ -45,216 +43,162 @@ impl Example {
     pub async fn run(self, template_type: &TemplateType) -> anyhow::Result<()> {
         let command_root_dir = std::env::current_dir()?;
         let template_file_tree = template_type.file_tree()?;
-        let template_name = template_type.name();
-        let is_vanilla_template = matches!(template_type, TemplateType::Vanilla);
 
-        let example = match self.example {
-            Some(e) => e,
-            None => {
-                if is_vanilla_template {
-                    println!("Scaffolding the {} example project", "hello-world".italic());
-                    ExampleType::HelloWorld
-                } else {
-                    ExampleType::Forum
-                }
-            }
-        };
-        let example_name = example.to_string();
-
-        let app_dir = command_root_dir.join(&example_name);
+        let app_dir = command_root_dir.join(FORUM);
         if app_dir.as_path().exists() {
             return Err(ScaffoldError::FolderAlreadyExists(app_dir.clone()))?;
         }
 
-        // Ensure the correct template is used for each example
-        if matches!(example, ExampleType::HelloWorld) && !is_vanilla_template
-            || matches!(example, ExampleType::Forum) && is_vanilla_template
-        {
-            return Err(ScaffoldError::InvalidArguments(format!(
-                "{} example cannot be used with the {} template.",
-                example.to_string().italic(),
-                &template_name.italic(),
-            ))
-            .into());
-        }
+        // scaffold web-app
+        let ScaffoldedTemplate { file_tree, .. } = scaffold_web_app(
+            FORUM,
+            Some("A simple 'forum' application."),
+            false,
+            &template_file_tree,
+        )?;
 
-        // Match on example types
-        let file_tree = match example {
-            ExampleType::HelloWorld => {
-                // scaffold web-app
-                let ScaffoldedTemplate { file_tree, .. } = scaffold_web_app(
-                    &example_name,
-                    Some("A simple 'hello world' application."),
-                    false,
-                    &template_file_tree,
-                )?;
+        // scaffold dna forum
+        let dna_name = FORUM;
 
-                file_tree
-            }
-            ExampleType::Forum => {
-                // scaffold web-app
-                let ScaffoldedTemplate { file_tree, .. } = scaffold_web_app(
-                    &example_name,
-                    Some("A simple 'forum' application."),
-                    false,
-                    &template_file_tree,
-                )?;
+        let app_file_tree = AppFileTree::get_or_choose(file_tree, Some(FORUM))?;
+        let ScaffoldedTemplate { file_tree, .. } =
+            scaffold_dna(app_file_tree, &template_file_tree, dna_name)?;
 
-                // scaffold dna hello_world
-                let dna_name = "forum";
+        // scaffold integrity zome posts
+        let dna_file_tree = DnaFileTree::get_or_choose(file_tree, Some(dna_name))?;
+        let dna_manifest_path = dna_file_tree.dna_manifest_path.clone();
 
-                let app_file_tree = AppFileTree::get_or_choose(file_tree, Some(&example_name))?;
-                let ScaffoldedTemplate { file_tree, .. } =
-                    scaffold_dna(app_file_tree, &template_file_tree, dna_name)?;
+        let integrity_zome_name = "posts_integrity";
+        let integrity_zome_path = PathBuf::new()
+            .join("dnas")
+            .join(dna_name)
+            .join("zomes")
+            .join("integrity");
+        let ScaffoldedTemplate { file_tree, .. } = scaffold_integrity_zome_with_path(
+            dna_file_tree,
+            &template_file_tree,
+            integrity_zome_name,
+            &integrity_zome_path,
+        )?;
 
-                // scaffold integrity zome posts
-                let dna_file_tree = DnaFileTree::get_or_choose(file_tree, Some(dna_name))?;
-                let dna_manifest_path = dna_file_tree.dna_manifest_path.clone();
+        let dna_file_tree = DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
 
-                let integrity_zome_name = "posts_integrity";
-                let integrity_zome_path = PathBuf::new()
-                    .join("dnas")
-                    .join(dna_name)
-                    .join("zomes")
-                    .join("integrity");
-                let ScaffoldedTemplate { file_tree, .. } = scaffold_integrity_zome_with_path(
-                    dna_file_tree,
-                    &template_file_tree,
-                    integrity_zome_name,
-                    &integrity_zome_path,
-                )?;
+        let coordinator_zome_name = "posts";
+        let coordinator_zome_path = PathBuf::new()
+            .join("dnas")
+            .join(dna_name)
+            .join("zomes")
+            .join("coordinator");
+        let ScaffoldedTemplate { file_tree, .. } = scaffold_coordinator_zome_in_path(
+            dna_file_tree,
+            &template_file_tree,
+            coordinator_zome_name,
+            Some(&vec![integrity_zome_name.to_owned()]),
+            &coordinator_zome_path,
+        )?;
 
-                let dna_file_tree =
-                    DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
+        // Scaffold the app here to enable ZomeFileTree::from_manifest(), which calls `cargo metadata`
+        MergeableFileSystemTree::<OsString, String>::from(file_tree.clone()).build(&app_dir)?;
 
-                let coordinator_zome_name = "posts";
-                let coordinator_zome_path = PathBuf::new()
-                    .join("dnas")
-                    .join(dna_name)
-                    .join("zomes")
-                    .join("coordinator");
-                let ScaffoldedTemplate { file_tree, .. } = scaffold_coordinator_zome_in_path(
-                    dna_file_tree,
-                    &template_file_tree,
-                    coordinator_zome_name,
-                    Some(&vec![integrity_zome_name.to_owned()]),
-                    &coordinator_zome_path,
-                )?;
+        std::env::set_current_dir(&app_dir)?;
 
-                // Scaffold the app here to enable ZomeFileTree::from_manifest(), which calls `cargo metadata`
-                MergeableFileSystemTree::<OsString, String>::from(file_tree.clone())
-                    .build(&app_dir)?;
+        let dna_file_tree = DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
 
-                std::env::set_current_dir(&app_dir)?;
+        let zome_file_tree =
+            ZomeFileTree::get_or_choose_integrity(dna_file_tree, Some(integrity_zome_name))?;
 
-                let dna_file_tree =
-                    DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
+        let post_entry_type_name = "post";
 
-                let zome_file_tree = ZomeFileTree::get_or_choose_integrity(
-                    dna_file_tree,
-                    Some(integrity_zome_name),
-                )?;
+        let ScaffoldedTemplate { file_tree, .. } = scaffold_entry_type(
+            zome_file_tree,
+            &template_file_tree,
+            "post",
+            Some(Crud {
+                update: true,
+                delete: true,
+            }),
+            Some(false),
+            Some(true),
+            Some(&vec![
+                FieldDefinition {
+                    field_name: "title".to_string(),
+                    field_type: FieldType::String,
+                    widget: Some("TextField".to_string()),
+                    cardinality: Cardinality::Single,
+                    linked_from: None,
+                },
+                FieldDefinition {
+                    field_name: "content".to_string(),
+                    field_type: FieldType::String,
+                    widget: Some("TextArea".to_string()),
+                    cardinality: Cardinality::Single,
+                    linked_from: None,
+                },
+            ]),
+            false,
+            false,
+        )?;
 
-                let post_entry_type_name = "post";
+        let dna_file_tree = DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
 
-                let ScaffoldedTemplate { file_tree, .. } = scaffold_entry_type(
-                    zome_file_tree,
-                    &template_file_tree,
-                    "post",
-                    Some(Crud {
-                        update: true,
-                        delete: true,
-                    }),
-                    Some(false),
-                    Some(true),
-                    Some(&vec![
-                        FieldDefinition {
-                            field_name: "title".to_string(),
-                            field_type: FieldType::String,
-                            widget: Some("TextField".to_string()),
-                            cardinality: Cardinality::Single,
-                            linked_from: None,
-                        },
-                        FieldDefinition {
-                            field_name: "content".to_string(),
-                            field_type: FieldType::String,
-                            widget: Some("TextArea".to_string()),
-                            cardinality: Cardinality::Single,
-                            linked_from: None,
-                        },
-                    ]),
-                    false,
-                    false,
-                )?;
+        let zome_file_tree =
+            ZomeFileTree::get_or_choose_integrity(dna_file_tree, Some("posts_integrity"))?;
 
-                let dna_file_tree =
-                    DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
-
-                let zome_file_tree =
-                    ZomeFileTree::get_or_choose_integrity(dna_file_tree, Some("posts_integrity"))?;
-
-                let ScaffoldedTemplate { file_tree, .. } = scaffold_entry_type(
-                    zome_file_tree,
-                    &template_file_tree,
-                    "comment",
-                    Some(Crud {
-                        update: false,
-                        delete: true,
-                    }),
-                    Some(false),
-                    Some(true),
-                    Some(&vec![
-                        FieldDefinition {
-                            field_name: "comment".to_string(),
-                            field_type: FieldType::String,
-                            widget: Some("TextArea".to_string()),
-                            cardinality: Cardinality::Single,
-                            linked_from: None,
-                        },
-                        FieldDefinition {
-                            field_name: "post_hash".to_string(),
-                            field_type: FieldType::ActionHash,
-                            widget: None,
-                            cardinality: Cardinality::Single,
-                            linked_from: Some(Referenceable::EntryType(EntryTypeReference {
-                                entry_type: post_entry_type_name.to_string(),
-                                reference_entry_hash: false,
-                            })),
-                        },
-                    ]),
-                    false,
-                    false,
-                )?;
-
-                let dna_file_tree =
-                    DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
-
-                let zome_file_tree = ZomeFileTree::get_or_choose_integrity(
-                    dna_file_tree,
-                    Some(integrity_zome_name),
-                )?;
-
-                let ScaffoldedTemplate { file_tree, .. } = scaffold_collection(
-                    zome_file_tree,
-                    &template_file_tree,
-                    "all_posts",
-                    Some(CollectionType::Global),
-                    Some(EntryTypeReference {
-                        entry_type: "post".to_string(),
+        let ScaffoldedTemplate { file_tree, .. } = scaffold_entry_type(
+            zome_file_tree,
+            &template_file_tree,
+            "comment",
+            Some(Crud {
+                update: false,
+                delete: true,
+            }),
+            Some(false),
+            Some(true),
+            Some(&vec![
+                FieldDefinition {
+                    field_name: "comment".to_string(),
+                    field_type: FieldType::String,
+                    widget: Some("TextArea".to_string()),
+                    cardinality: Cardinality::Single,
+                    linked_from: None,
+                },
+                FieldDefinition {
+                    field_name: "post_hash".to_string(),
+                    field_type: FieldType::ActionHash,
+                    widget: None,
+                    cardinality: Cardinality::Single,
+                    linked_from: Some(Referenceable::EntryType(EntryTypeReference {
+                        entry_type: post_entry_type_name.to_string(),
                         reference_entry_hash: false,
-                    }),
-                    false,
-                    false,
-                )?;
+                    })),
+                },
+            ]),
+            false,
+            false,
+        )?;
 
-                file_tree
-            }
-        };
+        let dna_file_tree = DnaFileTree::from_dna_manifest_path(file_tree, &dna_manifest_path)?;
+
+        let zome_file_tree =
+            ZomeFileTree::get_or_choose_integrity(dna_file_tree, Some(integrity_zome_name))?;
+
+        let ScaffoldedTemplate { file_tree, .. } = scaffold_collection(
+            zome_file_tree,
+            &template_file_tree,
+            "all_posts",
+            Some(CollectionType::Global),
+            Some(EntryTypeReference {
+                entry_type: "post".to_string(),
+                reference_entry_hash: false,
+            }),
+            false,
+            false,
+        )?;
 
         let ScaffoldedTemplate {
             mut file_tree,
             next_instructions,
-        } = scaffold_example(file_tree, &template_file_tree, &example)?;
+        } = scaffold_example(file_tree, &template_file_tree, FORUM)?;
 
         ScaffoldConfig::write_to_package_json(&mut file_tree, template_type)?;
 
@@ -281,7 +225,7 @@ impl Example {
 
         setup_git_environment(&app_dir)?;
 
-        println!("\nExample {} scaffolded!\n", example.to_string().italic());
+        println!("\nExample {} scaffolded!\n", FORUM.italic());
 
         if let Some(i) = next_instructions {
             println!("{i}");

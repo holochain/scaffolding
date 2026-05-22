@@ -3,7 +3,6 @@
 use crate::error::ScaffoldError;
 use crate::file_tree::load_directory_into_memory;
 use crate::scaffold::config::ScaffoldConfig;
-use crate::scaffold::example::ExampleType;
 use crate::scaffold::web_app::template_type::TemplateType;
 
 use colored::Colorize;
@@ -23,7 +22,7 @@ mod zome;
 pub struct HcScaffold {
     #[structopt(short, long, parse(try_from_str = TemplateType::from_str))]
     /// The template to use for the hc-scaffold commands.
-    /// Can either be an option from the built-in templates: "vanilla", "svelte", "headless",
+    /// Can either be an option from the built-in templates: "svelte", "headless",
     /// or a path to a custom template.
     template: Option<TemplateType>,
 
@@ -88,13 +87,7 @@ impl HcScaffold {
             None => {
                 let template_type = match &self.command {
                     HcScaffoldCommand::WebApp { .. } => TemplateType::choose()?,
-                    HcScaffoldCommand::Example(example::Example { ref example, .. }) => {
-                        match example {
-                            Some(ExampleType::HelloWorld) => TemplateType::Vanilla,
-                            Some(ExampleType::Forum) => TemplateType::Svelte,
-                            None => TemplateType::choose_non_headless()?,
-                        }
-                    }
+                    HcScaffoldCommand::Example(example::Example { .. }) => TemplateType::Svelte,
                     _ => TemplateType::try_from(&load_directory_into_memory(current_dir)?)?,
                 };
                 Ok(template_type)
