@@ -30,8 +30,10 @@ pub fn flake_nix() -> FileTree {
       devShells.default = pkgs.mkShell {
         inputsFrom = [ inputs'.holonix.devShells.default ];
 
+        ELECTRON_BINARY = "${pkgs.electron_42}/bin/electron"; # Force `hc-spin` to use Electron from nixpkgs.
+
         packages = (with pkgs; [
-          nodejs_22
+          nodejs_24
           binaryen
         ]);
 
