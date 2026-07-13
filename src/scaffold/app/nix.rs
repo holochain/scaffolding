@@ -35,6 +35,7 @@ pub fn flake_nix() -> FileTree {
         packages = (with pkgs; [
           nodejs_24
           binaryen
+          perl # Required to build OpenSSL from source
         ]);
 
         shellHook = ''
