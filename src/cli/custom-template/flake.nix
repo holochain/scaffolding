@@ -18,7 +18,11 @@
 
         ELECTRON_BINARY = "${pkgs.electron_42}/bin/electron"; # Force `hc-spin` to use Electron from nixpkgs.
 
-        packages = (with pkgs; [ nodejs_24 binaryen ]);
+        packages = (with pkgs; [
+          nodejs_24
+          binaryen
+          perl # Required to build OpenSSL from source
+        ]);
 
         shellHook = ''
           export PS1='\[\033[1;34m\][holonix:\w]\$\[\033[0m\] '
