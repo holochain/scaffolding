@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## \[[0.603.0](https://github.com/holochain/scaffolding/compare/v0.602.0...v0.603.0)\] - 2026-07-22
+
+### Features
+
+- Add perl as a package to the flake.nix templates for OpenSSL
+- Add ELECTRON_BINARY env var override for flake.nix template
+  - ELECTRON_BINARY is used by `hc-spin` to set the path to the Electron binary to use.
+- Update to Holochain 0.6.3
+
 ## \[[0.602.0](https://github.com/holochain/scaffolding/compare/v0.601.1...v0.602.0)\] - 2026-07-03
 
 ### Features
