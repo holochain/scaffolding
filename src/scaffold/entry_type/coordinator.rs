@@ -90,7 +90,7 @@ pub fn add_crud_functions_to_coordinator(
                             if find_ending_match_expr_in_block(&mut item_fn.block).is_none() {
                                 *item_fn.block = syn::parse_quote! {
                                     {
-                                        match action.hashed.content.clone() {
+                                        match &action.hashed.content.clone().data {
                                             _ => Ok(())
                                         }
                                     }
@@ -179,7 +179,7 @@ fn no_update_read_handler(entry_def: &EntryDefinition) -> TokenStream {
                         return Ok(None);
                     };
                     match details {
-                        Details::Entry(details) => Ok(Some(Record::new(details.actions[0].clone(), Some(details.entry)))),
+                        Details::Entry(details) => Ok(Some(Record::new(details.actions[0].clone(), RecordEntry::Present(details.entry)))),
                         _ => Err(wasm_error!(WasmErrorInner::Guest("Malformed get details response".to_string()))),
                     }
                 }
@@ -765,7 +765,7 @@ fn signal_entry_types_variants() -> ScaffoldResult<Vec<syn::Variant>> {
 fn signal_action_match_arms() -> ScaffoldResult<Vec<syn::Arm>> {
     Ok(vec![
         syn::parse_quote! {
-            Action::Create(_create) => {
+            ActionData::Create(_create) => {
                 if let Ok(Some(app_entry)) = get_entry_for_action(&action.hashed.hash) {
                     emit_signal(Signal::EntryCreated { action, app_entry })?;
                 }
@@ -773,7 +773,7 @@ fn signal_action_match_arms() -> ScaffoldResult<Vec<syn::Arm>> {
             }
         },
         syn::parse_quote! {
-            Action::Update(update) => {
+            ActionData::Update(update) => {
                 if let Ok(Some(app_entry)) = get_entry_for_action(&action.hashed.hash) {
                     if let Ok(Some(original_app_entry)) =
                         get_entry_for_action(&update.original_action_address)
@@ -789,7 +789,7 @@ fn signal_action_match_arms() -> ScaffoldResult<Vec<syn::Arm>> {
             }
         },
         syn::parse_quote! {
-            Action::Delete(delete) => {
+            ActionData::Delete(delete) => {
                 if let Ok(Some(original_app_entry)) = get_entry_for_action(&delete.deletes_address) {
                     emit_signal(Signal::EntryDeleted {
                         action,
