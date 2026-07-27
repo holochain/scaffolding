@@ -5,6 +5,11 @@ apps using `syn`/`quote` AST manipulation (not just Handlebars templates), so
 bumping the pinned Holochain version can require updating Rust code in this
 repo, not just a version string.
 
+If the target release looks like it dropped a helper or introduced a logic
+gap with no replacement (not just a rename), don't paper over it with a
+workaround — flag it and let the user decide. This is expected during RC
+cycles; upstream is often still actively fixing things.
+
 ## 1. Where the versions live
 
 `src/versions.rs` holds five constants:
@@ -17,9 +22,9 @@ repo, not just a version string.
 
 Find the matching set for a target Holochain release from the
 `holochain/holochain` GitHub repo tags (`holochain-X.Y.Z`, `hdi-X.Y.Z`,
-`hdk-X.Y.Z`) or crates.io/npmjs listings — the four crates are released
-together but with independent version numbers, so don't assume they move in
-lockstep.
+`hdk-X.Y.Z`) for the three Rust crates, and the npmjs listings for the two
+npm packages — verify each independently, since the Rust crates and the npm
+packages come from different repos and don't necessarily move in lockstep.
 
 This repo does **not** pin `holochain_client` or `holochain_types` as Rust
 crates anywhere (only the npm client and the crates above). If a reference
@@ -57,11 +62,11 @@ The `validate()` callback and its match arms are built programmatically via
   (used only for `#[tokio::test]` sweettest-based zome tests). Check this
   against the real `holochain` crate's `[features]` table
   (`crates/holochain/Cargo.toml` in `holochain/holochain` at the target tag)
-  — feature names get renamed/removed between releases (e.g.
-  `sqlite-encrypted` → `encryption`, `transport-iroh` removed in the
-  dev.23 → rc.3 jump).
+  — feature names do get renamed or removed between releases, so a feature
+  list that compiled against the old target version isn't guaranteed to
+  still be valid.
 
-None of the above four files have unit tests that exercise the generated
+None of the above five files have unit tests that exercise the generated
 `validate()`/`signal_action` content end-to-end (the existing
 `src/templates/entry_type/tests/*` and `src/templates/link_type/tests/*`
 tests only cover the *coordinator test file* templates, not the integrity
@@ -92,11 +97,31 @@ preference:
 
 ## 4. Verifying the change
 
-Unit tests (`cargo test --lib` in this repo) only catch syntax errors in
-`quote!`/`syn::parse_quote!` blocks (checked at *this tool's* compile time)
-— they do **not** catch errors in the `syn::parse_str(...)` calls used to
-insert new match arms, since those only run when the CLI actually executes.
-End-to-end verification is required for any change to the four files in §2:
+**`run_test.sh` at the repo root is what CI actually runs (`testbuild` job)
+and is the authoritative acceptance test — it's much more thorough than any
+hand-rolled check.** It scaffolds a full "forum" app through the real CLI
+binary (svelte template, `hc-scaffold web-app/dna/zome/entry-type/
+collection/link-type`), covering scenarios a quick manual pass easily
+misses: `--reference-entry-hash true` entries, `Enum`/`Vec`/`Option` fields,
+agent-role and `:EntryHash`-suffixed link referenceables, bidirectional
+links, and multiple collection types. Then it runs `npm install && npm run
+test && npm run package` (JS side, plus a real wasm32 zome build) and
+`cargo clippy --all -- -D warnings`. If you're not sure a manual check is
+representative, this script is more likely to be right than your intuition
+about what to cover — it caught a real bug (`Record::new()`'s signature
+change, see below) that a narrower manual pass had missed.
+
+CI also independently runs `cargo fmt --all -- --check`, `cargo clippy
+--all-targets -- -D warnings`, and `cargo test --lib` as separate jobs — run
+all of these locally before considering a change to this repo done, not
+just `cargo build`/`cargo test`. A change that only touches `syn::parse_quote!`/
+`quote!` blocks (rather than the `syn::parse_str(...)` calls used to insert
+match arms) can still fail `cargo fmt --all -- --check` even though the
+tool's own build and tests pass — formatting is checked against the
+generator's own source, not the code it emits.
+
+For fast local iteration while developing a codegen change (not as a
+substitute for `run_test.sh` before considering the change verified):
 
 ```sh
 cargo build --bin hc-scaffold
@@ -115,24 +140,28 @@ cd testapp
   --coordinator dnas/testapp/zomes/coordinator
 
 # Scaffold at least two entry types (one with a `linked_from` dependency,
-# to exercise deps_validation) and two link types (one deletable, one not),
-# to hit every insertion branch — first-arm-in-skeleton AND
-# subsequent-arm-push both need coverage.
+# to exercise deps_validation, and one with `--reference-entry-hash true`)
+# and two link types (one deletable, one not), to hit every insertion
+# branch — first-arm-in-skeleton AND subsequent-arm-push both need coverage.
 "$BIN" -t headless entry-type dino --dna testapp --zome testapp_integrity \
   --crud crud --reference-entry-hash false \
   --link-from-original-to-each-update false \
   --fields "name:String:TextField" --no-ui
 "$BIN" -t headless entry-type nest --dna testapp --zome testapp_integrity \
-  --crud cr --reference-entry-hash false \
+  --crud cr --reference-entry-hash true \
   --fields "dino_hash:ActionHash::Dino" --no-ui
 "$BIN" -t headless link-type nest dino --dna testapp --zome testapp_integrity \
   --bidirectional false --delete false --no-ui
+"$BIN" -t headless link-type dino nest --dna testapp --zome testapp_integrity \
+  --bidirectional false --delete true --no-ui
 
-# The real test: does it compile against the *actual* target crates?
+# Does it compile against the *actual* target crates?
 cargo check -p testapp_integrity --lib   # fast, no dev-deps
 cargo check -p testapp --lib             # fast, no dev-deps
 cargo check --workspace --all-targets    # slow (~10+ min): pulls in the
                                           # full `holochain` dev-dependency
+cargo fmt --all -- --check
+cargo clippy --all-targets -- -D warnings
 ```
 
 If a `Select`/`Confirm` prompt can't be avoided via flags, drive it with a
@@ -154,67 +183,10 @@ os.write(master, b"\x1b[B\r")  # Down, Enter — e.g. to answer "No"
   floats to `main` and is not version-pinned by this repo. It tracks
   upstream Holochain releases on its own; no change needed here when
   bumping versions.
-- **`sqlite-encrypted`/`encryption`, `transport-iroh`**: this tool has never
-  enabled `sqlite-encrypted`/`encryption` for the `holochain` dev-dependency
-  (only `wasmer-sys-cranelift` + `test_utils`). If a reference app has more
-  features enabled at the workspace level, that's likely a hand-edit on top
-  of what was scaffolded, not something to replicate by default.
-
-## 6. "It compiled yesterday" — crates.io drift during active RC cycles
-
-During an active RC cycle, `holochain`'s own transitive deps (`holochain_state`,
-`holochain_cascade`, `holochain_conductor_api`, ...) can get republished to
-crates.io *ahead of* a coordinated `holochain` release, breaking a fresh
-`cargo generate-lockfile` even though nothing in this repo or in `versions.rs`
-changed. Symptom: `cargo check --workspace --all-targets` fails **inside the
-`holochain` crate's own compilation** (not in the generated zome code) with
-errors like "no field `X`" or "this method takes N arguments" pointing at
-paths under `~/.cargo/registry/.../holochain-X.Y.Z-rc.N/...`.
-
-Diagnose by checking what actually resolved:
-
-```sh
-grep -A1 '^name = "holochain'  Cargo.lock   # in the affected app/test workspace
-```
-
-If a sibling crate (e.g. `holochain_state`) resolved to a *newer* pre-release
-than `holochain` itself, that's the drift. Confirm by trying to pin it back:
-
-```sh
-cargo update -p holochain_state --precise <holochain's-own-version>
-```
-
-If that fails ("candidate versions found which didn't match"), the sibling
-has already moved on and there's no going back — `holochain`'s own Cargo.toml
-now requires the newer sibling.
-
-**Do NOT try to decouple the `holochain` dev-dependency's version from
-`hdi`/`hdk`** (e.g. "pin the zome to hdi=rc.2 but let sweettest use a newer
-holochain") — this is not resolvable by Cargo. Enabling `test_utils`/
-`sweettest` on `holochain` activates its own optional `hdk` dependency, and
-Cargo unifies dependency resolution workspace-wide, so the exact `hdk` pin
-used by the zome crates conflicts with whatever `holochain` wants
-transitively. It fails outright with "failed to select a version for `hdk`".
-
-**The actual fix is to bump `hdi`/`hdk`/`holochain` together** to the next
-tag where upstream re-coordinated. Before assuming that requires new codegen
-work, diff `crates/hdi/src` and `crates/hdk/src` between the two tags — if
-empty, the bump is a pure version-string change in `versions.rs`, since the
-breakage was entirely inside `holochain`'s own conductor code, not in the
-zome-facing API:
-
-```sh
-gh api repos/holochain/holochain/compare/hdi-OLD...hdi-NEW \
-  -q '.files[] | .filename' | grep -E '^crates/(hdi|hdk)/src/'
-```
-
-Re-run the full §4 verification loop after any such bump — don't assume it's
-safe just because the source diff was empty; confirm `cargo check --workspace
---all-targets` actually passes.
-
-## 7. If something looks like an upstream regression
-
-If the target release seems to have dropped a helper or introduced a logic
-gap with no replacement (not just a rename), don't paper over it with a
-workaround — flag it and let the user decide. This is expected during RC
-cycles; upstream is often still actively fixing things.
+- **Extra `holochain` crate features on a reference app**: this tool only
+  ever enables a small, fixed feature set on the `holochain` dev-dependency
+  (see `initial_cargo_toml()` in `src/scaffold/zome/coordinator.rs` for the
+  current list). If a reference app's `Cargo.toml` has more features
+  enabled at the workspace level than that, it's likely a hand-edit made
+  after scaffolding, not something this tool generated — don't replicate it
+  here just because a reference app has it.
