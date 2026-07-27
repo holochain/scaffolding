@@ -160,7 +160,59 @@ os.write(master, b"\x1b[B\r")  # Down, Enter — e.g. to answer "No"
   features enabled at the workspace level, that's likely a hand-edit on top
   of what was scaffolded, not something to replicate by default.
 
-## 6. If something looks like an upstream regression
+## 6. "It compiled yesterday" — crates.io drift during active RC cycles
+
+During an active RC cycle, `holochain`'s own transitive deps (`holochain_state`,
+`holochain_cascade`, `holochain_conductor_api`, ...) can get republished to
+crates.io *ahead of* a coordinated `holochain` release, breaking a fresh
+`cargo generate-lockfile` even though nothing in this repo or in `versions.rs`
+changed. Symptom: `cargo check --workspace --all-targets` fails **inside the
+`holochain` crate's own compilation** (not in the generated zome code) with
+errors like "no field `X`" or "this method takes N arguments" pointing at
+paths under `~/.cargo/registry/.../holochain-X.Y.Z-rc.N/...`.
+
+Diagnose by checking what actually resolved:
+
+```sh
+grep -A1 '^name = "holochain'  Cargo.lock   # in the affected app/test workspace
+```
+
+If a sibling crate (e.g. `holochain_state`) resolved to a *newer* pre-release
+than `holochain` itself, that's the drift. Confirm by trying to pin it back:
+
+```sh
+cargo update -p holochain_state --precise <holochain's-own-version>
+```
+
+If that fails ("candidate versions found which didn't match"), the sibling
+has already moved on and there's no going back — `holochain`'s own Cargo.toml
+now requires the newer sibling.
+
+**Do NOT try to decouple the `holochain` dev-dependency's version from
+`hdi`/`hdk`** (e.g. "pin the zome to hdi=rc.2 but let sweettest use a newer
+holochain") — this is not resolvable by Cargo. Enabling `test_utils`/
+`sweettest` on `holochain` activates its own optional `hdk` dependency, and
+Cargo unifies dependency resolution workspace-wide, so the exact `hdk` pin
+used by the zome crates conflicts with whatever `holochain` wants
+transitively. It fails outright with "failed to select a version for `hdk`".
+
+**The actual fix is to bump `hdi`/`hdk`/`holochain` together** to the next
+tag where upstream re-coordinated. Before assuming that requires new codegen
+work, diff `crates/hdi/src` and `crates/hdk/src` between the two tags — if
+empty, the bump is a pure version-string change in `versions.rs`, since the
+breakage was entirely inside `holochain`'s own conductor code, not in the
+zome-facing API:
+
+```sh
+gh api repos/holochain/holochain/compare/hdi-OLD...hdi-NEW \
+  -q '.files[] | .filename' | grep -E '^crates/(hdi|hdk)/src/'
+```
+
+Re-run the full §4 verification loop after any such bump — don't assume it's
+safe just because the source diff was empty; confirm `cargo check --workspace
+--all-targets` actually passes.
+
+## 7. If something looks like an upstream regression
 
 If the target release seems to have dropped a helper or introduced a logic
 gap with no replacement (not just a rename), don't paper over it with a
