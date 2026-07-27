@@ -60,7 +60,7 @@ pub fn initial_lib_rs() -> TokenStream {
         #[hdk_extern]
         pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
             match op.flattened::<(), ()>()? {
-                FlatOp::StoreEntry(store_entry) => match store_entry {
+                FlatOp::CreateEntry(create_entry) => match create_entry {
                     OpEntry::CreateEntry {
                         app_entry,
                         action,
@@ -76,7 +76,7 @@ pub fn initial_lib_rs() -> TokenStream {
                     )),
                     _ => Ok(ValidateCallbackResult::Valid)
                 },
-                FlatOp::RegisterUpdate(update_entry) => match update_entry {
+                FlatOp::Update(update_entry) => match update_entry {
                     OpUpdate::Entry { app_entry, action } => {
                         Ok(ValidateCallbackResult::Invalid(
                             "There are no entry types in this integrity zome".to_string(),
@@ -84,67 +84,54 @@ pub fn initial_lib_rs() -> TokenStream {
                     },
                     _ => Ok(ValidateCallbackResult::Valid)
                 },
-                FlatOp::RegisterDelete(delete_entry) => Ok(ValidateCallbackResult::Invalid(
+                FlatOp::Delete(OpDelete { action }) => Ok(ValidateCallbackResult::Invalid(
                     "There are no entry types in this integrity zome".to_string(),
                 )),
-                FlatOp::RegisterCreateLink {
+                FlatOp::Link(OpLink::CreateLink {
                     link_type,
-                    base_address,
-                    target_address,
-                    tag,
                     action
-                } => Ok(ValidateCallbackResult::Invalid(
+                }) => Ok(ValidateCallbackResult::Invalid(
                     "There are no link types in this integrity zome".to_string()
                 )),
-                FlatOp::RegisterDeleteLink {
+                FlatOp::Link(OpLink::DeleteLink {
                     link_type,
-                    base_address,
-                    target_address,
-                    tag,
                     original_action,
                     action
-                } => Ok(ValidateCallbackResult::Invalid("There are no link types in this integrity zome".to_string())),
-                FlatOp::StoreRecord(store_record) => match store_record {
-                    /// Complementary validation to the `StoreEntry` Op, in which the record itself is validated
-                    /// If you want to optimize performance, you can remove the validation for an entry type here and keep it in `StoreEntry`
-                    /// Notice that doing so will cause `must_get_valid_record` for this record to return a valid record even if the `StoreEntry` validation failed
+                }) => Ok(ValidateCallbackResult::Invalid("There are no link types in this integrity zome".to_string())),
+                FlatOp::CreateRecord(store_record) => match store_record {
+                    /// Complementary validation to the `CreateEntry` Op, in which the record itself is validated
+                    /// If you want to optimize performance, you can remove the validation for an entry type here and keep it in `CreateEntry`
+                    /// Notice that doing so will cause `must_get_valid_record` for this record to return a valid record even if the `CreateEntry` validation failed
                     OpRecord::CreateEntry {
                         app_entry,
                         action
                     } => Ok(ValidateCallbackResult::Invalid("There are no entry types in this integrity zome".to_string())),
-                    /// Complementary validation to the `RegisterUpdate` Op, in which the record itself is validated
-                    /// If you want to optimize performance, you can remove the validation for an entry type here and keep it in `StoreEntry` and in `RegisterUpdate`
+                    /// Complementary validation to the `Update` Op, in which the record itself is validated
+                    /// If you want to optimize performance, you can remove the validation for an entry type here and keep it in `CreateEntry` and in `Update`
                     /// Notice that doing so will cause `must_get_valid_record` for this record to return a valid record even if the other validations failed
                     OpRecord::UpdateEntry {
-                        original_action_hash,
                         app_entry,
                         action,
                         ..
                     } => Ok(ValidateCallbackResult::Invalid("There are no entry types in this integrity zome".to_string())),
-                    /// Complementary validation to the `RegisterDelete` Op, in which the record itself is validated
-                    /// If you want to optimize performance, you can remove the validation for an entry type here and keep it in `RegisterDelete`
-                    /// Notice that doing so will cause `must_get_valid_record` for this record to return a valid record even if the `RegisterDelete` validation failed
+                    /// Complementary validation to the `Delete` Op, in which the record itself is validated
+                    /// If you want to optimize performance, you can remove the validation for an entry type here and keep it in `Delete`
+                    /// Notice that doing so will cause `must_get_valid_record` for this record to return a valid record even if the `Delete` validation failed
                     OpRecord::DeleteEntry {
-                        original_action_hash,
                         action,
                         ..
                     } => Ok(ValidateCallbackResult::Invalid("There are no entry types in this integrity zome".to_string())),
-                    /// Complementary validation to the `RegisterCreateLink` Op, in which the record itself is validated
-                    /// If you want to optimize performance, you can remove the validation for an entry type here and keep it in `RegisterCreateLink`
-                    /// Notice that doing so will cause `must_get_valid_record` for this record to return a valid record even if the `RegisterCreateLink` validation failed
+                    /// Complementary validation to the `Link(OpLink::CreateLink { .. })` Op, in which the record itself is validated
+                    /// If you want to optimize performance, you can remove the validation for a link type here and keep it in `Link`
+                    /// Notice that doing so will cause `must_get_valid_record` for this record to return a valid record even if the `Link` validation failed
                     OpRecord::CreateLink {
-                        base_address,
-                        target_address,
-                        tag,
                         link_type,
                         action
                     } => Ok(ValidateCallbackResult::Invalid("There are no link types in this integrity zome".to_string())),
-                    /// Complementary validation to the `RegisterDeleteLink` Op, in which the record itself is validated
-                    /// If you want to optimize performance, you can remove the validation for an entry type here and keep it in `RegisterDeleteLink`
-                    /// Notice that doing so will cause `must_get_valid_record` for this record to return a valid record even if the `RegisterDeleteLink` validation failed
+                    /// Complementary validation to the `Link(OpLink::DeleteLink { .. })` Op, in which the record itself is validated
+                    /// If you want to optimize performance, you can remove the validation for a link type here and keep it in `Link`
+                    /// Notice that doing so will cause `must_get_valid_record` for this record to return a valid record even if the `Link` validation failed
                     OpRecord::DeleteLink {
-                        original_action_hash,
-                        base_address,
                         action
                     } => Ok(ValidateCallbackResult::Invalid("There are no link types in this integrity zome".to_string())),
                     OpRecord::CreatePrivateEntry { .. } => Ok(ValidateCallbackResult::Valid),
@@ -159,14 +146,28 @@ pub fn initial_lib_rs() -> TokenStream {
                     OpRecord::InitZomesComplete { .. } => Ok(ValidateCallbackResult::Valid),
                     _ => Ok(ValidateCallbackResult::Valid)
                 },
-                FlatOp::RegisterAgentActivity(agent_activity) => match agent_activity {
-                    OpActivity::CreateAgent {
-                        agent,
-                        action
-                    } => {
-                        let previous_action = must_get_action(action.prev_action)?;
-                        match previous_action.action() {
-                            Action::AgentValidationPkg(AgentValidationPkg { membrane_proof, .. }) => validate_agent_joining(agent, membrane_proof),
+                FlatOp::AgentActivity(agent_activity) => match agent_activity {
+                    ref create @ OpActivity::CreateAgent { ref action } => {
+                        let prev = action
+                            .prev_action()
+                            .ok_or_else(|| {
+                                wasm_error!(WasmErrorInner::Guest("expected a prior action".into()))
+                            })?
+                            .clone();
+
+                        let agent = match create.agent() {
+                            Some(agent) => agent,
+                            None => {
+                                // Also expected to be checked by Holochain
+                                return Err(wasm_error!(WasmErrorInner::Guest(
+                                    "expected an agent key as the create data".into()
+                                )));
+                            }
+                        };
+
+                        let previous_action = must_get_action(prev)?;
+                        match &previous_action.action().data {
+                            ActionData::AgentValidationPkg(AgentValidationPkgData { membrane_proof, .. }) => validate_agent_joining(agent, membrane_proof),
                             _ => Ok(ValidateCallbackResult::Invalid("The previous action for a `CreateAgent` action must be an `AgentValidationPkg`".to_string()))
                         }
                     },

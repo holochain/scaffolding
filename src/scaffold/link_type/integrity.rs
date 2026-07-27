@@ -203,30 +203,24 @@ pub fn add_link_type_to_integrity_zome(
                     }
                 };
 
-                let base_address_ident = match from_referenceable {
-                    Some(Referenceable::EntryType(_)) => format_ident!("base_address"),
-                    _ => format_ident!("_base_address"),
-                };
-
                 let validate_create_from = from_referenceable
                     .as_ref()
-                    .map(|r| validate_referenceable(r, &base_address_ident));
-
-                let target_address_ident = match to_referenceable {
-                    Some(Referenceable::EntryType(_)) => format_ident!("target_address"),
-                    _ => format_ident!("_target_address"),
-                };
+                    .map(|r| validate_referenceable(r, &format_ident!("base_address")));
 
                 let validate_create_to = to_referenceable
                     .as_ref()
-                    .map(|r| validate_referenceable(r, &target_address_ident));
+                    .map(|r| validate_referenceable(r, &format_ident!("target_address")));
+
+                // `action` is only read from when there is a dependant entry type to check on
+                // either side of the link
+                let action_ident = match (&from_referenceable, &to_referenceable) {
+                    (None, None) => format_ident!("_action"),
+                    _ => format_ident!("action"),
+                };
 
                 let create_token_stream = quote! {
                     pub fn #validate_create_fn(
-                        _action: CreateLink,
-                        #base_address_ident: AnyLinkableHash,
-                        #target_address_ident: AnyLinkableHash,
-                        _tag: LinkTag,
+                        #action_ident: TypedAction<CreateLinkData>,
                     ) -> ExternResult<ValidateCallbackResult> {
                         #validate_create_from
 
@@ -239,11 +233,8 @@ pub fn add_link_type_to_integrity_zome(
 
                 let delete_token_stream = quote! {
                     pub fn #validate_delete_fn(
-                        _action: DeleteLink,
-                        _original_action: CreateLink,
-                        _base: AnyLinkableHash,
-                        _target: AnyLinkableHash,
-                        _tag: LinkTag
+                        _action: TypedAction<DeleteLinkData>,
+                        _original_action: TypedAction<CreateLinkData>,
                     ) -> ExternResult<ValidateCallbackResult> {
                         #validate_delete_result
                   }
@@ -287,7 +278,7 @@ pub fn add_link_type_to_integrity_zome(
 
 fn validate_referenceable(
     referenceable: &Referenceable,
-    address_ident: &syn::Ident,
+    address_field_ident: &syn::Ident,
 ) -> TokenStream {
     match referenceable {
         Referenceable::EntryType(entry_type) => {
@@ -298,7 +289,7 @@ fn validate_referenceable(
             if entry_type.reference_entry_hash {
                 quote! {
                     // Check the entry type for the given entry hash
-                    let entry_hash = #address_ident.into_entry_hash().ok_or(wasm_error!(WasmErrorInner::Guest("No entry hash associated with link".to_string())))?;
+                    let entry_hash = action.data.#address_field_ident.into_entry_hash().ok_or(wasm_error!(WasmErrorInner::Guest("No entry hash associated with link".to_string())))?;
                     let entry = must_get_entry(entry_hash)?.content;
 
                     let #entry_type_snake = crate::#entry_type_pascal::try_from(entry)?;
@@ -306,7 +297,7 @@ fn validate_referenceable(
             } else {
                 quote! {
                     // Check the entry type for the given action hash
-                    let action_hash = #address_ident.into_action_hash().ok_or(wasm_error!(
+                    let action_hash = action.data.#address_field_ident.into_action_hash().ok_or(wasm_error!(
                         WasmErrorInner::Guest("No action hash associated with link".to_string())
                     ))?;
                     let record = must_get_valid_record(action_hash)?;
@@ -351,7 +342,7 @@ fn add_link_type_signals(
                         if item_fn.sig.ident == "signal_action" {
                             if find_ending_match_expr_in_block(&mut item_fn.block).is_none() {
                                 *item_fn.block = syn::parse_str::<syn::Block>(
-                                    "{ match action.hashed.content.clone() { _ => Ok(()) } }",
+                                    "{ match &action.hashed.content.clone().data { _ => Ok(()) } }",
                                 )?;
                             }
 
@@ -413,7 +404,7 @@ fn signal_link_types_variants() -> ScaffoldResult<Vec<syn::Variant>> {
 fn signal_action_match_arms() -> ScaffoldResult<Vec<syn::Arm>> {
     Ok(vec![
         syn::parse_str::<syn::Arm>(
-            "Action::CreateLink(create_link) => {
+            "ActionData::CreateLink(create_link) => {
             if let Ok(Some(link_type)) =
                 LinkTypes::from_type(create_link.zome_index, create_link.link_type)
             {
@@ -423,14 +414,14 @@ fn signal_action_match_arms() -> ScaffoldResult<Vec<syn::Arm>> {
         }",
         )?,
         syn::parse_str::<syn::Arm>(
-            "Action::DeleteLink(delete_link) => {
+            "ActionData::DeleteLink(delete_link) => {
             let record = get(delete_link.link_add_address.clone(), GetOptions::default())?.ok_or(
                 wasm_error!(WasmErrorInner::Guest(
                     \"Failed to fetch CreateLink action\".to_string()
                 )),
             )?;
-            match record.action() {
-                Action::CreateLink(create_link) => {
+            match &record.action().data {
+                ActionData::CreateLink(create_link) => {
                     if let Ok(Some(link_type)) =
                         LinkTypes::from_type(create_link.zome_index, create_link.link_type)
                     {
@@ -485,130 +476,10 @@ fn add_link_type_to_validation_arms(
                         for arm in &mut match_expr.arms {
                             if let syn::Pat::TupleStruct(tuple_struct) = &mut arm.pat {
                                 if let Some(path_segment) = tuple_struct.path.segments.last() {
-                                    if path_segment.ident != "StoreRecord" {
-                                        continue;
-                                    }
-                                    if let Some(op_entry_match_expr) =
-                                        find_ending_match_expr(&mut arm.body)
-                                    {
-                                        for op_record_arm in &mut op_entry_match_expr.arms {
-                                            if is_create_link(&op_record_arm.pat) {
-                                                // Add new link type to match arm
-                                                if find_ending_match_expr(&mut op_record_arm.body)
-                                                    .is_none()
-                                                {
-                                                    // Change empty invalid to match on link_type
-                                                    *op_record_arm.body =
-                                                        syn::parse_str::<syn::Expr>(
-                                                            "match link_type {}",
-                                                        )?;
-                                                }
-
-                                                // Add new link type to match arm
-                                                if let Some(link_type_match) =
-                                                    find_ending_match_expr(&mut op_record_arm.body)
-                                                {
-                                                    let new_arm: syn::Arm = syn::parse_str(
-                                                                    format!(
-    "LinkTypes::{} => validate_create_link_{}(action, base_address, target_address, tag),",
-                                                                        link_type_name.to_case(Case::Pascal),
-                                                                        link_type_name.to_case(Case::Snake)
-                                                                    ).as_str()
-                                                                )?;
-                                                    link_type_match.arms.push(new_arm);
-                                                }
-                                            } else if is_delete_link(&op_record_arm.pat) {
-                                                // Add new link type to match arm
-                                                if find_ending_match_expr(&mut op_record_arm.body)
-                                                    .is_none()
-                                                {
-                                                    // Change empty invalid to match on link_type
-                                                    *op_record_arm.body = syn::parse_str::<
-                                                        syn::Expr,
-                                                    >(
-                                                        r#"{
-        let record = must_get_valid_record(original_action_hash)?;
-        let create_link = match record.action() {
-            Action::CreateLink(create_link) => create_link.clone(),
-            _ => {
-                return Ok(ValidateCallbackResult::Invalid("The action that a DeleteLink deletes must be a CreateLink".to_string()));
-            }
-        };
-        let link_type = match LinkTypes::from_type(create_link.zome_index, create_link.link_type)? {
-            Some(lt) => lt,
-            None => {
-                return Ok(ValidateCallbackResult::Valid);
-            }
-        };
-        match link_type {}
-    }"#,
-                                                    )?;
-                                                }
-
-                                                // Add new entry type to match arm
-                                                if let Some(link_type_match) =
-                                                    find_ending_match_expr(&mut op_record_arm.body)
-                                                {
-                                                    let new_arm: syn::Arm =
-                                                                    syn::parse_str(
-                                                                        format!(
-"LinkTypes::{} => validate_delete_link_{}(action, create_link.clone(), base_address, create_link.target_address, create_link.tag),",
-                                                                            link_type_name.to_case(Case::Pascal),
-                                                                            link_type_name.to_case(Case::Snake),
-                                                                        ).as_str()
-                                                                    )?;
-                                                    link_type_match.arms.push(new_arm);
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            if let syn::Pat::Struct(pat_struct) = &mut arm.pat {
-                                if let Some(path_segment) = pat_struct.path.segments.last() {
-                                    if path_segment.ident == "RegisterCreateLink" {
-                                        // Add new link type to match arm
-                                        if find_ending_match_expr(&mut arm.body).is_none() {
-                                            // Change empty invalid to match on link_type
-                                            *arm.body =
-                                                syn::parse_str::<syn::Expr>("match link_type {}")?;
-                                        }
-
-                                        // Add new link type to match arm
-                                        if let Some(link_type_match) =
-                                            find_ending_match_expr(&mut arm.body)
-                                        {
-                                            let new_arm: syn::Arm = syn::parse_str(
-                                                format!(
-    "LinkTypes::{} => validate_create_link_{}(action, base_address, target_address, tag),",
-                                                            link_type_name.to_case(Case::Pascal),
-                                                            link_type_name.to_case(Case::Snake)
-                                                        )
-                                                .as_str(),
-                                            )?;
-                                            link_type_match.arms.push(new_arm);
-                                        }
-                                    } else if path_segment.ident == "RegisterDeleteLink" {
-                                        // Add new link type to match arm
-                                        if find_ending_match_expr(&mut arm.body).is_none() {
-                                            // Change empty invalid to match on link_type
-                                            *arm.body =
-                                                syn::parse_str::<syn::Expr>("match link_type {}")?;
-                                        }
-
-                                        // Add new link type to match arm
-                                        if let Some(link_type_match) =
-                                            find_ending_match_expr(&mut arm.body)
-                                        {
-                                            let new_arm: syn::Arm = syn::parse_str(
-                                                        format!(
-        "LinkTypes::{} => validate_delete_link_{}(action, original_action, base_address, target_address, tag),",
-                                                            link_type_name.to_case(Case::Pascal),
-                                                            link_type_name.to_case(Case::Snake)
-                                                        ).as_str()
-                                                    )?;
-                                            link_type_match.arms.push(new_arm);
-                                        }
+                                    if path_segment.ident == "CreateRecord" {
+                                        handle_create_record_link_arm(arm, link_type_name)?;
+                                    } else if path_segment.ident == "Link" {
+                                        handle_link_arm(arm, link_type_name)?;
                                     }
                                 }
                             }
@@ -618,5 +489,122 @@ fn add_link_type_to_validation_arms(
             }
         }
     }
+    Ok(())
+}
+
+fn handle_create_record_link_arm(arm: &mut syn::Arm, link_type_name: &str) -> ScaffoldResult<()> {
+    if let Some(op_entry_match_expr) = find_ending_match_expr(&mut arm.body) {
+        for op_record_arm in &mut op_entry_match_expr.arms {
+            if is_create_link(&op_record_arm.pat) {
+                // Add new link type to match arm
+                if find_ending_match_expr(&mut op_record_arm.body).is_none() {
+                    // Change empty invalid to match on link_type
+                    *op_record_arm.body = syn::parse_str::<syn::Expr>("match link_type {}")?;
+                }
+
+                // Add new link type to match arm
+                if let Some(link_type_match) = find_ending_match_expr(&mut op_record_arm.body) {
+                    let new_arm: syn::Arm = syn::parse_str(
+                        format!(
+                            "LinkTypes::{} => validate_create_link_{}(action),",
+                            link_type_name.to_case(Case::Pascal),
+                            link_type_name.to_case(Case::Snake)
+                        )
+                        .as_str(),
+                    )?;
+                    link_type_match.arms.push(new_arm);
+                }
+            } else if is_delete_link(&op_record_arm.pat) {
+                // Add new link type to match arm
+                if find_ending_match_expr(&mut op_record_arm.body).is_none() {
+                    // Change empty invalid to match on link_type, after re-deriving the
+                    // CreateLink action that this DeleteLink deletes
+                    *op_record_arm.body = syn::parse_str::<syn::Expr>(
+                        r#"{
+        let record = must_get_valid_record(action.data.link_add_address.clone())?;
+        let create_link = match &record.action().data {
+            ActionData::CreateLink(create_link) => TypedAction {
+                header: record.action().header.clone(),
+                data: create_link.clone(),
+            },
+            _ => {
+                return Ok(ValidateCallbackResult::Invalid("The action that a DeleteLink deletes must be a CreateLink".to_string()));
+            }
+        };
+        let link_type = match LinkTypes::from_type(create_link.data.zome_index, create_link.data.link_type)? {
+            Some(lt) => lt,
+            None => {
+                return Ok(ValidateCallbackResult::Valid);
+            }
+        };
+        match link_type {}
+    }"#,
+                    )?;
+                }
+
+                // Add new link type to match arm
+                if let Some(link_type_match) = find_ending_match_expr(&mut op_record_arm.body) {
+                    let new_arm: syn::Arm = syn::parse_str(
+                        format!(
+                            "LinkTypes::{} => validate_delete_link_{}(action, create_link),",
+                            link_type_name.to_case(Case::Pascal),
+                            link_type_name.to_case(Case::Snake),
+                        )
+                        .as_str(),
+                    )?;
+                    link_type_match.arms.push(new_arm);
+                }
+            }
+        }
+    }
+    Ok(())
+}
+
+fn handle_link_arm(arm: &mut syn::Arm, link_type_name: &str) -> ScaffoldResult<()> {
+    let inner_pat = match &arm.pat {
+        syn::Pat::TupleStruct(tuple_struct) => tuple_struct.elems.first(),
+        _ => None,
+    };
+
+    if inner_pat.map(is_create_link).unwrap_or(false) {
+        // Add new link type to match arm
+        if find_ending_match_expr(&mut arm.body).is_none() {
+            // Change empty invalid to match on link_type
+            *arm.body = syn::parse_str::<syn::Expr>("match link_type {}")?;
+        }
+
+        // Add new link type to match arm
+        if let Some(link_type_match) = find_ending_match_expr(&mut arm.body) {
+            let new_arm: syn::Arm = syn::parse_str(
+                format!(
+                    "LinkTypes::{} => validate_create_link_{}(action),",
+                    link_type_name.to_case(Case::Pascal),
+                    link_type_name.to_case(Case::Snake)
+                )
+                .as_str(),
+            )?;
+            link_type_match.arms.push(new_arm);
+        }
+    } else if inner_pat.map(is_delete_link).unwrap_or(false) {
+        // Add new link type to match arm
+        if find_ending_match_expr(&mut arm.body).is_none() {
+            // Change empty invalid to match on link_type
+            *arm.body = syn::parse_str::<syn::Expr>("match link_type {}")?;
+        }
+
+        // Add new link type to match arm
+        if let Some(link_type_match) = find_ending_match_expr(&mut arm.body) {
+            let new_arm: syn::Arm = syn::parse_str(
+                format!(
+                    "LinkTypes::{} => validate_delete_link_{}(action, original_action),",
+                    link_type_name.to_case(Case::Pascal),
+                    link_type_name.to_case(Case::Snake)
+                )
+                .as_str(),
+            )?;
+            link_type_match.arms.push(new_arm);
+        }
+    }
+
     Ok(())
 }

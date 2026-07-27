@@ -220,9 +220,9 @@ pub fn render_entry_definition_file(
 
     let validate_update = quote! {
         pub fn #validate_update_fn(
-            _action: Update,
+            _action: TypedAction<UpdateData>,
             #new_entry_arg: #name_pascal,
-            _original_action: EntryCreationAction,
+            _original_action: TypedAction<EntryCreationData>,
             #original_entry_arg: #name_pascal
         ) -> ExternResult<ValidateCallbackResult> {
             #validate_update_result
@@ -247,8 +247,8 @@ pub fn render_entry_definition_file(
 
     let validate_delete = quote! {
         pub fn #validate_delete_fn(
-            _action: Delete,
-            _original_action: EntryCreationAction,
+            _action: TypedAction<DeleteData>,
+            _original_action: TypedAction<EntryCreationData>,
             #deleted_post_arg: #name_pascal
         ) -> ExternResult<ValidateCallbackResult> {
             #validate_delete_result
@@ -334,7 +334,7 @@ pub fn render_entry_definition_file(
         #entry_def_token_stream
 
         pub fn #validate_create_fn(
-            _action: EntryCreationAction,
+            _action: TypedAction<EntryCreationData>,
             #create_new_entry_arg: #name_pascal
         ) -> ExternResult<ValidateCallbackResult> {
             #(#deps_validation)*
@@ -479,25 +479,25 @@ fn add_entry_type_to_validation_arms(
                         for arm in &mut match_expr.arms {
                             if let syn::Pat::TupleStruct(pat_tuple_struct) = &mut arm.pat {
                                 if let Some(path_segment) = pat_tuple_struct.path.segments.last() {
-                                    if path_segment.ident == "StoreRecord" {
+                                    if path_segment.ident == "CreateRecord" {
                                         handle_store_record_arm(
                                             arm,
                                             &pascal_entry_def_name,
                                             &snake_entry_def_name,
                                         )?;
-                                    } else if path_segment.ident == "StoreEntry" {
+                                    } else if path_segment.ident == "CreateEntry" {
                                         handle_store_entry_arm(
                                             arm,
                                             &pascal_entry_def_name,
                                             &snake_entry_def_name,
                                         )?;
-                                    } else if path_segment.ident == "RegisterUpdate" {
+                                    } else if path_segment.ident == "Update" {
                                         handle_register_update_arm(
                                             arm,
                                             &pascal_entry_def_name,
                                             &snake_entry_def_name,
                                         )?;
-                                    } else if path_segment.ident == "RegisterDelete" {
+                                    } else if path_segment.ident == "Delete" {
                                         handle_register_delete_arm(
                                             arm,
                                             &pascal_entry_def_name,
@@ -525,39 +525,14 @@ fn handle_store_record_arm(
             if is_entry(&op_record_arm.pat, "CreateEntry") {
                 // Add new entry type to match arm
                 if find_ending_match_expr(&mut op_record_arm.body).is_none() {
-                    // Change empty invalid to match on entry_type
-                    *op_record_arm.body = syn::parse_quote! {match app_entry {}};
-                }
-
-                // Add new entry type to match arm
-                if let Some(entry_type_match) = find_ending_match_expr(&mut op_record_arm.body) {
-                    let new_arm = syn::parse_str(&format!(
-                        r#"EntryTypes::{pascal_entry_def_name}({snake_entry_def_name}) => {{
-                            validate_create_{snake_entry_def_name}(
-                                EntryCreationAction::Create(action),
-                                {snake_entry_def_name},
-                            )
-                        }}"#
-                    ))?;
-                    entry_type_match.arms.push(new_arm);
-                }
-            } else if is_entry(&op_record_arm.pat, "UpdateEntry") {
-                // Add new entry type to match arm
-                if find_ending_match_expr(&mut op_record_arm.body).is_none() {
-                    // Change empty invalid to match on entry_type
+                    // Change empty invalid to match on entry_type, after narrowing the action
+                    // down to a `TypedAction<EntryCreationData>`. This two-step conversion may
+                    // be simplified once holochain/holochain#5910 lands.
                     *op_record_arm.body = syn::parse_quote! {
                         {
-                            let original_record = must_get_valid_record(original_action_hash)?;
-                            let original_action = original_record.action().clone();
-                            let original_action = match original_action {
-                                Action::Create(create) => EntryCreationAction::Create(create),
-                                Action::Update(update) => EntryCreationAction::Update(update),
-                                _ => {
-                                    return Ok(ValidateCallbackResult::Invalid(
-                                        "Original action for an update must be a Create or Update action".to_string()
-                                    ));
-                                }
-                            };
+                            let action: Action = action.into();
+                            let action: Result<TypedAction<EntryCreationData>, WrongActionError> = action.try_into();
+                            let action = action.map_err(|e| wasm_error!(WasmErrorInner::Guest(e.to_string())))?;
                             match app_entry {}
                         }
                     };
@@ -567,7 +542,39 @@ fn handle_store_record_arm(
                 if let Some(entry_type_match) = find_ending_match_expr(&mut op_record_arm.body) {
                     let new_arm = syn::parse_str(&format!(
                         r#"EntryTypes::{pascal_entry_def_name}({snake_entry_def_name}) => {{
-                            let result = validate_create_{snake_entry_def_name}(EntryCreationAction::Update(action.clone()), {snake_entry_def_name}.clone())?;
+                            validate_create_{snake_entry_def_name}(
+                                action,
+                                {snake_entry_def_name},
+                            )
+                        }}"#
+                    ))?;
+                    entry_type_match.arms.push(new_arm);
+                }
+            } else if is_entry(&op_record_arm.pat, "UpdateEntry") {
+                // Add new entry type to match arm
+                if find_ending_match_expr(&mut op_record_arm.body).is_none() {
+                    // Change empty invalid to match on entry_type, after narrowing both the
+                    // original and new actions down to `TypedAction<EntryCreationData>`. This
+                    // conversion may be simplified once holochain/holochain#5910 lands.
+                    *op_record_arm.body = syn::parse_quote! {
+                        {
+                            let original_record = must_get_valid_record(action.data.original_action_address.clone())?;
+                            let original_action = original_record.action().clone();
+                            let original_action: Result<TypedAction<EntryCreationData>, WrongActionError> = original_action.try_into();
+                            let original_action = original_action.map_err(|e| wasm_error!(WasmErrorInner::Guest(e.to_string())))?;
+                            let creation_action: Action = action.clone().into();
+                            let creation_action: Result<TypedAction<EntryCreationData>, WrongActionError> = creation_action.try_into();
+                            let creation_action = creation_action.map_err(|e| wasm_error!(WasmErrorInner::Guest(e.to_string())))?;
+                            match app_entry {}
+                        }
+                    };
+                }
+
+                // Add new entry type to match arm
+                if let Some(entry_type_match) = find_ending_match_expr(&mut op_record_arm.body) {
+                    let new_arm = syn::parse_str(&format!(
+                        r#"EntryTypes::{pascal_entry_def_name}({snake_entry_def_name}) => {{
+                            let result = validate_create_{snake_entry_def_name}(creation_action, {snake_entry_def_name}.clone())?;
                             if let ValidateCallbackResult::Valid = result {{
                                 let original_{snake_entry_def_name}: Option<{pascal_entry_def_name}> = original_record
                                     .entry()
@@ -597,20 +604,15 @@ fn handle_store_record_arm(
             } else if is_entry(&op_record_arm.pat, "DeleteEntry") {
                 // Add new entry type to match arm
                 if find_ending_match_expr(&mut op_record_arm.body).is_none() {
-                    // Change empty invalid to match on entry_type
+                    // Change empty invalid to match on entry_type, after narrowing the original
+                    // action down to a `TypedAction<EntryCreationData>`. This conversion may be
+                    // simplified once holochain/holochain#5910 lands.
                     *op_record_arm.body = syn::parse_quote! {
                         {
-                            let original_record = must_get_valid_record(original_action_hash)?;
+                            let original_record = must_get_valid_record(action.data.deletes_address.clone())?;
                             let original_action = original_record.action().clone();
-                            let original_action = match original_action {
-                                Action::Create(create) => EntryCreationAction::Create(create),
-                                Action::Update(update) => EntryCreationAction::Update(update),
-                                _ => {
-                                    return Ok(ValidateCallbackResult::Invalid(
-                                        "Original action for a delete must be a Create or Update action".to_string()
-                                    ));
-                                }
-                            };
+                            let original_action: Result<TypedAction<EntryCreationData>, WrongActionError> = original_action.try_into();
+                            let original_action = original_action.map_err(|e| wasm_error!(WasmErrorInner::Guest(e.to_string())))?;
                             let app_entry_type = match original_action.entry_type() {
                                 EntryType::App(app_entry_type) => app_entry_type,
                                 _ => {
@@ -669,11 +671,23 @@ fn handle_store_entry_arm(
 ) -> ScaffoldResult<()> {
     if let Some(op_entry_match_expr) = find_ending_match_expr(&mut arm.body) {
         for op_entry_arm in &mut op_entry_match_expr.arms {
-            if is_entry(&op_entry_arm.pat, "CreateEntry") {
-                // Add new entry type to match arm
+            if is_entry(&op_entry_arm.pat, "CreateEntry")
+                || is_entry(&op_entry_arm.pat, "UpdateEntry")
+            {
+                // Add new entry type to match arm, after narrowing the action down to a
+                // `TypedAction<EntryCreationData>` (both Create and Update actions are
+                // validated by the same `validate_create_*` function here)
                 if find_ending_match_expr(&mut op_entry_arm.body).is_none() {
-                    // Change empty invalid to match on entry_type
-                    *op_entry_arm.body = syn::parse_quote! {match app_entry {}};
+                    // Change empty invalid to match on entry_type. This conversion may be
+                    // simplified once holochain/holochain#5910 lands.
+                    *op_entry_arm.body = syn::parse_quote! {
+                        {
+                            let action: Action = action.into();
+                            let create_action: Result<TypedAction<EntryCreationData>, WrongActionError> = action.try_into();
+                            let create_action = create_action.map_err(|e| wasm_error!(WasmErrorInner::Guest(e.to_string())))?;
+                            match app_entry {}
+                        }
+                    };
                 }
 
                 // Add new entry type to match arm
@@ -681,29 +695,10 @@ fn handle_store_entry_arm(
                     let new_arm = syn::parse_str(&format!(
                         r#"EntryTypes::{pascal_entry_def_name}({snake_entry_def_name}) => {{
                                 validate_create_{snake_entry_def_name}(
-                                    EntryCreationAction::Create(action),
+                                    create_action,
                                     {snake_entry_def_name},
                                 )
                         }},"#
-                    ))?;
-                    entry_type_match.arms.push(new_arm);
-                }
-            } else if is_entry(&op_entry_arm.pat, "UpdateEntry") {
-                // Add new entry type to match arm
-                if find_ending_match_expr(&mut op_entry_arm.body).is_none() {
-                    // Change empty invalid to match on entry_type
-                    *op_entry_arm.body = syn::parse_quote! {match app_entry {}};
-                }
-
-                // Add new entry type to match arm
-                if let Some(entry_type_match) = find_ending_match_expr(&mut op_entry_arm.body) {
-                    let new_arm = syn::parse_str(&format!(
-                        r#"EntryTypes::{pascal_entry_def_name}({snake_entry_def_name}) => {{
-                                validate_create_{snake_entry_def_name}(
-                                    EntryCreationAction::Update(action),
-                                    {snake_entry_def_name},
-                                )
-                        }}"#
                     ))?;
                     entry_type_match.arms.push(new_arm);
                 }
@@ -726,20 +721,16 @@ fn handle_register_update_arm(
                     if ps.ident == "Entry" {
                         // Add new entry type to match arm
                         if find_ending_match_expr(&mut op_entry_arm.body).is_none() {
-                            // Change empty invalid to match on entry_type
+                            // Change empty invalid to match on entry_type, after narrowing the
+                            // original action down to a `TypedAction<EntryCreationData>`. This
+                            // conversion may be simplified once holochain/holochain#5910 lands.
                             *op_entry_arm.body = syn::parse_quote! {
                                 {
-                                    let original_action = must_get_action(action.clone().original_action_address)?
+                                    let original_action = must_get_action(action.data.original_action_address.clone())?
                                         .action()
                                         .to_owned();
-                                    let original_create_action = match EntryCreationAction::try_from(original_action) {
-                                        Ok(action) => action,
-                                        Err(e) => {
-                                            return Ok(ValidateCallbackResult::Invalid(
-                                                format!("Expected to get EntryCreationAction from Action: {e:?}")
-                                            ));
-                                        }
-                                    };
+                                    let original_action: Result<TypedAction<EntryCreationData>, WrongActionError> = original_action.try_into();
+                                    let original_action = original_action.map_err(|e| wasm_error!(WasmErrorInner::Guest(e.to_string())))?;
                                     match app_entry {}
                                 }
                             };
@@ -751,7 +742,7 @@ fn handle_register_update_arm(
                         {
                             let new_arm = syn::parse_str(&format!(
                                 r#"EntryTypes::{pascal_entry_def_name}({snake_entry_def_name}) => {{
-                                    let original_app_entry = must_get_valid_record(action.clone().original_action_address)?;
+                                    let original_app_entry = must_get_valid_record(action.data.original_action_address.clone())?;
                                     let original_{snake_entry_def_name} = match {pascal_entry_def_name}::try_from(original_app_entry) {{
                                         Ok(entry) => entry,
                                         Err(e) => {{
@@ -763,7 +754,7 @@ fn handle_register_update_arm(
                                     validate_update_{snake_entry_def_name}(
                                         action,
                                         {snake_entry_def_name},
-                                        original_create_action,
+                                        original_action,
                                         original_{snake_entry_def_name},
                                     )
                                 }}"#,
@@ -784,17 +775,14 @@ fn handle_register_delete_arm(
     snake_entry_def_name: &str,
 ) -> ScaffoldResult<()> {
     if find_ending_match_expr(&mut arm.body).is_none() {
+        // Narrow the original action down to a `TypedAction<EntryCreationData>`. This
+        // conversion may be simplified once holochain/holochain#5910 lands.
         *arm.body = syn::parse_quote! {
             {
-                let original_action_hash = delete_entry.clone().action.deletes_address;
-                let original_record = must_get_valid_record(original_action_hash)?;
+                let original_record = must_get_valid_record(action.data.deletes_address.clone())?;
                 let original_record_action = original_record.action().clone();
-                let original_action = match EntryCreationAction::try_from(original_record_action) {
-                    Ok(action) => action,
-                    Err(e) => return Ok(ValidateCallbackResult::Invalid(format!(
-                        "Expected to get EntryCreationAction from Action: {e:?}"
-                    ))),
-                };
+                let original_action: Result<TypedAction<EntryCreationData>, WrongActionError> = original_record_action.try_into();
+                let original_action = original_action.map_err(|e| wasm_error!(WasmErrorInner::Guest(e.to_string())))?;
                 let app_entry_type = match original_action.entry_type() {
                     EntryType::App(app_entry_type) => app_entry_type,
                     _ => {
@@ -832,7 +820,7 @@ fn handle_register_delete_arm(
         let new_arm = syn::parse_str(&format!(
             r#"EntryTypes::{pascal_entry_def_name}(original_{snake_entry_def_name}) => {{
                 validate_delete_{snake_entry_def_name}(
-                    delete_entry.clone().action,
+                    action,
                     original_action,
                     original_{snake_entry_def_name}
                 )
