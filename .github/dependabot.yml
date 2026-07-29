@@ -1,0 +1,37 @@
+version: 2
+
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      updates:
+        applies-to: version-updates
+        patterns:
+          - "*"
+  - package-ecosystem: cargo
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      cargo-minor-patch:
+        applies-to: version-updates
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+  - package-ecosystem: rust-toolchain
+    directory: /
+    schedule:
+      interval: weekly
+  - package-ecosystem: nix
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      nix:
+        applies-to: version-updates
+        patterns:
+          - "*"
