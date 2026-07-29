@@ -521,12 +521,8 @@ fn remove_link_handlers(
     let pascal_link_type_name =
         format_ident!("{}", link_type_name(from_referenceable, to_referenceable));
 
-    let from_link_hash_type_code = hash_type_code_from_referenceable(to_referenceable);
-
     let bidirectional_remove = if bidirectional {
         {
-            let from_inverse_hash_type = hash_type_code_from_referenceable(from_referenceable);
-
             quote! {
                 let links = get_links(
                     LinkQuery::try_new(
@@ -535,7 +531,7 @@ fn remove_link_handlers(
                     GetStrategy::default(),
                 )?;
                 for link in links {
-                    if #from_inverse_hash_type == input.#base_field_name.clone().into_hash() {
+                    if link.target == input.#base_field_name.clone().into() {
                         delete_link(link.create_link_hash, GetOptions::default())?;
                     }
                 }
@@ -559,7 +555,7 @@ fn remove_link_handlers(
                 GetStrategy::default(),
             )?;
             for link in links {
-                if #from_link_hash_type_code == input.#target_field_name.clone().into_hash() {
+                if link.target == input.#target_field_name.clone().into() {
                     delete_link(link.create_link_hash, GetOptions::default())?;
                 }
             }
@@ -569,34 +565,23 @@ fn remove_link_handlers(
     }
 }
 
-fn hash_type_code_from_referenceable(referenceable: &Referenceable) -> TokenStream {
-    match referenceable {
-        Referenceable::Agent { .. } => quote! {
-            AgentPubKey::from(
-                link.target.clone()
-                    .into_entry_hash()
-                    .ok_or(wasm_error!(
-                        WasmErrorInner::Guest("No entry_hash associated with link".to_string())
-                    ))?
-            )
-        },
-        Referenceable::ExternalHash { .. } => quote! {
-            link.target.clone().into_hash()
-        },
-        Referenceable::EntryType(_) => {
-            let field_type = referenceable.field_type().to_string();
-            let into_hash_method_name = format_ident!("into_{}", field_type.to_case(Case::Snake));
-            let error_message = format!(
-                "No {} associated with link",
-                field_type.to_case(Case::Lower)
-            );
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-            quote! {
-                link.target
-                    .clone()
-                    .#into_hash_method_name()
-                    .ok_or(wasm_error!(WasmErrorInner::Guest(#error_message.to_string())))?
-            }
-        }
+    #[test]
+    fn external_hash_deletion_compares_any_linkable_hashes() {
+        let from_referenceable = Referenceable::ExternalHash {
+            name: "from".to_string(),
+        };
+        let to_referenceable = Referenceable::ExternalHash {
+            name: "to".to_string(),
+        };
+
+        let handlers = remove_link_handlers(&from_referenceable, &to_referenceable, true);
+        let generated = unparse_pretty(&syn::parse_quote! { #handlers });
+
+        assert!(generated.contains("if link.target == input.target_to.clone().into()"));
+        assert!(generated.contains("if link.target == input.base_from.clone().into()"));
     }
 }
