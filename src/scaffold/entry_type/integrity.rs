@@ -525,14 +525,11 @@ fn handle_store_record_arm(
             if is_entry(&op_record_arm.pat, "CreateEntry") {
                 // Add new entry type to match arm
                 if find_ending_match_expr(&mut op_record_arm.body).is_none() {
-                    // Change empty invalid to match on entry_type, after narrowing the action
-                    // down to a `TypedAction<EntryCreationData>`. This two-step conversion may
-                    // be simplified once holochain/holochain#5910 lands.
+                    // Change empty invalid to match on entry_type, after widening the Create
+                    // action to a `TypedAction<EntryCreationData>`
                     *op_record_arm.body = syn::parse_quote! {
                         {
-                            let action: Action = action.into();
-                            let action: Result<TypedAction<EntryCreationData>, WrongActionError> = action.try_into();
-                            let action = action.map_err(|e| wasm_error!(WasmErrorInner::Guest(e.to_string())))?;
+                            let action: TypedAction<EntryCreationData> = action.into();
                             match app_entry {}
                         }
                     };
@@ -553,18 +550,14 @@ fn handle_store_record_arm(
             } else if is_entry(&op_record_arm.pat, "UpdateEntry") {
                 // Add new entry type to match arm
                 if find_ending_match_expr(&mut op_record_arm.body).is_none() {
-                    // Change empty invalid to match on entry_type, after narrowing both the
-                    // original and new actions down to `TypedAction<EntryCreationData>`. This
-                    // conversion may be simplified once holochain/holochain#5910 lands.
+                    // Change empty invalid to match on entry_type, after narrowing the original
+                    // action down to a `TypedAction<EntryCreationData>` and widening the new
+                    // Update action to the same type
                     *op_record_arm.body = syn::parse_quote! {
                         {
-                            let original_record = must_get_valid_record(action.data.original_action_address.clone())?;
-                            let original_action = original_record.action().clone();
-                            let original_action: Result<TypedAction<EntryCreationData>, WrongActionError> = original_action.try_into();
-                            let original_action = original_action.map_err(|e| wasm_error!(WasmErrorInner::Guest(e.to_string())))?;
-                            let creation_action: Action = action.clone().into();
-                            let creation_action: Result<TypedAction<EntryCreationData>, WrongActionError> = creation_action.try_into();
-                            let creation_action = creation_action.map_err(|e| wasm_error!(WasmErrorInner::Guest(e.to_string())))?;
+                            let original_record = must_get_valid_record(action.original_action_address.clone())?;
+                            let original_action = TypedAction::<EntryCreationData>::try_from_action(original_record.action().clone())?;
+                            let creation_action: TypedAction<EntryCreationData> = action.clone().into();
                             match app_entry {}
                         }
                     };
@@ -605,14 +598,11 @@ fn handle_store_record_arm(
                 // Add new entry type to match arm
                 if find_ending_match_expr(&mut op_record_arm.body).is_none() {
                     // Change empty invalid to match on entry_type, after narrowing the original
-                    // action down to a `TypedAction<EntryCreationData>`. This conversion may be
-                    // simplified once holochain/holochain#5910 lands.
+                    // action down to a `TypedAction<EntryCreationData>`
                     *op_record_arm.body = syn::parse_quote! {
                         {
-                            let original_record = must_get_valid_record(action.data.deletes_address.clone())?;
-                            let original_action = original_record.action().clone();
-                            let original_action: Result<TypedAction<EntryCreationData>, WrongActionError> = original_action.try_into();
-                            let original_action = original_action.map_err(|e| wasm_error!(WasmErrorInner::Guest(e.to_string())))?;
+                            let original_record = must_get_valid_record(action.deletes_address.clone())?;
+                            let original_action = TypedAction::<EntryCreationData>::try_from_action(original_record.action().clone())?;
                             let app_entry_type = match original_action.entry_type() {
                                 EntryType::App(app_entry_type) => app_entry_type,
                                 _ => {
@@ -674,17 +664,14 @@ fn handle_store_entry_arm(
             if is_entry(&op_entry_arm.pat, "CreateEntry")
                 || is_entry(&op_entry_arm.pat, "UpdateEntry")
             {
-                // Add new entry type to match arm, after narrowing the action down to a
+                // Add new entry type to match arm, after widening the action to a
                 // `TypedAction<EntryCreationData>` (both Create and Update actions are
                 // validated by the same `validate_create_*` function here)
                 if find_ending_match_expr(&mut op_entry_arm.body).is_none() {
-                    // Change empty invalid to match on entry_type. This conversion may be
-                    // simplified once holochain/holochain#5910 lands.
+                    // Change empty invalid to match on entry_type
                     *op_entry_arm.body = syn::parse_quote! {
                         {
-                            let action: Action = action.into();
-                            let create_action: Result<TypedAction<EntryCreationData>, WrongActionError> = action.try_into();
-                            let create_action = create_action.map_err(|e| wasm_error!(WasmErrorInner::Guest(e.to_string())))?;
+                            let create_action: TypedAction<EntryCreationData> = action.into();
                             match app_entry {}
                         }
                     };
@@ -722,15 +709,13 @@ fn handle_register_update_arm(
                         // Add new entry type to match arm
                         if find_ending_match_expr(&mut op_entry_arm.body).is_none() {
                             // Change empty invalid to match on entry_type, after narrowing the
-                            // original action down to a `TypedAction<EntryCreationData>`. This
-                            // conversion may be simplified once holochain/holochain#5910 lands.
+                            // original action down to a `TypedAction<EntryCreationData>`. The
+                            // record is fetched here so each entry type arm can reuse it to
+                            // deserialize the original entry.
                             *op_entry_arm.body = syn::parse_quote! {
                                 {
-                                    let original_action = must_get_action(action.data.original_action_address.clone())?
-                                        .action()
-                                        .to_owned();
-                                    let original_action: Result<TypedAction<EntryCreationData>, WrongActionError> = original_action.try_into();
-                                    let original_action = original_action.map_err(|e| wasm_error!(WasmErrorInner::Guest(e.to_string())))?;
+                                    let original_record = must_get_valid_record(action.original_action_address.clone())?;
+                                    let original_action = TypedAction::<EntryCreationData>::try_from_action(original_record.action().clone())?;
                                     match app_entry {}
                                 }
                             };
@@ -742,8 +727,7 @@ fn handle_register_update_arm(
                         {
                             let new_arm = syn::parse_str(&format!(
                                 r#"EntryTypes::{pascal_entry_def_name}({snake_entry_def_name}) => {{
-                                    let original_app_entry = must_get_valid_record(action.data.original_action_address.clone())?;
-                                    let original_{snake_entry_def_name} = match {pascal_entry_def_name}::try_from(original_app_entry) {{
+                                    let original_{snake_entry_def_name} = match {pascal_entry_def_name}::try_from(original_record) {{
                                         Ok(entry) => entry,
                                         Err(e) => {{
                                             return Ok(ValidateCallbackResult::Invalid(
@@ -775,14 +759,11 @@ fn handle_register_delete_arm(
     snake_entry_def_name: &str,
 ) -> ScaffoldResult<()> {
     if find_ending_match_expr(&mut arm.body).is_none() {
-        // Narrow the original action down to a `TypedAction<EntryCreationData>`. This
-        // conversion may be simplified once holochain/holochain#5910 lands.
+        // Narrow the original action down to a `TypedAction<EntryCreationData>`
         *arm.body = syn::parse_quote! {
             {
-                let original_record = must_get_valid_record(action.data.deletes_address.clone())?;
-                let original_record_action = original_record.action().clone();
-                let original_action: Result<TypedAction<EntryCreationData>, WrongActionError> = original_record_action.try_into();
-                let original_action = original_action.map_err(|e| wasm_error!(WasmErrorInner::Guest(e.to_string())))?;
+                let original_record = must_get_valid_record(action.deletes_address.clone())?;
+                let original_action = TypedAction::<EntryCreationData>::try_from_action(original_record.action().clone())?;
                 let app_entry_type = match original_action.entry_type() {
                     EntryType::App(app_entry_type) => app_entry_type,
                     _ => {

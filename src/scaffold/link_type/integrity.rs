@@ -276,6 +276,9 @@ pub fn add_link_type_to_integrity_zome(
     Ok(zome_file_tree)
 }
 
+/// Note: the emitted code addresses the link fields through `action.data`, not through
+/// `TypedAction`'s `Deref`. `into_entry_hash`/`into_action_hash` take `self` by value, and
+/// you cannot move out of a deref.
 fn validate_referenceable(
     referenceable: &Referenceable,
     address_field_ident: &syn::Ident,
@@ -517,21 +520,13 @@ fn handle_create_record_link_arm(arm: &mut syn::Arm, link_type_name: &str) -> Sc
             } else if is_delete_link(&op_record_arm.pat) {
                 // Add new link type to match arm
                 if find_ending_match_expr(&mut op_record_arm.body).is_none() {
-                    // Change empty invalid to match on link_type, after re-deriving the
-                    // CreateLink action that this DeleteLink deletes
+                    // Change empty invalid to match on link_type, after narrowing the action
+                    // that this DeleteLink deletes down to a `TypedAction<CreateLinkData>`
                     *op_record_arm.body = syn::parse_str::<syn::Expr>(
                         r#"{
-        let record = must_get_valid_record(action.data.link_add_address.clone())?;
-        let create_link = match &record.action().data {
-            ActionData::CreateLink(create_link) => TypedAction {
-                header: record.action().header.clone(),
-                data: create_link.clone(),
-            },
-            _ => {
-                return Ok(ValidateCallbackResult::Invalid("The action that a DeleteLink deletes must be a CreateLink".to_string()));
-            }
-        };
-        let link_type = match LinkTypes::from_type(create_link.data.zome_index, create_link.data.link_type)? {
+        let record = must_get_valid_record(action.link_add_address.clone())?;
+        let create_link = TypedAction::<CreateLinkData>::try_from_action(record.action().clone())?;
+        let link_type = match LinkTypes::from_type(create_link.zome_index, create_link.link_type)? {
             Some(lt) => lt,
             None => {
                 return Ok(ValidateCallbackResult::Valid);
