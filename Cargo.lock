@@ -257,11 +257,11 @@ dependencies = [
 
 [[package]]
 name = "build-fs-tree"
-version = "0.6.0"
+version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4c68339add1d0c864575cd425203adee58c8b64ea1709b35bb90fc0fc07e4286"
+checksum = "e498c7ccbdde9f82e90826b8ffa37853d63c25ae75435a26ffcdb6ea8b9922ea"
 dependencies = [
- "derive_more 0.99.20",
+ "derive_more",
  "pipe-trait",
  "serde",
  "serde_yaml",
@@ -480,12 +480,6 @@ name = "constant_time_eq"
 version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3d52eff69cd5e647efe296129160853a42795992097e8af39800e1060caeea9b"
-
-[[package]]
-name = "convert_case"
-version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6245d59a3e82a7fc217c5828a6692dbc6dfb63a0c8c90495621f7b9d79704a0e"
 
 [[package]]
 name = "convert_case"
@@ -784,19 +778,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ab63b0e2bf4d5928aff72e83a7dace85d7bba5fe12dcc3c5a572d78caffd3f3c"
 dependencies = [
  "derive_builder_core",
- "syn 2.0.119",
-]
-
-[[package]]
-name = "derive_more"
-version = "0.99.20"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6edb4b64a43d977b8e99788fe3a04d483834fba1215a7e02caa415b626497f7f"
-dependencies = [
- "convert_case 0.4.0",
- "proc-macro2",
- "quote",
- "rustc_version",
  "syn 2.0.119",
 ]
 
@@ -1334,7 +1315,7 @@ checksum = "f8232ecf6508bdf883f5477067feaed8fa88978ef95b55b5db1f6b992c40a2a1"
 dependencies = [
  "base64",
  "blake2b_simd",
- "derive_more 2.1.1",
+ "derive_more",
  "futures",
  "holochain_serialized_bytes",
  "holochain_util",
@@ -1469,7 +1450,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a0ff873a00e757224a88f00855d67ece38b4d95872f012e0ad5457de1f025966"
 dependencies = [
  "chrono",
- "derive_more 2.1.1",
+ "derive_more",
  "inferno",
  "serde_json",
  "thiserror 2.0.19",
@@ -1489,7 +1470,7 @@ dependencies = [
  "backtrace",
  "bytes",
  "derive_builder",
- "derive_more 2.1.1",
+ "derive_more",
  "futures",
  "holo_hash",
  "holochain_nonce",
@@ -1559,7 +1540,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "35c592d79aceaea3c42b2e164fa7866e24e9d6e60d872b9b30013778a1ae13a1"
 dependencies = [
  "derive_builder",
- "derive_more 2.1.1",
+ "derive_more",
  "holo_hash",
  "holochain_integrity_types",
  "holochain_nonce",
@@ -3428,9 +3409,9 @@ dependencies = [
 
 [[package]]
 name = "text-block-macros"
-version = "0.1.1"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7f8b59b4da1c1717deaf1de80f0179a9d8b4ac91c986d5fd9f4a8ff177b84049"
+checksum = "f1ecd6317fa97541e6cfcdf79c1917ccb8f7a10ec9ece27aaadf5b2b6ccad3e8"
 
 [[package]]
 name = "text_lines"
