@@ -26,11 +26,54 @@ Find the matching set for a target Holochain release from the
 npm packages — verify each independently, since the Rust crates and the npm
 packages come from different repos and don't necessarily move in lockstep.
 
-This repo does **not** pin `holochain_client` or `holochain_types` as Rust
-crates anywhere (only the npm client and the crates above). If a reference
-app has those in its workspace `Cargo.toml`, that's app-specific
-customization, not something this tool generates — don't add it here on
-their account.
+Two more Holochain crates are pinned in this repo's **own** `Cargo.toml`
+(not in `src/versions.rs`, and easy to miss):
+
+- `holochain_types` — the CLI reads and writes `dna.yaml`/`happ.yaml` through
+  `DnaManifest`/`AppManifest`/`ZomeManifest`
+- `mr_bundle` — the `Manifest` trait behind those, plus
+  `ScaffoldError::MrBundleError`
+
+These must be bumped to the same release as `HOLOCHAIN_VERSION`. They are not
+just build hygiene: the manifest *format* the tool emits comes from these
+crates, so leaving them behind can silently generate a `dna.yaml` that the
+target conductor won't load. Check the crates.io versions independently —
+`mr_bundle` in particular has published `-dev`/`-rc` lines that lag the main
+release train.
+
+This repo does **not** pin `holochain_client` as a Rust crate, and it never
+emits `holochain_types` or `mr_bundle` into a scaffolded app — generated
+workspaces only get `hdi`, `hdk`, `serde`, `holochain_serialized_bytes`,
+`holochain` and `tokio` (see `add_common_zome_dependencies_to_workspace_cargo()`
+in `src/scaffold/zome.rs`). If a reference app has more than that in its
+workspace `Cargo.toml`, that's app-specific customization — don't add it here
+on their account.
+
+### The holonix ref
+
+`holonix.url = "github:holochain/holonix?ref=..."` appears in **four** places,
+and they must all say the same thing:
+
+- `flake.nix` — this repo's own dev shell / CI
+- `src/scaffold/app/nix.rs` (`flake_nix()`) — the flake written into every
+  scaffolded app
+- `src/cli/custom-template/flake.nix` and `src/cli/custom-template/README.md`
+  — the custom-template scaffold and its docs
+
+holonix keeps a `main-X.Y` branch per released Holochain line and lets `main`
+move on to the next dev cycle. While this repo is tracking a dev/rc cycle the
+ref floats on `main`; once the target line has released, pin all four to
+`main-X.Y` so a scaffolded app's dev shell can't drift onto the next major
+while its `Cargo.toml` is pinned to the old one. Precedent:
+`e94a1d81 build: pin holonix to main-0.6` (pin) and
+`66bad51f feat: Upgrade to 0.6` (unpin back to `main`).
+
+Right after the branch is cut, `main` and `main-X.Y` still resolve to the same
+Holochain, so switching looks like a no-op in the dev shell even though the
+`flake.lock` revs differ. That is expected and is not evidence the pin is
+unnecessary — the point is what `main` does *next*. Compare the two branches'
+`flake.nix` `holochain.url` ref (not their head revs) to confirm they still
+agree today.
 
 ## 2. Where the HDI/HDK API surface is hard-coded
 
@@ -179,10 +222,6 @@ os.write(master, b"\x1b[B\r")  # Down, Enter — e.g. to answer "No"
 
 ## 5. Things that are *not* pinned here (don't "fix" them)
 
-- **holonix** (`flake.nix`'s `holonix.url = "github:holochain/holonix?ref=main"`)
-  floats to `main` and is not version-pinned by this repo. It tracks
-  upstream Holochain releases on its own; no change needed here when
-  bumping versions.
 - **Extra `holochain` crate features on a reference app**: this tool only
   ever enables a small, fixed feature set on the `holochain` dev-dependency
   (see `initial_cargo_toml()` in `src/scaffold/zome/coordinator.rs` for the
