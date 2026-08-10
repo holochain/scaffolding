@@ -69,7 +69,7 @@ pub fn select_scaffold_zome_options() -> ScaffoldResult<(bool, bool)> {
     let option = Select::with_theme(&ColorfulTheme::default())
         .with_prompt("What do you want to scaffold?")
         .default(0)
-        .items(&[
+        .items([
             "Integrity/coordinator zome-pair (recommended)",
             "Only an integrity zome",
             "Only a coordinator zome",
