@@ -20,7 +20,7 @@ pub fn choose_reference_entry_hash(prompt: &str, recommended: bool) -> ScaffoldR
     let selection = Select::with_theme(&ColorfulTheme::default())
         .with_prompt(prompt)
         .default(0)
-        .items(&options.map(|(name, _)| name))
+        .items(options.map(|(name, _)| name))
         .interact()?;
 
     let (_, value) = options[selection];

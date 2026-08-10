@@ -57,7 +57,7 @@ pub fn choose_fields(
 
     let selection = Select::with_theme(&ColorfulTheme::default())
         .with_prompt("Do you want to proceed with the current entry type?")
-        .items(&["Confirm", "Modify", "Restart"])
+        .items(["Confirm", "Modify", "Restart"])
         .default(0)
         .interact()?;
 
@@ -65,7 +65,7 @@ pub fn choose_fields(
         loop {
             let action = Select::with_theme(&ColorfulTheme::default())
                 .with_prompt("What would you like to do?")
-                .items(&["Change Field", "Add Field", "Remove Field", "Done"])
+                .items(["Change Field", "Add Field", "Remove Field", "Done"])
                 .interact()?;
 
             match action {
@@ -75,7 +75,7 @@ pub fn choose_fields(
                         let field_to_change = Select::with_theme(&ColorfulTheme::default())
                             .with_prompt("Select field to change")
                             .items(
-                                &fields
+                                fields
                                     .iter()
                                     .map(|f| format!("{}: {}", f.field_name, f.field_type).italic())
                                     .collect::<Vec<_>>(),
@@ -111,7 +111,7 @@ pub fn choose_fields(
                         let field_to_remove = Select::with_theme(&ColorfulTheme::default())
                             .with_prompt("Select field to remove")
                             .items(
-                                &fields
+                                fields
                                     .iter()
                                     .map(|f| format!("{}: {}", f.field_name, f.field_type).italic())
                                     .collect::<Vec<_>>(),

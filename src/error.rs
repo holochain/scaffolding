@@ -134,6 +134,9 @@ pub enum ScaffoldError {
     #[error("Failed to build file tree: {0}")]
     FsBuildError(#[from] build_fs_tree::BuildError<PathBuf, io::Error>),
 
+    #[error("Failed to interact with the shell: {0}")]
+    DialoguerError(#[from] dialoguer::Error),
+
     /// anything else
     #[error("Unexpected error: {0}")]
     MiscError(#[from] anyhow::Error),
