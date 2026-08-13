@@ -1,4 +1,7 @@
-use handlebars::{Context, Handlebars, Helper, HelperDef, RenderContext, RenderError, ScopedJson};
+use handlebars::{
+    Context, Handlebars, Helper, HelperDef, RenderContext, RenderError, RenderErrorReason,
+    ScopedJson,
+};
 use serde_json::{json, Map, Value};
 
 /// A Handlebars helper to filter an iterable JSON value.
@@ -11,25 +14,26 @@ pub struct FilterHelper;
 impl HelperDef for FilterHelper {
     fn call_inner<'reg: 'rc, 'rc>(
         &self,
-        h: &Helper<'reg, 'rc>,
+        h: &Helper<'rc>,
         r: &'reg Handlebars<'reg>,
         _ctx: &'rc Context,
         _rc: &mut RenderContext<'reg, 'rc>,
-    ) -> Result<ScopedJson<'reg, 'rc>, RenderError> {
+    ) -> Result<ScopedJson<'rc>, RenderError> {
         let mut params = h.params().iter();
         let value = params
             .next()
-            .ok_or(RenderError::new(
-                "Filter helper: Param not found for index 0; must be value to be filtered",
+            .ok_or(RenderErrorReason::Other(
+                "Filter helper: Param not found for index 0; must be value to be filtered"
+                    .to_string(),
             ))?
             .value();
 
         let condition = params
             .next()
-            .ok_or(RenderError::new("Filter helper: Param not found for index 1; must be string containing filter condition predicate"))?
+            .ok_or(RenderErrorReason::Other("Filter helper: Param not found for index 1; must be string containing filter condition predicate".to_string()))?
             .value()
             .as_str()
-            .ok_or(RenderError::new("Filter helper: filter condition predicate must be a string"))?;
+            .ok_or(RenderErrorReason::Other("Filter helper: filter condition predicate must be a string".to_string()))?;
 
         let include_zero = h
             .hash_get("includeZero")
@@ -86,9 +90,10 @@ impl HelperDef for FilterHelper {
                 }
                 Ok(ScopedJson::Derived(json!(filtered_object)))
             }
-            _ => Err(RenderError::new(
-                "Filter helper: value to be filtered must be an array or object",
-            )),
+            _ => Err(RenderErrorReason::Other(
+                "Filter helper: value to be filtered must be an array or object".to_string(),
+            )
+            .into()),
         }
     }
 }

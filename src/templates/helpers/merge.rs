@@ -1,6 +1,6 @@
 use handlebars::{
     Context, Handlebars, Helper, HelperDef, HelperResult, Output, RenderContext, RenderError,
-    Renderable, StringOutput,
+    RenderErrorReason, Renderable, StringOutput,
 };
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Number, Value};
@@ -9,22 +9,23 @@ pub fn get_scope_open_and_close_char_indexes(
     text: &str,
     scope_opener: &str,
 ) -> Result<(usize, usize), RenderError> {
-    let mut index = text.find(scope_opener).ok_or(RenderError::new(
-        "Given scope opener not found in the given parameter",
+    let mut index = text.find(scope_opener).ok_or(RenderErrorReason::Other(
+        "Given scope opener not found in the given parameter".to_string(),
     ))?;
 
     let Some(open_scope_character) = scope_opener.chars().last() else {
-        return Err(RenderError::new(
-            "match_scope's first parameter cannot be an empty string",
-        ));
+        return Err(RenderErrorReason::Other(
+            "match_scope's first parameter cannot be an empty string".to_string(),
+        )
+        .into());
     };
     let close_scope_character = match open_scope_character {
         '{' => '}',
         '[' => ']',
         '(' => ')',
         '<' => '>',
-        _ => Err(RenderError::new(
-        "Last character for the first match_scope parameter was not recognized as a scope opener character."
+        _ => Err(RenderErrorReason::Other(
+        "Last character for the first match_scope parameter was not recognized as a scope opener character.".to_string()
         ))?
     };
 
@@ -42,7 +43,7 @@ pub fn get_scope_open_and_close_char_indexes(
                 scope_count -= 1;
             }
             None => {
-                return Err(RenderError::new("Malformed scopes"));
+                return Err(RenderErrorReason::Other("Malformed scopes".to_string()).into());
             }
             _ => {}
         }
@@ -70,28 +71,34 @@ pub struct Merge;
 impl HelperDef for Merge {
     fn call<'reg: 'rc, 'rc>(
         &self,
-        h: &Helper<'reg, 'rc>,
+        h: &Helper<'rc>,
         r: &'reg Handlebars<'reg>,
         ctx: &'rc Context,
         rc: &mut RenderContext<'reg, 'rc>,
         out: &mut dyn Output,
     ) -> HelperResult {
-        let t = h
-            .template()
-            .ok_or(RenderError::new("merge helper cannot have empty content"))?;
+        let t = h.template().ok_or(RenderErrorReason::Other(
+            "merge helper cannot have empty content".to_string(),
+        ))?;
 
         let s = h
             .param(0)
-            .ok_or(RenderError::new("merge helper needs 1 parameter"))?
+            .ok_or(RenderErrorReason::Other(
+                "merge helper needs 1 parameter".to_string(),
+            ))?
             .value()
             .as_str()
-            .ok_or(RenderError::new("merge first parameter must be a string"))?
+            .ok_or(RenderErrorReason::Other(
+                "merge first parameter must be a string".to_string(),
+            ))?
             .to_string();
 
         let mut data = ctx
             .data()
             .as_object()
-            .ok_or(RenderError::new("Context must be an object"))?
+            .ok_or(RenderErrorReason::Other(
+                "Context must be an object".to_string(),
+            ))?
             .clone();
         data.insert(String::from(SCOPE_CONTENT), Value::String(s.clone()));
         rc.set_context(Context::wraps(data)?);
@@ -103,7 +110,9 @@ impl HelperDef for Merge {
             let mut data = context
                 .data()
                 .as_object()
-                .ok_or(RenderError::new("Context must be an object"))?
+                .ok_or(RenderErrorReason::Other(
+                    "Context must be an object".to_string(),
+                ))?
                 .clone();
             if let Some(Value::Array(matched_scopes)) = data.get(MATCHED_SCOPES) {
                 let mut previous_index = s.len();
@@ -159,14 +168,14 @@ pub struct MatchScope;
 impl HelperDef for MatchScope {
     fn call<'reg: 'rc, 'rc>(
         &self,
-        h: &Helper<'reg, 'rc>,
+        h: &Helper<'rc>,
         r: &'reg Handlebars<'reg>,
         ctx: &'rc Context,
         rc: &mut RenderContext<'reg, 'rc>,
         _out: &mut dyn Output,
     ) -> HelperResult {
-        let t = h.template().ok_or(RenderError::new(
-            "match_scope helper cannot have empty content",
+        let t = h.template().ok_or(RenderErrorReason::Other(
+            "match_scope helper cannot have empty content".to_string(),
         ))?;
 
         let mut data = rc
@@ -174,22 +183,27 @@ impl HelperDef for MatchScope {
             .unwrap()
             .data()
             .as_object()
-            .ok_or(RenderError::new("Context must be an object"))?
+            .ok_or(RenderErrorReason::Other(
+                "Context must be an object".to_string(),
+            ))?
             .clone();
 
         let Some(Value::String(scope_content)) = data.get(SCOPE_CONTENT) else {
-            return Err(RenderError::new(
-                "match_scope needs to be placed inside a merge helper",
-            ));
+            return Err(RenderErrorReason::Other(
+                "match_scope needs to be placed inside a merge helper".to_string(),
+            )
+            .into());
         };
 
         let scope_opener = h
             .param(0)
-            .ok_or(RenderError::new("match_scope helper needs 1 parameter"))?
+            .ok_or(RenderErrorReason::Other(
+                "match_scope helper needs 1 parameter".to_string(),
+            ))?
             .value()
             .as_str()
-            .ok_or(RenderError::new(
-                "match_scope's first parameter must be a string",
+            .ok_or(RenderErrorReason::Other(
+                "match_scope's first parameter must be a string".to_string(),
             ))?
             .to_string();
 
