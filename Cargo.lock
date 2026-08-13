@@ -559,15 +559,9 @@ dependencies = [
 
 [[package]]
 name = "css_dataset"
-version = "0.3.0"
+version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a0ed4c49b3d82ab5e2a0167f0d24d30872cbd8526b54fb060c84295ad7b6d71d"
-dependencies = [
- "phf",
- "phf_codegen",
- "serde",
- "serde_json",
-]
+checksum = "25670139e591f1c2869eb8d0d977028f8d05e859132b4c874ecd02a00d3c9174"
 
 [[package]]
 name = "darling"
@@ -1824,15 +1818,6 @@ dependencies = [
 
 [[package]]
 name = "itertools"
-version = "0.13.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "413ee7dfc52ee1a4949ceeb7dbc8a33f2d6c088194d9f922fb8318faf1f01186"
-dependencies = [
- "either",
-]
-
-[[package]]
-name = "itertools"
 version = "0.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2b192c782037fadd9cfa75548310488aabdbf3d2da73885b31bd0abd03351285"
@@ -2015,15 +2000,16 @@ checksum = "0ceec5bc11778974d1bcb055b18002eba7f4b3518b6a0081b3af5f21666da9ad"
 
 [[package]]
 name = "markup_fmt"
-version = "0.10.0"
+version = "0.27.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d90c9d06b51c4026ad8b058b379341428d465660a211298c0311751466e562c9"
+checksum = "83b53ac34c9d6498632dcca4ad4542b1aef7c605d1d19037207910c4efe060a9"
 dependencies = [
  "aho-corasick",
+ "anyhow",
  "css_dataset",
- "itertools 0.13.0",
+ "itertools 0.14.0",
  "memchr",
- "once_cell",
+ "regex",
  "tiny_pretty",
 ]
 
@@ -2335,16 +2321,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1fd6780a80ae0c52cc120a26a1a42c1ae51b247a253e4e06113d23d2c2edd078"
 dependencies = [
  "phf_macros",
- "phf_shared",
-]
-
-[[package]]
-name = "phf_codegen"
-version = "0.11.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "aef8048c789fa5e851558d709946d6d79a8ff88c0440c587967f8e94bfb1216a"
-dependencies = [
- "phf_generator",
  "phf_shared",
 ]
 
@@ -3528,12 +3504,9 @@ dependencies = [
 
 [[package]]
 name = "tiny_pretty"
-version = "0.2.1"
+version = "0.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "650d82e943da333637be9f1567d33d605e76810a26464edfd7ae74f7ef181e95"
-dependencies = [
- "unicode-width 0.2.2",
-]
+checksum = "4c4c0dd4d9821b02f4a9848656f971304402049d80fb434d64a83890b2ade7d7"
 
 [[package]]
 name = "tinystr"
