@@ -14,13 +14,6 @@ import type { {{pascal_case entry_type.name}}{{#each entry_type.fields}}{{#if (e
 {{#if crud.update}}
 import Edit{{pascal_case entry_type.name}} from './Edit{{pascal_case entry_type.name}}.svelte';
 {{/if}}
-{{#uniq_lines}}
-  {{#each entry_type.fields}}
-    {{#if widget}}
-{{> (concat field_type.type "/" widget "/detail/imports") }}
-    {{/if}}
-  {{/each}}
-{{/uniq_lines}}
 
 const clientStore = getClient();
 

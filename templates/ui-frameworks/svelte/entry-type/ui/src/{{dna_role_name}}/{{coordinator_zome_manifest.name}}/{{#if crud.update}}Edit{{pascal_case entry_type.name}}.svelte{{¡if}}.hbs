@@ -4,13 +4,6 @@ import type { Record, EntryHash, AgentPubKey, DnaHash, ActionHash, HolochainErro
 import { decode } from '@msgpack/msgpack';
 import { getClient } from '../../contexts';
 import type { {{pascal_case entry_type.name}}{{#each entry_type.fields}}{{#if (eq field_type.type "Enum")}}, {{field_type.label}}{{/if}}{{/each}} } from './types';
-{{#uniq_lines}}
-  {{#each entry_type.fields}}
-    {{#if widget}}
-{{> (concat field_type.type "/" widget "/edit/imports") }}
-    {{/if}}
-  {{/each}}
-{{/uniq_lines}}
 
 const clientStore = getClient();
 
