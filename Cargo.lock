@@ -1381,7 +1381,7 @@ dependencies = [
  "serde_json",
  "serde_yaml",
  "structopt",
- "syn 2.0.119",
+ "syn 3.0.3",
  "thiserror 2.0.19",
  "tokio",
  "toml",
