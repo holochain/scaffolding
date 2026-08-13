@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
 use handlebars::{
-    Context, Handlebars, Helper, HelperDef, HelperResult, Output, RenderContext, RenderError,
+    Context, Handlebars, Helper, HelperDef, HelperResult, Output, RenderContext, RenderErrorReason,
     Renderable, StringOutput,
 };
 
@@ -11,14 +11,14 @@ pub struct UniqLines;
 impl HelperDef for UniqLines {
     fn call<'reg: 'rc, 'rc>(
         &self,
-        h: &Helper<'reg, 'rc>,
+        h: &Helper<'rc>,
         r: &'reg Handlebars<'reg>,
         ctx: &'rc Context,
         rc: &mut RenderContext<'reg, 'rc>,
         out: &mut dyn Output,
     ) -> HelperResult {
-        let t = h.template().ok_or(RenderError::new(
-            "uniq_lines helper cannot have empty content",
+        let t = h.template().ok_or(RenderErrorReason::Other(
+            "uniq_lines helper cannot have empty content".to_string(),
         ))?;
 
         let mut string_output = StringOutput::new();

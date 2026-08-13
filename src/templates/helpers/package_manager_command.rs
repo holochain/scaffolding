@@ -1,5 +1,5 @@
 use handlebars::{
-    Context, Handlebars, Helper, HelperDef, HelperResult, Output, RenderContext, RenderError,
+    Context, Handlebars, Helper, HelperDef, HelperResult, Output, RenderContext, RenderErrorReason,
 };
 
 use crate::scaffold::web_app::npm::{Npm, SubCommand};
@@ -10,7 +10,7 @@ pub struct PackageManagerCommandHelper;
 impl HelperDef for PackageManagerCommandHelper {
     fn call<'reg: 'rc, 'rc>(
         &self,
-        h: &Helper<'reg, 'rc>,
+        h: &Helper<'rc>,
         _r: &'reg Handlebars<'reg>,
         _ctx: &'rc Context,
         _rc: &mut RenderContext<'reg, 'rc>,
@@ -20,20 +20,22 @@ impl HelperDef for PackageManagerCommandHelper {
 
         let sub_command = params
             .next()
-            .ok_or(RenderError::new(
-                "PackageManagerCommand helper: Param not found for index 0; must be subcommand",
+            .ok_or(RenderErrorReason::Other(
+                "PackageManagerCommand helper: Param not found for index 0; must be subcommand"
+                    .to_string(),
             ))?
             .value()
             .as_str()
-            .ok_or(RenderError::new(
-                "PackageManagerCommand helper: failed to convert value to &str",
+            .ok_or(RenderErrorReason::Other(
+                "PackageManagerCommand helper: failed to convert value to &str".to_string(),
             ))?;
         let sub_command = SubCommand::from(sub_command);
 
         let workspace = params
             .next()
-            .ok_or(RenderError::new(
-                "PackageManagerCommand helper: Param not found for index 1; must be workspace",
+            .ok_or(RenderErrorReason::Other(
+                "PackageManagerCommand helper: Param not found for index 1; must be workspace"
+                    .to_string(),
             ))?
             .value()
             .as_str();
