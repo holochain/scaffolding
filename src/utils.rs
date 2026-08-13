@@ -328,7 +328,9 @@ pub fn format_code<P: Into<PathBuf>>(code: &str, file_name: P) -> ScaffoldResult
                     code,
                     markup_fmt::Language::Svelte,
                     &Default::default(),
-                    |path, raw, _| format_nested(path, extension, raw, &ts_format_config),
+                    |raw, hints| {
+                        format_nested(&file_path, extension, raw, hints, &ts_format_config)
+                    },
                 )
                 .map_err(|e| anyhow::anyhow!("Failed to format Svelte source code: {e:?}"))?;
 
@@ -346,24 +348,25 @@ fn format_nested<'a>(
     path: &Path,
     root_extension: &str,
     raw: &'a str,
+    hints: markup_fmt::Hints,
     ts_format_config: &dprint_plugin_typescript::configuration::Configuration,
-) -> ScaffoldResult<Cow<'a, str>> {
-    if let Some(nested_extension) = path.extension().and_then(|ext| ext.to_str()) {
-        if let ("svelte", "ts" | "js" | "tsx" | "jsx") = (root_extension, nested_extension) {
-            let formatted_code = dprint_plugin_typescript::format_text(
-                dprint_plugin_typescript::FormatTextOptions {
-                    path,
-                    extension: None,
-                    text: raw.to_owned(),
-                    config: ts_format_config,
-                    external_formatter: None,
-                },
-            )
+) -> anyhow::Result<Cow<'a, str>> {
+    // `markup_fmt` reports the nested language as a bare extension rather than a
+    // synthetic path, and also calls back for `<style>`/JSON blocks, so the guard
+    // has to stay to keep those away from the TypeScript formatter.
+    if let ("svelte", "ts" | "js" | "tsx" | "jsx") = (root_extension, hints.ext) {
+        let formatted_code =
+            dprint_plugin_typescript::format_text(dprint_plugin_typescript::FormatTextOptions {
+                path,
+                extension: Some(hints.ext),
+                text: raw.to_owned(),
+                config: ts_format_config,
+                external_formatter: None,
+            })
             .map_err(|e| anyhow::anyhow!("Failed to format source code: {e:?}"))?;
 
-            if let Some(value) = formatted_code {
-                return Ok(Cow::Owned(value));
-            }
+        if let Some(value) = formatted_code {
+            return Ok(Cow::Owned(value));
         }
     }
     Ok(Cow::Borrowed(raw))
