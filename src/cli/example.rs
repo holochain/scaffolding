@@ -46,7 +46,7 @@ impl Example {
 
         let app_dir = command_root_dir.join(FORUM);
         if app_dir.as_path().exists() {
-            return Err(ScaffoldError::FolderAlreadyExists(app_dir.clone()))?;
+            Err(ScaffoldError::FolderAlreadyExists(app_dir.clone()))?;
         }
 
         // scaffold web-app
@@ -219,7 +219,7 @@ impl Example {
         if let Some(true) | None = self.setup_nix {
             if let Err(err) = setup_nix_developer_environment(&command_root_dir, &app_dir) {
                 fs::remove_dir_all(&app_dir).await?;
-                return Err(err)?;
+                Err(err)?;
             }
         };
 

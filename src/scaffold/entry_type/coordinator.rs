@@ -47,7 +47,7 @@ pub fn add_crud_functions_to_coordinator(
 
     insert_file(
         &mut file_tree,
-        &crate_src_path.join(format!("{}.rs", &entry_def_snake_case_name)),
+        &crate_src_path.join(format!("{}.rs", entry_def_snake_case_name)),
         &file,
     )?;
 
@@ -58,7 +58,7 @@ pub fn add_crud_functions_to_coordinator(
         Ok(format!(
             r#"pub mod {};
 {contents}"#,
-            &entry_def_snake_case_name
+            entry_def_snake_case_name
         ))
     })?;
 

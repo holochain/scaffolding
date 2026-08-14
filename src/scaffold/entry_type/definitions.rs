@@ -494,7 +494,7 @@ impl EntryDefinition {
 
     /// Generate entry definition as typescript interface
     pub fn ts_type_codegen(&self) -> String {
-        let mut ts_interface = format!("export interface {} {{\n", &self.pascal_case_name());
+        let mut ts_interface = format!("export interface {} {{\n", self.pascal_case_name());
         let mut ts_enums = String::new();
 
         for field in &self.fields {
@@ -512,20 +512,20 @@ impl EntryDefinition {
             }
             let ts_field = match field.cardinality {
                 Cardinality::Single => {
-                    format!("  {}: {};", &field.field_name.to_case(Case::Snake), ts_type)
+                    format!("  {}: {};", field.field_name.to_case(Case::Snake), ts_type)
                 }
                 Cardinality::Option => format!(
                     "  {}: {} | undefined;",
-                    &field.field_name.to_case(Case::Snake),
+                    field.field_name.to_case(Case::Snake),
                     ts_type
                 ),
                 Cardinality::Vector => {
                     if matches!(field.field_type, FieldType::U8) {
-                        format!("  {}: Uint8Array;", &field.field_name.to_case(Case::Snake),)
+                        format!("  {}: Uint8Array;", field.field_name.to_case(Case::Snake),)
                     } else {
                         format!(
                             "  {}: Array<{}>;",
-                            &field.field_name.to_case(Case::Snake),
+                            field.field_name.to_case(Case::Snake),
                             ts_type
                         )
                     }
