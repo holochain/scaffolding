@@ -37,7 +37,7 @@ impl TemplateType {
 
     pub fn check_valid_template(&self) -> ScaffoldResult<()> {
         if file_content(&self.file_tree()?, &PathBuf::from("web-app/README.md.hbs")).is_err() {
-            return Err(ScaffoldError::MalformedTemplate(
+            Err(ScaffoldError::MalformedTemplate(
                 "Template does not contain a README.md.hbs file in its \"web-app\" directory"
                     .to_string(),
             ))?;

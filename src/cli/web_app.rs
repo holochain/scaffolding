@@ -58,7 +58,7 @@ impl WebApp {
         let app_folder = command_root_dir.join(&name);
 
         if app_folder.as_path().exists() {
-            return Err(ScaffoldError::FolderAlreadyExists(app_folder.clone()))?;
+            Err(ScaffoldError::FolderAlreadyExists(app_folder.clone()))?;
         }
 
         let template_file_tree = template_type.file_tree()?;
@@ -95,7 +95,7 @@ impl WebApp {
         if setup_nix {
             if let Err(err) = setup_nix_developer_environment(&command_root_dir, &app_folder) {
                 fs::remove_dir_all(&app_folder).await?;
-                return Err(err)?;
+                Err(err)?;
             }
             nix_instructions = "\n  nix develop";
         }

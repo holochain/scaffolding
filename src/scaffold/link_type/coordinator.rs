@@ -34,7 +34,7 @@ pub fn add_link_type_functions_to_coordinator(
     let new_file_path = coordinator_zome_file_tree
         .zome_crate_path
         .join("src")
-        .join(format!("{}.rs", &snake_link_type_name));
+        .join(format!("{}.rs", snake_link_type_name));
     let crate_src_path = coordinator_zome_file_tree.zome_crate_path.join("src");
 
     let lib_rs_path = crate_src_path.join("lib.rs");
