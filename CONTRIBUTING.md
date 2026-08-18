@@ -58,6 +58,11 @@ them clean. To help with keeping them clean, follow these principles:
   consistent with the existing codebase and/or it does not solve the problem it
   claims to, then we will close the PR without comment.
 
+## AI Policy
+
+If you use AI tools in any part of your contribution, you must read,
+understand, and follow our [AI Policy](./AI_POLICY.md).
+
 ## Reporting Issues
 
 - Use GitHub Issues to report bugs or request features.
