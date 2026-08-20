@@ -149,7 +149,7 @@ pub fn workspace_package_path(
     let package_path: Option<PathBuf> = metadata
         .workspace_packages()
         .into_iter()
-        .find(|p| p.name.eq(crate_name))
+        .find(|p| p.name.as_str().eq(crate_name))
         .map(|p| {
             PathBuf::from(p.manifest_path.as_std_path())
                 .iter()
