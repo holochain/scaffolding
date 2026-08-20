@@ -210,7 +210,7 @@ fn choose_field(
             "Enter the name of the enum (PascalCase):",
             None,
             |input: String| {
-                if !input.is_case(Case::Pascal) {
+                if input != input.to_case(Case::Pascal) {
                     return Err(format!("Input must be {:?} case.", Case::Pascal));
                 }
                 if input.to_ascii_lowercase() == entry_type_name {
@@ -230,7 +230,7 @@ fn choose_field(
                 "Enter the name of the next variant (PascalCase):",
                 None,
                 |input: String| {
-                    if !input.is_case(Case::Pascal) {
+                    if input != input.to_case(Case::Pascal) {
                         return Err(format!("Input must be {:?} case.", Case::Pascal));
                     }
                     if variants.contains(&input) {
