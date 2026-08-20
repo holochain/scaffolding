@@ -339,25 +339,26 @@ dependencies = [
 
 [[package]]
 name = "cargo-platform"
-version = "0.1.9"
+version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e35af189006b9c0f00a064685c727031e3ed2d8020f7ba284d78cc2671bd36ea"
+checksum = "dd0061da739915fae12ea00e16397555ed4371a6bb285431aab930f61b0aa4ba"
 dependencies = [
  "serde",
+ "serde_core",
 ]
 
 [[package]]
 name = "cargo_metadata"
-version = "0.18.1"
+version = "0.23.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2d886547e41f740c616ae73108f6eb70afe6d940c7bc697cb30f13daec073037"
+checksum = "ef987d17b0a113becdd19d3d0022d04d7ef41f9efe4f3fb63ac44ba61df3ade9"
 dependencies = [
  "camino",
  "cargo-platform",
  "semver",
  "serde",
  "serde_json",
- "thiserror 1.0.69",
+ "thiserror",
 ]
 
 [[package]]
@@ -687,7 +688,7 @@ dependencies = [
  "swc_ecma_parser",
  "swc_eq_ignore_macros",
  "text_lines",
- "thiserror 2.0.20",
+ "thiserror",
  "unicode-width 0.2.2",
  "url",
 ]
@@ -1225,7 +1226,7 @@ dependencies = [
  "pest_derive",
  "serde",
  "serde_json",
- "thiserror 2.0.20",
+ "thiserror",
 ]
 
 [[package]]
@@ -1320,7 +1321,7 @@ dependencies = [
  "serde",
  "serde_bytes",
  "sha2",
- "thiserror 2.0.20",
+ "thiserror",
 ]
 
 [[package]]
@@ -1387,7 +1388,7 @@ dependencies = [
  "serde_yaml",
  "structopt",
  "syn 3.0.3",
- "thiserror 2.0.20",
+ "thiserror",
  "tokio",
  "toml",
 ]
@@ -1415,7 +1416,7 @@ dependencies = [
  "serde-transcode",
  "serde_bytes",
  "serde_json",
- "thiserror 2.0.20",
+ "thiserror",
 ]
 
 [[package]]
@@ -1448,7 +1449,7 @@ dependencies = [
  "derive_more",
  "inferno",
  "serde_json",
- "thiserror 2.0.20",
+ "thiserror",
  "tracing",
  "tracing-core",
  "tracing-serde",
@@ -1492,7 +1493,7 @@ dependencies = [
  "strum",
  "strum_macros",
  "tempfile",
- "thiserror 2.0.20",
+ "thiserror",
  "tokio",
  "tracing",
  "yaml_serde",
@@ -1525,7 +1526,7 @@ dependencies = [
  "holochain_serialized_bytes",
  "serde",
  "serde_bytes",
- "thiserror 2.0.20",
+ "thiserror",
 ]
 
 [[package]]
@@ -1549,7 +1550,7 @@ dependencies = [
  "strum",
  "strum_macros",
  "subtle",
- "thiserror 2.0.20",
+ "thiserror",
  "tracing",
  "uuid",
  "yaml_serde",
@@ -1882,7 +1883,7 @@ dependencies = [
  "prost",
  "serde",
  "serde_json",
- "thiserror 2.0.20",
+ "thiserror",
  "tracing",
  "url",
 ]
@@ -2077,7 +2078,7 @@ dependencies = [
  "holochain_util",
  "rmp-serde",
  "serde",
- "thiserror 2.0.20",
+ "thiserror",
  "tokio",
  "yaml_serde",
 ]
@@ -2615,7 +2616,7 @@ checksum = "a4e608c6638b9c18977b00b475ac1f28d14e84b27d8d42f70e0bf1e3dec127ac"
 dependencies = [
  "getrandom 0.2.17",
  "libredox",
- "thiserror 2.0.20",
+ "thiserror",
 ]
 
 [[package]]
@@ -3434,31 +3435,11 @@ dependencies = [
 
 [[package]]
 name = "thiserror"
-version = "1.0.69"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b6aaf5339b578ea85b50e080feb250a3e8ae8cfcdff9a461c9ec2904bc923f52"
-dependencies = [
- "thiserror-impl 1.0.69",
-]
-
-[[package]]
-name = "thiserror"
 version = "2.0.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ec86235f5fcc2a73650310756d2ac5b138a5780bbbdfae3eeccec992c435ba4f"
 dependencies = [
- "thiserror-impl 2.0.20",
-]
-
-[[package]]
-name = "thiserror-impl"
-version = "1.0.69"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4fee6c4efc90059e10f81e6d42c60a18f76588c3d74cb83a0b242a2b6c7504c1"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.119",
+ "thiserror-impl",
 ]
 
 [[package]]
