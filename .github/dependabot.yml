@@ -4,7 +4,7 @@ updates:
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: weekly
+      interval: monthly
     groups:
       updates:
         applies-to: version-updates
@@ -13,7 +13,7 @@ updates:
   - package-ecosystem: cargo
     directory: /
     schedule:
-      interval: weekly
+      interval: monthly
     groups:
       cargo-minor-patch:
         applies-to: version-updates
@@ -25,7 +25,7 @@ updates:
   - package-ecosystem: rust-toolchain
     directory: /
     schedule:
-      interval: weekly
+      interval: monthly
   - package-ecosystem: nix
     directory: /
     schedule:
