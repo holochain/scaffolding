@@ -5,9 +5,9 @@ use crate::file_tree::load_directory_into_memory;
 use crate::scaffold::config::ScaffoldConfig;
 use crate::scaffold::web_app::template_type::TemplateType;
 
+use clap::Parser;
 use colored::Colorize;
 use std::{path::Path, str::FromStr};
-use structopt::StructOpt;
 
 mod collection;
 mod dna;
@@ -18,24 +18,28 @@ mod template;
 mod web_app;
 mod zome;
 
-#[derive(Debug, StructOpt)]
+#[derive(Debug, Parser)]
+#[command(version, propagate_version = true)]
 pub struct HcScaffold {
-    #[structopt(short, long, parse(try_from_str = TemplateType::from_str))]
+    #[arg(short, long, value_parser = TemplateType::from_str)]
     /// The template to use for the hc-scaffold commands.
     /// Can either be an option from the built-in templates: "svelte", "headless",
     /// or a path to a custom template.
     template: Option<TemplateType>,
 
-    #[structopt(subcommand)]
+    #[command(subcommand)]
     command: HcScaffoldCommand,
 }
 
 /// A command-line interface for creating and modifying a Holochain application (hApp).
-#[derive(Debug, StructOpt)]
-#[structopt(setting = structopt::clap::AppSettings::InferSubcommands)]
+#[derive(Debug, clap::Subcommand)]
+#[command(infer_subcommands = true)]
 pub enum HcScaffoldCommand {
     WebApp(web_app::WebApp),
-    Template(template::Template),
+    Template {
+        #[command(subcommand)]
+        command: template::Template,
+    },
     Dna(dna::Dna),
     Zome(zome::Zome),
     EntryType(entry_type::EntryType),
@@ -52,7 +56,7 @@ impl HcScaffold {
 
         match self.command {
             HcScaffoldCommand::WebApp(web_app) => web_app.run(&template_type).await,
-            HcScaffoldCommand::Template(template) => template.run(&template_type),
+            HcScaffoldCommand::Template { command } => command.run(&template_type),
             HcScaffoldCommand::Dna(dna) => dna.run(&template_type),
             HcScaffoldCommand::Zome(zome) => zome.run(&template_type),
             HcScaffoldCommand::EntryType(entry_type) => entry_type.run(&template_type),
@@ -92,6 +96,55 @@ impl HcScaffold {
                 };
                 Ok(template_type)
             }
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use clap::{error::ErrorKind, Parser};
+
+    use super::{HcScaffold, HcScaffoldCommand};
+
+    #[test]
+    fn entry_type_accepts_space_separated_fields() {
+        let cli = HcScaffold::try_parse_from([
+            "hc-scaffold",
+            "entry-type",
+            "post",
+            "--fields",
+            "title:String",
+            "body:String",
+        ])
+        .expect("space-separated fields should parse");
+
+        let HcScaffoldCommand::EntryType(entry_type) = cli.command else {
+            panic!("entry-type arguments should produce the entry-type command");
+        };
+        let fields = entry_type.fields.expect("fields should be present");
+
+        assert_eq!(fields.len(), 2);
+    }
+
+    #[test]
+    fn version_is_available_to_all_subcommands() {
+        let cases: &[&[&str]] = &[
+            &["hc-scaffold", "web-app", "--version"],
+            &["hc-scaffold", "template", "--version"],
+            &["hc-scaffold", "template", "new", "--version"],
+            &["hc-scaffold", "dna", "--version"],
+            &["hc-scaffold", "zome", "--version"],
+            &["hc-scaffold", "entry-type", "--version"],
+            &["hc-scaffold", "link-type", "--version"],
+            &["hc-scaffold", "collection", "--version"],
+            &["hc-scaffold", "example", "--version"],
+        ];
+
+        for args in cases {
+            let error = HcScaffold::try_parse_from(*args)
+                .expect_err("version requests should stop argument parsing");
+
+            assert_eq!(error.kind(), ErrorKind::DisplayVersion, "{args:?}");
         }
     }
 }

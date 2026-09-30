@@ -1,8 +1,8 @@
 use std::str::FromStr;
 
+use clap::Parser;
 use colored::Colorize;
 use convert_case::Case;
-use structopt::StructOpt;
 
 use crate::{
     file_tree::{build_file_tree, load_directory_into_memory},
@@ -17,14 +17,14 @@ use crate::{
     utils::{check_case, input_with_case, run_cargo_fmt_if_available},
 };
 
-#[derive(Debug, StructOpt)]
+#[derive(Debug, Parser)]
 /// Scaffold a collection of entries in an existing zome
 pub struct Collection {
-    #[structopt(long)]
+    #[arg(long)]
     /// Name of the dna in which you want to scaffold the zome
     pub dna: Option<String>,
 
-    #[structopt(long)]
+    #[arg(long)]
     /// Name of the integrity zome in which you want to scaffold the link type
     pub zome: Option<String>,
 
@@ -34,15 +34,15 @@ pub struct Collection {
     /// Collection name, just to differentiate it from other collections
     pub collection_name: Option<String>,
 
-    #[structopt(parse(try_from_str = EntryTypeReference::from_str))]
+    #[arg(value_parser = EntryTypeReference::from_str)]
     /// Entry type that is going to be added to the collection
     pub entry_type: Option<EntryTypeReference>,
 
-    #[structopt(long)]
+    #[arg(long)]
     /// Skips UI generation for this collection.
     pub no_ui: bool,
 
-    #[structopt(long)]
+    #[arg(long)]
     /// Skips test generation for this collection.
     pub no_spec: bool,
 }
