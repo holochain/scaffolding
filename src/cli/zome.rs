@@ -1,9 +1,9 @@
 use std::{ffi::OsString, path::PathBuf};
 
 use build_fs_tree::{Build, MergeableFileSystemTree};
+use clap::Parser;
 use colored::Colorize;
 use convert_case::Case;
-use structopt::StructOpt;
 
 use crate::{
     file_tree::load_directory_into_memory,
@@ -20,21 +20,21 @@ use crate::{
     utils::{check_case, input_with_case, run_cargo_fmt_if_available},
 };
 
-#[derive(Debug, StructOpt)]
+#[derive(Debug, Parser)]
 /// Scaffold one or multiple zomes into an existing DNA
 pub struct Zome {
-    #[structopt(long)]
+    #[arg(long)]
     /// Name of the dna in which you want to scaffold the zome
     pub dna: Option<String>,
 
     /// Name of the zome being scaffolded
     pub name: Option<String>,
 
-    #[structopt(long, parse(from_os_str))]
+    #[arg(long)]
     /// Scaffold an integrity zome at the given path
     pub integrity: Option<PathBuf>,
 
-    #[structopt(long, parse(from_os_str))]
+    #[arg(long)]
     /// Scaffold a coordinator zome at the given path
     pub coordinator: Option<PathBuf>,
 }
