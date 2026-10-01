@@ -21,7 +21,7 @@ path = "src/lib.rs"
 holochain_types = "0.7.0"
 mr_bundle = "0.7.0"
 
-dirs = "6.0"
+dirs = "7.0"
 ignore = "0.4"
 anyhow = "1.0"
 build-fs-tree = "0.8.1"
