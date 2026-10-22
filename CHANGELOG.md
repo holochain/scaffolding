@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## \[[0.700.1](https://github.com/holochain/scaffolding/compare/v0.700.0...v0.700.1)\] - 2026-10-22
+
+### Features
+
+- Upgrade to holochain v0.7.1
+
 ## \[[0.700.0](https://github.com/holochain/scaffolding/compare/v0.600.0...v0.700.0)\] - 2026-07-31
 
 ### Features
